@@ -137,6 +137,7 @@ class Manager(object):
         # takes the line for a few seconds and then it goes back.
         self.note = tk.StringVar(value="")
         self._note_until = 0.0
+        self._busy = self._busyText = None      # the "please wait" modal
 
         # A path is long and its interesting end is the file name, so each box
         # is as wide as the window (and grows with it) and is scrolled to show
@@ -483,6 +484,15 @@ class Manager(object):
         stay quiet."""
         verdict, _, rest = text.partition(" ")
         verb, _, detail = rest.partition(" ")
+        if verdict == "progress":
+            bits = detail.split()
+            try:
+                self._busy_progress(int(bits[0]), int(bits[1]))
+            except (IndexError, ValueError):
+                pass
+            return
+        # Anything else is the answer, so the modal has done its job.
+        self._busy_done()
         if verdict == "ok" and verb == "windows":
             self.say("Windows: %s" % detail)
             return
@@ -578,6 +588,80 @@ class Manager(object):
             self.root.wait_window(top)
         return answer["ok"]
 
+    # ---- while it is happening ------------------------------------------
+
+    def _working(self, title, lead, cancellable=True):
+        """A modal that says WAIT, shows how far along it is, and can stop it.
+
+        A save takes up to twenty seconds -- the vehicle is brought to a
+        stand, every computer writes its registers and a megabyte of memory,
+        the panel writes its switches and every display writes 16 KB of
+        picture -- and during that time the one thing that must not happen is
+        somebody deciding nothing is happening and touching the simulation.
+        A line of text at the foot of a window does not stop that; a modal
+        does, which is the whole reason to use one here.
+
+        The progress is FILES, not seconds.  Every part writes at its own
+        pace and an estimate would be a guess; "5 of 9 saved" is a fact, and
+        it also shows which part has stopped if it stops.
+        """
+        if self._busy is not None:
+            self._busy.destroy()
+        base = tkfont.nametofont("TkDefaultFont", self.root)
+        W, H = 620, 260
+        top = tk.Toplevel(self.root, bg=C_BG)
+        top.title(title)
+        top.transient(self.root)
+        self.root.update_idletasks()
+        top.geometry("%dx%d+%d+%d" % (
+            W, H,
+            max(0, self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2),
+            max(0, self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3)))
+        pad = 24
+        tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=base, anchor="w",
+                 justify="left", wraplength=W - 2 * pad
+                 ).pack(fill="x", padx=pad, pady=(pad, 6))
+        tk.Label(top, text="Do not touch the simulation until this finishes.",
+                 bg=C_BG, fg="#e0c070", font=base, anchor="w", justify="left",
+                 wraplength=W - 2 * pad).pack(fill="x", padx=pad, pady=(0, 12))
+        prog = tk.StringVar(value="Starting ...")
+        box = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
+                       highlightbackground="#4a4a4a")
+        box.pack(fill="both", expand=True, padx=pad)
+        tk.Label(box, textvariable=prog, bg="#1b1b1b", fg=C_FG, font=base,
+                 anchor="w", justify="left", wraplength=W - 2 * pad - 24
+                 ).pack(fill="both", expand=True, padx=12, pady=12)
+        row = tk.Frame(top, bg=C_BG)
+        row.pack(fill="x", padx=pad, pady=(12, pad))
+        if cancellable:
+            tk.Button(row, text="Cancel", command=self._cancel_busy, width=10,
+                      bg="#3c3c3c", fg=C_FG, activebackground="#505050",
+                      activeforeground=C_FG, highlightbackground=C_BG, font=base
+                      ).pack(side="right")
+        # NO OK, and the window manager's close button does nothing: the only
+        # way out is Cancel or the operation finishing.  Half-answering a
+        # modal that exists to stop meddling would defeat it.
+        top.protocol("WM_DELETE_WINDOW", lambda: None)
+        top.grab_set()
+        self._busy, self._busyText = top, prog
+        return top
+
+    def _cancel_busy(self):
+        self._session("cancel")
+        if self._busyText is not None:
+            self._busyText.set("Cancelling ...")
+
+    def _busy_progress(self, done, total):
+        if self._busyText is None:
+            return
+        self._busyText.set("%d of %d file(s) saved." % (done, total)
+                           if total else "Working ...")
+
+    def _busy_done(self):
+        if self._busy is not None:
+            self._busy.destroy()
+        self._busy = self._busyText = None
+
     # ---- snapshots ------------------------------------------------------
     #
     # ALL OF THESE JUST ASK.  The manager holds no process but the caption
@@ -611,12 +695,16 @@ class Manager(object):
         path = self._snapshot_dir()
         if path and self._session("save", path):
             self.say("Saving to %s ..." % os.path.basename(path), sticky=True)
+            self._working("Saving", "Saving the simulation to %s."
+                          % os.path.basename(path))
 
     def save_and_quit(self):
         path = self._snapshot_dir()
         if path and self._session("save-and-quit", path):
             self.say("Saving to %s before shutting down ..." % os.path.basename(path),
                      sticky=True)
+            self._working("Saving", "Saving the simulation to %s, then shutting "
+                          "down." % os.path.basename(path))
 
     def restore_snapshot(self):
         path = self._snapshot_dir()
@@ -627,6 +715,11 @@ class Manager(object):
             return
         if self._session("resume", path):
             self.say("Restoring from %s ..." % os.path.basename(path), sticky=True)
+            # NOT CANCELLABLE.  By the time this is up the children are being
+            # stopped; there is nothing left to go back to.
+            self._working("Restoring", "Restoring the simulation from %s.  "
+                          "Every window except this one is being replaced."
+                          % os.path.basename(path), cancellable=False)
 
     def show_panel(self):
         """Bring up a crew panel that a scripted run never mapped.

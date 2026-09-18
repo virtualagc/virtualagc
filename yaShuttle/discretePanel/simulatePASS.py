@@ -329,7 +329,7 @@ class Launcher(object):
 # listener records the request and wakes the main thread with SIGINT, which is
 # already the "stop what you are doing" path here -- main tells the two apart
 # by looking at this.
-SESSION = {"action": None, "dir": None}
+SESSION = {"action": None, "dir": None, "cancel": False}
 
 
 def session_listener(port_base, stop_event):
@@ -353,6 +353,14 @@ def session_listener(port_base, stop_event):
         text = data.decode("utf-8", errors="replace").strip()
         word, _, rest = text.partition(" ")
         word, rest = word.lower(), rest.strip()
+        if word == "cancel":
+            # A FLAG, AND NO SIGNAL.  The main thread is not parked in
+            # input() when this arrives -- it is inside take_snapshot,
+            # waiting for files -- so interrupting it would land in the wrong
+            # place entirely.  The wait polls this instead.
+            SESSION["cancel"] = True
+            log("session command: cancel")
+            continue
         if word not in ("save", "save-and-quit", "resume", "quit"):
             log("session command not understood: %r" % text)
             continue
@@ -472,11 +480,38 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
     if idps:
         crewscript.send_meds("save " + staging, port_base)
 
+    # EVERY PART OF THE VEHICLE WRITES AT ITS OWN PACE, so the only honest
+    # measure of how far along a save is, is how many of the files it needs
+    # have arrived.  Reported as they land, because twenty seconds of nothing
+    # is indistinguishable from a save that has already died.
+    def arrived():
+        return sum(1 for w in want
+                   if os.path.isfile(w) and os.path.getsize(w) > 0)
+
+    SESSION["cancel"] = False
+    total, seen = len(want), -1
+    crewscript.send_result("progress save 0 %d" % total, port_base)
     deadline = time.time() + timeout
+    cancelled = False
     while time.time() < deadline:
-        if all(os.path.isfile(w) and os.path.getsize(w) > 0 for w in want):
+        now = arrived()
+        if now != seen:
+            seen = now
+            crewscript.send_result("progress save %d %d" % (now, total), port_base)
+        if now == total:
+            break
+        if SESSION["cancel"]:
+            cancelled = True
             break
         time.sleep(0.2)
+    if cancelled:
+        SESSION["cancel"] = False
+        shutil.rmtree(staging, ignore_errors=True)
+        log("snapshot: CANCELLED after %d of %d file(s); %s is untouched"
+            % (seen, total, target))
+        return False, ("cancelled after %d of %d file(s).  Nothing was written "
+                       "and the previous snapshot, if any, is untouched."
+                       % (seen, total))
     missing = [os.path.basename(w) for w in want
                if not (os.path.isfile(w) and os.path.getsize(w) > 0)]
     if missing:
