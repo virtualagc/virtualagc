@@ -540,6 +540,7 @@ static void triggers_init(BatchRunner *r) {
  * the first. */
 static volatile sig_atomic_t g_snapshot_requested;
 static void on_sigusr1(int sig);
+static void install_sigusr1(void);
 
 /* Defined below, beside the landmark machinery it grew up with. */
 static void dump_main_storage(BatchRunner *r, const char *path);
@@ -3052,9 +3053,7 @@ int batchrunner_run(BatchRunner *r) {
      * needs -- are never printed.  Setting a stop reason instead makes SIGINT
      * land in the same reporting path as a fault. */
     signal(SIGINT, on_sigint);
-#ifdef SIGUSR1
-    signal(SIGUSR1, on_sigusr1);
-#endif
+    install_sigusr1();
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
@@ -3129,6 +3128,32 @@ static volatile sig_atomic_t g_snapshot_requested = 0;
 static void on_sigusr1(int sig) {
     (void)sig;
     g_snapshot_requested = 1;
+}
+
+/* INSTALLED WITH sigaction, AND IT HAS TO BE.
+ *
+ * signal() gave ONE-SHOT semantics here: the disposition reverted to SIG_DFL
+ * after the first delivery, and SIGUSR1's default action is to TERMINATE.  So
+ * the first snapshot worked and the second one killed the emulator -- both
+ * CRTs to POLL FAIL, nothing written, and a save that reported failure for
+ * the one reason that had nothing to do with saving.  Measured: the process
+ * left exit_code 10 in /proc, which is SIGUSR1 itself.
+ *
+ * SA_RESTART as well, because this arrives while the machine is very likely
+ * blocked in recvfrom on a bus socket, and an EINTR there is a lost word
+ * rather than a retried one. */
+static void install_sigusr1(void) {
+#ifdef SIGUSR1
+    struct sigaction sa;
+    memset(&sa, 0, sizeof sa);
+    sa.sa_handler = on_sigusr1;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;      /* and NOT SA_RESETHAND */
+    if (sigaction(SIGUSR1, &sa, NULL) != 0)
+        fprintf(stderr, "warning: cannot catch SIGUSR1 (%s) -- a snapshot "
+                        "request would KILL this run, so none will be "
+                        "asked for\n", strerror(errno));
+#endif
 }
 
 static void on_sigint(int sig) {
@@ -3265,9 +3290,7 @@ int batchrunner_run_interactive(BatchRunner *r) {
     batchrunner_init_watchpoints(r);
 
     signal(SIGINT, on_sigint);
-#ifdef SIGUSR1
-    signal(SIGUSR1, on_sigusr1);
-#endif
+    install_sigusr1();
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;

@@ -148,10 +148,11 @@ class Manager(object):
         self._section("SNAPSHOT", bold)
         self._path_box(self.snapshot)
         row = self._row()
+        self._button(row, "Browse", self.browse_snapshot)
         self._button(row, "Save", self.save_snapshot, wide=True)
-        self._button(row, "Save & Quit", self.save_and_quit)
         row = self._row()
-        self._button(row, "Restore", self.restore_snapshot, wide=True)
+        self._button(row, "Save & Quit", self.save_and_quit)
+        self._button(row, "Restore", self.restore_snapshot)
 
         self._section("CAPTION BOX", bold)
         row = self._row()
@@ -194,7 +195,12 @@ class Manager(object):
         return entry
 
     def _button(self, row, text, command, wide=False):
-        tk.Button(row, text=text, command=command, width=8 if wide else 7,
+        # AT LEAST AS WIDE AS ITS LABEL.  The width is in characters and was
+        # fixed at 7 or 8, which silently clipped anything longer: "Save &
+        # Quit" read "ave & qui" and "End Simulation" read "nd Simulatio".
+        # The minimum keeps the short buttons the size they have always been.
+        tk.Button(row, text=text, command=command,
+                  width=max(8 if wide else 7, len(text)),
                   bg="#3c3c3c", fg=C_FG, activebackground="#505050",
                   activeforeground=C_FG, highlightbackground=C_BG,
                   relief="raised").pack(side="left", padx=2)
@@ -222,10 +228,20 @@ class Manager(object):
         if name:
             self.layout.set(name)
 
+    def browse_snapshot(self):
+        """A DIRECTORY, not a file: a snapshot is gpc<N>.json and
+        gpc<N>.mem.bin for every computer, plus panel.json and vehicle.json,
+        so there is no single file to point at."""
+        name = filedialog.askdirectory(
+            title="Snapshot directory",
+            initialdir=self.snapshot.get().strip() or HERE, mustexist=False)
+        if name:
+            self.snapshot.set(name)
+
     def play(self):
         path = self.script.get().strip()
         if not path:
-            self.say("no script chosen")
+            self.say("No script chosen")
             return
         path = os.path.abspath(path)
         try:
@@ -240,37 +256,37 @@ class Manager(object):
             # with 'wait user' does not ask for it twice.
             crewscript.send_control("playnow " + path)
         except OSError as e:
-            self.say("cannot reach the panel: %s" % e)
+            self.say("Cannot reach the panel: %s" % e)
             return
-        self.say("playing %s -- %d steps, %d waits (the panel's log has the rest)"
+        self.say("Playing %s -- %d steps, %d waits (the panel's log has the rest)"
                  % (os.path.basename(path), steps, waits))
 
     def stop(self):
         try:
             crewscript.send_control("stop")
-            self.say("asked the panel to stop the script")
+            self.say("Asked the panel to stop the script")
         except OSError as e:
-            self.say("cannot reach the panel: %s" % e)
+            self.say("Cannot reach the panel: %s" % e)
 
     def save_layout(self):
         path = self.layout.get().strip()
         if not path:
-            self.say("no layout file chosen")
+            self.say("No layout file chosen")
             return
         try:
             n = windowLayout.save_layout(path, log=lambda _t: None)
         except OSError as e:
-            self.say("cannot save: %s" % e)
+            self.say("Cannot save: %s" % e)
             return
-        self.say("saved %d windows to %s" % (n, os.path.basename(path)))
+        self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
 
     def restore_layout(self):
         path = self.layout.get().strip()
         if not os.path.isfile(path):
-            self.say("no such layout file: %s" % path)
+            self.say("No such layout file: %s" % path)
             return
         placed, missing, inexact = windowLayout.restore_layout(path, log=lambda _t: None)
-        self.say("placed %d window(s)%s%s" % (
+        self.say("Placed %d window(s)%s%s" % (
             placed, ", %d not running" % missing if missing else "",
             ", %d not exactly" % inexact if inexact else ""))
 
@@ -303,12 +319,12 @@ class Manager(object):
         verdict, _, rest = text.partition(" ")
         verb, _, detail = rest.partition(" ")
         if verdict == "ok":
-            self.say({"save": "saved to %s",
-                      "save-and-quit": "saved to %s; shutting down",
-                      "resume": "restored from %s"}.get(verb, "%s")
+            self.say({"save": "Saved to %s",
+                      "save-and-quit": "Saved to %s; shutting down",
+                      "resume": "Restored from %s"}.get(verb, "%s")
                      % os.path.basename(detail.rstrip("/")))
             return
-        self.say("%s FAILED -- see the dialog" % verb)
+        self.say("%s failed" % verb.replace("-", " ").capitalize())
         messagebox.showerror(
             "%s failed" % verb.replace("-", " ").capitalize(),
             "%s did not work, and nothing usable was written.\n\n%s\n\n"
@@ -331,7 +347,7 @@ class Manager(object):
     def _snapshot_dir(self):
         path = self.snapshot.get().strip()
         if not path:
-            self.say("no snapshot directory chosen")
+            self.say("No snapshot directory chosen")
             return None
         return path
 
@@ -340,29 +356,29 @@ class Manager(object):
             crewscript.send_session(verb if path is None else "%s %s" % (verb, path),
                                     self.args.port_base)
         except OSError as e:
-            self.say("cannot reach simulatePASS: %s" % e)
+            self.say("Cannot reach simulatePASS: %s" % e)
             return False
         return True
 
     def save_snapshot(self):
         path = self._snapshot_dir()
         if path and self._session("save", path):
-            self.say("saving to %s ..." % os.path.basename(path))
+            self.say("Saving to %s ..." % os.path.basename(path))
 
     def save_and_quit(self):
         path = self._snapshot_dir()
         if path and self._session("save-and-quit", path):
-            self.say("saving to %s before shutting down ..." % os.path.basename(path))
+            self.say("Saving to %s before shutting down ..." % os.path.basename(path))
 
     def restore_snapshot(self):
         path = self._snapshot_dir()
         if not path:
             return
         if not os.path.isdir(path):
-            self.say("no such snapshot: %s" % path)
+            self.say("No such snapshot: %s" % path)
             return
         if self._session("resume", path):
-            self.say("restoring from %s ..." % os.path.basename(path))
+            self.say("Restoring from %s ..." % os.path.basename(path))
 
     def end_simulation(self):
         """The only control here that destroys a run without saving it, so it
@@ -375,11 +391,11 @@ class Manager(object):
                 "come back to this."):
             return
         if self._session("quit"):
-            self.say("shutting the simulation down")
+            self.say("Shutting the simulation down")
 
     def start_subtitles(self):
         if any(n == "subtitles.py" for n, _ in running(self.args.port_base)):
-            self.say("a caption box is already running on this port base")
+            self.say("A caption box is already running on this port base")
             return
         look = []
         path = self.layout.get().strip()
@@ -399,29 +415,29 @@ class Manager(object):
                                               stderr=subprocess.STDOUT,
                                               stdin=subprocess.DEVNULL)
         except OSError as e:
-            self.say("cannot start the caption box: %s" % e)
+            self.say("Cannot start the caption box: %s" % e)
             return
-        self.say("caption box started (%s)" % " ".join(look))
+        self.say("Caption box started (%s)" % " ".join(look))
         if os.path.isfile(path):
             self.root.after(2500, self.restore_layout)   # put it where the layout says
 
     def stop_subtitles(self):
         if self.subtitles is not None and self.subtitles.poll() is None:
             self.subtitles.terminate()
-            self.say("caption box stopped")
+            self.say("Caption box stopped")
             self.subtitles = None
             return
         boxes = [pid for n, pid in running(self.args.port_base) if n == "subtitles.py"]
         if not boxes:
-            self.say("no caption box on this port base")
+            self.say("No caption box on this port base")
             return
         for pid in boxes:
             try:
                 os.kill(pid, 15)
             except OSError as e:
-                self.say("cannot stop %d: %s" % (pid, e))
+                self.say("Cannot stop %d: %s" % (pid, e))
                 return
-        self.say("caption box stopped (pid %s)" % ", ".join(map(str, boxes)))
+        self.say("Caption box stopped (pid %s)" % ", ".join(map(str, boxes)))
 
     # -- what is up ---------------------------------------------------------
     def _what_run(self):
@@ -432,7 +448,7 @@ class Manager(object):
         that is exactly what someone reading a recording back needs.  All of
         it is passed by simulatePASS, which launches this last and so knows it.
         """
-        bits = ["port base %d" % self.args.port_base]
+        bits = []
         if self.args.gpcs:
             n = len([g for g in self.args.gpcs.split(",") if g.strip()])
             bits.append("GPC%s %s" % ("s" if n > 1 else "", self.args.gpcs))
@@ -440,7 +456,10 @@ class Manager(object):
             bits.append("%d CRT%s" % (self.args.crts, "s" if self.args.crts > 1 else ""))
         if self.args.tape:
             bits.append(os.path.basename(self.args.tape))
-        return ", ".join(bits)
+        # NO PORT BASE.  It is how the programs find each other, not anything
+        # a person looking at this window needs; it belongs on a command line,
+        # where it came from, and reads as clutter here.
+        return "  \u00b7  ".join(bits) if bits else "Simulation"
 
     def _poll(self):
         up = running(self.args.port_base)
@@ -448,12 +467,17 @@ class Manager(object):
             counts = {}
             for name, _pid in up:
                 counts[name] = counts.get(name, 0) + 1
-            self.state.set("%s:  %s" % (
-                self._what_run(),
-                "   ".join("%s%s" % (n, " x%d" % c if c > 1 else "")
-                           for n, c in sorted(counts.items()))))
+            # Names a person uses, not the file names the scan found.
+            pretty = {"yaGPC2": "GPC", "MEDS2.py": "MEDS", "panelO6.py": "Panel",
+                      "discretePanel.py": "Panel", "cam.py": "CAM",
+                      "stsKeyboard.py": "Keyboard", "subtitles.py": "Captions"}
+            shown = []
+            for n, c in sorted(counts.items()):
+                shown.append("%s%s" % (pretty.get(n, n),
+                                       " \u00d7%d" % c if c > 1 else ""))
+            self.state.set("%s  \u2014  %s" % (self._what_run(), ", ".join(shown)))
         else:
-            self.state.set("nothing running on %s" % self._what_run())
+            self.state.set("%s  \u2014  Nothing running" % self._what_run())
         self.root.after(POLL_MS, self._poll)
 
 
