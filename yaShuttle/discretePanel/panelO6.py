@@ -81,6 +81,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import select
 import socket
@@ -440,7 +441,9 @@ class PanelO6:
         self.cv.bind("<Configure>", self._on_configure)
         self.cv.bind("<Leave>", self._on_leave)
 
-        self._dump_state("startup")
+        # The startup report is printed by start_bus(), not here: --restore
+        # runs between the two, and a report of the DEFAULTS followed by a
+        # silent change is worse than no report at all.
 
         # The discrete bus.  Published on every change and re-asserted every
         # REPUBLISH_MS, because a discrete is a level and the bus is UDP with
@@ -495,9 +498,7 @@ class PanelO6:
             except OSError as e:
                 log("cannot listen on IDP%d's bus: %s" % (n, e))
         threading.Thread(target=self._listen_idp, daemon=True).start()
-        self._idp_publish()
-        self.root.after(IDP_REPUBLISH_MS, self._idp_tick)
-        self._tick()
+        # NOTHING IS PUBLISHED YET -- see start_bus(), which main() calls.
 
     # ---- the BFC modules --------------------------------------------------
     #
@@ -639,6 +640,118 @@ class PanelO6:
         if self.bfc_display != "ON":
             return 0
         return CRT_SELECT_VALUE[self.bfc_select]
+
+    def start_bus(self):
+        """Begin publishing: the first IDP assertion, the IDP re-assert timer,
+        and the Tk tick that drives _publish.
+
+        NOT CALLED FROM __init__, WHICH IS THE WHOLE POINT.  Constructing a
+        panel used to put its DEFAULTS on the bus immediately -- every GPC
+        POWER OFF and MODE HALT within one REPUBLISH_MS, every IDP POWER OFF
+        within IDP_REPUBLISH_MS -- and _pub_loop then re-asserted them every
+        250 ms.  Against a running vehicle that is not a stale reading, it is
+        a command: it halts every computer and powers off every display,
+        within a quarter second of the window appearing.
+
+        It never showed before because a panel was only ever built at the
+        start of a run, when OFF and HALT were the truth.  A restored
+        simulation is the case where the panel comes up second, and there the
+        constructor's defaults would destroy the machine it was meant to
+        drive.  So construction is now silent, --restore seeds the switches
+        from the snapshot, and only then does anything reach the bus.
+        """
+        self._dump_state("startup")
+        self._idp_publish()
+        self.root.after(IDP_REPUBLISH_MS, self._idp_tick)
+        self._tick()
+
+    # The switch positions, and nothing else.  A panel is a set of switches;
+    # everything else it shows is either momentary (IPL, the RHC ENGAGE
+    # pushbuttons), derived (the BFC latches, from _update_latches), or heard
+    # from the bus and therefore re-heard within a tick of coming up
+    # (activity, gpc_out).  Saving those would restore a picture; saving
+    # these restores the thing that DRIVES the vehicle.
+    SWITCHES = ("power", "output", "mode", "ipl_source", "bfc_display",
+                "bfc_select", "bfc_disengage", "idp_power", "idp_mf",
+                "kybd_sel")
+
+    # WHAT EACH SWITCH IS ALLOWED TO BE.  redraw() finds a control's position
+    # with POS.index(value), so a value that is merely unexpected raises
+    # ValueError from deep inside the drawing code -- "tuple.index(x): x not
+    # in tuple", naming neither the switch nor the file it came from.  These
+    # are the same tuples redraw() uses, checked at the point where the bad
+    # value actually entered.
+    CHOICES = {"power": POWER_POS, "output": OUTPUT_POS, "mode": MODE_POS,
+               "ipl_source": IPL_SOURCE_POS, "bfc_display": BFC_DISPLAY_POS,
+               "bfc_select": BFC_SELECT_POS, "bfc_disengage": BFC_DISENGAGE_POS,
+               "idp_power": IDP_POWER_POS, "idp_mf": tuple(range(len(MF_NAMES))),
+               "kybd_sel": {"left": LEFT_SEL_POS, "right": RIGHT_SEL_POS}}
+
+    @classmethod
+    def _bad_value(cls, name, value, key=None):
+        """None if the value is a legal position, else why it is not."""
+        allowed = cls.CHOICES[name]
+        if key is not None:
+            allowed = allowed[key]
+        if value in allowed:
+            return None
+        return "%s is %r, not one of %s" % (
+            name if key is None else "%s[%r]" % (name, key),
+            value, ", ".join(repr(a) for a in allowed))
+
+    def snapshot(self):
+        """The switch positions, as JSON-able plain data."""
+        out = {}
+        for name in self.SWITCHES:
+            v = getattr(self, name)
+            out[name] = dict(v) if isinstance(v, dict) else (
+                list(v) if isinstance(v, list) else v)
+        return out
+
+    def restore(self, state):
+        """Seed the switches from snapshot(), BEFORE start_bus().
+
+        Unknown keys are ignored and missing ones keep their default, so a
+        snapshot from a build with fewer switches still restores what it has
+        rather than refusing outright.  A list is length-checked, because a
+        short one would silently leave the last computers at their defaults
+        -- which for mode means HALT.
+        """
+        for name in self.SWITCHES:
+            if name not in state:
+                continue
+            cur, new = getattr(self, name), state[name]
+            if isinstance(cur, list):
+                if not isinstance(new, list) or len(new) != len(cur):
+                    log("--restore: %s is %r, wanted %d entries -- keeping the "
+                        "default" % (name, new, len(cur)))
+                    continue
+                bad = [self._bad_value(name, v) for v in new]
+                bad = [b for b in bad if b]
+                if bad:
+                    raise ValueError("; ".join(bad))
+                setattr(self, name, list(new))
+            elif isinstance(cur, dict):
+                if not isinstance(new, dict):
+                    log("--restore: %s is %r, wanted an object -- keeping the "
+                        "default" % (name, new))
+                    continue
+                for k, v in new.items():
+                    if k not in cur:
+                        log("--restore: %s has no %r -- ignored" % (name, k))
+                        continue
+                    bad = self._bad_value(name, v, k)
+                    if bad:
+                        raise ValueError(bad)
+                    cur[k] = v
+            else:
+                bad = self._bad_value(name, new)
+                if bad:
+                    raise ValueError(bad)
+                setattr(self, name, new)
+        # The BFC latches follow from the switches; they are not saved.
+        self._update_latches()
+        self.redraw()
 
     def _publish(self):
         """Hand every column's discretes to _pub_loop, and wake it."""
@@ -2212,7 +2325,7 @@ def _listen_control(panel):
     except OSError as e:
         log("cannot listen for script commands: %s" % e)
         return
-    log("script commands on %s:%d ('play FILE', 'stop')"
+    log("script commands on %s:%d ('play FILE', 'stop', 'save FILE')"
         % (D.GROUP, D.PORT_BASE + crewscript.CONTROL_OFFSET))
     while True:
         try:
@@ -2225,6 +2338,11 @@ def _listen_control(panel):
         if word == "stop":
             log("script command: stop")
             panel.root.after(0, lambda: _stop_script(panel))
+        elif word == "save" and rest:
+            # ON THE TK THREAD.  The switches are read by the same thread
+            # that writes them, so a save can never catch a control
+            # half-moved.  Whoever asked waits for the file to appear.
+            panel.root.after(0, lambda path=rest: _save_switches(panel, path))
         elif word in ("play", "playnow") and rest:
             try:
                 with open(rest) as fh:
@@ -2246,6 +2364,30 @@ def _listen_control(panel):
             panel.root.after(0, lambda e=entries: _run_script(panel, e))
         else:
             log("script command not understood: %r" % text)
+
+
+def _save_switches(panel, path):
+    """Write the switch positions where --restore can read them back.
+
+    Written to a temporary beside the target and renamed, so a reader never
+    sees a half-written file: the thing waiting on this is a shutdown with a
+    budget, and a truncated panel.json restores a vehicle with some switches
+    at their defaults -- for mode, HALT.
+    """
+    tmp = path + ".part"
+    try:
+        with open(tmp, "w") as fh:
+            json.dump(panel.snapshot(), fh, indent=1, sort_keys=True)
+            fh.write("\n")
+        os.replace(tmp, path)
+    except OSError as e:
+        log("script command: cannot save %s: %s" % (path, e))
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        return
+    log("script command: saved the switches to %s" % path)
 
 
 def _stop_script(panel):
@@ -2288,6 +2430,11 @@ def main(argv=None):
                          "as if its first line were 'wait user' (and show the window)")
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
+    ap.add_argument("--restore", metavar="FILE",
+                    help="seed the switches from a panel snapshot (see "
+                         "'save FILE' on the control port) BEFORE anything is "
+                         "published, so restoring a running simulation does "
+                         "not halt it")
     args = ap.parse_args(argv)
     if args.size <= 0:
         raise SystemExit("panelO6: --size must be a positive integer")
@@ -2312,6 +2459,17 @@ def main(argv=None):
     else:
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
+    # BETWEEN CONSTRUCTION AND THE FIRST PUBLISH, which is the only window
+    # where seeding the switches is silent -- see start_bus().
+    if args.restore:
+        try:
+            with open(args.restore) as fh:
+                panel.restore(json.load(fh))
+        except (OSError, ValueError) as e:
+            raise SystemExit("panelO6: cannot restore %s: %s" % (args.restore, e))
+        log("restored the switches from %s" % args.restore)
+    panel.start_bus()
+
     entries, text = None, ""
     if args.wait_user and not args.script:
         raise SystemExit("panelO6: --wait-user holds a --script; there is none")
