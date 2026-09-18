@@ -1051,7 +1051,18 @@ def main():
                 panel_argv += ["--restore", panel_restore]
             if args.wait_user and not args.panel_script:
                 log("note: --wait-user holds a --script, and there is none; ignored")
-            if args.panel_script:
+            # NOT ON A RESUME, AND THIS IS THE WHOLE POINT OF ONE.
+            #
+            # The crew script is how the vehicle got to where it was saved: it
+            # throws HALT, presses IPL, waits, throws STBY and RUN, and types
+            # the OPS transitions.  Replaying it against a machine that is
+            # ALREADY there does not add to the restored state, it destroys
+            # it -- the first line alone puts every computer back into reset.
+            # Restoring and then re-running the script is indistinguishable,
+            # from the outside, from the restore never having happened, which
+            # is exactly how it looked: four different snapshots that all
+            # "just seem to run the original script".
+            if args.panel_script and not resume:
                 panel_argv += ["--script", os.path.abspath(args.panel_script)]
                 if args.show_panel:
                     panel_argv += ["--show"]

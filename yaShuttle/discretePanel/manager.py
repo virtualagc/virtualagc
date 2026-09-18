@@ -60,6 +60,8 @@ C_NOTE = "#b0c4de"
 # in the window that cannot be pressed should not look like the things that
 # can.  Reversing it out is what makes it a band rather than a control.
 C_STATUS = "#c0c0c0"
+# The space around a button, used again between rows of them.
+BUTTON_GAP = 2
 C_STATUS_FG = "#101010"
 
 
@@ -116,9 +118,11 @@ class Manager(object):
     def __init__(self, root, args):
         self.root, self.args = root, args
         self.subtitles = None              # the caption box this window started
-        # WHAT THIS WINDOW IS ABOUT GOES IN THE TITLE BAR, which is what a
-        # title bar is for -- not on a second line above the status line.
-        root.title("Simulation manager  \u2014  %s" % self._what_run())
+        # SHORT ENOUGH TO READ.  This window is narrow, and a title bar it
+        # cannot fit says nothing at all: "Simulation manager" came back as
+        # something unreadable, let alone with the run appended.  The run is
+        # in the status line instead, where there is a whole width for it.
+        root.title("Manager")
         root.configure(bg=C_BG)
         shrink_fonts(root, 2)
         bold = tkfont.Font(family="Helvetica", size=8, weight="bold")
@@ -180,10 +184,26 @@ class Manager(object):
         # bar and are given their own background to say so.
         bar = tk.Frame(root, bg=C_STATUS)
         bar.pack(fill="x", side="bottom", pady=(10, 0))
+        # width=1 IS WHY THE WINDOW STOPS BREATHING.  A label asks for room
+        # enough to show its text, and this one's text changes every three
+        # seconds -- so the window grew and shrank under a person who had
+        # just put it where they wanted it.  Asking for one character and
+        # filling the width instead means the text never drives the size.
         tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg=C_STATUS_FG,
-                 anchor="w", justify="left", wraplength=560
+                 anchor="w", justify="left", width=1
                  ).pack(fill="x", padx=10, pady=6)
         root.bind_all("<Control-q>", lambda _e: root.quit())
+        # AND PINNED ONCE, at the size the controls actually need.  Without
+        # this the toplevel keeps taking its size from its contents, and any
+        # later change of text moves the edges again.  A person may still
+        # resize it; nothing here will.
+        root.update_idletasks()
+        root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
+        if not args.geometry:
+            root.geometry("%dx%d" % (root.winfo_reqwidth(), root.winfo_reqheight()))
+        # Recorded rather than displayed: the window is too narrow to carry it
+        # and the log is where it is wanted afterwards anyway.
+        print("manager: %s" % self._what_run(), flush=True)
         self.start_results()
         self._poll()
 
@@ -193,8 +213,12 @@ class Manager(object):
                  anchor="w").pack(fill="x", padx=10, pady=(10, 2))
 
     def _row(self):
+        # pady MATCHES THE BUTTONS' OWN padx, so two rows of buttons are
+        # separated by as much as two buttons side by side.  Without it
+        # "Browse | Save" and "Save & Quit | Restore" read as one block of
+        # four rather than as two rows.
         row = tk.Frame(self.root, bg=C_BG)
-        row.pack(fill="x", padx=10)
+        row.pack(fill="x", padx=10, pady=BUTTON_GAP)
         return row
 
     def _path_box(self, var):
@@ -219,7 +243,7 @@ class Manager(object):
                   width=max(8 if wide else 7, len(text)),
                   bg="#3c3c3c", fg=C_FG, activebackground="#505050",
                   activeforeground=C_FG, highlightbackground=C_BG,
-                  relief="raised").pack(side="left", padx=2)
+                  relief="raised").pack(side="left", padx=BUTTON_GAP)
 
     def _first_script(self):
         here = sorted(glob.glob(os.path.join(HERE, "examples", "*.script")))
@@ -254,9 +278,15 @@ class Manager(object):
         """A DIRECTORY, not a file: a snapshot is gpc<N>.json and
         gpc<N>.mem.bin for every computer, plus panel.json and vehicle.json,
         so there is no single file to point at."""
+        # THE PARENT, not the snapshot itself.  Opening inside the last one
+        # saved shows its gpc<N> files, which are not what is being chosen;
+        # one level up is where the snapshots are, which is where someone
+        # picking between them wants to start.
+        current = self.snapshot.get().strip()
+        start = os.path.dirname(current.rstrip("/")) if current else HERE
         name = filedialog.askdirectory(
             title="Snapshot directory",
-            initialdir=self.snapshot.get().strip() or HERE, mustexist=False)
+            initialdir=start or HERE, mustexist=False)
         if name:
             self.snapshot.set(name)
 

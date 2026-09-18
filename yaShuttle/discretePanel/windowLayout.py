@@ -67,6 +67,7 @@ TITLE_ROLES = [
     (re.compile(r"^CAM$"), "cam"),
     (re.compile(r"^Panels O6\b"), "panel"),
     (re.compile(r"^GPC discrete panel"), "discretepanel"),
+    (re.compile(r"^Manager\b"), "manager"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
 ]
 ROLE_PATTERNS = [
@@ -78,6 +79,10 @@ ROLE_PATTERNS = [
     (re.compile(r"discretePanel\.py"), lambda m: "discretepanel"),
     (re.compile(r"cam\.py"), lambda m: "cam"),
     (re.compile(r"subtitles\.py"), lambda m: "subtitles"),
+    # THE MANAGER'S OWN WINDOW.  It was missing, so the one window a person
+    # keeps in a particular corner -- the one with the buttons -- was the one
+    # window a layout could not put back.
+    (re.compile(r"manager\.py"), lambda m: "manager"),
 ]
 RESIZE_BY_DEFAULT = ("subtitles",)
 
