@@ -531,6 +531,9 @@ static void triggers_init(BatchRunner *r) {
                 t->stop[i] ? "STOPS" : "logs only");
 }
 
+/* Defined below, beside the landmark machinery it grew up with. */
+static void dump_main_storage(BatchRunner *r, const char *path);
+
 /* WHERE --dump-state's ON-STOP FILE GOES, which is not simply the name the
  * user gave once there is more than one computer.  Both stop sites below
  * wrote the bare --dump-state path, so in a multi-GPC vehicle every machine
@@ -556,6 +559,67 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
         snprintf(buf, n, "%s-gpc%d", base, r->gpcId);
     else
         snprintf(buf, n, "%.*s-gpc%d%s", (int)(dot - base), base, r->gpcId, dot);
+}
+
+
+/* WRITE THIS COMPUTER'S CAPTURE, while the whole vehicle is parked.
+ *
+ * Called only between vehicle_pause_enter and vehicle_pause_exit, so every
+ * machine's files describe the same instant -- as nearly as the barrier
+ * allows, which is barDeltaUs plus one instruction.  Before the rendezvous
+ * existed these were written where the trigger fired, which meant the second
+ * machine's registers were read after the first machine's file had reached
+ * the disk: a vehicle that never existed.
+ *
+ * The state and the memory are a PAIR and must not be separated -- see
+ * ageharness.c -- so both are written here, under the one tag.
+ */
+static void batchrunner_write_capture(BatchRunner *r) {
+    if (r->opts == NULL || r->opts->dumpState == NULL) return;
+    const char *tag = vehicle_pause_tag(r->vehicle);
+    /* SAY SO.  A trigger that fired used to leave no trace but a file, so a
+     * capture that landed at the wrong instant, or twice, or not at all,
+     * looked exactly like one that worked. */
+    fprintf(stderr, "GPC%d CAPTURE %s at t=%.6f s step=%ld\n",
+            r->gpcId, tag, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step);
+    char path[512];
+    snprintf(path, sizeof path, "%s-gpc%d-%s.json",
+             r->opts->dumpState, r->gpcId, tag);
+    ageharness_dump_state(&r->age, path);
+    snprintf(path, sizeof path, "%s-gpc%d-%s.mem.bin",
+             r->opts->dumpState, r->gpcId, tag);
+    dump_main_storage(r, path);
+
+    /* AND CONSUME THIS MACHINE'S CURSOR FOR THE TIME JUST CAPTURED, whoever
+     * asked for it.  A YAGPC_DUMPSTATE_AT time is a VEHICLE event -- capture
+     * every computer at t -- but each computer arms its own cursor for it, so
+     * without this the second machine reaches its own cursor microseconds
+     * after the rendezvous it was already parked in and asks for the same
+     * instant again.  Measured: two computers and two times gave FOUR
+     * rendezvous, two of them re-capturing an instant already on disk, a few
+     * microseconds later and overwriting it.
+     *
+     * Matched on the TAG and not on this machine's clock, which is what
+     * makes it exact.  A machine parked at t=0 has not passed t=1 us by its
+     * own clock -- but the capture it is writing right now IS the one its
+     * cursor was waiting for, and a clock test would leave it armed. */
+    while (r->trig.nextAt < r->trig.nAt) {
+        char mine[64];
+        snprintf(mine, sizeof mine, "%g", r->trig.at[r->trig.nextAt]);
+        if (strcmp(mine, tag) != 0) break;
+        r->trig.nextAt++;
+    }
+}
+
+/* THE PLACE A MACHINE CAN BE STOPPED.  Costs one relaxed load of
+ * pauseRequest when nothing is pending, which is why it can sit in the
+ * per-instruction path, in the wait-state loop and in the mode-switch hold
+ * -- a computer has to be stoppable from all three or a snapshot taken
+ * while any one of them is halted waits for it forever. */
+static void batchrunner_pause_point(BatchRunner *r) {
+    if (!vehicle_pause_enter(r->vehicle, r->gpcId)) return;
+    batchrunner_write_capture(r);
+    vehicle_pause_exit(r->vehicle, r->gpcId);
 }
 
 void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
@@ -1923,6 +1987,13 @@ static bool batchrunner_step(BatchRunner *r) {
                             "(held in reset)\n",
                     yagpc_monotonic_seconds(), r->gpcId);
         r->modeWasHeld = true;
+        /* A HALTED COMPUTER IS STILL A MEMBER OF THE VEHICLE.  It has left
+         * the barrier above, because its clock has stopped and a stopped
+         * clock is the slowest there is -- but it has NOT left the pause
+         * group, and a snapshot taken while one computer sits in HALT would
+         * wait for it until the deadline and then be abandoned.  It is also
+         * the easiest machine to capture: it is executing nothing. */
+        batchrunner_pause_point(r);
         /* Nothing to do but wait for the switch to move; don't spin a
          * core doing it. */
         yagpc_sleep_seconds(0.002);
@@ -1961,30 +2032,25 @@ static bool batchrunner_step(BatchRunner *r) {
             r->age.gpc.cpu.elapsedTimeUs >= r->trig.busyAfterUs &&
             iop_proc_get(&r->age.gpc.iop.regBusyWait, r->trig.busyProc) &&
             iop_proc_get(&r->age.gpc.iop.regHalt, r->trig.busyProc)) {
-            char path[512];
-            snprintf(path, sizeof path, "%s-gpc%d-busy%d.json",
-                     r->opts->dumpState, r->gpcId, r->trig.busyProc);
-            ageharness_dump_state(&r->age, path);
-            /* AND THE MEMORY, AT THE SAME INSTANT.  A state and a snapshot
-             * taken at two different times do not describe one machine:
-             * the PSW, the registers and the BCE program counters all
-             * refer to memory as it was when they were read.  Pairing them
-             * here is what makes a resume reproduce the captured machine
-             * rather than an average of two. */
-            snprintf(path, sizeof path, "%s-gpc%d-busy%d.mem.bin",
-                     r->opts->dumpState, r->gpcId, r->trig.busyProc);
-            dump_main_storage(r, path);
+            /* AND THE MEMORY, AT THE SAME INSTANT, AND EVERY OTHER
+             * COMPUTER TOO.  A state and a snapshot taken at two different
+             * times do not describe one machine: the PSW, the registers and
+             * the BCE program counters all refer to memory as it was when
+             * they were read.  The same argument extends across the vehicle,
+             * which is what the rendezvous is for -- see
+             * batchrunner_write_capture. */
+            char tag[64];
+            snprintf(tag, sizeof tag, "busy%d", r->trig.busyProc);
+            vehicle_pause_request(r->vehicle, tag);
+            batchrunner_pause_point(r);
             r->trig.busyDone = 1;
         }
         if (r->trig.nextAt < r->trig.nAt &&
             r->age.gpc.cpu.elapsedTimeUs >= r->trig.at[r->trig.nextAt] * 1e6) {
-            char path[512];
-            snprintf(path, sizeof path, "%s-gpc%d-%g.json",
-                     r->opts->dumpState, r->gpcId, r->trig.at[r->trig.nextAt]);
-            ageharness_dump_state(&r->age, path);
-            snprintf(path, sizeof path, "%s-gpc%d-%g.mem.bin",
-                     r->opts->dumpState, r->gpcId, r->trig.at[r->trig.nextAt]);
-            dump_main_storage(r, path);
+            char tag[64];
+            snprintf(tag, sizeof tag, "%g", r->trig.at[r->trig.nextAt]);
+            vehicle_pause_request(r->vehicle, tag);
+            batchrunner_pause_point(r);
             r->trig.nextAt++;
         }
     }
@@ -2057,13 +2123,15 @@ static bool batchrunner_step(BatchRunner *r) {
                             r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step);
                 if (r->trig.stop[i] != 0 && r->trig.hits[i] >= r->trig.stop[i]) {
                     if (r->opts != NULL && r->opts->dumpState != NULL) {
-                        char path[512];
-                        snprintf(path, sizeof path, "%s-gpc%d-landmark-%s.json",
-                                 r->opts->dumpState, r->gpcId, r->trig.label[i]);
-                        ageharness_dump_state(&r->age, path);
-                        snprintf(path, sizeof path, "%s-gpc%d-landmark-%s.mem.bin",
-                                 r->opts->dumpState, r->gpcId, r->trig.label[i]);
-                        dump_main_storage(r, path);
+                        /* PARK THE VEHICLE HERE, at the arrival, not after
+                         * the run has unwound: a stopping landmark stops
+                         * only the computer that reached it, and the others
+                         * would otherwise keep running while this one's
+                         * capture was written. */
+                        char tag[64];
+                        snprintf(tag, sizeof tag, "landmark-%s", r->trig.label[i]);
+                        vehicle_pause_request(r->vehicle, tag);
+                        batchrunner_pause_point(r);
                     }
                     snprintf(r->stopReason, sizeof r->stopReason,
                              "landmark %s hit %ld at 0x%05x (t=%.6f s)",
@@ -2236,6 +2304,10 @@ static bool batchrunner_step(BatchRunner *r) {
          * see the barrier note in vehicle.h. */
         vehicle_barrier_wait(r->vehicle, r->gpcId, r->age.gpc.cpu.elapsedTimeUs);
     }
+    /* AND STOP HERE IF A SNAPSHOT IS PENDING.  An instruction boundary is
+     * the only clean point the CPU has, and this is the one every running
+     * machine passes. */
+    batchrunner_pause_point(r);
 
     /* Elapsed instruction time (cpu->elapsedTimeUs) is now accumulated
      * unconditionally inside cpu_exec1() itself, not just under --debug
@@ -2365,6 +2437,10 @@ static bool batchrunner_step(BatchRunner *r) {
                  * would all stop to wait for it. */
                 vehicle_barrier_wait(r->vehicle, r->gpcId,
                                      r->age.gpc.cpu.elapsedTimeUs);
+                /* AND HERE TOO, for the same reason the barrier is: a wait
+                 * state is where this machine spends most of its time, so
+                 * most snapshots are asked for while it is in one. */
+                batchrunner_pause_point(r);
                 if (why != RTPACE_WAITING) break;
                 /* Behind the wall clock?  Then do not sleep -- go round
                  * again and keep fast-forwarding until simulated time has
@@ -2831,6 +2907,12 @@ static int batchrunner_report_stop(BatchRunner *r) {
 }
 
 int batchrunner_run(BatchRunner *r) {
+    /* A MEMBER OF THE PAUSE GROUP FOR EXACTLY AS LONG AS IT RUNS.  Not
+     * barActive, which a computer leaves whenever it is held in HALT, and
+     * not nExpected, which counts machines that may not have started yet --
+     * a snapshot must wait for every computer that could still be executing
+     * and for no computer that cannot.  See vehicle.h. */
+    vehicle_join_pause_group(r->vehicle, r->gpcId);
     long byteCount = batchrunner_load(r);
     batchrunner_init_io(r);
 
@@ -2935,6 +3017,11 @@ int batchrunner_run(BatchRunner *r) {
      * happen until every thread has been joined, is a deadlock -- the other
      * machines wait for a computer that has finished. */
     vehicle_barrier_leave(r->vehicle, r->gpcId);
+    /* And out of the pause group, for the same reason turned the other way
+     * round: a machine that has stopped will never reach another pause
+     * point, so anyone waiting for it would wait out the whole deadline and
+     * abandon a snapshot that was perfectly takeable. */
+    vehicle_leave_pause_group(r->vehicle, r->gpcId);
 
     return batchrunner_report_stop(r);
 }

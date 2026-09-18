@@ -45,6 +45,8 @@ void vehicle_init(Vehicle *v) {
 #ifdef HAVE_PTHREADS
     pthread_mutex_init(&v->barLock, NULL);
     pthread_cond_init(&v->barCond, NULL);
+    pthread_mutex_init(&v->pauseLock, NULL);
+    pthread_cond_init(&v->pauseCond, NULL);
     for (int b = 0; b <= YAGPC_BUS_MAX; b++)
         pthread_mutex_init(&v->busLock[b], NULL);
 #endif
@@ -268,6 +270,154 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
     v->barHeldSec += yagpc_monotonic_seconds() - t0;
 }
 
+
+/* ---- the stop-the-world -------------------------------------------------
+ *
+ * See the pause fields in vehicle.h for why this is not the barrier.
+ */
+
+/* The longest the vehicle will wait for a machine to reach its next pause
+ * check before abandoning the snapshot.  See vehicle.h: wall time, sized at
+ * about ten times the worst legitimate case (a 200 ms display peer hold). */
+#define PAUSE_MAX_WAIT_SEC 2.0
+/* How often a parked machine re-checks if nobody wakes it.  A safety net:
+ * every release broadcasts. */
+#define PAUSE_SLEEP_SEC 0.002
+
+void vehicle_join_pause_group(Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+    if (!v->pauseMember[gpcId]) { v->pauseMember[gpcId] = true; v->pauseGroup++; }
+    pthread_mutex_unlock(&v->pauseLock);
+#else
+    if (!v->pauseMember[gpcId]) { v->pauseMember[gpcId] = true; v->pauseGroup++; }
+#endif
+}
+
+void vehicle_leave_pause_group(Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+    if (v->pauseMember[gpcId]) { v->pauseMember[gpcId] = false; v->pauseGroup--; }
+    /* A machine that has ended its run must not be waited for.  Whoever is
+     * parked re-tests the count against the new, smaller group. */
+    pthread_cond_broadcast(&v->pauseCond);
+    pthread_mutex_unlock(&v->pauseLock);
+#else
+    if (v->pauseMember[gpcId]) { v->pauseMember[gpcId] = false; v->pauseGroup--; }
+#endif
+}
+
+void vehicle_pause_request(Vehicle *v, const char *tag) {
+    if (v == NULL) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+#endif
+    /* FIRST REQUEST WINS.  Two machines can reach a trigger in the same
+     * instant -- the same landmark, or two YAGPC_DUMPSTATE_AT times a
+     * microsecond apart -- and the second must not rename the capture the
+     * first is already parking for. */
+    if (!v->pauseRequest) {
+        snprintf(v->pauseTag, sizeof v->pauseTag, "%s", tag ? tag : "");
+        v->pauseRequest = 1;
+    }
+#ifdef HAVE_PTHREADS
+    pthread_cond_broadcast(&v->pauseCond);
+    pthread_mutex_unlock(&v->pauseLock);
+#endif
+}
+
+/* Read while parked, so no lock: every member is stopped and the tag was
+ * written before the first of them arrived. */
+const char *vehicle_pause_tag(const Vehicle *v) {
+    return (v == NULL) ? "" : v->pauseTag;
+}
+
+#ifdef HAVE_PTHREADS
+/* One half of the rendezvous: the last member through resets the counter and
+ * bumps the generation, which is what releases the rest.  The generation --
+ * rather than the counter -- is the release condition, so the reset cannot
+ * strand a member that had not yet woken.  False means the deadline passed;
+ * the caller then abandons rather than waiting further.
+ *
+ * Called with pauseLock held. */
+static bool pause_rendezvous(Vehicle *v, int *count, unsigned *gen, double t0) {
+    unsigned mine = *gen;
+    if (++*count >= v->pauseGroup) {
+        *count = 0;
+        (*gen)++;
+        pthread_cond_broadcast(&v->pauseCond);
+        return true;
+    }
+    while (*gen == mine) {
+        if (yagpc_monotonic_seconds() - t0 > PAUSE_MAX_WAIT_SEC) {
+            /* Undo this member's arrival so the NEXT request starts from a
+             * clean count -- an abandoned save must not poison the one after
+             * it. */
+            if (*count > 0) (*count)--;
+            return false;
+        }
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        long ns = ts.tv_nsec + (long)(PAUSE_SLEEP_SEC * 1e9);
+        ts.tv_sec += ns / 1000000000L;
+        ts.tv_nsec = ns % 1000000000L;
+        pthread_cond_timedwait(&v->pauseCond, &v->pauseLock, &ts);
+    }
+    return true;
+}
+#endif
+
+bool vehicle_pause_enter(Vehicle *v, int gpcId) {
+    /* THE HOT PATH, and the only cost when no snapshot is pending: one
+     * relaxed load.  Everything below happens at most once per save. */
+    if (v == NULL || !v->pauseRequest) return false;
+    if (gpcId < 1 || gpcId > 5 || !v->pauseMember[gpcId]) return false;
+#ifdef HAVE_PTHREADS
+    double t0 = yagpc_monotonic_seconds();
+    pthread_mutex_lock(&v->pauseLock);
+    bool ok = pause_rendezvous(v, &v->pauseArrived, &v->pauseArriveGen, t0);
+    if (!ok) {
+        v->pauseAbandoned++;
+        /* Clear the request so the machines that DID arrive are not left
+         * parking again immediately on a request nobody can satisfy. */
+        v->pauseRequest = 0;
+        pthread_cond_broadcast(&v->pauseCond);
+        fprintf(stderr, "vehicle: snapshot ABANDONED -- GPC%d waited %.1f s "
+                        "for %d machine(s) and one never arrived; nothing was "
+                        "written\n", gpcId, PAUSE_MAX_WAIT_SEC, v->pauseGroup);
+    }
+    pthread_mutex_unlock(&v->pauseLock);
+    return ok;
+#else
+    /* Without threads there is one machine, and it is already stopped. */
+    return true;
+#endif
+}
+
+void vehicle_pause_exit(Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+#ifdef HAVE_PTHREADS
+    double t0 = yagpc_monotonic_seconds();
+    pthread_mutex_lock(&v->pauseLock);
+    if (pause_rendezvous(v, &v->pauseFinished, &v->pauseFinishGen, t0)) {
+        /* Everyone has written.  Clearing the request here, inside the
+         * lock and after the second rendezvous, is what stops a machine
+         * that resumes early from parking again on the same request. */
+        if (v->pauseRequest) { v->pauseTaken++; v->pauseRequest = 0; }
+    } else {
+        v->pauseAbandoned++;
+        v->pauseRequest = 0;
+    }
+    pthread_cond_broadcast(&v->pauseCond);
+    pthread_mutex_unlock(&v->pauseLock);
+#else
+    v->pauseRequest = 0;
+    v->pauseTaken++;
+#endif
+}
+
 bool vehicle_multi(const Vehicle *v) {
     if (v == NULL) return false;
     /* nExpected is right from the start; nMachines only once everybody has
@@ -419,6 +569,12 @@ void vehicle_free(Vehicle *v) {
                         "%lu released while spinning, %lu sleeps\n",
                 v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs,
                 v->barSpinReleases, v->barSleeps);
+    /* REPORTED EVEN WHEN ZERO IF ANY WAS ASKED FOR, because "abandoned" is
+     * the answer that matters and a silent absence reads like success. */
+    if (v->pauseTaken > 0 || v->pauseAbandoned > 0)
+        fprintf(stderr, "vehicle: stop-the-world -- %lu snapshot(s) taken with "
+                        "every machine parked, %lu abandoned\n",
+                v->pauseTaken, v->pauseAbandoned);
     /* TWO COMPUTERS IN ONE CONVERSATION.  Not a condition to handle -- it
      * means the run asked two GPCs to use one unit at the same moment, which
      * the vehicle cannot do and a crew would not ask for. */

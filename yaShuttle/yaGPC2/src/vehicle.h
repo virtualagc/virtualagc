@@ -190,6 +190,66 @@ typedef struct Vehicle {
     pthread_cond_t barCond;
 #endif
 
+    /* THE STOP-THE-WORLD, WHICH THE BARRIER ABOVE DELIBERATELY IS NOT.
+     *
+     * vehicle_barrier_wait is a LEASH: it blocks only a machine that is
+     * AHEAD, and barrier_slowest() returns the caller's own time when the
+     * caller is the slowest, so the slowest machine never waits at all.
+     * That is the right design for keeping the computers together, and it
+     * means there is no instant when every thread is stopped -- there is
+     * only a guarantee that they are within barDeltaUs of one another.
+     *
+     * A snapshot needs the other thing.  Writing one machine's registers
+     * while another is still executing produces a vehicle that never
+     * existed, and the two would not even be wrong by a bounded amount:
+     * whichever machine wrote second would have run for however long the
+     * first one's file took to reach the disk.
+     *
+     * So this is a separate, two-phase rendezvous, on its own lock: every
+     * member parks, and only when ALL of them have parked does any of them
+     * write anything; then they all resume together.  It costs one relaxed
+     * load of pauseRequest per instruction while no snapshot is pending,
+     * which is the same price the barrier's own barWaiters check pays.
+     *
+     * MEMBERSHIP IS NOT barActive.  A computer held in HALT has LEFT the
+     * barrier (vehicle_barrier_leave), and a machine whose run has ended is
+     * still barActive until its thread tidies up -- waiting for either would
+     * hang the save forever.  Machines join this group when their run starts
+     * and leave when it ends, and a halted one parks from its mode-switch
+     * loop, where it is not executing instructions but is very much alive.
+     *
+     * THE DEADLINE IS WALL TIME, and has to be.  A parked machine's
+     * simulated clock is stopped by definition, so a simulated-time deadline
+     * could never expire; and what is being waited for -- a thread reaching
+     * its next check -- is a wall-clock event. It is sized for the slowest
+     * legitimate case by a wide margin: the longest single instruction is an
+     * MVH moving 7,654 halfwords, 6.7 ms of simulated time, and a display
+     * peer hold can freeze a thread 200 ms of wall time (iop.c). Two seconds
+     * is about ten times the worst of those, and expiry ABANDONS the
+     * snapshot rather than writing a partial one. */
+    /* ON ITS OWN CACHE LINE, because it is read once per instruction by
+     * every thread and written once per snapshot.  Measured offsets before
+     * this alignment: pauseRequest at 456, barCond at 408..455 -- the last
+     * eight bytes of the condition variable shared line 7 with it, so every
+     * barrier broadcast (and they happen on every hold) invalidated the line
+     * the hot path reads.  A read-mostly flag next to a contended lock is
+     * the textbook false-sharing mistake and costs nothing to avoid. */
+    _Alignas(64) volatile int pauseRequest;  /* somebody wants the vehicle still */
+    int pauseGroup;             /* machines that will honour that */
+    bool pauseMember[6];
+    int pauseArrived, pauseFinished;
+    unsigned pauseArriveGen, pauseFinishGen;
+    unsigned long pauseTaken;     /* rendezvous completed */
+    unsigned long pauseAbandoned; /* ... and gave up waiting for a machine */
+    /* WHAT THE CAPTURE IS CALLED, set by whoever asked for it and read by
+     * every machine, so that one instant's files share one name across the
+     * whole vehicle and cannot be mistaken for two different captures. */
+    char pauseTag[96];
+#ifdef HAVE_PTHREADS
+    pthread_mutex_t pauseLock;
+    pthread_cond_t pauseCond;
+#endif
+
     /* PER-BUS SERIALISATION, AND WHAT IT IS AND IS NOT FOR.
      *
      * The device models are single-conversation state machines, faithfully:
@@ -276,6 +336,25 @@ int vehicle_votes_against(const Vehicle *v, int gpcId);
  * simulated time ahead of the slowest running one.  Cheap and returning at
  * once in the ordinary case; call it once per instruction. */
 void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs);
+
+/* THE STOP-THE-WORLD.  See the pause fields in Vehicle.
+ *
+ * A machine joins the group when its run begins and leaves when it ends;
+ * outside that window it is not waited for.  vehicle_pause_request asks for
+ * the vehicle to be brought to a stand; every member then parks in
+ * vehicle_pause_enter, which returns true to ALL of them at the same
+ * instant, or false to all of them if one did not arrive in time.  Each
+ * member does its own work -- writing its own files -- and calls
+ * vehicle_pause_exit, which releases them together.
+ *
+ * vehicle_pause_enter is the one on the per-instruction path and returns
+ * false immediately when nothing is pending. */
+void vehicle_join_pause_group(Vehicle *v, int gpcId);
+void vehicle_leave_pause_group(Vehicle *v, int gpcId);
+void vehicle_pause_request(Vehicle *v, const char *tag);
+const char *vehicle_pause_tag(const Vehicle *v);
+bool vehicle_pause_enter(Vehicle *v, int gpcId);
+void vehicle_pause_exit(Vehicle *v, int gpcId);
 
 /* Take this machine out of the barrier -- it is held in reset, or done --
  * so the others do not wait for a clock that has stopped. */
