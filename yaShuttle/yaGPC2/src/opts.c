@@ -21,6 +21,10 @@ static const char *HELP_TEXT =
 "Options:\n"
 "  --start <addr>                  start address in hex\n"
 "  --symbols <file>                load symbol table JSON from linker\n"
+"  --resume <dir>                  start every computer from the snapshot in\n"
+"                                  <dir>: each loads its own gpc<N>.mem.bin\n"
+"                                  and gpc<N>.json.  Not --state, which is\n"
+"                                  one path for the whole process\n"
 "  --snapshot <dir>                on SIGUSR1, bring every computer in the\n"
 "                                  vehicle to a stand and write gpc<N>.json\n"
 "                                  and gpc<N>.mem.bin into <dir>.  The run\n"
@@ -331,6 +335,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->dumpState = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--snapshot", &n)) {
             opts->snapshotDir = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--resume", &n)) {
+            opts->resumeDir = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--state", &n)) {
             opts->state = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--ebcdic", &n)) {
@@ -526,18 +532,26 @@ void opts_parse(int argc, char **argv, Options *opts) {
                 "asked for it has already expired.  A display unit will IPL "
                 "forever and never show a menu.  Add --real-time.\n");
         }
-        if (!opts->mmuVolume[0] && !opts->mmuVolume[1] && !opts->bceNetwork) {
-            fprintf(stderr,
-                "error: no 'fcm-file', so the bootstrap must come from a "
-                "mass memory -- give --mmu-model VOLUME.mmv, or "
-                "--bce-network to read a real one\n");
-            exit(1);
-        }
-        if (!opts->discretes) {
-            fprintf(stderr,
-                "error: no 'fcm-file', so the run is driven from the crew "
-                "panel -- give --discretes and press IPL, then STBY\n");
-            exit(1);
+        /* --resume BRINGS ITS OWN IMAGE, one per computer, so neither of
+         * the demands below applies to it: there is no bootstrap to read
+         * because the machine is already past its IPL, and no crew panel
+         * to press IPL on because the switches come back from the snapshot
+         * too.  Asking for a tape here would be asking a restored machine
+         * to boot. */
+        if (opts->resumeDir == NULL) {
+            if (!opts->mmuVolume[0] && !opts->mmuVolume[1] && !opts->bceNetwork) {
+                fprintf(stderr,
+                    "error: no 'fcm-file', so the bootstrap must come from a "
+                    "mass memory -- give --mmu-model VOLUME.mmv, or "
+                    "--bce-network to read a real one\n");
+                exit(1);
+            }
+            if (!opts->discretes) {
+                fprintf(stderr,
+                    "error: no 'fcm-file', so the run is driven from the crew "
+                    "panel -- give --discretes and press IPL, then STBY\n");
+                exit(1);
+            }
         }
         opts->fcmPath = NULL;
         return;

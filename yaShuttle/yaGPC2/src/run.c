@@ -1084,12 +1084,47 @@ static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t ni
 
 static long batchrunner_load(BatchRunner *r) {
     ConfigureResult res;
-    ageharness_configure_from_opts(&r->age, r->opts->fcmPath, r->opts, &res);
+    /* --resume DIR: THIS COMPUTER'S OWN PAIR out of the directory.
+     * --state cannot do this -- it is one path, and every machine in the
+     * process would load the same registers, which is a vehicle whose
+     * computers are all copies of one of them.  Refused loudly if the pair
+     * is not there, because the alternative is a machine that comes up
+     * from the tape instead and looks like a restore that worked. */
+    Options ropts;
+    const Options *useOpts = r->opts;
+    const char *usePath = r->opts->fcmPath;
+    char rmem[512], rstate[512];
+    if (r->opts->resumeDir != NULL) {
+        snprintf(rmem, sizeof rmem, "%s/gpc%d.mem.bin", r->opts->resumeDir, r->gpcId);
+        snprintf(rstate, sizeof rstate, "%s/gpc%d.json", r->opts->resumeDir, r->gpcId);
+        FILE *probe = fopen(rmem, "rb");
+        if (probe == NULL) {
+            fprintf(stderr, "--resume: GPC%d has no %s -- refusing, because "
+                            "coming up from the tape instead would look like "
+                            "a restore that worked\n", r->gpcId, rmem);
+            exit(1);
+        }
+        fclose(probe);
+        probe = fopen(rstate, "rb");
+        if (probe == NULL) {
+            fprintf(stderr, "--resume: GPC%d has %s but no %s -- refusing; "
+                            "memory without the registers is not a machine\n",
+                    r->gpcId, rmem, rstate);
+            exit(1);
+        }
+        fclose(probe);
+        ropts = *r->opts;
+        ropts.state = rstate;
+        useOpts = &ropts;
+        usePath = rmem;
+        fprintf(stderr, "GPC%d RESUME from %s\n", r->gpcId, r->opts->resumeDir);
+    }
+    ageharness_configure_from_opts(&r->age, usePath, useOpts, &res);
     /* With no .fcm there is nothing in store yet and so no entry point to
      * have: the bootstrap arrives when IPL is pressed, and the address it
      * starts at comes from its own System Reset PSW when HALT is released.
      * Demanding one here would be demanding it before it can exist. */
-    if (!r->opts->fcmPath) return 0;
+    if (!usePath) return 0;
     if (!res.hasEntryPoint) {
         batchrunner_fatal(r, "No entry point: use --start=ADDR or provide a symbols file with a START symbol");
     }

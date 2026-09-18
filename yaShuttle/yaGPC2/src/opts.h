@@ -28,6 +28,12 @@ typedef struct {
      * and whose triggers fire on their own; this is asked for from
      * outside, at a moment nothing in here can predict. */
     char *snapshotDir;              /* --snapshot DIR, NULL if unset */
+    /* --resume DIR: the counterpart of --snapshot.  Each computer loads its
+     * OWN gpc<N>.mem.bin and gpc<N>.json out of the directory, which is why
+     * it is not just --state: --state is one path shared by every machine
+     * in the process, and a vehicle restored from one machine's registers
+     * is not the vehicle that was captured. */
+    char *resumeDir;                /* --resume DIR, NULL if unset */
     bool ebcdic;                    /* default false */
     bool trapSvcError;              /* default true */
     bool halucpSvc;                 /* default true; false = the loaded image
