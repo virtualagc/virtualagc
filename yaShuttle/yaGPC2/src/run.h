@@ -33,6 +33,51 @@ typedef enum { PACING_BURST, PACING_SIGNAL } PacingMode;
 
 #define DEU_EXTRA_MAX 3   /* built-in DK1 + 3 = the four DEUs PASS drives */
 
+/* 64, the same ceiling --debug's own breakpoint table uses
+ * (DEBUGGER_MAX_BREAKPOINTS, debugger.c).  --break, the third mechanism,
+ * holds exactly one address and has no array at all. */
+#define BATCHRUNNER_LM_MAX 64
+
+/* THE CAPTURE TRIGGERS, PER COMPUTER.  YAGPC_DUMPSTATE_AT, _BUSY and
+ * YAGPC_LANDMARKS were function-scope statics inside batchrunner_step,
+ * which gave every GPC thread ONE shared set.  With more than one machine
+ * that is silently wrong in three separate ways: the first thread to reach
+ * a time consumed the cursor and the others never dumped at all; every
+ * machine wrote the same path from the one --dump-state prefix, so a
+ * capture that did happen twice overwrote itself; and a stopping landmark
+ * stopped whichever computer arrived first while the rest ran on
+ * un-snapshotted.  The result was a one-machine snapshot of a many-machine
+ * vehicle, reported as a success.
+ *
+ * The parsed configuration is per-machine too, not merely the cursors.  It
+ * costs about 6.6 KB a computer and buys two things: no initialisation
+ * race (main() calls batchrunner_init for every machine before it starts a
+ * single thread, so the parse happens single-threaded), and no shared
+ * mutable state left in the per-instruction path at all. */
+typedef struct {
+    /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] */
+    double at[8];
+    int nAt;
+    int nextAt;               /* how many of them THIS computer has taken */
+    /* YAGPC_DUMPSTATE_BUSY=<proc>[,<afterSec>] */
+    int busyProc;             /* -1 when not armed */
+    double busyAfterUs;
+    int busyDone;             /* fired on THIS computer */
+    /* YAGPC_LANDMARKS / _AFTER */
+    int n;
+    uint32_t addr[BATCHRUNNER_LM_MAX];
+    char label[BATCHRUNNER_LM_MAX][32];
+    long stop[BATCHRUNNER_LM_MAX];   /* 0 = never stop, N = stop on Nth hit */
+    long hits[BATCHRUNNER_LM_MAX];   /* arrivals AT THIS COMPUTER */
+    double afterUs;
+    /* One test rejects almost every instruction: this check sits in the
+     * per-instruction path, and a linear scan of 64 addresses there is not
+     * free.  Indexed by the low 11 bits of the address; a set bit only
+     * means "some landmark could have these low bits", and the scan then
+     * confirms. */
+    unsigned char maybe[2048 / 8];
+} Triggers;
+
 /* Routes one bus to the in-process mass memory and the rest to whatever
  * servicer would otherwise have been installed; see run.c. */
 typedef struct {
@@ -204,6 +249,9 @@ typedef struct {
     struct DeuModel *deuModelExtra[DEU_EXTRA_MAX]; /* --deu-bus list */
     int nDeuModelExtra;
     BusRouter busRouter;   /* --deu-model: the in-process display unit */
+    /* --dump-state's triggers, armed from the environment in
+     * batchrunner_init.  Per computer -- see Triggers. */
+    Triggers trig;
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts,

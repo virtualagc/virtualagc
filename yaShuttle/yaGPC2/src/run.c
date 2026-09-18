@@ -418,6 +418,146 @@ static void batchrunner_resync(BatchRunner *r) {
     r->writtenOffUs = r->rtPacer.statRebaseLostMs * 1000.0 * r->rtPacer.factor;
 }
 
+/* ARM THIS COMPUTER'S CAPTURE TRIGGERS from the environment.
+ *
+ * These three were parsed lazily inside batchrunner_step, on first
+ * arrival, into function-scope statics -- one set shared by every GPC
+ * thread.  Moving the parse here fixes two things at once.  The statics
+ * made the triggers a VEHICLE-wide resource when they describe a single
+ * machine (see Triggers in run.h for what that silently did to a
+ * multi-GPC capture), and the lazy parse raced: main() starts the threads
+ * together, so two machines could both see the init flag clear, or one
+ * could see it already set while the other was still filling the table.
+ * main() calls batchrunner_init for every machine BEFORE it creates a
+ * single thread, so nothing here needs a lock.
+ *
+ * Reported per computer, because with four of them "3 of 64 armed" on its
+ * own no longer says whose. */
+static void triggers_init(BatchRunner *r) {
+    Triggers *t = &r->trig;
+    t->busyProc = -1;
+
+    /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
+     * first time simulated time passes each <sec>, without stopping the
+     * run. */
+    const char *e = yagpc_getenv("YAGPC_DUMPSTATE_AT");
+    while (e != NULL && *e != '\0' && t->nAt < 8) {
+        t->at[t->nAt++] = atof(e);
+        const char *c = strchr(e, ',');
+        if (c == NULL) break;
+        e = c + 1;
+    }
+
+    /* YAGPC_DUMPSTATE_BUSY=<proc> instead catches the machine WHILE that
+     * processor is running: 0 is the MSC, 1-24 are BCE 1-24.  Time cannot
+     * do this.  A display transaction is a START I/O followed by a bus
+     * program lasting microseconds, after which the BCE clears its own
+     * busy bit and its enable -- measured, a dump taken 124 us after a
+     * BCE7 SIO already shows halt=MSC alone.  Firing on the busy bit is
+     * the only way to capture a BCE that is actually mid-transfer. */
+    const char *b = yagpc_getenv("YAGPC_DUMPSTATE_BUSY");
+    if (b != NULL && *b != '\0') {
+        t->busyProc = atoi(b);
+        /* ",<afterSec>": the FIRST time a processor goes busy is not
+         * usually the one wanted.  GPCIPL's own IOP init starts every BCE
+         * at once (acc=7fffff80, t=6.1 s), long before the flight
+         * software's display transactions (acc=81000000, from t=109.7 s).
+         * Without a floor the capture is of the loader, not of PASS. */
+        const char *c = strchr(b, ',');
+        if (c != NULL) t->busyAfterUs = atof(c + 1) * 1e6;
+    }
+
+    /* YAGPC_LANDMARKS -- see batchrunner_step's own comment for what the
+     * mechanism is for and why arrival beats inference. */
+    const char *a = yagpc_getenv("YAGPC_LANDMARKS_AFTER");
+    if (a != NULL) t->afterUs = atof(a) * 1e6;
+    const char *lm = yagpc_getenv("YAGPC_LANDMARKS");
+    if (lm == NULL) return;
+    /* Room for BATCHRUNNER_LM_MAX entries at a generous 48 chars each, so
+     * a full set cannot be truncated mid-entry -- silent truncation would
+     * leave a half-parsed hex address armed at the wrong place. */
+    char buf[BATCHRUNNER_LM_MAX * 48];
+    if (strlen(lm) >= sizeof buf) {
+        fprintf(stderr, "GPC%d landmarks: *** YAGPC_LANDMARKS is %zu bytes, "
+                        "over the %zu-byte limit -- REFUSING, none armed\n",
+                r->gpcId, strlen(lm), sizeof buf - 1);
+        return;
+    }
+    snprintf(buf, sizeof buf, "%s", lm);
+    for (char *p = buf; *p != '\0'; ) {
+        if (t->n >= BATCHRUNNER_LM_MAX) {
+            fprintf(stderr, "GPC%d landmarks: *** more than %d given; the "
+                            "rest are NOT armed, starting at \"%s\"\n",
+                    r->gpcId, BATCHRUNNER_LM_MAX, p);
+            break;
+        }
+        char *comma = p;
+        while (*comma != '\0' && *comma != ',') comma++;
+        char save = *comma;
+        *comma = '\0';
+        char *colon = strchr(p, ':');
+        const char *label = "";
+        if (colon != NULL) { *colon = '\0'; label = colon + 1; }
+        /* "<label>!"  stop on the first arrival
+         * "<label>!2" stop on the SECOND, and so on.  The Nth form is the
+         * one that matters here: FTRMGPOV is reached once when phase 3's
+         * overlay completes and again for phase 8, so "overlay-complete!2"
+         * is precisely the success condition. */
+        size_t ll = strlen(label);
+        long stop = 0;
+        const char *bang = strchr(label, '!');
+        if (bang != NULL) {
+            stop = (bang[1] != '\0') ? strtol(bang + 1, NULL, 10) : 1;
+            if (stop < 1) stop = 1;
+            ll = (size_t)(bang - label);
+        }
+        t->addr[t->n] = (uint32_t)strtoul(p, NULL, 16);
+        snprintf(t->label[t->n], sizeof t->label[t->n], "%.*s", (int)ll, label);
+        if (t->label[t->n][0] == '\0')
+            snprintf(t->label[t->n], sizeof t->label[t->n], "%05x",
+                     (unsigned)t->addr[t->n]);
+        t->stop[t->n] = stop;
+        t->hits[t->n] = 0;
+        t->maybe[(t->addr[t->n] & 0x7ff) >> 3] |=
+            (unsigned char)(1u << (t->addr[t->n] & 7));
+        t->n++;
+        p = (save == ',') ? comma + 1 : comma;
+    }
+    fprintf(stderr, "GPC%d landmarks: %d of %d armed, ignored before %.1f s\n",
+            r->gpcId, t->n, BATCHRUNNER_LM_MAX, t->afterUs / 1e6);
+    for (int i = 0; i < t->n; i++)
+        fprintf(stderr, "GPC%d landmarks:   %05x %-24s %s\n",
+                r->gpcId, (unsigned)t->addr[i], t->label[i],
+                t->stop[i] ? "STOPS" : "logs only");
+}
+
+/* WHERE --dump-state's ON-STOP FILE GOES, which is not simply the name the
+ * user gave once there is more than one computer.  Both stop sites below
+ * wrote the bare --dump-state path, so in a multi-GPC vehicle every machine
+ * wrote the SAME file and the last one to stop silently won: a capture of
+ * one computer, indistinguishable from a capture of the vehicle.  The
+ * triggers in batchrunner_step had the same fault in three more places (see
+ * Triggers in run.h).
+ *
+ * With one computer the name is left exactly as given -- `--break <addr>
+ * --dump-state f.json` then `--state f.json` is the documented round trip
+ * and must keep working.  With several, "f.json" becomes "f-gpc1.json",
+ * inserted before the last extension so the suffix a reader keys on is
+ * still the last thing in the name. */
+static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
+    const char *base = r->opts->dumpState;
+    if (r->vehicle == NULL || r->vehicle->nExpected <= 1) {
+        snprintf(buf, n, "%s", base);
+        return;
+    }
+    const char *dot = strrchr(base, '.');
+    const char *slash = strrchr(base, '/');
+    if (dot == NULL || (slash != NULL && dot < slash))
+        snprintf(buf, n, "%s-gpc%d", base, r->gpcId);
+    else
+        snprintf(buf, n, "%.*s-gpc%d%s", (int)(dot - base), base, r->gpcId, dot);
+}
+
 void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                       int gpcId) {
     memset(r, 0, sizeof(*r));
@@ -512,6 +652,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     }
 
     r->gpcId = gpcId;
+    /* After r->gpcId, which every message it prints names. */
+    triggers_init(r);
     r->rtPacer.gpcId = gpcId;   /* for the YAGPC_PACETRACE label */
     /* NOT the zero memset leaves: generation 0 is a real value, and a memo
      * that matched it would answer "not held" before the panel had ever been
@@ -1815,51 +1957,13 @@ static bool batchrunner_step(BatchRunner *r) {
      * busyWait naming the MSC alone.  Pick a time just after a
      * YAGPC_SIOTRACE line that names the processor you care about. */
     if (r->opts != NULL && r->opts->dumpState != NULL) {
-        static int dsInit = 0;
-        static double dsAt[8];
-        static int dsN = 0, dsNext = 0;
-        if (!dsInit) {
-            dsInit = 1;
-            const char *e = yagpc_getenv("YAGPC_DUMPSTATE_AT");
-            while (e != NULL && *e != '\0' && dsN < 8) {
-                dsAt[dsN++] = atof(e);
-                const char *c = strchr(e, ',');
-                if (c == NULL) break;
-                e = c + 1;
-            }
-        }
-        /* YAGPC_DUMPSTATE_BUSY=<proc> instead catches the machine WHILE
-         * that processor is running: 0 is the MSC, 1-24 are BCE 1-24.
-         * Time cannot do this.  A display transaction is a START I/O
-         * followed by a bus program lasting microseconds, after which the
-         * BCE clears its own busy bit and its enable -- measured, a dump
-         * taken 124 us after a BCE7 SIO already shows halt=MSC alone.
-         * Firing on the busy bit is the only way to capture a BCE that is
-         * actually mid-transfer. */
-        static int dsBusyInit = 0, dsBusyProc = -1, dsBusyDone = 0;
-        static double dsBusyAfterUs = 0.0;
-        if (!dsBusyInit) {
-            dsBusyInit = 1;
-            const char *b = yagpc_getenv("YAGPC_DUMPSTATE_BUSY");
-            if (b != NULL && *b != '\0') {
-                dsBusyProc = atoi(b);
-                /* ",<afterSec>": the FIRST time a processor goes busy is
-                 * not usually the one wanted.  GPCIPL's own IOP init
-                 * starts every BCE at once (acc=7fffff80, t=6.1 s), long
-                 * before the flight software's display transactions
-                 * (acc=81000000, from t=109.7 s).  Without a floor the
-                 * capture is of the loader, not of PASS. */
-                const char *c = strchr(b, ',');
-                if (c != NULL) dsBusyAfterUs = atof(c + 1) * 1e6;
-            }
-        }
-        if (dsBusyProc >= 0 && !dsBusyDone &&
-            r->age.gpc.cpu.elapsedTimeUs >= dsBusyAfterUs &&
-            iop_proc_get(&r->age.gpc.iop.regBusyWait, dsBusyProc) &&
-            iop_proc_get(&r->age.gpc.iop.regHalt, dsBusyProc)) {
+        if (r->trig.busyProc >= 0 && !r->trig.busyDone &&
+            r->age.gpc.cpu.elapsedTimeUs >= r->trig.busyAfterUs &&
+            iop_proc_get(&r->age.gpc.iop.regBusyWait, r->trig.busyProc) &&
+            iop_proc_get(&r->age.gpc.iop.regHalt, r->trig.busyProc)) {
             char path[512];
-            snprintf(path, sizeof path, "%s-busy%d.json",
-                     r->opts->dumpState, dsBusyProc);
+            snprintf(path, sizeof path, "%s-gpc%d-busy%d.json",
+                     r->opts->dumpState, r->gpcId, r->trig.busyProc);
             ageharness_dump_state(&r->age, path);
             /* AND THE MEMORY, AT THE SAME INSTANT.  A state and a snapshot
              * taken at two different times do not describe one machine:
@@ -1867,21 +1971,21 @@ static bool batchrunner_step(BatchRunner *r) {
              * refer to memory as it was when they were read.  Pairing them
              * here is what makes a resume reproduce the captured machine
              * rather than an average of two. */
-            snprintf(path, sizeof path, "%s-busy%d.mem.bin",
-                     r->opts->dumpState, dsBusyProc);
+            snprintf(path, sizeof path, "%s-gpc%d-busy%d.mem.bin",
+                     r->opts->dumpState, r->gpcId, r->trig.busyProc);
             dump_main_storage(r, path);
-            dsBusyDone = 1;
+            r->trig.busyDone = 1;
         }
-        if (dsNext < dsN &&
-            r->age.gpc.cpu.elapsedTimeUs >= dsAt[dsNext] * 1e6) {
+        if (r->trig.nextAt < r->trig.nAt &&
+            r->age.gpc.cpu.elapsedTimeUs >= r->trig.at[r->trig.nextAt] * 1e6) {
             char path[512];
-            snprintf(path, sizeof path, "%s-%g.json",
-                     r->opts->dumpState, dsAt[dsNext]);
+            snprintf(path, sizeof path, "%s-gpc%d-%g.json",
+                     r->opts->dumpState, r->gpcId, r->trig.at[r->trig.nextAt]);
             ageharness_dump_state(&r->age, path);
-            snprintf(path, sizeof path, "%s-%g.mem.bin",
-                     r->opts->dumpState, dsAt[dsNext]);
+            snprintf(path, sizeof path, "%s-gpc%d-%g.mem.bin",
+                     r->opts->dumpState, r->gpcId, r->trig.at[r->trig.nextAt]);
             dump_main_storage(r, path);
-            dsNext++;
+            r->trig.nextAt++;
         }
     }
 
@@ -1938,117 +2042,32 @@ static bool batchrunner_step(BatchRunner *r) {
      * --dump-state, a stopping landmark dumps state AND memory at that
      * instant, which is the moment worth having. */
     {
-        /* 64, the same ceiling --debug's own breakpoint table uses
-         * (DEBUGGER_MAX_BREAKPOINTS, debugger.c).  --break, the third
-         * mechanism, holds exactly one address and has no array at all. */
-        enum { LM_MAX = 64 };
-        static int lmInit = 0, lmN = 0;
-        static uint32_t lmAddr[LM_MAX];
-        static char lmLabel[LM_MAX][32];
-        static long lmStop[LM_MAX];   /* 0 = never stop, N = stop on Nth hit */
-        static long lmHits[LM_MAX];
-        static double lmAfterUs = 0.0;
-        /* Room for LM_MAX entries at a generous 48 chars each, so a full
-         * set cannot be truncated mid-entry -- silent truncation would
-         * leave a half-parsed hex address armed at the wrong place. */
-        static char lmBuf[LM_MAX * 48];
-        /* One test rejects almost every instruction: this check sits in the
-         * per-instruction path, and a linear scan of 64 addresses there is
-         * not free.  Indexed by the low 11 bits of the address; a set bit
-         * only means "some landmark could have these low bits", and the
-         * scan below then confirms. */
-        static unsigned char lmMaybe[2048 / 8];
-        if (!lmInit) {
-            lmInit = 1;
-            const char *e = yagpc_getenv("YAGPC_LANDMARKS");
-            const char *a = yagpc_getenv("YAGPC_LANDMARKS_AFTER");
-            if (a != NULL) lmAfterUs = atof(a) * 1e6;
-            if (e != NULL) {
-                if (strlen(e) >= sizeof lmBuf) {
-                    fprintf(stderr, "landmarks: *** YAGPC_LANDMARKS is %zu "
-                                    "bytes, over the %zu-byte limit -- "
-                                    "REFUSING, none armed\n",
-                            strlen(e), sizeof lmBuf - 1);
-                    e = NULL;
-                }
-            }
-            if (e != NULL) {
-                snprintf(lmBuf, sizeof lmBuf, "%s", e);
-                for (char *p = lmBuf; *p != '\0'; ) {
-                    if (lmN >= LM_MAX) {
-                        fprintf(stderr, "landmarks: *** more than %d given; "
-                                        "the rest are NOT armed, starting at "
-                                        "\"%s\"\n", LM_MAX, p);
-                        break;
-                    }
-                    char *comma = p;
-                    while (*comma != '\0' && *comma != ',') comma++;
-                    char save = *comma;
-                    *comma = '\0';
-                    char *colon = strchr(p, ':');
-                    const char *label = "";
-                    if (colon != NULL) { *colon = '\0'; label = colon + 1; }
-                    /* "<label>!"  stop on the first arrival
-                     * "<label>!2" stop on the SECOND, and so on.  The Nth
-                     * form is the one that matters here: FTRMGPOV is
-                     * reached once when phase 3's overlay completes and
-                     * again for phase 8, so "overlay-complete!2" is
-                     * precisely the success condition. */
-                    size_t ll = strlen(label);
-                    long stop = 0;
-                    const char *bang = strchr(label, '!');
-                    if (bang != NULL) {
-                        stop = (bang[1] != '\0') ? strtol(bang + 1, NULL, 10) : 1;
-                        if (stop < 1) stop = 1;
-                        ll = (size_t)(bang - label);
-                    }
-                    lmAddr[lmN] = (uint32_t)strtoul(p, NULL, 16);
-                    snprintf(lmLabel[lmN], sizeof lmLabel[lmN], "%.*s",
-                             (int)ll, label);
-                    if (lmLabel[lmN][0] == '\0')
-                        snprintf(lmLabel[lmN], sizeof lmLabel[lmN], "%05x",
-                                 (unsigned)lmAddr[lmN]);
-                    lmStop[lmN] = stop;
-                    lmHits[lmN] = 0;
-                    lmMaybe[(lmAddr[lmN] & 0x7ff) >> 3] |=
-                        (unsigned char)(1u << (lmAddr[lmN] & 7));
-                    lmN++;
-                    p = (save == ',') ? comma + 1 : comma;
-                }
-                fprintf(stderr, "landmarks: %d of %d armed, ignored before "
-                                "%.1f s\n", lmN, LM_MAX, lmAfterUs / 1e6);
-                for (int i = 0; i < lmN; i++)
-                    fprintf(stderr, "landmarks:   %05x %-24s %s\n",
-                            (unsigned)lmAddr[i], lmLabel[i],
-                            lmStop[i] ? "STOPS" : "logs only");
-            }
-        }
-        if (lmN > 0 &&
-            (lmMaybe[(nia & 0x7ff) >> 3] & (1u << (nia & 7))) != 0 &&
-            r->age.gpc.cpu.elapsedTimeUs >= lmAfterUs) {
-            for (int i = 0; i < lmN; i++) {
-                if (nia != lmAddr[i]) continue;
-                lmHits[i]++;
+        if (r->trig.n > 0 &&
+            (r->trig.maybe[(nia & 0x7ff) >> 3] & (1u << (nia & 7))) != 0 &&
+            r->age.gpc.cpu.elapsedTimeUs >= r->trig.afterUs) {
+            for (int i = 0; i < r->trig.n; i++) {
+                if (nia != r->trig.addr[i]) continue;
+                r->trig.hits[i]++;
                 /* Every arrival, not just the first, up to a bound: the
                  * COUNT is the result for a landmark like FTRMGPOV, and a
                  * first-hit-only line cannot express "reached twice". */
-                if (lmHits[i] <= 20)
-                    fprintf(stderr, "LANDMARK %s #%ld at %05x t=%.6f s step=%ld\n",
-                            lmLabel[i], lmHits[i], (unsigned)nia,
+                if (r->trig.hits[i] <= 20)
+                    fprintf(stderr, "GPC%d LANDMARK %s #%ld at %05x t=%.6f s step=%ld\n",
+                            r->gpcId, r->trig.label[i], r->trig.hits[i], (unsigned)nia,
                             r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step);
-                if (lmStop[i] != 0 && lmHits[i] >= lmStop[i]) {
+                if (r->trig.stop[i] != 0 && r->trig.hits[i] >= r->trig.stop[i]) {
                     if (r->opts != NULL && r->opts->dumpState != NULL) {
                         char path[512];
-                        snprintf(path, sizeof path, "%s-landmark-%s.json",
-                                 r->opts->dumpState, lmLabel[i]);
+                        snprintf(path, sizeof path, "%s-gpc%d-landmark-%s.json",
+                                 r->opts->dumpState, r->gpcId, r->trig.label[i]);
                         ageharness_dump_state(&r->age, path);
-                        snprintf(path, sizeof path, "%s-landmark-%s.mem.bin",
-                                 r->opts->dumpState, lmLabel[i]);
+                        snprintf(path, sizeof path, "%s-gpc%d-landmark-%s.mem.bin",
+                                 r->opts->dumpState, r->gpcId, r->trig.label[i]);
                         dump_main_storage(r, path);
                     }
                     snprintf(r->stopReason, sizeof r->stopReason,
                              "landmark %s hit %ld at 0x%05x (t=%.6f s)",
-                             lmLabel[i], lmHits[i], (unsigned)nia,
+                             r->trig.label[i], r->trig.hits[i], (unsigned)nia,
                              r->age.gpc.cpu.elapsedTimeUs / 1e6);
                     r->hasStopReason = true;
                     return false;
@@ -2794,8 +2813,11 @@ static int batchrunner_report_stop(BatchRunner *r) {
              r->age.gpc.cpu.elapsedTimeUs / 1000.0, r->age.gpc.cpu.elapsedTimeUs,
              r->age.gpc.cpu.timingPass2 ? "pass2" : "poo");
     batchrunner_info(r, msg);
-    if (r->opts != NULL && r->opts->dumpState != NULL)
-        ageharness_dump_state(&r->age, r->opts->dumpState);
+    if (r->opts != NULL && r->opts->dumpState != NULL) {
+        char dsPath[512];
+        dump_state_path(r, dsPath, sizeof dsPath);
+        ageharness_dump_state(&r->age, dsPath);
+    }
     batchrunner_info(r, "--- FINAL REGISTERS ---");
     info_reg_dump(r, r->step);
 
@@ -2945,8 +2967,11 @@ static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, l
     char msg[128];
     snprintf(msg, sizeof msg, headerFmt, step);
     batchrunner_info(r, msg);
-    if (r->opts != NULL && r->opts->dumpState != NULL)
-        ageharness_dump_state(&r->age, r->opts->dumpState);
+    if (r->opts != NULL && r->opts->dumpState != NULL) {
+        char dsPath[512];
+        dump_state_path(r, dsPath, sizeof dsPath);
+        ageharness_dump_state(&r->age, dsPath);
+    }
     batchrunner_info(r, "--- FINAL REGISTERS ---");
     info_reg_dump(r, step);
     batchrunner_flush(r);
