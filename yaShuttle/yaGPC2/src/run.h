@@ -171,6 +171,7 @@ typedef struct {
     /* mode_switch_held()'s memo, keyed on this machine's discrete bus
      * generation -- see the comment there. */
     unsigned modeHeldGen;
+    unsigned modePollCalls;   /* gates the socket look -- see mode_switch_held */
     bool modeHeldLast;
     /* The crew panel gone quiet while this machine was running: it rides
      * through on its last position until YAGPC_DISCRETES_HOLD_SEC, then is

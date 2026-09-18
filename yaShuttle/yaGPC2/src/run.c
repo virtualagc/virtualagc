@@ -1681,16 +1681,41 @@ static void mode_held_update(BatchRunner *r) {
     }
 }
 
+/* Must be a power of two: mode_switch_held() masks with it minus one. */
+#define MODE_POLL_EVERY 64u
+
 static bool mode_switch_held(BatchRunner *r) {
     if (!discretes_enabled(r->discretes)) return false;
-    /* ONE DATAGRAM AT A TIME, evaluating after each.  The pushbutton is a
-     * pulse: draining the socket and looking once would let a press and its
-     * release arrive together and cancel out.  See discretes_poll_one. */
-    while (discretes_poll_one(r->discretes)) {
-        unsigned g = discretes_generation(r->discretes);
-        if (g == r->modeHeldGen) continue;
-        r->modeHeldGen = g;
-        mode_held_update(r);
+    /* LOOK EVERY MODE_POLL_EVERY CALLS, NOT EVERY ONE.
+     *
+     * This runs at the top of batchrunner_step, so it ran ONCE PER EMULATED
+     * INSTRUCTION, and discretes_poll_one() ends in a recv() -- a syscall on
+     * every instruction, against a socket a human at a crew panel writes to a
+     * few times a minute.  An uninstrumented one-GPC profile put recvfrom at
+     * 7.8% of cycles with its share of the syscall entry and exit on top.
+     * Syscalls are the cost worth attacking here: the emulation loop is
+     * memory-latency-bound (ledger #168), so removing ordinary work from it
+     * changes nothing, while removing a SERIALISED STALL does -- gating the
+     * clock read in attend() the same way was worth 105%.
+     *
+     * NOTHING IS LOST BY LOOKING LESS OFTEN, because the datagrams QUEUE in
+     * the socket: when the look does happen they are still taken ONE AT A
+     * TIME, which is what stops a pushbutton press and its release arriving
+     * together and cancelling out.  Only the notice is later, by at most
+     * MODE_POLL_EVERY calls -- tens of microseconds of wall clock.
+     *
+     * THE COUNTER MUST NOT BE r->step.  While the machine is held the step
+     * count does not move (see the ride-through note below), so a step-based
+     * gate would never fire in HALT and the switch leaving HALT would never
+     * be seen.  A call counter advances on every pass, held or running.
+     * discretes_poll() gates itself the same way, on its own pollCalls. */
+    if ((++r->modePollCalls & (MODE_POLL_EVERY - 1u)) == 0u) {
+        while (discretes_poll_one(r->discretes)) {
+            unsigned g = discretes_generation(r->discretes);
+            if (g == r->modeHeldGen) continue;
+            r->modeHeldGen = g;
+            mode_held_update(r);
+        }
     }
     /* SILENCE SENDS NO DATAGRAM, so nothing above would ever look again once
      * the panel went quiet: the ride-through could never expire, and a panel
