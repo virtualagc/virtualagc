@@ -383,7 +383,7 @@ def saved_epoch(snapdir):
         return None
 
 
-def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0,
+def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
                   expect_panel=True, timeout=20.0):
     """Bring the vehicle to a stand, write it, and say whether it worked.
 
@@ -426,6 +426,12 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0,
     panel_json = os.path.join(staging, "panel.json")
     if expect_panel:
         want.append(panel_json)
+    # THE DISPLAYS.  Display memory IS the picture: the static format arrives
+    # once, at DEU load time, so a restore that leaves PASS to repaint gets
+    # the live numbers over an empty screen -- gpc-causes #174.
+    for n in idps:
+        want += [os.path.join(staging, "idp%s.json" % n),
+                 os.path.join(staging, "idp%s.mem.bin" % n)]
 
     # WHO HAS TO BE THERE, CHECKED BEFORE ANYTHING IS ASKED FOR.
     #
@@ -461,6 +467,10 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0,
         log("snapshot: cannot signal yaGPC2: %s" % e)
         return False, "cannot signal yaGPC2: %s" % e
     crewscript.send_control("save " + panel_json, port_base)
+    # One datagram to every MEDS2 on this port base; each writes the units it
+    # actually owns, so the set is complete between them.
+    if idps:
+        crewscript.send_meds("save " + staging, port_base)
 
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -1174,11 +1184,31 @@ def main():
                 time.sleep(0.5)
             time.sleep(1.5)        # let the window manager finish placing them
             mine = windowLayout.window_ids() - windows_before
-            log("placing this run's windows as %s says (%d new window(s), "
-                "wanted %s)" % (layout, len(mine), ", ".join(sorted(roles_wanted))
-                                or "nothing"))
-            placed, missing, inexact = windowLayout.restore_layout(
-                layout, log=log, only_ids=mine)
+            # MATCHED BY ROLE, NOT BY WINDOW ID.
+            #
+            # only_ids was the set of windows that had appeared since this run
+            # started, and across a RESUME that is the wrong set and sometimes
+            # an empty one: every window is destroyed and rebuilt, and an id
+            # that has not been seen before is the only thing that qualifies.
+            # When it came out empty, restore_layout found no candidate for
+            # any role, reported all seven "not on screen", and moved nothing
+            # -- while panelO6 landed in the right place anyway because
+            # bring_up passes it --geometry on its command line.  So the one
+            # window that appeared to obey the layout was the one window that
+            # was not using it.
+            #
+            # Its stated purpose -- "one simulation cannot drag another's
+            # windows about" -- is already served by the roles themselves.
+            # windowLayout names anything that is not ours "other:<title>",
+            # and no layout entry is called that, so a foreign window can
+            # never match.  A second simulation on another port base still
+            # could; restore_layout says so when it happens ("N windows have
+            # this name") rather than silently doing nothing, which is the
+            # better failure of the two.
+            log("placing this run's windows as %s says (%d new window(s) seen, "
+                "waited for %s)"
+                % (layout, len(mine), ", ".join(sorted(roles_wanted)) or "nothing"))
+            placed, missing, inexact = windowLayout.restore_layout(layout, log=log)
             # SAID WHERE IT CAN BE SEEN.  This used to go only to the
             # terminal, which is the one place a person driving the manager
             # window is not looking -- so "the windows did not move" and "the
@@ -1232,7 +1262,8 @@ def main():
             SESSION["action"] = SESSION["dir"] = None
             if action in ("save", "save-and-quit"):
                 ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
-                                        args.port_base, gpcs, args.crts)
+                                        args.port_base, gpcs, args.crts,
+                                        idps=range(1, args.crts + 1))
                 # BACK TO WHOEVER ASKED.  A failure that only reaches this
                 # terminal is a failure nobody sees: the manager window exists
                 # so that nobody has to watch this terminal.
