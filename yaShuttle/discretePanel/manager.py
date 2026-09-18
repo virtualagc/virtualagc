@@ -43,7 +43,6 @@ import time
 import tkinter as tk
 import tkinter.filedialog as filedialog
 import tkinter.font as tkfont
-import tkinter.messagebox as messagebox
 
 import crewscript
 import discretes as D
@@ -56,9 +55,12 @@ POLL_MS = 3000
 C_BG = "#2b2b2b"
 C_FG = "#e8e8e8"
 C_NOTE = "#b0c4de"
-# The status bar at the foot.  Lighter than the window so the run's state
-# reads as a band of its own rather than as more text under the buttons.
-C_STATUS = "#3a3a3a"
+# The status bar at the foot.  SILVER WITH BLACK TEXT, not another dark grey:
+# a dark panel among dark buttons reads as one more button, and the one thing
+# in the window that cannot be pressed should not look like the things that
+# can.  Reversing it out is what makes it a band rather than a control.
+C_STATUS = "#c0c0c0"
+C_STATUS_FG = "#101010"
 
 
 def shrink_fonts(root, points):
@@ -177,8 +179,9 @@ class Manager(object):
         # bar and are given their own background to say so.
         bar = tk.Frame(root, bg=C_STATUS)
         bar.pack(fill="x", side="bottom", pady=(10, 0))
-        tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg="#d8d8d8", anchor="w",
-                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=6)
+        tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg=C_STATUS_FG,
+                 anchor="w", justify="left", wraplength=560
+                 ).pack(fill="x", padx=10, pady=6)
         root.bind_all("<Control-q>", lambda _e: root.quit())
         self.start_results()
         self._poll()
@@ -344,68 +347,89 @@ class Manager(object):
             return
         what = verb.replace("-", " ").capitalize()
         self.say("%s failed" % what)
-        self._failed_dialog(
+        self._dialog(
             "%s failed" % what,
             "%s did not work, and nothing usable was written." % what,
             detail or "No reason given.",
             "The simulation is still running and has not been touched.")
 
-    def _failed_dialog(self, title, lead, detail, reassurance):
-        """A window of our own rather than messagebox.showerror.
+    def _dialog(self, title, lead, detail, footnote, confirm=None):
+        """A window of our own rather than tkinter.messagebox.
 
-        The native dialog sizes itself to the text, which for a message of
-        this length comes out tall, narrow and bold -- and bold is what makes
-        it read as an alarm when what it needs to do is be legible.  A
-        Toplevel can be shaped: wider than it is tall, the reason set off from
-        the sentence around it, and the ordinary face throughout.
+        The native dialogs hand their shape to the platform: they size to the
+        text, which for messages of this length comes out tall, narrow and
+        bold -- and bold is what makes them read as an alarm when what they
+        need to do is be legible.  A Toplevel can be shaped: wider than it is
+        tall, the reason set off from the sentence around it, the ordinary
+        face at the window's own size, and nothing emboldened anywhere.
 
-        THE WINDOW'S OWN SIZE, not a point smaller.  Shrinking it was tried
-        and looked worse: the shape and the plain face are what make this
-        readable, and taking size away from a message someone is reading in a
-        hurry only costs legibility.
+        `confirm`, when given, is the label of the button that says yes, and
+        makes this ask rather than tell: it waits, and returns True or False.
         """
         base = tkfont.nametofont("TkDefaultFont", self.root)
         body = tkfont.Font(family=base.cget("family"),
                            size=abs(base.cget("size")), weight="normal")
-        head = body
 
         W, H = 620, 400            # wider than 4:3, which is what was asked for
+        answer = {"ok": False}
         top = tk.Toplevel(self.root, bg=C_BG)
         top.title(title)
         top.transient(self.root)
         top.resizable(True, True)
-        # Over the window it belongs to, not wherever the manager last left
-        # the pointer.
+        # Over the window it belongs to, not wherever the pointer happens to be.
         self.root.update_idletasks()
         x = self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2
         y = self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3
         top.geometry("%dx%d+%d+%d" % (W, H, max(0, x), max(0, y)))
 
         pad = 24
-        tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=head, anchor="w",
+        tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=body, anchor="w",
                  justify="left", wraplength=W - 2 * pad
                  ).pack(fill="x", padx=pad, pady=(pad, 12))
-        # The reason, in its own panel: it is the only part that differs
-        # between one failure and the next.
+        # The part that differs between one of these and the next, in a panel
+        # of its own so it does not compete with the sentence around it.
         box = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
                        highlightbackground="#4a4a4a")
         box.pack(fill="both", expand=True, padx=pad)
         tk.Label(box, text=detail, bg="#1b1b1b", fg=C_FG, font=body, anchor="nw",
                  justify="left", wraplength=W - 2 * pad - 24
                  ).pack(fill="both", expand=True, padx=12, pady=12)
-        tk.Label(top, text=reassurance, bg=C_BG, fg="#9a9a9a", font=body,
+        tk.Label(top, text=footnote, bg=C_BG, fg="#9a9a9a", font=body,
                  anchor="w", justify="left", wraplength=W - 2 * pad
                  ).pack(fill="x", padx=pad, pady=(12, 8))
+
         row = tk.Frame(top, bg=C_BG)
         row.pack(fill="x", padx=pad, pady=(0, pad))
-        ok = tk.Button(row, text="OK", command=top.destroy, width=10,
-                       bg="#3c3c3c", fg=C_FG, activebackground="#505050",
-                       activeforeground=C_FG, highlightbackground=C_BG, font=body)
-        ok.pack(side="right")
-        top.bind("<Return>", lambda _e: top.destroy())
-        top.bind("<Escape>", lambda _e: top.destroy())
-        ok.focus_set()
-        top.grab_set()             # modal, as the old one was
+
+        def close(ok):
+            answer["ok"] = ok
+            top.destroy()
+
+        def button(text, ok, default):
+            b = tk.Button(row, text=text, command=lambda: close(ok),
+                          width=max(10, len(text)), bg="#3c3c3c", fg=C_FG,
+                          activebackground="#505050", activeforeground=C_FG,
+                          highlightbackground=C_BG, font=body)
+            b.pack(side="right", padx=(8, 0))
+            if default:
+                b.focus_set()
+            return b
+
+        if confirm is None:
+            button("OK", True, True)
+            top.bind("<Return>", lambda _e: close(True))
+        else:
+            # Cancel is the default, because this is asked only where saying
+            # yes cannot be undone.
+            button(confirm, True, False)
+            button("Cancel", False, True)
+            top.bind("<Return>", lambda _e: close(False))
+        top.bind("<Escape>", lambda _e: close(False))
+        top.protocol("WM_DELETE_WINDOW", lambda: close(False))
+        top.grab_set()
+        if confirm is not None:
+            self.root.wait_window(top)
+        return answer["ok"]
 
     # ---- snapshots ------------------------------------------------------
     #
@@ -460,11 +484,13 @@ class Manager(object):
         """The only control here that destroys a run without saving it, so it
         is the only one that asks first.  Save & Quit does not, because its
         snapshot is written before anything is torn down."""
-        if not messagebox.askokcancel(
+        if not self._dialog(
                 "End simulation",
-                "Shut the whole simulation down?\n\n"
-                "Nothing is saved.  Use Save & Quit instead if you want to "
-                "come back to this."):
+                "Shut the whole simulation down?",
+                "Nothing is saved.  Everything since the last snapshot is "
+                "lost, including the IPL -- which is several minutes of it.",
+                "Use Save & Quit instead if you want to come back to this.",
+                confirm="End Simulation"):
             return
         if self._session("quit"):
             self.say("Shutting the simulation down")
