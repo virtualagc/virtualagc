@@ -56,6 +56,9 @@ POLL_MS = 3000
 C_BG = "#2b2b2b"
 C_FG = "#e8e8e8"
 C_NOTE = "#b0c4de"
+# The status bar at the foot.  Lighter than the window so the run's state
+# reads as a band of its own rather than as more text under the buttons.
+C_STATUS = "#3a3a3a"
 
 
 def shrink_fonts(root, points):
@@ -119,8 +122,11 @@ class Manager(object):
         self.script = tk.StringVar(value=args.script or self._first_script())
         self.layout = tk.StringVar(value=args.layout)
         self.snapshot = tk.StringVar(value=args.snapshot_dir)
-        self.note = tk.StringVar(value="port base %d" % D.PORT_BASE)
-        self.state = tk.StringVar(value="looking...")
+        # NOT "port base N".  That was the first thing this window ever said,
+        # and it is a command-line detail: how the programs find each other,
+        # not anything the person reading this needs.
+        self.note = tk.StringVar(value="")
+        self.state = tk.StringVar(value="Looking for the simulation...")
 
         # A path is long and its interesting end is the file name, so each box
         # is as wide as the window (and grows with it) and is scrolled to show
@@ -163,10 +169,15 @@ class Manager(object):
         row = self._row()
         self._button(row, "End Simulation", self.end_simulation, wide=True)
 
-        tk.Label(root, textvariable=self.state, bg=C_BG, fg=C_NOTE, anchor="w",
-                 justify="left").pack(fill="x", padx=10, pady=(10, 0))
-        tk.Label(root, textvariable=self.note, bg=C_BG, fg="#9a9a9a", anchor="w",
-                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=(2, 10))
+        # ONE BAND, SET OFF FROM THE CONTROLS.  Both lines say what the run is
+        # doing rather than offering anything to do, so they read as a status
+        # bar and are given their own background to say so.
+        bar = tk.Frame(root, bg=C_STATUS)
+        bar.pack(fill="x", side="bottom", pady=(10, 0))
+        tk.Label(bar, textvariable=self.state, bg=C_STATUS, fg=C_NOTE, anchor="w",
+                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=(6, 0))
+        tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg="#d0d0d0", anchor="w",
+                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=(2, 6))
         root.bind_all("<Control-q>", lambda _e: root.quit())
         self.start_results()
         self._poll()
@@ -324,12 +335,68 @@ class Manager(object):
                       "resume": "Restored from %s"}.get(verb, "%s")
                      % os.path.basename(detail.rstrip("/")))
             return
-        self.say("%s failed" % verb.replace("-", " ").capitalize())
-        messagebox.showerror(
-            "%s failed" % verb.replace("-", " ").capitalize(),
-            "%s did not work, and nothing usable was written.\n\n%s\n\n"
-            "The simulation is still running and has not been touched."
-            % (verb.replace("-", " ").capitalize(), detail or "No reason given."))
+        what = verb.replace("-", " ").capitalize()
+        self.say("%s failed" % what)
+        self._failed_dialog(
+            "%s failed" % what,
+            "%s did not work, and nothing usable was written." % what,
+            detail or "No reason given.",
+            "The simulation is still running and has not been touched.")
+
+    def _failed_dialog(self, title, lead, detail, reassurance):
+        """A window of our own rather than messagebox.showerror.
+
+        The native dialog sizes itself to the text, which for a message of
+        this length comes out tall, narrow and bold -- three things that make
+        it read as an alarm when what it needs to do is be legible.  A
+        Toplevel can be shaped: wider than it is tall, the ordinary face a
+        point smaller than the window's, and the reason set off from the
+        sentence around it.
+        """
+        base = tkfont.nametofont("TkDefaultFont", self.root)
+        body = tkfont.Font(family=base.cget("family"),
+                           size=max(6, abs(base.cget("size")) - 1),
+                           weight="normal")
+        head = tkfont.Font(family=base.cget("family"),
+                           size=max(7, abs(base.cget("size"))), weight="normal")
+
+        W, H = 620, 400            # wider than 4:3, which is what was asked for
+        top = tk.Toplevel(self.root, bg=C_BG)
+        top.title(title)
+        top.transient(self.root)
+        top.resizable(True, True)
+        # Over the window it belongs to, not wherever the manager last left
+        # the pointer.
+        self.root.update_idletasks()
+        x = self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2
+        y = self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3
+        top.geometry("%dx%d+%d+%d" % (W, H, max(0, x), max(0, y)))
+
+        pad = 24
+        tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=head, anchor="w",
+                 justify="left", wraplength=W - 2 * pad
+                 ).pack(fill="x", padx=pad, pady=(pad, 12))
+        # The reason, in its own panel: it is the only part that differs
+        # between one failure and the next.
+        box = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
+                       highlightbackground="#4a4a4a")
+        box.pack(fill="both", expand=True, padx=pad)
+        tk.Label(box, text=detail, bg="#1b1b1b", fg=C_FG, font=body, anchor="nw",
+                 justify="left", wraplength=W - 2 * pad - 24
+                 ).pack(fill="both", expand=True, padx=12, pady=12)
+        tk.Label(top, text=reassurance, bg=C_BG, fg="#9a9a9a", font=body,
+                 anchor="w", justify="left", wraplength=W - 2 * pad
+                 ).pack(fill="x", padx=pad, pady=(12, 8))
+        row = tk.Frame(top, bg=C_BG)
+        row.pack(fill="x", padx=pad, pady=(0, pad))
+        ok = tk.Button(row, text="OK", command=top.destroy, width=10,
+                       bg="#3c3c3c", fg=C_FG, activebackground="#505050",
+                       activeforeground=C_FG, highlightbackground=C_BG, font=body)
+        ok.pack(side="right")
+        top.bind("<Return>", lambda _e: top.destroy())
+        top.bind("<Escape>", lambda _e: top.destroy())
+        ok.focus_set()
+        top.grab_set()             # modal, as the old one was
 
     # ---- snapshots ------------------------------------------------------
     #
