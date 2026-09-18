@@ -782,10 +782,36 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
 
     const char *pp = json_as_string(json_obj_get(root, "protect"), NULL);
     if (pp != NULL) {
-        FILE *pf = fopen(pp, "rb");
+        /* BESIDE THE STATE FILE FIRST.  A snapshot is moved after it is
+         * written, so a path recorded at capture time need not exist any
+         * more; the one thing that is always true is that the map sits next
+         * to the .json that names it.  An older capture recorded a full
+         * path, so that is still tried -- but second, because a stale one
+         * may also still exist and belong to a different capture. */
+        char ppPath[700];
+        const char *base = strrchr(pp, '/');
+        base = (base != NULL) ? base + 1 : pp;
+        const char *slash = strrchr(path, '/');
+        if (slash != NULL)
+            snprintf(ppPath, sizeof ppPath, "%.*s/%s",
+                     (int)(slash - path), path, base);
+        else
+            snprintf(ppPath, sizeof ppPath, "%s", base);
+        FILE *pf = fopen(ppPath, "rb");
+        if (pf == NULL && strcmp(ppPath, pp) != 0) pf = fopen(pp, "rb");
         if (pf == NULL) {
-            fprintf(stderr, "--state: cannot open protect map %s\n", pp);
-        } else {
+            /* NOT A WARNING.  A machine restored without its protection map
+             * runs, answers nothing, and looks like a restore that half
+             * worked -- which is how this was found. */
+            fprintf(stderr, "--state: CANNOT OPEN THE PROTECT MAP (%s beside "
+                            "%s, nor %s).  Refusing to resume: without it the "
+                            "Instruction Monitor faults on every instruction "
+                            "and the computer will run and answer nothing.\n",
+                    base, path, pp);
+            json_free(root);
+            exit(1);
+        }
+        {
             uint32_t hw = (uint32_t)json_as_number(
                 json_obj_get(root, "protectHalfwords"),
                 age->gpc.cpu.mainStorage.wordCount * 2.0);
@@ -1151,7 +1177,22 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
             }
             if (hw & 7) fputc((uint8_t)(byte << (8 - (hw & 7))), pf);
             fclose(pf);
-            fprintf(f, "  \"protect\": \"%s\",\n", pp);
+            /* THE NAME, NOT THE PATH.  This used to record `pp`, the path
+             * the file was written at, and a snapshot is not written where
+             * it ends up: the emulator writes to a staging directory and a
+             * complete set is moved to wherever the save asked.  The
+             * recorded path then pointed at a directory that had been
+             * emptied, load_state could not open it, and the machine came
+             * up with NO STORE PROTECTION -- which does not fail quietly.
+             * See the Instruction Monitor note above: every instruction
+             * fetched from an unprotected address faults, FCOS logs X'0503'
+             * forever and never dispatches, so the computer is running and
+             * answering nothing.  Recording the bare name and resolving it
+             * beside the state file makes a snapshot relocatable, which it
+             * has to be. */
+            const char *ppName = strrchr(pp, '/');
+            ppName = (ppName != NULL) ? ppName + 1 : pp;
+            fprintf(f, "  \"protect\": \"%s\",\n", ppName);
             fprintf(f, "  \"protectHalfwords\": %u,\n", hw);
             fprintf(f, "  \"protectedHalfwords\": %u\n", nprot);
         } else {
