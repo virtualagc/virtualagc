@@ -30,6 +30,7 @@ SUBTITLE_OFFSET = 90            # subtitles.py: port base + 90
 SCREEN_OFFSET = 91              # MEDS2.py's screen announcements: port base + 91
 CONTROL_OFFSET = 92             # panelO6.py's script control: port base + 92
 SESSION_OFFSET = 93             # simulatePASS.py's own control: port base + 93
+RESULT_OFFSET = 94              # simulatePASS.py's answer to those: base + 94
 # A settled ScreenWatch has heard at least one round of MEDS2.py's
 # re-announcements (every 1 s), so "nothing heard" means a display is silent.
 SCREEN_SETTLE_S = 2.5
@@ -553,6 +554,37 @@ def send_session(text, port_base=None):
         sock.sendto(text.encode("utf-8"), (D.GROUP, base + SESSION_OFFSET))
     finally:
         sock.close()
+
+
+def send_result(text, port_base=None):
+    """simulatePASS's answer to a session command, on port base + 94.
+
+    A SEPARATE PORT AND NOT A REPLY, because the asker is a GUI: manager
+    sends and returns to its event loop at once, and a save takes seconds.
+    Without this the only record of a failure is simulatePASS's terminal log
+    -- and not having to watch that terminal is the whole reason the manager
+    window exists.  A save that failed would have looked exactly like one
+    that worked, which is the failure this feature is meant to remove."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + RESULT_OFFSET))
+    finally:
+        sock.close()
+
+
+def result_receiver(port_base=None):
+    """The socket manager.py listens on for those answers."""
+    base = D.PORT_BASE if port_base is None else port_base
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("", base + RESULT_OFFSET))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
 
 
 def session_receiver(port_base=None):

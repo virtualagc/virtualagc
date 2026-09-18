@@ -37,6 +37,7 @@ import argparse
 import glob
 import os
 import subprocess
+import threading
 import sys
 import time
 import tkinter as tk
@@ -166,6 +167,7 @@ class Manager(object):
         tk.Label(root, textvariable=self.note, bg=C_BG, fg="#9a9a9a", anchor="w",
                  justify="left", wraplength=560).pack(fill="x", padx=10, pady=(2, 10))
         root.bind_all("<Control-q>", lambda _e: root.quit())
+        self.start_results()
         self._poll()
 
     # -- the furniture ------------------------------------------------------
@@ -272,6 +274,47 @@ class Manager(object):
             placed, ", %d not running" % missing if missing else "",
             ", %d not exactly" % inexact if inexact else ""))
 
+    # ---- what came back -------------------------------------------------
+
+    def _listen_results(self):
+        """Thread: simulatePASS's answer to a session command, on base + 94."""
+        try:
+            sock = crewscript.result_receiver(self.args.port_base)
+        except OSError:
+            return
+        while True:
+            try:
+                data, _ = sock.recvfrom(4096)
+            except OSError:
+                return
+            text = data.decode("utf-8", errors="replace").strip()
+            self.root.after(0, lambda t=text: self._result(t))
+
+    def _result(self, text):
+        """On the Tk thread.  Success goes to the status line; A FAILURE GETS
+        A DIALOG.
+
+        Not symmetry for its own sake.  A failed save that only tinted a small
+        label is exactly the failure this is meant to remove -- somebody reads
+        "saving to snapshot", believes they have one, and shuts the run down.
+        A dialog during a recording is disruptive, which is the point: the
+        alternative is losing the run.  Successes, which are the common case,
+        stay quiet."""
+        verdict, _, rest = text.partition(" ")
+        verb, _, detail = rest.partition(" ")
+        if verdict == "ok":
+            self.say({"save": "saved to %s",
+                      "save-and-quit": "saved to %s; shutting down",
+                      "resume": "restored from %s"}.get(verb, "%s")
+                     % os.path.basename(detail.rstrip("/")))
+            return
+        self.say("%s FAILED -- see the dialog" % verb)
+        messagebox.showerror(
+            "%s failed" % verb.replace("-", " ").capitalize(),
+            "%s did not work, and nothing usable was written.\n\n%s\n\n"
+            "The simulation is still running and has not been touched."
+            % (verb.replace("-", " ").capitalize(), detail or "No reason given."))
+
     # ---- snapshots ------------------------------------------------------
     #
     # ALL OF THESE JUST ASK.  The manager holds no process but the caption
@@ -281,6 +324,9 @@ class Manager(object):
     # the one process holding both is simulatePASS -- this window's own
     # parent.  So each of these is a datagram to os.getppid()'s listener, and
     # the work happens there.
+
+    def start_results(self):
+        threading.Thread(target=self._listen_results, daemon=True).start()
 
     def _snapshot_dir(self):
         path = self.snapshot.get().strip()
@@ -301,12 +347,12 @@ class Manager(object):
     def save_snapshot(self):
         path = self._snapshot_dir()
         if path and self._session("save", path):
-            self.say("saving to %s (the run keeps going)" % os.path.basename(path))
+            self.say("saving to %s ..." % os.path.basename(path))
 
     def save_and_quit(self):
         path = self._snapshot_dir()
         if path and self._session("save-and-quit", path):
-            self.say("saving to %s, then shutting down" % os.path.basename(path))
+            self.say("saving to %s before shutting down ..." % os.path.basename(path))
 
     def restore_snapshot(self):
         path = self._snapshot_dir()
@@ -316,7 +362,7 @@ class Manager(object):
             self.say("no such snapshot: %s" % path)
             return
         if self._session("resume", path):
-            self.say("restoring from %s" % os.path.basename(path))
+            self.say("restoring from %s ..." % os.path.basename(path))
 
     def end_simulation(self):
         """The only control here that destroys a run without saving it, so it

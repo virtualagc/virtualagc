@@ -1520,6 +1520,13 @@ static void firmware_ipl(BatchRunner *r) {
     double startEmuUs = r->age.gpc.cpu.elapsedTimeUs;
     double startWall = yagpc_monotonic_seconds();
     double scale = (r->timeScale > 0.0) ? r->timeScale : 1.0;
+    /* NO SNAPSHOT WHILE THIS RUNS.  This loop is outside batchrunner_step and
+     * has no pause point, so a machine in it cannot reach the rendezvous for
+     * the ~2 s the transfer takes -- and the deadline is 2 s.  Adding a pause
+     * point instead would be worse: `image`, `got` and `guard` here are
+     * locals that no capture records, so a machine caught mid-transfer would
+     * resume into a read it has no memory of.  See Vehicle::bootstrapping. */
+    vehicle_bootstrap_enter(r->vehicle);
     while (got < nhw && guard++ < guardMax) {
         GpcServiceOutput out;
         mm_service(r, GPC_SVC_RECV_WORD, busID, 0, &out);
@@ -1556,6 +1563,10 @@ static void firmware_ipl(BatchRunner *r) {
         if (r->vehicle != NULL)
             vehicle_note_time(r->vehicle, r->age.gpc.cpu.elapsedTimeUs);
     }
+    /* Before EITHER exit below, so a tape with no bootstrap does not leave
+     * this computer counted as bootstrapping for the rest of the run --
+     * which would refuse every snapshot from then on. */
+    vehicle_bootstrap_leave(r->vehicle);
 
     if (got == 0) {
         fprintf(stderr,

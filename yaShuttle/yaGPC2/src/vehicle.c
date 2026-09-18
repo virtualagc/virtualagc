@@ -309,8 +309,31 @@ void vehicle_leave_pause_group(Vehicle *v, int gpcId) {
 #endif
 }
 
-void vehicle_pause_request(Vehicle *v, const char *tag) {
+void vehicle_bootstrap_enter(Vehicle *v) {
     if (v == NULL) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+    v->bootstrapping++;
+    pthread_mutex_unlock(&v->pauseLock);
+#else
+    v->bootstrapping++;
+#endif
+}
+
+void vehicle_bootstrap_leave(Vehicle *v) {
+    if (v == NULL) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+    if (v->bootstrapping > 0) v->bootstrapping--;
+    pthread_mutex_unlock(&v->pauseLock);
+#else
+    if (v->bootstrapping > 0) v->bootstrapping--;
+#endif
+}
+
+/* False means the request was REFUSED and nothing will be written. */
+bool vehicle_pause_request(Vehicle *v, const char *tag) {
+    if (v == NULL) return false;
 #ifdef HAVE_PTHREADS
     pthread_mutex_lock(&v->pauseLock);
 #endif
@@ -318,7 +341,17 @@ void vehicle_pause_request(Vehicle *v, const char *tag) {
      * instant -- the same landmark, or two YAGPC_DUMPSTATE_AT times a
      * microsecond apart -- and the second must not rename the capture the
      * first is already parking for. */
-    if (!v->pauseRequest) {
+    bool ok = true;
+    if (v->bootstrapping > 0) {
+        /* Refused, not deferred: whoever asked is waiting for files, and a
+         * silent wait that ends in a timeout tells them nothing about why. */
+        fprintf(stderr, "vehicle: snapshot REFUSED -- %d computer(s) are "
+                        "reading the bootstrap off the tape, and a machine "
+                        "caught there cannot be restored (the transfer's own "
+                        "buffer is not part of any capture).  Try again once "
+                        "the IPL is done.\n", v->bootstrapping);
+        ok = false;
+    } else if (!v->pauseRequest) {
         snprintf(v->pauseTag, sizeof v->pauseTag, "%s", tag ? tag : "");
         v->pauseRequest = 1;
     }
@@ -326,6 +359,7 @@ void vehicle_pause_request(Vehicle *v, const char *tag) {
     pthread_cond_broadcast(&v->pauseCond);
     pthread_mutex_unlock(&v->pauseLock);
 #endif
+    return ok;
 }
 
 /* Read while parked, so no lock: every member is stopped and the tag was

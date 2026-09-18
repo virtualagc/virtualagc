@@ -398,7 +398,7 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
         os.makedirs(snapdir, exist_ok=True)
     except OSError as e:
         log("snapshot: cannot make %s: %s" % (snapdir, e))
-        return False
+        return False, "cannot make %s: %s" % (snapdir, e)
     want = []
     for g in gpcs:
         want += [os.path.join(snapdir, "gpc%d.json" % g),
@@ -418,7 +418,7 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
         gpc.send_signal(signal.SIGUSR1)
     except OSError as e:
         log("snapshot: cannot signal yaGPC2: %s" % e)
-        return False
+        return False, "cannot signal yaGPC2: %s" % e
     crewscript.send_control("save " + panel_json, port_base)
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -428,16 +428,19 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
     missing = [os.path.basename(w) for w in want
                if not (os.path.isfile(w) and os.path.getsize(w) > 0)]
     if missing:
-        log("snapshot: INCOMPLETE after %.0f s -- missing %s; NOT usable"
-            % (timeout, ", ".join(missing)))
-        return False
+        why = ("nothing was written at all -- the emulator may be reading a "
+               "bootstrap off the tape, which cannot be captured"
+               if len(missing) == len(want) else
+               "missing " + ", ".join(missing))
+        log("snapshot: INCOMPLETE after %.0f s -- %s; NOT usable" % (timeout, why))
+        return False, why
     with open(os.path.join(snapdir, "vehicle.json"), "w") as fh:
         json.dump({"epoch": epoch, "gpcs": list(gpcs),
                    "taken": time.strftime("%Y-%m-%d %H:%M:%S",
                                           time.localtime(epoch))}, fh, indent=1)
         fh.write("\n")
     log("snapshot: written to %s" % snapdir)
-    return True
+    return True, ""
 
 
 def running_conflicts(port_base):
@@ -1055,7 +1058,13 @@ def main():
             action, snapdir = SESSION["action"], SESSION["dir"]
             SESSION["action"] = SESSION["dir"] = None
             if action in ("save", "save-and-quit"):
-                ok = take_snapshot(snapdir, gpc, args.port_base, gpcs)
+                ok, why = take_snapshot(snapdir, gpc, args.port_base, gpcs)
+                # BACK TO WHOEVER ASKED.  A failure that only reaches this
+                # terminal is a failure nobody sees: the manager window exists
+                # so that nobody has to watch this terminal.
+                crewscript.send_result(
+                    ("ok %s %s" % (action, snapdir)) if ok
+                    else ("fail %s %s" % (action, why)), args.port_base)
                 if action == "save" or not ok:
                     # A FAILED save-and-quit DOES NOT QUIT.  The whole point of
                     # writing before tearing anything down is that the
@@ -1069,6 +1078,9 @@ def main():
                 if not os.path.isdir(snapdir):
                     log("resume: %s is not a directory; the run is untouched"
                         % snapdir)
+                    crewscript.send_result(
+                        "fail resume %s is not a directory" % snapdir,
+                        args.port_base)
                     continue
                 log("resume: replacing every child but the manager from %s"
                     % snapdir)
@@ -1077,6 +1089,7 @@ def main():
                 gpc = bring_up(snapdir)
                 t0 = time.time()
                 place_windows(before)
+                crewscript.send_result("ok resume %s" % snapdir, args.port_base)
                 continue
             break
         if gpc.poll() is not None:

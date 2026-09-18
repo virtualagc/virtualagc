@@ -239,6 +239,20 @@ typedef struct Vehicle {
     bool pauseMember[6];
     int pauseArrived, pauseFinished;
     unsigned pauseArriveGen, pauseFinishGen;
+    /* HOW MANY COMPUTERS ARE READING THEIR BOOTSTRAP OFF THE TAPE.
+     *
+     * That loop lives outside batchrunner_step and has no pause point, so a
+     * machine in it cannot reach the rendezvous for the whole transfer --
+     * "on the order of two seconds of tape motion", against a 2 s deadline.
+     * A snapshot asked for then would simply be abandoned.
+     *
+     * And parking it there instead would be worse than refusing.  The
+     * bootstrap's half-filled image buffer and its cursor are locals of that
+     * loop; no snapshot captures them, so a machine caught mid-bootstrap
+     * would come back into a transfer it has no record of.  A capture that
+     * cannot be restored is not a capture, so the request is refused up
+     * front, with the reason. */
+    int bootstrapping;
     unsigned long pauseTaken;     /* rendezvous completed */
     unsigned long pauseAbandoned; /* ... and gave up waiting for a machine */
     /* WHAT THE CAPTURE IS CALLED, set by whoever asked for it and read by
@@ -351,7 +365,10 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs);
  * false immediately when nothing is pending. */
 void vehicle_join_pause_group(Vehicle *v, int gpcId);
 void vehicle_leave_pause_group(Vehicle *v, int gpcId);
-void vehicle_pause_request(Vehicle *v, const char *tag);
+bool vehicle_pause_request(Vehicle *v, const char *tag);
+/* A computer is reading its bootstrap; see Vehicle::bootstrapping. */
+void vehicle_bootstrap_enter(Vehicle *v);
+void vehicle_bootstrap_leave(Vehicle *v);
 const char *vehicle_pause_tag(const Vehicle *v);
 bool vehicle_pause_enter(Vehicle *v, int gpcId);
 void vehicle_pause_exit(Vehicle *v, int gpcId);
