@@ -42,6 +42,7 @@ import time
 import tkinter as tk
 import tkinter.filedialog as filedialog
 import tkinter.font as tkfont
+import tkinter.messagebox as messagebox
 
 import crewscript
 import discretes as D
@@ -116,6 +117,7 @@ class Manager(object):
 
         self.script = tk.StringVar(value=args.script or self._first_script())
         self.layout = tk.StringVar(value=args.layout)
+        self.snapshot = tk.StringVar(value=args.snapshot_dir)
         self.note = tk.StringVar(value="port base %d" % D.PORT_BASE)
         self.state = tk.StringVar(value="looking...")
 
@@ -137,10 +139,27 @@ class Manager(object):
         self._button(row, "Save", self.save_layout, wide=True)
         self._button(row, "Restore", self.restore_layout)
 
+        # SNAPSHOT.  Save & Continue is the one that has to be reachable at an
+        # unplanned moment -- the whole reason this window exists -- so it is
+        # the wide button.  End Simulation is deliberately in its own section,
+        # away from the three that write a file first: it is the only control
+        # here that destroys a run without saving it.
+        self._section("SNAPSHOT", bold)
+        self._path_box(self.snapshot)
+        row = self._row()
+        self._button(row, "Save", self.save_snapshot, wide=True)
+        self._button(row, "Save & Quit", self.save_and_quit)
+        row = self._row()
+        self._button(row, "Restore", self.restore_snapshot, wide=True)
+
         self._section("CAPTION BOX", bold)
         row = self._row()
         self._button(row, "Start", self.start_subtitles, wide=True)
         self._button(row, "Stop", self.stop_subtitles)
+
+        self._section("SIMULATION", bold)
+        row = self._row()
+        self._button(row, "End Simulation", self.end_simulation, wide=True)
 
         tk.Label(root, textvariable=self.state, bg=C_BG, fg=C_NOTE, anchor="w",
                  justify="left").pack(fill="x", padx=10, pady=(10, 0))
@@ -253,6 +272,65 @@ class Manager(object):
             placed, ", %d not running" % missing if missing else "",
             ", %d not exactly" % inexact if inexact else ""))
 
+    # ---- snapshots ------------------------------------------------------
+    #
+    # ALL OF THESE JUST ASK.  The manager holds no process but the caption
+    # box: it finds everything else by scanning /proc, which is enough to say
+    # what is running and nowhere near enough to replace it.  A restore needs
+    # fresh processes built from the configuration the run started with, and
+    # the one process holding both is simulatePASS -- this window's own
+    # parent.  So each of these is a datagram to os.getppid()'s listener, and
+    # the work happens there.
+
+    def _snapshot_dir(self):
+        path = self.snapshot.get().strip()
+        if not path:
+            self.say("no snapshot directory chosen")
+            return None
+        return path
+
+    def _session(self, verb, path=None):
+        try:
+            crewscript.send_session(verb if path is None else "%s %s" % (verb, path),
+                                    self.args.port_base)
+        except OSError as e:
+            self.say("cannot reach simulatePASS: %s" % e)
+            return False
+        return True
+
+    def save_snapshot(self):
+        path = self._snapshot_dir()
+        if path and self._session("save", path):
+            self.say("saving to %s (the run keeps going)" % os.path.basename(path))
+
+    def save_and_quit(self):
+        path = self._snapshot_dir()
+        if path and self._session("save-and-quit", path):
+            self.say("saving to %s, then shutting down" % os.path.basename(path))
+
+    def restore_snapshot(self):
+        path = self._snapshot_dir()
+        if not path:
+            return
+        if not os.path.isdir(path):
+            self.say("no such snapshot: %s" % path)
+            return
+        if self._session("resume", path):
+            self.say("restoring from %s" % os.path.basename(path))
+
+    def end_simulation(self):
+        """The only control here that destroys a run without saving it, so it
+        is the only one that asks first.  Save & Quit does not, because its
+        snapshot is written before anything is torn down."""
+        if not messagebox.askokcancel(
+                "End simulation",
+                "Shut the whole simulation down?\n\n"
+                "Nothing is saved.  Use Save & Quit instead if you want to "
+                "come back to this."):
+            return
+        if self._session("quit"):
+            self.say("shutting the simulation down")
+
     def start_subtitles(self):
         if any(n == "subtitles.py" for n, _ in running(self.args.port_base)):
             self.say("a caption box is already running on this port base")
@@ -300,18 +378,36 @@ class Manager(object):
         self.say("caption box stopped (pid %s)" % ", ".join(map(str, boxes)))
 
     # -- what is up ---------------------------------------------------------
+    def _what_run(self):
+        """The run's identity, as far as this window was told it.
+
+        The port base alone was all it used to have, which says which run but
+        not what the run IS -- and with several tapes and GPC counts in play
+        that is exactly what someone reading a recording back needs.  All of
+        it is passed by simulatePASS, which launches this last and so knows it.
+        """
+        bits = ["port base %d" % self.args.port_base]
+        if self.args.gpcs:
+            n = len([g for g in self.args.gpcs.split(",") if g.strip()])
+            bits.append("GPC%s %s" % ("s" if n > 1 else "", self.args.gpcs))
+        if self.args.crts:
+            bits.append("%d CRT%s" % (self.args.crts, "s" if self.args.crts > 1 else ""))
+        if self.args.tape:
+            bits.append(os.path.basename(self.args.tape))
+        return ", ".join(bits)
+
     def _poll(self):
         up = running(self.args.port_base)
         if up:
             counts = {}
             for name, _pid in up:
                 counts[name] = counts.get(name, 0) + 1
-            self.state.set("up on port base %d:  %s" % (
-                self.args.port_base,
+            self.state.set("%s:  %s" % (
+                self._what_run(),
                 "   ".join("%s%s" % (n, " x%d" % c if c > 1 else "")
                            for n, c in sorted(counts.items()))))
         else:
-            self.state.set("nothing running on port base %d" % self.args.port_base)
+            self.state.set("nothing running on %s" % self._what_run())
         self.root.after(POLL_MS, self._poll)
 
 
@@ -325,6 +421,16 @@ def main(argv=None):
     ap.add_argument("--layout", metavar="FILE", default=os.path.join(HERE, "demo.layout"),
                     help="layout file to save to and restore from (default demo.layout here)")
     ap.add_argument("--geometry", metavar="SPEC", help="Tk geometry for this window")
+    # PASSED BY simulatePASS, which launches this last and so knows all of it.
+    # Without them the manager can say which programs are up but not what the
+    # run IS -- how many computers, which tape -- and Save needs to know the
+    # GPC set to tell a complete snapshot from a partial one.
+    ap.add_argument("--gpcs", metavar="LIST", default="",
+                    help="which GPCs this run has, for the status line")
+    ap.add_argument("--crts", type=int, metavar="N", default=0)
+    ap.add_argument("--tape", metavar="FILE", default="")
+    ap.add_argument("--snapshot-dir", metavar="DIR", default="",
+                    help="where Save writes and Restore reads")
     args = ap.parse_args(argv)
     if args.port_base is not None:
         D.set_port_base(args.port_base)

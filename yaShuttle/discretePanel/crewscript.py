@@ -29,6 +29,7 @@ IDP_BUS_OFFSET = 40             # IDP n's bus: port base + 40 + n
 SUBTITLE_OFFSET = 90            # subtitles.py: port base + 90
 SCREEN_OFFSET = 91              # MEDS2.py's screen announcements: port base + 91
 CONTROL_OFFSET = 92             # panelO6.py's script control: port base + 92
+SESSION_OFFSET = 93             # simulatePASS.py's own control: port base + 93
 # A settled ScreenWatch has heard at least one round of MEDS2.py's
 # re-announcements (every 1 s), so "nothing heard" means a display is silent.
 SCREEN_SETTLE_S = 2.5
@@ -533,6 +534,37 @@ def send_control(text, port_base=None, sock=None):
     finally:
         if own:
             sock.close()
+
+
+def send_session(text, port_base=None):
+    """Tell simulatePASS.py to snapshot, resume or shut down: one UTF-8
+    datagram on port base + 93.
+
+    A SEPARATE PORT FROM send_control's, because a different program is
+    listening.  panelO6 owns base+92 and understands play/stop/save, which
+    are things a panel can do to itself; these are things only the process
+    that LAUNCHED the run can do, since it alone holds the children and
+    knows the configuration they were started with."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + SESSION_OFFSET))
+    finally:
+        sock.close()
+
+
+def session_receiver(port_base=None):
+    """The socket simulatePASS.py listens on for those."""
+    base = D.PORT_BASE if port_base is None else port_base
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("", base + SESSION_OFFSET))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
 
 
 def control_receiver(port_base=None):

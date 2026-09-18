@@ -68,6 +68,7 @@ typing on as if the GPC were ready.
 
 import argparse
 import datetime
+import json
 import os
 import re
 import shlex
@@ -273,7 +274,16 @@ class Launcher(object):
         log("%-9s started (pid %d, log %s)" % (name, p.pid, path))
         return p
 
-    def stop(self):
+    def stop(self, keep=()):
+        """Stop the children, except any whose name is in `keep`.
+
+        A RESUME KEEPS THE MANAGER.  It is the window the person just clicked
+        Restore in, and taking it down and putting it back would lose what is
+        typed in its path boxes and make the click look like a crash.  It is
+        also a sibling, not a parent, so nothing else depends on it going.
+        """
+        kept = [e for e in self.procs if e[0] in keep]
+        self.procs = [e for e in self.procs if e[0] not in keep]
         # yaGPC2 first, with SIGINT: that is the signal it treats as the end of
         # a run, printing its stop reason and device reports.  A TERM kills it
         # before it can.  Then everything else.
@@ -308,7 +318,126 @@ class Launcher(object):
                 except OSError:
                     pass
             fh.close()
-        self.procs = []
+        self.procs = kept
+
+
+# WHAT THE CONTROL PORT ASKED FOR, read by the main thread.
+#
+# The listener cannot do the work itself.  A resume stops and restarts every
+# child, and the thread holding those handles is the main one, parked in
+# input(); a restart driven from a listener thread would race it.  So the
+# listener records the request and wakes the main thread with SIGINT, which is
+# already the "stop what you are doing" path here -- main tells the two apart
+# by looking at this.
+SESSION = {"action": None, "dir": None}
+
+
+def session_listener(port_base, stop_event):
+    """Thread: 'save DIR', 'save-and-quit DIR', 'resume DIR' and 'quit' from
+    manager.py, on port base + 93."""
+    try:
+        sock = crewscript.session_receiver(port_base)
+    except OSError as e:
+        log("cannot listen for session commands: %s" % e)
+        return
+    sock.settimeout(0.5)
+    log("session commands on port %d ('save DIR', 'save-and-quit DIR', "
+        "'resume DIR', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
+    while not stop_event.is_set():
+        try:
+            data, _ = sock.recvfrom(4096)
+        except socket.timeout:
+            continue
+        except OSError:
+            return
+        text = data.decode("utf-8", errors="replace").strip()
+        word, _, rest = text.partition(" ")
+        word, rest = word.lower(), rest.strip()
+        if word not in ("save", "save-and-quit", "resume", "quit"):
+            log("session command not understood: %r" % text)
+            continue
+        if word != "quit" and not rest:
+            log("session command %s needs a directory" % word)
+            continue
+        SESSION["action"], SESSION["dir"] = word, rest
+        log("session command: %s %s" % (word, rest))
+        try:
+            os.kill(os.getpid(), signal.SIGINT)
+        except OSError:
+            pass
+
+
+def saved_epoch(snapdir):
+    """The wall-clock epoch a snapshot was taken at, or None.
+
+    Handed back to yaGPC2 as --date-time-epoch so the MEDS header clock
+    CONTINUES across a restore instead of restarting.  It is the one piece of
+    wall-clock time a snapshot is allowed to carry: everything inside the
+    machine travels as a duration and is rebased on load, but the time of day
+    is not a duration -- it is what the crew reads.
+    """
+    try:
+        with open(os.path.join(snapdir, "vehicle.json")) as fh:
+            return float(json.load(fh)["epoch"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0):
+    """Bring the vehicle to a stand, write it, and say whether it worked.
+
+    yaGPC2 does its own half on SIGUSR1: every computer parks at the
+    rendezvous, each writes its own gpc<N> pair, and they all resume.  The
+    panel writes its switches over its control port.  Both are asynchronous,
+    so this waits for the FILES rather than for the signals -- a save that
+    reports success without checking is how a half-written snapshot becomes a
+    restore that silently comes up wrong.
+    """
+    snapdir = os.path.abspath(snapdir)
+    try:
+        os.makedirs(snapdir, exist_ok=True)
+    except OSError as e:
+        log("snapshot: cannot make %s: %s" % (snapdir, e))
+        return False
+    want = []
+    for g in gpcs:
+        want += [os.path.join(snapdir, "gpc%d.json" % g),
+                 os.path.join(snapdir, "gpc%d.mem.bin" % g)]
+    panel_json = os.path.join(snapdir, "panel.json")
+    if expect_panel:
+        want.append(panel_json)
+    # Old files first, so a stale one from a previous save cannot be mistaken
+    # for a fresh one that never arrived.
+    for w in want:
+        try:
+            os.unlink(w)
+        except OSError:
+            pass
+    epoch = time.time()
+    try:
+        gpc.send_signal(signal.SIGUSR1)
+    except OSError as e:
+        log("snapshot: cannot signal yaGPC2: %s" % e)
+        return False
+    crewscript.send_control("save " + panel_json, port_base)
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if all(os.path.isfile(w) and os.path.getsize(w) > 0 for w in want):
+            break
+        time.sleep(0.2)
+    missing = [os.path.basename(w) for w in want
+               if not (os.path.isfile(w) and os.path.getsize(w) > 0)]
+    if missing:
+        log("snapshot: INCOMPLETE after %.0f s -- missing %s; NOT usable"
+            % (timeout, ", ".join(missing)))
+        return False
+    with open(os.path.join(snapdir, "vehicle.json"), "w") as fh:
+        json.dump({"epoch": epoch, "gpcs": list(gpcs),
+                   "taken": time.strftime("%Y-%m-%d %H:%M:%S",
+                                          time.localtime(epoch))}, fh, indent=1)
+        fh.write("\n")
+    log("snapshot: written to %s" % snapdir)
+    return True
 
 
 def running_conflicts(port_base):
@@ -511,6 +640,15 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog="crew script commands (--script FILE):\n"
                                         + crewscript.HELP)
+    ap.add_argument("--snapshot-dir", metavar="DIR", default=None,
+                    help="where Save writes, and the default Restore reads "
+                         "(default: <logs>/snapshot).  A snapshot is a "
+                         "directory: gpc<N>.json and gpc<N>.mem.bin per "
+                         "computer, panel.json, and vehicle.json")
+    ap.add_argument("--snapshot-resume", metavar="DIR", default=None,
+                    help="start from this snapshot instead of IPLing: each "
+                         "computer loads its own pair, the panel comes up with "
+                         "the switches it had, and the MEDS clock continues")
     ap.add_argument("--gpcs", type=parse_gpcs, default=[1], metavar="LIST",
                     help="which GPCs: 1 (default), 1,2, 1-3, 1-4")
     ap.add_argument("--tape", metavar="FILE",
@@ -616,7 +754,12 @@ def main():
 
     tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.mmv")
     tape = os.path.abspath(tape)
-    if not os.path.isfile(tape):
+    # A RESTORED RUN NEVER READS THE TAPE.  Every computer comes up from its
+    # own half of the snapshot, already past its IPL, so demanding a volume
+    # here would refuse a resume on a machine that has the snapshot and not
+    # the build it came from.  The name is still carried, for the manager's
+    # status line and so a Save records what the run was.
+    if not os.path.isfile(tape) and not args.snapshot_resume:
         sys.exit("simulatePASS: no volume %s -- give --tape FILE" % tape)
     exe = args.yagpc or os.path.join(YAGPC_DIR, "yaGPC2.exe" if os.name == "nt" else "yaGPC2")
     if not os.path.isfile(exe):
@@ -711,74 +854,130 @@ def main():
     # Unbuffered, so each program's log shows what it said when it said it.
     py = sys.executable or "python3"
     env["PYTHONUNBUFFERED"] = "1"
+    # Armed on every run so that Save works at any moment.  Beside the logs by
+    # default, because that is already the directory this run owns.
+    snapshot_dir = os.path.abspath(args.snapshot_dir
+                                   or os.path.join(logs, "snapshot"))
+    try:
+        os.makedirs(snapshot_dir, exist_ok=True)
+    except OSError as e:
+        raise SystemExit("simulatePASS: cannot make %s: %s" % (snapshot_dir, e))
+    if args.snapshot_resume and not os.path.isdir(args.snapshot_resume):
+        raise SystemExit("simulatePASS: --snapshot-resume %s is not a directory"
+                         % args.snapshot_resume)
     L = Launcher(logs)
     stop_event = threading.Event()
     try:
-        title = args.title or "GPC%s %s" % ("s" if multi else "", ",".join(map(str, gpcs)))
-        for k in range(args.crts):
-            e = dict(env)
-            e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
-            L.start("meds%d" % (k + 1),
-                    [py, "MEDS2.py", "--port-base", str(args.port_base), "--size", str(size),
-                     "--scale", str(args.scale), "--title", title,
-                     "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
-            time.sleep(1)
-        if args.keyboards:
-            for k in range(args.keyboards):
-                kx, ky = kb_geom.lstrip("+").split("+")
-                geom = "+%d+%d" % (int(kx) + k * (kb_w + 20 if kb_side_by_side else 60),
-                                   int(ky) + (0 if kb_side_by_side else k * 60))
-                L.start("keyboard%d" % (k + 1),
-                        [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
-                         str(k + 1), "--port-base",
-                         str(args.port_base), "--size", str(size), "--geometry", geom],
+        # EVERY CHILD BUT THE MANAGER, IN ONE PLACE, so that a resume can
+        # run it again.  A restore is always fresh processes -- the pacer
+        # takes its baseline from the CPU clock, panelO6 seeds its switches
+        # before it publishes, and cam.py only rebuilds its matrix because a
+        # new yaGPC2 has its discrete values zeroed and so its first publish
+        # is a CHANGE.  None of that can be arranged in a running process.
+        #
+        # The manager is deliberately NOT in here: it is the window the
+        # person is clicking, and it stays up across a resume.
+        def bring_up(resume=None):
+            title = args.title or "GPC%s %s" % ("s" if multi else "", ",".join(map(str, gpcs)))
+            for k in range(args.crts):
+                e = dict(env)
+                e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
+                L.start("meds%d" % (k + 1),
+                        [py, "MEDS2.py", "--port-base", str(args.port_base), "--size", str(size),
+                         "--scale", str(args.scale), "--title", title,
+                         "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                time.sleep(1)
+            if args.keyboards:
+                for k in range(args.keyboards):
+                    kx, ky = kb_geom.lstrip("+").split("+")
+                    geom = "+%d+%d" % (int(kx) + k * (kb_w + 20 if kb_side_by_side else 60),
+                                       int(ky) + (0 if kb_side_by_side else k * 60))
+                    L.start("keyboard%d" % (k + 1),
+                            [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
+                             str(k + 1), "--port-base",
+                             str(args.port_base), "--size", str(size), "--geometry", geom],
+                            HERE, env)
+            if multi:
+                L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
+                                "--size", str(cam_size), "--geometry", cam_geom],
                         HERE, env)
-        if multi:
-            L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
-                            "--size", str(cam_size), "--geometry", cam_geom],
-                    HERE, env)
-        gpc_argv = [exe, "run"]
-        if multi:
-            gpc_argv += ["--mmu-model", "1:" + tape, "--mmu-model", "2:" + tape,
-                         "--gpcs", ",".join(map(str, gpcs))]
-        else:
-            gpc_argv += ["--mmu-model", tape, "--gpc-id", str(gpcs[0])]
-        # --rt-idle-timeout is in MILLISECONDS and ends the run if a computer
-        # sits in a wait state that long; a session must never trip it.
-        gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
-                     "--rt-factor", "1", "--port-base", str(args.port_base),
-                     "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
-                     "--verbose"] + shlex.split(args.yagpc_extra)
-        gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
-        time.sleep(3)
-        if ((script_has_subtitles(args.keys, False)
-             or script_has_subtitles(args.panel_script, True))
-                and "subtitles" not in layout_roles):
-            log("note: the script has captions; start the caption box yourself: "
-                "python3 subtitles.py --port-base %d" % args.port_base)
-        panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
-                      "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
-        if args.wait_user and not args.panel_script:
-            log("note: --wait-user holds a --script, and there is none; ignored")
-        if args.panel_script:
-            panel_argv += ["--script", os.path.abspath(args.panel_script)]
-            if args.show_panel:
-                panel_argv += ["--show"]
-            if args.wait_user:
-                panel_argv += ["--wait-user"]
-            try:
-                with open(args.panel_script) as fh:
-                    waits_for_user = args.wait_user or crewscript.has_wait_user(fh.read())
-            except OSError:
-                waits_for_user = args.wait_user
-            if waits_for_user and args.duration:
-                log("note: the script has a 'wait user', and --duration counts from "
-                    "start-up -- including the time spent waiting")
-        L.start("panel", panel_argv, HERE, env)
+            gpc_argv = [exe, "run"]
+            # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
+            # instead of the tape: --resume makes each computer load its own
+            # gpc<N> pair out of the directory.  --date-time-epoch is what
+            # carries GMT across, and it needs no C at all -- the MEDS header
+            # clock is anchored to it, so handing back the epoch recorded at
+            # capture makes the display continue rather than restart.
+            if resume:
+                gpc_argv += ["--resume", os.path.abspath(resume)]
+                epoch = saved_epoch(resume)
+                if epoch is not None:
+                    gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
+            elif multi:
+                gpc_argv += ["--mmu-model", "1:" + tape, "--mmu-model", "2:" + tape,
+                             "--gpcs", ",".join(map(str, gpcs))]
+            else:
+                gpc_argv += ["--mmu-model", tape, "--gpc-id", str(gpcs[0])]
+            if resume and multi:
+                gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
+            elif resume:
+                gpc_argv += ["--gpc-id", str(gpcs[0])]
+            # --rt-idle-timeout is in MILLISECONDS and ends the run if a computer
+            # sits in a wait state that long; a session must never trip it.
+            # Always armed, so Save works at any moment without having been
+            # asked for at start-up.  It costs nothing until SIGUSR1 arrives.
+            gpc_argv += ["--snapshot", snapshot_dir]
+            gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
+                         "--rt-factor", "1", "--port-base", str(args.port_base),
+                         "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
+                         "--verbose"] + shlex.split(args.yagpc_extra)
+            gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
+            time.sleep(3)
+            if ((script_has_subtitles(args.keys, False)
+                 or script_has_subtitles(args.panel_script, True))
+                    and "subtitles" not in layout_roles):
+                log("note: the script has captions; start the caption box yourself: "
+                    "python3 subtitles.py --port-base %d" % args.port_base)
+            # BEFORE THE PANEL PUBLISHES ANYTHING.  panelO6 seeds its switches
+            # from this between construction and its first publish; without it
+            # a panel coming up beside a restored vehicle would assert POWER
+            # OFF and MODE HALT within a quarter second and halt it.
+            panel_restore = os.path.join(resume, "panel.json") if resume else None
+            panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
+                          "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
+            if panel_restore and os.path.isfile(panel_restore):
+                panel_argv += ["--restore", panel_restore]
+            if args.wait_user and not args.panel_script:
+                log("note: --wait-user holds a --script, and there is none; ignored")
+            if args.panel_script:
+                panel_argv += ["--script", os.path.abspath(args.panel_script)]
+                if args.show_panel:
+                    panel_argv += ["--show"]
+                if args.wait_user:
+                    panel_argv += ["--wait-user"]
+                try:
+                    with open(args.panel_script) as fh:
+                        waits_for_user = args.wait_user or crewscript.has_wait_user(fh.read())
+                except OSError:
+                    waits_for_user = args.wait_user
+                if waits_for_user and args.duration:
+                    log("note: the script has a 'wait user', and --duration counts from "
+                        "start-up -- including the time spent waiting")
+            L.start("panel", panel_argv, HERE, env)
+            return gpc
+        gpc = bring_up(args.snapshot_resume)
         t0 = time.time()
 
         if args.manager:
-            manager_argv = [py, "manager.py", "--port-base", str(args.port_base)]
+            # IT COULD NOT REPORT THE CONFIGURATION BEFORE.  manager.py was
+            # given only the port base, so it could not say how many GPCs
+            # were up or which tape was loaded -- a gap in its own right,
+            # and one Save/Restore would have tripped over.
+            manager_argv = [py, "manager.py", "--port-base", str(args.port_base),
+                            "--gpcs", ",".join(map(str, gpcs)),
+                            "--crts", str(args.crts),
+                            "--tape", tape,
+                            "--snapshot-dir", snapshot_dir]
             if args.panel_script:
                 manager_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.layout:
@@ -789,7 +988,12 @@ def main():
         # caption box of its own accord (no size or place suits every
         # recording), but a layout that names it says where it goes, so one is
         # started here if none is up.
-        if args.layout:
+        #
+        # A function, because a resume destroys and recreates every window but
+        # the manager's, so they all have to be placed again.
+        def place_windows(windows_before):
+            if not args.layout:
+                return
             mine_now = windowLayout.window_ids() - windows_before
             if ("subtitles" in layout_roles
                     and not windowLayout.has_role("subtitles", mine_now)):
@@ -813,6 +1017,10 @@ def main():
             mine = windowLayout.window_ids() - windows_before
             log("placing this run's windows as %s says" % args.layout)
             windowLayout.restore_layout(args.layout, log=log, only_ids=mine)
+
+        place_windows(windows_before)
+        threading.Thread(target=session_listener,
+                         args=(args.port_base, stop_event), daemon=True).start()
         if args.keys:
             threading.Thread(target=send_keys_thread,
                              args=(args.port_base, os.path.abspath(args.keys), t0, stop_event,
@@ -823,17 +1031,54 @@ def main():
         # would scroll them away while they are being read.
         log("for the steps: python3 simulatePASS.py --gpcs %s --crts %d --instructions"
             % (",".join(map(str, gpcs)), args.crts))
-        if args.duration:
-            log("running for %.0f s" % args.duration)
-            while time.time() - t0 < args.duration and gpc.poll() is None:
-                time.sleep(0.5)
-        else:
-            print("Everything is up.  Press Enter here to shut it all down (Ctrl-C also works).")
+        # ROUND AGAIN AFTER A RESUME.  Save and Restore arrive on the control
+        # port at a moment nothing here can predict, and the listener wakes
+        # this thread with SIGINT because it is already parked in input().
+        # Ctrl-C and a plain Enter still mean "shut it all down"; they are
+        # told apart by whether the listener left a request behind.
+        while True:
             try:
-                input()
-            except EOFError:
-                while gpc.poll() is None:
-                    time.sleep(0.5)
+                if args.duration:
+                    log("running for %.0f s" % args.duration)
+                    while time.time() - t0 < args.duration and gpc.poll() is None:
+                        time.sleep(0.5)
+                else:
+                    print("Everything is up.  Press Enter here to shut it all "
+                          "down (Ctrl-C also works).")
+                    try:
+                        input()
+                    except EOFError:
+                        while gpc.poll() is None and SESSION["action"] is None:
+                            time.sleep(0.5)
+            except KeyboardInterrupt:
+                print()
+            action, snapdir = SESSION["action"], SESSION["dir"]
+            SESSION["action"] = SESSION["dir"] = None
+            if action in ("save", "save-and-quit"):
+                ok = take_snapshot(snapdir, gpc, args.port_base, gpcs)
+                if action == "save" or not ok:
+                    # A FAILED save-and-quit DOES NOT QUIT.  The whole point of
+                    # writing before tearing anything down is that the
+                    # destructive half only runs once the safe half succeeded.
+                    if not ok and action == "save-and-quit":
+                        log("save-and-quit: the snapshot failed, so the run is "
+                            "STILL UP -- nothing was torn down")
+                    continue
+                break
+            if action == "resume":
+                if not os.path.isdir(snapdir):
+                    log("resume: %s is not a directory; the run is untouched"
+                        % snapdir)
+                    continue
+                log("resume: replacing every child but the manager from %s"
+                    % snapdir)
+                before = windowLayout.window_ids()
+                L.stop(keep={"manager"})
+                gpc = bring_up(snapdir)
+                t0 = time.time()
+                place_windows(before)
+                continue
+            break
         if gpc.poll() is not None:
             log("yaGPC2 has exited (code %s); see %s" % (gpc.returncode,
                                                         os.path.join(logs, "yaGPC2.log")))
