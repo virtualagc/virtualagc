@@ -255,9 +255,19 @@ class Manager(object):
     # is not left showing something that stopped being true.
     NOTE_SECONDS = 8.0
 
-    def say(self, text):
+    def say(self, text, sticky=False):
+        """sticky: HOLD THE LINE UNTIL THE ANSWER COMES.
+
+        A save takes as long as it takes -- up to twenty seconds if a part of
+        the simulation never answers -- and an ordinary message gives the line
+        back after eight.  So "Saving to snapshot201 ..." was replaced by the
+        running-programs list while the save was still going, the dialog
+        arrived ten seconds after that, and the window had spent the interval
+        looking exactly like a window with nothing happening in it.
+        """
         self.note.set(text)
-        self._note_until = time.monotonic() + self.NOTE_SECONDS
+        self._note_until = float("inf") if sticky \
+            else time.monotonic() + self.NOTE_SECONDS
         print("manager: %s" % text, flush=True)
 
     # -- what the buttons do ------------------------------------------------
@@ -600,12 +610,13 @@ class Manager(object):
     def save_snapshot(self):
         path = self._snapshot_dir()
         if path and self._session("save", path):
-            self.say("Saving to %s ..." % os.path.basename(path))
+            self.say("Saving to %s ..." % os.path.basename(path), sticky=True)
 
     def save_and_quit(self):
         path = self._snapshot_dir()
         if path and self._session("save-and-quit", path):
-            self.say("Saving to %s before shutting down ..." % os.path.basename(path))
+            self.say("Saving to %s before shutting down ..." % os.path.basename(path),
+                     sticky=True)
 
     def restore_snapshot(self):
         path = self._snapshot_dir()
@@ -615,7 +626,7 @@ class Manager(object):
             self.say("No such snapshot: %s" % path)
             return
         if self._session("resume", path):
-            self.say("Restoring from %s ..." % os.path.basename(path))
+            self.say("Restoring from %s ..." % os.path.basename(path), sticky=True)
 
     def show_panel(self):
         """Bring up a crew panel that a scripted run never mapped.

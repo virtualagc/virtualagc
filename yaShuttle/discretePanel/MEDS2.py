@@ -11824,7 +11824,7 @@ class MedsRunner(object):
         for idp in self._idps():
             # ON THE PUMP THREAD: both the state and the memory are read
             # there, together, so a save cannot catch a fill half-applied.
-            state, mem = BusPump.instance().callAndWait(lambda idp=idp: (
+            state, mem = BusPump.get().callAndWait(lambda idp=idp: (
                 idp.snapshotState(), bytes(idp.unit.mem.tobytes())))
             base = os.path.join(where, "idp%s" % idp.id)
             try:
@@ -11863,7 +11863,7 @@ class MedsRunner(object):
                 sys.stderr.write("meds: cannot read IDP%s state: %s\n"
                                  % (idp.id, e))
                 continue
-            BusPump.instance().call(
+            BusPump.get().call(
                 lambda idp=idp, st=state, m=mem: idp.restoreState(st, m))
 
     def _startSnapshotListener(self):
