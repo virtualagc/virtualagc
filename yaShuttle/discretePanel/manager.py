@@ -114,7 +114,9 @@ class Manager(object):
     def __init__(self, root, args):
         self.root, self.args = root, args
         self.subtitles = None              # the caption box this window started
-        root.title("Simulation manager")
+        # WHAT THIS WINDOW IS ABOUT GOES IN THE TITLE BAR, which is what a
+        # title bar is for -- not on a second line above the status line.
+        root.title("Simulation manager  \u2014  %s" % self._what_run())
         root.configure(bg=C_BG)
         shrink_fonts(root, 2)
         bold = tkfont.Font(family="Helvetica", size=8, weight="bold")
@@ -122,11 +124,12 @@ class Manager(object):
         self.script = tk.StringVar(value=args.script or self._first_script())
         self.layout = tk.StringVar(value=args.layout)
         self.snapshot = tk.StringVar(value=args.snapshot_dir)
-        # NOT "port base N".  That was the first thing this window ever said,
-        # and it is a command-line detail: how the programs find each other,
-        # not anything the person reading this needs.
+        # ONE LINE.  There were two, and the upper one only ever restated what
+        # the poll below already says -- a status line above the status line.
+        # What is running is the standing status; a message from a button
+        # takes the line for a few seconds and then it goes back.
         self.note = tk.StringVar(value="")
-        self.state = tk.StringVar(value="Looking for the simulation...")
+        self._note_until = 0.0
 
         # A path is long and its interesting end is the file name, so each box
         # is as wide as the window (and grows with it) and is scrolled to show
@@ -174,10 +177,8 @@ class Manager(object):
         # bar and are given their own background to say so.
         bar = tk.Frame(root, bg=C_STATUS)
         bar.pack(fill="x", side="bottom", pady=(10, 0))
-        tk.Label(bar, textvariable=self.state, bg=C_STATUS, fg=C_NOTE, anchor="w",
-                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=(6, 0))
-        tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg="#d0d0d0", anchor="w",
-                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=(2, 6))
+        tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg="#d8d8d8", anchor="w",
+                 justify="left", wraplength=560).pack(fill="x", padx=10, pady=6)
         root.bind_all("<Control-q>", lambda _e: root.quit())
         self.start_results()
         self._poll()
@@ -220,8 +221,14 @@ class Manager(object):
         here = sorted(glob.glob(os.path.join(HERE, "examples", "*.script")))
         return here[0] if here else ""
 
+    # How long a message from a button keeps the status line before what is
+    # running takes it back.  Long enough to read, short enough that the line
+    # is not left showing something that stopped being true.
+    NOTE_SECONDS = 8.0
+
     def say(self, text):
         self.note.set(text)
+        self._note_until = time.monotonic() + self.NOTE_SECONDS
         print("manager: %s" % text, flush=True)
 
     # -- what the buttons do ------------------------------------------------
@@ -544,9 +551,12 @@ class Manager(object):
             for n, c in sorted(counts.items()):
                 shown.append("%s%s" % (pretty.get(n, n),
                                        " \u00d7%d" % c if c > 1 else ""))
-            self.state.set("%s  \u2014  %s" % (self._what_run(), ", ".join(shown)))
+            standing = ", ".join(shown)
         else:
-            self.state.set("%s  \u2014  Nothing running" % self._what_run())
+            standing = "Nothing running"
+        # A message from a button wins until it has been up long enough.
+        if time.monotonic() >= self._note_until:
+            self.note.set(standing)
         self.root.after(POLL_MS, self._poll)
 
 
