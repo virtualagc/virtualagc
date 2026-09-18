@@ -383,8 +383,8 @@ def saved_epoch(snapdir):
         return None
 
 
-def take_snapshot(staging, target, gpc, port_base, gpcs, expect_panel=True,
-                  timeout=20.0):
+def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0,
+                  expect_panel=True, timeout=20.0):
     """Bring the vehicle to a stand, write it, and say whether it worked.
 
     EVERYTHING IS WRITTEN TO `staging` AND SWAPPED IN AT THE END, for two
@@ -426,6 +426,33 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, expect_panel=True,
     panel_json = os.path.join(staging, "panel.json")
     if expect_panel:
         want.append(panel_json)
+
+    # WHO HAS TO BE THERE, CHECKED BEFORE ANYTHING IS ASKED FOR.
+    #
+    # Without this the failures are silent for twenty seconds and then blame
+    # the wrong thing.  Signalling a child that has exited but not been reaped
+    # raises NOTHING -- measured -- so a dead emulator produced no files and
+    # was reported as "the emulator may be reading a bootstrap off the tape".
+    # A closed crew panel was reported only as "missing panel.json", which
+    # does not say that the window someone shut is the reason.
+    #
+    # Both are fatal to a snapshot rather than untidy.  A capture with no
+    # gpc<N> pair is not a machine; a capture with no panel.json cannot be
+    # restored, because a panel brought up without one comes up with its
+    # defaults -- POWER OFF and MODE HALT -- and halts the vehicle it was
+    # restored beside.
+    if gpc.poll() is not None:
+        why = ("the emulator is not running (it exited with code %s), so "
+               "there is nothing to capture" % gpc.returncode)
+        log("snapshot: %s" % why)
+        return False, why
+    if expect_panel:
+        up = {name for name, _pid in running_programs(port_base)}
+        if up and "panelO6.py" not in up:
+            why = ("the crew panel is not running, and without its switch "
+                   "positions a restored vehicle would come up HALTED")
+            log("snapshot: %s" % why)
+            return False, why
 
     epoch = time.time()
     try:
@@ -478,12 +505,31 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, expect_panel=True,
     except OSError as e:
         log("snapshot: written, but cannot put it in %s: %s" % (target, e))
         return False, "cannot put the snapshot in %s: %s" % (target, e)
-    log("snapshot: written to %s" % target)
+    # A CLOSED DISPLAY IS NOT FATAL, BUT IT IS NOT NOTHING EITHER.  The
+    # capture is of a vehicle with fewer displays than the run was started
+    # with, and a restore brings the missing ones back -- so the restored
+    # vehicle is not quite the captured one.  Said rather than refused,
+    # because it is a legitimate thing to have done.
+    up = [name for name, _pid in running_programs(port_base)]
+    meds = up.count("MEDS2.py")
+    note = ""
+    # Against the CRT COUNT, which is what says how many there should be --
+    # not the number of computers, which need not be the same.
+    if up and crts and meds < crts:
+        note = ("  Note: %d of %d displays are running; a restore will bring "
+                "back the ones that were closed." % (meds, crts))
+    log("snapshot: written to %s%s" % (target, note))
     return True, ""
 
 
-def running_conflicts(port_base):
-    """PIDs of a previous run's programs on this port base (Linux only)."""
+def running_programs(port_base):
+    """[(name, pid)] of the simulation's programs on this port base (Linux).
+
+    Which of them are up is not a detail: a snapshot taken with the crew
+    panel closed cannot be restored, because a panel that comes up without
+    panel.json comes up with its DEFAULTS -- POWER OFF and MODE HALT -- and
+    halts the vehicle it was restored beside.
+    """
     if not os.path.isdir("/proc"):
         return []
     names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py")
@@ -509,8 +555,13 @@ def running_conflicts(port_base):
             except (ValueError, IndexError):
                 pass
         if base == port_base:
-            found.append(int(entry))
+            found.append((prog if prog == "yaGPC2" else script, int(entry)))
     return found
+
+
+def running_conflicts(port_base):
+    """PIDs of a previous run's programs on this port base."""
+    return [pid for _name, pid in running_programs(port_base)]
 
 
 def screen_info():
@@ -1107,7 +1158,7 @@ def main():
             SESSION["action"] = SESSION["dir"] = None
             if action in ("save", "save-and-quit"):
                 ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
-                                        args.port_base, gpcs)
+                                        args.port_base, gpcs, args.crts)
                 # BACK TO WHOEVER ASKED.  A failure that only reaches this
                 # terminal is a failure nobody sees: the manager window exists
                 # so that nobody has to watch this terminal.
