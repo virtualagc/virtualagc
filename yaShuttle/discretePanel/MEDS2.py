@@ -35,6 +35,7 @@ import socket
 import struct
 import sys
 import threading
+import crewscript
 import time
 import traceback
 import xml.etree.ElementTree as ET
@@ -556,6 +557,35 @@ class BusPump(object):
             os.write(self._wakeW, b'x')
         except (BlockingIOError, InterruptedError):
             pass                         # full: a wake is already pending
+
+    def callAndWait(self, fn, timeout=5.0):
+        """Run fn on the pump thread and RETURN WHAT IT RETURNS.
+
+        call() is fire-and-forget, which is right for everything that drives
+        the bus -- nothing waits on a fill.  A snapshot is the exception:
+        whoever asked for it is holding a file open, and reading an IDP from
+        any other thread is the one thing this class exists to prevent.
+
+        Never call this FROM the pump thread; it would wait for itself.
+        """
+        box = {}
+        done = threading.Event()
+
+        def run():
+            try:
+                box['value'] = fn()
+            except BaseException as e:      # noqa: BLE001 - handed to the caller
+                box['error'] = e
+            finally:
+                done.set()
+
+        self.call(run)
+        if not done.wait(timeout):
+            raise TimeoutError("the bus pump did not answer within %.1f s"
+                               % timeout)
+        if 'error' in box:
+            raise box['error']
+        return box.get('value')
 
     def add(self, bus):
         self.call(lambda: self._sel.register(bus.server, selectors.EVENT_READ, bus))
@@ -10302,6 +10332,90 @@ class IDP(LRU):
         if int(msg.data16[0]) < MDUMsg.FILL:
             print("IDP%s: %s recv %s" % (t.id, busID, msg))
 
+    # -- the display's own state, for a snapshot ----------------------------
+    #
+    # DISPLAY MEMORY *IS* THE PICTURE.  Everything an MDU draws it draws from
+    # DEUUnit.mem, so saving that array and pushing it back is the whole of
+    # restoring a display -- no geometry, no glyph state, no Screen_DPS
+    # internals, all of which refresh() derives from the words.
+    #
+    # It has to be saved, not re-derived.  The static format text arrives
+    # ONCE, at DEU load time, as a format fill: measured at 8 in a whole
+    # 420-second run, against 367 display fills of the changing fields.  So a
+    # restore that waits for PASS to repaint gets the foreground and never
+    # the background -- which is exactly what a restored display looked like
+    # before this: live numbers on an empty screen (gpc-causes #174).
+    #
+    # BOTH HALVES RUN ON THE PUMP THREAD.  From IDP.start() on, everything an
+    # IDP does runs there and nothing else may touch it without a lock -- see
+    # BusPump.  The callers hand these to BusPump.call.
+
+    def snapshotState(self):
+        """Everything about this unit that a memory image does not carry."""
+        u = self.unit
+        return {
+            'id': str(self.id),
+            'powered': bool(self.powered),
+            'majorFunc': int(u.majorFunc),
+            'ipled': bool(u.ipled),
+            'iplRunning': bool(u.iplRunning),
+            'msgResetPending': bool(u.msgResetPending),
+            'ackPending': bool(u.ackPending),
+            'iplError': bool(u.iplError),
+            'iplCircuitError': bool(u.iplCircuitError),
+            'selfTest': bool(u.selfTest),
+            'swStatus': int(u.swStatus),
+            'deuId': u.deuId,
+            'kybdSel': self.kybdSel,
+            # The scratch pad, which is crew-paced and so may be half-typed at
+            # any moment; waiting for it to be empty would be an unbounded
+            # wait, so it travels.
+            'spl': u.spl._snapshot(),
+            'keyQueue': [list(k) for k in u.keyQueue],
+            # A transfer in progress is NOT saved: it is a few milliseconds
+            # long and the next command clears it anyway.  Recorded so a
+            # reader knows whether one was cut across.
+            'xferInFlight': u.xfer is not None,
+        }
+
+    def restoreState(self, state, mem):
+        """Put the unit back, and repaint every MDU from the words."""
+        u = self.unit
+        if mem is not None and len(mem) == DEU.DEU_MEMORY_WORDS:
+            u.mem[:] = mem
+        u.majorFunc = int(state.get('majorFunc', u.majorFunc))
+        u.ipled = bool(state.get('ipled', u.ipled))
+        u.iplRunning = bool(state.get('iplRunning', False))
+        u.msgResetPending = bool(state.get('msgResetPending', False))
+        u.ackPending = bool(state.get('ackPending', False))
+        u.iplError = bool(state.get('iplError', False))
+        u.iplCircuitError = bool(state.get('iplCircuitError', False))
+        u.selfTest = bool(state.get('selfTest', False))
+        u.swStatus = int(state.get('swStatus', u.swStatus))
+        u.deuId = state.get('deuId', u.deuId)
+        if state.get('kybdSel') is not None:
+            self.kybdSel = int(state['kybdSel'])
+        spl = state.get('spl')
+        if spl:
+            try:
+                u.spl._restore(spl)
+            except Exception:
+                pass
+        del u.keyQueue[:]
+        u.keyQueue.extend(list(k) for k in state.get('keyQueue', []))
+        u.xfer = None
+        # NOT powerUp(), which clears the memory just restored.  The switch
+        # position is set directly and the heartbeat started if it is on.
+        self.powered = bool(state.get('powered', True))
+        if self.powered:
+            self._heartbeat()
+            # The same one message _clearMDUs uses, with the words instead of
+            # zeros: the whole of display memory in one fill.
+            self._sendToMDUs(0, [int(w) for w in u.mem])
+        self.unit.log("IDP%s: restored %d word(s) of display memory%s"
+                      % (self.id, DEU.DEU_MEMORY_WORDS,
+                         "" if self.powered else " (unit is powered off)"))
+
     def _clearMDUs(self):
         """The unit's memory was cleared; so is every MDU's copy of it."""
         self._sendToMDUs(0, [0] * DEU.DEU_MEMORY_WORDS)
@@ -11687,9 +11801,94 @@ class MedsRunner(object):
         # console access: window.lru is the last LRU started in this window
         _EXEC_NS['lru'] = self.lrus.get(CONFIG['thisStart'][-1]) if CONFIG['thisStart'] else None
         _EXEC_NS['lrus'] = AttrDict(self.lrus)
+        # The display state of a snapshot, if this run was started from one,
+        # and the listener that lets a later Save ask for it.
+        self._restoreIDPs()
+        self._startSnapshotListener()
+
         # dev/test hook: NSTS_EXEC runs once the LRUs are up (2s after load)
         if env('NSTS_EXEC'):
             QTimer.singleShot(2000, _runNstsExec)
+
+    # -- display state, saved and restored ----------------------------------
+
+    def _idps(self):
+        return [l for l in self.lrus.values() if isinstance(l, IDP)]
+
+    def _saveIDPs(self, where):
+        """Write idp<N>.json and idp<N>.mem.bin for every unit in THIS
+        process.  A run has one of these per CRT and they own different
+        units, so each writes its own and the set is complete between them."""
+        import json as _json
+        done = []
+        for idp in self._idps():
+            # ON THE PUMP THREAD: both the state and the memory are read
+            # there, together, so a save cannot catch a fill half-applied.
+            state, mem = BusPump.instance().callAndWait(lambda idp=idp: (
+                idp.snapshotState(), bytes(idp.unit.mem.tobytes())))
+            base = os.path.join(where, "idp%s" % idp.id)
+            try:
+                with open(base + ".mem.bin", "wb") as fh:
+                    fh.write(mem)
+                with open(base + ".json", "w") as fh:
+                    _json.dump(state, fh, indent=1, sort_keys=True)
+                    fh.write("\n")
+            except OSError as e:
+                sys.stderr.write("meds: cannot save IDP%s: %s\n" % (idp.id, e))
+                continue
+            done.append(str(idp.id))
+        if done:
+            print("meds: saved display state for IDP %s to %s"
+                  % (", ".join(done), where), flush=True)
+
+    def _restoreIDPs(self):
+        """--idp-restore DIR: put each unit's display memory back."""
+        where = self.opts.get('idpRestore')
+        if not where:
+            return
+        import json as _json
+        for idp in self._idps():
+            base = os.path.join(where, "idp%s" % idp.id)
+            if not (os.path.isfile(base + ".json")
+                    and os.path.isfile(base + ".mem.bin")):
+                sys.stderr.write("meds: no saved display state for IDP%s in "
+                                 "%s\n" % (idp.id, where))
+                continue
+            try:
+                with open(base + ".json") as fh:
+                    state = _json.load(fh)
+                mem = np.frombuffer(open(base + ".mem.bin", "rb").read(),
+                                    dtype=np.uint16)
+            except (OSError, ValueError) as e:
+                sys.stderr.write("meds: cannot read IDP%s state: %s\n"
+                                 % (idp.id, e))
+                continue
+            BusPump.instance().call(
+                lambda idp=idp, st=state, m=mem: idp.restoreState(st, m))
+
+    def _startSnapshotListener(self):
+        """'save DIR' on port base + 95, from simulatePASS."""
+        try:
+            sock = crewscript.meds_receiver()
+        except Exception as e:
+            sys.stderr.write("meds: no snapshot listener (%s)\n" % e)
+            return
+
+        def listen():
+            while True:
+                try:
+                    data, _a = sock.recvfrom(4096)
+                except OSError:
+                    return
+                text = data.decode("utf-8", errors="replace").strip()
+                word, _, rest = text.partition(" ")
+                if word.lower() == "save" and rest.strip():
+                    try:
+                        self._saveIDPs(rest.strip())
+                    except Exception as e:
+                        sys.stderr.write("meds: snapshot failed: %s\n" % e)
+
+        threading.Thread(target=listen, daemon=True).start()
 
     def createWindows(self):
         C = self.CONFIG
@@ -11782,6 +11981,9 @@ def buildParser():
     p.add_argument('lrus', nargs='*',
                    help='LRU names from config/meds.json (e.g. crt1 idp1 cdr1); '
                         'default: the config "start" list')
+    p.add_argument('--idp-restore', dest='idpRestore', metavar='<dir>',
+                   help='restore each IDP\'s display memory from a snapshot '
+                        'directory (idp<N>.json and idp<N>.mem.bin)')
     p.add_argument('--title', metavar='<text>',
                    help='what to call the windows, before each LRU\'s own '
                         'name: "<text> / CRT1".  The orbiter has eleven MDUs '
@@ -11865,6 +12067,7 @@ def main(argv=None):
         'list': args.list,
         'pane': args.pane and not args.noPane,
         'edgekeys': not args.noEdgekeys,
+        'idpRestore': args.idpRestore,
     }
 
     # --list needs no window system at all.

@@ -1001,10 +1001,17 @@ def main():
             for k in range(args.crts):
                 e = dict(env)
                 e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
+                # A RESTORED DISPLAY IS HANDED ITS OWN MEMORY.  Without
+                # this the unit comes up blank and PASS only ever rewrites
+                # the changing fields, so the numbers appear over no format
+                # at all -- see gpc-causes #174.
+                meds_extra = (["--idp-restore", os.path.abspath(resume)]
+                              if resume else [])
                 L.start("meds%d" % (k + 1),
-                        [py, "MEDS2.py", "--port-base", str(args.port_base), "--size", str(size),
-                         "--scale", str(args.scale), "--title", title,
-                         "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                        [py, "MEDS2.py"] + meds_extra
+                        + ["--port-base", str(args.port_base), "--size", str(size),
+                           "--scale", str(args.scale), "--title", title,
+                           "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
                 time.sleep(1)
             if args.keyboards:
                 for k in range(args.keyboards):
