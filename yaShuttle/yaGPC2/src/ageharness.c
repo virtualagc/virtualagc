@@ -535,6 +535,27 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
     for (int i = 0; i < 8 && json_arr_count(fp) > i; i++)
         register_set32(registerfile_r(&age->gpc.cpu.regFiles[2], i),
                        state_word(json_arr_get(fp, i), 0));
+    /* AFTER "r", deliberately.  "rsets" carries BOTH general sets and is
+     * the better source; "r" only ever held the one the PSW selected, so
+     * where both are present the complete pair wins and where only the old
+     * key is present nothing changes. */
+    JsonValue *rs = json_obj_get(root, "rsets");
+    for (int set = 0; set < 2 && json_arr_count(rs) > set; set++) {
+        JsonValue *one = json_arr_get(rs, set);
+        for (int i = 0; i < 8 && json_arr_count(one) > i; i++)
+            register_set32(registerfile_r(&age->gpc.cpu.regFiles[set], i),
+                           state_word(json_arr_get(one, i), 0));
+    }
+    /* The Data Sector Extensions extend every address their general
+     * register forms, so getting these wrong does not fault -- it
+     * addresses the wrong sector and carries on. */
+    JsonValue *ds = json_obj_get(root, "dse");
+    for (int set = 0; set < 3 && json_arr_count(ds) > set; set++) {
+        JsonValue *one = json_arr_get(ds, set);
+        for (int i = 0; i < 8 && json_arr_count(one) > i; i++)
+            age->gpc.cpu.regFiles[set].dse[i] =
+                (uint8_t)(state_word(json_arr_get(one, i), 0) & 0xf);
+    }
     /* A MACHINE YOU ARE RESUMING HAD ITS INTERVAL TIMER RUNNING.  Counter 1
      * is a 1 MHz down-counter that the IPL firmware starts and nothing in
      * the software ever does -- see the --ipl comment above, which enables
@@ -657,6 +678,100 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
             if ((t = json_obj_get(e, "recvElapsedUs")) != NULL)
                 b->recvSinceUs = age->gpc.cpu.elapsedTimeUs
                                - json_as_number(t, 0.0);
+            /* The nine that a capture taken before this simply did not
+             * have.  Each defaults to what the freshly-built BCE already
+             * holds, so an older file still loads and just leaves them
+             * alone -- see the dump for why each has to travel. */
+            struct { const char *k; bool *p; } bb[] = {
+                {"recvAwaitCmd", &b->recvAwaitCmd},
+                {"recvSkippedEcho", &b->recvSkippedEcho},
+                {"recvErrored", &b->recvErrored},
+                {"latchCmdSync", &b->mia.latchCmdSync},
+                {"lastFromLatch", &b->mia.lastFromLatch},
+                {"lastCmdSync", &b->mia.lastCmdSync},
+            };
+            for (size_t k = 0; k < sizeof bb / sizeof bb[0]; k++)
+                if ((t = json_obj_get(e, bb[k].k)) != NULL && t->type == JSON_BOOL)
+                    *bb[k].p = t->boolVal;
+            if ((t = json_obj_get(e, "recvCount")) != NULL)
+                b->recvCount = (long)json_as_number(t, (double)b->recvCount);
+            /* Both rebased, for the same reason delayRemainUs is. */
+            if ((t = json_obj_get(e, "wireHoldRemainUs")) != NULL)
+                b->wireHoldUntilUs = age->gpc.cpu.elapsedTimeUs
+                                   + json_as_number(t, 0.0);
+            if ((t = json_obj_get(e, "rxNextRemainUs")) != NULL)
+                b->mia.rxNextUs = age->gpc.cpu.elapsedTimeUs
+                                + json_as_number(t, 0.0);
+        }
+        /* THE REST OF THE IOP -- see the dump for what each of these is
+         * and why it cannot be reconstructed.  Every one defaults to what
+         * the freshly-built IOP holds, so a capture taken before they were
+         * written still loads and simply leaves them at their reset
+         * values, which is exactly the old behaviour. */
+        {
+            double now = age->gpc.cpu.elapsedTimeUs;
+            JsonValue *t;
+            struct { const char *k; bool *p; } fb[] = {
+                {"wdRunning", &iop->wdRunning}, {"wdTimeout", &iop->wdTimeout},
+                {"rmVoterInhibit", &iop->rmVoterInhibit},
+                {"rmVoterFail", &iop->rmVoterFail},
+                {"intForceTest", &iop->intForceTest},
+                {"parityEnabled", &iop->parityEnabled},
+                {"forceHBusParity", &iop->forceHBusParity},
+                {"forceQueueParity", &iop->forceQueueParity},
+                {"forceDMAParity", &iop->forceDMAParity},
+                {"forceMIAParity", &iop->forceMIAParity},
+                {"mscRepeatActive", &iop->mscRepeatActive},
+            };
+            for (size_t k = 0; k < sizeof fb / sizeof fb[0]; k++)
+                if ((t = json_obj_get(io_, fb[k].k)) != NULL && t->type == JSON_BOOL)
+                    *fb[k].p = t->boolVal;
+            iop->wdCount = state_word(json_obj_get(io_, "wdCount"), iop->wdCount);
+            iop->msc.failDiscSeen = state_word(json_obj_get(io_, "mscFailDiscSeen"),
+                                               iop->msc.failDiscSeen);
+            iop->rmTestInputs = state_word(json_obj_get(io_, "rmTestInputs"),
+                                           iop->rmTestInputs);
+            iop->mscRepeatPC = state_word(json_obj_get(io_, "mscRepeatPC"),
+                                          iop->mscRepeatPC);
+            if ((t = json_obj_get(io_, "wdAccumUs")) != NULL)
+                iop->wdAccumUs = json_as_number(t, iop->wdAccumUs);
+            /* Rebased, as every other deadline is. */
+            if ((t = json_obj_get(io_, "wdSinceLastUs")) != NULL)
+                iop->wdLastUs = now - json_as_number(t, 0.0);
+            if ((t = json_obj_get(io_, "mscRepeatRemainUs")) != NULL)
+                iop->mscRepeatUntilUs = now + json_as_number(t, 0.0);
+            if ((t = json_obj_get(io_, "ccData")) != NULL)
+                register_set32(&iop->regCCData, state_word(t, 0));
+            JsonValue *ia = json_obj_get(io_, "interrupts");
+            for (int i = 0; i < 5 && json_arr_count(ia) > i; i++)
+                register_set32(registerfile_r(&iop->regInterrupts, i),
+                               state_word(json_arr_get(ia, i), 0));
+            JsonValue *lb = json_obj_get(io_, "lsBadParity");
+            for (int i = 0; i < 26 && json_arr_count(lb) > i; i++)
+                iop->lsBadParity[i] = state_word(json_arr_get(lb, i), 0);
+            JsonValue *bf = json_obj_get(io_, "busFreeRemainUs");
+            for (int i = 0; i < 32 && json_arr_count(bf) > i; i++)
+                iop->busFreeUs[i] = now + json_as_number(json_arr_get(bf, i), 0.0);
+            JsonValue *xw = json_obj_get(io_, "xmitWords");
+            for (int i = 0; i < 32 && json_arr_count(xw) > i; i++)
+                iop->xmitWords[i] = (long)json_as_number(json_arr_get(xw, i), 0.0);
+            JsonValue *dq = json_obj_get(io_, "dmaQueuedRead");
+            for (int i = 0; i < 32 && json_arr_count(dq) > i; i++)
+                iop->dmaQueuedRead[i] = (long)json_as_number(json_arr_get(dq, i), 0.0);
+            JsonValue *cw = json_obj_get(io_, "clearWatch");
+            for (int i = 0; i < 32 && json_arr_count(cw) > i; i++)
+                iop->clearWatch[i] = (int)json_as_number(json_arr_get(cw, i), 0.0);
+            /* IN ORDER, head first: the dump walks the ring from head, so
+             * pushing them back in the order written restores the queue
+             * the machine actually had rather than a permutation of it. */
+            JsonValue *dma = json_obj_get(io_, "dma");
+            for (int i = 0; i < json_arr_count(dma); i++) {
+                JsonValue *e = json_arr_get(dma, i);
+                iop_dma_queue_restore(
+                    iop, state_word(json_obj_get(e, "addr"), 0),
+                    (int)json_as_number(json_obj_get(e, "dir"), 0.0),
+                    (int)json_as_number(json_obj_get(e, "bce"), -1.0));
+            }
         }
         if (verbose)
             fprintf(stderr, "--state: IOP halt=%08x xmit=%08x recv=%08x\n",
@@ -749,6 +864,38 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
         fprintf(f, "%s\"%08x\"", i ? ", " : "",
                 register_get32(registerfile_r(&cpu->regFiles[2], i)));
     fprintf(f, "],\n");
+    /* BOTH GENERAL REGISTER SETS, AND THE DSE REGISTERS.
+     *
+     * "r" above is regFiles[grSet] -- whichever set the PSW selects right
+     * now -- so the OTHER one was never written and a restored machine got
+     * it zeroed.  The AP-101S has two and the software switches between
+     * them; a capture taken with set 1 active silently discarded set 0.
+     *
+     * The DSE registers are worse than merely missing.  There are eight,
+     * one 4-bit Data Sector Extension per general register, loaded by LXA
+     * and LDM (regmem.h), and they EXTEND EVERY ADDRESS those registers
+     * form.  A machine restored with them zeroed does not fail: it
+     * addresses the wrong sector and keeps going.
+     *
+     * "r" and "fp" stay exactly as they were so that captures taken before
+     * this still load; these are additions, not a replacement. */
+    fprintf(f, "  \"rsets\": [");
+    for (int set = 0; set < 2; set++) {
+        fprintf(f, "%s[", set ? ", " : "");
+        for (int i = 0; i < 8; i++)
+            fprintf(f, "%s\"%08x\"", i ? ", " : "",
+                    register_get32(registerfile_r(&cpu->regFiles[set], i)));
+        fprintf(f, "]");
+    }
+    fprintf(f, "],\n  \"dse\": [");
+    for (int set = 0; set < 3; set++) {
+        fprintf(f, "%s[", set ? ", " : "");
+        for (int i = 0; i < 8; i++)
+            fprintf(f, "%s%u", i ? ", " : "",
+                    (unsigned)cpu->regFiles[set].dse[i]);
+        fprintf(f, "]");
+    }
+    fprintf(f, "],\n");
     /* THE SCHEDULING STATE.  FCOS runs on the interval timers, so a
      * machine restored without them completes whatever transfer was in
      * flight and then issues no further START I/O -- measured: 2 DEU
@@ -836,7 +983,29 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
                    "\"recvAddr\": \"%08x\", \"recvLeft\": \"%08x\", "
                    "\"recvGotAny\": %s, \"latch\": \"%08x\", "
                    "\"latchValid\": %s, \"delayRemainUs\": %.3f, "
-                   "\"recvElapsedUs\": %.3f}",
+                   "\"recvElapsedUs\": %.3f, "
+                   /* THE OTHER NINE, and none of them is optional.  The
+                    * first six put the BCE somewhere in the middle of a
+                    * commanded receive that recvActive alone does not
+                    * describe: recvAwaitCmd and recvSkippedEcho are the
+                    * Listen/Command Mode first-input state, recvErrored
+                    * says the transfer has already failed, recvCount is
+                    * how much of it has arrived, and a restored BCE
+                    * without them either re-reads a word it has had or
+                    * reports a clean transfer that was not.  The last
+                    * three are the wire: wireHoldUntilUs is a bus busy
+                    * until a simulated time, rxNextUs is the MIA's 33 us
+                    * receive pacing, and latchCmdSync/lastFromLatch/
+                    * lastCmdSync are the echo and sync-mark latches that
+                    * tell a commanded receive its own transmission from
+                    * somebody else's.  All four times are DURATIONS from
+                    * the capture, as delayRemainUs already is -- see the
+                    * rebase in load_state. */
+                   "\"recvAwaitCmd\": %s, \"recvSkippedEcho\": %s, "
+                   "\"recvErrored\": %s, \"recvCount\": %ld, "
+                   "\"wireHoldRemainUs\": %.3f, \"rxNextRemainUs\": %.3f, "
+                   "\"latchCmdSync\": %s, \"lastFromLatch\": %s, "
+                   "\"lastCmdSync\": %s}",
                 i ? "," : "",
                 b->delayActive ? "true" : "false", b->delayPC,
                 b->recvActive ? "true" : "false", b->recvPC,
@@ -844,9 +1013,118 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
                 b->recvGotAny ? "true" : "false",
                 b->mia.latch, b->mia.latchValid ? "true" : "false",
                 b->delayUntilUs - cpu->elapsedTimeUs,
-                cpu->elapsedTimeUs - b->recvSinceUs);
+                cpu->elapsedTimeUs - b->recvSinceUs,
+                b->recvAwaitCmd ? "true" : "false",
+                b->recvSkippedEcho ? "true" : "false",
+                b->recvErrored ? "true" : "false",
+                (long)b->recvCount,
+                b->wireHoldUntilUs - cpu->elapsedTimeUs,
+                b->mia.rxNextUs - cpu->elapsedTimeUs,
+                b->mia.latchCmdSync ? "true" : "false",
+                b->mia.lastFromLatch ? "true" : "false",
+                b->mia.lastCmdSync ? "true" : "false");
     }
-    fprintf(f, "\n    ]\n  },\n");
+    fprintf(f, "\n    ],\n");
+
+    /* THE REST OF THE IOP THAT LIVES OUTSIDE MAIN STORAGE.
+     *
+     * Found by diffing the IOP struct against what this function wrote,
+     * rather than from a list: the list was short by the MSC's repeat-until
+     * state, which holds the MSC mid-instruction exactly as a BCE's
+     * delayActive holds a BCE, and that one was already being dumped.
+     *
+     * Each of these is state no memory image can carry:
+     *
+     *   - the GO/NO-GO WATCHDOG, a real counter that keeps running through
+     *     the CPU's wait state because noticing a stopped CPU is its whole
+     *     job.  Restored without it, a machine either never times out or
+     *     times out immediately depending on which way the zero falls;
+     *   - the RM VOTER's inhibit and test inputs, which arrive by LOAD TEST
+     *     REGISTER and are not readable back from regRMStatus -- only its
+     *     bits 17-18 live there, the rest is composed at read time;
+     *   - regInterrupts, five registers holding what has been raised and
+     *     not yet taken, and intForceTest;
+     *   - the DATA FLOW PARITY state.  Checking starts disabled and an
+     *     error leaves it disabled with the generators reset, so the enable
+     *     is a latch with real consequences; lsBadParity tags which stored
+     *     words arrived over a poisoned H-Bus, and the tag survives a read;
+     *   - busFreeUs, when each wire comes free, and the MSC's repeat-until;
+     *   - xmitWords, dmaQueuedRead and clearWatch, which are per-bus
+     *     positions WITHIN a command in progress -- how much has gone out,
+     *     what was queued, and whether the next MIA read is the CLEAR read.
+     *     A restored machine that loses clearWatch reads a stale status.
+     *
+     * DELIBERATELY NOT HERE: discOverlayGen/Driven/Value (a memo, rebuilt
+     * on the next publish), recvTimeoutFloorUs and recvFloorFromEnv (from
+     * the command line), and servicer/peerWait and their contexts (host
+     * wiring, restored by construction, and saving a function pointer
+     * across processes would be a latent crash). */
+    fprintf(f, "    \"wdCount\": %u, \"wdRunning\": %s, \"wdTimeout\": %s,\n",
+            iop->wdCount, iop->wdRunning ? "true" : "false",
+            iop->wdTimeout ? "true" : "false");
+    fprintf(f, "    \"wdAccumUs\": %.3f, \"wdSinceLastUs\": %.3f,\n",
+            iop->wdAccumUs, cpu->elapsedTimeUs - iop->wdLastUs);
+    fprintf(f, "    \"rmVoterInhibit\": %s, \"rmTestInputs\": %u, "
+               "\"rmVoterFail\": %s,\n",
+            iop->rmVoterInhibit ? "true" : "false", iop->rmTestInputs,
+            iop->rmVoterFail ? "true" : "false");
+    /* failDiscSeen is a WORD, not a flag -- one bit per fail discrete
+     * already noticed -- so it travels as one.  Dumping it as a boolean
+     * would have restored "some bit was set" as "bit 31 was set". */
+    fprintf(f, "    \"intForceTest\": %s, \"mscFailDiscSeen\": \"%08x\",\n",
+            iop->intForceTest ? "true" : "false",
+            (unsigned)iop->msc.failDiscSeen);
+    fprintf(f, "    \"ccData\": \"%08x\",\n", register_get32(&iop->regCCData));
+    fprintf(f, "    \"interrupts\": [");
+    for (int i = 0; i < 5; i++)
+        fprintf(f, "%s\"%08x\"", i ? ", " : "",
+                register_get32(registerfile_r(&iop->regInterrupts, i)));
+    fprintf(f, "],\n");
+    fprintf(f, "    \"parityEnabled\": %s, \"forceHBusParity\": %s, "
+               "\"forceQueueParity\": %s, \"forceDMAParity\": %s, "
+               "\"forceMIAParity\": %s,\n",
+            iop->parityEnabled ? "true" : "false",
+            iop->forceHBusParity ? "true" : "false",
+            iop->forceQueueParity ? "true" : "false",
+            iop->forceDMAParity ? "true" : "false",
+            iop->forceMIAParity ? "true" : "false");
+    fprintf(f, "    \"lsBadParity\": [");
+    for (int i = 0; i < 26; i++)
+        fprintf(f, "%s\"%08x\"", i ? ", " : "", iop->lsBadParity[i]);
+    fprintf(f, "],\n");
+    fprintf(f, "    \"mscRepeatActive\": %s, \"mscRepeatPC\": \"%08x\", "
+               "\"mscRepeatRemainUs\": %.3f,\n",
+            iop->mscRepeatActive ? "true" : "false", iop->mscRepeatPC,
+            iop->mscRepeatUntilUs - cpu->elapsedTimeUs);
+    /* Per bus.  busFreeUs is a time and so travels as a duration; the
+     * other three are counts and positions and travel as they are. */
+    fprintf(f, "    \"busFreeRemainUs\": [");
+    for (int i = 0; i < 32; i++)
+        fprintf(f, "%s%.3f", i ? ", " : "", iop->busFreeUs[i] - cpu->elapsedTimeUs);
+    fprintf(f, "],\n    \"xmitWords\": [");
+    for (int i = 0; i < 32; i++)
+        fprintf(f, "%s%ld", i ? ", " : "", iop->xmitWords[i]);
+    fprintf(f, "],\n    \"dmaQueuedRead\": [");
+    for (int i = 0; i < 32; i++)
+        fprintf(f, "%s%ld", i ? ", " : "", iop->dmaQueuedRead[i]);
+    fprintf(f, "],\n    \"clearWatch\": [");
+    for (int i = 0; i < 32; i++)
+        fprintf(f, "%s%d", i ? ", " : "", iop->clearWatch[i]);
+    fprintf(f, "],\n");
+    /* THE DMA QUEUE, which is a transfer in flight and not a statistic.
+     * It is drained one halfword per IOP slice and has been measured 819
+     * deep during a 511-word display fill, so a capture taken during one
+     * -- and a display fill is exactly when a capture is interesting --
+     * holds most of that fill in here and nowhere else. */
+    fprintf(f, "    \"dma\": [");
+    for (int i = 0; i < iop->dmaQueue.count; i++) {
+        const DMARequest *q = &iop->dmaQueue.items[
+            (iop->dmaQueue.head + i) % iop->dmaQueue.cap];
+        fprintf(f, "%s{\"addr\": \"%08x\", \"dir\": %d, \"bce\": %d}",
+                i ? ", " : "", q->addr, (int)q->direction,
+                q->bce ? q->bce->bceNum : -1);
+    }
+    fprintf(f, "]\n  },\n");   /* closes "iop" */
     /* STORE PROTECTION, and it is not an optimisation.  The Instruction
      * Monitor fires on any instruction fetched from an UNPROTECTED
      * address (cpu.c: intMask & 0x20 && !membus_get_store_protect), so a

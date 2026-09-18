@@ -1047,6 +1047,16 @@ void iop_first_op(IOP *iop, const char *kind, const char *nm, uint32_t pc) {
             (unsigned)pc, iop_now_us(iop) / 1e6);
 }
 
+void iop_dma_queue_restore(IOP *iop, uint32_t addr, int direction, int bceNum) {
+    if (iop == NULL) return;
+    DMARequest req;
+    memset(&req, 0, sizeof req);
+    req.addr = addr;
+    req.direction = direction;
+    req.bce = (bceNum >= 1 && bceNum <= 24) ? &iop->bce[bceNum - 1] : NULL;
+    dmaq_push(&iop->dmaQueue, req);
+}
+
 void iop_exec_dma_queue(IOP *iop) {
     if (iop->dmaQueue.count == 0) return;
     /* Hold the wire for one word time.  Only a TRANSMIT (DMA_READ: the IOP

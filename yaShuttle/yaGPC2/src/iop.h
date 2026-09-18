@@ -459,6 +459,14 @@ void iop_exec(IOP *iop);
 void iop_exec_idle(IOP *iop);
 void iop_exec_channel_control(IOP *iop);
 void iop_exec_dma_queue(IOP *iop);
+
+/* PUT A DMA REQUEST BACK, for --state only.  The queue is a transfer in
+ * flight -- measured 819 deep during a 511-word display fill -- so a
+ * machine restored with it empty completes nothing that was outstanding.
+ * dmaq_push is static because nothing but the IOP has any business adding
+ * to it; this is the one exception and it says so in its name.  bceNum is
+ * 1-24, or 0/-1 for a request that belongs to no BCE. */
+void iop_dma_queue_restore(IOP *iop, uint32_t addr, int direction, int bceNum);
 void iop_exec_processors(IOP *iop);
 void iop_exec_rm(IOP *iop);
 void iop_channel_reset(IOP *iop);
