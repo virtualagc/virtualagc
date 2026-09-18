@@ -138,6 +138,7 @@ class Manager(object):
         self.note = tk.StringVar(value="")
         self._note_until = 0.0
         self._busy = self._busyText = None      # the "please wait" modal
+        self._busyPending = False
 
         # A path is long and its interesting end is the file name, so each box
         # is as wide as the window (and grows with it) and is scrolled to show
@@ -646,6 +647,25 @@ class Manager(object):
         self._busy, self._busyText = top, prog
         return top
 
+    # A save that finds everything already written takes a few tens of
+    # milliseconds, and a modal that appears and vanishes inside that is a
+    # flash nobody can read -- reported as three saves in a row that were
+    # "essentially instantaneous", with the dialog unreadable each time.  So
+    # the modal is not raised at once: if the answer comes back first, it is
+    # never raised at all, and only an operation slow enough to be worth
+    # waiting for puts a window up.
+    BUSY_AFTER_MS = 400
+
+    def _working_soon(self, title, lead, cancellable=True):
+        self._busyPending = True
+
+        def raise_it():
+            if self._busyPending:
+                self._busyPending = False
+                self._working(title, lead, cancellable)
+
+        self.root.after(self.BUSY_AFTER_MS, raise_it)
+
     def _cancel_busy(self):
         self._session("cancel")
         if self._busyText is not None:
@@ -658,6 +678,7 @@ class Manager(object):
                            if total else "Working ...")
 
     def _busy_done(self):
+        self._busyPending = False        # never raise one after the answer
         if self._busy is not None:
             self._busy.destroy()
         self._busy = self._busyText = None
@@ -675,11 +696,37 @@ class Manager(object):
     def start_results(self):
         threading.Thread(target=self._listen_results, daemon=True).start()
 
-    def _snapshot_dir(self):
+    def _snapshot_dir(self, replacing=False):
         path = self.snapshot.get().strip()
         if not path:
             self.say("No snapshot directory chosen")
             return None
+        if replacing:
+            # SAVING OVER ONE DESTROYS IT, SILENTLY, and the path box keeps
+            # whatever it last held -- so the way to lose a snapshot is to
+            # take another without noticing the name did not change.  Which
+            # is exactly what happened: three saves into three names and a
+            # fourth into the second of them, leaving one snapshot holding a
+            # vehicle nobody expected and one name that had never existed.
+            man = os.path.join(path, "vehicle.json")
+            if os.path.isfile(man):
+                when = "an earlier run"
+                try:
+                    with open(man) as fh:
+                        when = json.load(fh).get("taken", when)
+                except (OSError, ValueError):
+                    pass
+                if not self._dialog(
+                        "Replace this snapshot?",
+                        "%s already holds a snapshot." % os.path.basename(
+                            path.rstrip("/")),
+                        "It was taken at %s, and saving over it cannot be "
+                        "undone." % when,
+                        "Change the name in the box first if you meant to keep "
+                        "both.", confirm="Replace"):
+                    self.say("Save cancelled; %s is untouched"
+                             % os.path.basename(path.rstrip("/")))
+                    return None
         return path
 
     def _session(self, verb, path=None):
@@ -692,19 +739,19 @@ class Manager(object):
         return True
 
     def save_snapshot(self):
-        path = self._snapshot_dir()
+        path = self._snapshot_dir(replacing=True)
         if path and self._session("save", path):
             self.say("Saving to %s ..." % os.path.basename(path), sticky=True)
-            self._working("Saving", "Saving the simulation to %s."
-                          % os.path.basename(path))
+            self._working_soon("Saving", "Saving the simulation to %s."
+                               % os.path.basename(path))
 
     def save_and_quit(self):
-        path = self._snapshot_dir()
+        path = self._snapshot_dir(replacing=True)
         if path and self._session("save-and-quit", path):
             self.say("Saving to %s before shutting down ..." % os.path.basename(path),
                      sticky=True)
-            self._working("Saving", "Saving the simulation to %s, then shutting "
-                          "down." % os.path.basename(path))
+            self._working_soon("Saving", "Saving the simulation to %s, then shutting "
+                               "down." % os.path.basename(path))
 
     def restore_snapshot(self):
         path = self._snapshot_dir()
@@ -717,9 +764,9 @@ class Manager(object):
             self.say("Restoring from %s ..." % os.path.basename(path), sticky=True)
             # NOT CANCELLABLE.  By the time this is up the children are being
             # stopped; there is nothing left to go back to.
-            self._working("Restoring", "Restoring the simulation from %s.  "
-                          "Every window except this one is being replaced."
-                          % os.path.basename(path), cancellable=False)
+            self._working_soon("Restoring", "Restoring the simulation from %s.  "
+                               "Every window except this one is being replaced."
+                               % os.path.basename(path), cancellable=False)
 
     def show_panel(self):
         """Bring up a crew panel that a scripted run never mapped.
