@@ -383,8 +383,25 @@ def saved_epoch(snapdir):
         return None
 
 
-def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0):
+def take_snapshot(staging, target, gpc, port_base, gpcs, expect_panel=True,
+                  timeout=20.0):
     """Bring the vehicle to a stand, write it, and say whether it worked.
+
+    EVERYTHING IS WRITTEN TO `staging` AND SWAPPED IN AT THE END, for two
+    reasons that turned out to be the same reason.
+
+    yaGPC2's --snapshot directory is fixed when it starts, and the Save
+    button names a directory when it is pressed; those need not be the same,
+    and if they are not then nothing arrives where this is watching and every
+    save fails.  So the emulator always writes to the one place it was told
+    about, and this moves the result to wherever the save asked.
+
+    That also stops a FAILED save destroying the last good one.  The files
+    have to be cleared before the capture, or a stale file from an earlier
+    save passes for a fresh one that never arrived -- but clearing the TARGET
+    is how a failure took a perfectly good snapshot with it.  Clearing the
+    staging directory instead costs nothing and leaves the target untouched
+    until there is a complete set to put there.
 
     yaGPC2 does its own half on SIGUSR1: every computer parks at the
     rendezvous, each writes its own gpc<N> pair, and they all resume.  The
@@ -393,26 +410,23 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
     reports success without checking is how a half-written snapshot becomes a
     restore that silently comes up wrong.
     """
-    snapdir = os.path.abspath(snapdir)
+    target = os.path.abspath(target)
     try:
-        os.makedirs(snapdir, exist_ok=True)
+        shutil.rmtree(staging, ignore_errors=True)
+        os.makedirs(staging, exist_ok=True)
+        os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
     except OSError as e:
-        log("snapshot: cannot make %s: %s" % (snapdir, e))
-        return False, "cannot make %s: %s" % (snapdir, e)
+        log("snapshot: cannot prepare %s: %s" % (staging, e))
+        return False, "cannot prepare %s: %s" % (staging, e)
+
     want = []
     for g in gpcs:
-        want += [os.path.join(snapdir, "gpc%d.json" % g),
-                 os.path.join(snapdir, "gpc%d.mem.bin" % g)]
-    panel_json = os.path.join(snapdir, "panel.json")
+        want += [os.path.join(staging, "gpc%d.json" % g),
+                 os.path.join(staging, "gpc%d.mem.bin" % g)]
+    panel_json = os.path.join(staging, "panel.json")
     if expect_panel:
         want.append(panel_json)
-    # Old files first, so a stale one from a previous save cannot be mistaken
-    # for a fresh one that never arrived.
-    for w in want:
-        try:
-            os.unlink(w)
-        except OSError:
-            pass
+
     epoch = time.time()
     try:
         gpc.send_signal(signal.SIGUSR1)
@@ -420,6 +434,7 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
         log("snapshot: cannot signal yaGPC2: %s" % e)
         return False, "cannot signal yaGPC2: %s" % e
     crewscript.send_control("save " + panel_json, port_base)
+
     deadline = time.time() + timeout
     while time.time() < deadline:
         if all(os.path.isfile(w) and os.path.getsize(w) > 0 for w in want):
@@ -432,14 +447,38 @@ def take_snapshot(snapdir, gpc, port_base, gpcs, expect_panel=True, timeout=20.0
                "bootstrap off the tape, which cannot be captured"
                if len(missing) == len(want) else
                "missing " + ", ".join(missing))
-        log("snapshot: INCOMPLETE after %.0f s -- %s; NOT usable" % (timeout, why))
+        log("snapshot: INCOMPLETE after %.0f s -- %s; NOT usable.  %s is "
+            "untouched." % (timeout, why, target))
         return False, why
-    with open(os.path.join(snapdir, "vehicle.json"), "w") as fh:
+
+    with open(os.path.join(staging, "vehicle.json"), "w") as fh:
         json.dump({"epoch": epoch, "gpcs": list(gpcs),
                    "taken": time.strftime("%Y-%m-%d %H:%M:%S",
                                           time.localtime(epoch))}, fh, indent=1)
         fh.write("\n")
-    log("snapshot: written to %s" % snapdir)
+
+    # INTO PLACE, and only now.  Built beside the target so the two renames
+    # are within one directory, then the old one is dropped -- so the target
+    # is either the snapshot that was there before or the one just taken, and
+    # at no point a mixture of the two.
+    incoming, previous = target + ".incoming", target + ".previous"
+    try:
+        shutil.rmtree(incoming, ignore_errors=True)
+        shutil.rmtree(previous, ignore_errors=True)
+        os.makedirs(incoming)
+        # Everything, not just the files waited for: ageharness writes a
+        # <name>.protect.bin beside each state file and a restore needs it.
+        for name in sorted(os.listdir(staging)):
+            shutil.move(os.path.join(staging, name),
+                        os.path.join(incoming, name))
+        if os.path.isdir(target):
+            os.rename(target, previous)
+        os.rename(incoming, target)
+        shutil.rmtree(previous, ignore_errors=True)
+    except OSError as e:
+        log("snapshot: written, but cannot put it in %s: %s" % (target, e))
+        return False, "cannot put the snapshot in %s: %s" % (target, e)
+    log("snapshot: written to %s" % target)
     return True, ""
 
 
@@ -857,14 +896,23 @@ def main():
     # Unbuffered, so each program's log shows what it said when it said it.
     py = sys.executable or "python3"
     env["PYTHONUNBUFFERED"] = "1"
-    # Armed on every run so that Save works at any moment.  Beside the logs by
-    # default, because that is already the directory this run owns.
+    # WHERE SAVE PUTS THINGS, and where the emulator writes them first.
+    #
+    # They are different directories on purpose.  yaGPC2 is told its snapshot
+    # directory once, when it starts, but the Save button names one when it is
+    # pressed -- so the emulator always writes to the staging directory it was
+    # given, and take_snapshot moves a COMPLETE set from there to wherever the
+    # save asked.  That is also what keeps a failed save from destroying the
+    # last good one: the files that have to be cleared before a capture are
+    # the staging copies, never the target.
     snapshot_dir = os.path.abspath(args.snapshot_dir
                                    or os.path.join(logs, "snapshot"))
+    snapshot_staging = os.path.join(logs, "snapshot-staging")
     try:
-        os.makedirs(snapshot_dir, exist_ok=True)
+        os.makedirs(snapshot_staging, exist_ok=True)
+        os.makedirs(os.path.dirname(snapshot_dir) or ".", exist_ok=True)
     except OSError as e:
-        raise SystemExit("simulatePASS: cannot make %s: %s" % (snapshot_dir, e))
+        raise SystemExit("simulatePASS: cannot make %s: %s" % (snapshot_staging, e))
     if args.snapshot_resume and not os.path.isdir(args.snapshot_resume):
         raise SystemExit("simulatePASS: --snapshot-resume %s is not a directory"
                          % args.snapshot_resume)
@@ -929,7 +977,7 @@ def main():
             # sits in a wait state that long; a session must never trip it.
             # Always armed, so Save works at any moment without having been
             # asked for at start-up.  It costs nothing until SIGUSR1 arrives.
-            gpc_argv += ["--snapshot", snapshot_dir]
+            gpc_argv += ["--snapshot", snapshot_staging]
             gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
                          "--rt-factor", "1", "--port-base", str(args.port_base),
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
@@ -1058,7 +1106,8 @@ def main():
             action, snapdir = SESSION["action"], SESSION["dir"]
             SESSION["action"] = SESSION["dir"] = None
             if action in ("save", "save-and-quit"):
-                ok, why = take_snapshot(snapdir, gpc, args.port_base, gpcs)
+                ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
+                                        args.port_base, gpcs)
                 # BACK TO WHOEVER ASKED.  A failure that only reaches this
                 # terminal is a failure nobody sees: the manager window exists
                 # so that nobody has to watch this terminal.
