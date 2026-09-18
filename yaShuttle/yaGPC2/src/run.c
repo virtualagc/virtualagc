@@ -531,6 +531,16 @@ static void triggers_init(BatchRunner *r) {
                 t->stop[i] ? "STOPS" : "logs only");
 }
 
+/* SIGUSR1 ASKS FOR A SNAPSHOT, and the same pattern as SIGINT is why:
+ * a handler may not take a lock, and vehicle_pause_request takes one.  So the
+ * handler only sets this, and the pause points -- which every machine passes
+ * constantly -- turn it into the request.  Two machines may both see it set
+ * before either clears it; that is harmless, because the second request
+ * arrives while the first is still pending and vehicle_pause_request keeps
+ * the first. */
+static volatile sig_atomic_t g_snapshot_requested;
+static void on_sigusr1(int sig);
+
 /* Defined below, beside the landmark machinery it grew up with. */
 static void dump_main_storage(BatchRunner *r, const char *path);
 
@@ -575,8 +585,27 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
  * ageharness.c -- so both are written here, under the one tag.
  */
 static void batchrunner_write_capture(BatchRunner *r) {
-    if (r->opts == NULL || r->opts->dumpState == NULL) return;
+    if (r->opts == NULL) return;
     const char *tag = vehicle_pause_tag(r->vehicle);
+    /* A SIGUSR1 SNAPSHOT GOES IN A DIRECTORY, one pair of files per
+     * computer, because that is what a restore reads back: a vehicle is
+     * the set of its machines and naming them by their gpcId inside one
+     * directory is what makes "these files are one vehicle" structural
+     * rather than a convention about prefixes. */
+    if (r->opts->snapshotDir != NULL && strcmp(tag, "snapshot") == 0) {
+        char path[512];
+        fprintf(stderr, "GPC%d SNAPSHOT at t=%.6f s step=%ld -> %s\n",
+                r->gpcId, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
+                r->opts->snapshotDir);
+        snprintf(path, sizeof path, "%s/gpc%d.json",
+                 r->opts->snapshotDir, r->gpcId);
+        ageharness_dump_state(&r->age, path);
+        snprintf(path, sizeof path, "%s/gpc%d.mem.bin",
+                 r->opts->snapshotDir, r->gpcId);
+        dump_main_storage(r, path);
+        return;
+    }
+    if (r->opts->dumpState == NULL) return;
     /* SAY SO.  A trigger that fired used to leave no trace but a file, so a
      * capture that landed at the wrong instant, or twice, or not at all,
      * looked exactly like one that worked. */
@@ -617,6 +646,13 @@ static void batchrunner_write_capture(BatchRunner *r) {
  * -- a computer has to be stoppable from all three or a snapshot taken
  * while any one of them is halted waits for it forever. */
 static void batchrunner_pause_point(BatchRunner *r) {
+    /* Somebody outside asked for one.  Turning the flag into the request
+     * HERE rather than in the handler is what keeps the handler free of
+     * locks; see g_snapshot_requested. */
+    if (g_snapshot_requested) {
+        g_snapshot_requested = 0;
+        vehicle_pause_request(r->vehicle, "snapshot");
+    }
     if (!vehicle_pause_enter(r->vehicle, r->gpcId)) return;
     batchrunner_write_capture(r);
     vehicle_pause_exit(r->vehicle, r->gpcId);
@@ -2970,6 +3006,9 @@ int batchrunner_run(BatchRunner *r) {
      * needs -- are never printed.  Setting a stop reason instead makes SIGINT
      * land in the same reporting path as a fault. */
     signal(SIGINT, on_sigint);
+#ifdef SIGUSR1
+    signal(SIGUSR1, on_sigusr1);
+#endif
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;
@@ -3039,6 +3078,12 @@ int batchrunner_run(BatchRunner *r) {
  * ------------------------------------------------------------------- */
 
 static volatile sig_atomic_t g_sigint_received = 0;
+static volatile sig_atomic_t g_snapshot_requested = 0;
+
+static void on_sigusr1(int sig) {
+    (void)sig;
+    g_snapshot_requested = 1;
+}
 
 static void on_sigint(int sig) {
     (void)sig;
@@ -3174,6 +3219,9 @@ int batchrunner_run_interactive(BatchRunner *r) {
     batchrunner_init_watchpoints(r);
 
     signal(SIGINT, on_sigint);
+#ifdef SIGUSR1
+    signal(SIGUSR1, on_sigusr1);
+#endif
 
     r->pacingRefWallSeconds = yagpc_monotonic_seconds();
     r->pacingRefVirtualUs = r->age.gpc.cpu.elapsedTimeUs;

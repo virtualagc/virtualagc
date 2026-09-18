@@ -22,6 +22,12 @@ typedef struct {
     char *symbols;                  /* NULL if unset */
     char *state;                    /* --state JSON, NULL if unset */
     char *dumpState;                /* --dump-state JSON, NULL if unset */
+    /* --snapshot DIR: where SIGUSR1 puts a capture of the WHOLE VEHICLE,
+     * one gpc<N>.json + gpc<N>.mem.bin per computer.  Separate from
+     * --dump-state, which is a file-name prefix for a run's diagnostics
+     * and whose triggers fire on their own; this is asked for from
+     * outside, at a moment nothing in here can predict. */
+    char *snapshotDir;              /* --snapshot DIR, NULL if unset */
     bool ebcdic;                    /* default false */
     bool trapSvcError;              /* default true */
     bool halucpSvc;                 /* default true; false = the loaded image

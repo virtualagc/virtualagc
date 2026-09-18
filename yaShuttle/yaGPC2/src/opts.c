@@ -21,6 +21,12 @@ static const char *HELP_TEXT =
 "Options:\n"
 "  --start <addr>                  start address in hex\n"
 "  --symbols <file>                load symbol table JSON from linker\n"
+"  --snapshot <dir>                on SIGUSR1, bring every computer in the\n"
+"                                  vehicle to a stand and write gpc<N>.json\n"
+"                                  and gpc<N>.mem.bin into <dir>.  The run\n"
+"                                  carries on afterwards; the pause is one\n"
+"                                  instruction plus the wait for the other\n"
+"                                  machines to reach theirs\n"
 "  --dump-state <file>             on stopping, write the machine state a\n"
 "                                  .fcm does not carry (CPU, IOP, local\n"
 "                                  store) as JSON --state can read back\n"
@@ -323,6 +329,8 @@ void opts_parse(int argc, char **argv, Options *opts) {
             opts->symbols = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--dump-state", &n)) {
             opts->dumpState = take_value(argc, argv, &i, tok, n);
+        } else if (tok_is(tok, "--snapshot", &n)) {
+            opts->snapshotDir = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--state", &n)) {
             opts->state = take_value(argc, argv, &i, tok, n);
         } else if (tok_is(tok, "--ebcdic", &n)) {
