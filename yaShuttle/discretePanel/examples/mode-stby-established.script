@@ -1,0 +1,30 @@
+# Take an ESTABLISHED member out of the set and put it back (gpc-causes #173).
+#
+# The difference from mode-stby-run.script, and it looks like the whole
+# difference: WAIT FOR THE TALKBACK FIRST.  In the session where votes
+# appeared, GPC2's MODE talkback was reading RUN before the switch moved --
+# GPC1 was hearing its ready discrete, so the two really were a set.  In the
+# test that found nothing, the talkback was barberpole throughout, so nothing
+# was taken out of anything.
+#
+# If a vote follows this, it is very likely CORRECT: a redundant set votes
+# against a member that stops driving its lines, and FCMCSYNC re-admits one
+# only on an observed 000 -> 111.  That would make #173 a misreading rather
+# than a defect, and would explain the other symptom exactly -- OPS
+# transitions stopping being done in common, because GPC2 had been voted out
+# and never readmitted.
+#
+# A `wait` takes no time prefix and every other line needs one; times after
+# a wait start again from when it returns.
+#
+# The second excursion is long on purpose: the session this reconstructs did
+# it twice, the second time held much longer, because it was not clear the
+# first had been seen -- and a POLL LOST on CRT2 was expected and did not
+# come, which is its own question.
++0     gpc 2
+wait gpc 2 mode-tb RUN timeout 300
++0     gpc 1
+wait gpc 1 mode-tb RUN timeout 300
++10    gpc 2
++0     mode STANDBY
++15    mode RUN
