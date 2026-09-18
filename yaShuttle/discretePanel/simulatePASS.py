@@ -438,8 +438,8 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
     # once, at DEU load time, so a restore that leaves PASS to repaint gets
     # the live numbers over an empty screen -- gpc-causes #174.
     for n in idps:
-        want += [os.path.join(staging, "idp%s.json" % n),
-                 os.path.join(staging, "idp%s.mem.bin" % n)]
+        want += [os.path.join(staging, f)
+                 for f in crewscript.idp_snapshot_files(n)]
 
     # WHO HAS TO BE THERE, CHECKED BEFORE ANYTHING IS ASKED FOR.
     #

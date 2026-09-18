@@ -10350,6 +10350,18 @@ class IDP(LRU):
     # IDP does runs there and nothing else may touch it without a lock -- see
     # BusPump.  The callers hand these to BusPump.call.
 
+    def snapshotNumber(self):
+        """The unit's NUMBER, for a snapshot file name.
+
+        `self.id` is the LRU name -- "IDP1", not "1" -- so naming files after
+        it gave idpIDP1.json, while everything asking for them wanted
+        idp1.json.  The save worked, wrote both files and reported success;
+        only the name was wrong, so the wait timed out and the failure said
+        "missing idp1.json" while idpIDP1.json sat beside it.
+        """
+        digits = "".join(c for c in str(self.id) if c.isdigit())
+        return digits or str(self.id)
+
     def snapshotState(self):
         """Everything about this unit that a memory image does not carry."""
         u = self.unit
@@ -11826,17 +11838,17 @@ class MedsRunner(object):
             # there, together, so a save cannot catch a fill half-applied.
             state, mem = BusPump.get().callAndWait(lambda idp=idp: (
                 idp.snapshotState(), bytes(idp.unit.mem.tobytes())))
-            base = os.path.join(where, "idp%s" % idp.id)
+            jname, mname = crewscript.idp_snapshot_files(idp.snapshotNumber())
             try:
-                with open(base + ".mem.bin", "wb") as fh:
+                with open(os.path.join(where, mname), "wb") as fh:
                     fh.write(mem)
-                with open(base + ".json", "w") as fh:
+                with open(os.path.join(where, jname), "w") as fh:
                     _json.dump(state, fh, indent=1, sort_keys=True)
                     fh.write("\n")
             except OSError as e:
                 sys.stderr.write("meds: cannot save IDP%s: %s\n" % (idp.id, e))
                 continue
-            done.append(str(idp.id))
+            done.append(idp.snapshotNumber())
         if done:
             print("meds: saved display state for IDP %s to %s"
                   % (", ".join(done), where), flush=True)
@@ -11848,17 +11860,17 @@ class MedsRunner(object):
             return
         import json as _json
         for idp in self._idps():
-            base = os.path.join(where, "idp%s" % idp.id)
-            if not (os.path.isfile(base + ".json")
-                    and os.path.isfile(base + ".mem.bin")):
+            jname, mname = crewscript.idp_snapshot_files(idp.snapshotNumber())
+            jpath = os.path.join(where, jname)
+            mpath = os.path.join(where, mname)
+            if not (os.path.isfile(jpath) and os.path.isfile(mpath)):
                 sys.stderr.write("meds: no saved display state for IDP%s in "
                                  "%s\n" % (idp.id, where))
                 continue
             try:
-                with open(base + ".json") as fh:
+                with open(jpath) as fh:
                     state = _json.load(fh)
-                mem = np.frombuffer(open(base + ".mem.bin", "rb").read(),
-                                    dtype=np.uint16)
+                mem = np.frombuffer(open(mpath, "rb").read(), dtype=np.uint16)
             except (OSError, ValueError) as e:
                 sys.stderr.write("meds: cannot read IDP%s state: %s\n"
                                  % (idp.id, e))

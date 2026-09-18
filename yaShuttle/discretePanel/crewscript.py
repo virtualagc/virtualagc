@@ -32,6 +32,20 @@ CONTROL_OFFSET = 92             # panelO6.py's script control: port base + 92
 SESSION_OFFSET = 93             # simulatePASS.py's own control: port base + 93
 RESULT_OFFSET = 94              # simulatePASS.py's answer to those: base + 94
 MEDS_OFFSET = 95                # MEDS2.py's display-state control: base + 95
+
+
+def idp_snapshot_files(n):
+    """The two file names a display's state is saved under, as (json, mem).
+
+    HERE, AND NOT IN EACH PROGRAM, because they have to agree and once did
+    not.  MEDS2 named them after the LRU -- self.id is "IDP1", not "1" -- so
+    it wrote idpIDP1.json and reported success, while simulatePASS waited for
+    idp1.json and reported "missing idp1.json" with the file sitting beside
+    it.  Two programs agreeing by convention is how that happens; one
+    function they both call is how it stops.
+    """
+    digits = "".join(c for c in str(n) if c.isdigit()) or str(n)
+    return "idp%s.json" % digits, "idp%s.mem.bin" % digits
 # A settled ScreenWatch has heard at least one round of MEDS2.py's
 # re-announcements (every 1 s), so "nothing heard" means a display is silent.
 SCREEN_SETTLE_S = 2.5
