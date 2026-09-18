@@ -347,18 +347,20 @@ class Manager(object):
         """A window of our own rather than messagebox.showerror.
 
         The native dialog sizes itself to the text, which for a message of
-        this length comes out tall, narrow and bold -- three things that make
+        this length comes out tall, narrow and bold -- and bold is what makes
         it read as an alarm when what it needs to do is be legible.  A
-        Toplevel can be shaped: wider than it is tall, the ordinary face a
-        point smaller than the window's, and the reason set off from the
-        sentence around it.
+        Toplevel can be shaped: wider than it is tall, the reason set off from
+        the sentence around it, and the ordinary face throughout.
+
+        THE WINDOW'S OWN SIZE, not a point smaller.  Shrinking it was tried
+        and looked worse: the shape and the plain face are what make this
+        readable, and taking size away from a message someone is reading in a
+        hurry only costs legibility.
         """
         base = tkfont.nametofont("TkDefaultFont", self.root)
         body = tkfont.Font(family=base.cget("family"),
-                           size=max(6, abs(base.cget("size")) - 1),
-                           weight="normal")
-        head = tkfont.Font(family=base.cget("family"),
-                           size=max(7, abs(base.cget("size"))), weight="normal")
+                           size=abs(base.cget("size")), weight="normal")
+        head = body
 
         W, H = 620, 400            # wider than 4:3, which is what was asked for
         top = tk.Toplevel(self.root, bg=C_BG)
