@@ -366,39 +366,31 @@ static const PooTimingEntry POO_TIMING_TABLE[] = {
 };
 #define POO_TIMING_COUNT (sizeof(POO_TIMING_TABLE) / sizeof(POO_TIMING_TABLE[0]))
 
-/* THESE TWO WERE A LINEAR strcmp SCAN OF THE WHOLE TABLE ON EVERY EMULATED
- * INSTRUCTION, and it cost more than the emulation.  Measured with perf on a
- * one-GPC run, 2026-09-17: __strcmp_avx2 was 21.8% of all CPU, 15.9% of it
- * reached through instr_time_poo -> find_poo_entry, against 5.8% for
- * instr_decode and 1.5% for iop_exec_processors.  The instruction timing model
- * was costing several times what decoding the instruction did.
+/* THE TIMING ROW IS NOW BOUND TO THE OPCODE, NOT LOOKED UP BY NAME.
  *
- * The lookup key is desc->nm, which is a string LITERAL from the static
- * instruction table (cpu_instr.c: { "PC", "11011xxx11101yyy", exec_PC, 2, 1 }),
- * so one opcode always presents the same POINTER.  Memoising on the pointer is
- * therefore exact -- a hit returns precisely what the scan would have -- and a
- * miss costs one extra comparison before the old scan runs.  Misses are cached
- * too, or an instruction with no timing entry would rescan the table forever.
+ * This was a linear strcmp scan of the whole table on every emulated
+ * instruction, and it cost more than the emulation: measured with perf on a
+ * one-GPC run, __strcmp_avx2 was 21.8% of all CPU, 15.9% of it reached
+ * through instr_time_poo -> find_poo_entry, against 5.8% for instr_decode.
  *
- * Thread-local, because a vehicle runs one of these per computer and a shared
- * cache would need synchronising for no gain: the table is small. */
+ * A memo keyed on desc->nm's POINTER (a literal from the static instruction
+ * table, so one opcode always presents the same address) fixed most of that
+ * and was the right first move, but not the end of it: 256 direct-mapped
+ * slots holding 135 mnemonics collide often, and every collision paid the
+ * full scan again.  __strcmp_sse42 was still 3.19% of all cycles afterwards,
+ * the largest userspace symbol in the profile.
+ *
+ * Since there are only 135 opcodes and the answer cannot change, it is
+ * settled once per opcode in instr_timing_bind() and kept in InstrDesc,
+ * exactly as fieldIx/fieldN/isLFXI already are.  No scan, no memo, no
+ * comparison in the instruction path at all. */
+
+
+/* Still memoised by name, and that is fine: this table serves
+ * instr_time_pass2(), which only runs under --timing=pass2 and is not the
+ * default path.  The hardware model above no longer looks anything up. */
 #define TIMING_MEMO 256
 #define TIMING_MEMO_SLOT(p) ((((uintptr_t)(p)) >> 3) & (TIMING_MEMO - 1))
-
-static _Thread_local const char *pooMemoKey[TIMING_MEMO];
-static _Thread_local const PooTimingEntry *pooMemoVal[TIMING_MEMO];
-
-static const PooTimingEntry *find_poo_entry(const char *nm) {
-    size_t h = TIMING_MEMO_SLOT(nm);
-    if (pooMemoKey[h] == nm) return pooMemoVal[h];
-    const PooTimingEntry *found = NULL;
-    for (size_t i = 0; i < POO_TIMING_COUNT; i++) {
-        if (strcmp(POO_TIMING_TABLE[i].nm, nm) == 0) { found = &POO_TIMING_TABLE[i]; break; }
-    }
-    pooMemoKey[h] = nm;
-    pooMemoVal[h] = found;
-    return found;
-}
 
 static _Thread_local const char *entMemoKey[TIMING_MEMO];
 static _Thread_local const TimingEntry *entMemoVal[TIMING_MEMO];
@@ -428,7 +420,7 @@ uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint
 
     if (desc->opType == OPTYPE_SHFT) return cpu_g_shift_cnt(cpu, hw1);
 
-    if (strcmp(desc->nm, "MVH") == 0) {
+    if (desc->nmBits & NM_MVH) {
         /* MVH is the one instruction whose section-17 figure cannot be
          * reconstructed after execution at all: it overwrites its own
          * count register, and the "source immediately follows
@@ -471,7 +463,7 @@ uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint
     /* Section-17 parametric instructions whose N is not a shift count.
      * Both are read BEFORE execution because both overwrite the register
      * the count comes from. */
-    if (strcmp(desc->nm, "NCT") == 0) {
+    if (desc->nmBits & NM_NCT) {
         /* NCT's N is what it is about to count: the run of leading bits
          * that match their neighbour, exactly as exec_NCT walks it. */
         uint32_t v2 = register_get32(cpu_r(cpu, (int)df_get(v, 'y')));
@@ -480,10 +472,10 @@ uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint
         while (n < 32 && (((v2 >> 31) & 1) == ((v2 >> 30) & 1))) { v2 <<= 1; n++; }
         return n;
     }
-    if (strcmp(desc->nm, "SUM") == 0) {
+    if (desc->nmBits & NM_SUM) {
         return (register_get32(cpu_r(cpu, (int)df_get(v, 'y'))) >> 16) & 0xffff;
     }
-    if (strcmp(desc->nm, "LXA") == 0 || strcmp(desc->nm, "LXAR") == 0) {
+    if (desc->nmBits & (NM_LXA | NM_LXAR)) {
         /* LXA/LXAR run 1.25 us faster when the DSE they are loading is
          * the one R1 already holds -- a microcode early out.  Both
          * halves of that comparison are gone by the time the
@@ -494,7 +486,7 @@ uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint
         return registerfile_get_dse(
             &cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'x'));
     }
-    if (strcmp(desc->nm, "ICR") == 0) {
+    if (desc->nmBits & NM_ICR) {
         /* ICR's time depends on the command in R2 (bits 0-4). */
         return (register_get32(cpu_r(cpu, (int)df_get(v, 'y'))) >> 27) & 0x1f;
     }
@@ -557,29 +549,48 @@ static const char *const POO_OVERRIDE_NAMES[] = {
     "NCT", "SLDL", "SLL", "SRA", "SRDA", "SRDL", "SRDR", "SRL", "SRR", "SUM",
 };
 
-static bool poo_override_possible(const char *nm) {
-    static _Thread_local const char *key[TIMING_MEMO];
-    static _Thread_local bool val[TIMING_MEMO];
-    size_t h = TIMING_MEMO_SLOT(nm);
-    if (key[h] == nm) return val[h];
-    bool any = false;
-    for (size_t i = 0; i < sizeof POO_OVERRIDE_NAMES / sizeof POO_OVERRIDE_NAMES[0]; i++) {
-        if (strcmp(POO_OVERRIDE_NAMES[i], nm) == 0) { any = true; break; }
+/* BIND THE TIMING MODEL TO THE OPCODE, ONCE, instead of looking it up by
+ * mnemonic on every emulated instruction.  Called from
+ * cpu_instr_table_init() for each of the 135 opcodes; see InstrDesc.
+ *
+ * Both answers used to come from a string comparison -- one against this
+ * file's 161-row table, one against the twenty names above -- each memoised
+ * on the mnemonic's pointer.  The memo is 256 direct-mapped slots holding
+ * 135 mnemonics, so collisions are common and every collision paid the full
+ * scan again: measured after the memo went in, __strcmp_sse42 was still
+ * 3.19% of all cycles, the largest userspace symbol in the profile.
+ *
+ * Neither answer can change while the program runs, so neither belongs in
+ * the instruction path at all. */
+void instr_timing_bind(InstrDesc *d) {
+    if (d == NULL || d->nm == NULL) return;
+    d->pooRow = NULL;
+    for (size_t i = 0; i < POO_TIMING_COUNT; i++) {
+        if (strcmp(POO_TIMING_TABLE[i].nm, d->nm) == 0) {
+            d->pooRow = &POO_TIMING_TABLE[i];
+            break;
+        }
     }
-    key[h] = nm;
-    val[h] = any;
-    return any;
+    d->pooOverridePossible = false;
+    for (size_t i = 0; i < sizeof POO_OVERRIDE_NAMES / sizeof POO_OVERRIDE_NAMES[0]; i++) {
+        if (strcmp(POO_OVERRIDE_NAMES[i], d->nm) == 0) {
+            d->pooOverridePossible = true;
+            break;
+        }
+    }
 }
 
-static double poo_override(CPU *cpu, const char *nm, const DInstr *v,
+
+static double poo_override(CPU *cpu, const InstrDesc *desc, const DInstr *v,
                            uint32_t preN, int xtCase) {
+    const char *nm = desc->nm;
     bool oddR = (df_get(v, 'x') & 1) != 0;
 
     /* MVH: computed in full before execution (see instr_time_pre_n). */
     if (cpu->timePooOverrideUs >= 0.0) return cpu->timePooOverrideUs;
 
     /* Nothing below can match this mnemonic -- see poo_override_possible. */
-    if (!poo_override_possible(nm)) return -1.0;
+    if (!desc->pooOverridePossible) return -1.0;   /* bound at table-init */
 
     /* Multiply/divide with an ODD R1 keep only the high half of the
      * product (or take the short divide path) and are correspondingly
@@ -628,7 +639,7 @@ static double poo_override(CPU *cpu, const char *nm, const DInstr *v,
         uint32_t dseNow = registerfile_get_dse(
             &cpu->regFiles[psw_get_reg_set(&cpu->psw)], (int)df_get(v, 'x'));
         if (dseNow != preN) return -1.0;
-        const PooTimingEntry *p = find_poo_entry(nm);
+        const PooTimingEntry *p = (const PooTimingEntry *)desc->pooRow;
         return p ? xt_pick(p->t, xtCase) - 1.25 : -1.0;
     }
 
@@ -666,13 +677,12 @@ static double poo_override(CPU *cpu, const char *nm, const DInstr *v,
  * addressing-mode column; then the untabulated-instruction floor. */
 static double instr_time_poo(CPU *cpu, const InstrDesc *desc, const DInstr *v,
                              uint32_t preN, bool branchTaken) {
-    const char *nm = desc->nm;
     int xtCase = cpu->xtCase;
 
-    double ovr = poo_override(cpu, nm, v, preN, xtCase);
+    double ovr = poo_override(cpu, desc, v, preN, xtCase);
     if (ovr >= 0.0) return ovr;
 
-    const PooTimingEntry *p = find_poo_entry(nm);
+    const PooTimingEntry *p = (const PooTimingEntry *)desc->pooRow;
     if (!p) return INSTR_TIME_UNKNOWN_US;
 
     /* "BT=x; BNT=y" applies to normal addressing; the indirection and

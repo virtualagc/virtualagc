@@ -32,6 +32,7 @@
 #include "strfmt.h"
 
 #include "envcache.h"
+#include "timing.h"
 /* ---------------------------------------------------------------------
  * Raw table: {name, bit-pattern, exec, addrWidth, opType}
  * ------------------------------------------------------------------- */
@@ -2319,11 +2320,40 @@ static const InstrDesc *SORTED[OPS_COUNT];
  * that CAN match the top BUCKET_BITS of hw1.  The bucket lists total a few
  * KB and stay in L1, and the candidate count per bucket is a handful
  * instead of the whole table. */
-#define BUCKET_BITS  8
-#define BUCKET_COUNT (1 << BUCKET_BITS)
-#define BUCKET_SHIFT (16 - BUCKET_BITS)
-static uint8_t BUCKET_N[BUCKET_COUNT];
-static uint16_t BUCKET_IX[BUCKET_COUNT][OPS_COUNT];
+/* EVERY hw1 -> ITS DESCRIPTOR, IN ONE INDEXED LOAD.
+ *
+ * This replaced a 256-bucket partition of the top byte plus a short scan of
+ * the candidates in that bucket, and before that a scan of the whole sorted
+ * list -- which was 32% of all CPU.  The history is worth keeping because it
+ * says what was actually measured and what was not.  A complete 65536-entry
+ * table of DESCRIPTOR POINTERS is 512 KB, overflows this CPU's 256 KB L2 and
+ * measured WORSE, 0.479 -> 0.691 us per instruction.  The same table of BYTE
+ * INDICES is 64 KB at eight times the density, and is what is here: the
+ * earlier result was about 512 KB of pointers, not about full tables.
+ *
+ * It is also SMALLER than what it replaced: the bucket lists were
+ * uint16_t[256][OPS_COUNT], 67.5 KB, and they are gone.
+ *
+ * One load answers everything static about the instruction: which opcode it
+ * is, how many halfwords it occupies, and how its operand is formed -- the
+ * descriptor carries the field masks and shifts, fieldIx, fieldN, isLFXI and
+ * the bound timing row, so the addressing mode and the timing come out of the
+ * same lookup rather than a second decision.
+ *
+ * It needs no invalidation when PASS loads an overlay and the code changes
+ * underneath it, because which descriptor matches depends only on hw1; hw2 is
+ * used for field extraction, never for selection.
+ *
+ * HONEST ABOUT THE PAYOFF: this is a simplification, not a speed-up.
+ * Measured on a one-GPC run it was worth 0.6%, inside the noise, because the
+ * emulation loop is memory-latency-bound and removing work from it does not
+ * make it faster -- see ledger #168 before optimising here again.
+ *
+ * DECODE_NONE marks a halfword no descriptor claims.  135 opcodes leaves the
+ * sentinel comfortably inside a byte. */
+#define DECODE_NONE 0xffu
+static uint8_t DECODE_IX[65536];
+
 static bool g_tableInit = false;
 
 static int popcount32(uint32_t v) {
@@ -2373,31 +2403,46 @@ void cpu_instr_table_init(void) {
             if (DESCS[i].pb.field[c].present)
                 DESCS[i].fieldIx[DESCS[i].fieldN++] = (uint8_t)c;
         DESCS[i].isLFXI = (strcmp(OPS[i].nm, "LFXI") == 0);
+        {
+            const char *n = OPS[i].nm;
+            uint16_t b = 0;
+            if (!strcmp(n, "MVH"))  b |= NM_MVH;
+            if (!strcmp(n, "NCT"))  b |= NM_NCT;
+            if (!strcmp(n, "SUM"))  b |= NM_SUM;
+            if (!strcmp(n, "LXA"))  b |= NM_LXA;
+            if (!strcmp(n, "LXAR")) b |= NM_LXAR;
+            if (!strcmp(n, "ICR"))  b |= NM_ICR;
+            if (!strcmp(n, "IAL"))  b |= NM_IAL;
+            DESCS[i].nmBits = b;
+        }
         SORTED[i] = &DESCS[i];
     }
     qsort(SORTED, OPS_COUNT, sizeof(SORTED[0]), cmp_mask_desc);
 
-    /* A descriptor belongs in bucket b if some hw1 whose top bits are b
-     * could satisfy (hw1 & mask) == maskedVal -- i.e. if the mask's own
-     * top bits agree with b where they are set.  Order within a bucket is
-     * SORTED order, so the winner is the one the full scan would pick. */
-    for (uint32_t b = 0; b < BUCKET_COUNT; b++) {
-        uint32_t hi = b << BUCKET_SHIFT;
-        uint32_t hiMask = ((1u << BUCKET_BITS) - 1u) << BUCKET_SHIFT;
-        int n = 0;
+    /* Settle each opcode's timing row and override flag once, so neither is
+     * found by comparing the mnemonic string per instruction. */
+    for (int i = 0; i < OPS_COUNT; i++) instr_timing_bind(&DESCS[i]);
+
+    /* Fill it by asking the sorted list, once, for every halfword there is.
+     * SORTED is in specificity order, so the first descriptor whose fixed
+     * bits agree is the one the old scan would have picked -- the ordering
+     * rule is preserved exactly, it is simply applied 65536 times at start-up
+     * instead of ten million times a second. */
+    for (uint32_t hw = 0; hw < 65536u; hw++) {
+        uint8_t sel = DECODE_NONE;
         for (int i = 0; i < OPS_COUNT; i++) {
             const InstrDesc *d = SORTED[i];
-            if (((hi ^ d->pb.maskedVal) & d->pb.mask & hiMask) == 0)
-                BUCKET_IX[b][n++] = (uint16_t)i;
+            if ((hw & d->pb.mask) == d->pb.maskedVal) { sel = (uint8_t)i; break; }
         }
-        BUCKET_N[b] = (uint8_t)(n > 255 ? 255 : n);
+        DECODE_IX[hw] = sel;
     }
+
     g_tableInit = true;
 
     /* YAGPC_DECODE_SELFTEST=1: prove the bucketed scan picks exactly what
      * the full scan would, for every one of the 65536 possible hw1.  This
-     * is the whole correctness argument for the bucketing, so it is
-     * checkable rather than merely asserted. */
+     * is the whole correctness argument for the table, so it is checkable
+     * rather than merely asserted. */
     if (yagpc_getenv("YAGPC_DECODE_SELFTEST") != NULL) {
         long bad = 0, matched = 0, none = 0;
         for (uint32_t h = 0; h < 65536u; h++) {
@@ -2406,27 +2451,16 @@ void cpu_instr_table_init(void) {
                 if ((h & SORTED[i]->pb.mask) == SORTED[i]->pb.maskedVal) {
                     ref = SORTED[i]; break;
                 }
-            const InstrDesc *got = NULL;
-            uint32_t b = (h >> BUCKET_SHIFT) & (BUCKET_COUNT - 1u);
-            for (int k = 0; k < BUCKET_N[b]; k++) {
-                const InstrDesc *d = SORTED[BUCKET_IX[b][k]];
-                if ((h & d->pb.mask) == d->pb.maskedVal) { got = d; break; }
-            }
+            uint8_t ix = DECODE_IX[h];
+            const InstrDesc *got = (ix == DECODE_NONE) ? NULL : SORTED[ix];
             if (got != ref) {
                 if (bad++ < 5)
-                    fprintf(stderr, "DECODE SELFTEST hw1=%04x full=%s bucket=%s\n",
+                    fprintf(stderr, "DECODE SELFTEST hw1=%04x full=%s table=%s\n",
                             h, ref ? ref->nm : "(none)", got ? got->nm : "(none)");
             } else if (ref) matched++; else none++;
         }
-        int maxN = 0; long totN = 0;
-        for (int b = 0; b < BUCKET_COUNT; b++) {
-            if (BUCKET_N[b] > maxN) maxN = BUCKET_N[b];
-            totN += BUCKET_N[b];
-        }
         fprintf(stderr, "DECODE SELFTEST: %ld mismatches over 65536 hw1 "
-                        "(%ld decode, %ld undefined); candidates/bucket avg %.1f max %d "
-                        "of %d\n",
-                bad, matched, none, (double)totN / BUCKET_COUNT, maxN, OPS_COUNT);
+                        "(%ld decode, %ld undefined)\n", bad, matched, none);
     }
 }
 
@@ -2481,7 +2515,7 @@ static void decodef(const InstrDesc *desc, uint32_t hw1, uint32_t hw2, DInstr *v
 
     if (desc->pb.type == PB_TYPE_SRS && desc->opType != OPTYPE_SHFT) {
         uint32_t dval = df_get(v, 'd');
-        bool isIAL = strcmp(desc->nm, "IAL") == 0;
+        bool isIAL = (desc->nmBits & NM_IAL) != 0;
         if (dval == 0x3c || (isIAL && dval == 0x3e)) {
             v->extended = true;
             df_set(v, 'd', hw2);
@@ -2507,19 +2541,8 @@ const InstrDesc *instr_decode(uint32_t hw1, uint32_t hw2, DInstr *v) {
     cpu_instr_table_init();
     memset(v, 0, sizeof(*v));
 
-    const InstrDesc *found = NULL;
-    {
-        uint32_t b = (hw1 >> BUCKET_SHIFT) & (BUCKET_COUNT - 1u);
-        int n = BUCKET_N[b];
-        const uint16_t *ix = BUCKET_IX[b];
-        for (int k = 0; k < n; k++) {
-            const InstrDesc *d = SORTED[ix[k]];
-            if ((hw1 & d->pb.mask) == d->pb.maskedVal) {
-                found = d;
-                break;
-            }
-        }
-    }
+    uint8_t ix = DECODE_IX[hw1 & 0xffffu];
+    const InstrDesc *found = (ix == DECODE_NONE) ? NULL : SORTED[ix];
     if (!found) return NULL;
 
     decodef(found, hw1, hw2, v);

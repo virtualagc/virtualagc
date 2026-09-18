@@ -68,7 +68,35 @@ typedef struct {
     uint8_t fieldIx[DINSTR_FIELD_TABLE_SIZE];
     uint8_t fieldN;
     bool isLFXI;
+    /* THE TIMING MODEL, BOUND TO THE OPCODE INSTEAD OF LOOKED UP BY NAME.
+     * Both of these used to be found by comparing the mnemonic STRING on
+     * every emulated instruction -- once against the 161-row timing table
+     * and once against the twenty names that can carry an override.  Each
+     * was memoised on the mnemonic's pointer, but a 256-slot direct-mapped
+     * memo holding 135 mnemonics collides often, and every collision paid
+     * the full scan again: __strcmp_sse42 was still 3.19% of all cycles.
+     * There are only 135 opcodes and neither answer can change, so both are
+     * settled once here, exactly as isLFXI above already is.
+     * `pooRow` is a `const PooTimingEntry *`, opaque outside timing.c. */
+    const void *pooRow;
+    bool pooOverridePossible;
+    /* WHICH OPCODE THIS IS, AS A BIT, so the hot paths stop asking by name.
+     * instr_time_pre_n() ran SIX strcmps on desc->nm for EVERY instruction
+     * and decodef() a seventh, which is why __strcmp_sse42 stayed at 3.6% of
+     * cycles even after the timing table and override list were bound: the
+     * cost was never in those two lookups.  Same technique as isLFXI above,
+     * applied where the comparisons actually were. */
+    uint16_t nmBits;
 } InstrDesc;
+
+/* Bits in InstrDesc.nmBits. */
+#define NM_MVH  (1u << 0)
+#define NM_NCT  (1u << 1)
+#define NM_SUM  (1u << 2)
+#define NM_LXA  (1u << 3)
+#define NM_LXAR (1u << 4)
+#define NM_ICR  (1u << 5)
+#define NM_IAL  (1u << 6)
 
 /* ADDR_* / OPTYPE_* — from cpu.coffee/cpu_instr.coffee (both files define
  * the same constants; consolidated here as the single source of truth). */

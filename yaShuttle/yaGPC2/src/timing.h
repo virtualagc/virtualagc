@@ -40,6 +40,11 @@
  * whose section-17 figure cannot be reconstructed after the fact at
  * all; it is reset to "none" here for every other instruction, so
  * cpu_exec1() does not have to clear it separately. */
+/* Settle this opcode's timing row and override flag once, at table-init
+ * time, so neither is looked up by mnemonic per instruction.  See the
+ * bound fields in InstrDesc. */
+void instr_timing_bind(InstrDesc *d);
+
 uint32_t instr_time_pre_n(CPU *cpu, const InstrDesc *desc, const DInstr *v, uint32_t hw1);
 
 /* Returns the execution time in microseconds for the instruction just
