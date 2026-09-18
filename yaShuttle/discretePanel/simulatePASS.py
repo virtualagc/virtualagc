@@ -478,6 +478,23 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0,
             "untouched." % (timeout, why, target))
         return False, why
 
+    # WHERE THE WINDOWS WERE, saved with everything else.
+    #
+    # Restoring a vehicle and then having to place its windows by hand is an
+    # extra step for something the snapshot already knew: at the instant of
+    # the save, every window was somewhere, and that is as much part of "how
+    # it was" as the registers are.  It also means a snapshot does not depend
+    # on a separate .layout file that may have moved on since.
+    #
+    # Best-effort: this needs wmctrl, and a run without it should still be
+    # able to save.
+    try:
+        n = windowLayout.save_layout(os.path.join(staging, "layout.json"),
+                                     log=lambda _t: None)
+        log("snapshot: %d window position(s) recorded" % n)
+    except Exception as e:                      # wmctrl missing, X gone, ...
+        log("snapshot: window positions not recorded (%s)" % e)
+
     with open(os.path.join(staging, "vehicle.json"), "w") as fh:
         json.dump({"epoch": epoch, "gpcs": list(gpcs),
                    "taken": time.strftime("%Y-%m-%d %H:%M:%S",
@@ -1104,15 +1121,37 @@ def main():
         #
         # A function, because a resume destroys and recreates every window but
         # the manager's, so they all have to be placed again.
-        def place_windows(windows_before):
-            if not args.layout:
+        def place_windows(windows_before, layout=None):
+            # A RESUME USES THE SNAPSHOT'S OWN, which is the point: the
+            # windows go back where they were when it was taken, without
+            # anyone having to remember a --layout or press Restore twice.
+            layout = layout or args.layout
+            if not layout:
                 return
+            # THE ROLES OF THE LAYOUT BEING USED, not of the one named on the
+            # command line.  A resume uses the snapshot's own layout, and a
+            # run given no --layout has no roles at all -- so the loop below
+            # would decide every window was up before any of them were, and
+            # place whatever happened to exist.
+            try:
+                roles_wanted = set(windowLayout.roles_in(layout))
+            except Exception:
+                roles_wanted = set(layout_roles)
+            # AND NOT THE ONES THAT NEVER WENT AWAY.  A resume keeps the
+            # manager, so its role is in the layout but will never turn up
+            # among the NEW windows -- and waiting for it would spend the
+            # whole twelve-second deadline on every restore before placing
+            # anything.
+            survivors = windowLayout.window_ids() & windows_before
+            if survivors:
+                roles_wanted -= {w["role"] for w in windowLayout.windows()
+                                 if w["id"] in survivors}
             mine_now = windowLayout.window_ids() - windows_before
-            if ("subtitles" in layout_roles
+            if ("subtitles" in roles_wanted
                     and not windowLayout.has_role("subtitles", mine_now)):
                 # The look the layout was saved with, if it has one; failing
                 # that, something legible on a dark background.
-                look = (windowLayout.look_in(args.layout)
+                look = (windowLayout.look_in(layout)
                         or ["--font-size", "14", "--bg", "#404040"])
                 if "--edit" not in look:
                     look = look + ["--edit"]      # so it can be adjusted in place
@@ -1123,15 +1162,19 @@ def main():
             while time.time() < deadline:
                 mine = windowLayout.window_ids() - windows_before
                 roles = {w["role"] for w in windowLayout.windows() if w["id"] in mine}
-                if all(r in roles for r in layout_roles):
+                if all(r in roles for r in roles_wanted):
                     break
                 time.sleep(0.5)
             time.sleep(1.5)        # let the window manager finish placing them
             mine = windowLayout.window_ids() - windows_before
-            log("placing this run's windows as %s says" % args.layout)
-            windowLayout.restore_layout(args.layout, log=log, only_ids=mine)
+            log("placing this run's windows as %s says" % layout)
+            windowLayout.restore_layout(layout, log=log, only_ids=mine)
 
-        place_windows(windows_before)
+        start_layout = (os.path.join(args.snapshot_resume, "layout.json")
+                        if args.snapshot_resume else None)
+        place_windows(windows_before,
+                      start_layout if start_layout and os.path.isfile(start_layout)
+                      else None)
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
         if args.keys:
@@ -1199,7 +1242,9 @@ def main():
                 L.stop(keep={"manager"})
                 gpc = bring_up(snapdir)
                 t0 = time.time()
-                place_windows(before)
+                snap_layout = os.path.join(snapdir, "layout.json")
+                place_windows(before,
+                              snap_layout if os.path.isfile(snap_layout) else None)
                 crewscript.send_result("ok resume %s" % snapdir, args.port_base)
                 continue
             break
