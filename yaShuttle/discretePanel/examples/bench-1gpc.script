@@ -1,0 +1,48 @@
+# ONE GPC, THREE DISPLAYS -- the CPU-BOUND benchmark, which is its whole point.
+#
+#   cd discretePanel
+#   python3 simulatePASS.py --gpcs 1 --crts 3 \
+#       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
+#       --script examples/bench-1gpc.script --duration 600 --no-manager
+#
+# THIS IS NOT A CREW PROCEDURE.  It is the measuring stick for optimisation
+# work, kept here because the alternatives do not measure anything:
+#
+#   * The headless regression gate (~/workspace/pass-run/headless-gpcmem.sh)
+#     runs with in-process mass memory and DEUs and PACES ITSELF TO REAL TIME
+#     -- measured, rate 1.16 even on a 2011 i7-3930K.  It therefore does the
+#     same work however fast the host is and cannot show a change of a few per
+#     cent.  It is a functional test, not a benchmark (ledger #160).
+#
+#   * A four-GPC run costs about forty minutes a leg and adds barrier
+#     interaction between the computers, which muddies attribution.
+#
+#   One GPC driving networked displays sits PINNED at ~98% of a core at about
+#   a fifth of real time, so every cycle saved becomes simulated time gained
+#   and the rate moves.  It does not exercise the inter-GPC discrete traffic;
+#   that needs peers.
+#
+# HOW TO READ THE RESULT.  Do NOT set YAGPC_PACETRACE to get the rate: run.c
+# takes two wall-clock readings per exec batch and two per bus service when
+# that trace is on, and on a host whose kernel has fallen back to the hpet
+# clocksource each reading is a syscall.  Switching on the trace that reports
+# the rate is what depresses it -- measured, it compressed a real 4.7%
+# improvement to 1.5%.  Use the step count printed at shutdown instead, over
+# measured wall time: same tape, same script, same phase, so steps per second
+# compares two builds honestly.
+#
+# AND CHECK THE RUN WAS VALID FIRST.  If panel.log holds "WAIT TIMED OUT" the
+# crew script stopped, the GPC sat in a wait state for the rest of the run,
+# and the step count is meaningless -- that is how a good build once reported
+# 40612 steps/s against 701144 (ledger #167).
+#
+# Reference figures on a 2011 i7-3930K, 600 s, uninstrumented, after the
+# display-buffer fix brought run-to-run spread to 0.2%:
+#     340906 steps/s   commit 45cf0856f
+#     698496 steps/s   commit 24ac489a0  (the attend() clock-read fix)
+
++0     gpc 1
++0.01  mode HALT
++0.02  idppower 1 on
++0.01  idppower 2 on
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
