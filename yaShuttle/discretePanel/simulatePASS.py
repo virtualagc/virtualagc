@@ -1167,8 +1167,21 @@ def main():
                 time.sleep(0.5)
             time.sleep(1.5)        # let the window manager finish placing them
             mine = windowLayout.window_ids() - windows_before
-            log("placing this run's windows as %s says" % layout)
-            windowLayout.restore_layout(layout, log=log, only_ids=mine)
+            log("placing this run's windows as %s says (%d new window(s), "
+                "wanted %s)" % (layout, len(mine), ", ".join(sorted(roles_wanted))
+                                or "nothing"))
+            placed, missing, inexact = windowLayout.restore_layout(
+                layout, log=log, only_ids=mine)
+            # SAID WHERE IT CAN BE SEEN.  This used to go only to the
+            # terminal, which is the one place a person driving the manager
+            # window is not looking -- so "the windows did not move" and "the
+            # windows were never asked to move" looked the same.
+            crewscript.send_result(
+                "ok windows placed %d window(s)%s%s" % (
+                    placed,
+                    ", %d not running" % missing if missing else "",
+                    ", %d not exactly" % inexact if inexact else ""),
+                args.port_base)
 
         start_layout = (os.path.join(args.snapshot_resume, "layout.json")
                         if args.snapshot_resume else None)

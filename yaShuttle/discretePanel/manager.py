@@ -35,6 +35,7 @@ what happened last.
 
 import argparse
 import glob
+import json
 import os
 import subprocess
 import threading
@@ -275,9 +276,111 @@ class Manager(object):
             self.layout.set(name)
 
     def browse_snapshot(self):
-        """A DIRECTORY, not a file: a snapshot is gpc<N>.json and
-        gpc<N>.mem.bin for every computer, plus panel.json and vehicle.json,
-        so there is no single file to point at."""
+        """CHOOSE A SNAPSHOT BY WHEN IT WAS TAKEN, not by its name.
+
+        A file browser cannot do this.  It shows directories, and snapshots
+        are directories with deliberately similar names -- snapshot301-6,
+        snapshot000-2, snapshot901-99 -- so picking between a dozen of them
+        by name alone is guesswork, and the one fact that tells them apart is
+        the one a directory chooser will not show: when each was taken.
+        vehicle.json has recorded exactly that since the first one, so this
+        reads it and lists them newest first.
+        """
+        current = self.snapshot.get().strip()
+        parent = os.path.dirname(current.rstrip("/")) if current else HERE
+        if not os.path.isdir(parent):
+            parent = HERE
+        rows = []
+        try:
+            for name in os.listdir(parent):
+                path = os.path.join(parent, name)
+                man = os.path.join(path, "vehicle.json")
+                if not os.path.isfile(man):
+                    continue
+                try:
+                    with open(man) as fh:
+                        v = json.load(fh)
+                    when = float(v.get("epoch", 0))
+                    gpcs = ",".join(str(g) for g in v.get("gpcs", []))
+                except (OSError, ValueError, TypeError):
+                    when, gpcs = os.path.getmtime(path), "?"
+                extra = []
+                if os.path.isfile(os.path.join(path, "layout.json")):
+                    extra.append("windows")
+                if os.path.isfile(os.path.join(path, "panel.json")):
+                    extra.append("panel")
+                rows.append((when, name, gpcs, ", ".join(extra)))
+        except OSError as e:
+            self.say("Cannot list %s: %s" % (parent, e))
+            return
+        if not rows:
+            # Nothing to choose between; fall back to the ordinary chooser so
+            # somewhere else can be pointed at.
+            name = filedialog.askdirectory(title="Snapshot directory",
+                                           initialdir=parent, mustexist=False)
+            if name:
+                self.snapshot.set(name)
+            return
+        rows.sort(reverse=True)               # newest first
+        self._choose_snapshot(parent, rows)
+
+    def _choose_snapshot(self, parent, rows):
+        """The list itself: name, when it was taken, and what is in it."""
+        base = tkfont.nametofont("TkDefaultFont", self.root)
+        mono = tkfont.Font(family="monospace", size=abs(base.cget("size")))
+        W, H = 620, 400
+        top = tk.Toplevel(self.root, bg=C_BG)
+        top.title("Choose a snapshot")
+        top.transient(self.root)
+        self.root.update_idletasks()
+        top.geometry("%dx%d+%d+%d" % (
+            W, H,
+            max(0, self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2),
+            max(0, self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3)))
+        tk.Label(top, text="In %s" % parent, bg=C_BG, fg="#9a9a9a", font=base,
+                 anchor="w", justify="left", wraplength=W - 48
+                 ).pack(fill="x", padx=24, pady=(20, 6))
+        frame = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
+                         highlightbackground="#4a4a4a")
+        frame.pack(fill="both", expand=True, padx=24)
+        bar = tk.Scrollbar(frame)
+        bar.pack(side="right", fill="y")
+        box = tk.Listbox(frame, bg="#1b1b1b", fg=C_FG, font=mono,
+                         selectbackground="#4a6a4a", selectforeground=C_FG,
+                         highlightthickness=0, borderwidth=0, activestyle="none",
+                         yscrollcommand=bar.set)
+        box.pack(side="left", fill="both", expand=True, padx=8, pady=8)
+        bar.config(command=box.yview)
+        width = max(len(r[1]) for r in rows)
+        for when, name, gpcs, extra in rows:
+            box.insert("end", "%-*s   %s   GPC %-6s %s" % (
+                width, name,
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(when)),
+                gpcs, extra))
+        box.selection_set(0)
+        box.focus_set()
+
+        def take(_e=None):
+            sel = box.curselection()
+            if sel:
+                self.snapshot.set(os.path.join(parent, rows[sel[0]][1]))
+                self.say("Chose %s" % rows[sel[0]][1])
+            top.destroy()
+
+        row = tk.Frame(top, bg=C_BG)
+        row.pack(fill="x", padx=24, pady=(12, 24))
+        for text, cmd in (("Open", take), ("Cancel", top.destroy)):
+            tk.Button(row, text=text, command=cmd, width=10, bg="#3c3c3c",
+                      fg=C_FG, activebackground="#505050", activeforeground=C_FG,
+                      highlightbackground=C_BG, font=base
+                      ).pack(side="right", padx=(8, 0))
+        box.bind("<Double-Button-1>", take)
+        top.bind("<Return>", take)
+        top.bind("<Escape>", lambda _e: top.destroy())
+        top.grab_set()
+
+    def _browse_snapshot_plain(self):
+        """The ordinary chooser, for pointing somewhere new."""
         # THE PARENT, not the snapshot itself.  Opening inside the last one
         # saved shows its gpc<N> files, which are not what is being chosen;
         # one level up is where the snapshots are, which is where someone
@@ -370,6 +473,9 @@ class Manager(object):
         stay quiet."""
         verdict, _, rest = text.partition(" ")
         verb, _, detail = rest.partition(" ")
+        if verdict == "ok" and verb == "windows":
+            self.say("Windows: %s" % detail)
+            return
         if verdict == "ok":
             self.say({"save": "Saved to %s",
                       "save-and-quit": "Saved to %s; shutting down",
