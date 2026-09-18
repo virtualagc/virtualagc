@@ -485,6 +485,18 @@ class Manager(object):
         stay quiet."""
         verdict, _, rest = text.partition(" ")
         verb, _, detail = rest.partition(" ")
+        if verdict == "warn":
+            # NOT a failure -- the restore is going ahead -- but not something
+            # to leave in a log either: a vehicle that comes back with blank
+            # screens looks like a restore that went wrong, and the person
+            # watching deserves to know it is the snapshot and not the run.
+            self._busy_done()
+            self.say("Restoring, but the snapshot is incomplete")
+            self._dialog("Incomplete snapshot",
+                         "This snapshot does not hold everything.",
+                         detail,
+                         "The restore is going ahead with what it does hold.")
+            return
         if verdict == "progress":
             bits = detail.split()
             try:

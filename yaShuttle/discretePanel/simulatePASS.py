@@ -375,6 +375,41 @@ def session_listener(port_base, stop_event):
             pass
 
 
+def snapshot_shortfall(snapdir, gpcs, crts):
+    """What a snapshot is missing, in words, or "" if it is whole.
+
+    SAVING REFUSES TO MAKE AN INCOMPLETE ONE; RESTORING USED TO LOAD ONE
+    WITHOUT SAYING SO.  A snapshot with no display state comes back as a
+    vehicle whose screens are blank, MEDS2 notes it in a log nobody is
+    reading, and the person who pressed Restore is left to work out from the
+    screens that the snapshot never had them -- which is the same class of
+    silent partial restore as the protect map, found the same way.
+
+    Not a refusal.  An older snapshot is still worth restoring for what it
+    does hold; what it must not do is arrive looking complete.
+    """
+    missing = []
+    for g in gpcs:
+        for f in ("gpc%d.json" % g, "gpc%d.mem.bin" % g):
+            if not os.path.isfile(os.path.join(snapdir, f)):
+                missing.append(f)
+    for n in range(1, crts + 1):
+        for f in crewscript.idp_snapshot_files(n):
+            if not os.path.isfile(os.path.join(snapdir, f)):
+                missing.append(f)
+    if not os.path.isfile(os.path.join(snapdir, "panel.json")):
+        missing.append("panel.json")
+    if not missing:
+        return ""
+    idp = [m for m in missing if m.startswith("idp")]
+    if len(idp) == len(missing):
+        return ("it has no display state, so the screens will come up blank "
+                "and stay blank -- PASS rewrites the changing fields but the "
+                "format itself arrives only at DEU load time.  It was taken "
+                "before snapshots carried the displays.")
+    return "it is missing " + ", ".join(missing)
+
+
 def saved_epoch(snapdir):
     """The wall-clock epoch a snapshot was taken at, or None.
 
@@ -1322,6 +1357,11 @@ def main():
                         "fail resume %s is not a directory" % snapdir,
                         args.port_base)
                     continue
+                short = snapshot_shortfall(snapdir, gpcs, args.crts)
+                if short:
+                    log("resume: %s -- %s" % (snapdir, short))
+                    crewscript.send_result(
+                        "warn resume %s" % short, args.port_base)
                 log("resume: replacing every child but the manager from %s"
                     % snapdir)
                 before = windowLayout.window_ids()

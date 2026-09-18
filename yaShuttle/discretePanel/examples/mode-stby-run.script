@@ -1,0 +1,12 @@
+# Does RUN -> STBY -> RUN provoke a fail vote?  (gpc-causes #173, #175)
+#
+# The votes in the 2026-09-18 session were last written within seconds of this
+# being done by hand, and a restored vehicle left alone for ten minutes votes
+# not at all -- so this is the difference between the two runs.  Played into a
+# RESTORED vehicle through the control port, because a resume deliberately
+# does not replay a crew script.
+#
+# GPC1 only: if one computer's switch can do it, moving both proves less.
++0     gpc 1
++2     mode STANDBY
++5     mode RUN
