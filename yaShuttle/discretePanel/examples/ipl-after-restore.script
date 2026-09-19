@@ -1,0 +1,10 @@
+# Re-IPL GPC1 inside a RESTORED vehicle.  Seen 2026-09-19: the IPL read
+# got no words at all from the mass memory ("carries no bootstrap"), where
+# the same tape boots in a fresh simulation.  For a restored 2-GPC vehicle
+# (snapshot201) via ~/workspace/pass-run/synctest.sh.
+wait gpc 1 mode-tb RUN timeout 300
++0     gpc 1
++2     mode HALT
++2     source MM1
++1     ipl
++5     mode STANDBY

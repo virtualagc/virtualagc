@@ -441,7 +441,8 @@ class Manager(object):
             self.say("No layout file chosen")
             return
         try:
-            n = windowLayout.save_layout(path, log=lambda _t: None)
+            n = windowLayout.save_layout(path, log=lambda _t: None,
+                                          only_pids=windowLayout.descendants(os.getppid()))
         except OSError as e:
             self.say("Cannot save: %s" % e)
             return
@@ -452,7 +453,11 @@ class Manager(object):
         if not os.path.isfile(path):
             self.say("No such layout file: %s" % path)
             return
-        placed, missing, inexact = windowLayout.restore_layout(path, log=lambda _t: None)
+        placed, missing, inexact = windowLayout.restore_layout(
+            path, log=lambda _t: None,
+            # This simulation's windows only: the manager is simulatePASS's
+            # child, so its parent's process tree is the simulation.
+            only_pids=windowLayout.descendants(os.getppid()))
         self.say("Placed %d window(s)%s%s" % (
             placed, ", %d not running" % missing if missing else "",
             ", %d not exactly" % inexact if inexact else ""))
@@ -929,6 +934,7 @@ def main(argv=None):
     else:
         args.port_base = D.PORT_BASE
     root = tk.Tk()
+    import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:
         root.geometry(args.geometry)
     Manager(root, args)

@@ -106,6 +106,66 @@ def cmdline(pid):
         return ""
 
 
+def descendants(root):
+    """root and every process descended from it, from /proc.
+
+    WHAT MAKES A WINDOW ONE SIMULATION'S RATHER THAN ANOTHER'S.  A role
+    ("crt1", "panel") says what a window is, not whose: two simulations on
+    one desktop have one of each, and matching by role alone moved the
+    owner's windows to another workspace when a test run placed its own
+    (2026-09-19).  Ancestry is what separates them, and it survives a
+    restore, because the relaunched children are simulatePASS's too."""
+    children = {}
+    for d in os.listdir("/proc"):
+        if not d.isdigit():
+            continue
+        try:
+            with open("/proc/%s/stat" % d) as fh:
+                st = fh.read()
+            ppid = int(st[st.rindex(")") + 2:].split()[1])
+        except (OSError, ValueError, IndexError):
+            continue
+        children.setdefault(ppid, []).append(int(d))
+    out, todo = set(), [root]
+    while todo:
+        p = todo.pop()
+        if p in out:
+            continue
+        out.add(p)
+        todo.extend(children.get(p, []))
+    return out
+
+
+def claim(root, delay_ms=300):
+    """Stamp this process's PID on a Tk window, so descendants() can tell
+    whose it is.
+
+    Tk does not set _NET_WM_PID, and wmctrl reports 0 for every window that
+    lacks it -- the panel, the CAM, the keyboards, the manager and the
+    captions all did, leaving role as the only thing to match on.  Set on
+    Tk's WRAPPER -- the parent of winfo_id(), which is the window the window
+    manager lists -- and after the window exists; never fatal.  NOT on
+    wm_frame(): once the window manager has reparented the window, that
+    names the manager's decoration frame, and a PID put there is never seen
+    (measured: frame 0xbf3481, listed window 0x05e00004)."""
+    def stamp():
+        try:
+            root.update_idletasks()
+            tree = subprocess.run(["xwininfo", "-tree", "-id", str(root.winfo_id())],
+                                  capture_output=True, text=True, timeout=5).stdout
+            m = re.search(r"Parent window id:\s*(0x[0-9a-fA-F]+)", tree)
+            if m is None:
+                return
+            subprocess.run(["xprop", "-id", str(int(m.group(1), 16)),
+                            "-f", "_NET_WM_PID", "32c",
+                            "-set", "_NET_WM_PID", str(os.getpid())],
+                           check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=5)
+        except Exception:
+            pass
+    root.after(delay_ms, stamp)
+
+
 def role_of(pid, title):
     cmd = cmdline(pid) if pid else ""
     for pattern, name in ROLE_PATTERNS:
@@ -199,12 +259,14 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     return (dx, dy)                    # how far out it finished
 
 
-def save_layout(path, everything=False, only_ids=None, log=print):
+def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None):
     """Write where the windows are now.  everything keeps unrecognised ones;
-    only_ids limits it to those windows.  Returns how many were saved."""
+    only_ids limits it to those windows, only_pids to those processes' (see
+    descendants()).  Returns how many were saved."""
     keep = [w for w in windows()
             if (everything or not w["role"].startswith("other:"))
-            and (only_ids is None or w["id"] in only_ids)]
+            and (only_ids is None or w["id"] in only_ids)
+            and (only_pids is None or w["pid"] in only_pids)]
     layout = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
               "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look")
                            if k in w}
@@ -264,16 +326,19 @@ def look_in(path, role="subtitles"):
     return []
 
 
-def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=None):
+def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=None,
+                   only_pids=None):
     """Put the windows where the file says.  only_ids, if given, is the set of
-    window ids that may be moved -- everything else is left alone, so one
-    simulation cannot drag another's windows about.  Returns (placed, missing,
-    inexact)."""
+    window ids that may be moved; only_pids the set of processes whose windows
+    may be -- see descendants(), which is how one simulation is kept from
+    dragging another's windows about.  Returns (placed, missing, inexact)."""
     with open(path) as fh:
         layout = json.load(fh)
     here = {}
     for w in windows():
         if only_ids is not None and w["id"] not in only_ids:
+            continue
+        if only_pids is not None and w["pid"] not in only_pids:
             continue
         here.setdefault(w["role"], []).append(w)
     done = missing = failed = 0

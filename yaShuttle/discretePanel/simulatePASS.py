@@ -570,7 +570,8 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
     # able to save.
     try:
         n = windowLayout.save_layout(os.path.join(staging, "layout.json"),
-                                     log=lambda _t: None)
+                                     log=lambda _t: None,
+                                     only_pids=windowLayout.descendants(os.getpid()))
         log("snapshot: %d window position(s) recorded" % n)
     except Exception as e:                      # wmctrl missing, X gone, ...
         log("snapshot: window positions not recorded (%s)" % e)
@@ -1278,7 +1279,8 @@ def main():
             log("placing this run's windows as %s says (%d new window(s) seen, "
                 "waited for %s)"
                 % (layout, len(mine), ", ".join(sorted(roles_wanted)) or "nothing"))
-            placed, missing, inexact = windowLayout.restore_layout(layout, log=log)
+            placed, missing, inexact = windowLayout.restore_layout(
+                layout, log=log, only_pids=windowLayout.descendants(os.getpid()))
             # SAID WHERE IT CAN BE SEEN.  This used to go only to the
             # terminal, which is the one place a person driving the manager
             # window is not looking -- so "the windows did not move" and "the

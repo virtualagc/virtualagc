@@ -2458,6 +2458,7 @@ def main(argv=None):
     D.set_gpc(args.gpc_id)
 
     root = tk.Tk()
+    import windowLayout; windowLayout.claim(root)   # whose window this is
     panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)
     geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
     if geom:

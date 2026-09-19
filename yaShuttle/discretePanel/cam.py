@@ -597,6 +597,7 @@ def main(argv=None):
         D.set_port_base(args.port_base)
 
     root = tk.Tk()
+    import windowLayout; windowLayout.claim(root)   # whose window this is
     root.resizable(True, True)
     panel = CamPanel(root, size=args.size, bus=not args.no_bus)
     geom = args.geometry or os.environ.get("NSTS_CAM_GEOMETRY")

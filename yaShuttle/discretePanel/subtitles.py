@@ -494,6 +494,7 @@ def main(argv=None):
         D.set_port_base(args.port_base)
 
     root = tk.Tk()
+    import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:
         m = GEOMETRY.match(args.geometry.strip())
         if not m:

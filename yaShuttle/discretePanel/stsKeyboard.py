@@ -520,6 +520,7 @@ def main(argv=None):
         raise SystemExit("stsKeyboard: --size must be a positive integer")
 
     root = tk.Tk()
+    import windowLayout; windowLayout.claim(root)   # whose window this is
     kb = STSKeyboard(root, size=args.size, bus=KeyboardBus(args.kybd),
                      title=args.title)
     geom = args.geometry or os.environ.get("NSTS_KEYBOARD_GEOMETRY")
