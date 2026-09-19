@@ -41,6 +41,9 @@
  *                              confusing for maintaining the software,
  *                              since I could never get it straight in my
  *                              head how much shifting needed to occur.
+ *              2026-09-19 MAS  Added proper simplex/duplex support by loading
+ *                              duplex words into and checking for conflicts
+ *                              in both target modules.
  */
 
 #include <stdlib.h>
@@ -133,7 +136,7 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
 
   while (NULL != fgets(buffer, MAX_LINE, fp))
     {
-      unsigned loc, offset, syl0, syl1, syl2, mo, se;
+      unsigned loc, offset, syl0, syl1, syl2, mo, se, duplex;
       char vals[8][100], types[8];
       buffer[MAX_LINE] = 0;
       trim(buffer);
@@ -185,23 +188,21 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
                   printf("Octal field is wrong length: %s\n", vals[j]);
                   goto done;
                 }
-              if (types[j] == ' ')
+              if (!strcmp(vals[j], "           "))
                 {
-                  if (strcmp(vals[j], "           "))
-                    {
-                      printf("Octal should be empty: %s\n", vals[j]);
-                      goto done;
-                    }
                   continue;
                 }
-              if (types[j] == 'S')
+              if (types[j] == ' ')
                 {
-                  printf("Simplex not supported.\n");
-                  goto done;
+                  duplex = 0;
                 }
-              if (types[j] != 'D')
+              else if (types[j] == 'D')
                 {
-                  printf("Unknown octal field type.\n");
+                  duplex = 1;
+                }
+              else
+                {
+                  printf("Unknown octal type %c", types[j]);
                   goto done;
                 }
               // Analyze vals[j] to determine its pattern.  There are 4 choices:
@@ -291,26 +292,31 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
                   sscanf(vals[j], " %o", &syl2);
                   values[2] = syl2 >> 1;
                   conflict = state.core[currentModule][currentSector][0][loc] != -1
-                      || state.core[currentModule][currentSector][1][loc] != -1;
+                      || state.core[currentModule][currentSector][1][loc] != -1
+                      || (duplex && state.core[currentModule ^ 1][currentSector][0][loc] != -1)
+                      || (duplex && state.core[currentModule ^ 1][currentSector][1][loc] != -1);
                 }
               else if (pi10 == 11)
                 {
                   sscanf(vals[j], "%o", &syl1);
                   values[1] = syl1 >> 2;
-                  conflict = state.core[currentModule][currentSector][2][loc] != -1;
+                  conflict = state.core[currentModule][currentSector][2][loc] != -1
+                      || (duplex && state.core[currentModule ^ 1][currentSector][2][loc] != -1);
                 }
               else if (pi01 == 11)
                 {
                   sscanf(vals[j], "      %o", &syl0);
                   values[0] = syl0 >> 1;
-                  conflict = state.core[currentModule][currentSector][2][loc] != -1;
+                  conflict = state.core[currentModule][currentSector][2][loc] != -1
+                      || (duplex && state.core[currentModule ^ 1][currentSector][2][loc] != -1);
                 }
               else if (pi11 == 11)
                 {
                   sscanf(vals[j], "%o %o", &syl1, &syl0);
                   values[1] = syl1 >> 2;
                   values[0] = syl0 >> 1;
-                  conflict = state.core[currentModule][currentSector][2][loc] != -1;
+                  conflict = state.core[currentModule][currentSector][2][loc] != -1
+                      || (duplex && state.core[currentModule ^ 1][currentSector][2][loc] != -1);
                 }
               else
                 {
@@ -331,9 +337,19 @@ readOctalListing(assembly_t *assembly, int count, char *filename)
                           currentModule, currentSector, s, loc,
                           formats[s], state.core[currentModule][currentSector][s][loc],
                           formats[s], values[s]);
+                    else if (duplex && state.core[currentModule ^ 1][currentSector][s][loc] != -1
+                        && state.core[currentModule ^ 1][currentSector][s][loc]
+                            != values[s])
+                      printf("Duplex octal conflict at %o-%02o-%o-%03o, %0*o != %0*o\n",
+                          currentModule ^ 1, currentSector, s, loc,
+                          formats[s], state.core[currentModule ^ 1][currentSector][s][loc],
+                          formats[s], values[s]);
                     else
                       {
                       state.core[currentModule][currentSector][s][loc] =
+                          values[s];
+                      if (duplex)
+                        state.core[currentModule ^ 1][currentSector][s][loc] =
                           values[s];
                       if (s == 2)
                         assembly->dataWords++;
