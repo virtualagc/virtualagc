@@ -11881,7 +11881,12 @@ class MedsRunner(object):
     def _startSnapshotListener(self):
         """'save DIR' on port base + 95, from simulatePASS."""
         try:
-            sock = crewscript.meds_receiver()
+            # THIS RUN'S PORT BASE, NOT THE DEFAULT.  crewscript falls back to
+            # the discretes module's base, which MEDS2 does not set -- so on
+            # any port base but 6900 the listener bound 6995 while simulatePASS
+            # sent to <base>+95, and a Save lost the displays with no error
+            # anywhere (seen on port base 7300, 2026-09-19).
+            sock = crewscript.meds_receiver(PORT_BASE)
         except Exception as e:
             sys.stderr.write("meds: no snapshot listener (%s)\n" % e)
             return
