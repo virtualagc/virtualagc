@@ -30,6 +30,7 @@
 #include "util.h"
 
 #include "envcache.h"
+#include "discretes.h"
 static int32_t sign_extend(uint32_t val, int bits) {
     uint32_t mask = 1u << (bits - 1);
     if (val & mask) {
@@ -500,6 +501,19 @@ static void exec_LAR(IOP *t, DInstr *v) {
     iop_incr_nia(t, 1);
 }
 
+/* WHO CAST A FAIL VOTE.  The vote is set and reset by these two MSC
+ * instructions and by nothing else, and the lamp sampler in run.c sees only
+ * the register -- not which program wrote it.  Under YAGPC_SYNCTRACE this
+ * names the MSC address of the instruction, which the link map turns into
+ * the FCOS program responsible.  Ledger #173/#175: a GPC that had just gone
+ * to STANDBY was seen voting against the computer it left. */
+static void fail_disc_trace(IOP *t, const char *op, uint32_t mask, uint32_t result) {
+    if (yagpc_getenv("YAGPC_SYNCTRACE") == NULL) return;
+    fprintf(stderr, "SYNC GPC%d %s mask %02x -> faildisc %02x at MSC PC %05x\n",
+            discretes_gpc_id(t->discretes), op, mask, result,
+            register_get32(iopls_PC(&t->ls)));
+}
+
 static void exec_SFD(IOP *t, DInstr *v) {
     (void)v;
     uint32_t acc = iopls_getACC(&t->ls);
@@ -507,6 +521,7 @@ static void exec_SFD(IOP *t, DInstr *v) {
     fd = fd | (acc >> 27); /* top 5 bits of ACC */
     register_set32(&t->msc.regFailDisc, fd & 0x1fu);
     t->msc.failDiscSeen |= (acc >> 27) & 0x1fu;   /* see MSC.failDiscSeen */
+    fail_disc_trace(t, "SFD", (acc >> 27) & 0x1fu, fd & 0x1fu);
     iop_incr_nia(t, 1);
 }
 
@@ -517,6 +532,7 @@ static void exec_RFD(IOP *t, DInstr *v) {
     uint32_t mask = (acc >> 27) & 0x1fu;
     fd = fd & ~mask;
     register_set32(&t->msc.regFailDisc, fd);
+    fail_disc_trace(t, "RFD", mask, fd);
     iop_incr_nia(t, 1);
 }
 
