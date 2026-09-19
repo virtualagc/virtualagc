@@ -567,6 +567,19 @@ void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d) {
     if (v == NULL || d == NULL || gpcId < 1 || gpcId > 5) return;
     v->lines[gpcId] = d;
     discretes_set_out_hook(d, vehicle_route_out, v);
+    /* EVERY machine's in-process lines, again: the one joining now is a new
+     * neighbour for each of the others.  What vehicle_route_out writes into
+     * reader m is exactly discretes_rotate_out(s, m, ...) of source s's
+     * outputs, so the union over the other machines here is the set of m's
+     * input bits whose datagrams are only late copies. */
+    for (int m = 1; m <= 5; m++) {
+        if (v->lines[m] == NULL) continue;
+        uint32_t wired = 0u;
+        for (int s = 1; s <= 5; s++)
+            if (s != m && v->lines[s] != NULL)
+                wired |= discretes_rotate_out(s, m, 0xffffffffu);
+        discretes_set_local_wired(v->lines[m], DISCRETES_REG_A, wired);
+    }
 }
 
 void vehicle_note_time(Vehicle *v, double machineUs) {

@@ -194,6 +194,9 @@ void discretes_apply_external_pair(Discretes *d, int reg, uint32_t setMask,
 typedef void (*DiscretesOutFn)(void *ctx, int sourceGpc, uint32_t before,
                                uint32_t after);
 void discretes_set_out_hook(Discretes *d, DiscretesOutFn fn, void *ctx);
+/* Input bits of `reg` that a neighbour in this process writes directly; a
+ * received datagram for them is ignored (see apply() in discretes.c). */
+void discretes_set_local_wired(Discretes *d, int reg, uint32_t mask);
 
 /* YAGPC_SYNCTRACE: report this computer's outgoing 3-bit sync code and each
  * neighbour's incoming one whenever either changes, decoded into the flight

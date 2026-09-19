@@ -159,6 +159,10 @@ struct Discretes {
      * what a REQUEST is answered with.  For A and B that is the combination
      * of locally derived and published bits, which only iop.c can form. */
     uint32_t canonical[5];
+    /* INPUT BITS WIRED IN PROCESS, per register: a neighbour in this same
+     * vehicle writes them directly (vehicle_route_out), so a datagram for
+     * them is a late copy of something already applied.  See apply(). */
+    uint32_t localWired[5];
     /* When each bit was last published.  Per BIT, not per register: a
      * crew panel republishing the switches must not make a departed mass
      * memory's READY look fresh. */
@@ -506,9 +510,23 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
      * hearing.  Ignored rather than applied. */
     if (op == OP_VALUE) return;
     if (op != OP_SET && op != OP_RESET) return;
+    int r = reg_index((int)reg);
+    /* NOT A LINE THIS PROCESS WIRES DIRECTLY.  A neighbour in the same
+     * vehicle writes its code into this register at once, both halves in one
+     * step (discretes_apply_external_pair), and ALSO sends the datagram for
+     * the benefit of monitors -- which this socket receives too.  Applied
+     * here it rewrote the register a second time, late, as two separate
+     * halves: an old code, then a half-code, arriving after the neighbour had
+     * moved on.  While the socket was drained on every instruction the window
+     * was a few instructions wide.  47efdb3f3 gated that drain to every 64th
+     * call, the window grew to hundreds of microseconds, and a 4-GPC set
+     * began failing to sync at the OPS 2 transition -- every computer voting
+     * against GPC1, and GPC1 left commanding both CRTs (bisected 2026-09-19).
+     * Datagrams from computers in OTHER processes, and the crew panel's, are
+     * unaffected: only bits a neighbour here drives are dropped. */
+    mask &= ~d->localWired[r];
     if (mask == 0) return;
 
-    int r = reg_index((int)reg);
     uint32_t before = d->value[r];
     if (op == OP_SET) d->value[r] |= mask;
     else              d->value[r] &= ~mask;
@@ -725,6 +743,11 @@ void discretes_set_canonical(Discretes *d, int reg, uint32_t value) {
 /* The output register is entirely this GPC's own, so every change to it is
  * published as the SET and RESET of the bits that moved -- nothing else
  * drives it and nothing else can contradict it. */
+void discretes_set_local_wired(Discretes *d, int reg, uint32_t mask) {
+    if (d == NULL || !reg_known(reg)) return;
+    d->localWired[reg_index(reg)] = mask;
+}
+
 void discretes_set_out_hook(Discretes *d, DiscretesOutFn fn, void *ctx) {
     if (d == NULL) return;
     d->outHook = fn;
