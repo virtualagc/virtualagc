@@ -1,0 +1,24 @@
+# ONE GPC, ONE DISPLAY -- the configuration with SLACK, which is its point.
+#
+#   cd discretePanel
+#   YAGPC_PACETRACE=1 GPCS=1 CRTS=1 \
+#       ~/workspace/pass-run/synctest.sh ... 10 light-1gpc
+#
+# THE OPPOSITE OF bench-1gpc.script, deliberately.  That one runs three
+# displays to be CPU-bound, because a benchmark wants the machine saturated;
+# its header says in terms not to use YAGPC_PACETRACE with it, since four
+# clock reads per step compressed a real 4.7% gain to 1.5%.
+#
+# But that cost only matters where there is nothing to spare.  Given headroom
+# the instrumentation stops changing the answer, and it is the only thing
+# that says WHERE the wall time went -- idle loop, sleeps, rebases and their
+# causes -- rather than merely how much of it there was.  Knowing how far
+# behind a configuration runs does not say what to fix; this does.
+#
+# At OPS 0 with one display this is the lightest real workload there is, and
+# directly comparable to the 48%-of-a-core figure measured for 1 GPC at OPS 0
+# earlier in this work.
++0     gpc 1
++0.01  mode HALT
++0.02  idppower 1 on
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1

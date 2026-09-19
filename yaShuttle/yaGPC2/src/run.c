@@ -1121,6 +1121,36 @@ static long batchrunner_load(BatchRunner *r) {
         fprintf(stderr, "GPC%d RESUME from %s\n", r->gpcId, r->opts->resumeDir);
     }
     ageharness_configure_from_opts(&r->age, usePath, useOpts, &res);
+    /* ANNOUNCE THE RESTORED OUTPUT DISCRETES IN FULL.
+     *
+     * discretes_publish_out sends only what CHANGED, and returns early when
+     * nothing did.  A resumed machine loads regDiscreteOut out of its
+     * snapshot, so by the time the software touches it again nothing has
+     * changed and the value is never put on the wire at all -- while every
+     * listener starts from nothing.  The crew panel's gpc_out is "None until
+     * heard", so its MODE talkback sits at barberpole for as long as the run
+     * lasts, and the peers, wired through outHook, never learn this
+     * computer's lines either.
+     *
+     * Measured: a restored two-GPC vehicle ran 2 h 16 min, 6.14 billion
+     * instructions a machine, 4270 display fills, and its MODE talkback never
+     * once read RUN -- a crew script waiting for it timed out at 300 s.
+     *
+     * This is the same publish-on-change trap the restore invariants already
+     * name for cam.py, which only rebuilds its matrix because a fresh yaGPC2
+     * has value[] zeroed and so its first publish IS a change.  A resumed
+     * machine is the case where that reasoning fails, because the value it
+     * comes up holding is the one it means to keep.
+     *
+     * Passing ~after as the previous value makes every bit "changed", so the
+     * whole register goes out as one SET and one RESET and a listener that
+     * has heard nothing can reconstruct it. */
+    if (r->opts->resumeDir != NULL && r->discretes != NULL) {
+        uint32_t out = register_get32(&r->age.gpc.iop.regDiscreteOut);
+        discretes_publish_out(r->discretes, ~out, out);
+        fprintf(stderr, "GPC%d RESUME: announced output discretes %08x\n",
+                r->gpcId, out);
+    }
     /* With no .fcm there is nothing in store yet and so no entry point to
      * have: the bootstrap arrives when IPL is pressed, and the address it
      * starts at comes from its own System Reset PSW when HALT is released.
