@@ -2099,6 +2099,18 @@ static bool batchrunner_step(BatchRunner *r) {
             fprintf(stderr, "SYNC t=%.6f GPC%d out  000 dead/halt/standby "
                             "(held in reset)\n",
                     yagpc_monotonic_seconds(), r->gpcId);
+        /* AND IT DRIVES NO OTHER OUTPUT EITHER -- the MODE talkback among
+         * them.  The sync lines and the votes were withdrawn above, but the
+         * rest of the output register stayed on the wire, so a machine moded
+         * RUN -> HALT went on showing RUN on panel O6: seen 2026-09-19 after
+         * a restore, whose announcement (#176) had put RUN up, then HALT
+         * never took it down.  Withdrawn once per hold, from the wire only;
+         * the register is left alone, as above, and is announced again on
+         * release below. */
+        if (!r->modeWasHeld)
+            discretes_publish_out(r->discretes,
+                                  discretes_value(r->discretes, DISCRETES_REG_OUT),
+                                  0u);
         r->modeWasHeld = true;
         /* A HALTED COMPUTER IS STILL A MEMBER OF THE VEHICLE.  It has left
          * the barrier above, because its clock has stopped and a stopped
@@ -2130,6 +2142,14 @@ static bool batchrunner_step(BatchRunner *r) {
     if (r->modeWasHeld) {
         r->modeWasHeld = false;
         if (r->realTime) batchrunner_resync(r);
+        /* Put back what the hold withdrew.  Publish-on-change would
+         * otherwise never announce any bit the software does not happen to
+         * change -- the same fault as #176, and a resumed machine is held
+         * until the panel is first heard, so this is also what carries its
+         * resume announcement through that first hold. */
+        discretes_publish_out(r->discretes,
+                              discretes_value(r->discretes, DISCRETES_REG_OUT),
+                              register_get32(&r->age.gpc.iop.regDiscreteOut));
     }
 
     /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
