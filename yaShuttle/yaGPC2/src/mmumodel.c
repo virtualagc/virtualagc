@@ -9,6 +9,7 @@
 #include "compat.h"
 #include "discretes.h"
 #include "busword.h"
+#include "json.h"
 
 #include "envcache.h"
 /* MM1 is register A bit 6, MM2 bit 7 -- the same bits iop.c computes for
@@ -166,6 +167,11 @@ struct MmuModel {
     /* Tape image.  blocks[i] is NULL for a block the volume never
      * recorded; volume.coffee reads those back as zeros. */
     uint16_t **blocks;
+    /* WHICH BLOCKS THE FLIGHT SOFTWARE WROTE.  A write lands in `blocks`
+     * and never reaches the .mmv, so these are the only copy -- and a
+     * capture that leaves them out restores a vehicle whose mass memory has
+     * forgotten everything PASS put there.  One byte per block. */
+    unsigned char *dirty;
     bool writeProtect;
 
     /* Transport state, mirroring mmu.coffee's own fields. */
@@ -508,6 +514,7 @@ static void write_block_done(MmuModel *m) {
             if (!m->blocks[idx]) { m->writeActive = false; return; }
         }
         memcpy(m->blocks[idx], m->writeBuf, sizeof m->writeBuf);
+        if (m->dirty != NULL) m->dirty[idx] = 1;
     }
     m->stats.blocksWritten++;
     m->writeDone++;
@@ -736,6 +743,8 @@ MmuModel *mmumodel_create(int unit, const char *volumePath) {
     m->bof = 1;                            /* beginning of tape at power up */
     m->blocks = calloc(BLOCKS_TOTAL, sizeof(uint16_t *));
     if (!m->blocks) { free(m); return NULL; }
+    m->dirty = calloc(BLOCKS_TOTAL, 1);
+    if (!m->dirty) { free(m->blocks); free(m); return NULL; }
 
     if (volumePath && *volumePath) {
         if (!load_volume(m, volumePath)) { mmumodel_free(m); return NULL; }
@@ -760,6 +769,7 @@ void mmumodel_free(MmuModel *m) {
     if (!m) return;
     for (int r = 0; r < 6; r++) { free(m->tap[r].w); free(m->tap[r].due); free(m->tap[r].paced); }
     if (m->blocks) {
+        free(m->dirty);
         for (int i = 0; i < BLOCKS_TOTAL; i++) free(m->blocks[i]);
         free(m->blocks);
     }
@@ -1023,4 +1033,204 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
         }
     }
     mmumodel_service(m, serviceNumber, input, output);
+}
+
+/* ---------------------------------------------------------------------
+ * CAPTURE AND RESTORE -- see mmumodel.h.
+ * ------------------------------------------------------------------- */
+
+static void mmu_paths(const MmuModel *m, const char *dir,
+                      char *js, size_t njs, char *bin, size_t nbin) {
+    snprintf(js, njs, "%s/mmu%d.json", dir, m->unit);
+    snprintf(bin, nbin, "%s/mmu%d.blocks.bin", dir, m->unit);
+}
+
+bool mmumodel_dump(const MmuModel *m, const char *dir, double nowUs) {
+    if (m == NULL || dir == NULL) return false;
+    char js[512], bin[512];
+    mmu_paths(m, dir, js, sizeof js, bin, sizeof bin);
+
+    /* THE WRITTEN BLOCKS FIRST, so the JSON is only written once their
+     * count is known and a reader can trust the two agree. */
+    uint32_t written = 0;
+    for (int i = 0; i < BLOCKS_TOTAL; i++)
+        if (m->dirty[i] && m->blocks[i]) written++;
+    if (written > 0) {
+        FILE *b = fopen(bin, "wb");
+        if (b == NULL) {
+            fprintf(stderr, "mmu%d: cannot write %s\n", m->unit, bin);
+            return false;
+        }
+        for (int i = 0; i < BLOCKS_TOTAL; i++) {
+            if (!m->dirty[i] || !m->blocks[i]) continue;
+            uint8_t hdr[4] = { (uint8_t)(i >> 24), (uint8_t)(i >> 16),
+                               (uint8_t)(i >> 8), (uint8_t)i };
+            fwrite(hdr, 1, 4, b);
+            for (int h = 0; h < HALFWORDS_PER_BLOCK; h++) {
+                uint8_t w[2] = { (uint8_t)(m->blocks[i][h] >> 8),
+                                 (uint8_t)m->blocks[i][h] };
+                fwrite(w, 1, 2, b);
+            }
+        }
+        if (fclose(b) != 0) {
+            fprintf(stderr, "mmu%d: cannot finish %s\n", m->unit, bin);
+            return false;
+        }
+    }
+
+    FILE *f = fopen(js, "w");
+    if (f == NULL) {
+        fprintf(stderr, "mmu%d: cannot write %s\n", m->unit, js);
+        return false;
+    }
+    fprintf(f, "{\n  \"unit\": %d,\n  \"writtenBlocks\": %u,\n",
+            m->unit, (unsigned)written);
+    fprintf(f, "  \"track\": %d,\n  \"file\": %d,\n  \"subfile\": %d,\n",
+            m->track, m->file, m->subfile);
+    fprintf(f, "  \"bof\": %d,\n  \"eof\": %d,\n", m->bof, m->eof);
+    fprintf(f, "  \"statusA\": %u,\n  \"statusB\": %u,\n",
+            (unsigned)m->statusA, (unsigned)m->statusB);
+    fprintf(f, "  \"writeEnabledTrack\": %d,\n  \"extendedCount\": %d,\n",
+            m->writeEnabledTrack, m->extendedCount);
+    fprintf(f, "  \"owner\": %d,\n", m->owner);
+    /* A TRANSFER STILL BEING HANDED OVER.  queue/slot are what the unit has
+     * yet to put on the wire; without them a machine that was collecting a
+     * read resumes waiting for words that no longer exist. */
+    fprintf(f, "  \"queue\": [");
+    for (size_t i = 0; i < m->queueCount; i++)
+        fprintf(f, "%s%u", i ? "," : "",
+                (unsigned)m->queue[(m->queueHead + i) % QUEUE_HW]);
+    fprintf(f, "],\n  \"slots\": [");
+    for (size_t i = 0; i < m->queueCount; i++)
+        fprintf(f, "%s%u", i ? "," : "",
+                (unsigned)m->slot[(m->queueHead + i) % QUEUE_HW]);
+    fprintf(f, "],\n");
+    fprintf(f, "  \"burstStart\": %.3f,\n  \"nextSlot\": %u,\n"
+               "  \"burstPrimed\": %d,\n",
+            m->burstPrimed ? m->burstStartUs - nowUs : 0.0,
+            (unsigned)m->nextSlot, m->burstPrimed ? 1 : 0);
+    fprintf(f, "  \"writeActive\": %d,\n  \"writeFirst\": %d,\n"
+               "  \"writeDone\": %d,\n  \"writeTotal\": %d,\n  \"writeN\": %d,\n",
+            m->writeActive ? 1 : 0, m->writeFirst, m->writeDone,
+            m->writeTotal, m->writeN);
+    fprintf(f, "  \"writeStart\": [%d,%d,%d,%d]\n}\n",
+            m->writeStartTrack, m->writeStartFile, m->writeStartSubfile,
+            m->writeStartBlock);
+    if (fclose(f) != 0) {
+        fprintf(stderr, "mmu%d: cannot finish %s\n", m->unit, js);
+        return false;
+    }
+    fprintf(stderr, "mmu%d: captured at %d/%d/%d, %u written block(s)\n",
+            m->unit, m->track, m->file, m->subfile, (unsigned)written);
+    return true;
+}
+
+bool mmumodel_load(MmuModel *m, const char *dir, double nowUs) {
+    if (m == NULL || dir == NULL) return false;
+    char js[512], bin[512];
+    mmu_paths(m, dir, js, sizeof js, bin, sizeof bin);
+    FILE *f = fopen(js, "rb");
+    if (f == NULL) return false;         /* a capture from before this */
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return false; }
+    long n = ftell(f);
+    if (n < 0 || fseek(f, 0, SEEK_SET) != 0) { fclose(f); return false; }
+    char *text = (char *)malloc((size_t)n + 1);
+    if (text == NULL || fread(text, 1, (size_t)n, f) != (size_t)n) {
+        free(text); fclose(f);
+        fprintf(stderr, "mmu%d: cannot read %s\n", m->unit, js);
+        return false;
+    }
+    text[n] = '\0';
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) {
+        fprintf(stderr, "mmu%d: %s is not JSON\n", m->unit, js);
+        return false;
+    }
+    m->track = (int)json_as_number(json_obj_get(root, "track"), m->track);
+    m->file = (int)json_as_number(json_obj_get(root, "file"), m->file);
+    m->subfile = (int)json_as_number(json_obj_get(root, "subfile"), m->subfile);
+    m->bof = (int)json_as_number(json_obj_get(root, "bof"), m->bof);
+    m->eof = (int)json_as_number(json_obj_get(root, "eof"), m->eof);
+    m->statusA = (uint16_t)json_as_number(json_obj_get(root, "statusA"), 0);
+    m->statusB = (uint16_t)json_as_number(json_obj_get(root, "statusB"), 0);
+    m->writeEnabledTrack =
+        (int)json_as_number(json_obj_get(root, "writeEnabledTrack"), -1);
+    m->extendedCount =
+        (int)json_as_number(json_obj_get(root, "extendedCount"), -1);
+    m->owner = (int)json_as_number(json_obj_get(root, "owner"), 0);
+    m->haveOffset = false;               /* recomputed against the new clock */
+    JsonValue *q = json_obj_get(root, "queue");
+    JsonValue *sl = json_obj_get(root, "slots");
+    int cnt = json_arr_count(q);
+    if (cnt > (int)QUEUE_HW) cnt = (int)QUEUE_HW;
+    m->queueHead = 0;
+    m->queueCount = (size_t)(cnt < 0 ? 0 : cnt);
+    for (int i = 0; i < cnt; i++) {
+        m->queue[i] = (uint16_t)json_as_number(json_arr_get(q, i), 0);
+        m->slot[i] = (uint32_t)json_as_number(json_arr_get(sl, i), 0);
+    }
+    m->burstPrimed = json_as_number(json_obj_get(root, "burstPrimed"), 0) != 0;
+    m->burstStartUs = m->burstPrimed
+        ? nowUs + json_as_number(json_obj_get(root, "burstStart"), 0.0) : 0.0;
+    m->nextSlot = (uint32_t)json_as_number(json_obj_get(root, "nextSlot"), 0);
+    m->writeActive =
+        json_as_number(json_obj_get(root, "writeActive"), 0) != 0;
+    m->writeFirst = (int)json_as_number(json_obj_get(root, "writeFirst"), 0);
+    m->writeDone = (int)json_as_number(json_obj_get(root, "writeDone"), 0);
+    m->writeTotal = (int)json_as_number(json_obj_get(root, "writeTotal"), 0);
+    m->writeN = (int)json_as_number(json_obj_get(root, "writeN"), 0);
+    JsonValue *ws = json_obj_get(root, "writeStart");
+    if (json_arr_count(ws) == 4) {
+        m->writeStartTrack = (int)json_as_number(json_arr_get(ws, 0), 0);
+        m->writeStartFile = (int)json_as_number(json_arr_get(ws, 1), 0);
+        m->writeStartSubfile = (int)json_as_number(json_arr_get(ws, 2), 0);
+        m->writeStartBlock = (int)json_as_number(json_arr_get(ws, 3), 0);
+    }
+    uint32_t want = (uint32_t)json_as_number(json_obj_get(root, "writtenBlocks"), 0);
+    json_free(root);
+
+    uint32_t got = 0;
+    if (want > 0) {
+        FILE *b = fopen(bin, "rb");
+        if (b == NULL) {
+            fprintf(stderr, "mmu%d: %s says %u written block(s) but %s is "
+                            "missing -- REFUSING, a mass memory missing what "
+                            "the software wrote is not the one captured\n",
+                    m->unit, js, (unsigned)want, bin);
+            return false;
+        }
+        for (uint32_t k = 0; k < want; k++) {
+            uint8_t hdr[4];
+            if (fread(hdr, 1, 4, b) != 4) break;
+            uint32_t idx = ((uint32_t)hdr[0] << 24) | ((uint32_t)hdr[1] << 16) |
+                           ((uint32_t)hdr[2] << 8) | hdr[3];
+            uint16_t buf[HALFWORDS_PER_BLOCK];
+            bool shortRead = false;
+            for (int h = 0; h < HALFWORDS_PER_BLOCK; h++) {
+                int hi = fgetc(b), lo = fgetc(b);
+                if (hi == EOF || lo == EOF) { shortRead = true; break; }
+                buf[h] = (uint16_t)((hi << 8) | lo);
+            }
+            if (shortRead) break;
+            if (idx >= BLOCKS_TOTAL) continue;
+            if (!m->blocks[idx])
+                m->blocks[idx] = calloc(HALFWORDS_PER_BLOCK, sizeof(uint16_t));
+            if (!m->blocks[idx]) break;
+            memcpy(m->blocks[idx], buf, sizeof buf);
+            m->dirty[idx] = 1;
+            got++;
+        }
+        fclose(b);
+        if (got != want) {
+            fprintf(stderr, "mmu%d: %s holds %u of the %u written block(s) it "
+                            "should -- REFUSING\n",
+                    m->unit, bin, (unsigned)got, (unsigned)want);
+            return false;
+        }
+    }
+    fprintf(stderr, "mmu%d: restored at %d/%d/%d, %u written block(s)\n",
+            m->unit, m->track, m->file, m->subfile, (unsigned)got);
+    return true;
 }

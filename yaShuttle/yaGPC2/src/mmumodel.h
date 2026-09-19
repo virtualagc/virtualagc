@@ -105,4 +105,14 @@ bool mmumodel_in_transfer(const MmuModel *m);
 
 void mmumodel_report(const MmuModel *m);
 
+/* THE UNIT'S OWN STATE IN A CAPTURE.  A restore attaches the volume again,
+ * which gives back what the tape holds -- but not what PASS WROTE to it
+ * (writes live only in the model), nor where the head is, nor a transfer
+ * still being handed over.  `dir` is the capture directory; each unit
+ * writes mmu<unit>.json and mmu<unit>.blocks.bin beside it, and the blocks
+ * file exists only if anything was written.  Times are relative to `nowUs`
+ * and rebased on load. */
+bool mmumodel_dump(const MmuModel *m, const char *dir, double nowUs);
+bool mmumodel_load(MmuModel *m, const char *dir, double nowUs);
+
 #endif

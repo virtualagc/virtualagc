@@ -73,4 +73,22 @@ void iccmodel_note_shared_us(IccModel *m, int gpcId, double sharedUs);
 
 void iccmodel_report(const IccModel *m);
 
+/* THE WIRE, CAPTURED AND PUT BACK.  A snapshot that leaves this out restores
+ * a vehicle whose computers were mid-transfer with the transfer gone: the
+ * one that was waiting for the rest of an ICC message never gets it, its
+ * next I/O sync does not match its partner's, and the pair fail each other
+ * within ten milliseconds of the restore (2026-09-19).  Only what the
+ * machines can observe is kept -- queued words with their tags and times,
+ * the per-bus transfer state -- not the instruments' counters.  Times are
+ * written relative to `nowUs` and rebased on load, like every other duration
+ * in a capture.  Both return false and say why on stderr if the file cannot
+ * be written or read. */
+/* `present` is a bit per computer (bit 1 = GPC1): a machine that is not in
+ * this vehicle never drains its queue, so its 2048 words are the model's
+ * own bookkeeping rather than anything to restore -- and they were 300 KB
+ * of a 320 KB capture. */
+bool iccmodel_dump(const IccModel *m, const char *path, double nowUs,
+                   unsigned present);
+bool iccmodel_load(IccModel *m, const char *path, double nowUs);
+
 #endif

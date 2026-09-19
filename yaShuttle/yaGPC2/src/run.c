@@ -604,6 +604,11 @@ static void batchrunner_write_capture(BatchRunner *r) {
         snprintf(path, sizeof path, "%s/gpc%d.mem.bin",
                  r->opts->snapshotDir, r->gpcId);
         dump_main_storage(r, path);
+        /* AND THE VEHICLE'S OWN DEVICES, ONCE.  Every machine is parked
+         * here, so this is the only instant at which they can be written
+         * coherently with the computers that were talking to them. */
+        if (vehicle_capture_writer(r->vehicle, r->gpcId))
+            vehicle_dump_devices(r->vehicle, r->opts->snapshotDir);
         return;
     }
     if (r->opts->dumpState == NULL) return;
@@ -879,6 +884,11 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             for (int u = 0; u < 2; u++) {
                 if (r->mmuModel[u] == NULL) continue;
                 mmumodel_set_clock(r->mmuModel[u], &veh->clockUs);
+            /* AND WHAT THE CAPTURE SAYS EACH UNIT HELD: its head position and
+             * the blocks PASS wrote, which are nowhere else.  Once per
+             * vehicle, as the units are made. */
+            if (opts->resumeDir != NULL && !veh->built)
+                vehicle_load_mmu(veh, opts->resumeDir);
     /* The DEU models get the same clock, so YAGPC_DEUKEYS_SIMTIME can gate
      * a keystroke batch on simulated time. */
     if (r->deuModel != NULL)
@@ -938,7 +948,15 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
              * transmissions falling through to a display unit that declined
              * every one.  The model recorded 0 transmits and 0 receives
              * across a 900 s two-computer run. */
-            if (veh->icc == NULL && vehicle_multi(veh)) veh->icc = iccmodel_create();
+            if (veh->icc == NULL && vehicle_multi(veh)) {
+                veh->icc = iccmodel_create();
+                /* WHAT WAS ON THE WIRE WHEN THE CAPTURE WAS TAKEN.  Loaded
+                 * as the model is made, before any machine runs, so the
+                 * first transfer after a restore sees the queue it was
+                 * half way through rather than an empty one. */
+                if (opts->resumeDir != NULL)
+                    vehicle_load_devices(veh, opts->resumeDir);
+            }
             r->busRouter.icc = veh->icc;
             /* The intercomputer model marks command sync (busword.h), so
              * receives on buses 1-5 can honour Listen Mode -- and with more

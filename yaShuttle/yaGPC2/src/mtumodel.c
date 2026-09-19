@@ -1,4 +1,5 @@
 #include "mtumodel.h"
+#include "json.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -311,4 +312,85 @@ void mtumodel_report(struct MtuModel *m) {
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);
+}
+
+/* ---------------------------------------------------------------------
+ * CAPTURE AND RESTORE -- see mtumodel.h.
+ * ------------------------------------------------------------------- */
+
+bool mtumodel_dump(const struct MtuModel *m, const char *path) {
+    if (m == NULL || path == NULL) return false;
+    FILE *f = fopen(path, "w");
+    if (f == NULL) {
+        fprintf(stderr, "mtu: cannot write %s\n", path);
+        return false;
+    }
+    fprintf(f, "{\n  \"buses\": [\n");
+    for (int b = 0; b < MTU_NBUS; b++) {
+        fprintf(f, "%s    {\"bus\": %d, \"commander\": %d, \"echoCmd\": %u,\n",
+                b ? ",\n" : "", MTU_BUS_FIRST + b, m->commander[b],
+                (unsigned)m->echoCmd[b]);
+        fprintf(f, "     \"reply\": [");
+        for (int w = 0; w < MTU_WORDS; w++)
+            fprintf(f, "%s%u", w ? "," : "", (unsigned)m->reply[b][w]);
+        fprintf(f, "],\n     \"readers\": [");
+        for (int r = 0; r < MTU_READERS; r++)
+            fprintf(f, "%s[%d,%d,%d]", r ? "," : "",
+                    m->head[b][r], m->count[b][r],
+                    m->echoPending[b][r] ? 1 : 0);
+        fprintf(f, "]}");
+    }
+    fprintf(f, "\n  ],\n  \"lastBus\": %d\n}\n", m->lastBus);
+    if (fclose(f) != 0) {
+        fprintf(stderr, "mtu: cannot finish %s\n", path);
+        return false;
+    }
+    return true;
+}
+
+bool mtumodel_load(struct MtuModel *m, const char *path) {
+    if (m == NULL || path == NULL) return false;
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) return false;          /* a capture from before this */
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return false; }
+    long n = ftell(f);
+    if (n < 0 || fseek(f, 0, SEEK_SET) != 0) { fclose(f); return false; }
+    char *text = (char *)malloc((size_t)n + 1);
+    if (text == NULL || fread(text, 1, (size_t)n, f) != (size_t)n) {
+        free(text); fclose(f);
+        fprintf(stderr, "mtu: cannot read %s\n", path);
+        return false;
+    }
+    text[n] = '\0';
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) {
+        fprintf(stderr, "mtu: %s is not JSON\n", path);
+        return false;
+    }
+    JsonValue *buses = json_obj_get(root, "buses");
+    for (int i = 0; i < json_arr_count(buses); i++) {
+        JsonValue *bv = json_arr_get(buses, i);
+        int bus = (int)json_as_number(json_obj_get(bv, "bus"), -1);
+        int b = bus - MTU_BUS_FIRST;
+        if (b < 0 || b >= MTU_NBUS) continue;
+        m->commander[b] = (int)json_as_number(json_obj_get(bv, "commander"), 0);
+        m->echoCmd[b] = (uint32_t)json_as_number(json_obj_get(bv, "echoCmd"), 0);
+        JsonValue *rep = json_obj_get(bv, "reply");
+        for (int w = 0; w < MTU_WORDS && w < json_arr_count(rep); w++)
+            m->reply[b][w] = (uint16_t)json_as_number(json_arr_get(rep, w), 0);
+        JsonValue *rs = json_obj_get(bv, "readers");
+        for (int r = 0; r < MTU_READERS && r < json_arr_count(rs); r++) {
+            JsonValue *e = json_arr_get(rs, r);
+            m->head[b][r] = (int)json_as_number(json_arr_get(e, 0), 0);
+            m->count[b][r] = (int)json_as_number(json_arr_get(e, 1), 0);
+            m->echoPending[b][r] =
+                json_as_number(json_arr_get(e, 2), 0) != 0;
+        }
+    }
+    m->lastBus = (int)json_as_number(json_obj_get(root, "lastBus"), m->lastBus);
+    json_free(root);
+    fprintf(stderr, "mtu: pending replies restored\n");
+    return true;
 }

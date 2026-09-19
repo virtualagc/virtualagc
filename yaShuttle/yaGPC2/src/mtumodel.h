@@ -70,4 +70,11 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
 
 void mtumodel_report(struct MtuModel *m);
 
+/* THE UNIT'S PENDING REPLIES IN A CAPTURE.  A machine that had asked the
+ * timing unit for the time and not yet collected the answer resumes waiting
+ * for words that were never kept.  Small, and the same shape as the other
+ * two (see iccmodel.h). */
+bool mtumodel_dump(const struct MtuModel *m, const char *path);
+bool mtumodel_load(struct MtuModel *m, const char *path);
+
 #endif

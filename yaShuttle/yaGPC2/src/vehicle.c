@@ -678,3 +678,80 @@ void vehicle_free(Vehicle *v) {
     }
     v->built = false;
 }
+
+/* ---------------------------------------------------------------------
+ * THE VEHICLE'S DEVICES IN A CAPTURE -- see vehicle.h.
+ * ------------------------------------------------------------------- */
+
+/* ONE WRITER, NAMED BY RULE RATHER THAN BY RACE.  Every machine reaches the
+ * rendezvous and writes its own pair; the devices belong to the vehicle and
+ * must be written exactly once, so the lowest-numbered machine present does
+ * it.  A rule beats "whoever gets there first" because it is the same
+ * machine every time, which is what makes two captures comparable. */
+bool vehicle_capture_writer(const Vehicle *v, int gpcId) {
+    if (v == NULL) return false;
+    for (int m = 1; m < gpcId; m++)
+        if (v->lines[m] != NULL) return false;
+    return v->lines[gpcId] != NULL || gpcId == 1;
+}
+
+void vehicle_dump_devices(const Vehicle *v, const char *dir) {
+    if (v == NULL || dir == NULL) return;
+    char path[512];
+    if (v->icc != NULL) {
+        snprintf(path, sizeof path, "%s/icc.json", dir);
+        unsigned present = 0u;
+        for (int m = 1; m <= 5; m++)
+            if (v->lines[m] != NULL) present |= 1u << m;
+        if (iccmodel_dump(v->icc, path, v->clockUs, present))
+            fprintf(stderr, "vehicle: intercomputer bus captured\n");
+    }
+    /* AND EACH MASS MEMORY: where its head is, and every block the flight
+     * software wrote -- which exist nowhere else, the .mmv being read only
+     * (mmumodel.h). */
+    for (int u = 0; u < 2; u++)
+        if (v->mmu[u] != NULL) mmumodel_dump(v->mmu[u], dir, v->clockUs);
+    if (v->mtu != NULL) {
+        snprintf(path, sizeof path, "%s/mtu.json", dir);
+        mtumodel_dump(v->mtu, path);
+    }
+}
+
+void vehicle_load_devices(Vehicle *v, const char *dir) {
+    if (v == NULL || dir == NULL) return;
+    char path[512];
+    if (v->icc != NULL) {
+        snprintf(path, sizeof path, "%s/icc.json", dir);
+        FILE *probe = fopen(path, "rb");
+        if (probe == NULL) {
+            /* NOT FATAL, AND SAID OUT LOUD.  Captures taken before the
+             * devices were part of one have no such file; they restore as
+             * they always did, and the difference is not silent. */
+            fprintf(stderr, "vehicle: no icc.json in this capture -- the "
+                            "intercomputer bus starts empty, as it did "
+                            "before captures carried it\n");
+            return;
+        }
+        fclose(probe);
+        if (iccmodel_load(v->icc, path, v->clockUs))
+            fprintf(stderr, "vehicle: intercomputer bus restored\n");
+    }
+}
+
+/* The mass memories are made later than the ICC -- they need their volumes
+ * -- so they are restored on their own, from the same directory. */
+void vehicle_load_mmu(Vehicle *v, const char *dir) {
+    if (v == NULL || dir == NULL) return;
+    /* ONCE FOR THE VEHICLE, not once per machine.  Every machine's set-up
+     * runs before veh->built is set, so a !built test let the second
+     * computer load the units again over the first's copy. */
+    if (v->devicesLoaded) return;
+    v->devicesLoaded = true;
+    char path[512];
+    for (int u = 0; u < 2; u++)
+        if (v->mmu[u] != NULL) mmumodel_load(v->mmu[u], dir, v->clockUs);
+    if (v->mtu != NULL) {
+        snprintf(path, sizeof path, "%s/mtu.json", dir);
+        mtumodel_load(v->mtu, path);
+    }
+}

@@ -10,6 +10,7 @@
 #include "busword.h"
 
 #include "envcache.h"
+#include "json.h"
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 #endif
@@ -452,4 +453,143 @@ void iccmodel_report(const IccModel *m) {
                     m->leftEarly[b][g]);
         }
     }
+}
+
+/* ---------------------------------------------------------------------
+ * CAPTURE AND RESTORE -- see iccmodel.h for why this exists at all.
+ * ------------------------------------------------------------------- */
+
+bool iccmodel_dump(const IccModel *m, const char *path, double nowUs,
+                   unsigned present) {
+    if (m == NULL || path == NULL) return false;
+    FILE *f = fopen(path, "w");
+    if (f == NULL) {
+        fprintf(stderr, "icc: cannot write %s\n", path);
+        return false;
+    }
+    fprintf(f, "{\n  \"buses\": [\n");
+    int firstBus = 1;
+    for (int b = YAGPC_ICC_BUS_FIRST; b <= YAGPC_ICC_BUS_LAST; b++) {
+        fprintf(f, "%s    {\n      \"bus\": %d,\n", firstBus ? "" : ",\n", b);
+        firstBus = 0;
+        fprintf(f, "      \"seqNow\": %u,\n      \"posNow\": %u,\n",
+                (unsigned)m->seqNow[b], (unsigned)m->posNow[b]);
+        fprintf(f, "      \"lenOf\": [");
+        for (int i = 0; i < 64; i++)
+            fprintf(f, "%s%u", i ? "," : "", (unsigned)m->lenOf[b][i]);
+        fprintf(f, "],\n      \"wantSeq\": [");
+        for (int i = 0; i < 64; i++)
+            fprintf(f, "%s%u", i ? "," : "", (unsigned)m->wantSeq[b][i]);
+        fprintf(f, "],\n      \"haveWant\": [");
+        for (int i = 0; i < 64; i++)
+            fprintf(f, "%s%d", i ? "," : "", m->haveWant[b][i]);
+        fprintf(f, "],\n      \"sentAt\": [");
+        for (int i = 0; i < 64; i++)
+            fprintf(f, "%s%.3f", i ? "," : "",
+                    m->sentAtUs[b][i] > 0.0 ? m->sentAtUs[b][i] - nowUs : 0.0);
+        fprintf(f, "],\n      \"queues\": [\n");
+        int firstQ = 1;
+        for (int g = 1; g <= 5; g++) {
+            /* ONLY WHAT IS THERE.  A queue is 2048 words and all but a few
+             * are empty at any instant; writing every slot would make a
+             * 2 MB file of zeros per capture. */
+            if (present != 0u && !(present & (1u << g))) continue;
+            if (m->q[b][g].count == 0 && !m->q[b][g].haveLast) continue;
+            fprintf(f, "%s        {\"gpc\": %d, \"lastTag\": %u, "
+                       "\"haveLast\": %d, \"words\": [",
+                    firstQ ? "" : ",\n", g, (unsigned)m->q[b][g].lastTag,
+                    m->q[b][g].haveLast);
+            firstQ = 0;
+            for (size_t i = 0; i < m->q[b][g].count; i++) {
+                size_t k = (m->q[b][g].head + i) % ICC_QUEUE;
+                double at = m->q[b][g].at[k];
+                fprintf(f, "%s[%u,%u,%.3f]", i ? "," : "",
+                        (unsigned)m->q[b][g].w[k], (unsigned)m->q[b][g].tag[k],
+                        at >= 0.0 ? at - nowUs : -1.0);
+            }
+            fprintf(f, "]}");
+        }
+        fprintf(f, "\n      ]\n    }");
+    }
+    fprintf(f, "\n  ]\n}\n");
+    if (fclose(f) != 0) {
+        fprintf(stderr, "icc: cannot finish %s\n", path);
+        return false;
+    }
+    return true;
+}
+
+bool iccmodel_load(IccModel *m, const char *path, double nowUs) {
+    if (m == NULL || path == NULL) return false;
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "icc: cannot read %s\n", path);
+        return false;
+    }
+    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return false; }
+    long n = ftell(f);
+    if (n < 0 || fseek(f, 0, SEEK_SET) != 0) { fclose(f); return false; }
+    char *text = (char *)malloc((size_t)n + 1);
+    if (text == NULL || fread(text, 1, (size_t)n, f) != (size_t)n) {
+        free(text); fclose(f);
+        fprintf(stderr, "icc: cannot read %s\n", path);
+        return false;
+    }
+    text[n] = '\0';
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) {
+        fprintf(stderr, "icc: %s is not JSON\n", path);
+        return false;
+    }
+    JsonValue *buses = json_obj_get(root, "buses");
+    int nb = json_arr_count(buses);
+    for (int i = 0; i < nb; i++) {
+        JsonValue *bv = json_arr_get(buses, i);
+        int b = (int)json_as_number(json_obj_get(bv, "bus"), 0);
+        if (!YAGPC_ICC_IS_BUS(b)) continue;
+        m->seqNow[b] = (uint32_t)json_as_number(json_obj_get(bv, "seqNow"), 0);
+        m->posNow[b] = (uint32_t)json_as_number(json_obj_get(bv, "posNow"), 0);
+        JsonValue *a = json_obj_get(bv, "lenOf");
+        for (int k = 0; k < 64 && k < json_arr_count(a); k++)
+            m->lenOf[b][k] = (uint32_t)json_as_number(json_arr_get(a, k), 0);
+        a = json_obj_get(bv, "wantSeq");
+        for (int k = 0; k < 64 && k < json_arr_count(a); k++)
+            m->wantSeq[b][k] = (uint32_t)json_as_number(json_arr_get(a, k), 0);
+        a = json_obj_get(bv, "haveWant");
+        for (int k = 0; k < 64 && k < json_arr_count(a); k++)
+            m->haveWant[b][k] = (int)json_as_number(json_arr_get(a, k), 0);
+        a = json_obj_get(bv, "sentAt");
+        for (int k = 0; k < 64 && k < json_arr_count(a); k++) {
+            double v = json_as_number(json_arr_get(a, k), 0.0);
+            m->sentAtUs[b][k] = (v == 0.0) ? 0.0 : nowUs + v;
+        }
+        JsonValue *qs = json_obj_get(bv, "queues");
+        for (int j = 0; j < json_arr_count(qs); j++) {
+            JsonValue *qv = json_arr_get(qs, j);
+            int g = (int)json_as_number(json_obj_get(qv, "gpc"), 0);
+            if (g < 1 || g > 5) continue;
+            m->q[b][g].lastTag =
+                (uint32_t)json_as_number(json_obj_get(qv, "lastTag"), 0);
+            m->q[b][g].haveLast =
+                (int)json_as_number(json_obj_get(qv, "haveLast"), 0);
+            JsonValue *ws = json_obj_get(qv, "words");
+            int cnt = json_arr_count(ws);
+            if (cnt > ICC_QUEUE) cnt = ICC_QUEUE;
+            m->q[b][g].head = 0;
+            m->q[b][g].count = (size_t)(cnt < 0 ? 0 : cnt);
+            for (int k = 0; k < cnt; k++) {
+                JsonValue *e = json_arr_get(ws, k);
+                m->q[b][g].w[k] =
+                    (uint32_t)json_as_number(json_arr_get(e, 0), 0);
+                m->q[b][g].tag[k] =
+                    (uint32_t)json_as_number(json_arr_get(e, 1), 0);
+                double at = json_as_number(json_arr_get(e, 2), -1.0);
+                m->q[b][g].at[k] = (at < 0.0) ? -1.0 : nowUs + at;
+            }
+        }
+    }
+    json_free(root);
+    return true;
 }

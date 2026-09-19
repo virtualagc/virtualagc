@@ -51,6 +51,7 @@ typedef struct Vehicle {
      * only when more than one is running; with one there is nobody to talk
      * to. */
     struct IccModel *icc;
+    bool devicesLoaded;          /* vehicle_load_mmu: once, not per machine */
     struct DeuModel *deu;                        /* the built-in DK1 unit */
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];    /* --deu-bus */
     int deuExtraBus[DEU_EXTRA_MAX];
@@ -325,6 +326,16 @@ void vehicle_expect_machines(Vehicle *v, int n);
 
 /* Carry the vehicle's clock forward to this machine's simulated time. */
 void vehicle_note_time(Vehicle *v, double machineUs);
+
+/* THE VEHICLE'S OWN DEVICES, CAPTURED AND PUT BACK.  A snapshot of the
+ * computers alone restores a vehicle whose peripherals have forgotten
+ * everything that was in flight -- see iccmodel.h.  Written once per
+ * capture, by the machine vehicle_capture_writer() names, while every
+ * machine is parked at the rendezvous. */
+bool vehicle_capture_writer(const Vehicle *v, int gpcId);
+void vehicle_dump_devices(const Vehicle *v, const char *dir);
+void vehicle_load_devices(Vehicle *v, const char *dir);
+void vehicle_load_mmu(Vehicle *v, const char *dir);
 
 /* Register a computer's discrete channel and wire its output register to the
  * other computers' inputs. */
