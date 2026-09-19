@@ -68,6 +68,7 @@ typing on as if the GPC were ready.
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -410,6 +411,49 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     return "it is missing " + ", ".join(missing)
 
 
+def tape_digest(path):
+    """SHA-256 of a volume, or None if it cannot be read."""
+    try:
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except OSError:
+        return None
+
+
+def snapshot_tape_problem(snapdir, tape):
+    """Whether `tape` is the mass memory `snapdir` was taken with: None if it
+    is, ("warn", why) if the snapshot does not say, ("fail", why) if it is not.
+
+    THE MASS MEMORY IS PART OF THE VEHICLE.  A restore used to attach none,
+    on the reasoning that a restored machine is past its IPL -- but PASS
+    reads mass memory for every OPS transition, not only at IPL, and a crew
+    can re-IPL any computer.  So the restored vehicle needs the volume it was
+    flying with, and another volume under the same memory image is a vehicle
+    that never existed: refused, not degraded."""
+    try:
+        with open(os.path.join(snapdir, "vehicle.json")) as fh:
+            v = json.load(fh)
+    except (OSError, ValueError):
+        v = {}
+    want = v.get("tapeSha256")
+    if not os.path.isfile(tape):
+        return ("fail", "the volume %s does not exist" % tape)
+    if not want:
+        return ("warn", "it does not record which volume it was taken with "
+                        "(taken before snapshots did); assuming %s"
+                        % os.path.basename(tape))
+    have = tape_digest(tape)
+    if have != want:
+        return ("fail", "it was taken with %s (sha256 %s...) and this run's "
+                        "volume is %s (sha256 %s...)"
+                        % (os.path.basename(v.get("tape", "?")), want[:12],
+                           os.path.basename(tape), (have or "unreadable")[:12]))
+    return None
+
+
 def saved_epoch(snapdir):
     """The wall-clock epoch a snapshot was taken at, or None.
 
@@ -427,7 +471,7 @@ def saved_epoch(snapdir):
 
 
 def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
-                  expect_panel=True, timeout=20.0):
+                  expect_panel=True, timeout=20.0, tape=None):
     """Bring the vehicle to a stand, write it, and say whether it worked.
 
     EVERYTHING IS WRITTEN TO `staging` AND SWAPPED IN AT THE END, for two
@@ -577,9 +621,14 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
         log("snapshot: window positions not recorded (%s)" % e)
 
     with open(os.path.join(staging, "vehicle.json"), "w") as fh:
+        # AND THE VOLUME, by content: a restore attaches the same one and
+        # refuses any other (snapshot_tape_problem).
         json.dump({"epoch": epoch, "gpcs": list(gpcs),
                    "taken": time.strftime("%Y-%m-%d %H:%M:%S",
-                                          time.localtime(epoch))}, fh, indent=1)
+                                          time.localtime(epoch)),
+                   "tape": tape,
+                   "tapeSha256": tape_digest(tape) if tape else None},
+                  fh, indent=1)
         fh.write("\n")
 
     # INTO PLACE, and only now.  Built beside the target so the two renames
@@ -929,6 +978,20 @@ def main():
                 crewscript.parse(fh.read(), args.panel_script)
         except (OSError, crewscript.ScriptError) as e:
             sys.exit("simulatePASS: %s: %s -- nothing started" % (args.panel_script, e))
+        # AND IT MUST BE A SCRIPT FOR THIS VEHICLE.  A 4-GPC IPL script
+        # started with --gpcs 1,2 brought two computers up and then waited
+        # 600 s for GPC3 to load: its panel switches exist, but no computer
+        # was behind them (2026-09-19).  The lines that select a computer are
+        # "gpc N" and a nested script's "gpc=N".
+        with open(args.panel_script) as fh:
+            named = {int(n) for n in re.findall(r"\bgpc(?:\s+|=)([1-5])\b",
+                                                 re.sub(r"#.*", "", fh.read()))}
+        absent = sorted(named - set(args.gpcs))
+        if absent:
+            sys.exit("simulatePASS: %s works GPC%s, but this vehicle is --gpcs %s"
+                     " -- nothing started" % (
+                         args.panel_script, ", GPC".join(map(str, absent)),
+                         ",".join(map(str, args.gpcs))))
 
     # Likewise a layout: read it now, so a bad one does not surface after
     # everything is running.
@@ -945,13 +1008,20 @@ def main():
 
     tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.mmv")
     tape = os.path.abspath(tape)
-    # A RESTORED RUN NEVER READS THE TAPE.  Every computer comes up from its
-    # own half of the snapshot, already past its IPL, so demanding a volume
-    # here would refuse a resume on a machine that has the snapshot and not
-    # the build it came from.  The name is still carried, for the manager's
-    # status line and so a Save records what the run was.
-    if not os.path.isfile(tape) and not args.snapshot_resume:
+    # A RESTORED RUN NEEDS ITS VOLUME TOO.  This used to excuse a resume,
+    # reasoning that its computers are past their IPL -- but the mass memory
+    # is part of the vehicle, PASS reads it for every OPS transition, and a
+    # crew can re-IPL.  A restore attached none, and re-IPL inside it failed
+    # (2026-09-19, examples/ipl-after-restore.script).
+    if not os.path.isfile(tape):
         sys.exit("simulatePASS: no volume %s -- give --tape FILE" % tape)
+    if args.snapshot_resume:
+        problem = snapshot_tape_problem(args.snapshot_resume, tape)
+        if problem and problem[0] == "fail":
+            sys.exit("simulatePASS: will not restore %s: %s"
+                     % (args.snapshot_resume, problem[1]))
+        if problem:
+            print("simulatePASS: restoring %s: %s" % (args.snapshot_resume, problem[1]))
     exe = args.yagpc or os.path.join(YAGPC_DIR, "yaGPC2.exe" if os.name == "nt" else "yaGPC2")
     if not os.path.isfile(exe):
         sys.exit("simulatePASS: no yaGPC2 at %s -- build it (make, in %s) or give --yagpc"
@@ -1120,11 +1190,18 @@ def main():
                 epoch = saved_epoch(resume)
                 if epoch is not None:
                     gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
-            elif multi:
-                gpc_argv += ["--mmu-model", "1:" + tape, "--mmu-model", "2:" + tape,
-                             "--gpcs", ",".join(map(str, gpcs))]
+            # THE MASS MEMORY, RESTORED OR NOT.  A restore used to be given the
+            # snapshot INSTEAD of the tape, leaving a vehicle with no mass
+            # memory at all: no re-IPL, no OPS transition.  See
+            # snapshot_tape_problem for why it must be the same volume.
+            if multi:
+                gpc_argv += ["--mmu-model", "1:" + tape, "--mmu-model", "2:" + tape]
+                if not resume:
+                    gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
             else:
-                gpc_argv += ["--mmu-model", tape, "--gpc-id", str(gpcs[0])]
+                gpc_argv += ["--mmu-model", tape]
+                if not resume:
+                    gpc_argv += ["--gpc-id", str(gpcs[0])]
             if resume and multi:
                 gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
             elif resume:
@@ -1335,7 +1412,8 @@ def main():
             if action in ("save", "save-and-quit"):
                 ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
                                         args.port_base, gpcs, args.crts,
-                                        idps=range(1, args.crts + 1))
+                                        idps=range(1, args.crts + 1),
+                                        tape=tape)
                 # BACK TO WHOEVER ASKED.  A failure that only reaches this
                 # terminal is a failure nobody sees: the manager window exists
                 # so that nobody has to watch this terminal.
@@ -1359,6 +1437,17 @@ def main():
                         "fail resume %s is not a directory" % snapdir,
                         args.port_base)
                     continue
+                problem = snapshot_tape_problem(snapdir, tape)
+                if problem and problem[0] == "fail":
+                    log("resume: will not restore %s: %s; the run is untouched"
+                        % (snapdir, problem[1]))
+                    crewscript.send_result("fail resume %s" % problem[1],
+                                           args.port_base)
+                    continue
+                if problem:
+                    log("resume: %s -- %s" % (snapdir, problem[1]))
+                    crewscript.send_result("warn resume %s" % problem[1],
+                                           args.port_base)
                 short = snapshot_shortfall(snapdir, gpcs, args.crts)
                 if short:
                     log("resume: %s -- %s" % (snapdir, short))
