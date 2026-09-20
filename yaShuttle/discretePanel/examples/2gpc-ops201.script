@@ -42,14 +42,17 @@
 
 # --- IPL each computer, on its own CRT and keyboard --------------------------
 +0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
+# DEASSIGN CRT2 FROM PASS FIRST.  The IDP is about to be lent to the GPC
+# being IPLed, and the Workbook deassigns it "to avoid any conflict in CRT
+# commanders" -- without this GPC1 goes on commanding CRT2 throughout
+# GPC2's IPL, two computers driving one display (ledger #184).  Entered
+# on KB1 because "all GPC/CRT key entries ... should be made to a
+# PASS-commanded CRT" (DPS Workbook USA005350 Rev B).
++2     keys KB1 GPC/CRT 0 2 EXEC
 +5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
-# AND ASSIGN GPC2 ITS IDP, as the real procedure does: "The GPC is then
-# ready to be moded to RUN and will be in OPS 0.  It is assigned an IDP to
-# ensure that it is running properly" (DPS Workbook USA005350 Rev B, 3.7).
-# Without it BOTH computers command CRT2 -- measured, ~175 command words
-# each per 20 s -- and CRT2 shows GPC1's displays (ledger #184).
-wait crt 2 title "GPC MEMORY" timeout 300
-+5     keys KB2 GPC/CRT 2 2 EXEC
+# ...and give CRT2 to GPC2 now that it is in RUN: "It is assigned an IDP to
+# ensure that it is running properly".
++5     keys KB1 GPC/CRT 2 2 EXEC
 
 # --- the NBAT for memory configuration 2, then OPS 201 -----------------------
 +11    keys ITEM 1 + 2 EXEC
