@@ -340,6 +340,13 @@ void vehicle_note_time(Vehicle *v, double machineUs);
  * everything that was in flight -- see iccmodel.h.  Written once per
  * capture, by the machine vehicle_capture_writer() names, while every
  * machine is parked at the rendezvous. */
+/* This machine's time on the clock the VEHICLE shares -- its own clock plus
+ * the offset the barrier gave it when it joined.  A trace that prints only
+ * a machine's own time cannot be compared across machines: each clock starts
+ * when that machine leaves reset, so two entries reading "t=13.7" are not
+ * the same instant (learned the hard way, 2026-09-20). */
+double vehicle_shared_us(const Vehicle *v, int gpcId);
+
 bool vehicle_capture_writer(const Vehicle *v, int gpcId);
 
 /* WHETHER THE SET AGREES ABOUT ITS I/O, which is what decides whether a

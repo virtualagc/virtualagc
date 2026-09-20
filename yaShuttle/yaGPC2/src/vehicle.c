@@ -579,6 +579,11 @@ int vehicle_votes_against(const Vehicle *v, int gpcId) {
     return votes;
 }
 
+double vehicle_shared_us(const Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return 0.0;
+    return v->barPubUs[gpcId];
+}
+
 void vehicle_set_iop(Vehicle *v, int gpcId, struct IOP *iop) {
     if (v == NULL || gpcId < 1 || gpcId > 5) return;
     v->iops[gpcId] = iop;

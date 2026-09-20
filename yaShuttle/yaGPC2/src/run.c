@@ -112,11 +112,15 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         if (ctOn && in->busID >= 1 && in->busID <= YAGPC_BUS_MAX &&
             want[in->busID] && budget-- > 0) {
             unsigned cmd = (unsigned)(in->in.word & 0x00ffffffu);
+            /* BOTH CLOCKS.  t= is this machine's own, which is what every
+             * other trace here prints; shared= is the vehicle's, and only
+             * that one may be compared between machines. */
             fprintf(stderr, "CMD gpc=%d bus=%d cmd=%06x iua=%u func=%03x "
-                            "words=%u t=%.6f\n",
+                            "words=%u t=%.6f shared=%.6f\n",
                     br->gpcId, in->busID, cmd, (cmd >> 19) & 0x1fu,
                     (cmd >> 9) & 0x3ffu, (cmd & 0x1ffu) + 1u,
-                    br->clockUs != NULL ? *br->clockUs / 1e6 : 0.0);
+                    br->clockUs != NULL ? *br->clockUs / 1e6 : 0.0,
+                    vehicle_shared_us(br->vehicle, br->gpcId) / 1e6);
         }
     }
     /* YAGPC_DKTRACE: every command issued on a display-keyboard bus, with the
@@ -970,6 +974,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             r->busRouter.clockUs = &r->age.gpc.cpu.elapsedTimeUs;
             r->busRouter.writtenOffUs = &r->writtenOffUs;
             r->busRouter.vehicle = veh;
+            /* And the IOP's own handle on it, for the shared clock its
+             * traces print beside this machine's own (see iop.h). */
+            r->age.gpc.iop.vehicle = veh;
             r->busRouter.gpcId = gpcId;
             r->busRouter.deu = r->deuModel;
             /* One wire for the vehicle, built by the first machine, and only
@@ -2045,10 +2052,10 @@ static void mode_held_update(BatchRunner *r) {
                         : !(drv & MODE_ANY) ? "nothing published"
                         : !(mode & (MODE_HALT | MODE_STBY | MODE_RUN)) ? "no position"
                         : "HALT";
-        fprintf(stderr, "%sHELD %s t=%.6f value=%08x driven=%08x "
+        fprintf(stderr, "%sHELD %s t=%.6f shared=%.6f value=%08x driven=%08x "
                         "age halt=%.3f stby=%.3f run=%.3f ipl=%.3f\n",
                 batchrunner_tag(r), why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
-                val, drv,
+                vehicle_shared_us(r->vehicle, r->gpcId) / 1e6, val, drv,
                 discretes_bit_age(r->discretes, DISCRETES_REG_A, 0),
                 discretes_bit_age(r->discretes, DISCRETES_REG_A, 1),
                 discretes_bit_age(r->discretes, DISCRETES_REG_A, 2),
@@ -2323,10 +2330,11 @@ static bool batchrunner_step(BatchRunner *r) {
                         if (lmMax < 1) lmMax = 1;
                     }
                     if (r->trig.hits[i] <= lmMax)
-                    fprintf(stderr, "GPC%d LANDMARK %s #%ld at %05x t=%.6f s step=%ld"
-                                    " r0=%08x r7=%08x\n",
+                    fprintf(stderr, "GPC%d LANDMARK %s #%ld at %05x t=%.6f s "
+                                    "shared=%.6f step=%ld r0=%08x r7=%08x\n",
                             r->gpcId, r->trig.label[i], r->trig.hits[i], (unsigned)nia,
-                            r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
+                            r->age.gpc.cpu.elapsedTimeUs / 1e6,
+                            vehicle_shared_us(r->vehicle, r->gpcId) / 1e6, r->step,
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 0)),
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 7)));
                     /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed

@@ -356,6 +356,10 @@ typedef struct IOP {
      * their own channel (port base+80+gpcId).  NULL when --discretes was not
      * given, and every discretes_* call tolerates that. */
     struct Discretes *discretes;
+    /* The vehicle, for the SHARED clock only: a trace that prints just this
+     * machine's elapsed time cannot be lined up against another machine's,
+     * because each clock starts when that machine leaves reset. */
+    struct Vehicle *vehicle;
     /* PER-MACHINE STATE THAT USED TO BE FILE STATICS.  Each of these is a
      * property of one computer, and sharing them between machines changes
      * behaviour rather than merely merging a trace. */

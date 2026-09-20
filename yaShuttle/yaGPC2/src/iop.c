@@ -10,6 +10,7 @@
 #include "discretes.h"
 
 #include "envcache.h"
+#include "vehicle.h"
 /* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
 static void msc_ring_dump_once(IOP *iop, const char *why);
@@ -2271,10 +2272,12 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
              * whose transmitter was never disabled sends every command too
              * (ledger #139). */
             if (yagpc_getenv("YAGPC_XMITENA_TRACE") && iop->cpu != NULL)
-                fprintf(stderr, "XMITENA gpc=%d %s data=%08x %08x->%08x nia=%05x t=%.1f\n",
+                fprintf(stderr, "XMITENA gpc=%d %s data=%08x %08x->%08x nia=%05x "
+                                "t=%.1f shared=%.6f\n",
                         iop->cpu->gpcId, (cmd == 0x85040000u) ? "ENABLE " : "DISABLE",
                         (unsigned)data, (unsigned)before, (unsigned)after,
-                        (unsigned)psw_get_nia(&iop->cpu->psw), iop->cpu->elapsedTimeUs);
+                        (unsigned)psw_get_nia(&iop->cpu->psw), iop->cpu->elapsedTimeUs,
+                        vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) / 1e6);
             break;
         }
         case 0x84080000: /* MIA RECEIVER DISABLE */
