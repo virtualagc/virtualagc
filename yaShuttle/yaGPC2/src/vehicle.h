@@ -52,6 +52,13 @@ typedef struct Vehicle {
      * to. */
     struct IccModel *icc;
     bool devicesLoaded;          /* vehicle_load_mmu: once, not per machine */
+    /* The spread a capture recorded, waiting for each machine's FIRST join
+     * -- see vehicle_dump_devices.  Not applied directly to barOffsetUs,
+     * because a resumed machine is held until its panel is heard and a held
+     * machine leaves the barrier; it rejoins afterwards, and the join is
+     * where the offset is decided. */
+    double resumeOffsetUs[6];
+    bool haveResumeOffset[6];
     struct DeuModel *deu;                        /* the built-in DK1 unit */
     struct DeuModel *deuExtra[DEU_EXTRA_MAX];    /* --deu-bus */
     int deuExtraBus[DEU_EXTRA_MAX];

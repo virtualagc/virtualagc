@@ -16,6 +16,7 @@
 #include "iccmodel.h"
 
 #include "envcache.h"
+#include "json.h"
 /* How far apart, in simulated microseconds, the machines are allowed to
  * drift.  Well inside FCOS's 3.85 ms sync timeout with room for the host's
  * scheduler, and coarse enough that the check costs nothing worth measuring.
@@ -89,10 +90,24 @@ static void barrier_join(Vehicle *v, int gpcId, double machineUs) {
     barrier_lock(v);
     double maxPub = 0.0;
     bool any = false;
+    int leader = 0;
     for (int m = 1; m <= 5; m++) {
         if (m == gpcId || !v->barActive[m]) continue;
-        if (!any || v->barPubUs[m] > maxPub) { maxPub = v->barPubUs[m]; any = true; }
+        if (!any || v->barPubUs[m] > maxPub) {
+            maxPub = v->barPubUs[m]; any = true; leader = m;
+        }
     }
+    /* A RESUME'S OWN SPREAD WINS, ONCE.  Levelling with the furthest
+     * advanced machine is right for a computer that has just been IPLed --
+     * and wrong for one coming back from a capture, where the spread
+     * between the machines is part of what was captured. */
+    if (v->haveResumeOffset[gpcId] && any && v->haveResumeOffset[leader]) {
+        /* Level with the leader as usual -- a machine must not have to run
+         * the leader's head start before the vehicle can proceed -- but at
+         * the DISTANCE from it that the capture recorded. */
+        v->barOffsetUs[gpcId] = maxPub - machineUs
+            + (v->resumeOffsetUs[gpcId] - v->resumeOffsetUs[leader]);
+    } else
     v->barOffsetUs[gpcId] = any ? (maxPub - machineUs) : 0.0;
     v->barPubUs[gpcId] = machineUs + v->barOffsetUs[gpcId];
     v->barActive[gpcId] = true;
@@ -715,6 +730,39 @@ void vehicle_dump_devices(const Vehicle *v, const char *dir) {
         snprintf(path, sizeof path, "%s/mtu.json", dir);
         mtumodel_dump(v->mtu, path);
     }
+    /* AND HOW FAR APART THE MACHINES WERE.  The barrier keeps them within
+     * barDeltaUs of each other in SIMULATED time, and that spread is what
+     * FCOS's 3.85 ms sync timeouts measure.  A restore starts every clock
+     * at zero and barrier_join levels a joiner with the furthest-advanced
+     * machine, so the spread becomes whatever the join order produces --
+     * which is why the same capture restores clean on one run and votes on
+     * the next.  Written relative to the machine that was furthest behind,
+     * so it means the same thing wherever the clocks restart. */
+    {
+        double least = 0.0;
+        bool any = false;
+        for (int m = 1; m <= 5; m++) {
+            if (v->lines[m] == NULL || !v->barActive[m]) continue;
+            if (!any || v->barPubUs[m] < least) { least = v->barPubUs[m]; any = true; }
+        }
+        if (any) {
+            snprintf(path, sizeof path, "%s/barrier.json", dir);
+            FILE *f = fopen(path, "w");
+            if (f != NULL) {
+                fprintf(f, "{\n  \"spreadUs\": {");
+                int first = 1;
+                for (int m = 1; m <= 5; m++) {
+                    if (v->lines[m] == NULL || !v->barActive[m]) continue;
+                    fprintf(f, "%s\"%d\": %.3f", first ? "" : ", ", m,
+                            v->barPubUs[m] - least);
+                    first = 0;
+                }
+                fprintf(f, "}\n}\n");
+                fclose(f);
+                fprintf(stderr, "vehicle: barrier spread captured\n");
+            }
+        }
+    }
 }
 
 void vehicle_load_devices(Vehicle *v, const char *dir) {
@@ -735,6 +783,39 @@ void vehicle_load_devices(Vehicle *v, const char *dir) {
         fclose(probe);
         if (iccmodel_load(v->icc, path, v->clockUs))
             fprintf(stderr, "vehicle: intercomputer bus restored\n");
+    }
+    /* THE SPREAD, RE-ESTABLISHED BEFORE ANYBODY RUNS.  Each machine is
+     * pre-joined at the offset it had, so its first published time is its
+     * own clock (zero at a resume) plus that offset -- and barrier_join,
+     * which would otherwise level it with whoever started first, is
+     * skipped.  See the capture side above. */
+    /* OFF BY DEFAULT, and measured before it is believed: putting the
+     * captured spread back made restores WORSE, not better -- nine of nine
+     * voted where the same kind of capture without it voted in one of
+     * three.  Kept behind YAGPC_BARRIER_RESTORE=1 so the experiment can be
+     * repeated rather than re-argued. */
+    if (yagpc_getenv("YAGPC_BARRIER_RESTORE") == NULL) return;
+    snprintf(path, sizeof path, "%s/barrier.json", dir);
+    {
+        FILE *f = fopen(path, "rb");
+        if (f == NULL) return;
+        char buf[1024];
+        size_t n = fread(buf, 1, sizeof buf - 1, f);
+        fclose(f);
+        buf[n] = '\0';
+        JsonValue *root = json_parse(buf);
+        if (root == NULL) return;
+        JsonValue *sp = json_obj_get(root, "spreadUs");
+        for (int m = 1; m <= 5; m++) {
+            char key[4];
+            snprintf(key, sizeof key, "%d", m);
+            JsonValue *e = json_obj_get(sp, key);
+            if (e == NULL) continue;
+            v->resumeOffsetUs[m] = json_as_number(e, 0.0);
+            v->haveResumeOffset[m] = true;
+        }
+        json_free(root);
+        fprintf(stderr, "vehicle: barrier spread restored\n");
     }
 }
 
