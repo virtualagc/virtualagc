@@ -226,6 +226,11 @@ typedef struct {
     /* Set while the mode switch holds this machine in reset, so the pacer can
      * be re-tied on the way out -- see batchrunner_step. */
     bool modeWasHeld;
+    /* A SNAPSHOT PUT OFF because the set was mid-transfer -- see
+     * vehicle_io_agrees.  Counted down in batchrunner_step; when it reaches
+     * one the capture is asked for again. */
+    long snapRetryIn;
+    int snapRetries;
     /* When the bus sockets were last drained and flushed, in SIMULATED
      * microseconds -- see batchrunner_step()'s bus-service gate. */
     double busServiceUs;

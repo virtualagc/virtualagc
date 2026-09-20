@@ -51,6 +51,7 @@ typedef struct Vehicle {
      * only when more than one is running; with one there is nobody to talk
      * to. */
     struct IccModel *icc;
+    struct IOP *iops[6];         /* per machine, for vehicle_io_agrees */
     bool devicesLoaded;          /* vehicle_load_mmu: once, not per machine */
     /* The spread a capture recorded, waiting for each machine's FIRST join
      * -- see vehicle_dump_devices.  Not applied directly to barOffsetUs,
@@ -340,6 +341,18 @@ void vehicle_note_time(Vehicle *v, double machineUs);
  * capture, by the machine vehicle_capture_writer() names, while every
  * machine is parked at the rendezvous. */
 bool vehicle_capture_writer(const Vehicle *v, int gpcId);
+
+/* WHETHER THE SET AGREES ABOUT ITS I/O, which is what decides whether a
+ * capture can be resumed.  The computers of a redundant set run the same
+ * bus programs, so at a resumable instant their outstanding receives match;
+ * where they do not, the capture has caught them at different points of the
+ * same transfer.  On a restore the peripheral PROCESSES start fresh and
+ * whatever was in flight is gone -- lost by both machines, they raise IPR
+ * together and carry on; lost by one, each declares the other failed to
+ * sync within ten milliseconds (ledger #180).  `why` is filled with the
+ * first disagreement found. */
+bool vehicle_io_agrees(const Vehicle *v, char *why, size_t n);
+void vehicle_set_iop(Vehicle *v, int gpcId, struct IOP *iop);
 void vehicle_dump_devices(const Vehicle *v, const char *dir);
 void vehicle_load_devices(Vehicle *v, const char *dir);
 void vehicle_load_mmu(Vehicle *v, const char *dir);

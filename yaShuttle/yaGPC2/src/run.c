@@ -585,6 +585,12 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
  * The state and the memory are a PAIR and must not be separated -- see
  * ageharness.c -- so both are written here, under the one tag.
  */
+/* How long to run on before asking again, and how many times.  A transfer
+ * on a display bus is over in well under a millisecond, so a few thousand
+ * instructions is long enough to land somewhere else in it. */
+#define SNAPSHOT_RETRY_STEPS 5000L
+#define SNAPSHOT_RETRY_MAX   40
+
 static void batchrunner_write_capture(BatchRunner *r) {
     if (r->opts == NULL) return;
     const char *tag = vehicle_pause_tag(r->vehicle);
@@ -595,6 +601,30 @@ static void batchrunner_write_capture(BatchRunner *r) {
      * rather than a convention about prefixes. */
     if (r->opts->snapshotDir != NULL && strcmp(tag, "snapshot") == 0) {
         char path[512];
+        /* NOT WHILE THE SET DISAGREES ABOUT ITS I/O.  Every machine tests
+         * the same vehicle state here and gets the same answer, so they
+         * either all write or all wait; the machine that would have written
+         * the vehicle's devices asks for the capture again a little later.
+         * SNAPSHOT_RETRY_MAX times, and then it is taken anyway and SAID --
+         * a capture nobody can take is worse than one that needs a second
+         * look, and the reason is on the record either way. */
+        char why[160];
+        if (!vehicle_io_agrees(r->vehicle, why, sizeof why)) {
+            if (r->snapRetries < SNAPSHOT_RETRY_MAX) {
+                if (vehicle_capture_writer(r->vehicle, r->gpcId)) {
+                    r->snapRetries++;
+                    r->snapRetryIn = SNAPSHOT_RETRY_STEPS;
+                    fprintf(stderr, "GPC%d SNAPSHOT put off (%d of %d): %s\n",
+                            r->gpcId, r->snapRetries, SNAPSHOT_RETRY_MAX, why);
+                }
+                return;
+            }
+            fprintf(stderr, "GPC%d SNAPSHOT taken anyway after %d tries -- the "
+                            "set never agreed about its I/O (%s).  It may vote "
+                            "on restore; see ledger #180.\n",
+                    r->gpcId, r->snapRetries, why);
+        }
+        r->snapRetries = 0;
         fprintf(stderr, "GPC%d SNAPSHOT at t=%.6f s step=%ld -> %s\n",
                 r->gpcId, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
                 r->opts->snapshotDir);
@@ -659,6 +689,11 @@ static void batchrunner_pause_point(BatchRunner *r) {
         g_snapshot_requested = 0;
         vehicle_pause_request(r->vehicle, "snapshot");
     }
+    /* A CAPTURE PUT OFF ASKS AGAIN.  Counted here rather than in the step
+     * loop because a machine parked in the wait state still passes this
+     * point, and that is exactly where a quiet vehicle sits. */
+    if (r->snapRetryIn > 0 && --r->snapRetryIn == 0)
+        vehicle_pause_request(r->vehicle, "snapshot");
     if (!vehicle_pause_enter(r->vehicle, r->gpcId)) return;
     batchrunner_write_capture(r);
     vehicle_pause_exit(r->vehicle, r->gpcId);
@@ -999,6 +1034,9 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
         r->discretes = discretes_create(r->gpcId);
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
         vehicle_add_machine(veh, r->gpcId, r->discretes);
+        /* And this machine's IOP, so a capture can ask whether the set
+         * agrees about its I/O before writing one (vehicle_io_agrees). */
+        vehicle_set_iop(veh, r->gpcId, &r->age.gpc.iop);
         /* A mass memory is wired to every computer; with one machine that
          * is one channel. */
         for (int u = 0; u < 2; u++)

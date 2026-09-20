@@ -14,6 +14,7 @@
 #include "discretes.h"
 #include "mtumodel.h"
 #include "iccmodel.h"
+#include "iop.h"
 
 #include "envcache.h"
 #include "json.h"
@@ -576,6 +577,62 @@ int vehicle_votes_against(const Vehicle *v, int gpcId) {
         if (fd & (0x10u >> k)) votes++;
     }
     return votes;
+}
+
+void vehicle_set_iop(Vehicle *v, int gpcId, struct IOP *iop) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+    v->iops[gpcId] = iop;
+}
+
+/* The buses a SEPARATE PROCESS serves -- displays, mass memories, timing
+ * unit.  The intercomputer buses are in this process and are captured
+ * (iccmodel.h), so a transfer there survives a restore; these do not. */
+static bool externally_served(int bus) {
+    return (bus >= 6 && bus <= 9) || bus == 18 || bus == 19 ||
+           (bus >= 20 && bus <= 22);
+}
+
+bool vehicle_io_agrees(const Vehicle *v, char *why, size_t n) {
+    if (why != NULL && n > 0) why[0] = '\0';
+    if (v == NULL) return true;
+    int first = 0;
+    for (int m = 1; m <= 5; m++)
+        if (v->iops[m] != NULL) { first = m; break; }
+    if (first == 0) return true;
+    /* NOBODY MID-TRANSFER, not merely both alike.  A transfer in flight on
+     * a bus a separate process serves is lost on restore whichever machine
+     * holds it: lost by both they agree and carry on, but the moment WITHIN
+     * the transfer still differs, and requiring symmetry alone left 4 of 9
+     * restores voting where the owner's quiet capture votes in none. */
+    for (int m = 1; m <= 5; m++) {
+        if (v->iops[m] == NULL) continue;
+        for (int b = 1; b <= 24; b++) {
+            if (!externally_served(b)) continue;
+            if (!v->iops[m]->bce[b - 1].recvActive) continue;
+            if (why != NULL && n > 0)
+                snprintf(why, n, "bus %d: GPC%d is receiving, %u word(s) left",
+                         b, m, (unsigned)v->iops[m]->bce[b - 1].recvLeft);
+            return false;
+        }
+    }
+    for (int m = first + 1; m <= 5; m++) {
+        if (v->iops[m] == NULL) continue;
+        for (int b = 1; b <= 24; b++) {
+            if (!externally_served(b)) continue;
+            const BCE *x = &v->iops[first]->bce[b - 1];
+            const BCE *y = &v->iops[m]->bce[b - 1];
+            if (x->recvLeft == y->recvLeft && x->recvActive == y->recvActive &&
+                x->recvAwaitCmd == y->recvAwaitCmd)
+                continue;
+            if (why != NULL && n > 0)
+                snprintf(why, n, "bus %d: GPC%d has %u word(s) left%s, "
+                                 "GPC%d has %u%s", b, first,
+                         (unsigned)x->recvLeft, x->recvActive ? " (receiving)" : "",
+                         m, (unsigned)y->recvLeft, y->recvActive ? " (receiving)" : "");
+            return false;
+        }
+    }
+    return true;
 }
 
 void vehicle_add_machine(Vehicle *v, int gpcId, struct Discretes *d) {
