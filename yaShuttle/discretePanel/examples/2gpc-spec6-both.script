@@ -1,3 +1,16 @@
+# EXAMPLE crew script: two GPCs to OPS 0, CRT2 assigned to GPC2, then SPEC 6
+# on BOTH CRTs -- so each computer's own view of which GPC commands which
+# bus can be read at the same instant.  Run with NSTS_ANNOUNCE_ROWS=all.
+# EXAMPLE crew script: two GPCs to OPS 0, SPEC 6 up on CRT1, then CRT2
+# assigned to GPC2.  Reads the flight software's OWN view of which GPC
+# commands each bus (the '*' columns), rather than inferring it from the
+# emulator's registers.  Run with NSTS_ANNOUNCE_ROWS=all and screenwatch.py.
+# EXAMPLE crew script: two GPCs IPL'd to OPS 0, then CRT2 handed to GPC2 by
+# hand.  THE TEST BEHIND IT: with no NBAT entry for an IDP, the lowest
+# numbered GPC in that major function commands it (DPS Workbook USA005350
+# Rev B, 3.3 DK Assignment), which is why CRT2 reads 'GPC MEMORY 1' after an
+# IPL -- GPC1 really is driving it.  A GPC/CRT entry is what moves it.
+# Run from discretePanel/ with --gpcs 1,2 --crts 2.
 # EXAMPLE crew script: TWO GPCs and two CRTs to OPS 201 -- the configuration
 # the vehicle actually flies on orbit.  Run from discretePanel/:
 #
@@ -43,25 +56,25 @@
 # --- IPL each computer, on its own CRT and keyboard --------------------------
 +0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 +5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
-# AND ASSIGN GPC2 ITS IDP, as the real procedure does: "The GPC is then
-# ready to be moded to RUN and will be in OPS 0.  It is assigned an IDP to
-# ensure that it is running properly" (DPS Workbook USA005350 Rev B, 3.7).
-# Without it BOTH computers command CRT2 -- measured, ~175 command words
-# each per 20 s -- and CRT2 shows GPC1's displays (ledger #184).
-wait crt 2 title "GPC MEMORY" timeout 300
-+5     keys KB2 GPC/CRT 2 2 EXEC
 
 # --- the NBAT for memory configuration 2, then OPS 201 -----------------------
-+11    keys ITEM 1 + 2 EXEC
-+8     keys ITEM 2 + 1 EXEC
-+8     keys ITEM 3 + 2 EXEC
-+8     keys ITEM 7 + 1 EXEC
-+8     keys ITEM 8 + 2 EXEC
-+8     keys ITEM 9 + 1 EXEC
-+8     keys ITEM 1 0 + 2 EXEC
-+8     keys ITEM 1 1 + 1 EXEC
-+8     keys ITEM 1 2 + 1 EXEC
-+8     keys ITEM 1 3 + 2 EXEC
-+8     keys ITEM 1 8 + 1 EXEC
-+8     keys ITEM 1 9 + 2 EXEC
-+21    keys OPS 2 0 1 PRO
+
+
+wait crt 2 title "GPC MEMORY" timeout 300
+# A wait that cannot be met, so the screen text is logged when it expires.
+
+
+# SPEC 6 on CRT1: the flight software's own view of who commands each bus.
+wait crt 1 title "GPC MEMORY" timeout 300
++5     keys SPEC 6 PRO
+wait crt 1 title "GPC/BUS STATUS" timeout 60
++30    subtitle
+# then the same after an explicit assignment of CRT2 to GPC2
++5     keys KB2 GPC/CRT 2 2 EXEC
++30    subtitle
+
+# SPEC 6 on CRT2 as well, which GPC2 draws once it has the CRT.
++10    keys KB2 SPEC 6 PRO
+wait crt 2 title "GPC/BUS STATUS" timeout 90
++45    subtitle
+wait crt 1 title NEVERMATCHES timeout 90

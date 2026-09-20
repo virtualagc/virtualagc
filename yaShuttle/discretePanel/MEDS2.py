@@ -5203,13 +5203,22 @@ class Screen_DPS(MDUScreen):
         name = getattr(self, 'mduName', None)
         if not name or rows is None:
             return
+        # NSTS_ANNOUNCE_ROWS=all sends the WHOLE frame, not just the top two.
+        # A crew script only ever needs the title, but a question about what
+        # the flight software itself believes -- which GPC commands which bus,
+        # on SPEC 6 -- is answered in the BODY of a display, and reading it
+        # off a photograph is not evidence anybody can re-check.
+        howMany = None if os.environ.get('NSTS_ANNOUNCE_ROWS') == 'all' else 2
         lines = []
-        for r in sorted(rows)[:2]:
+        for r in sorted(rows)[:howMany]:
             cols = rows[r]
             lines.append("".join(cols.get(c, ' ')
                                  for c in range(min(0, min(cols)), max(cols) + 1)).rstrip())
         while len(lines) < 2:
             lines.append("")
+        if howMany is None:
+            announceScreen(name, lines)      # every frame, unfiltered
+            return
         key = SCREEN_CLOCK.sub('#', " ".join(" ".join(lines).split()))
         now = time.monotonic()
         if key != getattr(self, '_scrKey', None):

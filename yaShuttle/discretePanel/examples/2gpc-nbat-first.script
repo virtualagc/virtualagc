@@ -1,3 +1,6 @@
+# EXAMPLE crew script: the 2-GPC OPS 201 run with the buses set up BEFORE
+# GPC2 is IPL'd, instead of after.  Under test (2026-09-20): whether that
+# leaves CRT2 commanded by GPC2 rather than GPC1 in OPS 0.
 # EXAMPLE crew script: TWO GPCs and two CRTs to OPS 201 -- the configuration
 # the vehicle actually flies on orbit.  Run from discretePanel/:
 #
@@ -42,16 +45,7 @@
 
 # --- IPL each computer, on its own CRT and keyboard --------------------------
 +0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
-+5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
-# AND ASSIGN GPC2 ITS IDP, as the real procedure does: "The GPC is then
-# ready to be moded to RUN and will be in OPS 0.  It is assigned an IDP to
-# ensure that it is running properly" (DPS Workbook USA005350 Rev B, 3.7).
-# Without it BOTH computers command CRT2 -- measured, ~175 command words
-# each per 20 s -- and CRT2 shows GPC1's displays (ledger #184).
-wait crt 2 title "GPC MEMORY" timeout 300
-+5     keys KB2 GPC/CRT 2 2 EXEC
-
-# --- the NBAT for memory configuration 2, then OPS 201 -----------------------
+# THE NBAT FIRST, BEFORE GPC2 IS IPLed -- the reordering under test.
 +11    keys ITEM 1 + 2 EXEC
 +8     keys ITEM 2 + 1 EXEC
 +8     keys ITEM 3 + 2 EXEC
@@ -64,4 +58,11 @@ wait crt 2 title "GPC MEMORY" timeout 300
 +8     keys ITEM 1 3 + 2 EXEC
 +8     keys ITEM 1 8 + 1 EXEC
 +8     keys ITEM 1 9 + 2 EXEC
+
++5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
+
+# --- the NBAT for memory configuration 2, then OPS 201 -----------------------
 +21    keys OPS 2 0 1 PRO
+
+# Sample CRT2 at the end: a wait that cannot be met logs the screen text.
+wait crt 2 title NEVERMATCHES timeout 120
