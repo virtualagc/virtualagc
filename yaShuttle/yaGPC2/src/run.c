@@ -2309,13 +2309,27 @@ static bool batchrunner_step(BatchRunner *r) {
                 /* R0 and R7 as well: FCOS passes a routine's arguments in
                  * R0 and its return address in R7, so at an ENTRY point
                  * these two say what it was asked to do and who asked. */
-                if (r->trig.hits[i] <= 20)
+                /* YAGPC_LANDMARKS_MAX raises the per-landmark print cap.
+                 * At the default of 20 a landmark on a routine the flight
+                 * software runs constantly goes quiet early, and its silence
+                 * later in the run reads exactly like "it was never called"
+                 * -- which is how a cap nearly became a finding
+                 * (2026-09-20). */
+                {
+                    static long lmMax = -1;
+                    if (lmMax < 0) {
+                        const char *e = yagpc_getenv("YAGPC_LANDMARKS_MAX");
+                        lmMax = (e != NULL && *e != '\0') ? atol(e) : 20;
+                        if (lmMax < 1) lmMax = 1;
+                    }
+                    if (r->trig.hits[i] <= lmMax)
                     fprintf(stderr, "GPC%d LANDMARK %s #%ld at %05x t=%.6f s step=%ld"
                                     " r0=%08x r7=%08x\n",
                             r->gpcId, r->trig.label[i], r->trig.hits[i], (unsigned)nia,
                             r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 0)),
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 7)));
+                }
                 if (r->trig.stop[i] != 0 && r->trig.hits[i] >= r->trig.stop[i]) {
                     if (r->opts != NULL && r->opts->dumpState != NULL) {
                         /* PARK THE VEHICLE HERE, at the arrival, not after

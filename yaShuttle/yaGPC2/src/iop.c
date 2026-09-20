@@ -2544,6 +2544,22 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             }
             break;
         default:
+            /* YAGPC_PCOUNKNOWN: a PROGRAM CONTROLLED OUTPUT this switch does
+             * not decode.  The cases match an EXACT command word, so a
+             * command the flight software builds with an extra field -- a
+             * BCE number in the low bits, say, as FIOSTIUA does for SET IUA
+             * -- falls here and is dropped in silence.  That is invisible
+             * from outside, and the question it answers is a live one: no
+             * GPC but GPC1 was ever seen enabling a display transmitter
+             * (ledger #182), and a lost enable would look exactly like
+             * that. */
+            if (isOutput && yagpc_getenv("YAGPC_PCOUNKNOWN") != NULL)
+                fprintf(stderr, "PCO UNDECODED gpc=%d cmd=%08x data=%08x "
+                                "dev=%02x dsel=%03x nia=%05x\n",
+                        iop->cpu ? iop->cpu->gpcId : 0, (unsigned)cmd,
+                        (unsigned)data, (unsigned)devSelect,
+                        (unsigned)dataSelect,
+                        iop->cpu ? (unsigned)psw_get_nia(&iop->cpu->psw) : 0u);
             break;
     }
 
