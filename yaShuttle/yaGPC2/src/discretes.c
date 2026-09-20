@@ -538,7 +538,10 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
     d->messages++;
 
     if (d->trace && d->value[r] != before) {
-        fprintf(stderr, "DISCRETE %-5s %c  %08x  ->  %08x   ",
+        /* WHOSE discretes.  With one computer the answer was obvious and the
+         * line left it out; with four, a trace of the crew panel's bits is
+         * unreadable without it. */
+        fprintf(stderr, "DISCRETE GPC%d %-5s %c  %08x  ->  %08x   ", d->gpcId,
                 (op == OP_SET) ? "SET" : "RESET",
                 (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, d->value[r]);
         const char *sep = "";

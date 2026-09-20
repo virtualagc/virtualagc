@@ -2329,6 +2329,19 @@ static bool batchrunner_step(BatchRunner *r) {
                             r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 0)),
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 7)));
+                    /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed
+                     * INSIDE a routine, where the interesting value is
+                     * whichever register that code happens to be using --
+                     * FCMBUSCM's R5, the new commander's id, for one. */
+                    if (r->trig.hits[i] <= lmMax &&
+                        yagpc_getenv("YAGPC_LANDMARKS_REGS") != NULL) {
+                        fprintf(stderr, "GPC%d LANDMARK %s regs:", r->gpcId,
+                                r->trig.label[i]);
+                        for (int q = 0; q < 8; q++)
+                            fprintf(stderr, " r%d=%08x", q,
+                                    (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, q)));
+                        fprintf(stderr, "\n");
+                    }
                 }
                 if (r->trig.stop[i] != 0 && r->trig.hits[i] >= r->trig.stop[i]) {
                     if (r->opts != NULL && r->opts->dumpState != NULL) {
