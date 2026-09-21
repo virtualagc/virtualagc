@@ -37,6 +37,7 @@ import argparse
 import glob
 import json
 import os
+import re
 import subprocess
 import threading
 import sys
@@ -435,10 +436,52 @@ class Manager(object):
         except OSError as e:
             self.say("Cannot reach the panel: %s" % e)
 
+    def _layout_overwrite_ok(self, path):
+        """Ask before writing over a layout made for a different vehicle.
+
+        The box is pre-filled from --layout, so Save writes over the very
+        file the run was STARTED from.  Saving a 2-GPC arrangement over a
+        4-GPC layout keeps only the windows that happen to be on screen and
+        silently drops the rest -- and a layout is placed by hand, so unlike
+        a log it cannot be had again by running again.  The snapshot path has
+        asked this question since it existed ("Replace this snapshot?"); this
+        one never did, and a layout was lost that way.
+        """
+        try:
+            with open(path) as fh:
+                old = json.load(fh)
+        except (OSError, ValueError):
+            return True                 # unreadable or not ours: nothing to lose
+        windows = old.get("windows", [])
+        were = ""
+        for w in windows:
+            m = re.search(r"GPCs?\s+([0-9,\-]+)", w.get("title", ""))
+            if m:
+                were = m.group(1)
+                break
+        if were and self.args.gpcs and were == self.args.gpcs:
+            return True                 # same vehicle: nothing would be lost
+        held = "%d window%s" % (len(windows), "" if len(windows) == 1 else "s")
+        if were:
+            held += " arranged for GPC%s %s" % ("s" if "," in were else "", were)
+        when = old.get("saved", "an earlier run")
+        return self._dialog(
+            "Replace this layout?",
+            "%s already holds %s." % (os.path.basename(path), held),
+            "It was saved %s, and this run has GPC%s %s -- saving keeps only "
+            "the windows on screen now, and cannot be undone."
+            % (when, "s" if (self.args.gpcs or "").count(",") else "",
+               self.args.gpcs or "?"),
+            "Change the name in the box first if you meant to keep both.",
+            confirm="Replace")
+
     def save_layout(self):
         path = self.layout.get().strip()
         if not path:
             self.say("No layout file chosen")
+            return
+        if os.path.isfile(path) and not self._layout_overwrite_ok(path):
+            self.say("Save cancelled; %s is untouched" % os.path.basename(path))
             return
         try:
             n = windowLayout.save_layout(path, log=lambda _t: None,
