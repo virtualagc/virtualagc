@@ -37,6 +37,7 @@
 #include "util.h"
 
 #include "envcache.h"
+#include "discretes.h"
 typedef struct {
     const char *nm;
     const char *pattern;
@@ -544,6 +545,9 @@ static void exec_DLY(IOP *t, DInstr *v) {
 static void exec_WAT(IOP *t, DInstr *v) {
     (void)v;
     iop_proc_set(&t->regBusyWait, t->curPE, 0);
+    /* The program's normal end -- what the MSC sees as the I/O completing.
+     * Recorded for the sync history; a few stores, no I/O. */
+    discretes_note_io_done(t->discretes, t->curPE, false);
     iop_incr_nia(t, 1);
 }
 

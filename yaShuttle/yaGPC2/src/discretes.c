@@ -420,6 +420,19 @@ static unsigned sync_code(uint32_t reg, int aBase, int bBase, int cBase, int off
     return code;
 }
 
+static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
+                        unsigned char code, uint32_t a, uint32_t driven);
+
+void discretes_note_io_done(Discretes *d, int bce, bool error) {
+    /* WHICH TRANSFER FINISHED WHEN, beside the sync codes.  The 3-CRT vote
+     * is one computer reaching an I/O-complete sync after the others have
+     * already held and dropped theirs (#190), and the sync codes alone
+     * cannot say which transfer was the late one.  Kind 2 is a normal end
+     * (the BCE's WAIT), kind 3 an error termination; 'who' is the BCE. */
+    if (d == NULL || bce < 0 || bce > 255) return;
+    sync_record(d, error ? 3 : 2, (unsigned char)bce, 0, 0u, 0u);
+}
+
 void discretes_note_sim_us(Discretes *d, double us) {
     if (d != NULL) d->simUs = us;     /* one store; no lock, no reader races */
 }
@@ -493,7 +506,11 @@ void discretes_dump_history(Discretes *d, const char *why) {
     size_t start = (d->histHead + d->histSize - d->histCount) % d->histSize;
     for (size_t i = 0; i < d->histCount; i++) {
         const struct SyncEvent *e = &d->hist[(start + i) % d->histSize];
-        if (e->kind == 0)
+        if (e->kind == 2 || e->kind == 3)
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f io BCE%u %s\n",
+                    d->gpcId, e->t, e->sim / 1e6, (unsigned)e->who,
+                    e->kind == 3 ? "ERROR-TERMINATED" : "done");
+        else if (e->kind == 0)
             fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f out %u%u%u %s\n",
                     d->gpcId, e->t, e->sim / 1e6,
                     (e->code >> 2) & 1u, (e->code >> 1) & 1u,

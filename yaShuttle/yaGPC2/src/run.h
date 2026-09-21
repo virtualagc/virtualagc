@@ -237,6 +237,7 @@ typedef struct {
     bool syncWindowDone;
     int syncWindowApplied;         /* how many times it had to be re-applied */
     bool resumeGatePending;        /* first post-hold instruction must wait at the gate */
+    int syncT3Applied;             /* YAGPC_SYNC_T3_US applications, for the log */
     /* A SNAPSHOT PUT OFF because the set was mid-transfer -- see
      * vehicle_io_agrees.  Counted down in batchrunner_step; when it reaches
      * one the capture is asked for again. */

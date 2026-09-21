@@ -1643,6 +1643,7 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
 }
 
 void iop_bce_error_terminate(IOP *iop, int p) {
+    discretes_note_io_done(iop->discretes, p, true);
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
      * BCEs (all, if the list is empty), per computer, with the BCE's program
      * address.  A time-out has its own RECV TIMEOUT line; one without it is a

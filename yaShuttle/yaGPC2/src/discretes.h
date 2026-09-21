@@ -213,6 +213,8 @@ void discretes_dump_history(Discretes *d, const char *why);
  * outlasts every healthy one is the thing to catch: an SVC phase runs
  * 211 us median and has never exceeded 638 us in 155,580 samples, while
  * the peers in the #190 failure held one for 4.7 ms. */
+/* Record a bus program's end in the sync history (see sync_record). */
+void discretes_note_io_done(Discretes *d, int bce, bool error);
 void discretes_note_sim_us(Discretes *d, double us);
 unsigned discretes_sync_code_out(Discretes *d);
 const char *discretes_sync_code_name(unsigned code);

@@ -2631,6 +2631,55 @@ static bool batchrunner_step(BatchRunner *r) {
                 }
             }
         }
+        /* RAISE FCOS'S SYNC HOLDS, IF ASKED.  The 3-CRT vote is a MISSED
+         * PULSE (#190): each computer holds its sync code for at least T3 --
+         * FCMIT3 188 us for an I/O sync, FCMIPRT3 248 with an IPR, FCMCTT3
+         * 103 for common-set/timer, FCMST3 182 for SVC -- and one that
+         * arrives later than that finds the others already back at null.
+         * Widening the TIMEOUT only made the late machine wait longer for a
+         * pulse that had gone (tested, 7 of 8 either way).
+         *
+         * Identified by their run of neighbours in FCMCBLKS -- FCMNOISE 10,
+         * FCMMISKW 200, FCMIT5 87, FCMST5 87, then the four T3s -- at
+         * halfword 0x081f2, unique in the image.  All four are raised by the
+         * SAME amount so FCOS's own ordering between them is kept.  Re-applied
+         * whenever they revert, as the timeout patch is.
+         *
+         * THE COST, unlike the timeout: every sync now lasts at least this
+         * long in simulated time, every time -- about a hundred a second --
+         * so it is time taken from PASS's own cycle. */
+        {
+            const char *t3 = yagpc_getenv("YAGPC_SYNC_T3_US");
+            if (t3 != NULL && *t3 != '\0') {
+                static const uint32_t sigAt = 0x081f2;
+                static const uint32_t sig[4] = {10u, 200u, 87u, 87u};
+                static const uint32_t orig[4] = {188u, 248u, 103u, 182u};
+                bool here = true;
+                for (int k = 0; k < 4 && here; k++)
+                    here = membus_get32(r->age.gpc.cpu.ram,
+                                        sigAt + 2u * (uint32_t)k) == sig[k];
+                uint32_t want = (uint32_t)atol(t3);
+                if (here && want > orig[0] &&
+                    membus_get32(r->age.gpc.cpu.ram, 0x081fa) == orig[0]) {
+                    uint32_t delta = want - orig[0];
+                    uint32_t got[4];
+                    for (int k = 0; k < 4; k++) {
+                        uint32_t a = 0x081fa + 2u * (uint32_t)k;
+                        membus_set32(r->age.gpc.cpu.ram, a, orig[k] + delta, false);
+                        got[k] = membus_get32(r->age.gpc.cpu.ram, a);
+                    }
+                    r->syncT3Applied++;
+                    fprintf(stderr, "GPC%d SYNC T3 #%d: FCMIT3/IPRT3/CTT3/ST3 "
+                                    "188/248/103/182 -> %u/%u/%u/%u us %s "
+                                    "t=%.6f\n",
+                            r->gpcId, r->syncT3Applied,
+                            got[0], got[1], got[2], got[3],
+                            got[0] == orig[0] + delta ? "APPLIED"
+                                                      : "*** NOT APPLIED ***",
+                            r->age.gpc.cpu.elapsedTimeUs / 1e6);
+                }
+            }
+        }
         /* AND SAY WHERE THIS COMPUTER IS IF ITS PHASE IS OUTLASTING EVERY
          * HEALTHY ONE.  Measured over a clean run: SVC 211 us median and 638
          * us worst in 155,580 samples, SSIP 886/2690, I/O complete 252/410,
