@@ -210,6 +210,7 @@ struct Discretes {
         unsigned char code;
         uint32_t a;
         uint32_t driven;
+        uint32_t x;              /* kind 4: parameter-list halfwords */
     } *hist;
     size_t histSize, histHead, histCount;
 };
@@ -422,6 +423,9 @@ static unsigned sync_code(uint32_t reg, int aBase, int bBase, int cBase, int off
 
 static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
                         unsigned char code, uint32_t a, uint32_t driven);
+static void sync_record_x(Discretes *d, unsigned char kind, unsigned char who,
+                          unsigned char code, uint32_t a, uint32_t driven,
+                          uint32_t x);
 
 void discretes_note_io_done(Discretes *d, int bce, bool error) {
     /* WHICH TRANSFER FINISHED WHEN, beside the sync codes.  The 3-CRT vote
@@ -431,6 +435,17 @@ void discretes_note_io_done(Discretes *d, int bce, bool error) {
      * (the BCE's WAIT), kind 3 an error termination; 'who' is the BCE. */
     if (d == NULL || bce < 0 || bce > 255) return;
     sync_record(d, error ? 3 : 2, (unsigned char)bce, 0, 0u, 0u);
+}
+
+void discretes_note_svc(void *ctx, uint32_t psw1, uint32_t ea, uint32_t pl) {
+    /* WHICH SVC, AND FROM WHERE.  In every 3-CRT vote so far one computer
+     * raised 100 SVC when its three peers raised nothing (#190), so the
+     * software on that machine took a path the others did not.  Kind 4
+     * records psw1 (the caller, expanded as for FCMSFAIL's R7), the
+     * parameter list's address and its first two halfwords. */
+    Discretes *d = ctx;
+    if (d == NULL || d->hist == NULL) return;
+    sync_record_x(d, 4, 0, 0, psw1, ea, pl);
 }
 
 void discretes_note_sim_us(Discretes *d, double us) {
@@ -464,6 +479,12 @@ static int sync_neighbour_gpc(int readerGpc, int k) {
 
 static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
                         unsigned char code, uint32_t a, uint32_t driven) {
+    sync_record_x(d, kind, who, code, a, driven, 0u);
+}
+
+static void sync_record_x(Discretes *d, unsigned char kind, unsigned char who,
+                          unsigned char code, uint32_t a, uint32_t driven,
+                          uint32_t x) {
     if (d->hist == NULL || d->histSize == 0) return;
     /* UNDER THE LOCK, because the writers are not one thread.  A neighbour's
      * code is applied to THIS object by the SOURCE machine's thread
@@ -483,6 +504,7 @@ static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
     e->code = code;
     e->a = a;
     e->driven = driven;
+    e->x = x;
     d->histHead = (d->histHead + 1) % d->histSize;
     if (d->histCount < d->histSize) d->histCount++;
 #ifdef HAVE_PTHREADS
@@ -506,7 +528,17 @@ void discretes_dump_history(Discretes *d, const char *why) {
     size_t start = (d->histHead + d->histSize - d->histCount) % d->histSize;
     for (size_t i = 0; i < d->histCount; i++) {
         const struct SyncEvent *e = &d->hist[(start + i) % d->histSize];
-        if (e->kind == 2 || e->kind == 3)
+        if (e->kind == 4) {
+            /* As FCMSFAIL's R7 is expanded: the NIA is psw1's HIGH
+             * halfword, the BSR its bits 24-27 (IBM numbering). */
+            uint32_t n = e->a >> 16, caller = (n & 0x8000u)
+                ? (((e->a >> 4) & 0xfu) << 15) | (n & 0x7fffu) : n;
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f svc nia=%05x "
+                            "psw1=%08x ea=%05x pl=%04x %04x\n",
+                    d->gpcId, e->t, e->sim / 1e6, (unsigned)caller,
+                    (unsigned)e->a, (unsigned)e->driven,
+                    (unsigned)(e->x >> 16), (unsigned)(e->x & 0xffffu));
+        } else if (e->kind == 2 || e->kind == 3)
             fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f io BCE%u %s\n",
                     d->gpcId, e->t, e->sim / 1e6, (unsigned)e->who,
                     e->kind == 3 ? "ERROR-TERMINATED" : "done");
@@ -655,6 +687,21 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
     mask &= ~d->localWired[r];
     if (mask == 0) return;
 
+    /* UNDER THE LOCK, because this register has more than one writer.  The
+     * mask above keeps a datagram off the bits a neighbour drives, but the
+     * update is a read-modify-write of the WHOLE word, and the neighbours
+     * write that word from their own threads (discretes_apply_external_pair,
+     * which does lock).  Unlocked, a datagram for some unrelated bit of input
+     * A -- a mass memory's READY -- could read the register just before a
+     * neighbour raised its sync code and write the old word back after, and
+     * the code was gone.  Losing the raising edge loses the whole pulse, since
+     * the lowering edge then changes nothing.  That is the 3-CRT vote (#190):
+     * GPC4 never saw GPC3's 200 us 100 SVC, matched its own SVC sync to
+     * GPC3's NEXT one, and ran one SVC behind the set until it issued one
+     * nobody answered (svc7500-1, 2026-09-21). */
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&d->lock);
+#endif
     uint32_t before = d->value[r];
     if (op == OP_SET) d->value[r] |= mask;
     else              d->value[r] &= ~mask;
@@ -664,14 +711,18 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
         if (mask & (0x80000000u >> bit)) d->lastSeen[r][bit] = d->attentive;
     }
     d->messages++;
+    uint32_t after = d->value[r];
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&d->lock);
+#endif
 
-    if (d->trace && d->value[r] != before) {
+    if (d->trace && after != before) {
         /* WHOSE discretes.  With one computer the answer was obvious and the
          * line left it out; with four, a trace of the crew panel's bits is
          * unreadable without it. */
         fprintf(stderr, "DISCRETE GPC%d %-5s %c  %08x  ->  %08x   ", d->gpcId,
                 (op == OP_SET) ? "SET" : "RESET",
-                (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, d->value[r]);
+                (reg == DISCRETES_REG_B) ? 'B' : 'A', mask, after);
         const char *sep = "";
         for (int bit = 0; bit < 32; bit++) {
             if (!(mask & (0x80000000u >> bit))) continue;

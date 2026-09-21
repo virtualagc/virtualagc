@@ -1914,6 +1914,10 @@ static void exec_SVC(CPU *t, DInstr *v) {
             fprintf(f, "\n");
         }
     }
+    if (t->svcNote != NULL)
+        t->svcNote(t->svcNoteCtx, register_get32(&t->psw.psw1), ea,
+                   ((uint32_t)membus_get16(t->ram, ea) << 16) |
+                   membus_get16(t->ram, ea + 1));
     if (t->halUCP && t->halUCPHandleSVC && t->halUCPHandleSVC(t->halUCP, ea, r1)) {
         return;
     }

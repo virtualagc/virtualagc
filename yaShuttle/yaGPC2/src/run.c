@@ -1067,6 +1067,8 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     if (opts->discretes) {
         r->discretes = discretes_create(r->gpcId);
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
+        r->age.gpc.cpu.svcNoteCtx = r->discretes;
+        r->age.gpc.cpu.svcNote = discretes_note_svc;
         vehicle_add_machine(veh, r->gpcId, r->discretes);
         /* And this machine's IOP, so a capture can ask whether the set
          * agrees about its I/O before writing one (vehicle_io_agrees). */

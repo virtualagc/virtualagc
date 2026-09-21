@@ -86,6 +86,13 @@ typedef struct CPU {
      *     SVC-interrupt PSW swap must be skipped. */
     void (*halUCPLog)(void *halUCP, const char *msg);
     bool (*halUCPHandleSVC)(void *halUCP, uint32_t ea, uint32_t r1);
+    /* Told of every SVC before it is taken: psw1 (so the caller expands
+     * as FCMSFAIL's does), the effective address, and the first two
+     * halfwords of the parameter list packed high/low.  The 3-CRT vote is
+     * one computer issuing an SVC its peers do not (#190); this says which
+     * one.  NULL when nothing is listening. */
+    void *svcNoteCtx;
+    void (*svcNote)(void *ctx, uint32_t psw1, uint32_t ea, uint32_t pl);
 
     /* The two interval timers' 16-bit HARDWARE counters.  Their high
      * halfwords are not here -- they live in main store at 0x00B0 and
