@@ -827,8 +827,27 @@ void vehicle_dump_devices(const Vehicle *v, const char *dir) {
     }
 }
 
+/* SKIP RESTORING THE VEHICLE'S DEVICES, for one experiment #180 never ran.
+ * That entry refuted the devices being UNCAPTURED as the cause of restore-time
+ * votes; it never tested the reverse, and the correlation points that way:
+ * snapshot201, the one capture recorded as clean five times out of five, is
+ * the only one with no icc/mmu/mtu files at all, while every capture taken
+ * after the devices were added votes some of the time.  That is confounded --
+ * snapshot201 also predates the #179 fix and had one display commander -- so
+ * it settles nothing by itself.  This makes it a controlled question: same
+ * capture, devices restored or not, N restores each. */
+static bool device_restore_wanted(void) {
+    const char *e = yagpc_getenv("YAGPC_DEVICE_RESTORE");
+    return e == NULL || strcmp(e, "0") != 0;
+}
+
 void vehicle_load_devices(Vehicle *v, const char *dir) {
     if (v == NULL || dir == NULL) return;
+    if (!device_restore_wanted()) {
+        fprintf(stderr, "vehicle: YAGPC_DEVICE_RESTORE=0 -- the intercomputer "
+                        "bus starts empty instead of being restored\n");
+        return;
+    }
     char path[512];
     if (v->icc != NULL) {
         snprintf(path, sizeof path, "%s/icc.json", dir);
@@ -884,6 +903,12 @@ void vehicle_load_devices(Vehicle *v, const char *dir) {
 /* The mass memories are made later than the ICC -- they need their volumes
  * -- so they are restored on their own, from the same directory. */
 void vehicle_load_mmu(Vehicle *v, const char *dir) {
+    if (!device_restore_wanted()) {
+        fprintf(stderr, "vehicle: YAGPC_DEVICE_RESTORE=0 -- mass memory and "
+                        "the timing unit start fresh instead of being "
+                        "restored\n");
+        return;
+    }
     if (v == NULL || dir == NULL) return;
     /* ONCE FOR THE VEHICLE, not once per machine.  Every machine's set-up
      * runs before veh->built is set, so a !built test let the second

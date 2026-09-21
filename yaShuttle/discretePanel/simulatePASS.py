@@ -391,9 +391,21 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     """
     missing = []
     for g in gpcs:
-        for f in ("gpc%d.json" % g, "gpc%d.mem.bin" % g):
+        # THE PROTECT MAP COUNTS.  A machine restored without it runs with no
+        # store protection and PASS puts up a continuous X'0503' Instruction
+        # Monitor storm -- a failure that looks like a flight-software defect
+        # and is a missing file.  It was not checked here, so a snapshot
+        # lacking it announced itself as whole.
+        for f in ("gpc%d.json" % g, "gpc%d.mem.bin" % g,
+                  "gpc%d.json.protect.bin" % g):
             if not os.path.isfile(os.path.join(snapdir, f)):
                 missing.append(f)
+    # THE VEHICLE'S OWN DEVICES.  A capture without these restores computers
+    # into a vehicle whose mass memory, intercomputer buses and timing unit
+    # start from nothing, which is not the vehicle that was captured.
+    for f in ("icc.json", "mmu1.json", "mmu2.json", "mtu.json"):
+        if not os.path.isfile(os.path.join(snapdir, f)):
+            missing.append(f)
     for n in range(1, crts + 1):
         for f in crewscript.idp_snapshot_files(n):
             if not os.path.isfile(os.path.join(snapdir, f)):
@@ -421,6 +433,29 @@ def tape_digest(path):
         return h.hexdigest()
     except OSError:
         return None
+
+
+def snapshot_forced(snapdir):
+    """What capture.json says about how this snapshot was taken, or "".
+
+    A capture is deferred while the machines disagree about their I/O and,
+    after SNAPSHOT_RETRY_MAX tries, taken anyway -- which the emulator says on
+    stderr at the time and nothing has recorded since.  Months later a capture
+    that was forced looks exactly like one that was not, which is the very
+    difference ledger #180 is trying to find between captures that restore
+    cleanly and captures that vote.
+    """
+    try:
+        with open(os.path.join(snapdir, "capture.json")) as fh:
+            d = json.load(fh)
+    except (OSError, ValueError):
+        return ""
+    if not d.get("forced"):
+        return ""
+    why = str(d.get("why", "")).strip()
+    return ("it was FORCED after %d deferrals -- the set never agreed about "
+            "its I/O%s.  It may vote on restore; see ledger #180."
+            % (int(d.get("retries", 0)), (" (%s)" % why) if why else ""))
 
 
 def snapshot_tape_problem(snapdir, tape):
@@ -1022,6 +1057,10 @@ def main():
                      % (args.snapshot_resume, problem[1]))
         if problem:
             print("simulatePASS: restoring %s: %s" % (args.snapshot_resume, problem[1]))
+        forced = snapshot_forced(args.snapshot_resume)
+        if forced:
+            print("simulatePASS: NOTE -- %s: %s"
+                  % (os.path.basename(args.snapshot_resume.rstrip("/")), forced))
     exe = args.yagpc or os.path.join(YAGPC_DIR, "yaGPC2.exe" if os.name == "nt" else "yaGPC2")
     if not os.path.isfile(exe):
         sys.exit("simulatePASS: no yaGPC2 at %s -- build it (make, in %s) or give --yagpc"
