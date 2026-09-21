@@ -80,12 +80,13 @@ wait crt 1 title "GPC MEMORY"
 # --- GPC1 loaded: to RUN; GPC2 IPL on CRT 2 ----------------------------------
 +2 subtitle Now repeat that whole exercise for GPC 2.
 +0 gpc 2
-+3 subtitle Select CRT "2+3" (CRT2).
++2 subtitle <left>First deassign CRT2 from PASS:  GPC/CRT 0 2 EXEC\nNo PASS GPC may command it while it is lent to the one being IPLed.
 # Deassign CRT 2 from PASS before lending it to the GPC being IPLed,
 # "to avoid any conflict in CRT commanders" (DPS Workbook USA005350
 # Rev B).  Keyed on KB1 because GPC/CRT entries go to a
 # PASS-commanded CRT.
 +2 keys KB1 GPC/CRT 0 2 EXEC
++3 subtitle Select CRT "2+3" (CRT2).
 +2 crt 2
 
 +1 subtitle Select IPL source MM1
@@ -118,6 +119,7 @@ wait gpc 2 mode-tb RUN timeout 300
 # Give GPC 2 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
++2 subtitle <left>GPC 2 is in RUN, so give it CRT2:  GPC/CRT 2 2 EXEC\nA GPC is assigned an IDP to show that it is running properly.
 +2 keys KB1 GPC/CRT 2 2 EXEC
 wait crt 2 title "GPC MEMORY" 
 +0 subtitle It's up! Notice the title "GPC MEMORY"
@@ -126,12 +128,13 @@ wait crt 2 title "GPC MEMORY"
 
 # --- GPC2 loaded: to RUN; GPC3 IPL -------------------------------------------
 +2 subtitle Now repeat that whole exercise for GPC 3.
-+3 subtitle CRT "2+3" should already still be selected
++2 subtitle <left>First deassign CRT2 from PASS:  GPC/CRT 0 2 EXEC\nNo PASS GPC may command it while it is lent to the one being IPLed.
 # Deassign CRT 2 from PASS before lending it to the GPC being IPLed,
 # "to avoid any conflict in CRT commanders" (DPS Workbook USA005350
 # Rev B).  Keyed on KB1 because GPC/CRT entries go to a
 # PASS-commanded CRT.
 +2 keys KB1 GPC/CRT 0 2 EXEC
++3 subtitle CRT "2+3" should already still be selected
 +1 crt 2
 
 +1 subtitle Select IPL source MM1
@@ -165,6 +168,7 @@ wait gpc 3 mode-tb RUN timeout 300
 # Give GPC 3 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
++2 subtitle <left>GPC 3 is in RUN, so give it CRT2:  GPC/CRT 3 2 EXEC\nA GPC is assigned an IDP to show that it is running properly.
 +2 keys KB1 GPC/CRT 3 2 EXEC
 wait crt 2 title "GPC MEMORY"
 +0 subtitle It's up! Notice the title "GPC MEMORY"
@@ -173,12 +177,13 @@ wait crt 2 title "GPC MEMORY"
 
 # --- GPC3 loaded: to RUN; GPC4 IPL -------------------------------------------
 +2 subtitle And GPC 4 should be almost the same thing as GPC 3.
-+3 subtitle CRT "2+3" should already still be selected
++2 subtitle <left>First deassign CRT2 from PASS:  GPC/CRT 0 2 EXEC\nNo PASS GPC may command it while it is lent to the one being IPLed.
 # Deassign CRT 2 from PASS before lending it to the GPC being IPLed,
 # "to avoid any conflict in CRT commanders" (DPS Workbook USA005350
 # Rev B).  Keyed on KB1 because GPC/CRT entries go to a
 # PASS-commanded CRT.
 +2 keys KB1 GPC/CRT 0 2 EXEC
++3 subtitle CRT "2+3" should already still be selected
 +1 crt 2
 
 +1 subtitle Select IPL source MM1
@@ -212,6 +217,7 @@ wait gpc 4 mode-tb RUN timeout 300
 # Give GPC 4 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
++2 subtitle <left>GPC 4 is in RUN, so give it CRT2:  GPC/CRT 4 2 EXEC\nA GPC is assigned an IDP to show that it is running properly.
 +2 keys KB1 GPC/CRT 4 2 EXEC
 wait crt 2 title "GPC MEMORY" 
 +0 subtitle It's up! Notice the title "GPC MEMORY"
@@ -223,8 +229,12 @@ wait crt 2 title "GPC MEMORY"
 # assigned an IDP to ensure that it is running properly", DPS Workbook
 # USA005350 Rev B).  It goes AFTER the last IPL because each IPL in turn
 # borrows CRT 2 through the BFC CRT switches, which would undo it.
-# Without this CRT 2 stays with GPC 1, and both computers command that
-# bus -- which the Workbook says to avoid (ledger #184).
+# Without this CRT 2 stays with GPC 1, which goes on commanding that bus
+# alone, so GPC 2 never drives a display of its own (ledger #184).  The two
+# computers do not command it at the same time -- possession of a display
+# bus is exclusive -- but the wrong one keeps it: measured, 1303 command
+# words to GPC 2's first at t=235, against 25 and t=69 with these entries
+# (ledger #185).
 +2 subtitle Assign CRT 2 to GPC 2, so GPC 2 drives its own display.
 +2 keys KB1 GPC/CRT 2 2 EXEC
 wait crt 2 title "GPC MEMORY" timeout 60
