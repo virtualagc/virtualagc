@@ -625,6 +625,8 @@ static bool load_state(AGEHarness *age, const char *path, bool verbose) {
             {"progExcept", &iop->regProgExcept},
             {"indicator", &iop->regIndicator},
             {"discreteOut", &iop->regDiscreteOut},
+            {"discreteInA", &iop->regDiscreteInA},
+            {"discreteInB", &iop->regDiscreteInB},
             {"rmStatus", &iop->regRMStatus},
             {"mscFailDisc", &iop->msc.regFailDisc},
             {"mscIntProg", &iop->msc.regIntProg},
@@ -984,6 +986,19 @@ bool ageharness_dump_state(AGEHarness *age, const char *path) {
     fprintf(f, "    \"progExcept\": \"%08x\",\n", register_get32(&iop->regProgExcept));
     fprintf(f, "    \"indicator\": \"%08x\",\n", register_get32(&iop->regIndicator));
     fprintf(f, "    \"discreteOut\": \"%08x\",\n", register_get32(&iop->regDiscreteOut));
+    /* AND THE INPUTS, which every other register here had and these two
+     * did not.  Discrete input A is where a computer reads ITS PEERS'
+     * SYNC CODES, so a machine that comes back at DISCRETE_IN_A_DEFAULT
+     * has no view of the set until each peer publishes again -- and
+     * whether that arrives before its first sync check is a race, which
+     * is the shape of the random vote after a restore (#180).  The
+     * STORED value is dumped, not iop_discrete_in_a(): the MM-ready bits
+     * and the crew panel overlay are computed on read and must stay
+     * computed. */
+    fprintf(f, "    \"discreteInA\": \"%08x\",\n",
+            register_get32(&iop->regDiscreteInA));
+    fprintf(f, "    \"discreteInB\": \"%08x\",\n",
+            register_get32(&iop->regDiscreteInB));
     fprintf(f, "    \"rmStatus\": \"%08x\",\n", register_get32(&iop->regRMStatus));
     fprintf(f, "    \"mscFailDisc\": \"%08x\",\n", register_get32(&iop->msc.regFailDisc));
     fprintf(f, "    \"mscIntProg\": \"%08x\",\n", register_get32(&iop->msc.regIntProg));

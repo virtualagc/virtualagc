@@ -105,7 +105,7 @@ _T0 = time.monotonic()
 
 
 def log(msg):
-    """Log with seconds since this process started.
+    r"""Log with seconds since this process started.
 
     A lit vote lamp is only interpretable if you know WHEN it lit: a vote at
     t=330 in a 700 s run is a failure under way, the same vote at t=699 is the
