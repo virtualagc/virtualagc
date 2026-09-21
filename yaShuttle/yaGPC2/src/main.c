@@ -7,6 +7,7 @@
 #endif
 
 #include "bcenet_transport.h"
+#include "discretes.h"
 #include "opts.h"
 #include "run.h"
 #include "vehicle.h"
@@ -89,6 +90,24 @@ int main(int argc, char **argv) {
         fprintf(stderr, "--gpcs with more than one computer cannot be combined "
                         "with --interactive or --debug\n");
         return 1;
+    }
+
+    /* THE PORT BASE BEFORE ANYTHING PRINTS ONE.  batchrunner_init applies
+     * --port-base, but that is per machine and runs later, so anything up
+     * here saw the default: the GPC2/GPC3 notice below reported 6925 and
+     * 6928 on a run whose sockets were 7325 and 7328, which reads exactly
+     * like a run squatting on another run's ports.  The sockets were always
+     * right -- the message was not.  Setting it once, here, is what makes
+     * the two agree. */
+    if (opts.portBase != NULL && *opts.portBase != '\0') {
+        char *end = NULL;
+        long v = strtol(opts.portBase, &end, 10);
+        if (end == NULL || *end != '\0' || v <= 0 || v >= 65536 - 100) {
+            fprintf(stderr, "--port-base: expected a port number, got \"%s\"\n",
+                    opts.portBase);
+            return 1;
+        }
+        yagpc_set_port_base((int)v);
     }
 
     /* WHICH COMPUTERS, before any socket is opened.  The intercomputer bus is
