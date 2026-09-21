@@ -268,6 +268,16 @@ typedef struct Vehicle {
      * every machine, so that one instant's files share one name across the
      * whole vehicle and cannot be mistaken for two different captures. */
     char pauseTag[96];
+    /* THE RESUME GATE.  A restore used to let each machine start the moment
+     * IT had loaded, and they load at different speeds: measured, the four
+     * began executing 0, 6.2, 13.4 and 17.9 ms apart on the shared clock.
+     * The first one out walks into a sync point with peers that are not
+     * running yet and fails them, and a wider sync window cannot help when
+     * the stagger is larger than any window (#180).  So after a resume every
+     * machine waits here until all have loaded, and they are released
+     * together.  Guarded by pauseLock/pauseCond. */
+    int resumeArrived;
+    bool resumeReleased;
 #ifdef HAVE_PTHREADS
     pthread_mutex_t pauseLock;
     pthread_cond_t pauseCond;
@@ -402,6 +412,11 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs);
  * vehicle_pause_enter is the one on the per-instruction path and returns
  * false immediately when nothing is pending. */
 void vehicle_join_pause_group(Vehicle *v, int gpcId);
+/* Hold a restored machine until every machine in the vehicle has loaded,
+ * then release them together; see resumeArrived. */
+void vehicle_resume_gate(Vehicle *v, int gpcId);
+/* Join the simulated-time barrier at zero before the resume gate opens. */
+void vehicle_barrier_prejoin(Vehicle *v, int gpcId);
 void vehicle_leave_pause_group(Vehicle *v, int gpcId);
 bool vehicle_pause_request(Vehicle *v, const char *tag);
 /* A computer is reading its bootstrap; see Vehicle::bootstrapping. */

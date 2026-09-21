@@ -300,6 +300,62 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
  * every release broadcasts. */
 #define PAUSE_SLEEP_SEC 0.002
 
+void vehicle_barrier_prejoin(Vehicle *v, int gpcId) {
+    if (v == NULL || gpcId < 1 || gpcId > 5) return;
+    /* JOIN AT ZERO, BEFORE ANYBODY RUNS.  Releasing the machines together in
+     * WALL time was not enough: measured, the stagger fell from 17.9 ms only
+     * to 6.9 ms, because the first thread awake starts executing before the
+     * others have joined the barrier, and barrier_join then levels each
+     * latecomer with the leader's ALREADY-ADVANCED time -- so the leader
+     * keeps its head start.  Joined here, every machine is active at the
+     * same instant before the gate opens, and the first one awake is held
+     * by the barrier until the others start moving.  A resumed machine's
+     * own clock restarts at zero, so zero offset puts them all together. */
+    barrier_lock(v);
+    v->barOffsetUs[gpcId] = 0.0;
+    v->barPubUs[gpcId] = 0.0;
+    v->barActive[gpcId] = true;
+    barrier_unlock(v);
+}
+
+void vehicle_resume_gate(Vehicle *v, int gpcId) {
+    if (v == NULL) return;
+    int want = v->nExpected;
+    if (want < 2) return;                 /* one machine has nobody to wait for */
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->pauseLock);
+    v->resumeArrived++;
+    double t0 = yagpc_monotonic_seconds();
+    if (v->resumeArrived >= want) {
+        v->resumeReleased = true;
+        pthread_cond_broadcast(&v->pauseCond);
+    }
+    /* BOUNDED, because a machine that fails to load must not hang the
+     * vehicle forever.  Ten seconds is far longer than any load takes (the
+     * stagger measured was 18 ms) and short enough to notice. */
+    while (!v->resumeReleased) {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_nsec += 50000000L;
+        if (ts.tv_nsec >= 1000000000L) { ts.tv_sec++; ts.tv_nsec -= 1000000000L; }
+        pthread_cond_timedwait(&v->pauseCond, &v->pauseLock, &ts);
+        if (!v->resumeReleased && yagpc_monotonic_seconds() - t0 > 10.0) {
+            fprintf(stderr, "GPC%d RESUME GATE: gave up after 10 s with %d of "
+                            "%d machines loaded -- releasing anyway\n",
+                    gpcId, v->resumeArrived, want);
+            v->resumeReleased = true;
+            pthread_cond_broadcast(&v->pauseCond);
+        }
+    }
+    pthread_mutex_unlock(&v->pauseLock);
+    fprintf(stderr, "GPC%d RESUME GATE: released with %d of %d loaded, after "
+                    "%.1f ms\n", gpcId, v->resumeArrived, want,
+            (yagpc_monotonic_seconds() - t0) * 1000.0);
+#else
+    (void)gpcId;
+#endif
+}
+
 void vehicle_join_pause_group(Vehicle *v, int gpcId) {
     if (v == NULL || gpcId < 1 || gpcId > 5) return;
 #ifdef HAVE_PTHREADS

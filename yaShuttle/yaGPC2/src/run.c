@@ -2242,6 +2242,22 @@ static bool batchrunner_step(BatchRunner *r) {
                               register_get32(&r->age.gpc.iop.regDiscreteOut));
     }
 
+    /* AFTER A RESUME, THE FIRST INSTRUCTION WAITS FOR EVERYBODY'S.  Gating
+     * straight after the load was not enough: a restored machine is then
+     * held until the fresh panel process is first heard ("silence is
+     * HALT"), and while held it LEAVES the time barrier and withdraws its
+     * outputs to 000.  Each is released when it next polls the panel, at a
+     * slightly different moment, rejoins the barrier levelled to whoever got
+     * out first, and the stagger comes back -- measured 1.0 to 6.9 ms, with
+     * restores still voting.  Here every machine has been released and has
+     * re-announced its outputs before any of them executes, and all four
+     * join the barrier at the same simulated instant. */
+    if (r->resumeGatePending) {
+        r->resumeGatePending = false;
+        vehicle_barrier_prejoin(r->vehicle, r->gpcId);
+        vehicle_resume_gate(r->vehicle, r->gpcId);
+    }
+
     /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the
      * first time simulated time passes each <sec>, without stopping the
      * run.  --dump-state alone fires only when the machine stops, and the
@@ -2580,8 +2596,16 @@ static bool batchrunner_step(BatchRunner *r) {
          * stopped computer is silent forever, not late by milliseconds, so
          * it trips any window this side of a second. */
         {
+            /* NOT ONE-SHOT.  The first version patched once and set a flag,
+             * and a capture of the same run showed 3850 back in every image
+             * at t=442 s: the word is REWRITTEN after the IPL -- the OPS load
+             * brings in a fresh common block -- so a single patch covered
+             * only the minutes before the OPS transition and none of the time
+             * in which the vote happens.  So: re-apply whenever it reverts,
+             * and log every application, which also measures WHEN it reverts.
+             * syncWindowDone now only counts applications for the log. */
             const char *w = yagpc_getenv("YAGPC_SYNC_WINDOW_US");
-            if (w != NULL && *w != '\0' && !r->syncWindowDone) {
+            if (w != NULL && *w != '\0') {
                 uint32_t want = (uint32_t)atol(w);
                 uint32_t here = membus_get32(r->age.gpc.cpu.ram, 0x08250);
                 uint32_t before = membus_get32(r->age.gpc.cpu.ram, 0x0824e);
@@ -2594,11 +2618,13 @@ static bool batchrunner_step(BatchRunner *r) {
                     membus_set32(r->age.gpc.cpu.ram, 0x08250, want, false);
                     uint32_t now = membus_get32(r->age.gpc.cpu.ram, 0x08250);
                     r->syncWindowDone = true;
-                    fprintf(stderr, "GPC%d SYNC WINDOW: FCMSNTO2 at 0x08250 "
-                                    "was 3850 us, asked for %u, reads %u "
-                                    "(FCMSYNTO at 0x0824e left at %u) %s "
+                    r->syncWindowApplied++;
+                    fprintf(stderr, "GPC%d SYNC WINDOW #%d: FCMSNTO2 at "
+                                    "0x08250 was 3850 us, asked for %u, reads "
+                                    "%u (FCMSYNTO at 0x0824e left at %u) %s "
                                     "t=%.6f\n",
-                            r->gpcId, (unsigned)want, (unsigned)now,
+                            r->gpcId, r->syncWindowApplied,
+                            (unsigned)want, (unsigned)now,
                             (unsigned)before,
                             now == want ? "APPLIED" : "*** NOT APPLIED ***",
                             r->age.gpc.cpu.elapsedTimeUs / 1e6);
@@ -3276,6 +3302,12 @@ int batchrunner_run(BatchRunner *r) {
     vehicle_join_pause_group(r->vehicle, r->gpcId);
     long byteCount = batchrunner_load(r);
     batchrunner_init_io(r);
+    /* AFTER A RESUME, NOBODY STARTS UNTIL EVERYBODY HAS LOADED.  See
+     * vehicle_resume_gate: the machines load at different speeds, and one
+     * that starts early fails its peers before they exist. */
+    /* A resume is gated at the first instruction AFTER the panel hold, not
+     * here -- see resumeGatePending in batchrunner_step. */
+    r->resumeGatePending = (r->opts != NULL && r->opts->resumeDir != NULL);
 
     r->age.halUCP.cbCtx = r;
     r->age.halUCP.inputCallback = batchrunner_input_cb;

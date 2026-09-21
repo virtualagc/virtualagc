@@ -235,6 +235,8 @@ typedef struct {
     /* YAGPC_SYNC_WINDOW_US: FCOS's sync timeout, widened in the loaded image
      * once the IPL has put it there.  See the note at the patch site. */
     bool syncWindowDone;
+    int syncWindowApplied;         /* how many times it had to be re-applied */
+    bool resumeGatePending;        /* first post-hold instruction must wait at the gate */
     /* A SNAPSHOT PUT OFF because the set was mid-transfer -- see
      * vehicle_io_agrees.  Counted down in batchrunner_step; when it reaches
      * one the capture is asked for again. */
