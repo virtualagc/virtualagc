@@ -101,8 +101,21 @@ BEZEL_X1 = GRID_X0 + GRID_SPAN + GRID_PAD
 REF_W = int(BEZEL_X1 + MARGIN)
 
 
+_T0 = time.monotonic()
+
+
 def log(msg):
-    print("voting: %s" % msg, flush=True)
+    """Log with seconds since this process started.
+
+    A lit vote lamp is only interpretable if you know WHEN it lit: a vote at
+    t=330 in a 700 s run is a failure under way, the same vote at t=699 is the
+    shutdown tearing the machines down one at a time.  Without a stamp here
+    the two are indistinguishable and the log can only be read by re-running.
+    The stamp goes at the END of the line: syncscore.py matches
+    `voting:\s+(\d)(\d)\s+(ON|OFF)` from the start, and a prefix would make
+    every vote invisible to it without any sign that it had.
+    """
+    print("voting: %s  [t=%.1f]" % (msg, time.monotonic() - _T0), flush=True)
 
 
 def scaled_wh(w, h, size):
