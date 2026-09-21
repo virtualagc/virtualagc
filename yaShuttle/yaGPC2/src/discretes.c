@@ -192,6 +192,21 @@ struct Discretes {
      * no real code is, so the first of each always prints. */
     unsigned syncOutLast;
     unsigned syncInLast[5];
+    /* THE CONVERSATION, KEPT BUT NOT PRINTED.  A full YAGPC_SYNCTRACE is
+     * 2.4 million lines for a ten-minute run and slows the vehicle enough
+     * that the race in #190 stops happening -- the instrument destroys what
+     * it measures.  These are the same events, recorded into a ring at a
+     * few stores each and printed only when a computer actually declares a
+     * failure, which is the one moment the history is wanted. */
+    struct SyncEvent {
+        double t;
+        unsigned char kind;      /* 0 = this machine speaking, 1 = hearing */
+        unsigned char who;       /* the neighbour's GPC id, for kind 1 */
+        unsigned char code;
+        uint32_t a;
+        uint32_t driven;
+    } *hist;
+    size_t histSize, histHead, histCount;
 };
 
 static int reg_index(int reg) {
@@ -226,6 +241,19 @@ Discretes *discretes_create(int gpcId) {
      * that, so a "last seen" of 0 would swallow it. */
     d->syncOutLast = 8u;
     for (int k = 0; k < 5; k++) d->syncInLast[k] = 8u;
+    {
+        /* YAGPC_SYNC_HISTORY=N keeps the last N sync events per computer.
+         * Off by default: a run that is not investigating #190 should carry
+         * nothing, and 4096 events is about a second of conversation, which
+         * is ample either side of a 3.85 ms timeout. */
+        const char *e = yagpc_getenv("YAGPC_SYNC_HISTORY");
+        long n = (e != NULL && *e != '\0') ? atol(e) : 0;
+        if (n > 0) {
+            if (n > 1000000L) n = 1000000L;
+            d->hist = calloc((size_t)n, sizeof *d->hist);
+            d->histSize = d->hist != NULL ? (size_t)n : 0;
+        }
+    }
     /* THE ATTENTIVE CLOCK STARTS AT ONE, not at zero.  lastSeen uses 0.0 to
      * mean "this bit has never been published", so a clock that began at 0
      * would stamp the very first datagram with the never-seen sentinel and
@@ -407,12 +435,51 @@ static int sync_neighbour_gpc(int readerGpc, int k) {
     return ((readerGpc - 1 + k) % 5) + 1;
 }
 
+static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
+                        unsigned char code, uint32_t a, uint32_t driven) {
+    if (d->hist == NULL || d->histSize == 0) return;
+    struct SyncEvent *e = &d->hist[d->histHead];
+    e->t = yagpc_monotonic_seconds();
+    e->kind = kind;
+    e->who = who;
+    e->code = code;
+    e->a = a;
+    e->driven = driven;
+    d->histHead = (d->histHead + 1) % d->histSize;
+    if (d->histCount < d->histSize) d->histCount++;
+}
+
+void discretes_dump_history(Discretes *d, const char *why) {
+    if (d == NULL || d->hist == NULL || d->histCount == 0) return;
+    fprintf(stderr, "SYNCHIST GPC%d %s -- last %zu events, oldest first\n",
+            d->gpcId, why != NULL ? why : "", d->histCount);
+    size_t start = (d->histHead + d->histSize - d->histCount) % d->histSize;
+    for (size_t i = 0; i < d->histCount; i++) {
+        const struct SyncEvent *e = &d->hist[(start + i) % d->histSize];
+        if (e->kind == 0)
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f out %u%u%u %s\n",
+                    d->gpcId, e->t, (e->code >> 2) & 1u, (e->code >> 1) & 1u,
+                    e->code & 1u, discretes_sync_code_name(e->code));
+        else
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f <- GPC%u %u%u%u %s "
+                            "A=%08x driven=%08x\n",
+                    d->gpcId, e->t, (unsigned)e->who,
+                    (e->code >> 2) & 1u, (e->code >> 1) & 1u, e->code & 1u,
+                    discretes_sync_code_name(e->code),
+                    (unsigned)e->a, (unsigned)e->driven);
+    }
+}
+
 void discretes_synctrace(Discretes *d) {
-    if (d == NULL || !synctrace_on()) return;
+    if (d == NULL) return;
+    bool say = synctrace_on();
+    if (!say && d->hist == NULL) return;
 
     unsigned out = sync_code(d->value[reg_index(DISCRETES_REG_OUT)], 20, 24, 28, 0);
     if (out != d->syncOutLast) {
         d->syncOutLast = out;
+        sync_record(d, 0, 0, (unsigned char)out, 0u, 0u);
+        if (say)
         fprintf(stderr, "SYNC t=%.6f GPC%d out  %u%u%u %s\n",
                 yagpc_monotonic_seconds(), d->gpcId,
                 (out >> 2) & 1u, (out >> 1) & 1u, out & 1u,
@@ -425,6 +492,9 @@ void discretes_synctrace(Discretes *d) {
         if (code == d->syncInLast[k]) continue;
         d->syncInLast[k] = code;
         int from = sync_neighbour_gpc(d->gpcId, k);
+        sync_record(d, 1, (unsigned char)from, (unsigned char)code, in,
+                    discretes_driven_mask(d, DISCRETES_REG_A));
+        if (!say) continue;
         /* THE DRIVEN MASK IS PRINTED WITH IT.  The value alone proves only
          * that the bits reached this object; what the CPU reads is the
          * overlay, which passes a bit ONLY if it is also currently driven.

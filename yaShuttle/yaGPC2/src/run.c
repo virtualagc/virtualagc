@@ -613,6 +613,8 @@ static void batchrunner_write_capture(BatchRunner *r) {
          * a capture nobody can take is worse than one that needs a second
          * look, and the reason is on the record either way. */
         char why[160];
+        bool forced = false;
+        why[0] = '\0';
         if (!vehicle_io_agrees(r->vehicle, why, sizeof why)) {
             if (r->snapRetries < SNAPSHOT_RETRY_MAX) {
                 if (vehicle_capture_writer(r->vehicle, r->gpcId)) {
@@ -627,7 +629,9 @@ static void batchrunner_write_capture(BatchRunner *r) {
                             "set never agreed about its I/O (%s).  It may vote "
                             "on restore; see ledger #180.\n",
                     r->gpcId, r->snapRetries, why);
+            forced = true;
         }
+        int snapTries = r->snapRetries;
         r->snapRetries = 0;
         fprintf(stderr, "GPC%d SNAPSHOT at t=%.6f s step=%ld -> %s\n",
                 r->gpcId, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
@@ -641,8 +645,31 @@ static void batchrunner_write_capture(BatchRunner *r) {
         /* AND THE VEHICLE'S OWN DEVICES, ONCE.  Every machine is parked
          * here, so this is the only instant at which they can be written
          * coherently with the computers that were talking to them. */
-        if (vehicle_capture_writer(r->vehicle, r->gpcId))
+        if (vehicle_capture_writer(r->vehicle, r->gpcId)) {
             vehicle_dump_devices(r->vehicle, r->opts->snapshotDir);
+            /* AND WHETHER THIS CAPTURE WAS FORCED.  The "taken anyway" line
+             * goes to stderr, which a restore never sees and a log rotation
+             * eventually eats -- so a capture that was taken while the set
+             * disagreed about its I/O is indistinguishable, months later,
+             * from one taken cleanly.  That is precisely the difference #180
+             * is trying to find between captures that restore and captures
+             * that vote, so it belongs IN the snapshot. */
+            snprintf(path, sizeof path, "%s/capture.json",
+                     r->opts->snapshotDir);
+            FILE *cf = fopen(path, "w");
+            if (cf != NULL) {
+                fprintf(cf, "{\n  \"forced\": %s,\n  \"retries\": %d,\n",
+                        forced ? "true" : "false", snapTries);
+                fprintf(cf, "  \"why\": \"");
+                for (const char *c = why; *c != '\0'; c++) {
+                    if (*c == '"' || *c == '\\') fputc('\\', cf);
+                    fputc((unsigned char)*c < 0x20 ? ' ' : *c, cf);
+                }
+                fprintf(cf, "\",\n  \"capturedAtUs\": %.0f\n}\n",
+                        r->age.gpc.cpu.elapsedTimeUs);
+                fclose(cf);
+            }
+        }
         return;
     }
     if (r->opts->dumpState == NULL) return;
@@ -2337,6 +2364,15 @@ static bool batchrunner_step(BatchRunner *r) {
                             vehicle_shared_us(r->vehicle, r->gpcId) / 1e6, r->step,
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 0)),
                             (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 7)));
+                    /* AND THE CONVERSATION THAT LED HERE.  With
+                     * YAGPC_SYNC_HISTORY=N each computer keeps its last N
+                     * sync-code events in a ring; a landmark on FCMSFAIL is
+                     * exactly the moment to print them, because what is
+                     * wanted is what this machine had just heard from its
+                     * peers -- and a full YAGPC_SYNCTRACE slows the vehicle
+                     * enough that the failure stops happening (#190). */
+                    if (r->trig.hits[i] == 1)
+                        discretes_dump_history(r->discretes, r->trig.label[i]);
                     /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed
                      * INSIDE a routine, where the interesting value is
                      * whichever register that code happens to be using --

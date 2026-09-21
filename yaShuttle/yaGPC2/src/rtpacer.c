@@ -29,6 +29,33 @@
  * passes come back-to-back and 5 ms apiece is repaid quickly. */
 #define IDLE_CATCHUP_MAX_NS 5000000.0   /* 5 ms of simulated time per pass */
 
+/* AND THE DEADLINE IT HAS TO STAY INSIDE IS NOT THE BUS TIMEOUT.  The cap
+ * above was sized against a bus receive timeout, which on a display bus is
+ * 5.0 ms -- but the tightest deadline the flight software measures in
+ * SIMULATED time is FCOS's sync timeout, 3.85 ms, and 5 ms is longer than
+ * that.  A single repayment pass can therefore carry a waiting computer's
+ * clock past the point where its peers' sync codes are "late" even though
+ * no wall time has passed for them, and the machine fails all three at once
+ * from FCMISYNC -- which is the signature recorded in ledger #190.
+ *
+ * YAGPC_IDLE_CATCHUP_MS sets it, so the hypothesis is one run rather than
+ * one rebuild, and YAGPC_IDLE_CATCHUP_TRACE reports any pass that repays
+ * more than a millisecond, which is rare enough to leave on. */
+static double idle_catchup_max_ns(void) {
+    static int init = 0;
+    static double ns = IDLE_CATCHUP_MAX_NS;
+    if (!init) {
+        init = 1;
+        const char *e = yagpc_getenv("YAGPC_IDLE_CATCHUP_MS");
+        if (e != NULL) {
+            char *end = NULL;
+            double v = strtod(e, &end);
+            if (end != NULL && *end == '\0' && v > 0.0) ns = v * 1e6;
+        }
+    }
+    return ns;
+}
+
 /* WHEN A REBASE IS LEGITIMATE.
  *
  * Re-basing says: the machine was STOPPED, the world moved on, carry on
@@ -225,13 +252,20 @@ RTPaceResult rtpacer_advance_idle(RTPacer *p) {
          * expiry and the instant the wait clears, so no interrupt is taken
          * late or early. */
         double owedNs = -rtpacer_ahead_ms(p) * 1e6 * p->factor;
-        if (owedNs > IDLE_CATCHUP_MAX_NS) {
+        double cap = idle_catchup_max_ns();
+        if (owedNs > cap) {
             /* Bounded per call so a pathological gap is closed over
              * several passes rather than in one jump.  NOT dropped: the
              * remainder is still owed and the next call still sees it. */
             p->statCappedCalls++;
-            owedNs = IDLE_CATCHUP_MAX_NS;
+            owedNs = cap;
         }
+        if (owedNs > 1e6 && yagpc_getenv("YAGPC_IDLE_CATCHUP_TRACE") != NULL)
+            fprintf(stderr, "CATCHUP gpc=%d repaid %.3f ms of simulated time "
+                            "in one pass (cap %.3f ms, FCOS sync timeout "
+                            "3.85 ms) t=%.6f\n",
+                    p->gpcId, owedNs / 1e6, cap / 1e6,
+                    p->cpu->elapsedTimeUs / 1e6);
         if (owedNs > 0.0) cpu_advance_idle_ns(p->cpu, owedNs);
     }
     if (!psw_get_wait_state(&p->cpu->psw)) {

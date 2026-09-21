@@ -204,6 +204,11 @@ void discretes_set_local_wired(Discretes *d, int reg, uint32_t mask);
  * unless the variable is set.  See the block comment in discretes.c for the
  * codes and where they come from. */
 void discretes_synctrace(Discretes *d);
+/* Print the recorded sync conversation (YAGPC_SYNC_HISTORY=N), which is
+ * what a full trace would have shown without the full trace's cost.
+ * Called when a computer declares a sync failure -- the one moment the
+ * history is worth having. */
+void discretes_dump_history(Discretes *d, const char *why);
 const char *discretes_sync_code_name(unsigned code);
 
 /* Bits of `reg` currently being published by somebody, and their values.
