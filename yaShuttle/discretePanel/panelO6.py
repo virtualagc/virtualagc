@@ -315,8 +315,18 @@ FULL_SIZE = 768        # --size units: 768 is the design (full) window
 SETTING_SIZE = 8
 
 
+_LOG_T0 = time.monotonic()
+
+
 def log(msg):
-    print("panelO6: %s" % msg, flush=True)
+    r"""Log with seconds since this process started.
+
+    The panel's log is the record of what the CREW DID, and until now it
+    carried no time -- so "the set voted GPC3 out after I halted it" could be
+    asserted but not measured.  Stamped at the END of the line, like cam.py's:
+    anything already matching these lines from the start keeps working.
+    """
+    print("panelO6: %s  [t=%.1f]" % (msg, time.monotonic() - _LOG_T0), flush=True)
 
 
 def _active_window():

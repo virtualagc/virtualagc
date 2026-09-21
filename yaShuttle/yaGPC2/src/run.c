@@ -2557,6 +2557,96 @@ static bool batchrunner_step(BatchRunner *r) {
          * go stale.  See vehicle_refresh_lines. */
         vehicle_refresh_lines(r->vehicle, r->gpcId,
                               discretes_value(r->discretes, DISCRETES_REG_OUT));
+        /* WIDEN FCOS'S SYNC WINDOW, IF ASKED, ONCE THE IPL HAS LOADED IT.
+         *
+         * FCMSNTO2 is a plain word -- 'DC F'3850'  3.85 MILLISEC IN
+         * MICROSECONDS', FCMCBLKS.asm:686 -- that FCMISYNC, FCMCSYNC and
+         * FCMSSYNC each subtract from the PC1 timer to form their deadline.
+         * At halfword 0x08250 in the loaded image, with FCMSYNTO's 440
+         * immediately before it, which is what identifies it.
+         *
+         * WHY THE EMULATOR AND NOT THE BUILD.  This is the experiment for
+         * whether a wider window removes the 3-CRT vote (#190), and it has
+         * to be answerable before anyone rebuilds a tape.  A run patches its
+         * own store after the IPL, so the tape and the flight software are
+         * untouched and the change is visible in one line of the log.
+         *
+         * WHY IT IS DEFENSIBLE AT ALL.  Our four computers are OS threads
+         * sharing a host, not four boxes on a backplane, and they reach a
+         * sync point within 35 us of each other except for an excursion of a
+         * few milliseconds about once every ten minutes.  3.85 ms was sized
+         * for the real machine's jitter, not ours.  The property that must
+         * survive is that a computer which STOPS is still failed -- and a
+         * stopped computer is silent forever, not late by milliseconds, so
+         * it trips any window this side of a second. */
+        {
+            const char *w = yagpc_getenv("YAGPC_SYNC_WINDOW_US");
+            if (w != NULL && *w != '\0' && !r->syncWindowDone) {
+                uint32_t want = (uint32_t)atol(w);
+                uint32_t here = membus_get32(r->age.gpc.cpu.ram, 0x08250);
+                uint32_t before = membus_get32(r->age.gpc.cpu.ram, 0x0824e);
+                if (want > 0 && here == 3850u && before == 440u) {
+                    /* WITHOUT THE PROTECT CHECK: the common block is store
+                     * protected, and this write is the emulator's, not the
+                     * flight software's -- checked, it is rejected with the
+                     * check on.  And VERIFIED by reading it back, so the log
+                     * cannot claim a change that did not land. */
+                    membus_set32(r->age.gpc.cpu.ram, 0x08250, want, false);
+                    uint32_t now = membus_get32(r->age.gpc.cpu.ram, 0x08250);
+                    r->syncWindowDone = true;
+                    fprintf(stderr, "GPC%d SYNC WINDOW: FCMSNTO2 at 0x08250 "
+                                    "was 3850 us, asked for %u, reads %u "
+                                    "(FCMSYNTO at 0x0824e left at %u) %s "
+                                    "t=%.6f\n",
+                            r->gpcId, (unsigned)want, (unsigned)now,
+                            (unsigned)before,
+                            now == want ? "APPLIED" : "*** NOT APPLIED ***",
+                            r->age.gpc.cpu.elapsedTimeUs / 1e6);
+                }
+            }
+        }
+        /* AND SAY WHERE THIS COMPUTER IS IF ITS PHASE IS OUTLASTING EVERY
+         * HEALTHY ONE.  Measured over a clean run: SVC 211 us median and 638
+         * us worst in 155,580 samples, SSIP 886/2690, I/O complete 252/410,
+         * IPR 313/393.  In the #190 failure the three survivors held SVC for
+         * at least 4.7 ms and the fourth timed out at FCOS's 3.85 ms.  So a
+         * phase past a few milliseconds is not slowness, it is the defect --
+         * and the one thing not yet known is what the machine is executing
+         * while it sits there.  Once per phase, so a stuck computer says it
+         * once and not every pass. */
+        {
+            /* NO FUNCTION-SCOPE STATIC HERE.  Four machine threads run this,
+             * and a static would be one cursor shared between them -- the
+             * fault that made a two-machine capture come out as a one-machine
+             * one (ledger #172).  yagpc_getenv is memoised per thread, so
+             * asking every pass costs a pointer compare. */
+            const char *slowEnv = yagpc_getenv("YAGPC_SLOWPHASE_MS");
+            double slowUs = (slowEnv != NULL && *slowEnv != '\0')
+                                ? atof(slowEnv) * 1000.0 : 0.0;
+            if (slowUs > 0.0) {
+                unsigned code = discretes_sync_code_out(r->discretes);
+                double nowUs = r->age.gpc.cpu.elapsedTimeUs;
+                if (code != r->lastSyncCode) {
+                    r->lastSyncCode = code;
+                    r->lastSyncAtUs = nowUs;
+                    r->slowPhaseSaid = false;
+                } else if (!r->slowPhaseSaid &&
+                           nowUs - r->lastSyncAtUs > slowUs) {
+                    r->slowPhaseSaid = true;
+                    fprintf(stderr, "SLOWPHASE gpc=%d code=%u%u%u %s held "
+                                    "%.3f ms, PC=%05x r0=%08x r7=%08x "
+                                    "t=%.6f shared=%.6f\n",
+                            r->gpcId, (code >> 2) & 1u, (code >> 1) & 1u,
+                            code & 1u, discretes_sync_code_name(code),
+                            (nowUs - r->lastSyncAtUs) / 1000.0,
+                            (unsigned)psw_get_nia(&r->age.gpc.cpu.psw),
+                            (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 0)),
+                            (unsigned)register_get32(cpu_r(&r->age.gpc.cpu, 7)),
+                            nowUs / 1e6,
+                            vehicle_shared_us(r->vehicle, r->gpcId) / 1e6);
+                }
+            }
+        }
     }
 
     /* The shared devices pace against the vehicle's clock, not this
@@ -2565,6 +2655,11 @@ static bool batchrunner_step(BatchRunner *r) {
      * from it while another sits in reset. */
     if (r->vehicle != NULL) {
         vehicle_note_time(r->vehicle, r->age.gpc.cpu.elapsedTimeUs);
+        /* And give the discrete lines this machine's clock, so the sync
+         * history can say whether a wait outran a deadline measured in
+         * simulated time.  A wall stamp orders events; only this one can
+         * be compared against a timeout.  One store. */
+        discretes_note_sim_us(r->discretes, r->age.gpc.cpu.elapsedTimeUs);
         /* And keep this machine within reach of the others in SIMULATED
          * time, which is the time the sync timeouts are measured in --
          * see the barrier note in vehicle.h. */

@@ -209,6 +209,12 @@ void discretes_synctrace(Discretes *d);
  * Called when a computer declares a sync failure -- the one moment the
  * history is worth having. */
 void discretes_dump_history(Discretes *d, const char *why);
+/* This machine's own 3-bit sync code as it stands now.  A phase that
+ * outlasts every healthy one is the thing to catch: an SVC phase runs
+ * 211 us median and has never exceeded 638 us in 155,580 samples, while
+ * the peers in the #190 failure held one for 4.7 ms. */
+void discretes_note_sim_us(Discretes *d, double us);
+unsigned discretes_sync_code_out(Discretes *d);
 const char *discretes_sync_code_name(unsigned code);
 
 /* Bits of `reg` currently being published by somebody, and their values.

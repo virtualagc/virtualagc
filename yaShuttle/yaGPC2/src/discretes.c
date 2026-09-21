@@ -187,6 +187,7 @@ struct Discretes {
     DiscretesOutFn outHook;
     void *outHookCtx;
     double lastPollSec;
+    double simUs;                /* this machine's clock, noted per instruction */
     /* YAGPC_SYNCTRACE: the last code seen going out, and the last seen
      * arriving from each of the four neighbours.  8 is "nothing yet", which
      * no real code is, so the first of each always prints. */
@@ -200,6 +201,10 @@ struct Discretes {
      * failure, which is the one moment the history is wanted. */
     struct SyncEvent {
         double t;
+        /* AND THE SIMULATED TIME, because the deadline the flight software
+         * measures is in ITS clock, not the host's.  A wall stamp orders
+         * events; only this one can say whether a wait outran a timeout. */
+        double sim;
         unsigned char kind;      /* 0 = this machine speaking, 1 = hearing */
         unsigned char who;       /* the neighbour's GPC id, for kind 1 */
         unsigned char code;
@@ -415,6 +420,15 @@ static unsigned sync_code(uint32_t reg, int aBase, int bBase, int cBase, int off
     return code;
 }
 
+void discretes_note_sim_us(Discretes *d, double us) {
+    if (d != NULL) d->simUs = us;     /* one store; no lock, no reader races */
+}
+
+unsigned discretes_sync_code_out(Discretes *d) {
+    if (d == NULL) return 8u;   /* 8 is "no code", as syncOutLast uses it */
+    return sync_code(d->value[reg_index(DISCRETES_REG_OUT)], 20, 24, 28, 0);
+}
+
 const char *discretes_sync_code_name(unsigned code) {
     switch (code & 7u) {
         case 7: return "null";
@@ -438,8 +452,19 @@ static int sync_neighbour_gpc(int readerGpc, int k) {
 static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
                         unsigned char code, uint32_t a, uint32_t driven) {
     if (d->hist == NULL || d->histSize == 0) return;
+    /* UNDER THE LOCK, because the writers are not one thread.  A neighbour's
+     * code is applied to THIS object by the SOURCE machine's thread
+     * (vehicle_route_out -> discretes_apply_external_pair), while this
+     * machine's own outgoing codes are recorded by its own -- and the trace
+     * runs after the register mutex is released, so without this the ring's
+     * head is advanced by several threads at once and the record that gets
+     * dumped is not the conversation that happened. */
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&d->lock);
+#endif
     struct SyncEvent *e = &d->hist[d->histHead];
     e->t = yagpc_monotonic_seconds();
+    e->sim = d->simUs;
     e->kind = kind;
     e->who = who;
     e->code = code;
@@ -447,27 +472,43 @@ static void sync_record(Discretes *d, unsigned char kind, unsigned char who,
     e->driven = driven;
     d->histHead = (d->histHead + 1) % d->histSize;
     if (d->histCount < d->histSize) d->histCount++;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&d->lock);
+#endif
 }
 
 void discretes_dump_history(Discretes *d, const char *why) {
-    if (d == NULL || d->hist == NULL || d->histCount == 0) return;
+    if (d == NULL || d->hist == NULL) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&d->lock);
+#endif
+    if (d->histCount == 0) {
+#ifdef HAVE_PTHREADS
+        pthread_mutex_unlock(&d->lock);
+#endif
+        return;
+    }
     fprintf(stderr, "SYNCHIST GPC%d %s -- last %zu events, oldest first\n",
             d->gpcId, why != NULL ? why : "", d->histCount);
     size_t start = (d->histHead + d->histSize - d->histCount) % d->histSize;
     for (size_t i = 0; i < d->histCount; i++) {
         const struct SyncEvent *e = &d->hist[(start + i) % d->histSize];
         if (e->kind == 0)
-            fprintf(stderr, "SYNCHIST GPC%d t=%.6f out %u%u%u %s\n",
-                    d->gpcId, e->t, (e->code >> 2) & 1u, (e->code >> 1) & 1u,
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f out %u%u%u %s\n",
+                    d->gpcId, e->t, e->sim / 1e6,
+                    (e->code >> 2) & 1u, (e->code >> 1) & 1u,
                     e->code & 1u, discretes_sync_code_name(e->code));
         else
-            fprintf(stderr, "SYNCHIST GPC%d t=%.6f <- GPC%u %u%u%u %s "
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f <- GPC%u %u%u%u %s "
                             "A=%08x driven=%08x\n",
-                    d->gpcId, e->t, (unsigned)e->who,
+                    d->gpcId, e->t, e->sim / 1e6, (unsigned)e->who,
                     (e->code >> 2) & 1u, (e->code >> 1) & 1u, e->code & 1u,
                     discretes_sync_code_name(e->code),
                     (unsigned)e->a, (unsigned)e->driven);
     }
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&d->lock);
+#endif
 }
 
 void discretes_synctrace(Discretes *d) {

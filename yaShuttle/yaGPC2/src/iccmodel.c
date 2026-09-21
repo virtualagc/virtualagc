@@ -78,6 +78,14 @@ struct IccModel {
      * each new command how many words of older transfers a reader still
      * has queued -- a real bus holds none. */
     double sentAtUs[YAGPC_ICC_BUS_LAST + 1][64];
+    /* YAGPC_ICCORDER: the two things a receiver cannot see and the flight
+     * software cannot correct for -- a transfer processed AFTER one that was
+     * sent later (the buffers are drained by sender index, not by time), and
+     * a word deleted by age before the software ever sees it.  Both are
+     * logged with the shared clock so they can be lined up against a vote.
+     * Per reader: the send time and bus of the last transfer it began. */
+    double lastTakenSentUs[6];
+    int lastTakenBus[6];
     unsigned long lagN[YAGPC_ICC_BUS_LAST + 1][6];
     unsigned long lagHist[YAGPC_ICC_BUS_LAST + 1][6][8];
     double lagMin[YAGPC_ICC_BUS_LAST + 1][6], lagMax[YAGPC_ICC_BUS_LAST + 1][6];
@@ -247,6 +255,11 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
         while (m->q[bus][gpcId].count > 0) {
             double at = m->q[bus][gpcId].at[m->q[bus][gpcId].head];
             if (at < 0.0 || m->sharedUs[gpcId] - at <= m->expireUs) break;
+            if (yagpc_getenv("YAGPC_ICCORDER") != NULL)
+                fprintf(stderr, "ICCEXPIRE reader=GPC%d bus=%d sent=%.1f "
+                                "age=%.1f us tshared=%.1f\n",
+                        gpcId, bus, at, m->sharedUs[gpcId] - at,
+                        m->sharedUs[gpcId]);
             m->q[bus][gpcId].head = (m->q[bus][gpcId].head + 1) % ICC_QUEUE;
             m->q[bus][gpcId].count--;
             m->expired[bus][gpcId]++;
@@ -381,6 +394,28 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                                 bus, gpcId, (unsigned)ICC_SEQ(tg), m->sentAtUs[bus][ICC_SEQ(tg) & 63u],
                                 m->sharedUs[gpcId], lag, (unsigned long)(m->q[bus][gpcId].count - 1));
                     }
+                }
+                /* OUT OF TIME ORDER?  Only meaningful at a transfer's
+                 * command word, which is where processing of that message
+                 * begins.  An inversion means this reader is handling a
+                 * message that was sent BEFORE one it has already handled
+                 * from another computer -- structural, since AIESIP walks
+                 * the per-sender buffers by index (1 TO 5) and nothing
+                 * reorders them. */
+                if (ICC_POS(tg) == 0u &&
+                    yagpc_getenv("YAGPC_ICCORDER") != NULL) {
+                    double sent = m->sentAtUs[bus][ICC_SEQ(tg) & 63u];
+                    int prevBus = m->lastTakenBus[gpcId];
+                    double prevSent = m->lastTakenSentUs[gpcId];
+                    if (prevBus > 0 && prevBus != bus && sent > 0.0 &&
+                        prevSent > 0.0 && sent < prevSent)
+                        fprintf(stderr, "ICCORDER reader=GPC%d took bus=%d "
+                                        "sent=%.1f AFTER bus=%d sent=%.1f "
+                                        "(inverted by %.1f us) tshared=%.1f\n",
+                                gpcId, bus, sent, prevBus, prevSent,
+                                prevSent - sent, m->sharedUs[gpcId]);
+                    m->lastTakenBus[gpcId] = bus;
+                    m->lastTakenSentUs[gpcId] = sent;
                 }
                 /* The receiver has now taken the last word of a transfer that
                  * carried a wanted message: it has the whole of it. */

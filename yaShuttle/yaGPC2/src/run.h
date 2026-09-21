@@ -226,6 +226,15 @@ typedef struct {
     /* Set while the mode switch holds this machine in reset, so the pacer can
      * be re-tied on the way out -- see batchrunner_step. */
     bool modeWasHeld;
+    /* YAGPC_SLOWPHASE_MS: where a computer is when its own sync code has
+     * stood unchanged far longer than any healthy phase lasts.  The failure
+     * in #190 is a machine timing out on peers who were still inside one. */
+    unsigned lastSyncCode;
+    double lastSyncAtUs;
+    bool slowPhaseSaid;
+    /* YAGPC_SYNC_WINDOW_US: FCOS's sync timeout, widened in the loaded image
+     * once the IPL has put it there.  See the note at the patch site. */
+    bool syncWindowDone;
     /* A SNAPSHOT PUT OFF because the set was mid-transfer -- see
      * vehicle_io_agrees.  Counted down in batchrunner_step; when it reaches
      * one the capture is asked for again. */

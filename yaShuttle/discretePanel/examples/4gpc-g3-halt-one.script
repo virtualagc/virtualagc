@@ -1,0 +1,109 @@
+# EXAMPLE crew script: four GPCs in a REDUNDANT SET, the way the vehicle
+# actually flies one -- memory configuration 3, GNC OPS 301 (entry).  Run from
+# discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-4 --crts 3 \
+#       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
+#       --script examples/4gpc-g3-startup.script --duration 1200
+#
+# WHY THIS AND NOT 4gpc-startup.script.  That one asks for OPS 201, and OPS 2
+# ON ORBIT IS A TWO-GPC SET: the flight MEMORY CONFIGURATION TABLE gives
+# CONFIG 2 a GPC SEL of 1,2 with strings 1,3 to one computer and 2,4 to the
+# other, and the post-insertion procedure then HALTs the rest.  Four computers
+# in one set is CONFIG 1 (ascent) or CONFIG 3 (entry), not CONFIG 2.  The older
+# script asks for MC 2 while assigning buses the CONFIG 3 way, which is a
+# mixture that never flies.  This script is CONFIG 3 throughout.
+#
+# The table, from STS-134 Post Insertion (local mirror, Shuttle/Post Insertion,
+# book page 1-3), CONFIG 3 column:
+#     GPC SEL 1,2,3,4    STR 1->1 2->2 3->3 4->4    P/L 0
+#     CRT 1->1 2->2 3->3 4->0        L 1->0 2->0    MM 1->1 2->2
+#
+# THREE CRTs, AND THE THIRD IS POWERED LAST -- which is the whole trick.
+# CONFIG 3 gives CRT3 to GPC3, and it is worth having: a computer that drops
+# out of the set still has a keyboard into it, which every recovery attempt on
+# 2026-09-16 lacked.
+#
+# But a display powered before it has been ASSIGNED goes to whoever is already
+# running.  USA005350 3.2.15.1: a PASS GPC moded to RUN takes IDPs 1 TO 3 when
+# the common set commands no DK buses -- so with all three powered during the
+# IPLs, GPC1 alone drives every display while the others idle.  ONE GPC DRIVING
+# THREE DISPLAYS NEEDS MORE THAN ONE CORE, and a GPC only gets one: measured,
+# the vehicle then runs at rate 0.42 instead of 1.00, the barrier paces every
+# computer to the slowest, MEDS2's wall-clock watchdogs start firing, and
+# whichever computer is unlucky fails itself out.  Three runs lost GPC1+GPC2,
+# then GPC2, then GPC3.
+#
+# Powering IDP3 only after the set is formed and ITEM 14 has given CRT3 to GPC3
+# means no computer ever drives more than one display.  Three displays then
+# cost nothing at all -- rate stays 1.00.  See ledger #159.
+#
+# Each IPL is ipl-one-gpc.script, unchanged -- the IPL procedure does not care
+# which OPS follows it.
+#
+# VERIFIED 2026-09-17, unattended: a FULL FOUR-COMPUTER REDUNDANT SET in
+# OPS 301, every computer driving its own flight-critical strings (bus 14/20
+# GPC1, 15/21 GPC2, 16/22 GPC3, 17/23 GPC4).  With two CRTs it ran 36,319 /
+# 36,322 / 36,320 / 36,308 sync issues per minute, matched to within 30.  With
+# the third CRT powered late, as below, all four hold at rate 1.00 (SSIP cadence
+# 160.04 / 160.05 / 160.08 / 160.04 ms against a nominal 160) and CRT3 takes its
+# fills with no bus timeouts at all -- where powering it early cost 120.
+
+# --- all four GPCs to HALT, the IDPs on ---------------------------------------
++0     gpc 1
++0     mode HALT
++0.01  gpc 2
++0.01  mode HALT
++0.01  gpc 3
++0.01  mode HALT
++0.01  gpc 4
++0.01  mode HALT
++0.02  idppower 1 on
++0.01  idppower 2 on
+
+# --- each computer in turn: the same procedure, four times -------------------
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
++5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
++5     script ipl-one-gpc.script gpc=3 crt=2 idp=2 kb=KB2
++5     script ipl-one-gpc.script gpc=4 crt=2 idp=2 kb=KB2
+
+# --- the NBAT for memory configuration 3, then OPS 301 -----------------------
++11    keys ITEM 1 + 3 EXEC
++8     keys ITEM 2 + 1 EXEC
++8     keys ITEM 3 + 2 EXEC
++8     keys ITEM 4 + 3 EXEC
++8     keys ITEM 5 + 4 EXEC
++8     keys ITEM 7 + 1 EXEC
++8     keys ITEM 8 + 2 EXEC
++8     keys ITEM 9 + 3 EXEC
++8     keys ITEM 1 0 + 4 EXEC
++8     keys ITEM 1 1 + 0 EXEC
++8     keys ITEM 1 2 + 1 EXEC
++8     keys ITEM 1 3 + 2 EXEC
++8     keys ITEM 1 4 + 3 EXEC
++8     keys ITEM 1 8 + 1 EXEC
++8     keys ITEM 1 9 + 2 EXEC
++21    keys OPS 3 0 1 PRO
+
+# --- and only now the third display, with GPC3 already named its commander ---
++20    idppower 3 on
++2     majfunc 3 gnc
++2     idpload 3
+
+# --- AND NOW THE FAULT.  ----------------------------------------------------
+#
+# This script exists to test the OTHER half of what synchronisation is for.
+# Every other run asks whether a healthy computer is ever failed by mistake;
+# this one asks whether a computer that genuinely stops IS failed, which is
+# the property that makes the CAM and SPEC 6 worth believing.  A set that
+# never votes is as wrong as one that votes at random -- it just fails
+# quietly, and a pilot would never know a machine had died.
+#
+# Sixty seconds of settled four-computer running first, so the vote cannot be
+# confused with the OPS transition, then GPC 3 is halted at the panel exactly
+# as the crew would.  What should follow: the other three fail it within a
+# fraction of a second, the CAM lights column 3, and SPEC 6 shows it down.
++60    subtitle Now HALT GPC 3.  The set should notice, and vote it out.
++0     gpc 3
++2     mode HALT
++30    subtitle GPC 3 is halted.  The remaining three should still be in sync.
