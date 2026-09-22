@@ -3483,6 +3483,43 @@ ADJ = {
     'viewY': envnum('NSTS_VIEW_DY', 0),
 }
 
+# PER-FORMAT OVERRIDES.  The values above are what suits MOST displays; a few
+# are laid out differently enough to want their own (owner, 2026-09-22).  Two
+# screens settle it: GPC MEMORY's background drops its field underscores below
+# the data cell and DEORB MNVR COAST's does not, so no single underscore dY
+# reads as an underline on both, and a rule that clears one meets the other.
+#
+# Keyed on the FORMAT NUMBER the background itself draws in the title line
+# (3011 = DEORB MNVR COAST, 0001 = GPC MEMORY), learned from the frame -- see
+# _announceTopLines -- so a display names itself and nothing has to be wired
+# to an address.  The file is JSON, {"3011": {"underY": -0.05}, ...}, from
+# NSTS_DPS_FORMAT_ADJ or data/dps-format-adj.json beside this program.  An
+# unlisted format uses the defaults, which is every format until one is found
+# wanting: this is a place to record a screen we have LOOKED at, not a knob to
+# turn for its own sake.
+FORMAT_ADJ = {}
+_fmtAdj = {}            # the active format's overrides, or {}
+
+
+def adj(key):
+    """An adjustment, per the format now on screen."""
+    return _fmtAdj.get(key, ADJ[key])
+
+
+def loadFormatAdj():
+    global FORMAT_ADJ
+    path = env('NSTS_DPS_FORMAT_ADJ') or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'data', 'dps-format-adj.json')
+    try:
+        with open(path) as fh:
+            # '_'-prefixed keys are notes to a reader, not formats.
+            FORMAT_ADJ = {str(k): {kk: float(vv) for kk, vv in v.items()}
+                          for k, v in json.load(fh).items()
+                          if not str(k).startswith('_') and isinstance(v, dict)}
+    except (OSError, ValueError, AttributeError, TypeError):
+        FORMAT_ADJ = {}
+    return FORMAT_ADJ
+
 
 # ---------------------------------------------------------------------------
 # CoffeeScript ranges
@@ -3759,14 +3796,14 @@ class CharGen(object):
         dx = 0.0
         if self.suffix == 'deu' and not centered and not rot:
             if glyphChar in '[]':
-                width *= ADJ['brkStroke']
-                dx = ADJ['brkIn'] if glyphChar == '[' else -ADJ['brkIn']
-            elif glyphChar in u'+-\u00b1' and ADJ['signSize'] != 1.0:
+                width *= adj('brkStroke')
+                dx = adj('brkIn') if glyphChar == '[' else -adj('brkIn')
+            elif glyphChar in u'+-\u00b1' and adj('signSize') != 1.0:
                 xs = [p[0] for stroke in strokes for p in stroke]
                 ys = [p[1] for stroke in strokes for p in stroke]
                 mx = (min(xs) + max(xs)) / 2.0
                 my = (min(ys) + max(ys)) / 2.0
-                k = ADJ['signSize']
+                k = adj('signSize')
                 strokes = [[[mx + (p[0] - mx) * k, my + (p[1] - my) * k]
                             for p in stroke] for stroke in strokes]
 
@@ -5255,6 +5292,12 @@ class Screen_DPS(MDUScreen):
         self.d.dirty = True
 
     def _drawPasses(self):
+        global _fmtAdj
+        # THE FORMAT NOW ON SCREEN sets the adjustments for this frame.  Its
+        # number comes from the title line of the frame BEFORE this one
+        # (_announceTopLines), so a display call-up takes effect on the next
+        # refresh, half a second later, which no one can see.
+        _fmtAdj = FORMAT_ADJ.get(getattr(self, '_fmtId', None) or '', {})
         self._frameRows = {}          # row -> {column: character}, for announceScreen
         # The trace holds ONE frame -- the most recent.
         if cellTracePath():
@@ -5273,7 +5316,7 @@ class Screen_DPS(MDUScreen):
             self.geo_dps_bg = self.drawFCWS(
                 self.bgFCWS, self.geo_dps_bg,
                 {'memory': self.bgFCWS, 'start': DEU.ADDR.BACKGROUND_TOP,
-                 'stopAt': DEU.CF_PAD, 'rowScale': ADJ['rowGap']})
+                 'stopAt': DEU.CF_PAD, 'rowScale': adj('rowGap')})
         else:
             # NO POINTER, NO BACKGROUND.  A display unit draws what its memory
             # says on every refresh, so a background whose branch has gone is
@@ -5284,12 +5327,38 @@ class Screen_DPS(MDUScreen):
         self.geo_dps_fcws = self.drawFCWS(
             self.bgFCWS, self.geo_dps_fcws,
             {'memory': self.bgFCWS, 'start': DEU.ADDR.DISPLAY_HEADER,
-             'rowScale': ADJ['rowGap']})
+             'rowScale': adj('rowGap')})
         self._announceTopLines()
+
+    FORMAT_IN_TITLE = re.compile(r"\s*(\d{4})/")
+
+    def _noteFormat(self, line):
+        """The format number the background drew in its title line -- '3011'
+        for DEORB MNVR COAST, '0001' for GPC MEMORY.  It keys the per-format
+        adjustments (see FORMAT_ADJ); a display thereby names itself."""
+        m = self.FORMAT_IN_TITLE.match(line or '')
+        fmt = m.group(1) if m else None
+        if fmt != getattr(self, '_fmtId', None):
+            self._fmtId = fmt
+            if fmt in FORMAT_ADJ:
+                self.log("%s: format %s -- %s"
+                         % (getattr(self, 'name', 'DPS'), fmt,
+                            ", ".join("%s=%s" % kv
+                                      for kv in sorted(FORMAT_ADJ[fmt].items()))))
+            self.d.dirty = True
 
     def _announceTopLines(self):
         """The top two text lines to crew scripts (see announceScreen)."""
         rows, self._frameRows = self._frameRows, None
+        # THE FORMAT FIRST, and whether or not anybody is listening for screen
+        # announcements: the per-format adjustments depend on it, and an MDU
+        # with no crew script attached still has to draw the right thing.
+        if rows:
+            top = sorted(rows)[0]
+            cols = rows[top]
+            self._noteFormat("".join(cols.get(c, ' ')
+                                     for c in range(min(0, min(cols)),
+                                                    max(cols) + 1)))
         name = getattr(self, 'mduName', None)
         if not name or rows is None:
             return
@@ -5361,16 +5430,16 @@ class Screen_DPS(MDUScreen):
         # format area's own origin.  The reference registers are NOT added
         # here -- the position words below fold them in.
         def penX():
-            return cellCol(st['beamX']) + 1 + ADJ['textX']
+            return cellCol(st['beamX']) + 1 + adj('textX')
 
         # `rowScale` spreads the ROWS, not the glyphs.  It multiplies where a
         # row is placed and touches nothing about the character.
         rowScale = opts.get('rowScale', 1)
 
-        layerY = ADJ['bgY'] if passLabel == 'BG' else ADJ['fgY']
+        layerY = adj('bgY') if passLabel == 'BG' else adj('fgY')
 
         def penY():
-            return cellRow(st['beamY']) * rowScale + 1 + ADJ['textY'] + layerY
+            return cellRow(st['beamY']) * rowScale + 1 + adj('textY') + layerY
 
         blinkGroup = Object3D()
         blinkGroup.userData['deuBlink'] = True
@@ -5456,10 +5525,10 @@ class Screen_DPS(MDUScreen):
                                             ' BLINK' if st['blink'] else ''))
                         except Exception:
                             pass
-                    gdy = ADJ['underY'] if ch == '_' else (GLYPH_DY.get(ch) or 0)
+                    gdy = adj('underY') if ch == '_' else (GLYPH_DY.get(ch) or 0)
                     # Font strokes are in cell units, the cell's centre at
                     # (1.5, 0.5); shift so a resized glyph stays centred.
-                    gs = ADJ['glyph']
+                    gs = adj('glyph')
                     add(self.d.str(penX() + (1.0 - gs) * 1.5,
                                    penY() + gdy + (1.0 - gs) * 0.5, ch,
                                    penColor(),
@@ -5473,8 +5542,8 @@ class Screen_DPS(MDUScreen):
             ellipse."""
             if not (r > 0):
                 return
-            cx = penX() + ADJ['vecX']
-            cy = penY() + ADJ['vecY']
+            cx = penX() + adj('vecX')
+            cy = penY() + adj('vecY')
             n = max(24, min(96, jsround(2 * r)))
             pts = [[cx + r * math.cos(2 * math.pi * i / n) / COL_PITCH,
                     cy - r * math.sin(2 * math.pi * i / n) / ROW_PITCH]
@@ -5500,18 +5569,18 @@ class Screen_DPS(MDUScreen):
                 dy = minor * (-1 if a['signDiffer'] else 1) * (-1 if dx < 0 else 1)
             if st['vecRotate']:
                 dx, dy = rot(dx, dy)
-            x0 = penX() + ADJ['vecX']
-            y0 = penY() + ADJ['vecY']
+            x0 = penX() + adj('vecX')
+            y0 = penY() + adj('vecY')
             if traceOn:
                 trace('VECTOR', "d %s,%s major=%s minor=%s yMajor=%s signDiffer=%s slope=%s"
                       % (dx, dy, major, minor, a['yMajor'], a['signDiffer'], a['slope']))
             st['beamX'] += dx
             st['beamY'] += dy
-            seg = [[x0, y0], [penX() + ADJ['vecX'], penY() + ADJ['vecY']]]
+            seg = [[x0, y0], [penX() + adj('vecX'), penY() + adj('vecY')]]
             if st['dash']:
                 add(self.d.dashedLine(seg, penColor()))
             else:
-                add(self.d.line(seg, penColor(), penIntensity() * ADJ['vecI']))
+                add(self.d.line(seg, penColor(), penIntensity() * adj('vecI')))
 
         # The walk is by index, not by iteration, because a BRANCH moves the
         # program counter.
@@ -12181,6 +12250,9 @@ def main(argv=None):
     argv = [a for a in argv if a not in ('--no-sandbox', '--disable-gpu-sandbox',
                                          '--disable-setuid-sandbox')]
     args = buildParser().parse_args(argv)
+    if loadFormatAdj():
+        print("DPS per-format adjustments: %s"
+              % ", ".join(sorted(FORMAT_ADJ)), flush=True)
     # Before any Bus is constructed.
     if args.portBase is not None:
         setPortBase(args.portBase)
