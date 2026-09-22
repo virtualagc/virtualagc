@@ -109,8 +109,16 @@ def parse_gpcs(text):
         lo, _, hi = part.partition("-")
         out.update(range(int(lo), int(hi or lo) + 1))
     gpcs = sorted(out)
-    if not gpcs or gpcs[0] < 1 or gpcs[-1] > 4:
-        raise argparse.ArgumentTypeError("GPCs 1 to 4, e.g. 1  or  1,2  or  1-3")
+    # FIVE, BECAUSE THE VEHICLE HAS FIVE.  This launcher was written for "one
+    # to four GPCs" (bc5c3e473) and the bound was that commit's scope, not a
+    # constraint anything else imposes: crewscript.py validates the GPC column
+    # as [1-5] throughout, the O6 panel model carries five columns, the
+    # emulator's per-GPC arrays are all [6], and a five-machine vehicle has
+    # been run before -- ledger #140, which had to drive yaGPC2 directly
+    # because this refused.  The orbiter flies four PASS computers and a fifth
+    # as the Backup Flight System, so the fifth machine is the ordinary case.
+    if not gpcs or gpcs[0] < 1 or gpcs[-1] > 5:
+        raise argparse.ArgumentTypeError("GPCs 1 to 5, e.g. 1  or  1,2  or  1-4")
     return gpcs
 
 

@@ -1,0 +1,106 @@
+# EXAMPLE crew script: FIVE GPCs in ONE REDUNDANT SET -- memory configuration
+# 3, GNC OPS 301.  Run from discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-5 --crts 3 \
+#       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
+#       --script examples/5gpc-set-g3-startup.script --duration 1800
+#
+# THIS IS NOT A CONFIGURATION THE VEHICLE FLIES.  The orbiter runs four PASS
+# computers in a redundant set and a fifth as the Backup Flight System, in its
+# own major function; five in ONE set was not designed for, and the flight
+# software's own GRT says so -- CZ2B_GRT_GPC_SET gives OPS 1 the mask F000,
+# GPCs 1 through 4 (ledger #92).  It is run anyway because it is a cheap and
+# unusually searching test of the emulator: five computers is the most the
+# hardware model must carry, and it once broke in a way four never did.
+#
+# WHAT IT IS RETESTING.  Ledger #140: in a five-computer set GPC4 alone failed
+# itself out on the timing-unit transaction (IOQE 905A, buses 20/22) at
+# t=1056.661 s, from FIOERRLC+0313 -- the fail-to-sync rule for an I/O error
+# only self saw -- and GPC1, 2, 3 and 5 voted it out 11 ms later.  Four
+# computers handle that same transaction cleanly.  The entry was left LATENT
+# rather than refuted, because five-GPC work was set aside on 2026-09-13, not
+# because the defect was understood.
+#
+# WHY RETEST IT NOW, which the ledger's own rule requires a reason for: a
+# great deal has changed underneath it.  The lost-sync-code race is fixed
+# (#196, e46bb0eac), a GPC now answers on the mass-memory buses (#199), and
+# the intercomputer model no longer drops arriving words or queues them for
+# computers that are not there (#193, #201) -- and that last one is not a
+# detail here, because with five GPCs there is no phantom fifth receiver any
+# more: every ICC queue belongs to a machine that really reads it.
+#
+# It is also the discriminator for the configuration we actually want.  If
+# #140 needs five computers IN THE SET, a four-GPC set plus a fifth computer
+# in another major function is unaffected.  If it only needs five computers on
+# buses 20/22, that configuration hits it too.  One run tells us which.
+#
+# Identical to 4gpc-g3-startup.script in every other respect -- same memory
+# configuration, same string and CRT assignments, same IPL procedure, same
+# display ordering (each display's commander named before it is powered, which
+# is #159's lesson).  The only additions are GPC5's HALT, GPC5's IPL, and
+# ITEM 6 naming it in the NBAT.
+#
+# ITEM 6 IS GPC5, confirmed from the flight source rather than inferred from
+# the gap in the four-GPC script's item numbers.  ARFDPSCO is the DPS UTILITY
+# SPEC: item 1 selects the memory configuration, items 2-6 edit its GPC set,
+# and item N accepts only the value N-1 --
+#
+#     IF ARF_I NOT = ARF_NO-1 THEN            ARFDPSCO.hal, seq 008100BA
+#        ARF_CDLK_NDEX = CDLK_K1;             (illegal entry)
+#
+# which is exactly why the four-GPC script reads ITEM 2 + 1 ... ITEM 5 + 4.
+# The edit lands in the GRT itself:
+#
+#     CZ2B_GRT_GPC_SET$(CZ2V_MC_REQ:) = ARFB_GPC_MC;   seq 010300BA
+#     ICC_CZ2V_MC_REQ;                                 (told to the others)
+#
+# Memory configuration 3 has GRT bit 6 CLEAR, so adding a GPC does not wipe
+# the rest of the set.  The four single-GPC configurations (S2, S4, P9, S9)
+# have bit 6 SET, and there item 6 would first clear GPCs 1-5 -- which is how
+# a simplex configuration stays simplex.
++0     gpc 1
++0     mode HALT
++0.01  gpc 2
++0.01  mode HALT
++0.01  gpc 3
++0.01  mode HALT
++0.01  gpc 4
++0.01  mode HALT
++0.01  gpc 5
++0.01  mode HALT
++0.02  idppower 1 on
++0.01  idppower 2 on
++0.01  idppower 3 on
++0.01  majfunc 3 gnc
+
+# --- each computer in turn: the same procedure, five times -------------------
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
++5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
+# GPC3 IPLs onto CRT3, with IDP LOAD on IDP3: GPCIPL loads the unit that is
+# asking at the IPL, and that is the ONLY load IDP3 can get -- PASS will not
+# load a display once it is running an OPS (ledger #197, #198).  KB2 reaches
+# CRT3 through the right IDP/CRT select, and goes back to CRT2 after.
++5     kybdsel right 3
++1     script ipl-one-gpc.script gpc=3 crt=3 idp=3 kb=KB2
++1     kybdsel right 2
++5     script ipl-one-gpc.script gpc=4 crt=2 idp=2 kb=KB2
++5     script ipl-one-gpc.script gpc=5 crt=2 idp=2 kb=KB2
+
+# --- the NBAT for memory configuration 3, then OPS 301 -----------------------
++11    keys ITEM 1 + 3 EXEC
++8     keys ITEM 2 + 1 EXEC
++8     keys ITEM 3 + 2 EXEC
++8     keys ITEM 4 + 3 EXEC
++8     keys ITEM 5 + 4 EXEC
++8     keys ITEM 6 + 5 EXEC
++8     keys ITEM 7 + 1 EXEC
++8     keys ITEM 8 + 2 EXEC
++8     keys ITEM 9 + 3 EXEC
++8     keys ITEM 1 0 + 4 EXEC
++8     keys ITEM 1 1 + 0 EXEC
++8     keys ITEM 1 2 + 1 EXEC
++8     keys ITEM 1 3 + 2 EXEC
++8     keys ITEM 1 4 + 3 EXEC
++8     keys ITEM 1 8 + 1 EXEC
++8     keys ITEM 1 9 + 2 EXEC
++21    keys OPS 3 0 1 PRO
