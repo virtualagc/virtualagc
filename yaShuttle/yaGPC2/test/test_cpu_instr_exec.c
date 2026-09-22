@@ -33,8 +33,8 @@
 /* WHICH REFERENCE, AND THE PATCHES TO IT (2026-09-22).  Generated against
  * the LIVE gpc -- YAGPC_REF_ROOT=~/donschmidt/nsts-sim-gpc, NODE_PATH set
  * to its node_modules, its tsconfig.json present so esbuild resolves
- * `com/lru` -- from a SCRATCH COPY carrying two patches, both places where
- * the reference is wrong and this emulator is right:
+ * `com/lru` -- from a SCRATCH COPY carrying the patches below, every one a
+ * place where the reference is wrong and this emulator is right:
  *
  *   SVC: the effective address is 19 bits and the interrupt-code field is
  *   16, and AP-101S PoO 2.5.1.1 saves the 4-bit extension in the old PSW's
@@ -56,11 +56,28 @@
  *   gpc expands here, an inherited defect.  Branches are excluded.  About
  *   460 fixtures across two dozen instructions.
  *
- * ~7 fixtures still fail, all one shape: INDEXED addressing with B2 == 11
- * (a=1, b=3, i=3), where the reference lands a sector away from us.  Our
- * side follows the same 2.2.8 reading -- no base register, so no base DSE
- * and no expansion -- but the case is not yet adjudicated against the
- * document, and the runs cannot settle it either way.
+ *   g_EA, FULLWORD-INDIRECT POST-INDEXING (ia=1, ii=1): the pointer's own
+ *   high bit decides whether a sector is applied AT ALL -- Sec. 2.9, and
+ *   Figure 2-17's expansion flowchart, whose leaves are EXPAND USING DSR /
+ *   DSV / DSE / *0000*, that last one being this case -- and the index
+ *   addition is 16-bit and includes that bit ("All EA/BA address
+ *   calculations involve 16-bit operands and bit 0 of the fullword indirect
+ *   address pointer is included", note under Figure 2-15).  The reference
+ *   strips bit 15 and forces a sector unconditionally, so a pointer to
+ *   sector 0 reads from sector DSV instead; cpu_g_ea carries the measured
+ *   evidence (DCI#CON's ZCON at 0x42845, and the -0602 / FFFFFFFFFF that
+ *   GPC MEMORY showed because of it).  24 fixtures.
+ *
+ *   BAL and SCAL, the LINK SNAPSHOT: psw1 carries the caller's BSR/DSR
+ *   alongside the return address, and g_EA can replace both from a C=1
+ *   fullword indirect pointer (Fig. 2-17, "MODIFY PSW ACTION") before it
+ *   returns.  The reference reads psw1 AFTER g_EA and so saves the
+ *   CALLEE's sectors, which BCRE then "restores" into the caller -- see
+ *   exec_BAL for the FCMSSYNC/FCMTRACE measurement that found it.  Both
+ *   snapshot before the EA here.  2 fixtures (BAL; no SCAL fixture drew
+ *   the case, but the reference had the same defect and was patched too).
+ *
+ * All 111432 fixtures pass.
  */
 #include <stdio.h>
 #include <string.h>
