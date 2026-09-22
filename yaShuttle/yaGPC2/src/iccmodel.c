@@ -37,6 +37,17 @@ struct IccModel {
         uint32_t lastTag;         /* the last word this receiver took off it */
         int haveLast;
     } q[YAGPC_ICC_BUS_LAST + 1][6];   /* [bus 1-5][receiving GPC id 1-5] */
+    /* WHICH COMPUTERS ARE ACTUALLY THERE.  A vehicle is not always five
+     * computers, and icc_broadcast has no other way to tell: it would
+     * otherwise queue every word for a receiver that does not exist, whose
+     * queue fills once and stays full forever.  Measured in a 4-GPC 3-CRT
+     * run (ops200-7500): every bus reported exactly 2048 pending -- one
+     * full queue, GPC5's -- and 333842 dropped words per bus, essentially
+     * all of them charged to that phantom.  The drop counter was therefore
+     * useless as a health signal, which is how #193's evidence came to
+     * attribute six-figure drop totals to "receivers before their first
+     * read".  A computer announces itself by using the bus at all. */
+    bool present[6];
     unsigned long busXmit[YAGPC_ICC_BUS_LAST + 1];
     unsigned long busRecv[YAGPC_ICC_BUS_LAST + 1];
 
@@ -161,7 +172,35 @@ static void icc_broadcast(IccModel *m, int bus, int from, uint32_t word,
                           uint32_t tag) {
     for (int g = 1; g <= 5; g++) {
         if (g == from) continue;
-        if (m->q[bus][g].count >= ICC_QUEUE) { m->q[bus][g].dropped++; continue; }
+        /* Nothing is queued for a computer that is not in this vehicle.  A
+         * computer that IS here but has not yet touched the bus also misses
+         * these words, and that is correct rather than merely tolerable: a
+         * receiver's first read flushes the whole queue by age anyway (each
+         * one was measured discarding exactly 2048 words expired unread),
+         * so nothing it could have used is lost. */
+        if (!m->present[g]) continue;
+        /* A FULL QUEUE DROPS ITS OLDEST WORD, NOT THE ARRIVING ONE.  This
+         * models a wire, and a wire holds nothing: the words standing in a
+         * full queue are by definition the ones nobody read, and the word
+         * arriving is the live one.  Dropping the arrival instead -- what
+         * this did -- meant that a receiver which stopped reading froze its
+         * queue full of dead words and then discarded every later broadcast
+         * AT THE DOOR, so it could never recover even once it resumed
+         * reading: the expiry at the read end only ever saw the same stale
+         * head.  Ledger #193.
+         *
+         * Latent rather than observed: while a receiver drains normally the
+         * count never approaches the bound (measured, 3-CRT runs: every
+         * machine in the set reports "0 new commands found older words still
+         * queued", and 100% of transfers land in the <1 ms bucket).  The one
+         * receiver that ever filled it was GPC4 after it had been voted out
+         * and stopped reading -- which is precisely the case this gets
+         * right and the old policy got backwards. */
+        if (m->q[bus][g].count >= ICC_QUEUE) {
+            m->q[bus][g].head = (m->q[bus][g].head + 1) % ICC_QUEUE;
+            m->q[bus][g].count--;
+            m->q[bus][g].dropped++;
+        }
         size_t at = (m->q[bus][g].head + m->q[bus][g].count) % ICC_QUEUE;
         m->q[bus][g].w[at] = word;
         m->q[bus][g].tag[at] = tag;
@@ -230,6 +269,7 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
     int bus = in->busID;
     if (!YAGPC_ICC_IS_BUS(bus)) return;
     icc_lock(m);
+    m->present[gpcId] = true;
     /* A BUS HOLDS NOTHING.  Words are on the wire only while they are being
      * sent, and a transfer that goes out while a computer is not listening
      * is lost to that computer.  This model queued them instead, and paid
