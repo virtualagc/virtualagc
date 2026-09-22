@@ -47,11 +47,20 @@
  *   exception, leaving the destination register holding whatever it held
  *   before -- see exec_CVFX.  136 fixtures.
  *
- * 90 fixtures still fail, a few each across 29 instructions, and are NOT
- * adjudicated: the LM/STM/LPS group differs over whether a displacement
- * with bit 15 set expands by the base register's sector (we expand; the
- * reference does not), which is an addressing question for the PoO, and
- * the rest are unexamined.
+ *   g_EA, B2 == 11: AP-101S PoO 2.2.8 on the extended RS form -- "When B2
+ *   equals 11, base addressing is not performed.  In this case, the
+ *   displacement is instead used DIRECTLY AS THE EFFECTIVE ADDRESS" -- so
+ *   there is no 16-bit address left for 2.9 to expand.  cpu_g_ea carries
+ *   the same rule with its evidence (every such operand in FCMSSYNC equals
+ *   its symbol's address exactly, bit-15 ones included) and the note that
+ *   gpc expands here, an inherited defect.  Branches are excluded.  About
+ *   460 fixtures across two dozen instructions.
+ *
+ * ~7 fixtures still fail, all one shape: INDEXED addressing with B2 == 11
+ * (a=1, b=3, i=3), where the reference lands a sector away from us.  Our
+ * side follows the same 2.2.8 reading -- no base register, so no base DSE
+ * and no expansion -- but the case is not yet adjudicated against the
+ * document, and the runs cannot settle it either way.
  */
 #include <stdio.h>
 #include <string.h>

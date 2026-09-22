@@ -1757,6 +1757,28 @@ void cpu_exec1(CPU *cpu) {
     cpu->xtCase = 0;
     uint32_t timePreN = instr_time_pre_n(cpu, desc, &v, hw1);
 
+    /* YAGPC_FIRSTOP, the CPU's half: the FIRST execution of each distinct
+     * instruction, with the address and the simulated time.  The IOP has
+     * had this for its BCE and MSC sets (iop_first_op) and it answers the
+     * question that keeps arising about a correction -- "does the flight
+     * software ever execute the instruction you just changed?"  It could
+     * be asked of #MOUT@ and not of SVC, which is a poor place to be.
+     * One line per instruction, ever; nothing after the first. */
+    {
+        static int fpInit = 0, fpOn = 0, fpN = 0;
+        static const char *fpSeen[256];
+        if (!fpInit) { fpInit = 1; fpOn = yagpc_getenv("YAGPC_FIRSTOP") != NULL; }
+        if (fpOn && desc->nm != NULL) {
+            int found = 0;
+            for (int i = 0; i < fpN; i++) if (fpSeen[i] == desc->nm) { found = 1; break; }
+            if (!found && fpN < (int)(sizeof fpSeen / sizeof fpSeen[0])) {
+                fpSeen[fpN++] = desc->nm;
+                fprintf(stderr, "FIRSTOP CPU    %-8s pc=%05x t=%.6f\n",
+                        desc->nm, (unsigned)nia, cpu->elapsedTimeUs / 1e6);
+            }
+        }
+    }
+
     if (desc->e) desc->e(cpu, &v);
 
     {
