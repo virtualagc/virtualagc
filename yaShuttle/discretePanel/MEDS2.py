@@ -3415,6 +3415,16 @@ ADJ = {
     'textX': envnum('NSTS_DPS_TEXTX', -0.71),
     'vecX': envnum('NSTS_DPS_VECX', 0.41),
     'pageY': envnum('NSTS_DPS_YSHIFT', 1),
+    # ONE LAYER AGAINST THE OTHER, in rows.  Everything above moves both the
+    # resident background and the per-cycle foreground together, so none of
+    # it can say anything about the two being out of register -- and on DEORB
+    # MNVR COAST they are: the background's entry-field underscores land on
+    # top of the foreground data instead of under it, both being TEXT, so the
+    # text/vector offsets cannot be the cause.  These are a workaround and a
+    # measurement at once: the value that lines a display up is the size of
+    # the displacement, which says where it comes from.  Zero is untouched.
+    'bgY': envnum('NSTS_DPS_BGY', 0),
+    'fgY': envnum('NSTS_DPS_FGY', 0),
     'menuX': envnum('NSTS_MENU_DX', 0),
     'viewX': envnum('NSTS_VIEW_DX', 0),
     'viewY': envnum('NSTS_VIEW_DY', 0),
@@ -5277,8 +5287,10 @@ class Screen_DPS(MDUScreen):
         # row is placed and touches nothing about the character.
         rowScale = opts.get('rowScale', 1)
 
+        layerY = ADJ['bgY'] if passLabel == 'BG' else ADJ['fgY']
+
         def penY():
-            return cellRow(st['beamY']) * rowScale + 1 + ADJ['textY']
+            return cellRow(st['beamY']) * rowScale + 1 + ADJ['textY'] + layerY
 
         blinkGroup = Object3D()
         blinkGroup.userData['deuBlink'] = True
@@ -5798,6 +5810,8 @@ class Screen_DPS(MDUScreen):
             mk('vector dY', 'vecY', [-3.0, 3.0, 0.05]),
             mk('vector dX', 'vecX', [-2.0, 2.0, 0.02]),
             mk('page dY', 'pageY', [-4.0, 4.0, 0.05]),
+            mk('background dY', 'bgY', [-2.0, 2.0, 0.02]),
+            mk('foreground dY', 'fgY', [-2.0, 2.0, 0.02]),
             mk('menu dX', 'menuX', [-1.0, 2.0, 0.02]),
             mk('view dX', 'viewX', [-3.0, 3.0, 0.02]),
             mk('view dY', 'viewY', [-3.0, 3.0, 0.02]),
