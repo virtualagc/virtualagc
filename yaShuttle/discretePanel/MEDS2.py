@@ -3489,10 +3489,10 @@ ADJ = {
 # the data cell and DEORB MNVR COAST's does not, so no single underscore dY
 # reads as an underline on both, and a rule that clears one meets the other.
 #
-# Keyed on the FORMAT NUMBER the background itself draws in the title line
-# (3011 = DEORB MNVR COAST, 0001 = GPC MEMORY), learned from the frame -- see
-# _announceTopLines -- so a display names itself and nothing has to be wired
-# to an address.  The file is JSON, {"3011": {"underY": -0.05}, ...}, from
+# Keyed on WHICH DISPLAY the title line names -- 'S000' for GPC MEMORY (SPEC
+# 0), 'M3011' for DEORB MNVR COAST (a major-mode display, no SPEC) -- learned
+# from the frame, see _noteFormat, so a display names itself and nothing has
+# to be wired to an address.  The file is JSON, {"S000": {"underY": -0.05}},
 # NSTS_DPS_FORMAT_ADJ or data/dps-format-adj.json beside this program.  An
 # unlisted format uses the defaults, which is every format until one is found
 # wanting: this is a place to record a screen we have LOOKED at, not a knob to
@@ -5330,14 +5330,31 @@ class Screen_DPS(MDUScreen):
              'rowScale': adj('rowGap')})
         self._announceTopLines()
 
-    FORMAT_IN_TITLE = re.compile(r"\s*(\d{4})/")
+    FORMAT_IN_TITLE = re.compile(r"\s*(\d{4})/\s*(\d{3})?\s*/")
 
     def _noteFormat(self, line):
-        """The format number the background drew in its title line -- '3011'
-        for DEORB MNVR COAST, '0001' for GPC MEMORY.  It keys the per-format
-        adjustments (see FORMAT_ADJ); a display thereby names itself."""
+        """Which DISPLAY this is, from its title line.
+
+        The first field is the OPS and major mode, the second the SPEC
+        number, and it is the SECOND that names a display: GPC MEMORY draws
+        `0001/000/` seen from OPS 0 and `3011/000/` from OPS 3 -- the same
+        display, two major modes -- while a major-mode display such as DEORB
+        MNVR COAST draws `3011/   /`, with no SPEC at all, and IS the first
+        field.  Keying on the first field alone would give one display two
+        sets of values and give DEORB the same key as GPC MEMORY seen from
+        OPS 3, which is how this was first written and wrong.
+
+        So: 'S000' for a SPEC, 'M3011' for a major-mode display."""
         m = self.FORMAT_IN_TITLE.match(line or '')
-        fmt = m.group(1) if m else None
+        fmt = None
+        if m:
+            fmt = ('S' + m.group(2)) if m.group(2) else ('M' + m.group(1))
+        elif 'GPCIPL' in (line or ''):
+            # The one display with no numbers of its own: the IPL program's
+            # menu, which also draws in GPCIPL's coordinate frame (see GEOMS).
+            # Keyed on its own name rather than on the ABSENCE of a title,
+            # which a half-drawn frame shares.
+            fmt = 'GPCIPL'
         if fmt != getattr(self, '_fmtId', None):
             self._fmtId = fmt
             if fmt in FORMAT_ADJ:
