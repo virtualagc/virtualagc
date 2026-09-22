@@ -3430,8 +3430,11 @@ ADJ = {
     # -2.52, fitted against Don's video with the REAL frustum.
     'textY': envnum('NSTS_DPS_TEXTY', -2.52),
     # +0.50: the rules were landing exactly on the top strokes of the row
-    # below, so centring them in the 0.30-row gap is 4 px up.
-    'vecY': envnum('NSTS_DPS_VECY', 0.50),
+    # below, so centring them in the 0.30-row gap is 4 px up.  +0.55 since
+    # the underscore moved to +0.03 (2026-09-22): on GPC MEMORY the rule now
+    # lies exactly on its underscores, which at the dimmed vector intensity
+    # reads as deliberate (owner's choice); other screens not yet surveyed.
+    'vecY': envnum('NSTS_DPS_VECY', 0.55),
     'textX': envnum('NSTS_DPS_TEXTX', -0.71),
     'vecX': envnum('NSTS_DPS_VECX', 0.41),
     'pageY': envnum('NSTS_DPS_YSHIFT', 1),
