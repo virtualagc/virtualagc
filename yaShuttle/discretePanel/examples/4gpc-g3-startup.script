@@ -50,9 +50,10 @@
 # OPS 301, every computer driving its own flight-critical strings (bus 14/20
 # GPC1, 15/21 GPC2, 16/22 GPC3, 17/23 GPC4).  With two CRTs it ran 36,319 /
 # 36,322 / 36,320 / 36,308 sync issues per minute, matched to within 30.  With
-# the third CRT powered late, as below, all four hold at rate 1.00 (SSIP cadence
-# 160.04 / 160.05 / 160.08 / 160.04 ms against a nominal 160) and CRT3 takes its
-# fills with no bus timeouts at all -- where powering it early cost 120.
+# the third CRT powered late (as this script then did) all four held at rate
+# 1.00 (SSIP cadence 160.04 / 160.05 / 160.08 / 160.04 ms against a nominal
+# 160) -- but CRT3's IDP was never loaded.  Since 2026-09-21 IDP3 is loaded at
+# GPC3's IPL instead; see the IDP3 note above and ledger #197.
 
 # --- all four GPCs to HALT, the IDPs on ---------------------------------------
 +0     gpc 1
