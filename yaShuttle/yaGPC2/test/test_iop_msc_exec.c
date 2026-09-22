@@ -8,6 +8,28 @@
  *   node test/gen_iop_instr_exec_fixtures.cjs msc NAME... > fixtures.json
  *   python3 test/gen_iop_instr_exec_fixtures_header.py fixtures.json \
  *     YAGPC_TEST_IOP_MSC_EXEC_FIXTURES_H > test/iop_msc_exec_fixtures.h
+ *
+ * WHICH REFERENCE, AND ONE PATCH TO IT (2026-09-22).  The generator wants
+ * the LIVE gpc -- it sets regProcEnable, which the frozen yaShuttle/gpc
+ * still calls regHalt -- so YAGPC_REF_ROOT=~/donschmidt/nsts-sim-gpc, with
+ * NODE_PATH set to that tree's node_modules and its tsconfig.json present
+ * (esbuild resolves `com/lru` through the tsconfig paths; a scratch copy
+ * without it does not build).
+ *
+ * @LH is generated against a SCRATCH COPY of gpc/iop_msc_instr.coffee with
+ * one line added, because the reference is wrong there and the hardware
+ * says so.  IBM-6246556A part 1, @LH: "The addressed halfword is placed in
+ * the lower 16 bits of the MSC Accumulator, with the upper 16 bits
+ * SIGN-EXTENDED."  The reference zero-extends; three fixtures -- the ones
+ * whose halfword has bit 15 set -- therefore disagreed with this emulator,
+ * which sign-extends.  The patch is
+ *     v1 = (v1 | 0xffff0000) >>> 0 if (v1 & 0x8000) != 0
+ * before `t.ls.setACC(v1)`, the same technique #MOUT/#MIN's fixtures use.
+ *
+ * @LAR needed no patch, only regenerating: its stored fixtures expected the
+ * PC one halfword further on than either implementation produces, so they
+ * were stale -- generated from an older reference.  Both gpcs, and this
+ * emulator, advance one halfword.
  */
 #include <stdio.h>
 #include <string.h>
