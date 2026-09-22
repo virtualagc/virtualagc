@@ -243,6 +243,11 @@ typedef struct {
     int cap, head, count;
 } DMAQueue;
 
+/* The display buses.  com/bus.civet gives DK1=6, and the four run to 9
+ * (discretes.h's processor table: IC1-5 = 1-5, DK1-4 = 6-9). */
+#define YAGPC_DK_BUS_FIRST 6
+#define YAGPC_DK_BUS_LAST  9
+
 typedef struct IOP {
     struct CPU *cpu;
     /* No separate IOP storage: real AP-101S main storage is a single
@@ -322,6 +327,10 @@ typedef struct IOP {
      * checkers re-issues ENABLE FLOW PARITY CHECK before every one. */
     bool parityEnabled;
     bool forceHBusParity;    /* C102: everything arriving over the H-Bus */
+    /* How many DISPLAY buses this computer was last seen transmitting on.
+     * One computer driving several displays is what cost #159 its rate, and
+     * nothing reported it; see the transmitter-enable case in iop.c. */
+    int dkBusesCommanded;
     bool forceQueueParity;   /* C108: local store address / queue control */
     bool forceDMAParity;     /* C140: DMA address and data */
     bool forceMIAParity;     /* C180: octal MIA pages */

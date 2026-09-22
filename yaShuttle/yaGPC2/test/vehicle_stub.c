@@ -10,3 +10,15 @@ double vehicle_shared_us(const Vehicle *v, int gpcId) {
     (void)gpcId;
     return 0.0;
 }
+
+/* vehicle_multi() decides whether the display-bus guard in
+ * iop_recv_from_cpu applies at all -- one computer driving several displays
+ * is ordinary when it is the only computer there.  A test IOP has no
+ * vehicle, so the answer is normally "no"; test_iop_dkbuses.c sets this to
+ * exercise the guard without building a vehicle. */
+bool yagpc_test_vehicle_multi = false;
+
+bool vehicle_multi(const Vehicle *v) {
+    (void)v;
+    return yagpc_test_vehicle_multi;
+}

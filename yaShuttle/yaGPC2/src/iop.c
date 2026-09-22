@@ -2279,6 +2279,46 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
                         (unsigned)data, (unsigned)before, (unsigned)after,
                         (unsigned)psw_get_nia(&iop->cpu->psw), iop->cpu->elapsedTimeUs,
                         vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) / 1e6);
+            /* ONE COMPUTER DRIVING SEVERAL DISPLAYS IS THE STATE THAT COSTS
+             * THE RATE, and until now nothing said so.
+             *
+             * A GPC's emulation is serial -- one thread, one core -- so a
+             * computer that ends up commanding every display bus delivers a
+             * fraction of real time, the barrier correctly paces the whole
+             * vehicle down to it, and MEDS2's wall-clock watchdogs then fire
+             * against a vehicle that is healthy but slow.  A display stops
+             * answering, the member alone with an I/O error fails itself
+             * out, and what is actually an ORDERING mistake in the startup
+             * script -- powering a display before the NBAT names its
+             * commander, so whoever is already in RUN captures it -- reads
+             * as a sync defect.  That is ledger #159, and rediscovering it
+             * cost the runs of #158 before it.
+             *
+             * Only in a multi-GPC vehicle: one computer commanding two
+             * displays is ordinary and correct when it is the only computer
+             * there.  Reported on each change, not once, because the
+             * interesting part is when it starts and when it stops. */
+            if (vehicle_multi(iop->vehicle)) {
+                int n = 0;
+                for (int b = YAGPC_DK_BUS_FIRST; b <= YAGPC_DK_BUS_LAST; b++)
+                    if (iop_proc_get(&iop->regXmitEna, b)) n++;
+                if (n != iop->dkBusesCommanded) {
+                    if (n > 1)
+                        fprintf(stderr,
+                                "vehicle: GPC%d transmits on %d display buses "
+                                "at once -- one computer driving several "
+                                "displays paces the whole vehicle down to "
+                                "itself (ledger #159); check that the NBAT "
+                                "named each display's commander BEFORE it was "
+                                "powered\n",
+                                iop->cpu->gpcId, n);
+                    else if (iop->dkBusesCommanded > 1)
+                        fprintf(stderr,
+                                "vehicle: GPC%d now transmits on %d display "
+                                "bus(es)\n", iop->cpu->gpcId, n);
+                    iop->dkBusesCommanded = n;
+                }
+            }
             break;
         }
         case 0x84080000: /* MIA RECEIVER DISABLE */
