@@ -132,8 +132,16 @@ SCAN = {
 }
 
 
+_LOG_T0 = time.monotonic()
+
+
 def log(msg):
-    print("stsKeyboard: %s" % msg, flush=True)
+    """Stamped at the END of the line, as panelO6.py and cam.py are, with
+    seconds since this process started.  Unstamped, a flown run's keystrokes
+    could be put back in order but not in time: rebuilding the owner's eyes-on
+    3-CRT session as a script (2026-09-22) had to guess every key's moment."""
+    print("stsKeyboard: %s  [t=%.1f]" % (msg, time.monotonic() - _LOG_T0),
+          flush=True)
 
 
 # A key that arrives from the bus -- a script typing it -- shows pressed for

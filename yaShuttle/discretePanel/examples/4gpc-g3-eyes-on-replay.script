@@ -1,0 +1,37 @@
+# The owner's eyes-on 4-GPC 3-CRT session of 2026-09-22, replayed.
+#
+# Played into a RESTORED vehicle (g3-3crt-ops301-idp3): through the Manager
+# or the control port ('play FILE'), or as synctest.sh's fourth argument.  A
+# resume deliberately does not replay the script that built a configuration.
+#
+# RECONSTRUCTED, NOT RECORDED.  The IDP/CRT SEL movements and their times are
+# exact, from panel.log (seconds after the panel started, shown in each
+# comment).  The KEYS AND THEIR ORDER are exact, from the keyboard logs, and
+# which CRT each reached is from the MEDS2 logs -- but the keyboard logs then
+# carried no timestamps, so each key's moment is a guess placed inside the
+# window the switch times allow (FAULT SUMM reached CRT3, so it falls while
+# LEFT was on 3).  KB2's second RESUME reached no CRT's log; it is placed in
+# the RIGHT=3 window, where it most plausibly went.  stsKeyboard.py now stamps
+# its log, so a session flown after this can be replayed exactly.
+#
+# Everything the owner did was in the first 2.5 minutes; the run then sat
+# idle for over 30.  It flew at 0.70 of real time while a headless restore of
+# the same capture flies at 1.000 -- which is what this replay is for.
+
++5     keys KB1 SPEC 2 PRO      # t=30.0
++7     keys KB1 SPEC 6 PRO      # t=37.0
++7.1   kybdsel left 3           # t=44.1
++5.9   keys KB1 FAULT_SUMM      # t=50.0
++7     kybdsel left 1           # t=57.0
++3.1   kybdsel right 3          # t=60.1
++2.4   kybdsel right 2          # t=62.5
++7.5   keys KB1 RESUME          # t=70.0
++6     keys KB2 SPEC 0 PRO      # t=76.0
++9     keys KB2 RESUME          # t=85.0
++12.2  kybdsel left 3           # t=97.2
++9.6   kybdsel left 1           # t=106.8
++5.2   keys KB1 SPEC 6 PRO      # t=112.0
++8     keys KB1 SPEC 0 PRO      # t=120.0
++9.8   kybdsel right 3          # t=129.8
++3.2   keys KB2 RESUME          # t=133.0
++4.7   kybdsel right 2          # t=137.7
