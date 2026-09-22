@@ -33,8 +33,12 @@
 /* WHICH REFERENCE, AND THE PATCHES TO IT (2026-09-22).  Generated against
  * the LIVE gpc -- YAGPC_REF_ROOT=~/donschmidt/nsts-sim-gpc, NODE_PATH set
  * to its node_modules, its tsconfig.json present so esbuild resolves
- * `com/lru` -- from a SCRATCH COPY carrying the patches below, every one a
- * place where the reference is wrong and this emulator is right:
+ * `com/lru` -- from a copy carrying the patches below, every one a place
+ * where the reference is wrong and this emulator is right.  The patches are
+ * checked in and applied by test/make_patched_ref.sh, which also documents
+ * the regeneration commands; running it and regenerating reproduces this
+ * header byte for byte.  They used to live only in a scratch copy under
+ * /tmp, where losing them would have cost a day of re-derivation:
  *
  *   SVC: the effective address is 19 bits and the interrupt-code field is
  *   16, and AP-101S PoO 2.5.1.1 saves the 4-bit extension in the old PSW's

@@ -1,0 +1,71 @@
+--- /home/rburkey/donschmidt/nsts-sim-gpc/gpc/cpu_instr.coffee	2026-08-31 20:02:37.690072476 -0500
++++ /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad/refpatched/gpc/cpu_instr.coffee	2026-09-22 17:40:26.335932121 -0500
+@@ -1925,8 +1925,13 @@
+                     xts:[3.75,7,10,6.75,10,8,9.5]
+                     xtc:[1.6,1.8,2.6,1.7,1.8]
+                     e:(t,v) ->
++                        # PATCHED FOR FIXTURE GENERATION ONLY.  The link must be snapshotted
++                        # BEFORE g_EA, which can replace BSR/DSR from a C=1 fullword indirect
++                        # pointer -- otherwise the CALLEE's sectors are saved and BCRE
++                        # 'restores' them into the caller.  See src/cpu_instr.c's exec_BAL.
++                        link = t.psw.psw1.get32()
+                         branch = t.g_EA(v)
+-                        t.r(v.x).set32(t.psw.psw1.get32())
++                        t.r(v.x).set32(link)
+                         # BALR R1, 0 -> no branch
+                         t.psw.setNIA(branch)
+ 
+@@ -3990,7 +3995,12 @@
+                         rawIn = t.f(v.y).get32() >>> 0
+                         v2 = FloatIBM.From32(rawIn)
+                         {result, exc} = cvfx(v2)
+-                        return unless t.fp_dispatch_exc(exc)
++                        # PATCHED FOR FIXTURE GENERATION ONLY: a real CVFX
++                        # always completes and stores a result before any
++                        # interrupt is taken; bailing out here leaves the
++                        # destination register holding unrelated garbage.
++                        # See exec_CVFX in yaGPC2's cpu_instr.c.
++                        t.fp_dispatch_exc(exc)
+                         t.r(v.x).set32(result >>> 0)
+                         # POO 8.13: a floating-point value of
+                         # 41100000 is converted to 0x00010000 but gives
+@@ -5636,7 +5646,10 @@
+                     t:OPTYPE_BRCH
+                     xts:[18.125,21.5,24.5,21.25,24.5,22.5,24]
+                     e:(t,v) ->
+-                        # Compute branch address first
++                        # PATCHED FOR FIXTURE GENERATION ONLY.  Same ordering rule as BAL:
++                        # psw1 must be snapshotted BEFORE g_EA, which can replace BSR/DSR
++                        # from a C=1 fullword indirect pointer.  See exec_SCAL.
++                        savedPsw1 = t.psw.psw1.get32()
+                         branchAddr = t.g_EA(v)
+                         # Get SSD from R1: PTR (bits 0-15), INC (bits 16-31)
+                         r1val = t.r(v.x).get32()
+@@ -5648,7 +5661,7 @@
+                         sa = (ptr + inc) & 0xffff
+                         #console.log "SCAL SA=#{sa.asHex(8)}"
+                         # Save PSW1 (first 2 halfwords) at SA
+-                        return if not t.storeFW(sa, t.psw.psw1.get32())
++                        return if not t.storeFW(sa, savedPsw1)
+                         for i in [0..7]
+                             return if not t.storeFW(sa + 2 + i * 2, t.r(i).get32())
+                         # Update SSD: PTR = SA, INC = 18
+@@ -5823,7 +5836,17 @@
+                         # This swap is part of the instruction, not an end-of-instruction
+                         # acceptance, so it does not pass the stop-before-swap hold in
+                         # cpu.checkInterrupts
+-                        t.psw.setIntCode(ea)
++                        # PATCHED FOR FIXTURE GENERATION ONLY: the SVC's
++                        # effective address is 19 bits but the interrupt-code
++                        # field is 16, and AP-101S PoO 2.5.1.1 says the 4-bit
++                        # extension is saved in the OLD PSW's bits 40-43 (the
++                        # 'e' field of DESC2).  FPMSVC rebuilds the parameter
++                        # list address from it, so without this every SVC
++                        # issued from sector 2 or above rebuilds an address
++                        # one to seven sectors low -- see exec_SVC in
++                        # yaGPC2's cpu_instr.c.
++                        t.psw.setIntCode(ea & 0xffff)
++                        t.psw._setField2(t.psw.pack2.desc.f.e, (ea >>> 15) & 0xf)
+                         t.ram.set32(0x58,t.psw.psw1.get32())
+                         t.ram.set32(0x5a,t.psw.psw2.get32())
+                         t.psw.load(t.ram.get32(0x5c),

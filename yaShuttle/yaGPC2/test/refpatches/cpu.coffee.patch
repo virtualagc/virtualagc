@@ -1,0 +1,86 @@
+--- /home/rburkey/donschmidt/nsts-sim-gpc/gpc/cpu.coffee	2026-08-22 18:15:51.794924080 -0500
++++ /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad/refpatched/gpc/cpu.coffee	2026-09-22 17:37:49.576496357 -0500
+@@ -532,56 +532,41 @@
+ 
+                       regx = (@r(v.i).get32() >>> 16) << (v.indexWidth - 1)  # aligned index register value
+ 
+-                      if c == 0
+-                          # C=0: use pointer's BSR/DSR for data, current PSW's BSR for branches
+-                          if v.opType == OPTYPE_BRCH
+-                              # Branch: use current PSW's BSR
+-                              if xc == 0
+-                                  # Post-indexing
+-                                  ea = (address15 + regx) & 0x7fff
+-                                  ea = (@psw.getBSR() << 15) + ea
+-                              else
+-                                  # No post-indexing
+-                                  ea = (@psw.getBSR() << 15) + address15
+-                          else
+-                              # Data instruction: use pointer's DSR
+-                              if xc == 0
+-                                  # Post-indexing
+-                                  ea = (address15 + regx) & 0x7fff
+-                                  ea = (ptrDSR << 15) + ea
+-                              else
+-                                  # No post-indexing: ptrDSR || address15
+-                                  ea = (ptrDSR << 15) + address15
+-                      else
+-                          # C=1: selectively update PSW BSR/DSR based on CB/CD
++                      # PATCHED FOR FIXTURE GENERATION ONLY.  The pointer's own high bit
++                      # decides whether a sector is applied at all (Sec. 2.9; Fig. 2-17's
++                      # expansion flowchart has a *0000* leaf), and the index addition is
++                      # 16-bit including that bit -- see src/cpu.c's cpu_g_ea and the
++                      # DCI#CON evidence there.  This reference strips bit 15 and forces a
++                      # sector unconditionally, an inherited defect.
++                      if c == 1
+                           if cd == 1
+                               @psw.setDSR(ptrDSR)
+                           if cb == 1
+                               @psw.setBSR(ptrBSR)
+-                          
+-                          if v.opType == OPTYPE_BRCH
+-                              # Branch: use (possibly updated) PSW's BSR
+-                              if xc == 0
+-                                  # Post-indexing
+-                                  ea = (address15 + regx) & 0x7fff
+-                                  ea = (@psw.getBSR() << 15) + ea
+-                              else
+-                                  # No post-indexing
+-                                  ea = (@psw.getBSR() << 15) + address15
+-                          else
+-                              # Data instruction: use (possibly updated) PSW's DSR
+-                              if xc == 0
+-                                  # Post-indexing
+-                                  ea = (address15 + regx) & 0x7fff
+-                                  ea = (@psw.getDSR() << 15) + ea
+-                              else
+-                                  # No post-indexing
+-                                  ea = (@psw.getDSR() << 15) + address15
++                      effDSR = if c == 0 then ptrDSR else @psw.getDSR()
++                      ea16 = if xc == 0 then ((address16 + regx) & 0xffff) else address16
++                      if (ea16 & 0x8000) != 0
++                          sector = if v.opType == OPTYPE_BRCH then @psw.getBSR() else effDSR
++                          ea = (sector << 15) + (ea16 & 0x7fff)
++                      else
++                          ea = ea16
+                   
+               #ea = pea + index & 0xffff
+           else
+               ea = pea
+-              ea = @g_EXPAND(ea,v.opType,dseVal)
++              # PATCHED FOR FIXTURE GENERATION ONLY.  AP-101S PoO 2.2.8, on
++              # the EXTENDED RS form: "When B2 equals 11, base addressing is
++              # not performed.  In this case, the displacement is instead
++              # used DIRECTLY AS THE EFFECTIVE ADDRESS."  There is then no
++              # 16-bit address left for 2.9 to expand.  Confirmed against
++              # the linked flight image -- every such operand in FCMSSYNC
++              # equals its symbol's address exactly, including the three
++              # whose bit 15 is set.  Branches are excluded: a branch target
++              # still has to reach sector 3.  See cpu_g_ea in yaGPC2.
++              if v.b == 3 and v.opType != OPTYPE_BRCH
++                  ea = ea & 0xffff
++              else
++                  ea = @g_EXPAND(ea,v.opType,dseVal)
+ 
+       else
+           # SRS or SI addressing
