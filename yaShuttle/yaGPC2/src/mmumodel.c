@@ -105,20 +105,19 @@ static int gtg_iua(void) {
     return v;
 }
 
-/* OFF UNTIL IT IS RIGHT.  Carrying the words does get an OPS 3 transition
- * whose source is a GPC to complete -- all three CRTs reach DEORB MNVR
- * COAST, where without it the vehicle stays in OPS 0 -- but the set then
- * fails: every computer lights its own fail lamp, and the receivers leave
- * most of the words unread (554,421 past unread against 359,378 carried, on
- * bus 18 alone).  Something about what the receiving bus programs expect,
- * or when, is still wrong.  YAGPC_GTG=1 turns it on to work on it; the
- * default leaves the bus exactly as it was, where ITEM 10 on DPS UTILITY
- * (force the MMU as the overlay source) is the way round it.  Ledger #199. */
+/* ON.  Without it an OPS transition whose overlay source is a GPC never
+ * arrives and the vehicle stays in the OPS it was in (ledger #199).  With
+ * it, 301 -> 201 -> 000 -> 301 reaches DEORB MNVR COAST on all three CRTs,
+ * from a restore and from a fresh IPL, carrying 184,934 words each time,
+ * with no votes; a ten-minute restore that makes no such transfer carries
+ * none and is unaffected.  YAGPC_GTG=0 goes back to the old behaviour,
+ * where ITEM 10 on DPS UTILITY (force the MMU as the source) is the way
+ * round it. */
 static bool gtg_on(void) {
     static int v = -1;
     if (v < 0) {
         const char *e = yagpc_getenv("YAGPC_GTG");
-        v = (e != NULL && *e != '\0' && *e != '0') ? 1 : 0;
+        v = (e != NULL && *e == '0') ? 0 : 1;
     }
     return v != 0;
 }
@@ -1057,7 +1056,8 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
                 /* Wire order: the echo follows the replies already
                  * sent, and a word nobody takes ages out in tap_word. */
                 tap_end_stream(m, r, sharedUs);
-                tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, echoDue, false);
+                tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC,
+                         m->gtg ? -1.0 : echoDue, false);
             }
             break;                      /* and on to the unit itself, below */
         }
@@ -1075,12 +1075,14 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
                 uint32_t w = input->in.word & 0xffffu;
                 for (int r = 1; r <= 5; r++) {
                     if (r == g || m->tap[r].w == NULL) continue;
-                    double due = (m->replyWireUs > sharedUs ? m->replyWireUs
-                                                            : sharedUs) + BUS_WORD_US;
-                    tap_push(m, r, w, due, false);
+                    /* READY AT ONCE, AND NEVER AGED OUT (a negative due --
+                     * see tap_word).  The wire pacing of a GPC-to-GPC
+                     * transfer is the TRANSMITTING computer's own bus
+                     * program, which is already paced by its BCE; pacing
+                     * the words a second time here only made the receivers
+                     * miss them. */
+                    tap_push(m, r, w, -1.0, false);
                 }
-                m->replyWireUs = (m->replyWireUs > sharedUs ? m->replyWireUs
-                                                            : sharedUs) + BUS_WORD_US;
                 m->gtgWords++;
                 return;                 /* not this unit's business */
             }
