@@ -3463,6 +3463,13 @@ ADJ = {
     # settings the owner liked: stroke 0.5, inward 0.2, sign 0.7 -- now the
     # defaults, with underscore dY 0.03 and --scale 0.8 (2026-09-22), "at
     # least until it's possible to test them with a lot more screens".
+    # DPS VECTORS DIMMED against text, by opacity (the path DEU FEAT
+    # intensity already uses).  Rules meet underscores on GPC MEMORY and
+    # text on SPEC 6 at every vector dY, and half-height text was rejected
+    # for legibility; a dimmer rule makes the unavoidable touch read as the
+    # rule passing behind (owner, 2026-09-22).  Multiplies the list's own
+    # intensity (0.72 normal, 1.0 bright), so bright still outranks normal.
+    'vecI': envnum('NSTS_DPS_VECI', 0.6),
     'brkStroke': envnum('NSTS_DPS_BRKSTROKE', 0.5),
     'brkIn': envnum('NSTS_DPS_BRKIN', 0.2),
     'signSize': envnum('NSTS_DPS_SIGNSIZE', 0.7),
@@ -5501,7 +5508,7 @@ class Screen_DPS(MDUScreen):
             if st['dash']:
                 add(self.d.dashedLine(seg, penColor()))
             else:
-                add(self.d.line(seg, penColor(), penIntensity()))
+                add(self.d.line(seg, penColor(), penIntensity() * ADJ['vecI']))
 
         # The walk is by index, not by iteration, because a BRANCH moves the
         # program counter.
@@ -5891,6 +5898,7 @@ class Screen_DPS(MDUScreen):
                                 setattr(self.d, 'dirty', True)))},
             mk('glyph size', 'glyph', [0.50, 1.20, 0.01]),
             mk('underscore dY', 'underY', [-0.6, 0.6, 0.01]),
+            mk('vector intensity', 'vecI', [0.20, 1.00, 0.02]),
             mk('bracket stroke', 'brkStroke', [0.30, 1.00, 0.05]),
             mk('bracket inward', 'brkIn', [0.0, 0.30, 0.005]),
             mk('sign size', 'signSize', [0.50, 1.00, 0.02]),
