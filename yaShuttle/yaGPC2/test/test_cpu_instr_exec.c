@@ -30,6 +30,29 @@
  * from gpc without reapplying this correction (`make test`'s failure
  * list names the exact (hw1,hw2) pairs) will silently reintroduce these
  * failures. */
+/* WHICH REFERENCE, AND THE PATCHES TO IT (2026-09-22).  Generated against
+ * the LIVE gpc -- YAGPC_REF_ROOT=~/donschmidt/nsts-sim-gpc, NODE_PATH set
+ * to its node_modules, its tsconfig.json present so esbuild resolves
+ * `com/lru` -- from a SCRATCH COPY carrying two patches, both places where
+ * the reference is wrong and this emulator is right:
+ *
+ *   SVC: the effective address is 19 bits and the interrupt-code field is
+ *   16, and AP-101S PoO 2.5.1.1 saves the 4-bit extension in the old PSW's
+ *   bits 40-43 (DESC2's 'e').  The reference drops it, so FPMSVC rebuilds
+ *   every parameter-list address issued from sector 2 or above one to
+ *   seven sectors low -- see exec_SVC.  317 fixtures.
+ *
+ *   CVFX: a real CVFX completes and stores its result before any interrupt
+ *   is taken; the reference returns without storing on a floating-point
+ *   exception, leaving the destination register holding whatever it held
+ *   before -- see exec_CVFX.  136 fixtures.
+ *
+ * 90 fixtures still fail, a few each across 29 instructions, and are NOT
+ * adjudicated: the LM/STM/LPS group differs over whether a displacement
+ * with bit 15 set expands by the base register's sector (we expand; the
+ * reference does not), which is an addressing question for the PoO, and
+ * the rest are unexamined.
+ */
 #include <stdio.h>
 #include <string.h>
 
