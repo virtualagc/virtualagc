@@ -3418,7 +3418,11 @@ CELL_TRACE_PER_FRAME = 4000
 # (XG3011.dfg) puts its underscores IN the data's cell, as plain CHAR text on
 # the grid, and there the same raise lands them on the digits' bottom stroke
 # (cell traces, 2026-09-22).  The character generator draws '_' in one place
-# for both; this is the knob for finding it.
+# for both; this is the knob for finding it.  0.03 is the owner's compromise
+# at --scale 0.8: a slight gap on both screens, touching neither the row above
+# (DEORB) nor the row below (GPC MEMORY).  Known cost: horizontal RULES
+# (vectors) can now meet underscores, and no vector dY was found that fixes
+# it -- open.
 GLYPH_DY = {'_': -0.15}
 
 ADJ = {
@@ -3439,7 +3443,29 @@ ADJ = {
     # text/vector offsets cannot be the cause.  These are a workaround and a
     # measurement at once: the value that lines a display up is the size of
     # the displacement, which says where it comes from.  Zero is untouched.
-    'underY': envnum('NSTS_DPS_UNDERY', -0.15),
+    # THE GLYPH'S SIZE ABOUT ITS CELL'S CENTRE -- beside `--scale`, which
+    # resizes about the digits' ink centre and so also moves an underscore
+    # (it lies on the cell's edge) toward its own row's digits.  This one
+    # opens equal room on every side: between rows for the underscore, and
+    # between '[+]' and the digit after it (owner, 2026-09-22).  Both are
+    # Shift+X sliders so the combination can be found without a restart.
+    'glyph': envnum('NSTS_DPS_GLYPH', 1.0),
+    'underY': envnum('NSTS_DPS_UNDERY', 0.03),
+    # SIGN FIELDS.  DEORB MNVR COAST draws '[+]' with the brackets half a cell
+    # OFF the grid (x.82 against the text's x.29), straddling the boundaries
+    # either side of a one-cell sign -- the display list's intent, since it
+    # fits no other way.  Our '+' spans 0.88 of a column and the brackets are
+    # centred in their cells, so ']' leaves about a third of a pixel either
+    # side at --scale 0.8 and reads as touching the digit (owner,
+    # 2026-09-22).  Three knobs, DEU glyphs only: the brackets' line width,
+    # an inward shift in columns ('[' right, ']' left), and the size of
+    # '+', '-' and the plus-minus sign about their own centres.  First
+    # settings the owner liked: stroke 0.5, inward 0.2, sign 0.7 -- now the
+    # defaults, with underscore dY 0.03 and --scale 0.8 (2026-09-22), "at
+    # least until it's possible to test them with a lot more screens".
+    'brkStroke': envnum('NSTS_DPS_BRKSTROKE', 0.5),
+    'brkIn': envnum('NSTS_DPS_BRKIN', 0.2),
+    'signSize': envnum('NSTS_DPS_SIGNSIZE', 0.7),
     'bgY': envnum('NSTS_DPS_BGY', 0),
     'fgY': envnum('NSTS_DPS_FGY', 0),
     'menuX': envnum('NSTS_MENU_DX', 0),
@@ -3576,7 +3602,15 @@ class CharGen(object):
         self.CONFIG = CONFIG or {}
         self.chars = {' ': []}
         self.loadCharSVG()
+        self.textScale = 1.0
         self.scaleGlyphs(float(self.CONFIG.get('textScale', 1.0)))
+
+    def setTextScale(self, k):
+        """The same resize as `--scale`, live: rescale by the ratio to the
+        current size, about the same digit ink centre, which a resize about
+        that centre leaves where it was."""
+        if k > 0 and k != self.textScale:
+            self.scaleGlyphs(k / self.textScale)
 
     def scaleGlyphs(self, k):
         """`--scale` / a config `textScale`: resize every glyph about the
@@ -3586,6 +3620,8 @@ class CharGen(object):
         the SDF stroke width is in pixels, so is the weight of the lines."""
         if k == 1.0:
             return
+        if hasattr(self, 'textScale'):
+            self.textScale *= k
         pts = [p for c in '0123456789' for s in self.chars.get(c, []) for p in s]
         cx = (min(p[0] for p in pts) + max(p[0] for p in pts)) / 2
         cy = (min(p[1] for p in pts) + max(p[1] for p in pts)) / 2
@@ -3707,14 +3743,31 @@ class CharGen(object):
                          gcy + (p[0] - gcx) * sn / AR + (p[1] - gcy) * cs]
                         for p in stroke] for stroke in strokes]
 
+        # SIGN-FIELD KNOBS (see ADJ 'brkStroke'), for the DEU font only: a
+        # thinner line and an inward shift for the brackets, a narrower sign.
+        width = mdu.TEXT_STROKE
+        dx = 0.0
+        if self.suffix == 'deu' and not centered and not rot:
+            if glyphChar in '[]':
+                width *= ADJ['brkStroke']
+                dx = ADJ['brkIn'] if glyphChar == '[' else -ADJ['brkIn']
+            elif glyphChar in u'+-\u00b1' and ADJ['signSize'] != 1.0:
+                xs = [p[0] for stroke in strokes for p in stroke]
+                ys = [p[1] for stroke in strokes for p in stroke]
+                mx = (min(xs) + max(xs)) / 2.0
+                my = (min(ys) + max(ys)) / 2.0
+                k = ADJ['signSize']
+                strokes = [[[mx + (p[0] - mx) * k, my + (p[1] - my) * k]
+                            for p in stroke] for stroke in strokes]
+
         # One batched mesh for the whole glyph: every stroke shares the
         # material and the transform, so this is the same picture in one draw.
-        buffer = mdu.lines(strokes, c, 1.0, clip, mdu.TEXT_STROKE)
+        buffer = mdu.lines(strokes, c, 1.0, clip, width)
         if centered:
             buffer.position.set(x - scaleFactor * scalex * gcx,
                                 y - scaleFactor * gcy, 0)
         else:
-            buffer.position.set(x - 1, y, 0)
+            buffer.position.set(x - 1 + dx, y, 0)
         buffer.scale.set(scaleFactor * scalex, scaleFactor, 1)
         return [buffer]
 
@@ -5394,9 +5447,13 @@ class Screen_DPS(MDUScreen):
                         except Exception:
                             pass
                     gdy = ADJ['underY'] if ch == '_' else (GLYPH_DY.get(ch) or 0)
-                    add(self.d.str(penX(), penY() + gdy, ch,
+                    # Font strokes are in cell units, the cell's centre at
+                    # (1.5, 0.5); shift so a resized glyph stays centred.
+                    gs = ADJ['glyph']
+                    add(self.d.str(penX() + (1.0 - gs) * 1.5,
+                                   penY() + gdy + (1.0 - gs) * 0.5, ch,
                                    penColor(),
-                                   (COL_PITCH_L / COL_PITCH) if st['large'] else 1.0,
+                                   gs * ((COL_PITCH_L / COL_PITCH) if st['large'] else 1.0),
                                    1.0, 1.0, self.d.deuFont, st['angle'], False))
                 advance()
 
@@ -5828,7 +5885,15 @@ class Screen_DPS(MDUScreen):
             mk('vector dY', 'vecY', [-3.0, 3.0, 0.05]),
             mk('vector dX', 'vecX', [-2.0, 2.0, 0.02]),
             mk('page dY', 'pageY', [-4.0, 4.0, 0.05]),
+            {'label': 'text scale', 'range': [0.50, 1.20, 0.01],
+             'get': (lambda: self.d.deuFont.textScale),
+             'set': (lambda v: (self.d.deuFont.setTextScale(v), self.refresh(),
+                                setattr(self.d, 'dirty', True)))},
+            mk('glyph size', 'glyph', [0.50, 1.20, 0.01]),
             mk('underscore dY', 'underY', [-0.6, 0.6, 0.01]),
+            mk('bracket stroke', 'brkStroke', [0.30, 1.00, 0.05]),
+            mk('bracket inward', 'brkIn', [0.0, 0.30, 0.005]),
+            mk('sign size', 'signSize', [0.50, 1.00, 0.02]),
             mk('background dY', 'bgY', [-2.0, 2.0, 0.02]),
             mk('foreground dY', 'fgY', [-2.0, 2.0, 0.02]),
             mk('menu dX', 'menuX', [-1.0, 2.0, 0.02]),
