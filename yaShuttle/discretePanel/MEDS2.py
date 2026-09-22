@@ -3370,8 +3370,15 @@ class GLRenderer(object):
 
 # NSTS_CELL_TRACE=<file> appends one line per drawn glyph -- which pass drew
 # it, the character cell it landed in, and the character.  Capped: a refresh
-# draws hundreds and there are two a second.
+# draws hundreds and there are two a second.  A '%p' in the path becomes this
+# process's id: a vehicle runs one MEDS2 per display, every one of them
+# inherits the same environment, and without it they all rewrite one file.
 _cellTraceLeft = [0]
+
+
+def cellTracePath():
+    p = env('NSTS_CELL_TRACE')
+    return p.replace('%p', str(os.getpid())) if p else p
 
 # SCREEN ANNOUNCEMENTS, for crew scripts that wait on a page (crewscript.py's
 # 'wait crt N title TEXT' and 'wait crt N new-screen').  After each refresh a
@@ -3403,6 +3410,15 @@ CELL_TRACE_PER_FRAME = 4000
 
 # Per-glyph vertical corrections, for characters the font itself puts in the
 # wrong place.  The underscore's ink sits a full row below its anchor.
+#
+# THE UNDERSCORE'S VALUE IS UNDER TEST, and is read from ADJ['underY'] so the
+# Shift+X panel can move it.  -0.15 was fitted on GPC MEMORY, whose background
+# already drops its underscores 0.11-0.19 rows below the data cell by its own
+# beam moves; the raise cancels that and looks right there.  DEORB MNVR COAST
+# (XG3011.dfg) puts its underscores IN the data's cell, as plain CHAR text on
+# the grid, and there the same raise lands them on the digits' bottom stroke
+# (cell traces, 2026-09-22).  The character generator draws '_' in one place
+# for both; this is the knob for finding it.
 GLYPH_DY = {'_': -0.15}
 
 ADJ = {
@@ -3423,6 +3439,7 @@ ADJ = {
     # text/vector offsets cannot be the cause.  These are a workaround and a
     # measurement at once: the value that lines a display up is the size of
     # the displacement, which says where it comes from.  Zero is untouched.
+    'underY': envnum('NSTS_DPS_UNDERY', -0.15),
     'bgY': envnum('NSTS_DPS_BGY', 0),
     'fgY': envnum('NSTS_DPS_FGY', 0),
     'menuX': envnum('NSTS_MENU_DX', 0),
@@ -5177,9 +5194,9 @@ class Screen_DPS(MDUScreen):
     def _drawPasses(self):
         self._frameRows = {}          # row -> {column: character}, for announceScreen
         # The trace holds ONE frame -- the most recent.
-        if env('NSTS_CELL_TRACE'):
+        if cellTracePath():
             try:
-                open(env('NSTS_CELL_TRACE'), 'w').close()
+                open(cellTracePath(), 'w').close()
             except Exception:
                 pass
             _cellTraceLeft[0] = CELL_TRACE_PER_FRAME
@@ -5273,7 +5290,7 @@ class Screen_DPS(MDUScreen):
               'colorCode': None, 'slope': None, 'lsiteHi': None,
               'repeatCount': 0}
         sector = opts.get('sector', 1)                # branch page
-        cellTraceFile = env('NSTS_CELL_TRACE')
+        cellTraceFile = cellTracePath()
         passLabel = 'BG' if opts.get('start') == DEU.ADDR.BACKGROUND_TOP else 'FG'
 
         # A glyph is drawn at the beam, in the character-cell coordinates the
@@ -5376,7 +5393,8 @@ class Screen_DPS(MDUScreen):
                                             ' BLINK' if st['blink'] else ''))
                         except Exception:
                             pass
-                    add(self.d.str(penX(), penY() + (GLYPH_DY.get(ch) or 0), ch,
+                    gdy = ADJ['underY'] if ch == '_' else (GLYPH_DY.get(ch) or 0)
+                    add(self.d.str(penX(), penY() + gdy, ch,
                                    penColor(),
                                    (COL_PITCH_L / COL_PITCH) if st['large'] else 1.0,
                                    1.0, 1.0, self.d.deuFont, st['angle'], False))
@@ -5810,6 +5828,7 @@ class Screen_DPS(MDUScreen):
             mk('vector dY', 'vecY', [-3.0, 3.0, 0.05]),
             mk('vector dX', 'vecX', [-2.0, 2.0, 0.02]),
             mk('page dY', 'pageY', [-4.0, 4.0, 0.05]),
+            mk('underscore dY', 'underY', [-0.6, 0.6, 0.01]),
             mk('background dY', 'bgY', [-2.0, 2.0, 0.02]),
             mk('foreground dY', 'fgY', [-2.0, 2.0, 0.02]),
             mk('menu dX', 'menuX', [-1.0, 2.0, 0.02]),
