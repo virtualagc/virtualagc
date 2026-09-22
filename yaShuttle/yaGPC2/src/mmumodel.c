@@ -88,6 +88,40 @@
  * invent a failure.
  * ------------------------------------------------------------------- */
 #define BUS_WORD_US 33.0             /* one word time on the serial bus */
+/* THE ADDRESS A GPC-TO-GPC OVERLAY USES on a mass-memory bus.  FCMMGBOV
+ * builds the transmitter and receiver bus programs for it, and every
+ * transfer seen -- GPC1 and GPC3 commanding buses 18 and 19 during an OPS
+ * transition whose source is a GPC -- addresses 5.  Overridable while that
+ * rests on observation rather than on a document. */
+#define GTG_IUA (gtg_iua())
+
+static int gtg_iua(void) {
+    static int v = -1;
+    if (v < 0) {
+        const char *e = yagpc_getenv("YAGPC_GTG_IUA");
+        v = (e != NULL && *e != '\0') ? atoi(e) : 5;
+        if (v < 0 || v > 31) v = 5;
+    }
+    return v;
+}
+
+/* OFF UNTIL IT IS RIGHT.  Carrying the words does get an OPS 3 transition
+ * whose source is a GPC to complete -- all three CRTs reach DEORB MNVR
+ * COAST, where without it the vehicle stays in OPS 0 -- but the set then
+ * fails: every computer lights its own fail lamp, and the receivers leave
+ * most of the words unread (554,421 past unread against 359,378 carried, on
+ * bus 18 alone).  Something about what the receiving bus programs expect,
+ * or when, is still wrong.  YAGPC_GTG=1 turns it on to work on it; the
+ * default leaves the bus exactly as it was, where ITEM 10 on DPS UTILITY
+ * (force the MMU as the overlay source) is the way round it.  Ledger #199. */
+static bool gtg_on(void) {
+    static int v = -1;
+    if (v < 0) {
+        const char *e = yagpc_getenv("YAGPC_GTG");
+        v = (e != NULL && *e != '\0' && *e != '0') ? 1 : 0;
+    }
+    return v != 0;
+}
 #define BLOCK_GAP_WORDS_DEFAULT 256  /* FCMBOOT's 128 is HALF a block gap */
 
 /* YAGPC_MMU_BLOCK_GAP overrides the inter-block gap, in word times.
@@ -237,6 +271,17 @@ struct MmuModel {
         size_t head, count;
     } tap[6];
     int owner;                  /* GPC id of the commander, 0 = none yet */
+    /* A GPC-TO-GPC OVERLAY IS IN PROGRESS ON THIS BUS.  PASS's default
+     * overlay source is another GPC when one already holds the software
+     * (DPS Overview Workbook, DPS UTILITY ITEM 9 GPC/MMU): FCMMGBOV builds
+     * a transmitter bus program for the source and a receiver one for each
+     * target, and they run on the MM bus with the mass memory not involved
+     * at all -- the source commands some IUA of its own (5 in every run
+     * seen) and sends the words, the targets listen on that IUAR.  This
+     * unit is the only object every computer on the bus shares, so it also
+     * plays the WIRE for those words; see mmumodel_service_as. */
+    bool gtg;                   /* the commander is addressing another GPC */
+    long gtgWords;              /* words carried between GPCs, for the report */
     double ownerOffsetUs;       /* shared minus the commander's own clock */
     double replyWireUs;         /* shared time the last reply/command word ends */
     bool haveOffset;
@@ -909,6 +954,11 @@ void mmumodel_report(const MmuModel *m) {
     if (m->listenerWords > 0 || m->listenerLost > 0)
         fprintf(stderr, "mmu%d listeners: %ld word(s) delivered, %ld gone past unread\n",
                 m->unit, m->listenerWords, m->listenerLost);
+    /* Words this bus carried BETWEEN COMPUTERS, which are nothing to do with
+     * the unit itself -- see the `gtg` field. */
+    if (m->gtgWords > 0)
+        fprintf(stderr, "mmu%d bus: %ld word(s) carried GPC-to-GPC\n",
+                m->unit, m->gtgWords);
 }
 
 void mmumodel_service(void *ctx, GpcServiceNumber serviceNumber,
@@ -991,20 +1041,49 @@ void mmumodel_service_as(MmuModel *m, int gpcId, double sharedUs,
             /* The command word goes on the wire after the reply words ahead
              * of it; a stream in progress simply stops. */
             double echoDue = (m->replyWireUs > sharedUs ? m->replyWireUs : sharedUs) + BUS_WORD_US;
-            if ((int)((cmd >> 19) & 0x1f) == IUA) {
-                m->replyWireUs = echoDue;
-                for (int r = 1; r <= 5; r++) {
-                    if (r == g || m->tap[r].w == NULL) continue;
-                    /* Wire order: the echo follows the replies already
-                     * sent, and a word nobody takes ages out in tap_word. */
-                    tap_end_stream(m, r, sharedUs);
-                    tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, echoDue, false);
-                }
+            /* A command names this unit or the GPC overlay address; the
+             * listeners are told of either, because a BCE in Listen Mode
+             * starts on a command with a matching IUA (BCE Principles of
+             * Operation section 4.1, and iop.c's own listen path).  ANY
+             * OTHER address is left alone: echoing every command flooded
+             * the listener queues -- half a million words past unread in a
+             * five-minute run -- and cost the set its synchronisation. */
+            int cmdIua = (int)((cmd >> 19) & 0x1f);
+            m->gtg = gtg_on() && (cmdIua == GTG_IUA);
+            if (cmdIua != IUA && !m->gtg) break;
+            m->replyWireUs = echoDue;
+            for (int r = 1; r <= 5; r++) {
+                if (r == g || m->tap[r].w == NULL) continue;
+                /* Wire order: the echo follows the replies already
+                 * sent, and a word nobody takes ages out in tap_word. */
+                tap_end_stream(m, r, sharedUs);
+                tap_push(m, r, cmd | YAGPC_BUSWORD_CMD_SYNC, echoDue, false);
             }
             break;                      /* and on to the unit itself, below */
         }
         case GPC_SVC_XMIT_WORD:
             if (g == m->owner) { m->ownerOffsetUs = sharedUs - mm_now(m); m->haveOffset = true; }
+            /* THE WORDS OF A GPC-TO-GPC TRANSFER.  Addressed to another
+             * computer, they are nothing to this unit, but they are on the
+             * wire and the other computers' receivers must have them -- one
+             * word time apart, as everything else on this bus is.  Without
+             * this an OPS transition whose overlay source is a GPC simply
+             * never arrives: the targets all time out, ARC marks them failed
+             * and gives up before trying mass memory, and the vehicle stays
+             * in the OPS it was in (ledger #199). */
+            if (m->gtg && g == m->owner) {
+                uint32_t w = input->in.word & 0xffffu;
+                for (int r = 1; r <= 5; r++) {
+                    if (r == g || m->tap[r].w == NULL) continue;
+                    double due = (m->replyWireUs > sharedUs ? m->replyWireUs
+                                                            : sharedUs) + BUS_WORD_US;
+                    tap_push(m, r, w, due, false);
+                }
+                m->replyWireUs = (m->replyWireUs > sharedUs ? m->replyWireUs
+                                                            : sharedUs) + BUS_WORD_US;
+                m->gtgWords++;
+                return;                 /* not this unit's business */
+            }
             break;
         case GPC_SVC_RECV_POLL:
             if (m->owner != 0 && g != m->owner) {
