@@ -34,9 +34,14 @@
 # whichever computer is unlucky fails itself out.  Three runs lost GPC1+GPC2,
 # then GPC2, then GPC3.
 #
-# Powering IDP3 only after the set is formed and ITEM 14 has given CRT3 to GPC3
-# means no computer ever drives more than one display.  Three displays then
-# cost nothing at all -- rate stays 1.00.  See ledger #159.
+# That was #159's reason for powering IDP3 only after OPS 301, and it cost
+# IDP3 its load: an IDP is loaded by GPCIPL when IDP LOAD is pressed with the
+# IPL, and never afterwards by PASS in an OPS, so CRT3 showed page data with
+# no background in every run (ledger #197, #198).  IDP3 is now powered with
+# the others and loaded at GPC3's IPL, the owner's own procedure.  #159's
+# losses were measured before the lock fix for the lost-sync-code race
+# (e46bb0eac, #196), so whether the early power still costs anything is
+# being re-measured, not assumed.
 #
 # Each IPL is ipl-one-gpc.script, unchanged -- the IPL procedure does not care
 # which OPS follows it.
@@ -60,11 +65,19 @@
 +0.01  mode HALT
 +0.02  idppower 1 on
 +0.01  idppower 2 on
++0.01  idppower 3 on
++0.01  majfunc 3 gnc
 
 # --- each computer in turn: the same procedure, four times -------------------
 +0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 +5     script ipl-one-gpc.script gpc=2 crt=2 idp=2 kb=KB2
-+5     script ipl-one-gpc.script gpc=3 crt=2 idp=2 kb=KB2
+# GPC3 IPLs onto CRT3, with IDP LOAD on IDP3: GPCIPL loads the unit that is
+# asking at the IPL, and that is the ONLY load IDP3 can get -- PASS will not
+# load a display once it is running an OPS (ledger #197, #198).  KB2 reaches
+# CRT3 through the right IDP/CRT select, and goes back to CRT2 after.
++5     kybdsel right 3
++1     script ipl-one-gpc.script gpc=3 crt=3 idp=3 kb=KB2
++1     kybdsel right 2
 +5     script ipl-one-gpc.script gpc=4 crt=2 idp=2 kb=KB2
 
 # --- the NBAT for memory configuration 3, then OPS 301 -----------------------
@@ -84,8 +97,3 @@
 +8     keys ITEM 1 8 + 1 EXEC
 +8     keys ITEM 1 9 + 2 EXEC
 +21    keys OPS 3 0 1 PRO
-
-# --- and only now the third display, with GPC3 already named its commander ---
-+20    idppower 3 on
-+2     majfunc 3 gnc
-+2     idpload 3
