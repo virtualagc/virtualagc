@@ -255,13 +255,25 @@ async function main() {
     }
     const isLong = mask > 0xffff;
 
+    // THE '@' FAMILY ADDRESSES A TABLE, AND THE TABLE MUST BE IN MEMORY.
+    // #BU@, #LBR@, #MIN@ and #MOUT@ take `operand + 2*BCE#` as the address
+    // of a per-bus table ENTRY and act on the fullword there (see
+    // iop_bce_instr.c).  With the operand left random over 18 bits the
+    // entry is far above MEM_WINDOW, where neither side has anything to
+    // read, so the fixtures could not exercise the fetch at all -- they
+    // recorded whatever each implementation did with an address off the
+    // end.  Confining the operand to the window makes them mean something.
+    const INDIRECT = { '#BU@': 1, '#LBR@': 1, '#MIN@': 1, '#MOUT@': 1 };
+    const addrMask = INDIRECT[nm] ? 0x7ff : 0;   // 0..2047, +48 +2*BCE still inside 4096
+
     const cases = [];
     const TRIALS = 300;
     for (let trial = 0; trial < TRIALS; trial++) {
       let hw1, hw2;
       if (isLong) {
         const rand32 = randU32();
-        const combined = (maskedVal | (rand32 & (~mask >>> 0))) >>> 0;
+        let combined = (maskedVal | (rand32 & (~mask >>> 0))) >>> 0;
+        if (addrMask) combined = ((combined & ~0x3ffff) | (rand32 & addrMask)) >>> 0;
         hw1 = (combined >>> 16) & 0xffff;
         hw2 = combined & 0xffff;
       } else {

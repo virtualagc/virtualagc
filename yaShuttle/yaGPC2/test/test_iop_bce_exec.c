@@ -15,6 +15,21 @@
  * (previously colliding, permanently-partly-unreachable) separate
  * dispatch-table entry.
  *
+ * 2026-09-22: the '@' family's fixtures were regenerated the same way,
+ * and the generator now CONFINES their operand to the memory window
+ * (see gen_iop_instr_exec_fixtures.cjs).  Those instructions address a
+ * table at `operand + 2*BCE#`; with the operand random over 18 bits the
+ * table lay far above the 4096-halfword window, so the fixtures recorded
+ * whatever each side did with an address off the end and could not
+ * arbitrate at all.  The scratch reference was patched for #BU@ and
+ * #LBR@ (which dereference that table -- FIOMGDSP/FIOCBLKS build it at
+ * run time) and for #LBR@'s 18-bit base register ("The 18 bit effective
+ * address is loaded into the current Bus Control Element's Base
+ * Register", IBM-6246556A part 3).  #MOUT@/#MIN@ needed no patch: the
+ * reference was right and this emulator was wrong, ignoring the
+ * displacement in the table entry and never issuing the companion
+ * command that loads the IUAR.
+ *
  * The #MOUT/#MIN fixtures below were regenerated against a scratch copy
  * of gpc/iop_bce_instr.coffee patched to match this corrected behavior
  * (same technique as the IOPLocalStore#ls fix above) — the live

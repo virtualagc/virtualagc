@@ -362,25 +362,32 @@ static void exec_TDL(IOP *t, DInstr *v) {
  * opcode bits distinguishing an "#MOUTC" from an "#MINC" — the two
  * mnemonics are indistinguishable at the bit level and only ever meant
  * to be decoded in the context of their parent instruction. */
-static void bce_process_mio_command(IOP *t, uint32_t pc) {
+/* The companion command at a KNOWN ADDRESS.  The direct forms take it from
+ * their own second halfword and so pass a PC (below); the indirect ones
+ * take it from the command table and pass its address outright. */
+static void bce_process_mio_command_at(IOP *t, uint32_t addr) {
     if (!iop_proc_get(&t->regXmitEna, t->curPE)) {
         if (yagpc_getenv("YAGPC_DISPTRACE"))
-            fprintf(stderr, "MIOCMD proc%-3d pc=%05x GATED (xmit disabled)\n",
-                    t->curPE, (unsigned)pc);
+            fprintf(stderr, "MIOCMD proc%-3d at=%05x GATED (xmit disabled)\n",
+                    t->curPE, (unsigned)addr);
         return;
     }
+    uint32_t cmdWord = iop_g_eaf(t, addr & 0x3ffffu) & 0x00ffffffu;
+    if (yagpc_getenv("YAGPC_DISPTRACE"))
+        fprintf(stderr, "MIOCMD proc%-3d at=%05x cmd=%06x\n",
+                t->curPE, (unsigned)addr, (unsigned)cmdWord);
+    register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
+    BCE *bce = iop_cur_bce(t);
+    if (bce) mia_xmit_cmd(t, &bce->mia, cmdWord);
+}
+
+static void bce_process_mio_command(IOP *t, uint32_t pc) {
     /* The PC is an 18-bit register, so the companion command's address
      * wraps with it: the reference fetches from
      * (PC + 2) & LS_WORD_MASK.  Without the mask a PC carrying anything
      * above bit 17 sent the fetch outside main storage, which read as
      * zero and left the IUA register at 0. */
-    uint32_t cmdWord = iop_g_eaf(t, (pc + 2) & 0x3ffffu) & 0x00ffffffu;
-    if (yagpc_getenv("YAGPC_DISPTRACE"))
-        fprintf(stderr, "MIOCMD proc%-3d pc=%05x cmd=%06x\n",
-                t->curPE, (unsigned)pc, (unsigned)cmdWord);
-    register_set32(iopls_IUAR(&t->ls), (cmdWord >> 19) & 0x1fu);
-    BCE *bce = iop_cur_bce(t);
-    if (bce) mia_xmit_cmd(t, &bce->mia, cmdWord);
+    bce_process_mio_command_at(t, (pc + 2) & 0x3ffffu);
 }
 
 static void exec_MOUT(IOP *t, DInstr *v) {
@@ -416,12 +423,33 @@ static void exec_MOUT_at(IOP *t, DInstr *v) {
      * not 3. */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
     /* Same fullword table as #TDL above (and as #BU@/#LBR@/#CMD@ already
-     * fetch): a halfword read at an even entry returns the high half,
-     * which is zero for a count. */
-    uint32_t count = (iop_g_eaf(t, addr) & 0xffffu) + 1;
+     * fetch).  THE ENTRY CARRIES BOTH HALVES of what the direct #MOUT
+     * takes from its own second halfword: the DISPLACEMENT above the count.
+     * IBM-6246556A part 3, #MOUT: "The location of the first halfword is
+     * the sum of the BCE Base Register and the Displacement field."  This
+     * read only the count and transmitted from the base itself, so a bus
+     * program whose table entry carried a displacement sent the wrong
+     * words; 300 #MOUT@ fixtures said so (2026-09-22).
+     *
+     * LATENT, NOT OBSERVED: neither #MOUT@ nor #MIN@ executes in the
+     * OI340700 workload -- YAGPC_FIRSTOP over an OPS 201/000/301 sequence
+     * lists 41 opcodes including #MOUT, #MIN, #BU@ and #LBR@, and neither
+     * indirect form among them -- so this rests on the document and the
+     * fixtures and cannot be confirmed by a run, exactly as #RDL's fix
+     * above does.
+     *
+     * AND ITS COMPANION COMMAND GOES OUT, which is what loads the IUAR --
+     * the direct form does it from its own instruction (see exec_MOUT);
+     * the indirect one takes it from the command table that follows the
+     * address table, 48 halfwords (24 fullwords, one per BCE) along. */
+    uint32_t entry = iop_g_eaf(t, addr);
+    uint32_t disp = (entry >> 16) & 0x7ffu;
+    uint32_t count = (entry & 0xffffu) + 1;
+    bce_process_mio_command_at(t, df_get(v, 'a') + 48u + 2u * (uint32_t)t->curPE);
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     BCE *bce = iop_cur_bce(t);
-    for (uint32_t i = 0; i < count; i++) iop_queue_dma(t, base + i, DMA_READ, bce);
+    for (uint32_t i = 0; i < count; i++)
+        iop_queue_dma(t, base + disp + i, DMA_READ, bce);
     iop_incr_nia(t, 2);
 }
 
@@ -497,11 +525,19 @@ static void exec_MIN(IOP *t, DInstr *v) {
 }
 
 static void exec_MIN_at(IOP *t, DInstr *v) {
-    /* See exec_MOUT_at's comment: same NIA-increment fix, same evidence. */
+    /* See exec_MOUT_at's comment: same NIA-increment fix, same evidence,
+     * and the same table entry -- displacement above count -- with the
+     * companion command issued ONLY as the receive starts, exactly as the
+     * direct #MIN does (a receive re-fetches itself while it waits, and
+     * the command that asked for the data must go out once). */
     uint32_t addr = df_get(v, 'a') + 2u * (uint32_t)t->curPE;
-    uint32_t count = (iop_g_eah(t, addr) & 0xffffu) + 1;
+    uint32_t entry = iop_g_eaf(t, addr);
+    uint32_t disp = (entry >> 16) & 0x7ffu;
+    uint32_t count = (entry & 0xffffu) + 1;
+    if (iop_bce_receive_starting(t))
+        bce_process_mio_command_at(t, df_get(v, 'a') + 48u + 2u * (uint32_t)t->curPE);
     uint32_t base = register_get32(iopls_BASE(&t->ls));
-    if (iop_bce_receive(t, base, count)) iop_incr_nia(t, 2);
+    if (iop_bce_receive(t, base + disp, count)) iop_incr_nia(t, 2);
 }
 
 /* ---------------------------------------------------------------------
