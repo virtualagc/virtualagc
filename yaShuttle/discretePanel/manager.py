@@ -595,8 +595,16 @@ class Manager(object):
         self.script_heading.configure(
             text="SCRIPT %s/%s:%s %s" % (done, total, line, name)
             if name else "SCRIPT %s/%s" % (done, total))
-        # ONLY WHEN IT CHANGES: a status line rewritten a hundred times a
-        # second is a status line nobody can read.
+        # THE STEP TEXT ONLY UNDER --debug.  It is useful to somebody who
+        # knows what the script is doing and a distraction to everybody else
+        # -- and a demonstration of PASS is not improved by a running
+        # commentary on the machinery driving it.  The heading above still
+        # gives the count and the line, which is what a stuck script needs.
+        #
+        # ONLY WHEN IT CHANGES, too: a status line rewritten a hundred times
+        # a second is a status line nobody can read.
+        if not getattr(self.args, "debug", False):
+            return
         step = parts[3] if len(parts) > 3 else ""
         if step and step != getattr(self, "_last_step", None):
             self._last_step = step
@@ -1043,6 +1051,13 @@ def main(argv=None):
     ap.add_argument("--layout", metavar="FILE", default=os.path.join(HERE, "demo.layout"),
                     help="layout file to save to and restore from (default demo.layout here)")
     ap.add_argument("--geometry", metavar="SPEC", help="Tk geometry for this window")
+    ap.add_argument("--debug", action="store_true",
+                    help="put each script step on the status line as it runs. "
+                         "Off by default: the step text means something to "
+                         "whoever wrote the script and is a distraction to "
+                         "everyone else, which is exactly wrong while PASS is "
+                         "being demonstrated.  The SCRIPT heading shows the "
+                         "count and the line either way.")
     # PASSED BY simulatePASS, which launches this last and so knows all of it.
     # Without them the manager can say which programs are up but not what the
     # run IS -- how many computers, which tape -- and Save needs to know the

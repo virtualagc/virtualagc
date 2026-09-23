@@ -1040,6 +1040,10 @@ def main():
     ap.add_argument("--show-panel", action="store_true",
                     help="accepted and ignored: the panel is shown by default "
                          "now (kept so older command lines still run)")
+    ap.add_argument("--debug", action="store_true",
+                    help="show each crew-script step on the manager's status "
+                         "line as it runs; off by default because it means "
+                         "something only to whoever wrote the script")
     ap.add_argument("--no-wait-user", action="store_true",
                     help="start a --script run at once instead of waiting for "
                          "a click in the panel window; for unattended runs, "
@@ -1444,6 +1448,11 @@ def main():
                 manager_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.layout:
                 manager_argv += ["--layout", os.path.abspath(args.layout)]
+            # Forwarded, or the manager's own --debug could never be reached
+            # in the ordinary case: the manager is started by this program,
+            # not by hand.
+            if args.debug:
+                manager_argv += ["--debug"]
             L.start("manager", manager_argv, HERE, env)
 
         # THE WINDOWS WHERE THEY WERE PUT LAST TIME.  A run does not start the
