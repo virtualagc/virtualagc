@@ -188,6 +188,12 @@ HELP = """\
                         name it again: script inner.script gpc=$gpc.  Write $$
                         for a literal $, and quote a VALUE that has a space in
                         it.
+    keygap SECONDS      (no time prefix, like wait) how far apart the keys of
+                        a later 'keys' line are
+                        typed (default %(gap)s).  Set it near the top of a
+                        script meant to be WATCHED: a viewer being shown what
+                        an ITEM entry is wants to see each key land.  It
+                        applies to scripts this one calls, too.
     subtitle [TEXT]     show TEXT in the caption box (subtitles.py); no TEXT
                         clears it.  The two characters \\n start a new line;
                         a leading <left>, <center> or <right> aligns that
@@ -414,6 +420,19 @@ def parse(text, path=None, _depth=0, _seen=None):
                 entries.append(entry)
                 last_ms = 0
                 continue
+            # NO TIME PREFIX, like 'wait': keygap does not HAPPEN at a moment,
+            # it changes how the keys after it are typed.  Giving it a prefix
+            # would invite '+2 keygap 1' and the question of what the 2 meant.
+            if first.lower() == "keygap":
+                try:
+                    gap = float(rest)
+                except ValueError:
+                    raise ScriptError("keygap wants a number of seconds, got %r" % rest)
+                if not 0.0 <= gap <= 10.0:
+                    raise ScriptError("keygap out of range (0 to 10 s), got %r" % rest)
+                entries.append({"kind": "step", "ms": last_ms, "verb": "keygap",
+                                "arg": rest, "gap": gap, "text": line, "line": n})
+                continue
             # '+N': N seconds after the line before (or after the start or the
             # last wait), resolved here, so the player sees only the sum.
             rel = first.startswith("+")
@@ -444,6 +463,7 @@ def parse(text, path=None, _depth=0, _seen=None):
                 entry["keys"] = key_codes(arg.split())
             elif verb == "subtitle":
                 pass
+
             elif verb == "script":
                 if not arg:
                     raise ScriptError("script needs a file name")
@@ -762,7 +782,7 @@ class Player(object):
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None):
+                 source=None, gap=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
@@ -798,6 +818,9 @@ class Player(object):
         # children, so a 150-line script that calls a 20-line one five times
         # reports over 200 entries and no line of it matches any of them.
         self.source = source
+        # Shared with nested scripts, so a 'keygap' near the top of a script
+        # governs the keys typed by the scripts it calls as well.
+        self.gap = gap if gap is not None else [KEY_GAP_S]
 
     def start(self):
         self.origin = time.monotonic()
@@ -863,6 +886,13 @@ class Player(object):
             if due > 0:
                 self.after(int(due * 1000) + 1, lambda k=k: self._run(k))
                 return
+            if e["verb"] == "keygap":
+                # Not a panel control: it changes how the NEXT keys are
+                # typed, and the list is shared with any nested script.
+                self.gap[0] = e["gap"]
+                self.log(e["text"])
+                k += 1
+                continue
             if e["verb"] == "keys":
                 self.log(e["text"])
                 self._type(k, e["keys"], 0)
@@ -896,7 +926,7 @@ class Player(object):
                 self.bus.send_key(keys[i])
             except OSError as err:
                 self.log("cannot send key %s: %s" % (keys[i][3], err))
-            self.after(int(KEY_GAP_S * 1000), lambda: self._type(k, keys, i + 1))
+            self.after(int(self.gap[0] * 1000), lambda: self._type(k, keys, i + 1))
         else:
             self._run(k + 1)
 
@@ -934,7 +964,7 @@ class Player(object):
         child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
-                       source=os.path.basename(e["path"]))
+                       source=os.path.basename(e["path"]), gap=self.gap)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):
