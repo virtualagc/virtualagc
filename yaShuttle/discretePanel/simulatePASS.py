@@ -26,11 +26,14 @@ captions and 'wait gpc N mode-tb RUN|IPL|BP' lines, all in seconds, played by
 panelO6.py on one clock so switches and keys stay in step.  The commands are
 listed at the end of this help, and 'python3 crewscript.py FILE' checks a
 script without running anything; examples/4gpc-startup.script brings up four
-GPCs to OPS 2.  For a demonstration, --show-panel keeps panelO6's window up so the
-switches are seen to move, and a 'wait user' line (first, say) holds the
-script until someone clicks in the panel window -- time to arrange windows
-and start a recording; leave --duration off then, since it counts from
-start-up.  --wait-user gives that pause without editing the script (it also
+GPCs to OPS 2.  A SCRIPTED RUN IS USUALLY A DEMONSTRATION, so it is set up to
+be watched: the panel window stays up so the switches are seen to move, and
+the script holds until someone clicks in that window -- which is after the
+layout has been applied, and is the moment to start a recording.  For an
+unattended measurement, --hide-panel drops the window and --no-wait-user
+starts at once; without the latter such a run waits for ever.  Leave
+--duration off when waiting, since it counts from start-up.  A 'wait user'
+line in the script gives the same pause at any other point (it also
 shows the panel), so a script can stay fit to run unattended.  The paragraphs
 below describe the older split, which still works.
 
@@ -1035,7 +1038,16 @@ def main():
     ap.add_argument("--procedure", dest="instructions", action="store_true",
                     help=argparse.SUPPRESS)          # the old name
     ap.add_argument("--show-panel", action="store_true",
-                    help="show panelO6's window during a --script run (for demonstrations)")
+                    help="accepted and ignored: the panel is shown by default "
+                         "now (kept so older command lines still run)")
+    ap.add_argument("--no-wait-user", action="store_true",
+                    help="start a --script run at once instead of waiting for "
+                         "a click in the panel window; for unattended runs, "
+                         "which would otherwise wait for ever")
+    ap.add_argument("--hide-panel", action="store_true",
+                    help="do not show panelO6's window during a --script run; "
+                         "for unattended measurement, where nobody is watching "
+                         "and one less window is one less thing to place")
     ap.add_argument("--wait-user", action="store_true",
                     help="hold the --script until someone clicks in panelO6's window, as if "
                          "it began with 'wait user'; shows the panel too")
@@ -1370,15 +1382,46 @@ def main():
             # "just seem to run the original script".
             if args.panel_script and not resume:
                 panel_argv += ["--script", os.path.abspath(args.panel_script)]
-                if args.show_panel:
+                # THE PANEL IS SHOWN UNLESS ASKED OTHERWISE.  It used to be
+                # hidden whenever a --script was given, on the reasoning that
+                # nobody is watching an unattended run and an unmapped window
+                # cannot steal the keyboard -- but that has the common case
+                # backwards.  A script is how the simulation is DEMONSTRATED,
+                # and a demonstration of a crew station whose controls cannot
+                # be seen moving is not much of one; the unattended
+                # measurement is the exception, and it is the exception that
+                # should carry the flag.
+                #
+                # The evidence that it was wrong was already in the tree:
+                # manager.py grew a "Show Panel" button whose own comment says
+                # it exists "rather than making them restart with
+                # --show-panel".  And the reasoning never applied only to this
+                # window -- the displays, the keyboards, the CAM and the
+                # manager are all mapped during a scripted run, so if mapping
+                # a window stole the keyboard, seven already did.
+                #
+                # It also hid the one place a scripted run says where it has
+                # got to, since that progress is written into the panel's
+                # title bar.
+                if not args.hide_panel:
                     panel_argv += ["--show"]
-                if args.wait_user:
+                # AND IT WAITS FOR YOU TO SAY GO, unless told not to.  The
+                # script used to begin the moment panelO6 started, which is
+                # BEFORE the windows are placed -- so the opening of a
+                # demonstration played out while the layout was still being
+                # applied and the viewer could not follow what was happening.
+                # Waiting for a click is also the moment to start a
+                # recording.  --no-wait-user is for the unattended run, which
+                # would otherwise hang for ever; that is the exception, and
+                # the exception carries the flag.
+                if not args.no_wait_user:
                     panel_argv += ["--wait-user"]
                 try:
                     with open(args.panel_script) as fh:
-                        waits_for_user = args.wait_user or crewscript.has_wait_user(fh.read())
+                        waits_for_user = (not args.no_wait_user
+                                          or crewscript.has_wait_user(fh.read()))
                 except OSError:
-                    waits_for_user = args.wait_user
+                    waits_for_user = not args.no_wait_user
                 if waits_for_user and args.duration:
                     log("note: the script has a 'wait user', and --duration counts from "
                         "start-up -- including the time spent waiting")
