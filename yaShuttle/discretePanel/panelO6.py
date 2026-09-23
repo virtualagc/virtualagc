@@ -2345,12 +2345,17 @@ def _run_script(panel, entries, quit_after_ms=None):
                 "done" if text is None else "%d %d %s" % (done, total, text))
         except OSError:
             pass
+        # THE COUNT COMES FIRST.  A title is elided from the RIGHT when the
+        # window is narrow, and the panel is narrow in every layout that has
+        # three CRTs in it -- so a count put after the forty-odd characters
+        # of TITLE_BASE is the first thing to disappear, which is what
+        # happened to the first version of this.
         if text is None:
-            root.title("%s  —  script complete (%d steps)" % (TITLE_BASE, total))
+            root.title("script done  —  %s" % TITLE_BASE)
             return
-        if len(text) > 44:
-            text = text[:41] + "..."
-        root.title("%s  —  script %d/%d: %s" % (TITLE_BASE, done, total, text))
+        if len(text) > 40:
+            text = text[:37] + "..."
+        root.title("%d/%d %s  —  %s" % (done, total, text, TITLE_BASE))
 
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
