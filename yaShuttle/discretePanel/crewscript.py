@@ -17,6 +17,8 @@ a crew script print in their --help, and what this module prints when run:
 import os
 import re
 import shlex
+import shutil
+import subprocess
 import socket
 import struct
 import threading
@@ -188,6 +190,12 @@ HELP = """\
                         name it again: script inner.script gpc=$gpc.  Write $$
                         for a literal $, and quote a VALUE that has a space in
                         it.
+    audio FILE          play a sound, and carry straight on.  For telling
+                        somebody that a long script has finished, or reached
+                        a point worth coming back for.  FILE is relative to
+                        the script, and its existence is checked when the
+                        script is checked -- a name misspelt is found now
+                        rather than at the moment it should have sounded.
     keygap SECONDS      (no time prefix, like wait) how far apart the keys of
                         a later 'keys' line are
                         typed (default %(gap)s).  Set it near the top of a
@@ -463,6 +471,23 @@ def parse(text, path=None, _depth=0, _seen=None):
                 entry["keys"] = key_codes(arg.split())
             elif verb == "subtitle":
                 pass
+            elif verb == "audio":
+                # A SOUND AT A MOMENT THAT MATTERS.  A long script ends in
+                # silence, and the person recording it is by then looking
+                # somewhere else; the same goes for the few points in a run
+                # worth being called back for.
+                #
+                # CHECKED HERE, with the rest of the script, because the
+                # alternative is finding out that the file was misspelt at
+                # the moment it was supposed to tell you something.
+                if not arg:
+                    raise ScriptError("audio needs a file name")
+                snd = arg
+                if not os.path.isabs(snd):
+                    snd = os.path.join(os.path.dirname(os.path.abspath(path or ".")), snd)
+                if not os.path.isfile(snd):
+                    raise ScriptError("audio: no such file: %s" % arg)
+                entry["audio"] = snd
 
             elif verb == "script":
                 if not arg:
@@ -621,6 +646,41 @@ def result_receiver(port_base=None):
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
                              socket.inet_aton(D.IFACE)))
     return s
+
+
+AUDIO_PLAYERS = (
+    ("paplay", ()),                       # PulseAudio: .oga, .ogg, .wav, .flac
+    ("aplay", ("-q",)),                   # ALSA: .wav
+    ("ffplay", ("-nodisp", "-autoexit", "-loglevel", "quiet")),
+)
+
+
+def play_audio(path, log=None):
+    """Start FILE playing and return at once.
+
+    NOT WAITED FOR.  This exists to tell somebody that a script has reached a
+    point, and a script that stopped for the length of the sound would be
+    reporting its own progress dishonestly -- the run would pause exactly
+    where the recording should not.
+
+    Whichever player is installed; the sounds a desktop already ships are
+    .oga, which aplay cannot read and paplay can, so the order matters."""
+    for prog, flags in AUDIO_PLAYERS:
+        if shutil.which(prog) is None:
+            continue
+        try:
+            subprocess.Popen([prog] + list(flags) + [path],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             stdin=subprocess.DEVNULL)
+            return True
+        except OSError as e:
+            if log:
+                log("audio: %s would not start: %s" % (prog, e))
+            return False
+    if log:
+        log("audio: nothing to play %s with (tried %s)"
+            % (path, ", ".join(p for p, _ in AUDIO_PLAYERS)))
+    return False
 
 
 def send_progress(text, port_base=None, sock=None):
@@ -898,6 +958,10 @@ class Player(object):
                 self._type(k, e["keys"], 0)
                 return
             self.log(e["text"])
+            if e["verb"] == "audio":
+                play_audio(e["audio"], self.log)
+                k += 1
+                continue
             if e["verb"] == "subtitle":
                 try:
                     self.bus.send_subtitle(e["arg"])
