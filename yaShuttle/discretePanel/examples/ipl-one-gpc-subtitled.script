@@ -1,0 +1,56 @@
+# One GPC's IPL, captioned -- ipl-one-gpc.script with the commentary a viewer
+# needs.  Same parameters, same waits, same order:
+#
+#   script ipl-one-gpc-subtitled.script gpc=2 crt=2 idp=2 kb=KB2
+#
+#   gpc   the GPC column the O6 controls act on, 1-5
+#   crt   the CRT its IPL display goes to, and the one waited on
+#   idp   the IDP given the spring-loaded LOAD toggle
+#   kb    the keyboard ITEM 1 EXEC is typed on: KB1, KB2 or KB3
+#
+# WHY A SEPARATE FILE rather than captions in the original: the original is
+# played by every unattended run in the tree, where a caption is at best
+# wasted work and at worst a window nobody asked for.  A video wants the
+# talking; a measurement does not.  The two stay in step because this file is
+# the other one with subtitle lines interleaved and NOTHING ELSE changed --
+# if you alter one, alter both.
+#
+# The waits are the point and are kept verbatim.  Read ipl-one-gpc.script's
+# own comments for why 'new-screen' has to come before 'title' (three
+# computers share CRT2, and a stale GPCIPL MENU satisfied the title test
+# instantly) and why the timeouts are sized for the slowest host we own.
+# A caption budget must never become a guessed delay: every caption here sits
+# between actions that are themselves gated on a wait.
+
++0     subtitle Now GPC $gpc.\nSelect it with the GPC SELECT switch, upper left on panel O6.
++2     gpc $gpc
++1     subtitle Point it at mass memory 1: IPL SOURCE to MM1.
++2     source MM1
++1     subtitle Lend CRT $crt to the computer being loaded.
++2     crt $crt
++1     subtitle Flip the spring-loaded IDP $idp LOAD toggle.\nThe display unit asks the GPC for its format.
++1.5   idpload $idp
++1     subtitle Press IPL for GPC $gpc.\nWatch the ACTIVITY light for MM1.
++1.5   ipl
++1     subtitle And move GPC $gpc from HALT to STBY, which starts it.
++2     mode STANDBY
++1     subtitle The bootstrap loader is running. This takes a while --\nthe GPC is reading itself in from tape.
+
+# WAIT FOR THE PAGE TO CHANGE HANDS BEFORE BELIEVING WHAT IT SAYS.  A state
+# test alone is met by the PREVIOUS computer's menu; see ipl-one-gpc.script.
+wait crt $crt new-screen timeout 300
+wait crt $crt title GPCIPL timeout 300
+
++0     subtitle There it is: the GPCIPL MENU, served by GPC $gpc itself.
++3     subtitle <left>Ask for memory configuration 1 with ITEM 1 EXEC.
++2     keys $kb ITEM 1 EXEC
++1     subtitle Loading. The GPC is pulling its operating system off the tape.
+
+# loaded: to RUN, and the IPL source back off
+wait gpc $gpc mode-tb RUN timeout 900
+
++0     subtitle Loaded. The MODE talkback for GPC $gpc now reads RUN.
++2     subtitle Give the CRT back, take the GPC to RUN, and switch the tape off.
++1     crt 0
++2     mode RUN
++2     source OFF

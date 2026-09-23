@@ -1,0 +1,146 @@
+# FIVE COMPUTERS, THREE DISPLAYS, AND AN ASCENT -- the narrated version of
+# 4gpc-ops1-plus-gpc5.script, for recording.  Run from discretePanel/:
+#
+#   python3 simulatePASS.py --gpcs 1-5 --crts 3 --size 384 --scale 0.8 \
+#       --tape ~/workspace/pass-run/OI340700-v44boot.mmv \
+#       --layout examples/5gpc-3crt-subtitled.layout \
+#       --script examples/5gpc-3crt-subtitled.script --duration 2400
+#
+# --layout is what starts subtitles.py; without it the captions below go
+# nowhere and the run is simply the unnarrated one.
+#
+# WHAT IS BEING SHOWN.  The orbiter's real ascent arrangement: four General
+# Purpose Computers flying as ONE redundant set, executing the same software
+# on the same inputs in lockstep, and a fifth computer that is NOT part of it
+# and drives its own display.  On the vehicle that fifth machine runs the
+# Backup Flight System; we have no BFS, so it stays in OPS 0 -- still a fifth
+# computer on every bus, still in the common set, visibly running something
+# else.
+#
+# THE THREE THINGS A VIEWER SHOULD COME AWAY WITH, and the script is paced to
+# make each visible rather than merely true:
+#
+#   1. Each computer is loaded from a tape, one at a time, by hand.  There is
+#      no operating system until somebody flips switches.
+#   2. Ascent cannot be commanded from a cold machine.  OPS 0 -> OPS 901 ->
+#      OPS 101 is the vehicle's own sequence and the flight software enforces
+#      it: DM6OPS's transition table simply does not list 2101 as reachable
+#      from OPS 0.  The script goes through G9 because it must.
+#   3. A display belongs to whichever computer the crew gives it to, and a
+#      GPC runs up to three major functions at once -- so the same computer
+#      can show an ascent trajectory on one screen and a memory display on
+#      another, which is exactly what CRT3 demonstrates at the end.
+#
+# EVERY WAIT IN HERE IS A CONDITION, NOT A GUESS.  The IPLs are gated on the
+# GPCIPL menu appearing and on the MODE talkback reading RUN, so a slow host
+# stretches the recording without ever desynchronising the captions from what
+# is on screen.  The only fixed delays are between a caption and the action
+# it describes, and the reading time of a caption that follows one.  The two
+# OPS loads are gated on the display changing and on the ascent format
+# announcing itself by name, so the narration cannot run ahead of the
+# vehicle.
+
++0     subtitle Space Shuttle avionics: five computers, three displays.\nWe are going to fly an ascent configuration.
++6     subtitle Everything you are about to see is done from the crew panels,\nexactly as it was done on the flight deck.
+
+# --- all five GPCs to HALT, the three IDPs on --------------------------------
++5     subtitle First, all five computers to HALT. Nothing is running yet.
++3     gpc 1
++0     mode HALT
++0.5   gpc 2
++0.5   mode HALT
++0.5   gpc 3
++0.5   mode HALT
++0.5   gpc 4
++0.5   mode HALT
++0.5   gpc 5
++0.5   mode HALT
+
++1     subtitle Power up the three display units.
++2     idppower 1 on
++0.5   idppower 2 on
++0.5   idppower 3 on
++1     subtitle All three start on the GNC major function.\nCRT3 will be moved later, and that move matters.
++3     majfunc 1 gnc
++0.5   majfunc 2 gnc
++0.5   majfunc 3 gnc
+
+# --- the four that will form the redundant set -------------------------------
++3     subtitle Now load each computer from the mass memory tape.\nGPC1 first, onto CRT1.
++4     script ipl-one-gpc-subtitled.script gpc=1 crt=1 idp=1 kb=KB1
+
++2     subtitle GPC2, GPC3 and GPC4 follow, sharing CRT2.
++4     script ipl-one-gpc-subtitled.script gpc=2 crt=2 idp=2 kb=KB2
++2     script ipl-one-gpc-subtitled.script gpc=3 crt=2 idp=2 kb=KB2
++2     script ipl-one-gpc-subtitled.script gpc=4 crt=2 idp=2 kb=KB2
+
+# --- then GPC5, onto CRT3, which is also how IDP3 gets its background --------
++2     subtitle Last, GPC5 -- the one that will NOT join the set.\nIt loads onto CRT3.
++4     subtitle A display is given its background only by the computer\nthat loads it, so GPC5 must be the one to load CRT3.
++5     kybdsel right 3
++2     script ipl-one-gpc-subtitled.script gpc=5 crt=3 idp=3 kb=KB2
++2     kybdsel right 2
+
++2     subtitle Five computers loaded. All five talkbacks read RUN.\nNone of them is flying anything yet.
+
+# --- take CRT3 out of both NBATs --------------------------------------------
++5     subtitle Before asking for an OPS, tell the software which computer\nowns which bus. That table is the NBAT.
++6     subtitle <right>The tape assigns CRT3 to GPC3 in BOTH configurations\nwe are about to use. We must take it back, twice.
++6     subtitle <right>First for memory configuration 9.
++3     keys ITEM 1 + 9 EXEC
++5     keys ITEM 1 4 + 0 EXEC
+
++3     subtitle <right>Now memory configuration 1 -- ascent.\nFour computers, four flight-critical strings.
++4     keys ITEM 1 + 1 EXEC
++5     keys ITEM 2 + 1 EXEC
++5     keys ITEM 3 + 2 EXEC
++5     keys ITEM 4 + 3 EXEC
++5     keys ITEM 5 + 4 EXEC
++2     subtitle <right>GPC1 to string 1, GPC2 to 2, GPC3 to 3, GPC4 to 4.
++4     keys ITEM 7 + 1 EXEC
++5     keys ITEM 8 + 2 EXEC
++5     keys ITEM 9 + 3 EXEC
++5     keys ITEM 1 0 + 4 EXEC
++5     keys ITEM 1 1 + 0 EXEC
++2     subtitle <right>CRT1 to GPC1, CRT2 to GPC2, and CRT3 to nobody.
++4     keys ITEM 1 2 + 1 EXEC
++5     keys ITEM 1 3 + 2 EXEC
++5     keys ITEM 1 4 + 0 EXEC
++5     keys ITEM 1 8 + 1 EXEC
++5     keys ITEM 1 9 + 2 EXEC
+
++3     subtitle Move CRT3 off GNC, so the ascent software has no claim on it.
++4     majfunc 3 pl
+
+# --- OPS 0 -> OPS 901 -> OPS 101 --------------------------------------------
++4     subtitle Now the transition. Ascent cannot be commanded from a cold\nmachine -- the software will not allow it.
++7     subtitle <left>So we go by way of OPS 9, as the countdown does.
++4     keys OPS 9 0 1 PRO
++4     subtitle Four computers are loading memory configuration 9 together.
+
+# Gated, not timed: G9's own display replaces the OPS 0 one when the load
+# lands.  A fixed delay here would either cut the caption off on a slow host
+# or leave the recording sitting on a finished screen on a fast one.
+wait crt 1 new-screen timeout 600
+
++1     subtitle <left>And now ascent: OPS 101.
++6     keys OPS 1 0 1 PRO
++4     subtitle Watch CRT1 and CRT2. Four computers, one redundant set,\nloading the ascent software in lockstep.
+
+# The ascent display announces itself by name, so wait for the name.
+wait crt 1 title LAUNCH TRAJ timeout 600
+
+# --- and finally, give CRT3 to GPC5 -----------------------------------------
++2     subtitle LAUNCH TRAJ 1. The set is flying an ascent.
++6     subtitle But look at CRT3 -- it is showing GPC MEMORY, driven by GPC1.\nNot by GPC5.
++7     subtitle A display with no owner goes to the lowest-numbered computer\nin THAT major function, and in PL that is GPC1.
++8     subtitle Which is why GPC1 is showing two different screens at once:\nascent on CRT1, memory on CRT3. One computer, two major functions.
++9     subtitle <right>So we hand CRT3 to GPC5 explicitly.
++5     kybdsel right 3
++2     keys KB2 GPC/CRT 5 3 EXEC
++4     kybdsel right 2
+
++3     subtitle There: CRT3 now reads 5.
++4     subtitle Four computers flying an ascent as one machine,\nand a fifth alongside them, outside the set, on its own display.
++8     subtitle That is the configuration the orbiter launched in --\nwith the Backup Flight System in the fifth seat.
++8     subtitle
