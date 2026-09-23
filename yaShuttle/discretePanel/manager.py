@@ -176,11 +176,21 @@ class Manager(object):
         # here that destroys a run without saving it.
         self._section("SNAPSHOT", bold)
         self._path_box(self.snapshot)
+        # ALL FOUR ON ONE LINE: they are one group of related actions, and
+        # two rows of two suggested a division that does not exist.
+        #
+        # MEASURED IN THE REAL WINDOW, after a mock-up said it would not fit.
+        # That mock-up built its buttons with the default Tk font instead of
+        # this program's, and so put the row at 360 px against 330 available;
+        # the actual row is 304 px inside an inner width of 304.  It fits
+        # with the window no wider than it already was -- and one row
+        # shorter.  "Save/Quit" rather than "Save & Quit", and a 6-character
+        # minimum button width rather than 7 or 8, are what make the margin,
+        # so both are load-bearing.
         row = self._row()
         self._button(row, "Browse", self.browse_snapshot)
         self._button(row, "Save", self.save_snapshot, wide=True)
-        row = self._row()
-        self.quit_button = self._button(row, "Save & Quit", self.save_and_quit)
+        self.quit_button = self._button(row, "Save/Quit", self.save_and_quit)
         self._button(row, "Restore", self.restore_snapshot)
 
         self._section("CAPTION BOX", bold)
@@ -218,12 +228,11 @@ class Manager(object):
         # line and the script's name -- and a heading that is cut off is a
         # heading that does not do its job.  Modest on purpose: the manager
         # sits beside three CRTs and a panel, and the screen is already full.
-        extra = 0
-        try:
-            extra = self.quit_button.winfo_reqwidth()
-        except (AttributeError, tk.TclError):
-            extra = 80
-        want = root.winfo_reqwidth() + extra
+        # The four-button SNAPSHOT row is now the widest thing in here, so
+        # the natural width already carries it; a little is added for the
+        # SCRIPT heading, which is text rather than a widget and so asks for
+        # nothing.
+        want = root.winfo_reqwidth() + 24
         root.minsize(want, root.winfo_reqheight())
         if not args.geometry:
             root.geometry("%dx%d" % (want, root.winfo_reqheight()))
@@ -264,11 +273,13 @@ class Manager(object):
 
     def _button(self, row, text, command, wide=False):
         # AT LEAST AS WIDE AS ITS LABEL.  The width is in characters and was
-        # fixed at 7 or 8, which silently clipped anything longer: "Save &
-        # Quit" read "ave & qui" and "End Simulation" read "nd Simulatio".
-        # The minimum keeps the short buttons the size they have always been.
+        # once fixed at 7 or 8, which silently clipped anything longer: "Save
+        # & Quit" read "ave & qui" and "End Simulation" read "nd Simulatio".
+        # The minimum is now 6, which is what lets the four SNAPSHOT buttons
+        # share one row; `wide` is kept so existing calls still read sensibly
+        # but no longer changes the width, since the label decides it.
         b = tk.Button(row, text=text, command=command,
-                      width=max(8 if wide else 7, len(text)),
+                      width=max(6, len(text)),
                       bg="#3c3c3c", fg=C_FG, activebackground="#505050",
                       activeforeground=C_FG, highlightbackground=C_BG,
                       relief="raised")
