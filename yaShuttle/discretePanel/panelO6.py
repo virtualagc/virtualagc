@@ -2195,7 +2195,7 @@ def _on(word):
     return word.lower() in ("on", "1", "set", "true")
 
 
-def _run_script(panel, entries, quit_after_ms=None):
+def _run_script(panel, entries, quit_after_ms=None, source=None):
     root = panel.root
     # WHICH COLUMN THE SCRIPT IS DRIVING.  Every column now drives its own
     # computer, so a script that brings up more than one GPC has to be able
@@ -2331,10 +2331,11 @@ def _run_script(panel, entries, quit_after_ms=None):
     # so on port base + 96 and lets the program somebody is actually looking
     # at do the displaying.  See crewscript.send_progress and manager.py's
     # SCRIPT heading.
-    def show_progress(done, total, text):
+    def show_progress(done, total, text, where=""):
         try:
             crewscript.send_progress(
-                "done" if text is None else "%d %d %s" % (done, total, text))
+                "done" if text is None
+                else "%d %d %s %s" % (done, total, where or "?", text))
         except OSError:
             pass          # a progress report is never worth failing a run for
 
@@ -2342,7 +2343,8 @@ def _run_script(panel, entries, quit_after_ms=None):
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
                                      wait_user=panel.wait_for_click,
                                      screens=panel.screens,
-                                     progress=show_progress)
+                                     progress=show_progress,
+                                     source=source)
     panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
@@ -2402,7 +2404,8 @@ def _listen_control(panel):
                     log("script command: skipping the opening 'wait user'")
             steps, waits = crewscript.count_entries(entries)
             log("script command: %s %s (%d steps, %d waits)" % (word, rest, steps, waits))
-            panel.root.after(0, lambda e=entries: _run_script(panel, e))
+            panel.root.after(0, lambda e=entries, r=rest:
+                             _run_script(panel, e, None, os.path.basename(r)))
         else:
             log("script command not understood: %r" % text)
 
@@ -2537,7 +2540,8 @@ def main(argv=None):
     panel.screens = crewscript.ScreenWatch()
     threading.Thread(target=_listen_control, args=(panel,), daemon=True).start()
     if entries is not None:
-        _run_script(panel, entries, args.quit_after)
+        _run_script(panel, entries, args.quit_after,
+                    os.path.basename(args.script) if args.script else None)
     elif args.quit_after is not None:
         root.after(args.quit_after, root.quit)
     # Keep a reference so the panel is not collected.

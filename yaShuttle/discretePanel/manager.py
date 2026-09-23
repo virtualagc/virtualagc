@@ -548,17 +548,36 @@ class Manager(object):
             self.root.after(0, lambda t=text: self._progress(t))
 
     def _progress(self, text):
-        """On the Tk thread.  "<done> <total> <what>", or "done"."""
+        """On the Tk thread.  "<done> <total> <file:line> <what>", or "done".
+
+        THE COUNT ALONE CANNOT BE LOOKED UP.  A 'script FILE' line counts as
+        one entry PLUS all of its children, so a 150-line script that calls a
+        20-line one five times reports past 200 and no line of the file
+        matches any number -- which is no help at all when a script sticks.
+        The file and line come with it, and that is what a person needs:
+
+            SCRIPT (194/206 at 5gpc-3crt-subtitled.script:134)
+
+        and the step's own text goes to the status line, so a stuck script
+        says what it is waiting FOR as well as where."""
         if self.script_heading is None:
             return
         if text == "done":
             self.script_heading.configure(text="SCRIPT")
             return
-        parts = text.split(None, 2)
-        if len(parts) < 2:
+        parts = text.split(None, 3)
+        if len(parts) < 3:
             return
-        self.script_heading.configure(text="SCRIPT (%s/%s processing)"
-                                           % (parts[0], parts[1]))
+        done, total, where = parts[0], parts[1], parts[2]
+        self.script_heading.configure(
+            text="SCRIPT (%s/%s at %s)" % (done, total, where)
+            if where != "?" else "SCRIPT (%s/%s processing)" % (done, total))
+        # ONLY WHEN IT CHANGES: a status line rewritten a hundred times a
+        # second is a status line nobody can read.
+        step = parts[3] if len(parts) > 3 else ""
+        if step and step != getattr(self, "_last_step", None):
+            self._last_step = step
+            self.say(step[:70])
 
     def _result(self, text):
         """On the Tk thread.  Success goes to the status line; A FAILURE GETS

@@ -761,7 +761,8 @@ class Player(object):
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
-                 screens=None, on_done=None, progress=None, counter=None):
+                 screens=None, on_done=None, progress=None, counter=None,
+                 source=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
@@ -791,6 +792,12 @@ class Player(object):
             steps, waits = count_entries(entries)
             self.counter = {"done": 0, "total": steps + waits}
         self._reported = -1
+        # WHICH FILE THESE ENTRIES CAME FROM, so a report can say where the
+        # script has got to and not merely how far.  A count alone cannot be
+        # looked up: a 'script FILE' line counts as one PLUS all of its
+        # children, so a 150-line script that calls a 20-line one five times
+        # reports over 200 entries and no line of it matches any of them.
+        self.source = source
 
     def start(self):
         self.origin = time.monotonic()
@@ -806,7 +813,10 @@ class Player(object):
         self._reported = k
         self.counter["done"] += 1
         text = (e.get("text") or e.get("kind") or "").strip()
-        self.progress(self.counter["done"], self.counter["total"], text)
+        where = ""
+        if e.get("line"):
+            where = "%s:%d" % (self.source or "?", e["line"])
+        self.progress(self.counter["done"], self.counter["total"], text, where)
 
     def _run(self, k):
         while k < len(self.entries) and not self.stopped:
@@ -871,7 +881,7 @@ class Player(object):
             return
         if k >= len(self.entries) and self.progress is not None and \
                 self.counter["done"] >= self.counter["total"]:
-            self.progress(self.counter["done"], self.counter["total"], None)
+            self.progress(self.counter["done"], self.counter["total"], None, "")
         if k >= len(self.entries) and self.on_done:
             self.on_done(False)
             return
@@ -923,7 +933,8 @@ class Player(object):
 
         child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
-                       on_done=done, progress=self.progress, counter=self.counter)
+                       on_done=done, progress=self.progress, counter=self.counter,
+                       source=os.path.basename(e["path"]))
         child.start()
 
     def _poll_screen(self, k, e, begun, base):
