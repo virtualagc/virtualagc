@@ -607,8 +607,10 @@ static void batchrunner_write_capture(BatchRunner *r) {
         char path[512];
         /* NOT WHILE THE SET DISAGREES ABOUT ITS I/O.  Every machine tests
          * the same vehicle state here and gets the same answer, so they
-         * either all write or all wait; the machine that would have written
-         * the vehicle's devices asks for the capture again a little later.
+         * either all write or all wait -- which is true of the waiting case
+         * by construction and had to be MADE true of the forced one, see the
+         * counter below.  The machine that would have written the vehicle's
+         * devices asks for the capture again a little later.
          * SNAPSHOT_RETRY_MAX times, and then it is taken anyway and SAID --
          * a capture nobody can take is worse than one that needs a second
          * look, and the reason is on the record either way. */
@@ -617,18 +619,39 @@ static void batchrunner_write_capture(BatchRunner *r) {
         why[0] = '\0';
         if (!vehicle_io_agrees(r->vehicle, why, sizeof why)) {
             if (r->snapRetries < SNAPSHOT_RETRY_MAX) {
+                /* EVERY MACHINE COUNTS ITS OWN TRIES, not just the writer.
+                 * They are all parked here together and all saw the same
+                 * disagreement, so they must all reach the limit on the same
+                 * round -- otherwise "they either all write or all wait"
+                 * above is simply untrue of the forced case: the writer's
+                 * counter was the only one advancing, so when it gave up and
+                 * took the capture anyway, every other machine was still at
+                 * zero and returned, and the capture held ONE computer.
+                 *
+                 * Measured, ledger #202: a five-GPC vehicle at OPS 301 whose
+                 * bus 20 never settled produced 40 "GPC1 SNAPSHOT put off"
+                 * lines, one "taken anyway", one "SNAPSHOT at t=" -- all from
+                 * GPC1 -- and simulatePASS then refused the result with
+                 * "missing gpc2.json ... gpc5.mem.bin".  A four-GPC vehicle
+                 * hid it by agreeing before the count ran out.
+                 *
+                 * Only the writer schedules the retry and says so, because
+                 * one re-request brings the whole set back and five identical
+                 * lines a round would bury the reason. */
+                r->snapRetries++;
                 if (vehicle_capture_writer(r->vehicle, r->gpcId)) {
-                    r->snapRetries++;
                     r->snapRetryIn = SNAPSHOT_RETRY_STEPS;
                     fprintf(stderr, "GPC%d SNAPSHOT put off (%d of %d): %s\n",
                             r->gpcId, r->snapRetries, SNAPSHOT_RETRY_MAX, why);
                 }
                 return;
             }
-            fprintf(stderr, "GPC%d SNAPSHOT taken anyway after %d tries -- the "
-                            "set never agreed about its I/O (%s).  It may vote "
-                            "on restore; see ledger #180.\n",
-                    r->gpcId, r->snapRetries, why);
+            if (vehicle_capture_writer(r->vehicle, r->gpcId))
+                fprintf(stderr, "SNAPSHOT taken anyway after %d tries -- the "
+                                "set never agreed about its I/O (%s).  Every "
+                                "computer writes; it may vote on restore, see "
+                                "ledger #180.\n",
+                        r->snapRetries, why);
             forced = true;
         }
         int snapTries = r->snapRetries;
