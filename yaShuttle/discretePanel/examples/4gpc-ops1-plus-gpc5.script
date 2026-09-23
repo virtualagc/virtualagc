@@ -50,10 +50,13 @@
 # whose 8th slot -- ITEM 14, CRT3 -- is GPC3.  Left alone, GPC3 would take
 # CRT3 the moment either OPS loads, and GPC5 would lose the only display it
 # has.  So ITEM 14 is zeroed in BOTH configurations, and IDP3's MAJ FUNC is
-# moved off GNC so that the GNC NBAT has no claim on it at all: USA005350's
-# rule is that an unassigned display falls to the lowest-numbered GPC IN THAT
-# MAJOR FUNCTION (ledger #181), and with CRT3 on SM the only computer in SM is
-# GPC5, which is in OPS 0 in every major function.
+# moved off GNC so that the GNC NBAT has no claim on it.
+#
+# THAT IS STILL NOT ENOUGH, and it was wrong to think it would be -- see the
+# GPC/CRT step at the foot of this script.  USA005350's rule is that an
+# unassigned display falls to the lowest-numbered GPC IN THAT MAJOR FUNCTION
+# (ledger #181), and moving CRT3 to SM does not narrow that field to GPC5:
+# EVERY common-set computer is in OPS 0 for SM, so GPC1 wins it.
 #
 # GPC5 IPLs LAST AND ONTO CRT3.  An IDP is loaded by GPCIPL when IDP LOAD is
 # pressed during an IPL, and never afterwards by PASS in an OPS (ledger #197,
@@ -61,17 +64,16 @@
 # it.  That gives IDP3 its background and leaves CRT3 in GPC5's hands from the
 # start, instead of having to be taken back later.
 #
-# WHAT IS NOT YET KNOWN, and what to look at if this does not come up:
-#   - whether zeroing ITEM 14 plus MAJ FUNC SM really leaves CRT3 with GPC5,
-#     or whether something claims it anyway.  The emulator now reports a
-#     computer transmitting on more than one display bus (ledger #159), so a
-#     wrong answer should announce itself rather than merely running slowly.
-#   - whether a GPC in OPS 0 will drive a display whose MAJ FUNC is SM.
-#   - ledger #140: in a five-computer set GPC4 failed itself out on the
-#     timing-unit transaction (IOQE 905A, buses 20/22) that four handle
-#     cleanly.  Whether that needs five computers IN THE SET, or merely five
-#     on those buses, is exactly what this configuration and the five-in-one-
-#     set run together settle.
+# RUN AND WATCHED, 2026-09-22.  It comes up: CRT1 and CRT2 on 1011 LAUNCH
+# TRAJ 1 under GPC1 and GPC2 -- ascent, which had never been reached here
+# before -- four computers in the GNC set, and CRT3 under GPC5 showing 0001
+# GPC MEMORY.  Two things were learned on screen and are folded in above:
+# zeroing ITEM 14 and moving the MAJ FUNC leaves CRT3 with GPC1, not GPC5, so
+# the GPC/CRT command at the foot is required; and a GPC in OPS 0 does drive
+# an SM display perfectly well, which is what GPC5 is doing.
+#
+# Ledger #140 -- five computers and the timing-unit transaction on buses
+# 20/22 -- did not bite here or in the five-in-one-set run.
 
 # --- all five GPCs to HALT, the three IDPs on --------------------------------
 +0     gpc 1
@@ -131,3 +133,30 @@
 # --- OPS 0 -> OPS 901 -> OPS 101, on CRT1, which GPC1 commands ---------------
 +21    keys OPS 9 0 1 PRO
 +90    keys OPS 1 0 1 PRO
+
+# --- AND ONLY NOW, GIVE CRT3 TO GPC5 ----------------------------------------
+# Zeroing CRT3 in both NBATs and moving IDP3's MAJ FUNC to SM is NECESSARY but
+# NOT SUFFICIENT, which a run on 2026-09-22 showed on screen: CRT1 and CRT2
+# came up on 1011 LAUNCH TRAJ 1 under GPC1 and GPC2, and CRT3 came up under
+# GPC1 -- not GPC5 -- showing 0001 GPC MEMORY.
+#
+# The reason is USA005350's rule as ledger #181 states it: an unassigned
+# display goes to the lowest-numbered GPC IN THAT MAJOR FUNCTION.  Putting
+# CRT3 on SM does not narrow the field to GPC5, because EVERY common-set
+# computer is in OPS 0 for SM -- none of them has an SM major function loaded
+# -- so the lowest-numbered of them is GPC1 and it takes the display.  GPC5
+# has no special claim on it at all.
+#
+# (That is also the answer to how one computer showed two different screens
+# at once: GPC1 held GNC in OPS 101 for CRT1 and SM in OPS 0 for CRT3.  A GPC
+# runs up to three major functions, and a display shows whichever one its own
+# MAJ FUNC switch selects.)
+#
+# So the assignment has to be made explicitly, and AFTER the OPS transition
+# rather than before it -- an NBAT loaded by an OPS request would take the
+# display straight back.  The command is actioned by whoever commands the CRT
+# it is typed on, so it goes to CRT3 itself.  Verified live: GPC1 dropped from
+# two display buses to one and CRT3's digit became 5.
++30    kybdsel right 3
++2     keys KB2 GPC/CRT 5 3 EXEC
++3     kybdsel right 2

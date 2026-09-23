@@ -724,7 +724,7 @@ class Player(object):
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
-                 screens=None, on_done=None):
+                 screens=None, on_done=None, progress=None, counter=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
@@ -733,14 +733,48 @@ class Player(object):
         self.bus = bus or Bus()
         self.origin = None
         self.stopped = False
+        # WHERE THE SCRIPT HAS GOT TO, for anyone watching rather than
+        # reading the log.  A run whose script is still working and one whose
+        # script ended twenty minutes ago look identical on screen, which is
+        # no way to watch a simulation: the owner sat through an eyes-on run
+        # unable to tell whether the configuration he was looking at was the
+        # final one or a half-built one (2026-09-22).
+        #
+        # Captions can say so, but only if the script's author wrote them AND
+        # subtitles.py is running, which needs --layout.  This is the channel
+        # that is always there.
+        #
+        # The counter is SHARED WITH NESTED SCRIPTS -- a 'script FILE' step
+        # plays its children on a Player of their own, and progress through
+        # them is progress through the whole run -- so a caller passes none
+        # and children inherit the parent's.
+        self.progress = progress
+        self.counter = counter
+        if self.counter is None and progress is not None:
+            steps, waits = count_entries(entries)
+            self.counter = {"done": 0, "total": steps + waits}
+        self._reported = -1
 
     def start(self):
         self.origin = time.monotonic()
         self.after(0, lambda: self._run(0))
 
+    def _note(self, k, e):
+        """Say where the script has got to, once per entry.  _run is
+        re-entered for the same entry whenever a step is not yet due, so the
+        highest entry reached is what counts rather than the number of
+        visits."""
+        if self.progress is None or k <= self._reported:
+            return
+        self._reported = k
+        self.counter["done"] += 1
+        text = (e.get("text") or e.get("kind") or "").strip()
+        self.progress(self.counter["done"], self.counter["total"], text)
+
     def _run(self, k):
         while k < len(self.entries) and not self.stopped:
             e = self.entries[k]
+            self._note(k, e)
             if e["kind"] == "wait_user":
                 if self.wait_user is None:
                     self.log("%s: nothing to click -- script stopped" % e["text"])
@@ -798,6 +832,9 @@ class Player(object):
         if self.stopped and self.on_done:
             self.on_done(True)
             return
+        if k >= len(self.entries) and self.progress is not None and \
+                self.counter["done"] >= self.counter["total"]:
+            self.progress(self.counter["done"], self.counter["total"], None)
         if k >= len(self.entries) and self.on_done:
             self.on_done(False)
             return
@@ -849,7 +886,7 @@ class Player(object):
 
         child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
-                       on_done=done)
+                       on_done=done, progress=self.progress, counter=self.counter)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):

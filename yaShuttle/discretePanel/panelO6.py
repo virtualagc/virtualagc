@@ -93,6 +93,8 @@ import tkinter as tk
 import tkinter.font as tkfont
 
 import crewscript
+
+TITLE_BASE = "Panels O6, C3, F6, C2, R11  \u2014  GPC / BFC / IDP"
 import discretes as D
 
 GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
@@ -402,7 +404,7 @@ def scaled_wh(w, h, size):
 class PanelO6:
     def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
-        root.title("Panels O6, C3, F6, C2, R11  —  GPC / BFC / IDP")
+        root.title(TITLE_BASE)
         root.configure(bg=C_WINDOW)
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
@@ -2317,10 +2319,27 @@ def _run_script(panel, entries, quit_after_ms=None):
     # switches above and the keystrokes and captions alike (crewscript.py).
     if getattr(panel, "player", None) is not None:
         panel.player.stopped = True        # whatever was playing, stop it
+    # THE TITLE BAR SAYS WHERE THE SCRIPT HAS GOT TO.  Without this a run
+    # whose script is still working and one whose script finished long ago
+    # look exactly alike, and somebody watching a simulation cannot tell
+    # whether the configuration in front of him is the intended one or a
+    # half-built one.  Captions can say it, but only when the script's author
+    # wrote them and subtitles.py is running (--layout); the title is always
+    # there.  Truncated, because a window title that grows is a title that
+    # gets elided from the left, losing the count.
+    def show_progress(done, total, text):
+        if text is None:
+            root.title("%s  —  script complete (%d steps)" % (TITLE_BASE, total))
+            return
+        if len(text) > 44:
+            text = text[:41] + "..."
+        root.title("%s  —  script %d/%d: %s" % (TITLE_BASE, done, total, text))
+
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
                                      wait_user=panel.wait_for_click,
-                                     screens=panel.screens)
+                                     screens=panel.screens,
+                                     progress=show_progress)
     panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
