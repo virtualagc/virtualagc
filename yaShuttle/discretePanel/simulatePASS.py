@@ -68,6 +68,7 @@ typing on as if the GPC were ready.
 
 import argparse
 import datetime
+import getpass
 import hashlib
 import json
 import os
@@ -269,10 +270,12 @@ class Launcher(object):
         self.logs = logs
         self.procs = []
 
-    def start(self, name, argv, cwd, env=None):
+    def start(self, name, argv, cwd, env=None, pass_fds=()):
         path = os.path.join(self.logs, name + ".log")
         fh = open(path, "w")
         kw = {}
+        if pass_fds:
+            kw["pass_fds"] = pass_fds
         if os.name == "posix":
             kw["start_new_session"] = True          # its own group, so it can be killed whole
         else:
@@ -431,15 +434,72 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     return "it is missing " + ", ".join(missing)
 
 
+SEVENZ_MAGIC = b"7z\xbc\xaf\x27\x1c"
+TAPE_PASSWORD = None            # asked for once, for an encrypted volume
+
+
+def tape_is_archive(path):
+    """Whether this volume is an encrypted 7-Zip archive rather than a bare
+    .mmv -- by extension, as the owner asked, or by signature, because a
+    renamed archive is still an archive."""
+    if path.lower().endswith(".7z"):
+        return True
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(6) == SEVENZ_MAGIC
+    except OSError:
+        return False
+
+
+def tape_password(path):
+    """The password for an encrypted volume, asked for once.
+
+    ASKED HERE RATHER THAN IN THE EMULATOR, even though the emulator can ask
+    too.  This is the program with a terminal: it launches yaGPC2 with its
+    standard input on /dev/null, so a prompt down there reaches nobody unless
+    /dev/tty happens to be openable.  Asking once here also means asking ONCE
+    for a vehicle whose two mass memories are the same archive."""
+    global TAPE_PASSWORD
+    if TAPE_PASSWORD is None:
+        env = os.environ.get("YAGPC_TAPE_PASSWORD")
+        if env:
+            TAPE_PASSWORD = env
+        else:
+            TAPE_PASSWORD = getpass.getpass(
+                "password for %s: " % os.path.basename(path))
+    return TAPE_PASSWORD
+
+
 def tape_digest(path):
-    """SHA-256 of a volume, or None if it cannot be read."""
+    """SHA-256 of a volume, or None if it cannot be read.
+
+    OF THE FLIGHT SOFTWARE, NOT OF THE FILE.  A snapshot records this so a
+    restore can refuse a vehicle that never existed (see
+    snapshot_tape_problem), and the thing that has to match is the VOLUME --
+    so an encrypted archive is digested by what it contains.  Otherwise
+    encrypting a tape would silently invalidate every snapshot ever taken
+    with it, and two archives of one volume would not match each other."""
     try:
         h = hashlib.sha256()
+        if tape_is_archive(path):
+            pw = tape_password(path)
+            proc = subprocess.Popen(["7z", "x", "-so", "--", path],
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.DEVNULL)
+            proc.stdin.write((pw + "\n").encode())
+            proc.stdin.close()
+            for chunk in iter(lambda: proc.stdout.read(1 << 20), b""):
+                h.update(chunk)
+            proc.stdout.close()
+            if proc.wait() != 0:
+                return None
+            return h.hexdigest()
         with open(path, "rb") as fh:
             for chunk in iter(lambda: fh.read(1 << 20), b""):
                 h.update(chunk)
         return h.hexdigest()
-    except OSError:
+    except (OSError, FileNotFoundError):
         return None
 
 
@@ -1249,6 +1309,20 @@ def main():
                 gpc_argv += ["--mmu-model", tape]
                 if not resume:
                     gpc_argv += ["--gpc-id", str(gpcs[0])]
+            # AN ENCRYPTED VOLUME NEEDS THE PASSWORD DOWN THERE TOO, and the
+            # emulator is started with its standard input on /dev/null, so it
+            # cannot ask.  It goes down a pipe whose read end the child
+            # inherits -- never in argv, where ps would show it, and never in
+            # the environment, which /proc exposes to the same people.
+            if tape_is_archive(tape):
+                pw_r, pw_w = os.pipe()
+                os.write(pw_w, (tape_password(tape) + "\n").encode())
+                os.close(pw_w)
+                os.set_inheritable(pw_r, True)
+                gpc_argv += ["--tape-password-fd", str(pw_r)]
+                gpc_pass_fds = (pw_r,)
+            else:
+                gpc_pass_fds = ()
             if resume and multi:
                 gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
             elif resume:
@@ -1262,7 +1336,10 @@ def main():
                          "--rt-factor", "1", "--port-base", str(args.port_base),
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
                          "--verbose"] + shlex.split(args.yagpc_extra)
-            gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env)
+            gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,
+                          pass_fds=gpc_pass_fds)
+            for _fd in gpc_pass_fds:        # ours to close once it is inherited
+                os.close(_fd)
             time.sleep(3)
             if ((script_has_subtitles(args.keys, False)
                  or script_has_subtitles(args.panel_script, True))

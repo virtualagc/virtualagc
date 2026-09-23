@@ -1,5 +1,6 @@
 /* In-process mass memory unit; see mmumodel.h. */
 #include "mmumodel.h"
+#include "volsource.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -720,13 +721,27 @@ static uint32_t be32(const uint8_t *p) {
 }
 
 static bool load_volume(MmuModel *m, const char *path) {
-    FILE *f = fopen(path, "rb");
-    if (!f) { fprintf(stderr, "mmu: cannot open %s\n", path); return false; }
+    /* THE VOLUME MAY BE AN ENCRYPTED ARCHIVE, and if it is, the plaintext
+     * exists only in this process -- see volsource.h.  Nothing below changes,
+     * because a volume is read start to finish and never seeks, so a pipe
+     * serves exactly as well as a file. */
+    VolSource vs;
+    if (!volsource_open(&vs, path)) {
+        fprintf(stderr, "mmu: cannot open %s\n", path);
+        return false;
+    }
+    FILE *f = vs.f;
     uint8_t hdr[32];
     if (fread(hdr, 1, sizeof hdr, f) != sizeof hdr ||
         memcmp(hdr, "MMUVOL01", 8) != 0) {
-        fprintf(stderr, "mmu: %s is not an MMUVOL01 volume\n", path);
-        fclose(f);
+        /* THE CAUSE BEFORE THE SYMPTOM.  A wrong password makes 7z write
+         * nothing, so the first thing noticed here is a missing header --
+         * and "is not an MMUVOL01 volume" is a wrong answer that reads like
+         * a right one.  Close the source first: if the child failed it says
+         * so itself, and that is the whole message. */
+        bool childOk = volsource_close(&vs);
+        if (childOk)
+            fprintf(stderr, "mmu: %s is not an MMUVOL01 volume\n", path);
         return false;
     }
     uint32_t hwPerBlock = be32(hdr + 8);
@@ -735,40 +750,43 @@ static bool load_volume(MmuModel *m, const char *path) {
     if (hwPerBlock != HALFWORDS_PER_BLOCK) {
         fprintf(stderr, "mmu: %s has %u halfwords per block, expected %d\n",
                 path, hwPerBlock, HALFWORDS_PER_BLOCK);
-        fclose(f);
+        volsource_close(&vs);
         return false;
     }
     m->writeProtect = (flags & 1u) != 0;
 
     uint32_t *dir = calloc(entries ? entries : 1, sizeof(uint32_t));
-    if (!dir) { fclose(f); return false; }
+    if (!dir) { volsource_close(&vs); return false; }
     for (uint32_t i = 0; i < entries; i++) {
         uint8_t w[4];
         if (fread(w, 1, 4, f) != 4) {
             fprintf(stderr, "mmu: %s: short directory\n", path);
-            free(dir); fclose(f); return false;
+            free(dir); volsource_close(&vs); return false;
         }
         dir[i] = be32(w);
     }
     for (uint32_t i = 0; i < entries; i++) {
         uint32_t idx = dir[i];
         uint16_t *blk = calloc(HALFWORDS_PER_BLOCK, sizeof(uint16_t));
-        if (!blk) { free(dir); fclose(f); return false; }
+        if (!blk) { free(dir); volsource_close(&vs); return false; }
         for (int h = 0; h < HALFWORDS_PER_BLOCK; h++) {
             int hi = fgetc(f), lo = fgetc(f);
             if (hi == EOF || lo == EOF) {
                 fprintf(stderr, "mmu: %s: short block data\n", path);
-                free(blk); free(dir); fclose(f); return false;
+                free(blk); free(dir); volsource_close(&vs); return false;
             }
             blk[h] = (uint16_t)((hi << 8) | lo);
         }
         if (idx < BLOCKS_TOTAL) m->blocks[idx] = blk;
         else free(blk);
     }
-    fprintf(stderr, "mmu%d: %u block(s) from %s%s\n", m->unit, entries, path,
+    fprintf(stderr, "mmu%d: %u block(s) from %s%s%s\n", m->unit, entries, path,
+            vs.encrypted ? " (decrypted in memory)" : "",
             m->writeProtect ? " (write protected)" : "");
     free(dir);
-    fclose(f);
+    /* The child's exit status is the only place a wrong password shows up as
+     * itself rather than as a short read, so it is checked even on success. */
+    if (!volsource_close(&vs)) return false;
     return true;
 }
 

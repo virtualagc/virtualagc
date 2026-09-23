@@ -1,4 +1,5 @@
 #include "opts.h"
+#include "volsource.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -171,7 +172,18 @@ static const char *HELP_TEXT =
 "                                  `--mmu-model 1:A.mmv --mmu-model 2:B.mmv`.\n"
 "                                  A bare volume is MM1 unless --mmu-unit\n"
 "                                  says otherwise\n"
+"                                  A VOLUME MAY BE AN ENCRYPTED 7-ZIP\n"
+"                                  ARCHIVE -- name it `...7z` and the\n"
+"                                  plaintext is read from a pipe and never\n"
+"                                  written anywhere.  Make one with\n"
+"                                  `7z a -t7z -mhe=on -p tape.7z tape.mmv`.\n"
 "  --mmu-unit <n>                   which mass memory a bare --mmu-model is\n"
+"  --tape-password-fd <n>           read the password for an encrypted volume\n"
+"                                  from this file descriptor, first line, so\n"
+"                                  a run with no terminal need not put it in\n"
+"                                  the environment.  Without it the password\n"
+"                                  comes from YAGPC_TAPE_PASSWORD, or is\n"
+"                                  asked for on /dev/tty\n"
 "  --deu-bus [<gpc>:]<n>[,...]      install a display unit on bus n, beside\n"
 "                                  the one --deu-model puts on DK1.  PASS\n"
 "                                  surrenders whichever DK bus the BFC CRT\n"
@@ -448,6 +460,9 @@ void opts_parse(int argc, char **argv, Options *opts) {
             (void)n; opts->deuModel = true;
         } else if (tok_is(tok, "--discretes", &n)) {
             (void)n; opts->discretes = true;
+        } else if (tok_is(tok, "--tape-password-fd", &n)) {
+            char *v = take_value(argc, argv, &i, tok, n);
+            if (v != NULL) volsource_password_fd(atoi(v));
         } else if (tok_is(tok, "--mmu-model", &n)) {
             {   /* [unit:]volume -- "--mmu-model 2:OTHER.mmv" names MM2, a
                  * bare volume means MM1 unless --mmu-model-unit says

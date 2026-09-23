@@ -113,7 +113,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_volsource
 
 TEST_SCRIPTS := test/run_all.sh test/test_debugger.sh test/test_scheduler.sh \
                 test/test_io_read.sh test/test_random.sh test/test_rtl.sh
@@ -212,6 +212,11 @@ $(TEST_BIN_DIR)/test_iop_dkbuses: test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/c
 # The intercomputer bus queue's overflow policy -- ledger #193.  Nothing
 # else links iccmodel.c on its own; it needs only util.c (getenv cache and
 # the monotonic clock's callers) and compat.c beneath it.
+# Reading a volume out of an encrypted 7-Zip archive -- the feature that lets
+# a .mmv be distributed without its plaintext sitting on disk.
+$(TEST_BIN_DIR)/test_volsource: test/test_volsource.c src/volsource.c src/util.c src/compat.c src/envcache.c src/volsource.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_volsource.c src/volsource.c src/util.c src/compat.c src/envcache.c $(LDLIBS)
+
 $(TEST_BIN_DIR)/test_icc_queue: test/test_icc_queue.c src/iccmodel.c src/util.c src/compat.c src/envcache.c src/json.c src/iccmodel.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_icc_queue.c src/iccmodel.c src/util.c src/compat.c src/envcache.c src/json.c $(LDLIBS)
 
