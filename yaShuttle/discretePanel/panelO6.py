@@ -2319,43 +2319,24 @@ def _run_script(panel, entries, quit_after_ms=None):
     # switches above and the keystrokes and captions alike (crewscript.py).
     if getattr(panel, "player", None) is not None:
         panel.player.stopped = True        # whatever was playing, stop it
-    # THE TITLE BAR SAYS WHERE THE SCRIPT HAS GOT TO.  Without this a run
-    # whose script is still working and one whose script finished long ago
-    # look exactly alike, and somebody watching a simulation cannot tell
-    # whether the configuration in front of him is the intended one or a
-    # half-built one.  Captions can say it, but only when the script's author
-    # wrote them and subtitles.py is running (--layout); the title is always
-    # there.  Truncated, because a window title that grows is a title that
-    # gets elided from the left, losing the count.
+    # WHERE THE SCRIPT HAS GOT TO IS SENT, NOT SHOWN HERE.  It went in this
+    # window's title first, which was the wrong place twice over: the panel is
+    # narrow in any layout with three CRTs in it, so the window manager elides
+    # the title and the count is what goes -- the owner's screen read
+    # "Panels O6,C3,F6,C2,R1 -- GPC / BFC / IDP -- scri..." -- and once
+    # manager.py shows it properly there is no reason for a second, worse copy
+    # competing for the same characters.  The title stays what it always was.
+    #
+    # panelO6 still plays the script, so it is still what KNOWS; it just says
+    # so on port base + 96 and lets the program somebody is actually looking
+    # at do the displaying.  See crewscript.send_progress and manager.py's
+    # SCRIPT heading.
     def show_progress(done, total, text):
-        # TOLD TO THE MANAGER AS WELL AS SHOWN HERE, and the manager is the
-        # one that matters: this window is small -- at the --size a run with
-        # three CRTs has to use, its title bar is not readable at all -- and
-        # it is the manager that somebody actually watches a run from.  The
-        # title is kept because it costs nothing and is legible when the
-        # panel is given room.
-        # The port base is the module's own (D.set_port_base at start-up);
-        # _run_script has no args of its own, and reaching for one here threw
-        # a NameError that a bare `except Exception` swallowed whole -- the
-        # report simply never went, and nothing said so.  Hence OSError only:
-        # a socket that will not send is not worth failing a run over, but a
-        # mistake in this code should be loud.
         try:
             crewscript.send_progress(
                 "done" if text is None else "%d %d %s" % (done, total, text))
         except OSError:
-            pass
-        # THE COUNT COMES FIRST.  A title is elided from the RIGHT when the
-        # window is narrow, and the panel is narrow in every layout that has
-        # three CRTs in it -- so a count put after the forty-odd characters
-        # of TITLE_BASE is the first thing to disappear, which is what
-        # happened to the first version of this.
-        if text is None:
-            root.title("script done  —  %s" % TITLE_BASE)
-            return
-        if len(text) > 40:
-            text = text[:37] + "..."
-        root.title("%d/%d %s  —  %s" % (done, total, text, TITLE_BASE))
+            pass          # a progress report is never worth failing a run for
 
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
