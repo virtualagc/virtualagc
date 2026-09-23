@@ -180,7 +180,7 @@ class Manager(object):
         self._button(row, "Browse", self.browse_snapshot)
         self._button(row, "Save", self.save_snapshot, wide=True)
         row = self._row()
-        self._button(row, "Save & Quit", self.save_and_quit)
+        self.quit_button = self._button(row, "Save & Quit", self.save_and_quit)
         self._button(row, "Restore", self.restore_snapshot)
 
         self._section("CAPTION BOX", bold)
@@ -212,9 +212,21 @@ class Manager(object):
         # later change of text moves the edges again.  A person may still
         # resize it; nothing here will.
         root.update_idletasks()
-        root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
+        # A LITTLE WIDER THAN THE CONTROLS NEED, by about the width of the
+        # "Save & Quit" button.  The controls alone settle on a window too
+        # narrow for the SCRIPT heading, which now carries the count, the
+        # line and the script's name -- and a heading that is cut off is a
+        # heading that does not do its job.  Modest on purpose: the manager
+        # sits beside three CRTs and a panel, and the screen is already full.
+        extra = 0
+        try:
+            extra = self.quit_button.winfo_reqwidth()
+        except (AttributeError, tk.TclError):
+            extra = 80
+        want = root.winfo_reqwidth() + extra
+        root.minsize(want, root.winfo_reqheight())
         if not args.geometry:
-            root.geometry("%dx%d" % (root.winfo_reqwidth(), root.winfo_reqheight()))
+            root.geometry("%dx%d" % (want, root.winfo_reqheight()))
         # Recorded rather than displayed: the window is too narrow to carry it
         # and the log is where it is wanted afterwards anyway.
         print("manager: %s" % self._what_run(), flush=True)
@@ -255,11 +267,13 @@ class Manager(object):
         # fixed at 7 or 8, which silently clipped anything longer: "Save &
         # Quit" read "ave & qui" and "End Simulation" read "nd Simulatio".
         # The minimum keeps the short buttons the size they have always been.
-        tk.Button(row, text=text, command=command,
-                  width=max(8 if wide else 7, len(text)),
-                  bg="#3c3c3c", fg=C_FG, activebackground="#505050",
-                  activeforeground=C_FG, highlightbackground=C_BG,
-                  relief="raised").pack(side="left", padx=BUTTON_GAP)
+        b = tk.Button(row, text=text, command=command,
+                      width=max(8 if wide else 7, len(text)),
+                      bg="#3c3c3c", fg=C_FG, activebackground="#505050",
+                      activeforeground=C_FG, highlightbackground=C_BG,
+                      relief="raised")
+        b.pack(side="left", padx=BUTTON_GAP)
+        return b
 
     def _first_script(self):
         here = sorted(glob.glob(os.path.join(HERE, "examples", "*.script")))
@@ -569,9 +583,18 @@ class Manager(object):
         if len(parts) < 3:
             return
         done, total, where = parts[0], parts[1], parts[2]
+        # AS SHORT AS IT CAN BE MADE, because this window is narrow and the
+        # heading is the whole point: no parentheses, the line appended to
+        # the count with a colon, and no ".script" on the name -- every file
+        # here is one.  "SCRIPT 194/206:134 5gpc-3crt-subtitled".  The name
+        # may still be cut, and it is last precisely so that the count and
+        # the line survive when it is.
+        name, _, line = where.rpartition(":")
+        if name.endswith(".script"):
+            name = name[:-len(".script")]
         self.script_heading.configure(
-            text="SCRIPT (%s/%s at %s)" % (done, total, where)
-            if where != "?" else "SCRIPT (%s/%s processing)" % (done, total))
+            text="SCRIPT %s/%s:%s %s" % (done, total, line, name)
+            if name else "SCRIPT %s/%s" % (done, total))
         # ONLY WHEN IT CHANGES: a status line rewritten a hundred times a
         # second is a status line nobody can read.
         step = parts[3] if len(parts) > 3 else ""

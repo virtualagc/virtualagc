@@ -120,17 +120,27 @@
 +4     keys OPS 9 0 1 PRO
 +4     subtitle Four computers are loading memory configuration 9 together.
 
-# Gated, not timed: G9's own display replaces the OPS 0 one when the load
-# lands.  A fixed delay here would either cut the caption off on a slow host
-# or leave the recording sitting on a finished screen on a fast one.
-wait crt 1 new-screen timeout 600
+# WAIT FOR THE MAJOR MODE, WHICH IS THE ONLY THING THAT CHANGES.  Both of
+# the obvious conditions are met INSTANTLY and are therefore no wait at all:
+#
+#   'new-screen' is any page change, and the page changes at once
+#   'title GPC MEMORY' is what OPS 0 ALREADY shows
+#
+# G9's display is called GPC MEMORY too -- the difference is the major mode
+# in the corner, 0001 before and 9011 after.  Measured the hard way on
+# 2026-09-23: with 'new-screen' the wait was met after 0.1 s, OPS 101 was
+# keyed ELEVEN seconds after OPS 901 instead of the ninety the unnarrated
+# script allows, the ascent request went into a machine still loading G9 and
+# was lost, and the run sat at the LAUNCH TRAJ wait until it timed out with
+# CRT1 reading "9011/ / GPC MEMORY 1".
+wait crt 1 title "9011" timeout 600
 
 +1     subtitle <left>And now ascent: OPS 101.
 +6     keys OPS 1 0 1 PRO
 +4     subtitle Watch CRT1 and CRT2. Four computers, one redundant set,\nloading the ascent software in lockstep.
 
 # The ascent display announces itself by name, so wait for the name.
-wait crt 1 title LAUNCH TRAJ timeout 600
+wait crt 1 title "LAUNCH TRAJ" timeout 600
 
 # --- and finally, give CRT3 to GPC5 -----------------------------------------
 +2     subtitle LAUNCH TRAJ 1. The set is flying an ascent.
