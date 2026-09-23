@@ -1678,6 +1678,31 @@ void iop_bce_error_terminate(IOP *iop, int p) {
     if (p < 1 || p > 24) return;
     BCE *bce = &iop->bce[p - 1];
     bce->recvActive = false;
+    /* AND THE COUNT OF WORDS THAT WILL NEVER ARRIVE.  Everything else about
+     * the abandoned transfer is torn down here -- the MIA is drained, the
+     * queued DMA is dropped -- but recvLeft used to be left holding whatever
+     * remained when the receive died, and nothing ever cleared it: it is set
+     * only when a receive is ARMED, and counted down only by words that
+     * actually come.  So an error-terminated BCE sat for the rest of the run
+     * saying it had N words outstanding while recvActive said it was not
+     * receiving, which is not a state a real BCE can be in.
+     *
+     * That stale residue is the root cause of ledger #202's "the set never
+     * agreed about its I/O".  vehicle_io_agrees compares recvLeft across the
+     * machines, and once one computer had error-terminated a receive on some
+     * bus and another had not, the two disagreed PERMANENTLY -- through 40
+     * retries spanning tens of seconds, with neither side marked receiving:
+     *
+     *     bus 20: GPC1 has 1 word(s) left, GPC5 has 0      (OPS 301)
+     *     bus 7:  GPC1 has 16 word(s) left, GPC2 has 0     (OPS 0)
+     *
+     * so no capture could ever find the vehicle quiet.  It is worse with five
+     * computers only because five give more chances for one of them to carry
+     * a residue the others do not.  Clearing it is also what a snapshot
+     * wants: a restored BCE should not come back owed words that were
+     * dropped before the capture. */
+    bce->recvLeft = 0;
+    bce->recvGotAny = false;
     /* Anything the MIA had received is dropped with it, and so is any DMA
      * this BCE still had queued. */
     while (mia_data_available(iop, &bce->mia)) (void)mia_get_data(iop, &bce->mia);
