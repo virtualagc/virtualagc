@@ -2305,43 +2305,28 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
                         (unsigned)psw_get_nia(&iop->cpu->psw), iop->cpu->elapsedTimeUs,
                         vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) / 1e6);
             /* ONE COMPUTER DRIVING SEVERAL DISPLAYS IS THE STATE THAT COSTS
-             * THE RATE, and until now nothing said so.
+             * THE RATE (ledger #159), but only if it LASTS.
              *
-             * A GPC's emulation is serial -- one thread, one core -- so a
-             * computer that ends up commanding every display bus delivers a
-             * fraction of real time, the barrier correctly paces the whole
-             * vehicle down to it, and MEDS2's wall-clock watchdogs then fire
-             * against a vehicle that is healthy but slow.  A display stops
-             * answering, the member alone with an I/O error fails itself
-             * out, and what is actually an ORDERING mistake in the startup
-             * script -- powering a display before the NBAT names its
-             * commander, so whoever is already in RUN captures it -- reads
-             * as a sync defect.  That is ledger #159, and rediscovering it
-             * cost the runs of #158 before it.
+             * This used to say so the instant the count changed, and that was
+             * useless: GPCIPL enables every transmitter for a moment during
+             * each IPL, so a five-computer run produced the same eleven
+             * reports for EVERY machine -- 55 lines saying nothing, and a
+             * uniform result across every machine is the signature of a
+             * broken measurement rather than of five identical faults.  It
+             * also carried no time, so no line of it could be lined up
+             * against a vote.
              *
-             * Only in a multi-GPC vehicle: one computer commanding two
-             * displays is ordinary and correct when it is the only computer
-             * there.  Reported on each change, not once, because the
-             * interesting part is when it starts and when it stops. */
+             * So this only records; run.c reports, once the state has been
+             * held long enough to be the thing that matters and with the
+             * time it began. */
             if (vehicle_multi(iop->vehicle)) {
                 int n = 0;
                 for (int b = YAGPC_DK_BUS_FIRST; b <= YAGPC_DK_BUS_LAST; b++)
                     if (iop_proc_get(&iop->regXmitEna, b)) n++;
                 if (n != iop->dkBusesCommanded) {
-                    if (n > 1)
-                        fprintf(stderr,
-                                "vehicle: GPC%d transmits on %d display buses "
-                                "at once -- one computer driving several "
-                                "displays paces the whole vehicle down to "
-                                "itself (ledger #159); check that the NBAT "
-                                "named each display's commander BEFORE it was "
-                                "powered\n",
-                                iop->cpu->gpcId, n);
-                    else if (iop->dkBusesCommanded > 1)
-                        fprintf(stderr,
-                                "vehicle: GPC%d now transmits on %d display "
-                                "bus(es)\n", iop->cpu->gpcId, n);
                     iop->dkBusesCommanded = n;
+                    iop->dkSinceUs = (iop->cpu != NULL)
+                                     ? iop->cpu->elapsedTimeUs : 0.0;
                 }
             }
             break;

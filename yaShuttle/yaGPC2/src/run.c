@@ -593,6 +593,11 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
  * on a display bus is over in well under a millisecond, so a few thousand
  * instructions is long enough to land somewhere else in it. */
 #define SNAPSHOT_RETRY_STEPS 5000L
+/* How long one computer must hold several display buses before it is worth
+ * saying so: above GPCIPL's momentary blanket enable, far below the minutes
+ * that cost #158 its runs. */
+#define DK_HOLD_REPORT_US  5.0e6
+
 #define SNAPSHOT_RETRY_MAX   40
 
 /* FIND A CONSTANT BY ITS NEIGHBOURS, NOT BY ITS ADDRESS.
@@ -2315,6 +2320,37 @@ static bool batchrunner_step(BatchRunner *r) {
         r->resumeGatePending = false;
         vehicle_barrier_prejoin(r->vehicle, r->gpcId);
         vehicle_resume_gate(r->vehicle, r->gpcId);
+    }
+
+    /* ONE COMPUTER ON SEVERAL DISPLAY BUSES, once it has LASTED.
+     *
+     * The condition is recorded by iop.c as the transmit-enable register
+     * changes; the judging is here, because whether it matters is a question
+     * about DURATION and the register does not change while it does.  A
+     * momentary enable of every transmitter is what GPCIPL does during each
+     * IPL and costs nothing; a computer that holds two or three display
+     * buses for minutes is what paces the whole vehicle down to itself
+     * (#159).  Five seconds is far above the first and far below the second.
+     *
+     * With a time on it, so a line can be set beside a vote. */
+    {
+        IOP *iop = &r->age.gpc.iop;
+        double now = r->age.gpc.cpu.elapsedTimeUs;
+        if (iop->dkBusesCommanded > 1 && !iop->dkReported &&
+            now - iop->dkSinceUs >= DK_HOLD_REPORT_US) {
+            iop->dkReported = true;
+            fprintf(stderr, "vehicle: GPC%d has driven %d display buses since "
+                            "t=%.1f s (%.1f s now) -- one computer driving "
+                            "several displays paces the whole vehicle down to "
+                            "itself, ledger #159\n",
+                    r->gpcId, iop->dkBusesCommanded, iop->dkSinceUs / 1e6,
+                    (now - iop->dkSinceUs) / 1e6);
+        } else if (iop->dkBusesCommanded <= 1 && iop->dkReported) {
+            iop->dkReported = false;
+            fprintf(stderr, "vehicle: GPC%d now drives %d display bus(es) "
+                            "t=%.1f s\n",
+                    r->gpcId, iop->dkBusesCommanded, now / 1e6);
+        }
     }
 
     /* YAGPC_DUMPSTATE_AT=<sec>[,<sec>...] writes --dump-state's JSON the

@@ -331,6 +331,8 @@ typedef struct IOP {
      * One computer driving several displays is what cost #159 its rate, and
      * nothing reported it; see the transmitter-enable case in iop.c. */
     int dkBusesCommanded;
+    double dkSinceUs;        /* when that count was last reached */
+    bool dkReported;         /* run.c has said so and not yet said it cleared */
     bool forceQueueParity;   /* C108: local store address / queue control */
     bool forceDMAParity;     /* C140: DMA address and data */
     bool forceMIAParity;     /* C180: octal MIA pages */
