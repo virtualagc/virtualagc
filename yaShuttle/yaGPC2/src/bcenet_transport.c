@@ -394,7 +394,10 @@ struct BceNetTransport {
     pthread_mutex_t lock;   /* guards every bus's outbound FIFO and bucket */
     pthread_t txThread;
     bool txThreadRunning;
-    volatile bool txStop;
+    /* ATOMIC, not merely volatile: it is written by the thread doing the
+     * free and read by the transmit thread, and volatile promises nothing
+     * between threads.  ThreadSanitizer names it outright. */
+    bool txStop;
 #endif
 };
 
@@ -438,7 +441,7 @@ BceNetTransport *bcenet_transport_create(int gpcId) {
 #ifdef BCENET_HAVE_TX_THREAD
     pthread_mutex_init(&t->lock, NULL);
     t->txThreadRunning = false;
-    t->txStop = false;
+    __atomic_store_n(&t->txStop, false, __ATOMIC_RELAXED);
 #endif
     return t;
 }
@@ -449,7 +452,7 @@ void bcenet_transport_free(BceNetTransport *t) {
     /* Stopped and joined BEFORE any socket closes: the thread sends on
      * txFd and would otherwise be doing so as the descriptor went. */
     if (t->txThreadRunning) {
-        t->txStop = true;
+        __atomic_store_n(&t->txStop, true, __ATOMIC_RELEASE);
         pthread_join(t->txThread, NULL);
         t->txThreadRunning = false;
     }
@@ -617,7 +620,25 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
 #ifdef BCENET_HAVE_TX_THREAD
     /* Started on the first bus to open, not at create(): a transport
      * nothing ever opens a bus on -- which is every build of this that
-     * runs without --bce-network -- never starts a thread at all. */
+     * runs without --bce-network -- never starts a thread at all.
+     *
+     * UNDER THE LOCK, because this function is called from EVERY MACHINE'S
+     * OWN EMULATION THREAD as that machine opens its first bus, and
+     * "test the flag, then create, then set the flag" is not one action.
+     * Two computers opening their first bus at the same moment both saw
+     * txThreadRunning false and both created a thread -- and t->txThread
+     * then held only the SECOND handle, so bcenet_transport_free joined
+     * that one and the first was orphaned.  The orphan kept reading
+     * t->txStop out of the transport for the rest of the run, and when
+     * free(t) finally released it the next read was of memory that had
+     * gone: SIGSEGV in tx_thread_main, at the same instruction every time,
+     * while the main thread was already inside exit() flushing stdio.
+     * Seven of them between 2026-09-21 and 2026-09-22, none of which
+     * appeared in any log of ours -- see ledger #205.
+     *
+     * pump_once takes this same lock partway through, so the new thread
+     * simply waits for it; the lock is released immediately below. */
+    transport_lock(t);
     if (!t->txThreadRunning) {
         if (pthread_create(&t->txThread, NULL, tx_thread_main, t) == 0) {
             t->txThreadRunning = true;
@@ -626,6 +647,7 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
                             "sending inline from the emulation thread\n");
         }
     }
+    transport_unlock(t);
 #endif
     return true;
 #endif
@@ -927,7 +949,7 @@ static void pump_once(BceNetTransport *t) {
 #ifdef BCENET_HAVE_TX_THREAD
 static void *tx_thread_main(void *arg) {
     BceNetTransport *t = (BceNetTransport *)arg;
-    while (!t->txStop) {
+    while (!__atomic_load_n(&t->txStop, __ATOMIC_ACQUIRE)) {
         pump_once(t);
         yagpc_sleep_seconds(TX_THREAD_TICK_SECONDS);
     }

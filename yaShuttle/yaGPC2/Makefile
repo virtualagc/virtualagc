@@ -113,7 +113,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_volsource
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_volsource test_bcenet_txthread
 
 TEST_SCRIPTS := test/run_all.sh test/test_debugger.sh test/test_scheduler.sh \
                 test/test_io_read.sh test/test_random.sh test/test_rtl.sh
@@ -214,6 +214,20 @@ $(TEST_BIN_DIR)/test_iop_dkbuses: test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/c
 # the monotonic clock's callers) and compat.c beneath it.
 # Reading a volume out of an encrypted 7-Zip archive -- the feature that lets
 # a .mmv be distributed without its plaintext sitting on disk.
+# Starting the bus transport's transmit thread exactly once -- ledger #205.
+BCENET_TEST_DEPS := src/bcenet_transport.c src/discretes.c src/util.c src/compat.c src/envcache.c
+
+$(TEST_BIN_DIR)/test_bcenet_txthread: test/test_bcenet_txthread.c $(BCENET_TEST_DEPS) src/bcenet_transport.h | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_bcenet_txthread.c $(BCENET_TEST_DEPS) $(LDLIBS)
+
+# THE ONE THAT WOULD HAVE CAUGHT IT.  The plain build only smoke-tests the
+# race; ThreadSanitizer names the unguarded flag outright.  Not part of
+# `make test` because it needs a sanitizer build of its own.
+.PHONY: tsan-bcenet
+tsan-bcenet: | $(TEST_BIN_DIR)
+	$(CC) -std=c11 -g -O1 -fsanitize=thread -I../yaGpcIntegration -DHAVE_POSIX_TIMERS -DHAVE_PTHREADS -pthread -o $(TEST_BIN_DIR)/tsan_bcenet test/test_bcenet_txthread.c $(BCENET_TEST_DEPS) -lm -pthread
+	$(TEST_BIN_DIR)/tsan_bcenet
+
 $(TEST_BIN_DIR)/test_volsource: test/test_volsource.c src/volsource.c src/util.c src/compat.c src/envcache.c src/volsource.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_volsource.c src/volsource.c src/util.c src/compat.c src/envcache.c $(LDLIBS)
 
