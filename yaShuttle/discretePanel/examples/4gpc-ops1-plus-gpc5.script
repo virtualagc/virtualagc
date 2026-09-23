@@ -157,6 +157,21 @@
 # display straight back.  The command is actioned by whoever commands the CRT
 # it is typed on, so it goes to CRT3 itself.  Verified live: GPC1 dropped from
 # two display buses to one and CRT3's digit became 5.
+#
+# AND IT MUST COME AFTER THE LAST MAJ FUNC CHANGE TOO -- a dependency, not an
+# accident of ordering, so do not move these lines above the `majfunc 3`
+# above.  A GPC/CRT assignment DOES NOT SURVIVE a major-function change:
+# moving the switch re-evaluates the display against the NEW major function's
+# NBAT and discards what was assigned by hand.  Measured on the running
+# vehicle 2026-09-22: with CRT3 under GPC5 on SM, flipping IDP3 to PL handed
+# it straight back to GPC1 -- PL's own bus row (memory configuration 6, P9)
+#
+#     0,0,0,0,0,2,2,0,2,0,0,2,2
+#
+# leaves its 8th slot, CRT3, unassigned, and every common-set computer is in
+# OPS 0 for PL, so GPC1 wins "lowest numbered in that major function" again.
+# Re-keying GPC/CRT 5 3 EXEC took it back.  The emulator's display-bus guard
+# (ledger #159) showed both handovers without anyone watching the screen.
 +30    kybdsel right 3
 +2     keys KB2 GPC/CRT 5 3 EXEC
 +3     kybdsel right 2
