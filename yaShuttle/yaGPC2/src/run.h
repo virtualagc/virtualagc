@@ -236,6 +236,14 @@ typedef struct {
      * once the IPL has put it there.  See the note at the patch site. */
     bool syncWindowDone;
     int syncWindowApplied;         /* how many times it had to be re-applied */
+    /* WHERE THE CONSTANTS TURNED OUT TO BE, found by their neighbours rather
+     * than assumed -- see batchrunner_find_run().  0 means "not looked for
+     * yet"; searched-and-missing is remembered so the complaint is made once
+     * rather than every pass. */
+    uint32_t syncWindowAt;
+    uint32_t syncT3At;
+    bool syncWindowMissing;
+    bool syncT3Missing;
     bool resumeGatePending;        /* first post-hold instruction must wait at the gate */
     int syncT3Applied;             /* YAGPC_SYNC_T3_US applications, for the log */
     /* A SNAPSHOT PUT OFF because the set was mid-transfer -- see

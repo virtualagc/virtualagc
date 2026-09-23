@@ -595,6 +595,40 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
 #define SNAPSHOT_RETRY_STEPS 5000L
 #define SNAPSHOT_RETRY_MAX   40
 
+/* FIND A CONSTANT BY ITS NEIGHBOURS, NOT BY ITS ADDRESS.
+ *
+ * A fixed address is only fixed for one build.  FCMSNTO2 is at 0x08250 in
+ * OI340700 and will be somewhere else entirely in OI340600 or OI301700, and
+ * the patches below used to check for their constants AT a guessed address:
+ * on any other tape that check simply fails, nothing is written, nothing is
+ * said, and the run LOOKS as though a window had been widened when it had
+ * not.  A silent no-op is the worst of the available failures.
+ *
+ * The run of neighbouring constants, though, is the same in every build,
+ * because it is the order of the declarations in FCMCBLKS -- so search the
+ * image for the run and take the address from what is found.  A run that
+ * appears more than once is refused rather than guessed at.
+ *
+ * Returns the halfword address of the first fullword of the run, or 0, and
+ * sets *matches to how many runs were found (capped at 2, which is all the
+ * caller needs to know). */
+static uint32_t batchrunner_find_run(MemoryBus *ram, const uint32_t *pat,
+                                     int n, uint32_t hi, int *matches) {
+    uint32_t found = 0;
+    int seen = 0;
+    for (uint32_t a = 0; a + 2u * (uint32_t)n <= hi; a += 2u) {
+        bool all = true;
+        for (int k = 0; k < n && all; k++)
+            all = membus_get32(ram, a + 2u * (uint32_t)k) == pat[k];
+        if (all) {
+            if (seen == 0) found = a;
+            if (++seen > 1) break;
+        }
+    }
+    *matches = seen;
+    return found;
+}
+
 static void batchrunner_write_capture(BatchRunner *r) {
     if (r->opts == NULL) return;
     const char *tag = vehicle_pause_tag(r->vehicle);
@@ -2603,8 +2637,9 @@ static bool batchrunner_step(BatchRunner *r) {
          * FCMSNTO2 is a plain word -- 'DC F'3850'  3.85 MILLISEC IN
          * MICROSECONDS', FCMCBLKS.asm:686 -- that FCMISYNC, FCMCSYNC and
          * FCMSSYNC each subtract from the PC1 timer to form their deadline.
-         * At halfword 0x08250 in the loaded image, with FCMSYNTO's 440
-         * immediately before it, which is what identifies it.
+         * FCMSYNTO's 440 sits immediately before it, and that PAIR is what
+         * identifies it -- searched for, not assumed: it is at halfword
+         * 0x08250 in OI340700 and somewhere else in every other build.
          *
          * WHY THE EMULATOR AND NOT THE BUILD.  This is the experiment for
          * whether a wider window removes the 3-CRT vote (#190), and it has
@@ -2630,27 +2665,55 @@ static bool batchrunner_step(BatchRunner *r) {
              * and log every application, which also measures WHEN it reverts.
              * syncWindowDone now only counts applications for the log. */
             const char *w = yagpc_getenv("YAGPC_SYNC_WINDOW_US");
-            if (w != NULL && *w != '\0') {
+            if (w != NULL && *w != '\0' && !r->syncWindowMissing) {
                 uint32_t want = (uint32_t)atol(w);
-                uint32_t here = membus_get32(r->age.gpc.cpu.ram, 0x08250);
-                uint32_t before = membus_get32(r->age.gpc.cpu.ram, 0x0824e);
-                if (want > 0 && here == 3850u && before == 440u) {
+                /* FCMSYNTO 440 then FCMSNTO2 3850, adjacent in FCMCBLKS.  The
+                 * search runs once: the value reverts when an OPS load brings
+                 * in a fresh common block, but the block does not move. */
+                if (r->syncWindowAt == 0) {
+                    static const uint32_t sig[2] = {440u, 3850u};
+                    int hits = 0;
+                    uint32_t at = batchrunner_find_run(
+                        r->age.gpc.cpu.ram, sig, 2,
+                        (uint32_t)r->age.gpc.cpu.mainStorage.wordCount * 2u,
+                        &hits);
+                    if (hits == 1) {
+                        r->syncWindowAt = at + 2u;      /* FCMSNTO2 itself */
+                        fprintf(stderr, "GPC%d SYNC WINDOW: FCMSNTO2 found at "
+                                        "0x%05x (FCMSYNTO 440 at 0x%05x)\n",
+                                r->gpcId, (unsigned)r->syncWindowAt, (unsigned)at);
+                    } else {
+                        r->syncWindowMissing = true;
+                        fprintf(stderr, "GPC%d *** SYNC WINDOW NOT APPLIED ***: "
+                                        "the pair FCMSYNTO 440 / FCMSNTO2 3850 "
+                                        "was found %s in this image, so there is "
+                                        "nothing to patch.  The run is using the "
+                                        "flight software's own window.\n",
+                                r->gpcId, hits == 0 ? "nowhere" : "more than once");
+                    }
+                }
+                uint32_t here = r->syncWindowAt ?
+                    membus_get32(r->age.gpc.cpu.ram, r->syncWindowAt) : 0u;
+                uint32_t before = r->syncWindowAt ?
+                    membus_get32(r->age.gpc.cpu.ram, r->syncWindowAt - 2u) : 0u;
+                if (want > 0 && r->syncWindowAt != 0 && here == 3850u) {
                     /* WITHOUT THE PROTECT CHECK: the common block is store
                      * protected, and this write is the emulator's, not the
                      * flight software's -- checked, it is rejected with the
                      * check on.  And VERIFIED by reading it back, so the log
                      * cannot claim a change that did not land. */
-                    membus_set32(r->age.gpc.cpu.ram, 0x08250, want, false);
-                    uint32_t now = membus_get32(r->age.gpc.cpu.ram, 0x08250);
+                    membus_set32(r->age.gpc.cpu.ram, r->syncWindowAt, want, false);
+                    uint32_t now = membus_get32(r->age.gpc.cpu.ram, r->syncWindowAt);
                     r->syncWindowDone = true;
                     r->syncWindowApplied++;
                     fprintf(stderr, "GPC%d SYNC WINDOW #%d: FCMSNTO2 at "
-                                    "0x08250 was 3850 us, asked for %u, reads "
-                                    "%u (FCMSYNTO at 0x0824e left at %u) %s "
+                                    "0x%05x was 3850 us, asked for %u, reads "
+                                    "%u (FCMSYNTO at 0x%05x left at %u) %s "
                                     "t=%.6f\n",
                             r->gpcId, r->syncWindowApplied,
+                            (unsigned)r->syncWindowAt,
                             (unsigned)want, (unsigned)now,
-                            (unsigned)before,
+                            (unsigned)(r->syncWindowAt - 2u), (unsigned)before,
                             now == want ? "APPLIED" : "*** NOT APPLIED ***",
                             r->age.gpc.cpu.elapsedTimeUs / 1e6);
                 }
@@ -2665,8 +2728,10 @@ static bool batchrunner_step(BatchRunner *r) {
          * pulse that had gone (tested, 7 of 8 either way).
          *
          * Identified by their run of neighbours in FCMCBLKS -- FCMNOISE 10,
-         * FCMMISKW 200, FCMIT5 87, FCMST5 87, then the four T3s -- at
-         * halfword 0x081f2, unique in the image.  All four are raised by the
+         * FCMMISKW 200, FCMIT5 87, FCMST5 87, then the four T3s -- which is
+         * unique in the image and is SEARCHED FOR.  That run is 0x081f2 in
+         * OI340700; the point of searching is that it is not 0x081f2 in
+         * OI340600 or OI301700.  All four are raised by the
          * SAME amount so FCOS's own ordering between them is kept.  Re-applied
          * whenever they revert, as the timeout patch is.
          *
@@ -2675,21 +2740,40 @@ static bool batchrunner_step(BatchRunner *r) {
          * so it is time taken from PASS's own cycle. */
         {
             const char *t3 = yagpc_getenv("YAGPC_SYNC_T3_US");
-            if (t3 != NULL && *t3 != '\0') {
-                static const uint32_t sigAt = 0x081f2;
+            if (t3 != NULL && *t3 != '\0' && !r->syncT3Missing) {
+                /* FCMNOISE 10, FCMMISKW 200, FCMIT5 87, FCMST5 87, then the
+                 * four T3s -- searched for rather than assumed at 0x081f2,
+                 * which is only where they are in OI340700. */
                 static const uint32_t sig[4] = {10u, 200u, 87u, 87u};
                 static const uint32_t orig[4] = {188u, 248u, 103u, 182u};
-                bool here = true;
-                for (int k = 0; k < 4 && here; k++)
-                    here = membus_get32(r->age.gpc.cpu.ram,
-                                        sigAt + 2u * (uint32_t)k) == sig[k];
+                if (r->syncT3At == 0) {
+                    int hits = 0;
+                    uint32_t at = batchrunner_find_run(
+                        r->age.gpc.cpu.ram, sig, 4,
+                        (uint32_t)r->age.gpc.cpu.mainStorage.wordCount * 2u,
+                        &hits);
+                    if (hits == 1) {
+                        r->syncT3At = at + 8u;     /* the first T3 */
+                        fprintf(stderr, "GPC%d SYNC T3: FCMIT3 found at 0x%05x "
+                                        "(FCMNOISE/MISKW/IT5/ST5 at 0x%05x)\n",
+                                r->gpcId, (unsigned)r->syncT3At, (unsigned)at);
+                    } else {
+                        r->syncT3Missing = true;
+                        fprintf(stderr, "GPC%d *** SYNC T3 NOT APPLIED ***: the "
+                                        "run FCMNOISE 10 / FCMMISKW 200 / FCMIT5 "
+                                        "87 / FCMST5 87 was found %s in this "
+                                        "image, so the sync holds are the flight "
+                                        "software's own.\n",
+                                r->gpcId, hits == 0 ? "nowhere" : "more than once");
+                    }
+                }
                 uint32_t want = (uint32_t)atol(t3);
-                if (here && want > orig[0] &&
-                    membus_get32(r->age.gpc.cpu.ram, 0x081fa) == orig[0]) {
+                if (r->syncT3At != 0 && want > orig[0] &&
+                    membus_get32(r->age.gpc.cpu.ram, r->syncT3At) == orig[0]) {
                     uint32_t delta = want - orig[0];
                     uint32_t got[4];
                     for (int k = 0; k < 4; k++) {
-                        uint32_t a = 0x081fa + 2u * (uint32_t)k;
+                        uint32_t a = r->syncT3At + 2u * (uint32_t)k;
                         membus_set32(r->age.gpc.cpu.ram, a, orig[k] + delta, false);
                         got[k] = membus_get32(r->age.gpc.cpu.ram, a);
                     }
