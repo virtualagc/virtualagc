@@ -118,6 +118,9 @@ def running(port_base):
 
 class Manager(object):
     def __init__(self, root, args):
+        # Set before the UI is built: a progress datagram can arrive at any
+        # moment, including before there is a heading to put it in.
+        self.script_heading = None
         self.root, self.args = root, args
         self.subtitles = None              # the caption box this window started
         # SHORT ENOUGH TO READ.  This window is narrow, and a title bar it
@@ -145,7 +148,14 @@ class Manager(object):
         # is as wide as the window (and grows with it) and is scrolled to show
         # the end whenever it changes; the buttons sit underneath rather than
         # stealing the width.
-        self._section("SCRIPT", bold)
+        # THE SCRIPT HEADING SAYS WHETHER ONE IS RUNNING, and how far it has
+        # got: "SCRIPT (12/187 processing)" while it plays, plain "SCRIPT"
+        # when nothing is.  Without it a run whose script is still working
+        # and one whose script ended twenty minutes ago look identical --
+        # which is no way to watch a simulation.  panelO6 plays the script
+        # and knows the count, but its window is small and often hidden, so
+        # it sends the count here (crewscript.send_progress).
+        self.script_heading = self._section("SCRIPT", bold)
         self._path_box(self.script)
         row = self._row()
         self._button(row, "Browse", self.browse_script)
@@ -213,8 +223,10 @@ class Manager(object):
 
     # -- the furniture ------------------------------------------------------
     def _section(self, text, font):
-        tk.Label(self.root, text=text, bg=C_BG, fg="#8fbc8f", font=font,
-                 anchor="w").pack(fill="x", padx=10, pady=(10, 2))
+        lab = tk.Label(self.root, text=text, bg=C_BG, fg="#8fbc8f", font=font,
+                       anchor="w")
+        lab.pack(fill="x", padx=10, pady=(10, 2))
+        return lab
 
     def _row(self):
         # pady MATCHES THE BUTTONS' OWN padx, so two rows of buttons are
@@ -521,6 +533,33 @@ class Manager(object):
             text = data.decode("utf-8", errors="replace").strip()
             self.root.after(0, lambda t=text: self._result(t))
 
+    def _listen_progress(self):
+        """Thread: how far panelO6's script has got, on base + 96."""
+        try:
+            sock = crewscript.progress_receiver(self.args.port_base)
+        except OSError:
+            return
+        while True:
+            try:
+                data, _ = sock.recvfrom(4096)
+            except OSError:
+                return
+            text = data.decode("utf-8", errors="replace").strip()
+            self.root.after(0, lambda t=text: self._progress(t))
+
+    def _progress(self, text):
+        """On the Tk thread.  "<done> <total> <what>", or "done"."""
+        if self.script_heading is None:
+            return
+        if text == "done":
+            self.script_heading.configure(text="SCRIPT")
+            return
+        parts = text.split(None, 2)
+        if len(parts) < 2:
+            return
+        self.script_heading.configure(text="SCRIPT (%s/%s processing)"
+                                           % (parts[0], parts[1]))
+
     def _result(self, text):
         """On the Tk thread.  Success goes to the status line; A FAILURE GETS
         A DIALOG.
@@ -755,6 +794,7 @@ class Manager(object):
 
     def start_results(self):
         threading.Thread(target=self._listen_results, daemon=True).start()
+        threading.Thread(target=self._listen_progress, daemon=True).start()
 
     def _snapshot_dir(self, replacing=False):
         path = self.snapshot.get().strip()

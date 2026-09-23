@@ -32,6 +32,7 @@ CONTROL_OFFSET = 92             # panelO6.py's script control: port base + 92
 SESSION_OFFSET = 93             # simulatePASS.py's own control: port base + 93
 RESULT_OFFSET = 94              # simulatePASS.py's answer to those: base + 94
 MEDS_OFFSET = 95                # MEDS2.py's display-state control: base + 95
+PROGRESS_OFFSET = 96            # how far panelO6.py's script has got: base + 96
 
 
 def idp_snapshot_files(n):
@@ -596,6 +597,42 @@ def result_receiver(port_base=None):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("", base + RESULT_OFFSET))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
+
+
+def send_progress(text, port_base=None, sock=None):
+    """Say how far the running script has got: "<done> <total> <what>", or
+    "done" when it ends.  One datagram on port base + 96.
+
+    SENT RATHER THAN SHOWN, because the program that KNOWS is not the program
+    anybody is looking at.  panelO6 plays the script, and its own window is
+    small and often behind something; the manager is where a person watches a
+    run from.  It is also fire-and-forget: nobody has to be listening, and a
+    run with no manager is unaffected."""
+    own = sock is None
+    if own:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + PROGRESS_OFFSET))
+    except OSError:
+        pass                      # a progress report is never worth a failure
+    finally:
+        if own:
+            sock.close()
+
+
+def progress_receiver(port_base=None):
+    """The socket manager.py listens on for those reports."""
+    base = D.PORT_BASE if port_base is None else port_base
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("", base + PROGRESS_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
                              socket.inet_aton(D.IFACE)))

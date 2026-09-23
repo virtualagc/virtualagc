@@ -2328,6 +2328,23 @@ def _run_script(panel, entries, quit_after_ms=None):
     # there.  Truncated, because a window title that grows is a title that
     # gets elided from the left, losing the count.
     def show_progress(done, total, text):
+        # TOLD TO THE MANAGER AS WELL AS SHOWN HERE, and the manager is the
+        # one that matters: this window is small -- at the --size a run with
+        # three CRTs has to use, its title bar is not readable at all -- and
+        # it is the manager that somebody actually watches a run from.  The
+        # title is kept because it costs nothing and is legible when the
+        # panel is given room.
+        # The port base is the module's own (D.set_port_base at start-up);
+        # _run_script has no args of its own, and reaching for one here threw
+        # a NameError that a bare `except Exception` swallowed whole -- the
+        # report simply never went, and nothing said so.  Hence OSError only:
+        # a socket that will not send is not worth failing a run over, but a
+        # mistake in this code should be loud.
+        try:
+            crewscript.send_progress(
+                "done" if text is None else "%d %d %s" % (done, total, text))
+        except OSError:
+            pass
         if text is None:
             root.title("%s  —  script complete (%d steps)" % (TITLE_BASE, total))
             return
