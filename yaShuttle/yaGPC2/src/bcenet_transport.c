@@ -483,7 +483,9 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
         fprintf(stderr, "bcenet: bus %d out of range (1-%d)\n", busID, BCENET_MAX_BUS_ID);
         return false;
     }
-    if (b->fd >= 0) return true; /* already open */
+    /* A cheap look before any socket is made; the binding test that actually
+     * decides is made again under the lock further down (ledger #206). */
+    if (__atomic_load_n(&b->fd, __ATOMIC_ACQUIRE) >= 0) return true;
 
     /* THE SLOT'S OWN COMPUTER, not the transport's.  The transport became
      * one-per-process when the vehicle took ownership of the bus sockets,
@@ -579,8 +581,11 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
     int flags = fcntl(fd, F_GETFL, 0);
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 
-    b->fd = fd;
-    b->port = port;
+    /* NOTHING IS PUBLISHED INTO THE SLOT YET.  The descriptors are built in
+     * locals and handed over together, under the lock, at the end -- see the
+     * hand-over below for why the old order was unsafe. */
+    int newTxFd = -1;
+    int newTxPort = 0;
 
     /* A SEPARATE socket for transmitting, bound to an ephemeral port.
      * Its only purpose is to give our own datagrams a return address no
@@ -592,8 +597,6 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
      *
      * Not fatal if it fails: sends fall back to the receive socket and
      * the byte-exact filter, which is what this did before. */
-    b->txFd = -1;
-    b->txPort = 0;
     int txFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (txFd >= 0) {
         struct sockaddr_in txAddr = {0};
@@ -607,16 +610,54 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
                 setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_IF, &iface, sizeof iface);
                 setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof loop);
                 setsockopt(txFd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof ttl);
-                b->txFd = txFd;
-                b->txPort = ntohs(bound.sin_port);
+                newTxFd = txFd;
+                newTxPort = ntohs(bound.sin_port);
             }
         }
-        if (b->txFd < 0) close(txFd);
+        if (newTxFd < 0) close(txFd);
     }
-    if (b->txFd < 0) {
+    if (newTxFd < 0) {
         fprintf(stderr, "bcenet: bus %d: no separate transmit socket; "
                         "falling back to byte-exact self-echo filtering\n", busID);
     }
+    /* THE HAND-OVER, UNDER THE LOCK AND WITH fd LAST.  Two things were wrong
+     * before, and both are live DURING a run rather than only at teardown,
+     * because a bus is opened the first time EACH MACHINE touches it --
+     * which is an OPS transition handing a display bus to another computer,
+     * or the first mass-memory overlay, not merely start-up.  Ledger #206.
+     *
+     * ORDER.  b->fd was written first, then b->port, and b->txFd only after
+     * a second socket had been made.  pump_once treats any slot with fd >= 0
+     * as live, so the transmit thread could see a bus whose port was not yet
+     * set, or whose txFd was still -1 -- silently taking the no-transmit-
+     * socket fallback for that pass.  fd is therefore published LAST, after
+     * everything it implies is already in place.
+     *
+     * EXCLUSION.  The early-out at the top -- "if (b->fd >= 0) return true"
+     * -- is not a claim that only one machine opens a bus, because the
+     * machines run in their own threads and a shared bus (DK, MM, FC) is ONE
+     * slot for all of them; only the intercomputer bus gets a slot per
+     * computer.  Two computers first touching the same bus together both got
+     * past it and both bound the port, and because these are multicast
+     * sockets with SO_REUSEADDR the second bind SUCCEEDED -- no error, no
+     * log line, one socket orphaned in the multicast group with nobody
+     * reading it.  Which is why "no bind failures in any log" said nothing.
+     * So the test is made again here, holding the lock; the loser closes
+     * what it built and uses what the winner published. */
+    transport_lock(t);
+    if (b->fd >= 0) {
+        transport_unlock(t);
+        if (newTxFd >= 0) close(newTxFd);
+        close(fd);
+        return true;                  /* another computer got there first */
+    }
+    b->port = port;
+    b->txFd = newTxFd;
+    b->txPort = newTxPort;
+    b->selfEchoCount = 0;
+    __atomic_store_n(&b->fd, fd, __ATOMIC_RELEASE);   /* last, and visibly */
+    transport_unlock(t);
+
 #ifdef BCENET_HAVE_TX_THREAD
     /* Started on the first bus to open, not at create(): a transport
      * nothing ever opens a bus on -- which is every build of this that
@@ -880,7 +921,10 @@ static void pump_once(BceNetTransport *t) {
 
     for (int i = 0; i < BCENET_SLOTS; i++) {
         BceNetBusSocket *b = &t->buses[i];
-        if (b->fd < 0) continue;
+        /* Paired with the release store in bcenet_transport_open_bus: seeing
+         * a live descriptor here means the port and the transmit socket that
+         * go with it are already in place.  Ledger #206. */
+        if (__atomic_load_n(&b->fd, __ATOMIC_ACQUIRE) < 0) continue;
 
         OutDatagram batch[(size_t)BUS_BURST_MAX];
         size_t batchCount = 0;

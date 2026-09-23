@@ -33,17 +33,28 @@
  * exports it once configures the whole instance. */
 static int g_portBase = -1;
 
-void yagpc_set_port_base(int base) { g_portBase = base; }
+void yagpc_set_port_base(int base) {
+    __atomic_store_n(&g_portBase, base, __ATOMIC_RELEASE);
+}
 
+/* READ AND WRITTEN ATOMICALLY, because the fallback below is a LAZY INIT and
+ * every machine's thread can reach it.  In the emulator main() settles the
+ * base before any thread starts, so the lazy path is never taken there -- but
+ * "unreachable today" is not a property the compiler knows, and
+ * ThreadSanitizer named it while ledger #206 was being closed.  Two threads
+ * racing here both compute the SAME answer, so the only thing wanted is that
+ * neither sees a half-written one. */
 int yagpc_port_base(void) {
-    if (g_portBase < 0) {
+    int base = __atomic_load_n(&g_portBase, __ATOMIC_ACQUIRE);
+    if (base < 0) {
         const char *w = yagpc_getenv("NSTS_BUS_PORT_BASE");
         char *end = NULL;
         long v = (w != NULL && *w != '\0') ? strtol(w, &end, 10) : -1;
-        g_portBase = (end != NULL && *end == '\0' && v > 0 && v < 65536 - 100)
-                         ? (int)v : YAGPC_PORT_BASE_DEFAULT;
+        base = (end != NULL && *end == '\0' && v > 0 && v < 65536 - 100)
+                   ? (int)v : YAGPC_PORT_BASE_DEFAULT;
+        __atomic_store_n(&g_portBase, base, __ATOMIC_RELEASE);
     }
-    return g_portBase;
+    return base;
 }
 
 /* Which of the five GPCs this process is.  Only the intercomputer bus
