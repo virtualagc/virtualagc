@@ -56,83 +56,131 @@
 # calls as well, so the ITEM 1 EXEC in each of the five IPLs slows too.
 keygap 1
 
-+0     subtitle Space Shuttle avionics: five computers, three displays.\nWe are going to fly an ascent configuration.
-+6     subtitle Everything you are about to see is done from the crew panels,\nexactly as it was done on the flight deck.
++0     subtitle This is a demonstration in which we run Space Shuttle\nflight software version OI-34.07, as used for flight STS-134.
++5     subtitle But first, a brief tour of the visuals.
++5     subtitle <left>Commander's (CDR) display (CRT1) and keyboard.\nComputer Annunciation Matrix (CAM): for\nindicating out-of-sync computers.
++6     subtitle <right>Pilot's (PLT) display (CRT2) and keyboard.\nManager: a supervisor for various\nfunctions of the simulator itself.
++6     subtitle Panel: a collection of controls from various\nlocations on the full control panel.  CRT3, a\ndisplay shared by the CDR and the PLT.
++5     subtitle
+
++1     subtitle First, power up all five computers.\n(Look at the upper left of the Panel.)
++5 gpc 1
++0 power on
++1 gpc 2
++0 power on
++1 gpc 3
++0 power on
++1 gpc 4
++0 power on
++1 gpc 5
++0 power on
 
 # --- all five GPCs to HALT, the three IDPs on --------------------------------
-+5     subtitle First, all five computers to HALT. Nothing is running yet.
-+3     gpc 1
-+0     mode HALT
-+0.5   gpc 2
-+0.5   mode HALT
-+0.5   gpc 3
-+0.5   mode HALT
-+0.5   gpc 4
-+0.5   mode HALT
-+0.5   gpc 5
-+0.5   mode HALT
++1     subtitle Next, put all five computers into the HALT state.\n(Look at the bottom left of the Panel.  HALT is the\nsim's default, so they may be in HALT already.)
++5   gpc 1
++0   mode HALT
++0   gpc 2
++1   mode HALT
++0   gpc 3
++1   mode HALT
++0   gpc 4
++1   mode HALT
++0   gpc 5
++1   mode HALT
 
-+1     subtitle Power up the three display units.
-+2     idppower 1 on
-+0.5   idppower 2 on
-+0.5   idppower 3 on
-+1     subtitle All three start on the GNC major function.\nCRT3 will be moved later, and that move matters.
-+3     majfunc 1 gnc
-+0.5   majfunc 2 gnc
-+0.5   majfunc 3 gnc
++1   subtitle Apply power to displays 1-3 and their\nIntegrated Display Processors (IDP).\n(Look at the Panel's upper right.)
++5   idppower 1 on
++1   idppower 2 on
++1   idppower 3 on
++1   subtitle Set Major Function (MF) to GNC for each\nof displays 1-3, if not already set that way.\n(Look at the Panel's upper right corner.)
++5   majfunc 1 gnc
++1   majfunc 2 gnc
++1   majfunc 3 gnc
 
 # --- the four that will form the redundant set -------------------------------
-+3     subtitle Now load each computer from the mass memory tape.\nGPC1 first, onto CRT1.
-+4     script ipl-one-gpc-subtitled.script gpc=1 crt=1 idp=1 kb=KB1
-
-+2     subtitle GPC2, GPC3 and GPC4 follow, sharing CRT2.
-+4     script ipl-one-gpc-subtitled.script gpc=2 crt=2 idp=2 kb=KB2
-+2     script ipl-one-gpc-subtitled.script gpc=3 crt=2 idp=2 kb=KB2
-+2     script ipl-one-gpc-subtitled.script gpc=4 crt=2 idp=2 kb=KB2
++1   subtitle We're going to load the software for each of\nthe five computers from one of the two Mass\nMemory Units (MMU), or "tape drives".
++5   subtitle To load the first computer (GPC1), we'll use\nthe CDR display (CRT1) and keyboard (KYBD1).
++5   script ipl-one-gpc-subtitled.script gpc=1 crt=1 idp=1 kb=KB1
++2   subtitle In contrast to GPC1, to load GPC2-GPC4 we'll use\nthe PLT display (CRT2) and keyboard (KYBD2).
+#+4   subtitle First, deassign CRT2 from it previous driver.
+#+4   keys KB1 GPC/CRT 0 2 EXEC
++1   script ipl-one-gpc-subtitled.script gpc=2 crt=2 idp=2 kb=KB2
+#+2   subtitle Deassign CRT2 from its previous driver.
+#+4   keys KB1 GPC/CRT 0 2 EXEC
++2   script ipl-one-gpc-subtitled.script gpc=3 crt=2 idp=2 kb=KB2
+#+2   subtitle Deassign CRT2 from its previous driver.
+#+4   keys KB1 GPC/CRT 0 2 EXEC
++2   script ipl-one-gpc-subtitled.script gpc=4 crt=2 idp=2 kb=KB2
 
 # --- then GPC5, onto CRT3, which is also how IDP3 gets its background --------
-+2     subtitle Last, GPC5 -- the one that will NOT join the set.\nIt loads onto CRT3.
-+4     subtitle A display is given its background only by the computer\nthat loads it, so GPC5 must be the one to load CRT3.
-+5     kybdsel right 3
-+2     script ipl-one-gpc-subtitled.script gpc=5 crt=3 idp=3 kb=KB2
-+2     kybdsel right 2
 
-+2     subtitle Five computers loaded. All five talkbacks read RUN.\nNone of them is flying anything yet.
++2   subtitle Computers GPC1-GPC4 are synchronized,\nrunning identical Primary Flight Software\n(PFS), and forming a "redundant set".
++5   subtitle GPC5 is different.  It doesn't syncronize with\nGPC1-4, and instead runs the Backup Flight\nSoftware (BFS).  So the procedure differs.
++5   subtitle (We don't have a copy of BFS, so we're\njust going to load a different portion of\nPFS and pretend that it's BFS.)
+
++2   subtitle And now we load GPC5. Recall that GPC1-4 are redundant/synchronized.\nGPC2 won't be synchronized with the others, because it's for running BFS.\nWe'll watch that on CRT3, the display shared by the CDR and PLT.
++5   subtitle For loading GPC5, we'll use the shared center\ndisplay (CRT3).  There's no dedicated keyboard,\nbut we can borrow the PLT keyboard (KYBD2).
++5   subtitle In the middle right of the Panel, notice\nthe RIGHT IDP/CRT SEL switch.  We're\ngoing to flip it from CRT 2 to CRT 3.
++5   kybdsel right 3
++2   subtitle Notice that the yellow line at the bottom of CRT2\nmoves instead to the bottom of CRT3.  That\nline points to the keyboard used by the CRT.
++5   script ipl-one-gpc-subtitled.script gpc=5 crt=3 idp=3 kb=KB2
++2   subtitle CRT3 doesn't need a keyboard any more, so\nreturn the RIGHT IDP/CRT SEL switch to CRT 2.
++5   kybdsel right 2
+
++2   subtitle All five computers are now loaded and running\nOperational Sequence (OPS) 000, otherwise\nknown as the System Software (SSW).
++5   subtitle Now it gets harder.
 
 # --- take CRT3 out of both NBATs --------------------------------------------
-+5     subtitle Before asking for an OPS, tell the software which computer\nowns which bus. That table is the NBAT.
-+6     subtitle <right>The tape assigns CRT3 to GPC3 in BOTH configurations\nwe are about to use. We must take it back, twice.
-+6     subtitle <right>First for memory configuration 9.
-+3     keys ITEM 1 + 9 EXEC
-+5     keys ITEM 1 4 + 0 EXEC
++5   subtitle The Shuttle has a variety of dedicated "databuses"\nthat interconnect the computers and peripherals\nin lots of ways.  These need to be configured.
 
-+3     subtitle <right>Now memory configuration 1 -- ascent.\nFour computers, four flight-critical strings.
-+4     keys ITEM 1 + 1 EXEC
-+5     keys ITEM 2 + 1 EXEC
-+5     keys ITEM 3 + 2 EXEC
-+5     keys ITEM 4 + 3 EXEC
-+5     keys ITEM 5 + 4 EXEC
-+2     subtitle <right>GPC1 to string 1, GPC2 to 2, GPC3 to 3, GPC4 to 4.
-+4     keys ITEM 7 + 1 EXEC
-+5     keys ITEM 8 + 2 EXEC
-+5     keys ITEM 9 + 3 EXEC
-+5     keys ITEM 1 0 + 4 EXEC
-+5     keys ITEM 1 1 + 0 EXEC
-+2     subtitle <right>CRT1 to GPC1, CRT2 to GPC2, and CRT3 to nobody.
-+4     keys ITEM 1 2 + 1 EXEC
-+5     keys ITEM 1 3 + 2 EXEC
-+5     keys ITEM 1 4 + 0 EXEC
-+5     keys ITEM 1 8 + 1 EXEC
-+5     keys ITEM 1 9 + 2 EXEC
++5   subtitle The original documentation lists various databus\nconfigurations used in different flight phases.\nWe'll set up an Ascent/Entry configuration
++5   subtitle We'll use the CDR keyboard (KYBD1) and display (CRT1).
++5   subtitle As we go through the configuration\nsteps, changes can be seen in the\nupper left of display CRT1 (or CRT2).
++5   subtitle <left>Use keys ITEM 1 + 9 EXEC
++2   keys ITEM 1 + 9 EXEC
++1   subtitle <left>Use keys ITEM 1 4 + 0 EXEC
++2   keys ITEM 1 4 + 0 EXEC
++1   subtitle <left>Use keys ITEM 1 + 1 EXEC
++2   keys ITEM 1 + 1 EXEC
++1   subtitle <left>Use keys ITEM 2 + 1 EXEC
++2   keys ITEM 2 + 1 EXEC
++1   subtitle <left>Use keys ITEM 3 + 2 EXEC
++2   keys ITEM 3 + 2 EXEC
++1   subtitle <left>Use keys ITEM 4 + 3 EXEC
++2   keys ITEM 4 + 3 EXEC
++1   subtitle <left>Use keys ITEM 5 + 4 EXEC
++2   keys ITEM 5 + 4 EXEC
++1   subtitle <left>Use keys ITEM 4 + 1 EXEC
++2   keys ITEM 7 + 1 EXEC
++1   subtitle <left>Use keys ITEM 8 + 2 EXEC
++2   keys ITEM 8 + 2 EXEC
++1   subtitle <left>Use keys ITEM 9 + 3 EXEC
++2   keys ITEM 9 + 3 EXEC
++1   subtitle <left>Use keys ITEM 1 0 + 4 EXEC
++2   keys ITEM 1 0 + 4 EXEC
++1   subtitle <left>Use keys ITEM 1 1 + 0 EXEC
++2   keys ITEM 1 1 + 0 EXEC
++1   subtitle <left>Use keys ITEM 1 2 + 1 EXEC
++2   keys ITEM 1 2 + 1 EXEC
++1   subtitle <left>Use keys ITEM 1 3 + 2 EXEC
++2   keys ITEM 1 3 + 2 EXEC
++1   subtitle <left>Use keys ITEM 1 4 + 0 EXEC
++2   keys ITEM 1 4 + 0 EXEC
++1   subtitle <left>Use keys ITEM 1 8 + 1 EXEC
++2   keys ITEM 1 8 + 1 EXEC
++1   subtitle <left>Use keys ITEM 1 9 + 2 EXEC
++2   keys ITEM 1 9 + 2 EXEC
 
-+3     subtitle Move CRT3 off GNC, so the ascent software has no claim on it.
-+4     majfunc 3 pl
++3   subtitle Move CRT3 off of Major Function GNC, so\nthat the Ascent software won't claim it.\n(Look in the upper right of the Panel.)
++5   majfunc 3 pl
 
 # --- OPS 0 -> OPS 901 -> OPS 101 --------------------------------------------
-+4     subtitle Now the transition. Ascent cannot be commanded from a cold\nmachine -- the software will not allow it.
-+7     subtitle <left>So we go by way of OPS 9, as the countdown does.
-+4     keys OPS 9 0 1 PRO
-+4     subtitle Four computers are loading memory configuration 9 together.
++2   subtitle We want to put our Redundant Set (RS) of\nGPCs into Ascent mode (OPS 1).  But that\ncan't be done directly from OPS 000.
++5   subtitle First we have to go from OPS 0 to OPS 9, and then to OPS 1.
+
++5   subtitle <left>Use keys OPS 9 0 1 PRO
++2   keys OPS 9 0 1 PRO
++1   subtitle GPC1-4 are now loading Memory Configuration\n(MC) 9 together.  That's OPS 9.  (Look for the red\nACTIVITY indicator at the bottom of the PANEL.)
 
 # WAIT FOR THE MAJOR MODE, WHICH IS THE ONLY THING THAT CHANGES.  Both of
 # the obvious conditions are met INSTANTLY and are therefore no wait at all:
@@ -147,35 +195,37 @@ keygap 1
 # script allows, the ascent request went into a machine still loading G9 and
 # was lost, and the run sat at the LAUNCH TRAJ wait until it timed out with
 # CRT1 reading "9011/ / GPC MEMORY 1".
-wait crt 1 title "9011" timeout 600
+wait crt 1 title "9011" timeout 120
 
-+1     subtitle <left>And now ascent: OPS 101.
-+6     keys OPS 1 0 1 PRO
-+4     subtitle Watch CRT1 and CRT2. Four computers, one redundant set,\nloading the ascent software in lockstep.
++1   subtitle The RS is now in OPS 9, and specifically in menu\nOPS 901.  (Look in the upper left corner of CRT1\nor CRT2.)  But we need to go to menu OPS 101.
++5   subtitle <left>Use keys OPS 1 0 1 PRO
++2   keys OPS 1 0 1 PRO
++1   subtitle The entire Redundant Set (RS) is now loading\nOPS 1 in lockstep.  Observe CRT1, CRT2, and\nthe red ACTIVITY indicator at Panel bottom.
 
 # The ascent display announces itself by name, so wait for the name.
-wait crt 1 title "LAUNCH TRAJ" timeout 600
+wait crt 1 title LAUNCH TRAJ timeout 120
 
 # --- and finally, give CRT3 to GPC5 -----------------------------------------
-+2     subtitle LAUNCH TRAJ 1. The set is flying an ascent.
-+6     subtitle But look at CRT3 -- it is showing GPC MEMORY, driven by GPC1.\nNot by GPC5.
-+7     subtitle A display with no owner goes to the lowest-numbered computer\nin THAT major function, and in PL that is GPC1.
-+8     subtitle Which is why GPC1 is showing two different screens at once:\nascent on CRT1, memory on CRT3. One computer, two major functions.
-+9     subtitle <right>So we hand CRT3 to GPC5 explicitly.
-+5     kybdsel right 3
-+2     keys KB2 GPC/CRT 5 3 EXEC
-+4     kybdsel right 2
++0   subtitle We're now in OPS 1, as you can tell by the\n"1011" in the displays' upper left corners or\nby the menus' titles "LAUNCH TRAJ 1".
 
-# THE ASCENT IS UP: worth being called back for, if you stepped away during
-# the five IPLs.
 +0     audio /usr/share/sounds/freedesktop/stereo/complete.oga
-+3     subtitle There: CRT3 now reads 5.
-+4     subtitle Four computers flying an ascent as one machine,\nand a fifth alongside them, outside the set, on its own display.
-+8     subtitle That is the configuration the orbiter launched in --\nwith the Backup Flight System in the fifth seat.
-+8     subtitle
+
+#+5   subtitle But look at CRT3:  It's titled "GPC MEMORY" and\nis also driven by GPC1.  How can CRT1 and CRT3\nsimultaneously be driven differently by GPC1?
+#+5   subtitle Each GPC can simultaneously drive displays\in three different Major Functions (MF):  GNC,\nSM, and PL.  (Look at Panel upper right.)
+#+5   subtitle So ... mystery solved!  Nevertheless, we do want\nCRT3 to be driven by GPC5 rather than GPC1.\nFirst, give CRT3 the PLT keyboard again.
+#+5   kybdsel right 3
+#+2   subtitle <right>Use the keys GPC/CRT 5 3 EXEC
+#+2   keys KB2 GPC/CRT 5 3 EXEC
+#+1   subtitle Give the PLT keyboard back to the PLT display.
+#+2   kybdsel right 2
+
++3   subtitle Hopefully you'll now see that CRT1 is driven by GPC1, CRT2 is driven by GPC2,\nand CRT3 is driven by GPC5.  How can you tell?  Look at the clock at the top right\nof the display.  The number just to the left of the clock is the GPC driving the CRT.
++5   subtitle In summary, four computers flying an Ascent as one computer,\nand a fifth along-side them, outside the set, on its own display.
++5   subtitle Our little demo is now concluded.
++5   subtitle
 
 # AND IT IS OVER.  A script that ends in silence ends while the person
 # recording it is looking somewhere else.  Any file will do; this one is a
 # sound the desktop already ships, and the name is checked when the script
 # is checked.
-+2     audio /usr/share/sounds/freedesktop/stereo/complete.oga
++0     audio /usr/share/sounds/freedesktop/stereo/complete.oga

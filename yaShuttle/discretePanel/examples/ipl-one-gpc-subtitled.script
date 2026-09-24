@@ -22,35 +22,42 @@
 # A caption budget must never become a guessed delay: every caption here sits
 # between actions that are themselves gated on a wait.
 
-+0     subtitle Now GPC $gpc.\nSelect it with the GPC SELECT switch, upper left on panel O6.
-+2     gpc $gpc
-+1     subtitle Point it at mass memory 1: IPL SOURCE to MM1.
-+2     source MM1
-+1     subtitle Lend CRT $crt to the computer being loaded.
-+2     crt $crt
-+1     subtitle Flip the spring-loaded IDP $idp LOAD toggle.\nThe display unit asks the GPC for its format.
-+1.5   idpload $idp
-+1     subtitle Press IPL for GPC $gpc.\nWatch the ACTIVITY light for MM1.
-+1.5   ipl
-+1     subtitle And move GPC $gpc from HALT to STBY, which starts it.
-+2     mode STANDBY
-+1     subtitle The bootstrap loader is running. This takes a while --\nthe GPC is reading itself in from tape.
++0   subtitle Let's do the Initial Program Load (IPL) for GPC $gpc.
++3   gpc $gpc
++1   subtitle Point at Mass Memory Unit 1 (MMU1).  (Look at\nthe IPL SOURCE SWITCH in the middle of the Panel.)
++5   source MM1
++1   subtitle Lend CRT $crt to the computer being loaded.  (Look at\nthe BFC CRT switches at Panel's top center.)
++5   crt $crt
++1   subtitle Momentarily flip the spring-loaded IDP $crt toggle.\n(Look at the middle right side of the Panel.)
++5   idpload $idp
++1   subtitle Press the IPL button for GPC $gpc.  (Look at the\nINITIAL PROGRAM LOAD row in Panel mid-left.)\nWatch for red ACTIVITY lamp at Panel bottom.
++5   ipl
++1   subtitle Move GPC $gpc from HALT to STBY to let it run.\n(Look along the bottom left of the Panel.)
++4   mode STANDBY
++1   subtitle The bootstrap loader is now loading the\nsecond-stage loader.  Watch the red\nACTIVITY lamp MM1 at Panel bottom.
 
 # WAIT FOR THE PAGE TO CHANGE HANDS BEFORE BELIEVING WHAT IT SAYS.  A state
 # test alone is met by the PREVIOUS computer's menu; see ipl-one-gpc.script.
-wait crt $crt new-screen timeout 300
-wait crt $crt title GPCIPL timeout 300
+wait crt $crt new-screen timeout 120
+wait crt $crt title GPCIPL timeout 120
 
-+0     subtitle There it is: the GPCIPL MENU, served by GPC $gpc itself.
-+3     subtitle <left>Ask for memory configuration 1 with ITEM 1 EXEC.
-+2     keys $kb ITEM 1 EXEC
-+1     subtitle Loading. The GPC is pulling its operating system off the tape.
++0   subtitle There it is: the GPCIPL MENU, served by GPC $gpc itself.
++4   subtitle Next we ask for Memory Configuration 1 (MC 1) to\nbe loaded.  Use keys ITEM 1 EXEC on keyboard $kb.
++5   keys $kb ITEM 1 EXEC
++1   subtitle Loading ... The GPC is pulling its operating system off the tape.
 
 # loaded: to RUN, and the IPL source back off
-wait gpc $gpc mode-tb RUN timeout 900
+wait gpc $gpc mode-tb RUN timeout 120
 
-+0     subtitle Loaded. The MODE talkback for GPC $gpc now reads RUN.
-+2     subtitle Give the CRT back, take the GPC to RUN, and switch the tape off.
-+1     crt 0
-+2     mode RUN
-+2     source OFF
++0   subtitle Loaded. The MODE talkback for GPC $gpc now reads RUN.\n(Look at the row of indicators just above the\ncaption "MODE", Panel's lower-middle left.)
++5   subtitle Release the BFC CRT.  (Look at\nthe top center of the Panel.)
++2   crt 0
++1   subtitle Flip the computer from STBY mode to RUN mode.\n(Look along the bottom left of the Panel.)
++5   mode RUN
++1   subtitle Turn off the IPL SOURCE.  (Look at\nthe very middle of the Panel.)
++5   source OFF
++1   subtitle Assign the CRT to the proper GPC.
++3   subtitle <left>Use keys GPC/CRT $gpc $crt EXEC
++5   keys GPC/CRT $gpc $crt EXEC
++1   subtitle Success! GPC $gpc is running.
++3   subtitle
