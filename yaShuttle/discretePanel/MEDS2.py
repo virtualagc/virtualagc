@@ -12135,8 +12135,19 @@ class MedsRunner(object):
         for idp in self._idps():
             # ON THE PUMP THREAD: both the state and the memory are read
             # there, together, so a save cannot catch a fill half-applied.
+            # BIG ENDIAN ON THE WAY OUT, not the host's order.  numpy's
+            # own tobytes() writes whatever this machine uses, which made
+            # this the ONE file in a snapshot whose meaning depended on the
+            # machine that wrote it -- everything else, the GPC's memory and
+            # its store-protect bitmap included, is assembled byte by byte
+            # big-endian, as is this program's own wordsFromBytes.  It
+            # round-tripped only because every platform we run on happens to
+            # be little-endian.  Snapshots are starting to travel, so it is
+            # fixed while few of them exist; `memFormat` below is what lets
+            # the ones already taken still be read.
             state, mem = BusPump.get().callAndWait(lambda idp=idp: (
-                idp.snapshotState(), bytes(idp.unit.mem.tobytes())))
+                idp.snapshotState(), idp.unit.mem.astype('>u2').tobytes()))
+            state['memFormat'] = 'be16'
             jname, mname = crewscript.idp_snapshot_files(idp.snapshotNumber())
             try:
                 with open(os.path.join(where, mname), "wb") as fh:
@@ -12169,7 +12180,13 @@ class MedsRunner(object):
             try:
                 with open(jpath) as fh:
                     state = _json.load(fh)
-                mem = np.frombuffer(open(mpath, "rb").read(), dtype=np.uint16)
+                # A SNAPSHOT WITHOUT THE MARKER IS AN OLD ONE, written in
+                # this host's own byte order.  Reading it as big endian
+                # would byte-swap every word of the display and show
+                # nothing recognisable, so the absence is the version.
+                raw = open(mpath, "rb").read()
+                dt = '>u2' if state.get('memFormat') == 'be16' else np.uint16
+                mem = np.frombuffer(raw, dtype=dt).astype(np.uint16)
             except (OSError, ValueError) as e:
                 sys.stderr.write("meds: cannot read IDP%s state: %s\n"
                                  % (idp.id, e))

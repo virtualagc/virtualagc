@@ -28,7 +28,15 @@ endif
 INTEGRATION_DIR := ../yaGpcIntegration
 
 CSTD    := -std=c11
-WARN    := -Wall -Wextra
+# -Werror=format, not merely -Wall: a snapshot is a FILE FORMAT, and the one
+# way a compiler's integer widths can still reach one is a printf conversion
+# that does not match its argument -- "%08x" given a long, say.  Everything a
+# snapshot contains is written either as a fixed-width hex string or as bytes
+# assembled from uint32_t, so the widths themselves are already explicit; this
+# is what keeps them that way when someone adds a field years from now, on a
+# compiler whose `int` is a different size.  A warning nobody reads is not a
+# guarantee.
+WARN    := -Wall -Wextra -Werror=format
 OPT     := -O2 -g
 CFLAGS  ?= $(CSTD) $(WARN) $(OPT) -I$(INTEGRATION_DIR)
 LDFLAGS ?=
