@@ -497,6 +497,32 @@ The root cause is unchanged.  What is gone is any demonstration that answering
 the traffic repairs it, and the lesson is the one this ledger keeps relearning:
 CHECK THAT THE TWO RUNS BEING COMPARED ARE IN THE SAME CONFIGURATION before
 believing a difference between them.
+  A SECOND ATTEMPT, AT THE RECEIVE LEVEL, AND WHY IT ALSO FAILS.  The
+bus-level answer had to GUESS a length from the command's count field, and any
+mismatch with what the BCE actually armed left residue that shifted every later
+transfer.  The receive path does not have to guess: at the time-out in
+iop_bce_receive, bce->recvLeft is exactly what this transfer still wants.  So
+the second attempt let a receive on BCE 14-17 or 20-23 COMPLETE there instead
+of error-terminating, writing NOTHING -- no fabricated data at all, the buffer
+simply keeps what the flight software last had.  Measured on the two-computer
+fixture, it clears every bar the zero-fill failed: the vehicle REACHES OPS 201
+(CRT2 reads '2011/ / UNIV PTG 2', 28 distinct device/function pairs on the FC
+buses after t=280 against the control's 24 and the zero-fill's 6), the six MTU
+slots are never bypassed, and there is no unprogrammed-store execution.
+  AND THE REDUNDANT SET STILL BREAKS, both computers voting each other out at
+t=249.3, about eight seconds after the transition.  The reason is the
+completion itself: a transfer that completes with stale buffer contents lets
+the two computers' data DIVERGE, because their buffers have different
+histories, so they compute differently and fail each other.  Zeros do not
+diverge -- they are identical on both machines -- which is why the zero-fill
+kept the set and lost the transition instead.  That is the shape of the whole
+problem: every fabrication available at the I/O layer is either
+identical-and-wrong or plausible-and-divergent, and PASS notices either way.
+  BOTH ATTEMPTS ARE REVERTED, and the reason not to keep either behind a flag
+is forward-looking: a blanket 'if nothing answered, call it complete' rule sits
+UNDERNEATH any future FF/FA MDM model and masks exactly the failures that model
+would need to show, so a half-written MDM would read as healthy instead of
+timing out.  The fix has to be the devices themselves.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed
