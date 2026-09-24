@@ -1540,11 +1540,26 @@ class DEU(object):
 
     @staticmethod
     def biteResponse(o=None):
+        """The five halfwords a BITE STATUS request is answered with.
+
+        THE FIRST ONE IS THE MESSAGE HEADER, not the first BITE word, and
+        that is the whole of ledger #208.  The flight software lays the
+        reply down as `CZ1B_D_DEU_MSG_HDR` followed by `CZ1B_D_BITE_STAT`
+        ARRAY(4) -- CZ1COM.hal's CZ1B_D_BITE structure, 044600 and 044700 --
+        so a reply that begins with BITE word 1 puts every word one slot
+        early.  AIG_DEU_LOADER then reads CZ1B_D_BITE_STAT(1), tests its
+        bits 2 to 4 for `IPL performed, no IPL error, no IPL circuit error`
+        (AIGDEU.hal 008500), finds the zero that belongs in the next slot
+        instead, and abandons the load without a word of complaint.  That is
+        why a display that asked to be loaded was never loaded: measured,
+        124 BITE requests in one run, not one of them followed by a mass
+        memory read."""
         o = o or {}
-        words = [(o['bite1'] if o.get('bite1') is not None else DEU.BITE1_HEALTHY) & 0xffff,
+        words = [(o.get('header') or 0) & 0xffff,
+                 (o['bite1'] if o.get('bite1') is not None else DEU.BITE1_HEALTHY) & 0xffff,
                  (o.get('bite2') or 0) & 0xffff,
                  (o['swStatus'] if o.get('swStatus') is not None else DEU.SWSTATUS_HEALTHY) & 0xffff,
-                 (o.get('software') or 0) & 0xffff, 0]
+                 0]
         words[4] = DEU.checksum(words[0:4])
         return words
 
@@ -1944,7 +1959,20 @@ class DEUUnit(object):
                 self._reply(self.pollResponse())
         elif f == DEU.FUNC.BITE:
             self.stats['bite'] += 1
-            self._reply(DEU.biteResponse(self.biteState()))
+            # header(), not takeHeader(): a BITE is a status enquiry and must
+            # not consume the MSG RESET / ACK the next poll has to report.
+            st = dict(self.biteState() or {})
+            st.setdefault('header', self.header())
+            self._reply(DEU.biteResponse(st))
+            # NSTS_BITE_TRACE: the five halfwords as sent.  A BITE is
+            # answered hundreds of times a run and logged nowhere, so when
+            # the loader refused to load there was no way to see what it had
+            # been told -- which is how the header and the IPL PERFORMED bit
+            # went unnoticed for so long.
+            if os.environ.get('NSTS_BITE_TRACE'):
+                self.log('%s: BITE -> %s (ipled=%s)'
+                         % (self.name, " ".join("%04x" % w
+                            for w in DEU.biteResponse(st)), self.ipled))
         elif f == DEU.FUNC.RESET_SPL:
             self.stats['resets'] += 1
             del self.keyQueue[:]
@@ -2035,13 +2063,35 @@ class DEUUnit(object):
 
     # -- what the GPC polls out of the unit --------------------------------
     def biteState(self):
+        """Hardware register 1, as a BITE STATUS request returns it.
+
+        IPL PERFORMED IS THE UNIT'S OWN INITIALIZATION, NOT THE SOFTWARE
+        LOAD, and that distinction is the rest of ledger #208.  This used to
+        set the bit only when a load module was present -- but the only
+        thing in the flight software that reads it, AIG_DEU_LOADER, reads it
+        on a unit that has just ASKED to be loaded, and refuses to load
+        unless it is set (AIGDEU.hal 008500, "IF HARDWARE REG1, BIT1, (IPL
+        PERFORMED) = 1 AND ... BIT2 (IPL ERROR) = 0 AND ... BIT3 (IPL
+        CIRCUIT ERROR) = 0 THEN CONTINUE LOAD OF DEU").  Tying it to the
+        load would make that test unsatisfiable exactly when it is asked,
+        and the loader dead code on a working orbiter.
+
+        What the bit reports is that the unit has finished initializing
+        ITSELF and can take a load -- which is the state a DEU enters the
+        moment it detects an IPL request.  DPS Console Handbook: "When the
+        DEU detects a DEU IPL request, the DEU initializes itself for a DEU
+        load -- ignoring all interrupts during this brief time interval."
+        So it is set for any unit that is not reporting a fault; the two
+        error bits carry the failures.  Measured before: 124 BITE requests
+        in one run, every one answered with this bit clear, and every one
+        followed by the loader giving up."""
         b1 = DEU.BITE1.ALWAYS_ONE
-        if self.ipled:
-            b1 |= DEU.BITE1.IPL_DONE
         if self.iplError:
             b1 |= DEU.BITE1.IPL_ERROR
         if self.iplCircuitError:
             b1 |= DEU.BITE1.IPL_CIRCUIT_ERROR
+        if not (self.iplError or self.iplCircuitError):
+            b1 |= DEU.BITE1.IPL_DONE
         return {'bite1': b1, 'swStatus': self.swStatus}
 
     def _logMedsXfer(self, words):
