@@ -498,6 +498,21 @@ void mia_xmit_cmd(struct IOP *iop, MIA *m, uint32_t cmd24) {
     /* IUA occupies bits 19-23 of the 24-bit command word (see
      * exec_CMDI/exec_CMD in iop_bce_instr.c, which build it as
      * (IUA << 19) | rest). */
+    /* The last command put on each bus, so that a receive which nobody
+     * answers can be attributed to the device and function that asked for
+     * it -- see YAGPC_FC_LEARN at the receive time-out. */
+    if (m->bceNum >= 0 && m->bceNum < 32) iop->lastBusCmd[m->bceNum] = cmd24;
+    /* THE COMMAND THIS RECEIVE IS WAITING FOR is the FIRST one to follow the
+     * arming, not the last one on the bus before the time-out two
+     * milliseconds later: the #MIN arms and the #MINC that asks then goes
+     * out, and more commands may follow before the wait expires.  Recording
+     * it here, once per receive, is what makes the learned table trustworthy
+     * -- attributing at the time-out gave the MTU's own func 126 three
+     * different lengths. */
+    if (m->bceNum >= 1 && m->bceNum <= 24) {
+        BCE *rb = &iop->bce[m->bceNum - 1];
+        if (rb->recvActive && rb->recvCmd == 0u) rb->recvCmd = cmd24;
+    }
     GpcServiceInput input = {.busID = m->bceNum, .address = (int)((cmd24 >> 19) & 0x1fu), .in.word = cmd24};
     GpcServiceOutput output = {0};
     iop->servicer(iop->servicerCtx, GPC_SVC_XMIT_CMD, &input, &output);
@@ -1995,6 +2010,7 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                             ((iop->busMarksSync >> bce->bceNum) & 1u);
         bce->recvSkippedEcho = false;
         bce->recvErrored = false;
+        bce->recvCmd = 0u;
         if (yagpc_getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
             now >= timeout_trace_from_us()) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);
@@ -2059,6 +2075,22 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                     now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
                     (now - bce->recvSinceUs) / 1000.0,
                     iop_recv_timeout_us(iop, p) / 1000.0);
+        /* YAGPC_FC_LEARN: what a device that never answered was ASKED for.
+         * The reply length is not in the command -- FIOMTURD's count field
+         * is 38 and the BCE arms seven -- it is in the bus program's own
+         * #MIN/#RDLI, which is what recvCount holds.  Printing the pair here
+         * is exact, where correlating two logs by time is not: the #MIN
+         * precedes the #MINC, so the command before an arm is the LISTEN
+         * command and not the one being answered.  This is how the table a
+         * device model needs gets built. */
+        if (!bce->recvGotAny && p >= 0 && p < 32 &&
+            yagpc_getenv("YAGPC_FC_LEARN")) {
+            uint32_t c = bce->recvCmd ? bce->recvCmd : iop->lastBusCmd[p];
+            fprintf(stderr, "FCLEN bce=%d iua=%u func=%03x words=%u t=%.1f\n",
+                    p, (unsigned)((c >> 19) & 0x1fu),
+                    (unsigned)((c >> 9) & 0x3ffu),
+                    (unsigned)bce->recvCount, now);
+        }
         /* WHICH TIMEOUT IT WAS.  Table 1.2 separates them: Initial Time Out
          * is the first input word never arriving, Time Out is a later one,
          * and recvGotAny is exactly that distinction. */

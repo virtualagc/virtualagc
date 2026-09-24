@@ -552,6 +552,44 @@ being bypassed while the other units are silent.  A fix is therefore several
 device models, each with its own function-to-length table and its own decision
 about what the data should be -- work to be scoped deliberately, not a defect
 repair.
+  A PARTIAL REPAIR THAT IS REAL, AND THE LINE IT STOPS AT.  YAGPC_FC_LEARN
+(src/iop.c) names every receive on a flight-critical bus that nothing answers,
+attributing it to the command the receive was WAITING for -- the first command
+after the arming, recorded in bce->recvCmd, because the #MIN precedes the
+#MINC and the command before an arm is the listen command.  Run over a whole
+two-computer OPS 201 vehicle it gives about 437 unanswered transfers on those
+buses, and they are not spread evenly: func 132 ninety-three times, func 138
+ninety-three times, and 186 listener halves waiting for a command that never
+came, against single digits for everything else.  FIONSPPG names them --
+'#MIN 0,0 / #MINC FIOFFIUA,FIONSP2P  READ NSP2 POWER DISCRETE' -- so the
+dominant I/O failure in the whole vehicle is two ONE-WORD NSP POWER DISCRETE
+READS, and FCMRTBLE groups NSP with MTU, which is how the timing unit goes
+down with them.
+  So the forward MDM now answers them: FIONSP1P (132), FIONSP2P (138),
+FIONSPDR (128) with one word and FIONSPRD (136) with 32, all zero, meaning THE
+NSP IS NOT POWERED -- which is true of this vehicle, is a statement about the
+interface rather than about any sensor, and is the same word on every computer
+because it goes through the one shared model and its per-reader cursors.
+Measured: unanswered transfers on those buses fall from about 437 to 66, the
+vehicle reaches OPS 201 with exactly the control's 24 device/function pairs on
+those buses, nothing executes unprogrammed store, and THERE ARE NO SYNC VOTES.
+  IT IS NOT YET ENOUGH.  Sixty-six is still far over FIOERRLC's threshold of
+two, so the strings are still commfaulted and the six MTU slots are still
+overlaid -- the reads still stop, now at t=242.9 instead of t=242.4.  What
+remains is the MDMs' own traffic at IUA 10 and 12: a return word (func 18a)
+and channel reads (func 041, 21 words at IUA 10 and 34 at IUA 12; func 042, 4
+and 6), plus the IMU behind the same unit, which is func 126 with a count of
+14 -- FIOIMUC1 X'00024C0D' -- and is correctly distinguished from the timing
+unit's own X'00024C26' by the full command field.
+  AND THE LINE IS MEASURED, NOT ASSUMED.  Both further steps were tried and
+both cost the redundant set both computers, where the NSP answers cost it
+nothing: the NSP discretes alone give ZERO votes, adding the return word gives
+two, adding the channel reads as well gives two.  The boundary is between what
+the INTERFACE says and what the SENSORS say.  A device model may truthfully
+report an unpowered box; it may not invent channel data, because the flight
+software acts on it and two computers then disagree.  That is the constraint
+any fuller MDM model has to satisfy, and it is why the rest of this is real
+device work and not a patch.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed

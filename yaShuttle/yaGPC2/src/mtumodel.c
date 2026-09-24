@@ -66,6 +66,79 @@
  * The extra word goes on the END, after GMT (0,1,2) and MET (3,4,5). */
 #define MTU_WORDS 7
 
+/* THE FORWARD MDM ANSWERS FOR THE NETWORK SIGNAL PROCESSOR, WHICH THIS
+ * VEHICLE DOES NOT HAVE.
+ *
+ * IUA 10 is not the timing unit's own address: BCEEQU.asm has FIOFFIUA EQU
+ * 10, "FF INTERFACE UNIT ADDRESS", and the timing unit is read THROUGH the
+ * forward MDM -- "#MINC FIOFFIUA,FIOMTURD".  So this file has always been a
+ * partial model of that MDM, answering one of its commands.  These are three
+ * more of them, and they are the ones whose silence costs the timing unit.
+ *
+ * FIONSPPG reads the NSP through the same MDM: "#MIN 0,0 / #MINC
+ * FIOFFIUA,FIONSP2P  READ NSP2 POWER DISCRETE", and the same for NSP1 and for
+ * the two-stage 'A' discrete.  Measured with YAGPC_FC_LEARN over a whole
+ * two-computer run to OPS 201, those single-word discrete reads are almost
+ * the entire I/O failure on the flight-critical buses: func 132 ninety-three
+ * times, func 138 ninety-three times, and 186 listener halves waiting for a
+ * command that never came, against single digits for everything else.
+ * FCMRTBLE is titled "NSP AND MTU RESTORE TABLES" and groups the two, so when
+ * the NSP's errors cross FIOERRLC's threshold the timing unit is bypassed
+ * with it -- which is why MTU ACCUM 1-3 freeze on SPEC 2 PRO.
+ *
+ * WHAT IS REPORTED IS TRUE: zero, the NSP is not powered.  That is not
+ * invented telemetry and not a protocol lie.  The MDM is present -- it must
+ * be, or the timing unit could not be read through it -- and it is saying
+ * that the box behind it is off, which is a state the flight software is
+ * built to handle.  A transfer that never completes is not: that is a dead
+ * MDM, and FCOS responds by commfaulting the string.
+ *
+ * The lengths are the ones the BUS PROGRAM arms, not the count field of the
+ * command: FIOMTURD's count field is 38 and its #MIN arms seven. */
+#define FF_NSP1_PWR   0x132u    /* FIONSP1P, #MIN 0,0  -- one word  */
+#define FF_NSP2_PWR   0x138u    /* FIONSP2P, #MIN 0,0  -- one word  */
+#define FF_NSP_DISCR  0x128u    /* FIONSPDR, #MIN 1,0  -- one word  */
+#define FF_NSP_DATA   0x136u    /* FIONSPRD, #MIN 0,31 -- 32 words  */
+#define FF_REPLY_MAX  34
+
+/* AND THE MDM'S OWN READS.  With the NSP answered, YAGPC_FC_LEARN's list of
+ * unanswered transfers on the flight-critical buses fell from about 437 in a
+ * run to 66, and what remained was the MDMs themselves at IUA 10 and 12: a
+ * return word (func 18a, one word) and two channel reads (func 041 and 042),
+ * eight of each.  Sixty-six is still well over FIOERRLC's threshold of two,
+ * so the strings were still commfaulted and the timing unit still went with
+ * them.
+ *
+ * The return word is protocol, and answering it is the same kind of statement
+ * as the NSP discrete.  The channel reads are data, and zero is what an MDM
+ * with nothing wired to its channels reads -- which is this vehicle.  The
+ * lengths differ by unit, so the table is keyed by BOTH: func 041 is 21 words
+ * at IUA 10 and 34 at IUA 12, func 042 is 4 and 6.  They come from the bus
+ * programs' own #MIN, harvested rather than guessed. */
+
+/* How many words the forward MDM answers this command with, or 0 if this
+ * model does not know the command. */
+static int ff_nsp_words(uint32_t cmd) {
+    switch ((cmd >> 9) & 0x3ffu) {
+    case FF_NSP1_PWR:  case FF_NSP2_PWR:  case FF_NSP_DISCR: return 1;
+    case FF_NSP_DATA:  return 32;
+    /* AND NO FURTHER.  Two more steps were tried and are NOT included,
+     * because each cost the redundant set both computers where these four
+     * cost it nothing: the MDM's return word (func 18a), and its channel
+     * reads (func 041 and 042) answered with zeros.  Measured, same fixture,
+     * same script: these four alone give no votes at all; adding the return
+     * word gives two; adding the channel reads as well gives two.
+     *
+     * The line is between what the INTERFACE says and what the SENSORS say.
+     * "The NSP is not powered" is true of this vehicle, is a statement about
+     * the interface, and is the same word on every computer.  "Every channel
+     * of this MDM reads zero" is a claim about the vehicle's sensors, and the
+     * flight software acts on it -- which is how it ends up disagreeing with
+     * itself across a redundant set. */
+    default:           return 0;
+    }
+}
+
 /* EVERY COMPUTER ON A BUS HEARS THE REPLY; NONE OF THEM USES IT UP.
  *
  * In a redundant set every member issues the same read: the one whose MIA
@@ -88,13 +161,13 @@ struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
     const double *offsetUs;      /* see mtumodel_set_clock_offset */
-    uint16_t reply[MTU_NBUS][MTU_WORDS];
+    uint16_t reply[MTU_NBUS][FF_REPLY_MAX];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
     int commander[MTU_NBUS];
     int lastBus;                 /* the bus last filled, for the report */
-    long commands, reads, wordsOut, listenerWords;
+    long commands, reads, wordsOut, listenerWords, nspReads;
 };
 
 struct MtuModel *mtumodel_create(void) {
@@ -276,8 +349,22 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * other device, which then timed out with seven taken -- and with
              * a cursor per computer, not necessarily the same seven for each
              * (ledger #137). */
-            for (int r = 0; r < MTU_READERS; r++)
-                m->count[b][r] = 0;
+            unsigned cu = CMD_IUA(cmd);
+            int nsp = (cu == MTU_IUA || cu == 12u) ? ff_nsp_words(cmd) : 0;
+            if (nsp > 0) {
+                /* The NSP is not powered: zero, the same word to every
+                 * computer on the bus, through the same per-reader path the
+                 * timing unit's own reply uses. */
+                memset(m->reply[b], 0, sizeof m->reply[b]);
+                for (int r = 0; r < MTU_READERS; r++) {
+                    m->head[b][r] = 0;
+                    m->count[b][r] = nsp;
+                }
+                m->nspReads++;
+            } else {
+                for (int r = 0; r < MTU_READERS; r++)
+                    m->count[b][r] = 0;
+            }
         } else {
             mtu_fill_time(m, b);
         }
@@ -334,6 +421,9 @@ void mtumodel_report(struct MtuModel *m) {
             m->commands, m->reads, m->wordsOut,
             m->reply[m->lastBus][0], m->reply[m->lastBus][1],
             m->reply[m->lastBus][2]);
+    if (m->nspReads > 0)
+        fprintf(stderr, "mtu: %ld NSP read(s) answered by the forward MDM "
+                        "(the NSP is not powered in this vehicle)\n", m->nspReads);
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);

@@ -192,6 +192,8 @@ typedef struct {
     bool recvActive;
     uint32_t recvPC;
     uint32_t recvAddr;
+    /* The command this receive is waiting for; see YAGPC_FC_LEARN. */
+    uint32_t recvCmd;
     uint32_t recvLeft;
     double recvSinceUs;
     bool recvGotAny;
@@ -295,6 +297,8 @@ typedef struct IOP {
      * port originally held the register inverted, which reversed the
      * status the flight software reads back. */
     Register regProgExcept, regBusyWait, regHalt, regIndicator;
+    /* The last command word put on each bus, for YAGPC_FC_LEARN. */
+    uint32_t lastBusCmd[32];
     Register regDiscreteOut, regDiscreteInA, regDiscreteInB, regRMStatus;
 
     /* Redundancy management (POO Appendix I, READ RM STATUS REGISTER).
