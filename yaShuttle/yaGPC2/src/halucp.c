@@ -1,4 +1,4 @@
-/* localtime_r (POSIX, not C11) -- DATE()/CLOCKTIME() need the reentrant
+/* gmtime_r (POSIX, not C11) -- DATE()/CLOCKTIME() need the reentrant
  * form since this codebase has no other feature-test macro already
  * pulling it in (unlike ageharness.c's plain time(), which is C89). */
 #define _POSIX_C_SOURCE 200809L
@@ -369,7 +369,9 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
      * instead derived from cpu->dateTimeAnchorEpochSec (a wall-clock
      * anchor -- see cpu.h's own comment, and opts.h's --date-time-epoch
      * override) plus cpu->elapsedTimeUs progressing virtual time forward
-     * from that anchor, decomposed via localtime() at query time.
+     * from that anchor, decomposed via gmtime() at query time -- GMT, not
+     * the host's local time, which is what the ICD's own wording above says
+     * and what the vehicle's clock is (see mtumodel.c's mtu_fill_time).
      *
      * DATE -- USA003090 8.2 item 17: "returns today's date as YYDDD"
      * (year*1000+day-of-year, DDD 1-indexed) as an INTEGER. USA003087's
@@ -396,7 +398,7 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
      * exhaustively for a documented sub-second unit (centiseconds,
      * hundredths, etc.) and found none -- the only implementation choice
      * consistent with "double precision scalar" and CLOCKTIME's own name
-     * is seconds since local midnight, matching RUNTIME's own "scalar,
+     * is seconds since midnight GMT, matching RUNTIME's own "scalar,
      * in seconds" convention and delivered the same way, in FP0-FP1. */
     uint32_t svcLow22 = svcCode & 0xff;
     uint32_t dateTimeType = (svcCode >> 8) & 0xff;
@@ -411,7 +413,7 @@ bool halucp_handle_svc(void *halUCPvp, uint32_t ea, uint32_t r1) {
         time_t nowWhole = (time_t)nowEpoch;
         double frac = nowEpoch - (double)nowWhole;
         struct tm tmVal;
-        localtime_r(&nowWhole, &tmVal);
+        gmtime_r(&nowWhole, &tmVal);
         if (dateTimeType == 1) {
             double secsSinceMidnight = tmVal.tm_hour * 3600.0 + tmVal.tm_min * 60.0 + tmVal.tm_sec + frac;
             FloatIBM ct = fibm_from_float(secsSinceMidnight);

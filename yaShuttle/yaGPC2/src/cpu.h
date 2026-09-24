@@ -204,8 +204,9 @@ typedef struct CPU {
      * value (seconds since 1970-01-01 UTC). yaGPC2 has no real mission-
      * epoch the way real FCOS would (an actual launch GMT); DATE()/
      * CLOCKTIME() report dateTimeAnchorEpochSec + elapsedTimeUs/1e6,
-     * decomposed via localtime() (the process's own configured
-     * timezone) at query time -- this field itself never changes after
+     * decomposed via gmtime() at query time -- GMT, because that is
+     * what the vehicle's clock is and an orbiter has no time zone --
+     * this field itself never changes after
      * being set once. Defaults to the Unix epoch itself (0) here, a
      * fixed and deterministic value matching fcosMode's own "safe
      * default for direct/embedded/test use" precedent -- the CLI's own

@@ -140,8 +140,15 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         /* THE TIME OF DAY, not seconds since start-up.  The unit is a clock:
          * PASS initialises GMT from it (FPMMTURM) and shows it on every
          * display's top line.  Reporting elapsed time made every session
-         * begin on day 0 at whatever hour the run had reached.  Local time,
-         * day of year counted from 001, as --date-time-epoch documents. */
+         * begin on day 0 at whatever hour the run had reached.
+         *
+         * AND IT IS GMT, NOT THE HOST'S LOCAL TIME.  The name in the flight
+         * software is not decoration: the crew reads this as GMT and sets it
+         * as GMT from SPEC 2 PRO, and nothing aboard an orbiter has a time
+         * zone.  Local time put the vehicle's clock hours out, and could put
+         * it on the wrong day of the year outright, since the day number
+         * comes out of the same decomposition.  Day of year counted from
+         * 001, as --date-time-epoch documents. */
         /* Plus the time the computer spent not running -- held in HALT
          * while the crew set up the IPL, most of all.  Without it PASS's
          * GMT ran behind the real time of day by exactly that long. */
@@ -149,7 +156,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
                    (us + (m->offsetUs != NULL ? *m->offsetUs : 0.0)) / 1e6;
         time_t whole = (time_t)floor(t);
         struct tm lt;
-        localtime_r(&whole, &lt);
+        gmtime_r(&whole, &lt);
         ms = (unsigned)((t - (double)whole) * 1000.0) % 1000u;
         sec = (unsigned)lt.tm_sec % 60u;     /* a leap second reads as :59 */
         min = (unsigned)lt.tm_min;
