@@ -1324,6 +1324,10 @@ class DEU(object):
     FUNC_NAME = {}
 
     # How many halfwords the GPC reads back
+    # The header clock is seven halfwords, and that length is what tells it
+    # apart from a memory fill arriving on the same function code -- see
+    # onData.
+    TIME_FILL_WORDS = 7
     POLL_WORDS = 16          # header, key count, 10 keys, 3 BITE, checksum
     BITE_WORDS = 5
     # The same poll command serves two bus programs: the normal poll reads
@@ -1878,6 +1882,7 @@ class DEUUnit(object):
         self.xfer = None
         self.ipled = False
         self.iplRunning = False
+        self.formatsLoaded = False
         self.deuId = None
         self.mem[:] = 0
 
@@ -2001,7 +2006,20 @@ class DEUUnit(object):
         if x['func'] == DEU.FUNC.DUMP:
             return self._dumpRequest(x['words'])
         if x['func'] == DEU.FUNC.TIME_FILL:
-            return self._timeFill(x['words'])
+            # FUNCTION 380 CARRIES TWO DIFFERENT THINGS, and they are told
+            # apart by LENGTH.  Seven halfwords is the header clock.  Anything
+            # else is a memory fill -- a word count, a destination and a
+            # payload, exactly like 38c -- and that is how PASS's own display
+            # loader writes a unit: AIG_DEU_LOADER sends eight of them, of
+            # AIGV_FILL_LENGTH+2 halfwords each, which is 510 five times, then
+            # 202, 3 and 252 (AIGDEU.hal 011900).  Every one of them used to
+            # be handed to _timeFill and stored as a clock, so the unit's
+            # memory was never written, it never reported itself loaded, and
+            # the loader tried again for ever: measured, 64 complete passes of
+            # all eight fills in one run with not one halfword reaching the
+            # unit.  That is the last link of ledger #208.
+            if len(x['words']) == DEU.TIME_FILL_WORDS:
+                return self._timeFill(x['words'])
         return self._fill(x['words'], x['func'])
 
     def _timeFill(self, words):
@@ -2033,6 +2051,8 @@ class DEUUnit(object):
         if not self.ipled and not self.iplRunning:
             self.iplRunning = True
             self.log("%s: load started" % self.name)
+        if func == DEU.FUNC.FORMAT_FILL:
+            self.formatsLoaded = True
         if self.iplRunning and f['count'] == DEU.LAST_FILL_WORDS:
             self.iplRunning = False
             self.ipled = True
@@ -2138,6 +2158,20 @@ class DEUUnit(object):
             hdr |= DEU.HDR.SELF_TEST
         if not self.ipled:
             hdr |= DEU.HDR.IPL_REQUIRED
+        elif not self.formatsLoaded:
+            # A UNIT WITH A CONTROL PROGRAM AND NO CRITICAL FORMATS fails its
+            # own format checksum, and that is a critical BITE.  PASS's
+            # display loader requires exactly this before it will send the
+            # formats -- AIGDEU.hal 015700 wants header bits 15 to 16 to read
+            # BIN'10', critical BITE present and no IPL required -- and its
+            # next act is to load the formats and re-check the checksum
+            # (017700, "WAIT 70 MS FOR DCP CHECKSUM PROCESSING").  Without it
+            # the loader finishes the control program, polls, is told
+            # everything is well, and gives up with code 6 rather than send a
+            # single format.  DMIMCD reads the same bit only to decide to
+            # checksum the poll response (DMIMCD.hal 021100), which this
+            # model computes, so asserting it costs nothing elsewhere.
+            hdr |= DEU.HDR.BITE_CRITICAL
         if self.msgResetPending:
             hdr |= DEU.HDR.MSG_RESET
         if self.ackPending:
