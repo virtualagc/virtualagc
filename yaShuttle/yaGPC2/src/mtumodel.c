@@ -240,12 +240,30 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         /* YAGPC_MTUTRACE: every command reaching these buses, with the IUA
          * it names.  This is what showed the MTU is IUA 10 rather than the
          * device number 22 FIOCBLKS calls it. */
-        if (yagpc_getenv("YAGPC_MTUTRACE")) {
+        {
+            /* YAGPC_MTUTRACE=<n> traces that many commands; any non-numeric
+             * value traces all of them.  The cap was a hard 40, which is
+             * thirty milliseconds of a flight-critical bus -- enough to show
+             * WHICH devices share it, which is what it was written for, and
+             * useless for asking whether a particular command ever comes
+             * again.  Same convention as YAGPC_SSTTRACE. */
+            static int inited = 0;
+            static long cap = 40;
             static long n = 0;
-            if (n++ < 40)
-                fprintf(stderr, "MTUCMD t=%.3f bus=%d cmd=%06x iua=%u\n",
+            const char *w = yagpc_getenv("YAGPC_MTUTRACE");
+            if (!inited) {
+                inited = 1;
+                if (w != NULL) {
+                    char *end = NULL;
+                    long v = strtol(w, &end, 10);
+                    cap = (end != w && *end == '\0' && v > 0) ? v : -1;
+                }
+            }
+            if (w != NULL && (cap < 0 || n++ < cap))
+                fprintf(stderr, "MTUCMD t=%.3f bus=%d cmd=%06x iua=%u func=%03x words=%u\n",
                         m->clockUs ? *m->clockUs / 1e6 : 0.0,
-                        in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd));
+                        in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd),
+                        (unsigned)((cmd >> 9) & 0x3ffu), (unsigned)((cmd & 0x1ffu) + 1u));
         }
         if (CMD_IUA(cmd) != MTU_IUA || CMD_FIELD(cmd) != MTU_READ_CMD) {
             /* A command for ANOTHER device on this bus -- the flight-critical
