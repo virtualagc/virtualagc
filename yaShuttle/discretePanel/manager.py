@@ -374,6 +374,71 @@ class Manager(object):
         rows.sort(reverse=True)               # newest first
         self._choose_snapshot(parent, rows)
 
+    def _place_dialog(self, top, W, H):
+        """Put a dialog beside the manager, but ON THE SCREEN.
+
+        A GUARD, NOT THE CURE FOR THE FREEZE THAT PROMPTED IT.  These
+        centred on the parent and clamped only at zero, so a manager far to
+        the right could in principle place a dialog past the edge, where a
+        window manager need not map it -- and an unmapped dialog holding a
+        modal grab is a frozen application with nothing to click.  That
+        failure did happen (2026-09-24: the snapshot chooser alive at
+        6104,1416, Map State IsUnMapped, every control dead, and the owner
+        unable to find the window because it was never drawn) -- but the
+        position was NOT the reason.  The desktop is two 3840 monitors and
+        Tk reports the screen as 7680 wide, so 6104 was a legal place for it
+        and this clamp would have left it exactly there.  Why it was never
+        mapped is unknown.  _grab_dialog is what actually stops the freeze;
+        this only removes one way of reaching it.
+        """
+        self.root.update_idletasks()
+        sw, sh = top.winfo_screenwidth(), top.winfo_screenheight()
+        x = self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2
+        y = self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3
+        top.geometry("%dx%d+%d+%d" % (W, H,
+                                      max(0, min(x, max(0, sw - W))),
+                                      max(0, min(y, max(0, sh - H)))))
+
+    def _grab_dialog(self, top, tries=10):
+        """Make a dialog modal, once it can be seen.
+
+        A grab held by a window that is not visible is a frozen application
+        with nothing to click -- which is what _place_dialog's comment
+        describes.  Tk refuses a grab on a window that is not yet viewable,
+        so this retries briefly rather than grabbing blind.
+
+        AND IT NEVER WAITS UNBOUNDED.  wait_visibility() is the usual idiom
+        and is exactly the wrong one here: if the window never maps, it does
+        not return, and the application is frozen again by the cure.  Ten
+        tries at 50 ms is half a second, after which the dialog is simply
+        not modal -- worse behaviour, but working controls.
+        """
+        if not top.winfo_exists():
+            return
+        try:
+            top.update_idletasks()
+            # AND IN FRONT.  A modal dialog that is behind something is the
+            # same as one that is not there: the controls do not answer and
+            # there is nothing visible to answer them with.  transient()
+            # alone only promises to stay above its OWN parent.
+            top.deiconify()
+            top.lift()
+            top.attributes("-topmost", True)
+            # NOT VIEWABLE, NOT MODAL.  Tk does NOT always refuse a grab on
+            # a window that is not on screen -- measured: grab_set() on a
+            # withdrawn Toplevel succeeds and takes every control with it,
+            # which is the freeze this whole helper exists to prevent.  So
+            # ask, rather than relying on it to raise.
+            if not top.winfo_viewable():
+                raise tk.TclError("window not viewable")
+            top.grab_set()
+            top.focus_force()
+        except tk.TclError as e:
+            if tries > 0:
+                top.after(50, lambda: self._grab_dialog(top, tries - 1))
+            else:
+                self.say("dialog: no modal grab (%s)" % e)
+
     def _choose_snapshot(self, parent, rows):
         """The list itself: name, when it was taken, and what is in it."""
         base = tkfont.nametofont("TkDefaultFont", self.root)
@@ -382,11 +447,7 @@ class Manager(object):
         top = tk.Toplevel(self.root, bg=C_BG)
         top.title("Choose a snapshot")
         top.transient(self.root)
-        self.root.update_idletasks()
-        top.geometry("%dx%d+%d+%d" % (
-            W, H,
-            max(0, self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2),
-            max(0, self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3)))
+        self._place_dialog(top, W, H)
         tk.Label(top, text="In %s" % parent, bg=C_BG, fg="#9a9a9a", font=base,
                  anchor="w", justify="left", wraplength=W - 48
                  ).pack(fill="x", padx=24, pady=(20, 6))
@@ -427,7 +488,10 @@ class Manager(object):
         box.bind("<Double-Button-1>", take)
         top.bind("<Return>", take)
         top.bind("<Escape>", lambda _e: top.destroy())
-        top.grab_set()
+        # AND THE WINDOW MANAGER'S OWN CLOSE BUTTON, which otherwise is not
+        # one of the ways out of a modal dialog.
+        top.protocol("WM_DELETE_WINDOW", top.destroy)
+        self._grab_dialog(top)
 
     def _browse_snapshot_plain(self):
         """The ordinary chooser, for pointing somewhere new."""
@@ -695,10 +759,7 @@ class Manager(object):
         top.transient(self.root)
         top.resizable(True, True)
         # Over the window it belongs to, not wherever the pointer happens to be.
-        self.root.update_idletasks()
-        x = self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2
-        y = self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3
-        top.geometry("%dx%d+%d+%d" % (W, H, max(0, x), max(0, y)))
+        self._place_dialog(top, W, H)
 
         pad = 24
         tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=body, anchor="w",
@@ -744,7 +805,7 @@ class Manager(object):
             top.bind("<Return>", lambda _e: close(False))
         top.bind("<Escape>", lambda _e: close(False))
         top.protocol("WM_DELETE_WINDOW", lambda: close(False))
-        top.grab_set()
+        self._grab_dialog(top)
         if confirm is not None:
             self.root.wait_window(top)
         return answer["ok"]
@@ -773,11 +834,7 @@ class Manager(object):
         top = tk.Toplevel(self.root, bg=C_BG)
         top.title(title)
         top.transient(self.root)
-        self.root.update_idletasks()
-        top.geometry("%dx%d+%d+%d" % (
-            W, H,
-            max(0, self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2),
-            max(0, self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3)))
+        self._place_dialog(top, W, H)
         pad = 24
         tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=base, anchor="w",
                  justify="left", wraplength=W - 2 * pad
@@ -803,7 +860,7 @@ class Manager(object):
         # way out is Cancel or the operation finishing.  Half-answering a
         # modal that exists to stop meddling would defeat it.
         top.protocol("WM_DELETE_WINDOW", lambda: None)
-        top.grab_set()
+        self._grab_dialog(top)
         self._busy, self._busyText = top, prog
         return top
 
