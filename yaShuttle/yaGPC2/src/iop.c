@@ -2738,6 +2738,29 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
                     else              iop->lsBadParity[region] &= ~bit;
                 }
             } else {
+                /* YAGPC_BASEREAD_TRACE: the CPU reading a BCE's BASE REGISTER
+                 * (bank 2 word 3), which is how the flight software names the
+                 * element that failed -- FIOERRLC's "PC R6,R6  READ BASE REG
+                 * FROM BCE" at 054600, matched against the BMT's TBCEBUF.  It
+                 * is only a truthful answer if the BCE has STOPPED at the
+                 * element that failed, so the state it stopped in is printed
+                 * with it: go is STAT1 (1 = GO), busy is STAT4 (1 = Busy, 0 =
+                 * Wait), and pc is where its program stands.  A read of a BCE
+                 * that is still running names whichever element it has reached
+                 * by now, and the flight software then bypasses THAT one --
+                 * see ledger #210. */
+                if (bank == 2 && word == 3 && region >= 1 && region <= 24 &&
+                    yagpc_getenv("YAGPC_BASEREAD_TRACE"))
+                    fprintf(stderr, "BASEREAD gpc=%d bce=%u base=%05x go=%d "
+                                    "busy=%d pc=%05x t=%.1f\n",
+                            (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
+                            (unsigned)region,
+                            (unsigned)(register_get32(r) & 0x3ffffu),
+                            iop_proc_get(&iop->regProgExcept, (int)region) ? 1 : 0,
+                            iop_proc_get(&iop->regBusyWait, (int)region) ? 1 : 0,
+                            (unsigned)(register_get32(
+                                iopls_at(&iop->ls, (int)region, 0, 2)) & 0x3ffffu),
+                            (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0);
                 register_set32(&iop->regCCData,
                                0xfffc0000u | (register_get32(r) & 0x3ffffu));
             }

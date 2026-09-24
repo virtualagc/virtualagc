@@ -436,6 +436,42 @@ real fix has to model the flight-critical devices well enough that the data
 passes the flight software's own checks, which is a vehicle-wide piece of work
 and a fidelity decision, not a patch.  Keep the flag for re-proving #210
 cheaply; do not turn it on for a simulation anyone is watching.
+  THE BLAME MECHANISM IS NOT THE DEFECT -- MY OWN HYPOTHESIS, REFUTED.
+The suspicion above, that FCOS names an innocent element because it reads the
+base register off a BCE that has not stopped, is WRONG, and three measurements
+settle it.  (a) YAGPC_BASEREAD_TRACE (new, src/iop.c, default off) prints every
+CPU read of a BCE's base register -- bank 2 word 3, the FIOBARC3 = X'22098000'
+command FIOERRLC issues at 054600 -- with that BCE's STAT1, STAT4 and program
+counter.  Over a whole two-computer run 1,243 such reads were taken and 1,236
+of them found the BCE STOPPED, go=0 busy=0: the identification is honest, and
+the BCE really is parked at the element that failed.  Our scheduler is right to
+do that -- iop_exec_slice refuses to step a processor whose Busy/Wait bit is
+clear, and the BCE Principles of Operation 3.4.7 says a time-out 'will also
+error terminate to the Wait State'.  (b) NOT ONE of those reads returned 09c7e,
+the timing unit's buffer, so the MTU element was never individually named.
+(c) FIOBMTAD never held the MTU's BMT entry address either: that entry is at
+09ef8 in our own G2 memory, read out of a capture of this fixture -- buf=9c7e,
+flag=1015, adrs=cc74, and the halfword at +3 is 2236, whose high byte 22 is
+exactly the delay in the c022 overlay -- and the string '9ef8' does not appear
+anywhere in the run's log.
+  WHAT FCMBCEMD IS ACTUALLY DOING IS A WHOLE-STRING BYPASS.  The NIA ring taken
+at the instant of the overlay is entirely inside FCMBCEMD and is a LOOP --
+181df 181e1 181e2 181e3 181e5 181ee 181f0 181f1 181f3 181f5 (the store) 181f6
+181f8 181f9 181fb 181fc 181fe 18200 18206 18207 and round again, about three
+and a half times in the 64 addresses the ring holds.  FCMBCEMD's single-element
+bypass sets R5 to 1 and runs that loop ONCE; a loop means it is walking a
+TABLE of BMT entries, which is its bus-or-string path.  So the timing unit is
+not being blamed for someone else's failure: FCOS is bypassing everything on
+the affected strings, which is what it is supposed to do to a string whose
+devices have stopped answering, and the MTU's six slots are six of the 121 that
+go with it.
+  CONCLUSION.  There is no element-identification defect to fix, and no
+MTU-specific defect either.  The only thing wrong in the vehicle is that the
+flight-critical devices are not modelled, which YAGPC_FC_STUB demonstrates from
+the other direction by keeping every MTU slot live for as long as the traffic
+is answered.  The route to a real fix is to model those devices with data the
+flight software accepts; nothing short of that will keep a GNC OPS
+configuration's I/O alive.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed
