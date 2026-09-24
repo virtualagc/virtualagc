@@ -172,6 +172,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
           right down to the <i>other</i> dreadful, nerdy stuff</a>.<br>
       </p>
     </blockquote>
@@ -210,6 +211,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         into <font color="#009900"><i><b>scratch</b></i></font>. <br>
       </li>
       <li>For OI-34.06:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
@@ -218,8 +220,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         into <font color="#009900"><i><b>scratch</b></i></font>.</li>
       <li>For OI-34.07:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
+
 
 
 
@@ -233,6 +237,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
         OI-34.06 and OI-34.07 source code is so similar, <font
           color="#009900"><i><b>PFS</b></i></font>/OI340700 stores only
         the files that are <i>different</i> from <font color="#009900"><i><b>PFS</b></i></font>/OI340600.
+
 
 
 
@@ -255,8 +260,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         Code"/PASS.REL32V0/RUNASM</li>
       <li><font color="#009900"><i><b>virtualagc</b></i></font>/yaShuttle/"Source
+
 
 
 
@@ -328,6 +335,27 @@ compilePASS<br></pre>
     </p>
     <p>TBD<br>
     </p>
+    <p>Depending on the particular contents of the tape and the current
+      legal thinking on the matter, it may be better for distribution
+      purposes to keep the tape in a compressed, encrypted form rather
+      than in the raw form as described above.&nbsp; My recommendation
+      at the moment is to use the <b>7z</b> format.&nbsp; In Linux, the
+      compression step would look like this:<br>
+    </p>
+    <blockquote>
+      <pre>7z a -t7z -mhe=on -p <i>TAPE</i>.7z <i>TAPE</i>.mmv</pre>
+    </blockquote>
+    <p>On Mac OS and Windows it might be carried out differently.&nbsp;
+      The <code>-mhe=on</code> switch means to compress header as well
+      as data. The emulator itself recognizes that a compressed,
+      encrypted format has been used by the filename extension (".7z")
+      rather than the usual (".mmv"), and in the encrypted case prompts
+      for a password (with no echoing to the screen) or optionally lets
+      you input a password from a command-line option or an environment
+      variable, depending on how paranoid you may be about security. In
+      any case, the "tape" obtained from decrypting only ever exists in
+      memory, and not ever in the filesystem.<br>
+    </p>
     <h1><a name="emulationFromTape"></a>Step 6: Emulation and IPL from
       Tape</h1>
     <h2><a name="iplBackground"></a>Background<br>
@@ -373,6 +401,7 @@ compilePASS<br></pre>
       are possible.&nbsp; If you want to know more, <a
         moz-do-not-send="true"
         href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf#page=52">the <i>OI-32
+
 
 
 
@@ -524,8 +553,8 @@ compilePASS<br></pre>
     <a href="Shuttle%20flight%20computer%20software%20USA006083%20B.png"><img
         moz-do-not-send="true"
         src="Shuttle%20flight%20computer%20software%20USA006083%20B.png"
-        title="Click to enlarge" alt="" height="413" align="right"
-        border="2" width="400"></a>Before proceeding, there are a few
+        title="Click to enlarge" alt="" width="400" height="413"
+        align="right" border="2"></a>Before proceeding, there are a few
     general things worth knowing.&nbsp; PASS software is partitioned
     into up to 10 <i>Memory Configurations</i> (MC) or <i>Operational
       Sequences</i> (OPS), which as far as I can tell are essentially
@@ -583,7 +612,7 @@ compilePASS<br></pre>
     <br>
     <a href="legalMMtoMM-OI-32.png"><img moz-do-not-send="true"
         src="legalMMtoMM-OI-32.png" title="Click to enlarge" alt=""
-        height="531" align="right" border="2" width="400"></a>But if you
+        width="400" height="531" align="right" border="2"></a>But if you
     try to jump around at random from MM to MM, you'll quickly get into
     trouble because not all transitions from MM to MM are allowed.&nbsp;
     In the diagram to the right, for example, you see the allowed
@@ -635,10 +664,10 @@ compilePASS<br></pre>
       <pre>SPEC <i><b>L</b></i> <i><b>M</b></i> <i><b>N</b></i> PRO<br></pre>
     </blockquote>
     <a href="GPC_MEMORY.png"><img moz-do-not-send="true"
-        src="GPC_MEMORY.png" title="Click to enlarge" alt=""
-        height="397" align="right" border="2" width="400"></a>The
-    available specialized screens tend to vary according to the current
-    OPS, although some are available in most or all OPS:<br>
+        src="GPC_MEMORY.png" title="Click to enlarge" alt="" width="400"
+        height="397" align="right" border="2"></a>The available
+    specialized screens tend to vary according to the current OPS,
+    although some are available in most or all OPS:<br>
     <ul>
       <li><code>SPEC 0 PRO</code> — The "GPC MEMORY" screen, as in the
         illustration at the right.&nbsp; TBD <br>
@@ -777,13 +806,13 @@ compilePASS<br></pre>
       GPCs experienced redundancy-sync problems, but believe me, if they
       had done so you'd see it on the CAM.<br>
     </p>
-    <table height="600px" width="100%" cellspacing="2" cellpadding="2">
+    <table width="100%" cellspacing="2" cellpadding="2" height="600px">
       <tbody>
         <tr>
           <td style="height:600px; width:40%" valign="top">
             <div style="height:600px; overflow:auto">
-              <table border="1" width="100%" cellspacing="2"
-                cellpadding="2">
+              <table width="100%" cellspacing="2" cellpadding="2"
+                border="1">
                 <tbody>
                   <tr>
                     <th valign="top">Left Keyboard<br>
@@ -804,6 +833,7 @@ compilePASS<br></pre>
                     </td>
                     <td valign="top"><b>GENERAL PURPOSE COMPUTER POWER →
                         ON for GPC 1, 2, 3, and 4</b>. <font size="-1">(This
+
 
                         doesn't actually do anything within the
                         simulation, but you'd have to do it in real
@@ -901,6 +931,7 @@ compilePASS<br></pre>
                     <td valign="top"><b>Wait for steady green on
                         ACTIVITY indicator for MM1</b>. <font size="-1">(The
 
+
                         preceding step causes the indicator to change
                         from <font color="#009900">green</font> to <font
                           color="#ff0000">red</font>, and then back to <font
@@ -953,6 +984,7 @@ compilePASS<br></pre>
                     </td>
                     <td valign="top"><b>Wait for steady green on
                         ACTIVITY indicator for MM1</b>. <font size="-1">(The
+
 
                         preceding step causes the indicator to change
                         from <font color="#009900">green</font> to <font
@@ -1468,6 +1500,7 @@ compilePASS<br></pre>
                   <tr>
                     <td rowspan="1" colspan="3" valign="top"><i>Transition
 
+
                         to OPS 2:</i><br>
                     </td>
                   </tr>
@@ -1536,8 +1569,8 @@ compilePASS<br></pre>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
-              hosted by ibiblio.org" src="hosted.png" height="100"
-              width="300"></a><br>
+              hosted by ibiblio.org" src="hosted.png" width="300"
+              height="100"></a><br>
         </font></i></center>
     <br>
   </body>
