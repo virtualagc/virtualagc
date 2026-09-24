@@ -1916,9 +1916,28 @@ class DEUUnit(object):
         elif f == DEU.FUNC.POLL:
             self.stats['polls'] += 1
             self.onPoll()
-            if self.iplRunning:
-                self.stats['modeStatus'] += 1
-                self._logPollReply('mode-status', self.header())
+            if not self.ipled:
+                # A UNIT THAT NEEDS INITIALIZING ANSWERS WITH ONE WORD, and
+                # that -- not the word's contents -- is how the flight
+                # software finds out.  DPS Console Handbook: "Upon completion
+                # of the IPL reconfiguration, the DEU will respond to the
+                # first DEU poll request, returning a single poll header
+                # response word (with the 'DEU initialization required' bit
+                # set).  The IOP, however, is expecting a 16-word response
+                # and will therefore log a T/O ...  When an I/O error is
+                # detected on a DEU poll, the UI software (DMI MCDS IN)
+                # checks for a DEU load request."  DMIMCD is that software,
+                # and it will not even look at the header unless the
+                # transaction status is non-zero -- so a unit that answers
+                # all sixteen words is a unit whose request is never heard,
+                # and it waits for a GPCIPL of its own instead (ledger #208).
+                # The one-word reply was already given during a load, as the
+                # mode-status check between blocks; it belongs to the whole
+                # of the un-IPLed state, which is what this now says.
+                if self.iplRunning:
+                    self.stats['modeStatus'] += 1
+                self._logPollReply('mode-status' if self.iplRunning else 'poll',
+                                   self.header())
                 self._reply([self.takeHeader()])
             else:
                 self._logPollReply('poll', self.header())
