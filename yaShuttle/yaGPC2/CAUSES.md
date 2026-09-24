@@ -590,6 +590,21 @@ report an unpowered box; it may not invent channel data, because the flight
 software acts on it and two computers then disagree.  That is the constraint
 any fuller MDM model has to satisfy, and it is why the rest of this is real
 device work and not a patch.
+  AND THE BOUNDARY IS NOT AN ARTEFACT OF OUR BUFFERING, WHICH WAS WORTH
+RULING OUT.  The obvious suspicion about those two votes was that this model
+manufactured them: it kept ONE reply per bus with a cursor per reader, so a
+reply arriving while another computer was partway through the previous one
+handed that computer a MIXTURE of the two, and whether it happened depended on
+when each machine polled -- a divergence that would grow with the number of
+commands answered, which is exactly the pattern.  Each reader now gets its own
+COPY of the words, not merely its own cursor, so no computer can receive half
+of one reply and half of the next.  With that in place the channel reads were
+tried again and STILL give two votes.  So the mixture was real and is now
+fixed, but it is not what the computers disagree about: it is the channel data
+itself.  Verified final state -- NSP answers plus per-reader copies -- zero
+votes, OPS 201 reached with the control's 24 device/function pairs, no
+unprogrammed-store execution, and the six MTU slots still overlaid at t=241.4.
+The timing unit is STILL FROZEN and this is still not a fix for #210.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed

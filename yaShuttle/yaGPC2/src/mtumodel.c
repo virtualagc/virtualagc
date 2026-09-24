@@ -122,12 +122,15 @@ static int ff_nsp_words(uint32_t cmd) {
     switch ((cmd >> 9) & 0x3ffu) {
     case FF_NSP1_PWR:  case FF_NSP2_PWR:  case FF_NSP_DISCR: return 1;
     case FF_NSP_DATA:  return 32;
-    /* AND NO FURTHER.  Two more steps were tried and are NOT included,
+    /* AND NO FURTHER.  Two more steps were tried and
      * because each cost the redundant set both computers where these four
      * cost it nothing: the MDM's return word (func 18a), and its channel
      * reads (func 041 and 042) answered with zeros.  Measured, same fixture,
      * same script: these four alone give no votes at all; adding the return
-     * word gives two; adding the channel reads as well gives two.
+     * word gives two; adding the channel reads as well gives two -- and that
+     * stayed true after each reader was given its own copy of the words, so
+     * it is not an artefact of this model's buffering.  What the two
+     * computers disagree about is the CHANNEL DATA itself.
      *
      * The line is between what the INTERFACE says and what the SENSORS say.
      * "The NSP is not powered" is true of this vehicle, is a statement about
@@ -156,12 +159,24 @@ static int ff_nsp_words(uint32_t cmd) {
  * Listen Mode waits for (busword.h).  The commander is not echoed, so a
  * single computer sees exactly what it saw before. */
 #define MTU_READERS 6
+
+/* AND EACH READER ITS OWN COPY OF THE WORDS, not only its own cursor.  With
+ * one buffer per bus, a reply that arrived while another computer was partway
+ * through the previous one handed that computer a MIXTURE of the two -- its
+ * cursor pointed into words that had been overwritten.  Whether it happened
+ * depended on when each machine polled, so the two saw different data and
+ * disagreed, and the rate of it rose with the number of commands answered.
+ * That is a divergence this model manufactured, and it is why answering more
+ * of the forward MDM's functions used to cost the redundant set both
+ * computers.  A refill now writes every reader's own copy and resets its own
+ * cursor, so no computer can ever receive half of one reply and half of the
+ * next. */
 #define MTU_NBUS (MTU_BUS_LAST - MTU_BUS_FIRST + 1)
 struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
     const double *offsetUs;      /* see mtumodel_set_clock_offset */
-    uint16_t reply[MTU_NBUS][FF_REPLY_MAX];
+    uint16_t reply[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
@@ -283,10 +298,10 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
      * FPMLIMCK's MET tests have no lower bound (days < X'365', hours
      * <= X'23', min <= X'59', sec <= X'164'), so all-zero passes. */
     memset(m->reply[b], 0, sizeof m->reply[b]);
-    m->reply[b][0] = (uint16_t)dyhr;
-    m->reply[b][1] = (uint16_t)mnsc;
-    m->reply[b][2] = (uint16_t)msec;
     for (int r = 0; r < MTU_READERS; r++) {
+        m->reply[b][r][0] = (uint16_t)dyhr;
+        m->reply[b][r][1] = (uint16_t)mnsc;
+        m->reply[b][r][2] = (uint16_t)msec;
         m->head[b][r] = 0;
         m->count[b][r] = MTU_WORDS;
     }
@@ -400,7 +415,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             out->out.recv.word = m->echoCmd[b] | YAGPC_BUSWORD_CMD_SYNC;
         } else if (m->count[b][g] > 0) {
             out->out.recv.available = true;
-            out->out.recv.word = m->reply[b][m->head[b][g]++];
+            out->out.recv.word = m->reply[b][g][m->head[b][g]++];
             m->count[b][g]--;
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
@@ -419,8 +434,8 @@ void mtumodel_report(struct MtuModel *m) {
     fprintf(stderr, "mtu: {\"commands\":%ld,\"timeReads\":%ld,\"wordsOut\":%ld,"
             "\"lastTime\":\"%04x %04x %04x\"}\n",
             m->commands, m->reads, m->wordsOut,
-            m->reply[m->lastBus][0], m->reply[m->lastBus][1],
-            m->reply[m->lastBus][2]);
+            m->reply[m->lastBus][0][0], m->reply[m->lastBus][0][1],
+            m->reply[m->lastBus][0][2]);
     if (m->nspReads > 0)
         fprintf(stderr, "mtu: %ld NSP read(s) answered by the forward MDM "
                         "(the NSP is not powered in this vehicle)\n", m->nspReads);
@@ -447,7 +462,7 @@ bool mtumodel_dump(const struct MtuModel *m, const char *path) {
                 (unsigned)m->echoCmd[b]);
         fprintf(f, "     \"reply\": [");
         for (int w = 0; w < MTU_WORDS; w++)
-            fprintf(f, "%s%u", w ? "," : "", (unsigned)m->reply[b][w]);
+            fprintf(f, "%s%u", w ? "," : "", (unsigned)m->reply[b][0][w]);
         fprintf(f, "],\n     \"readers\": [");
         for (int r = 0; r < MTU_READERS; r++)
             fprintf(f, "%s[%d,%d,%d]", r ? "," : "",
@@ -493,8 +508,12 @@ bool mtumodel_load(struct MtuModel *m, const char *path) {
         m->commander[b] = (int)json_as_number(json_obj_get(bv, "commander"), 0);
         m->echoCmd[b] = (uint32_t)json_as_number(json_obj_get(bv, "echoCmd"), 0);
         JsonValue *rep = json_obj_get(bv, "reply");
-        for (int w = 0; w < MTU_WORDS && w < json_arr_count(rep); w++)
-            m->reply[b][w] = (uint16_t)json_as_number(json_arr_get(rep, w), 0);
+        /* One saved reply, restored to every reader: a capture is taken with
+         * the vehicle quiet, so the copies agree. */
+        for (int w = 0; w < MTU_WORDS && w < json_arr_count(rep); w++) {
+            uint16_t v = (uint16_t)json_as_number(json_arr_get(rep, w), 0);
+            for (int r = 0; r < MTU_READERS; r++) m->reply[b][r][w] = v;
+        }
         JsonValue *rs = json_obj_get(bv, "readers");
         for (int r = 0; r < MTU_READERS && r < json_arr_count(rs); r++) {
             JsonValue *e = json_arr_get(rs, r);
