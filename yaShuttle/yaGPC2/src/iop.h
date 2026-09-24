@@ -297,6 +297,7 @@ typedef struct IOP {
      * port originally held the register inverted, which reversed the
      * status the flight software reads back. */
     Register regProgExcept, regBusyWait, regHalt, regIndicator;
+    long fcZeroCompletions;   /* see YAGPC_FC_ZERO in iop.c */
     /* The last command word put on each bus, for YAGPC_FC_LEARN. */
     uint32_t lastBusCmd[32];
     Register regDiscreteOut, regDiscreteInA, regDiscreteInB, regRMStatus;

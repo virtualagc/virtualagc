@@ -1940,6 +1940,19 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
     }
 }
 
+/* Default ON; YAGPC_NO_FC_ZERO restores the old silence.  See the long
+ * note at the receive time-out.  BCE 14-17 and
+ * 20-23 are FC5-8 and FC1-4; the display, mass memory, payload, launch and
+ * intercomputer buses are excluded because their devices ARE modelled and a
+ * time-out there is a real defect. */
+static bool fc_zero_completes(IOP *iop, int p) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_NO_FC_ZERO") == NULL; }
+    (void)iop;
+    if (!on) return false;
+    return (p >= 14 && p <= 17) || (p >= 20 && p <= 23);
+}
+
 /* How overdue, in simulated microseconds, a reply must be before a peer in
  * another process is allowed to hold the machine for it.  See iop_bce_receive. */
 #define PEER_HOLD_AFTER_US 500.0
@@ -2090,6 +2103,45 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                     p, (unsigned)((c >> 19) & 0x1fu),
                     (unsigned)((c >> 9) & 0x3ffu),
                     (unsigned)bce->recvCount, now);
+        }
+        /* NOTHING ON THIS FLIGHT-CRITICAL BUS ANSWERED, and this vehicle
+         * models almost nothing that lives on one.  YAGPC_FC_ZERO completes
+         * the transfer with ZEROS instead of error-terminating.
+         *
+         * The three earlier shapes of this each failed for a reason that
+         * this one does not share.  Answering at the BUS level had to guess
+         * a length from the command's count field, which is not the reply
+         * length -- FIOMTURD's count field is 38 and its #MIN arms seven --
+         * so leftovers shifted later transfers; here the length is
+         * recvLeft, exactly what this transfer armed, and nothing is left
+         * over.  Completing with NO data left each computer's buffer
+         * holding its own history, so two computers diverged; zeros are the
+         * same on every machine.  And answering only SOME devices made the
+         * errors NON-UNIVERSAL, which is worse than all of them failing:
+         * FIOERRLC self-fails a computer that has an error its peers do not
+         * ("IF (CHI,R6,EQ,1) ... CALL FCMSFAIL"), where a universal error
+         * merely commfaults the string.  This answers every one of them.
+         *
+         * It is a statement about the VEHICLE, not the flight software: a
+         * bus with nothing wired to it reads zero.  It is not a device
+         * model and must not be mistaken for one. */
+        /* THE COMMANDER ONLY.  A LISTENER MUST NOT BE HANDED ZEROS: on a bus
+         * whose device IS modelled -- the timing unit on 20, 21 and 22 --
+         * the commander gets the unit's real words while a listener whose
+         * receive ran late would get zeros here, so the two computers' copies
+         * of the same transfer would differ and they would disagree about the
+         * vehicle.  A listener that hears nothing goes on waiting, exactly as
+         * it does today. */
+        if (fc_zero_completes(iop, p) && iop_proc_get(&iop->regXmitEna, p)) {
+            while (bce->recvLeft > 0) {
+                iop_write_main16(iop, bce->recvAddr, 0u);
+                bce->recvAddr = (bce->recvAddr + 1) & 0x3ffffu;
+                bce->recvLeft--;
+            }
+            bce->recvGotAny = true;
+            bce->recvActive = false;
+            iop->fcZeroCompletions++;
+            return true;
         }
         /* WHICH TIMEOUT IT WAS.  Table 1.2 separates them: Initial Time Out
          * is the first input word never arriving, Time Out is a later one,
