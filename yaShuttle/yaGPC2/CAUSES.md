@@ -523,6 +523,35 @@ is forward-looking: a blanket 'if nothing answered, call it complete' rule sits
 UNDERNEATH any future FF/FA MDM model and masks exactly the failures that model
 would need to show, so a half-written MDM would read as healthy instead of
 timing out.  The fix has to be the devices themselves.
+  WHAT THE DEVICE ACTUALLY IS, AND THE START OF THE TABLE A MODEL NEEDS.
+BCEEQU.asm settles the naming: FIOFFIUA EQU 10, 'FF INTERFACE UNIT ADDRESS',
+and FIOMTURD EQU X'00024C26' is one of that unit's commands -- the MTU read is
+'#MINC FIOFFIUA,FIOMTURD', so the timing unit is read THROUGH THE FORWARD MDM
+and is not a device of its own.  FIOLMIUA EQU 8 is the listen-mode address,
+which is the iua=8 func=005 traffic.  So src/mtumodel.c is already a PARTIAL FF
+MDM MODEL: it answers one of that unit's commands and ignores the rest.  The
+repair is to finish that device, in the device model at the device's own IUA,
+not to add a rule in the I/O layer -- which is also the only form that a later,
+fuller MDM implementation will not have to fight.
+  THE COMMAND'S COUNT FIELD IS NOT THE REPLY LENGTH, which is what made the
+first attempt guess wrong: FIOMTURD's count field is 38, and the BCE arms
+SEVEN.  The lengths have to come from the bus programs' own #MIN/#RDLI, and
+they can be harvested: arm each receive's YAGPC_TIMEOUT_TRACE 'RECV ARM ...
+count=' line with the command that FOLLOWS it (the #MIN precedes the #MINC, so
+pairing with the preceding command gives the listen command instead and is
+wrong).  Measured that way on a two-computer control run, for iua 10:
+      func 041 -> 21 words     func 042 -> 4      func 10a -> 7
+      func 110 -> 7            func 126 -> 7      func 132 -> 1
+      func 138 -> 1            func 18a -> 1
+and func 126 -> 7 agrees with the MTU_WORDS the model already uses, which is
+the check that the method is sound.
+  AND THE SCOPE IS BIGGER THAN ONE UNIT.  After the transition the same buses
+carry 24 distinct device/function pairs at IUAs 6, 8, 9, 10 and 15, so
+finishing the FF MDM is necessary and NOT sufficient: the strings will keep
+being bypassed while the other units are silent.  A fix is therefore several
+device models, each with its own function-to-length table and its own decision
+about what the data should be -- work to be scoped deliberately, not a defect
+repair.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed
