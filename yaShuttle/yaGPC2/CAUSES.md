@@ -605,6 +605,27 @@ itself.  Verified final state -- NSP answers plus per-reader copies -- zero
 votes, OPS 201 reached with the control's 24 device/function pairs, no
 unprogrammed-store execution, and the six MTU slots still overlaid at t=241.4.
 The timing unit is STILL FROZEN and this is still not a fix for #210.
+  AND THE ASYMMETRY THEORY IS REFUTED TOO, WHICH WAS THE LAST CHEAP ONE.
+The model owned buses 20-22 only, so with the channel reads answered GPC1 --
+which commands FC1 and FC3 -- had both its strings alive while GPC2, which
+commands FC2 and FC4, had one alive and one dead: measured, buses 20/21/22
+fell to 14/13/15 unanswered transfers while bus 23 stayed at 6, untouched.
+Two computers holding different opinions about how many of their strings are
+healthy is exactly the shape of a disagreement, and it was OUR asymmetry.  So
+ownership was extended to all eight flight-critical buses (14-17 and 20-23,
+excluding 18 and 19, which are mass memory and ARE modelled) and the channel
+reads tried again.  Bus 23 fell from 6 unanswered to 4 and bus 14 likewise,
+and THERE ARE STILL TWO VOTES, with the six MTU slots still overlaid.
+  So the protocol/telemetry line has now survived three independent
+challenges -- per-reader cursors, per-reader COPIES of the words, and
+symmetric bus ownership -- and each time what the two computers disagree about
+is the channel data itself.  DO NOT RETEST THESE THREE.  Answering an MDM's
+channel reads with a value this simulator invented costs the redundant set,
+however carefully the words are delivered, and the remaining work is therefore
+to decide what this vehicle's sensors actually read.  That is vehicle
+simulation and a scoping decision, not a defect repair.  The committed state
+is the NSP answers plus per-reader copies: zero votes, OPS 201 reached, 437
+unanswered transfers down to 66, and MTU ACCUM 1-3 STILL FROZEN.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed
