@@ -472,6 +472,31 @@ the other direction by keeping every MTU slot live for as long as the traffic
 is answered.  The route to a real fix is to model those devices with data the
 flight software accepts; nothing short of that will keep a GNC OPS
 configuration's I/O alive.
+  THE STUB EVIDENCE ABOVE IS WITHDRAWN.  IT WAS A CONFOUND, AND THE STUB IS
+REVERTED.  'With it on the six MTU slots are never bypassed and the reads
+continue to the end of the run' is true and means NOTHING, because with it on
+THE VEHICLE NEVER LEAVES OPS 0.  Counting the distinct device/function pairs
+commanded on buses 20-22 after t=280 s settles it: the control run carries 24
+of them -- iua 10 functions 100, 104, 105, 106, 10a, 10b, 110, 114 and the
+rest, the GNC traffic of a loaded G2 -- and every stub run carries SIX, the
+timing unit's own functions plus iua 8 function 005, which is the OPS 0
+profile.  An end-to-end run typed OPS 2 0 1 PRO at t=240.9 and SPEC 2 PRO at
+t=272.7 and CRT2 still read '0001/ / GPC MEMORY 2' at t=318.8: neither the
+transition nor the keystroke took.  So the comparison was never
+bypass-versus-no-bypass; it was a G2 vehicle against a vehicle stuck in the
+one configuration where the MTU is not bypassed anyway.  Feeding zeros to the
+flight-critical buses breaks the vehicle from early in the run -- the traffic
+is already down to six pairs before t=200 -- and in its first form it also cost
+the redundant set both computers and made listener elements run off the end of
+their programs into unprogrammed store.  Zeros are worse than silence.
+  WHAT STILL STANDS is everything that was read out of memory images and the
+NIA ring, none of which involved the stub: the 121 overlaid branches in twelve
+bus programs, FIOERRLC calling FCMBCEMD, the FIOGPCWE test that makes a set
+necessary, the honest base-register reads, and the whole-string bypass loop.
+The root cause is unchanged.  What is gone is any demonstration that answering
+the traffic repairs it, and the lesson is the one this ledger keeps relearning:
+CHECK THAT THE TWO RUNS BEING COMPARED ARE IN THE SAME CONFIGURATION before
+believing a difference between them.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed

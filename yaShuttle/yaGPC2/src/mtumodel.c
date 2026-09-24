@@ -83,34 +83,12 @@
  * Listen Mode waits for (busword.h).  The commander is not echoed, so a
  * single computer sees exactly what it saw before. */
 #define MTU_READERS 6
-
-/* YAGPC_FC_STUB: answer every command on these three buses, not just the
- * timing unit's, with the number of ZERO words the command asked for.
- *
- * NOT A DEFAULT, and not a device model.  It exists to test one claim of
- * ledger #210: that the frozen MTU ACCUM times are collateral damage from
- * the flight-critical devices we do not model at all.  With none of them
- * answering, every computer in a set sees the same I/O errors after a GNC
- * OPS transition, FIOERRLC's comfaultable path runs continuously over all
- * ten flight-critical buses, and it bypasses whichever element the BCE's
- * base register happens to name -- 121 live #BU branches in twelve bus
- * programs, of which the MTU's six are the part a crew member can see.
- * If the traffic on these buses is answered, those six should stay live.
- *
- * The data is zeros, which is NOT what an MDM would send, so a run with
- * this on is an experiment and not a better simulation: PASS will act on
- * whatever it is handed. */
-#define FC_REPLY_MAX 512
 #define MTU_NBUS (MTU_BUS_LAST - MTU_BUS_FIRST + 1)
 struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
     const double *offsetUs;      /* see mtumodel_set_clock_offset */
-    /* The timing unit's own answer is MTU_WORDS long; the buffer is bigger
- * because YAGPC_FC_STUB (see fc_stub_words) answers OTHER devices on these
- * same flight-critical buses out of it, and a command may ask for up to the
- * count field's limit. */
-    uint16_t reply[MTU_NBUS][FC_REPLY_MAX];
+    uint16_t reply[MTU_NBUS][MTU_WORDS];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
@@ -136,18 +114,6 @@ void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec) {
 
 void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs) {
     if (m) m->offsetUs = offsetUs;
-}
-
-/* How many zero words YAGPC_FC_STUB should answer a command with, or 0 when
- * the stub is off.  The count is the command's own low nine bits plus one,
- * so the reply is exactly as long as the transfer that asked for it and no
- * device table is needed. */
-static unsigned fc_stub_words(uint32_t cmd) {
-    static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_STUB") != NULL; }
-    if (!on) return 0u;
-    unsigned n = (cmd & 0x1ffu) + 1u;
-    return n > FC_REPLY_MAX ? (unsigned)FC_REPLY_MAX : n;
 }
 
 bool mtumodel_owns_bus(int busID) {
@@ -310,17 +276,8 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * other device, which then timed out with seven taken -- and with
              * a cursor per computer, not necessarily the same seven for each
              * (ledger #137). */
-            unsigned stub = fc_stub_words(cmd);
-            if (stub > 0u) {
-                memset(m->reply[b], 0, sizeof m->reply[b]);
-                for (int r = 0; r < MTU_READERS; r++) {
-                    m->head[b][r] = 0;
-                    m->count[b][r] = (int)stub;
-                }
-            } else {
-                for (int r = 0; r < MTU_READERS; r++)
-                    m->count[b][r] = 0;
-            }
+            for (int r = 0; r < MTU_READERS; r++)
+                m->count[b][r] = 0;
         } else {
             mtu_fill_time(m, b);
         }
