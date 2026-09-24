@@ -15,12 +15,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "../src/volsource.h"
 
 #define PLAIN "/tmp/yagpc2-volsource-plain.bin"
 #define ARCHIVE "/tmp/yagpc2-volsource-test.7z"
+#define MISSING "/tmp/yagpc2-volsource-no-such-file.7z"
+#define STDERR_LOG "/tmp/yagpc2-volsource-stderr.txt"
 #define PASSWORD "correct horse battery staple"
 
 static int failures;
@@ -79,6 +82,33 @@ int main(void) {
     check(!volsource_is_archive(PLAIN), "a plain volume is not an archive");
     check(volsource_is_archive(ARCHIVE), "a .7z is an archive");
 
+    /* A NAME THAT IS NOT THERE IS NOT A WRONG PASSWORD.  The extension alone
+     * decides that a volume is an archive, so a path that does not exist used
+     * to be handed to 7z and come back as "wrong password?" -- which sends
+     * somebody hunting for the wrong thing entirely.  What is under test is
+     * the DIAGNOSIS, so the message itself is read back. */
+    {
+        remove(MISSING);
+        fflush(stderr);
+        int saved = dup(2);
+        int log = open(STDERR_LOG, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+        if (log >= 0) dup2(log, 2);
+        VolSource mv;
+        bool opened = volsource_open(&mv, MISSING);
+        if (opened) volsource_close(&mv);
+        fflush(stderr);
+        if (log >= 0) { dup2(saved, 2); close(log); }
+        close(saved);
+        check(!opened, "a volume that is not there does not open");
+        char said[512] = {0};
+        FILE *fh = fopen(STDERR_LOG, "r");
+        if (fh != NULL) { (void)!fread(said, 1, sizeof said - 1, fh); fclose(fh); }
+        remove(STDERR_LOG);
+        check(strstr(said, "cannot read") != NULL
+                  && strstr(said, "wrong password") == NULL,
+              "it is reported as missing, not as a wrong password");
+    }
+
     /* WRONG PASSWORD FIRST, because a right one would be cached and the
      * wrong case could never then be reached. */
     static unsigned char got[sizeof want + 16];
@@ -107,7 +137,7 @@ int main(void) {
     remove(ARCHIVE);
 
     if (failures == 0) {
-        printf("6/6 volsource checks passed\n");
+        printf("8/8 volsource checks passed\n");
         return 0;
     }
     printf("%d volsource check(s) failed\n", failures);

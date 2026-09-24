@@ -185,6 +185,14 @@ bool volsource_open(VolSource *v, const char *path) {
         v->f = fopen(path, "rb");
         return v->f != NULL;
     }
+    /* THERE BEFORE ASKING FOR A PASSWORD.  The extension alone makes a name
+     * an archive, so a path that does not exist used to be handed to 7z and
+     * come back as "wrong password?" -- which sends somebody looking for the
+     * wrong thing entirely. */
+    if (access(path, R_OK) != 0) {
+        fprintf(stderr, "mmu: cannot read %s: %s\n", path, strerror(errno));
+        return false;
+    }
     const char *pw = password_for(path);
     if (pw == NULL) return false;
     return spawn_7z(v, path, pw);

@@ -1006,6 +1006,19 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                                   ? mmumodel_create(u + 1, opts->mmuVolume[u])
                                   : NULL;
             r->mmuModel[u] = veh->mmu[u];
+            /* A TAPE THAT WAS ASKED FOR AND DID NOT LOAD IS FATAL.  It used
+             * to leave veh->mmu NULL and carry on, so the vehicle ran with
+             * NO MASS MEMORY and the only sign was that nothing ever loaded
+             * from it -- which is exactly how a wrong password for an
+             * encrypted volume presented itself: one line about 7z, then a
+             * run that looked normal and never IPLed. */
+            if (opts->mmuVolume[u] != NULL && r->mmuModel[u] == NULL) {
+                fprintf(stderr, "mmu%d: %s did not load, and a vehicle with no "
+                                "mass memory cannot IPL or take an OPS -- "
+                                "stopping rather than pretending\n",
+                        u + 1, opts->mmuVolume[u]);
+                r->exitCode = 2;
+            }
         }
         if (r->mmuModel[0] || r->mmuModel[1] || r->mtuModel ||
             r->nDeuModelExtra > 0) {

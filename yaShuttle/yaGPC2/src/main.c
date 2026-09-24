@@ -136,8 +136,17 @@ int main(int argc, char **argv) {
     vehicle_expect_machines(&vehicle, nGpc);
 
     BatchRunner runners[MAX_GPCS];
-    for (int i = 0; i < nGpc; i++)
+    for (int i = 0; i < nGpc; i++) {
         batchrunner_init(&runners[i], &opts, &vehicle, gpcs[i]);
+        /* Set up cannot fail quietly: a volume that was named and did not
+         * load leaves a vehicle that can never IPL. */
+        if (runners[i].exitCode != 0) {
+            int bad = runners[i].exitCode;
+            for (int j = 0; j <= i; j++) batchrunner_free(&runners[j]);
+            vehicle_free(&vehicle);
+            return bad;
+        }
+    }
 
     int code = 0;
     if (nGpc == 1) {

@@ -1134,6 +1134,16 @@ def main():
     # (2026-09-19, examples/ipl-after-restore.script).
     if not os.path.isfile(tape):
         sys.exit("simulatePASS: no volume %s -- give --tape FILE" % tape)
+    # AND IF IT IS ENCRYPTED, THAT THE PASSWORD OPENS IT -- here, before a
+    # single window is on screen.  A wrong password used to cost a whole
+    # start-up and then hide: the emulator said so on its own log, mass
+    # memory quietly did not exist, and the only sign was that nothing ever
+    # loaded.  Asking now costs one pass over the archive, which is what the
+    # digest below needs anyway.
+    if tape_is_archive(tape):
+        if tape_digest(tape) is None:
+            sys.exit("simulatePASS: %s would not open -- wrong password?  "
+                     "Nothing started." % os.path.basename(tape))
     if args.snapshot_resume:
         problem = snapshot_tape_problem(args.snapshot_resume, tape)
         if problem and problem[0] == "fail":
@@ -1361,7 +1371,7 @@ def main():
                  or script_has_subtitles(args.panel_script, True))
                     and "subtitles" not in layout_roles):
                 log("note: the script has captions; start the caption box yourself: "
-                    "python3 subtitles.py --port-base %d" % args.port_base)
+                    "python3 subtitles.py --font-size 14 --port-base %d" % args.port_base)
             # BEFORE THE PANEL PUBLISHES ANYTHING.  panelO6 seeds its switches
             # from this between construction and its first publish; without it
             # a panel coming up beside a restored vehicle would assert POWER
