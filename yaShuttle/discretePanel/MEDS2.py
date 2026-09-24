@@ -5306,11 +5306,24 @@ class Screen_DPS(MDUScreen):
             except Exception:
                 pass
             _cellTraceLeft[0] = CELL_TRACE_PER_FRAME
-        # TWO passes.  A DFG-generated display is not one list: its background
-        # is resident -- downloaded once during the unit's IPL, into the
-        # critical-format buffer at 0x0100 -- and at call-up the GPC writes
-        # only a pointer to it, at the top of memory.  The per-cycle list at
-        # DISPLAY_HEADER never mentions it.
+        # THREE passes.  A DFG-generated display is not one list: its
+        # background is resident -- downloaded once during the unit's IPL,
+        # into the critical-format buffer at 0x0100 -- and at call-up the GPC
+        # writes only a pointer to it, at the top of memory.  The per-cycle
+        # list at DISPLAY_HEADER never mentions it.  One display's background
+        # is not in the unit at all but here, in MEDS, and is named rather
+        # than sent; that is the third pass.
+        # THE BACKGROUND MEDS OWNS, first, because it is behind everything
+        # else -- and on its own group, so that it neither replaces the
+        # resident pass nor is replaced by it.  The two are independent: a
+        # display can have a resident background, a MEDS one, or neither.
+        meds = self._medsBackground(self._vdisp)
+        self.geo_dps_meds = self.drawFCWS(
+            meds if meds is not None else [], self.geo_dps_meds,
+            {'memory': meds, 'start': 0, 'stopAt': DEU.CF_PAD,
+             'medsBg': True, 'rowScale': adj('rowGap')}
+            if meds is not None else None)
+
         d = self.fcw.decodeFCW(int(self.bgFCWS[DEU.ADDR.BACKGROUND_TOP]))
         if d is not None and d['nm'] == 'BRANCH':
             self.geo_dps_bg = self.drawFCWS(
@@ -5328,6 +5341,15 @@ class Screen_DPS(MDUScreen):
             self.bgFCWS, self.geo_dps_fcws,
             {'memory': self.bgFCWS, 'start': DEU.ADDR.DISPLAY_HEADER,
              'rowScale': adj('rowGap')})
+        # WHICH BACKGROUND THE NEXT FRAME DRAWS, decided by the walks just
+        # made.  The name is a command inside a stream, so it is known only
+        # once that stream has been walked, and the pass that would draw it
+        # has already run: it takes effect on the next refresh, half a second
+        # later.  That is the same one-frame lag _fmtAdj above has always had
+        # and for the same reason, and at a display's call-up it costs one
+        # frame of the bare foreground -- the state every frame used to be.
+        self._vdisp = self._vdispNext
+        self._vdispNext = None
         self._announceTopLines()
 
     FORMAT_IN_TITLE = re.compile(r"\s*(\d{4})/\s*(\d{3})?\s*/")
@@ -5757,7 +5779,28 @@ class Screen_DPS(MDUScreen):
                 for _ in range(n):
                     drawGlyph(v['g1'])
                     drawGlyph(v['g2'])
-            # VDISP latches state this renderer does not draw.
+            elif nm == 'VDISP':
+                # THE ONE BACKGROUND THE GPC DOES NOT DRAW ITSELF.  Every
+                # other display either carries its static text in the list
+                # being walked here or points at a critical format resident
+                # in the unit; DPS UTILITY does neither, because CR93220A
+                # (01/23/08, OI3404) MOVED ITS BACKGROUND TO MEDS.  The deck
+                # says so in as many words -- SSSRC/CD0010.dfg deletes the
+                # whole static drawing, lines 002000-005446, and puts
+                # `VDISP=158` in its place under the comment `DRAW DPS
+                # UTILITY BACKGROUND`.  So the GPC only NAMES the background
+                # and the display unit draws it, and CD0010.dfg is the only
+                # deck in the flight source that uses VDISP at all: this is
+                # the one screen in the vehicle whose background lives here.
+                # WHERE IT ARRIVES.  Not in the per-cycle list, as one
+                # would expect of a command the GPC issues: PASS points
+                # BACKGROUND_TOP at a stub and the stub holds this and
+                # nothing else, which is just what the deck compiles to now
+                # that its drawing is gone.  So it is taken from whichever
+                # walk finds it -- never from the MEDS background's own,
+                # which would be circular.
+                if not opts.get('medsBg'):
+                    self._vdispNext = v['vdisp']
 
         self.group.add(targetGroup)
         self.d.dirty = True
@@ -5839,8 +5882,12 @@ class Screen_DPS(MDUScreen):
 
         self.geo_dps_fcws = Object3D()
         self.group.add(self.geo_dps_fcws)
+        self.geo_dps_meds = Object3D()    # the background MEDS draws itself
+        self.group.add(self.geo_dps_meds)
         self.geo_dps_bg = Object3D()      # the resident background
         self.group.add(self.geo_dps_bg)
+        self._vdisp = None                # the MEDS background now showing
+        self._vdispNext = None            # ...and the one this frame named
 
         if self._blinkOn is None:
             self._blinkOn = True
@@ -5936,6 +5983,35 @@ class Screen_DPS(MDUScreen):
     def loadBGDFBFile(self, path):
         with open(path, 'rb') as f:
             return wordsFromBytes(f.read())
+
+    # THE BACKGROUNDS MEDS OWNS, by the VDISP number the flight software
+    # names them with.  There is one, and there is exactly one deck in the
+    # flight source that asks for one -- see the VDISP case in drawFCWS for
+    # the change request that put it here.  The file is generated from the
+    # drawing commands that change request deleted, which the release before
+    # it still carries; tools/build_meds_background.py rebuilds it.
+    MEDS_BACKGROUNDS = {158: '0010-D-DPS_UTILITY.dfb'}
+    _medsBackgroundCache = {}
+
+    def _medsBackground(self, vdisp):
+        """The halfword stream for a VDISP number, or None if there is no
+        such background.  Read once and kept: a display names it on every
+        refresh."""
+        if vdisp is None:
+            return None
+        if vdisp not in self._medsBackgroundCache:
+            name = self.MEDS_BACKGROUNDS.get(vdisp)
+            words = None
+            if name is not None:
+                path = os.path.join(self.d.CONFIG['NSTS_TOP'], 'data', name)
+                try:
+                    words = self.loadBGDFBFile(path)
+                except OSError as e:
+                    # Said once, and then drawn as any other backgroundless
+                    # display: a missing file must not stop the screen.
+                    print('MEDS background %d: %s' % (vdisp, e))
+            self._medsBackgroundCache[vdisp] = words
+        return self._medsBackgroundCache[vdisp]
 
     def _dfbList(self):
         pth = os.path.join(self.d.CONFIG['NSTS_TOP'], 'data')
