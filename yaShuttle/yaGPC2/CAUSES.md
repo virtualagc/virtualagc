@@ -416,6 +416,26 @@ symptom out of twelve.  REPRODUCTION, four minutes: cd yaShuttle/discretePanel
 --crts 2 --size 384 --no-wait-user --tape ~/workspace/pass-run/OI340700-v44boot.mmv
 --script examples/2gpc-ops201.script --port-base 7900 --logs OUT --duration 400
 -- the six slots go from f001 to c0xx about 14 s after OPS 2 0 1 PRO.
+  PROVED BY ANSWERING THE TRAFFIC, AND THE NAIVE FIX IS NOT A FIX.
+YAGPC_FC_STUB (src/mtumodel.c, default OFF) answers every command on buses
+20-22, not just the timing unit's, with the number of ZERO words the command
+asked for -- the count is the command's own low nine bits plus one, so no
+device table is needed.  Same fixture, same script, same tape: WITH IT ON the
+six MTU slots are NEVER bypassed and the reads continue to the end of the run
+(t=318 s and still going), where the control stops dead at t=242.4.  That is
+the causal claim demonstrated rather than argued: the timing unit freezes
+because the traffic AROUND it is unanswered, and answering that traffic --
+without touching the MTU model, the MTU bus programs or anything else -- keeps
+it alive.
+  BUT THE SET BREAKS.  The control runs record no votes at all; the stub run
+records two at t=254.7, 'voting: 21 ON (bus)' and 'voting: 12 ON (bus)', each
+computer failing the other, and the MTU read rate then decays from 121 per 30 s
+to 38.  Zeros are not what an MDM sends, and PASS acts on what it is handed.
+So the stub settles the diagnosis and must not be mistaken for the repair: a
+real fix has to model the flight-critical devices well enough that the data
+passes the flight software's own checks, which is a vehicle-wide piece of work
+and a fidelity decision, not a patch.  Keep the flag for re-proving #210
+cheaply; do not turn it on for a simulation anyone is watching.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Fixed
