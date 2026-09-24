@@ -535,7 +535,38 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count);
 /* An error termination: the BCE stops where it is, its program exception
  * bit goes to 0 (NO-GO in STAT1), it leaves the busy state, and its
  * indicator bit is set. */
-void iop_bce_error_terminate(IOP *iop, int p);
+/* THE BCE STATUS REGISTER, Table 1.2 of the Bus Control Element Principles
+ * of Operation (IBM-6246556A part 3, pages 14-16).  Bit 0 is the most
+ * significant, so a bit's mask is 1 << (31 - b).
+ *
+ * WHY THESE ARE HERE AT ALL.  The manual gives an error termination three
+ * parts: the Program Exception bit to 0, the BCE-MSC Indicator bit to 1, and
+ * "it records the cause of the error in its own BCE status register".  Only
+ * the first two were done, so the register read zero forever -- 2,984 stores
+ * in a measured run, every one of them 00000000.  The flight software reads
+ * that register as the TRANSACTION STATUS of every I/O it performs, and at
+ * least one path is gated on it outright: DMIMCD will not look at a display
+ * unit's poll reply, and so will never schedule AIG_DEU_LOADER, unless the
+ * status is non-zero (ledger #208). */
+#define BST_BIT(b) (1u << (31 - (b)))
+#define BST_M   BST_BIT(3)    /* signature mismatch on an input word */
+#define BST_P   BST_BIT(4)    /* bad parity on an input word */
+#define BST_S   BST_BIT(15)   /* an input word arrived with COMMAND sync */
+#define BST_GAP BST_BIT(21)   /* transmit gap over 20 us (5 us in a MOUT) */
+#define BST_ST  BST_BIT(22)   /* the BCE's own self test found a fault */
+#define BST_XMT BST_BIT(23)   /* the MIA's transmitter was disabled */
+#define BST_ITO BST_BIT(25)   /* the FIRST input word never arrived */
+#define BST_TO  BST_BIT(26)   /* a LATER input word never arrived */
+#define BST_BTO BST_BIT(27)   /* the interblock gap never ended */
+#define BST_BA  BST_BIT(28)   /* long instruction on an odd halfword */
+#define BST_I   BST_BIT(29)   /* illegal opcode */
+
+/* `cause` is the Table 1.2 bit(s) to record, or 0 for a termination whose
+ * cause the modelled hardware does not yet distinguish. */
+void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause);
+
+/* OR bits into BCE p's status register, wherever it is paged. */
+void iop_bce_status_or(IOP *iop, int p, uint32_t bits);
 
 uint32_t iop_msc_ea(IOP *iop, uint32_t disp, bool indexed);
 /* BCE short-format effective address: "PC + DISP", or with M=1

@@ -599,7 +599,7 @@ static void exec_STP(IOP *t, DInstr *v) {
              * to 1 (Self Test failure)." */
             iop_proc_set(&t->regProgExcept, t->curPE, 0);
             iop_proc_set(&t->regBusyWait, t->curPE, 0);
-            iopls_setBST(&t->ls, iopls_getBST(&t->ls) | (1u << (31 - 22)));
+            iopls_setBST(&t->ls, iopls_getBST(&t->ls) | BST_ST);
             iop_incr_nia(t, 1);
             return;
         }

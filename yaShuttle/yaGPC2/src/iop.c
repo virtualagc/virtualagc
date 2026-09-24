@@ -1642,7 +1642,21 @@ static double iop_recv_timeout_us(IOP *iop, int p) {
     return t > iop->recvTimeoutFloorUs ? t : iop->recvTimeoutFloorUs;
 }
 
-void iop_bce_error_terminate(IOP *iop, int p) {
+void iop_bce_status_or(IOP *iop, int p, uint32_t bits) {
+    /* BANK 2 WORDS 6 AND 7 of THIS BCE's page -- not the current one.  An
+     * error is terminated from the receive path, which usually is on p's
+     * page, but "usually" is not a thing to write into a status register. */
+    if (bits == 0u || iop == NULL || p < 0 || p > PROC_SELFTEST) return;
+    Register *h = iopls_at(&iop->ls, p, 2, 6);
+    Register *l = iopls_at(&iop->ls, p, 2, 7);
+    if (h == NULL || l == NULL) return;
+    /* OR, because a BCE accumulates causes until the program stores and
+     * clears the register with #SSC. */
+    register_set16(h, register_get16(h) | ((bits >> 16) & 0xffffu));
+    register_set16(l, register_get16(l) | (bits & 0xffffu));
+}
+
+void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
     discretes_note_io_done(iop->discretes, p, true);
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
      * BCEs (all, if the list is empty), per computer, with the BCE's program
@@ -1675,6 +1689,9 @@ void iop_bce_error_terminate(IOP *iop, int p) {
     iop_proc_set(&iop->regProgExcept, p, 0);
     iop_proc_set(&iop->regBusyWait, p, 0);
     iop_proc_set(&iop->regIndicator, p, 1);
+    /* AND THE CAUSE, which is the third of the three things the manual says
+     * happens here and the one that was missing.  See BST_* in iop.h. */
+    iop_bce_status_or(iop, p, cause);
     if (p < 1 || p > 24) return;
     BCE *bce = &iop->bce[p - 1];
     bce->recvActive = false;
@@ -1885,7 +1902,10 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
                 bce->recvSinceUs = now;
                 continue;
             }
-            iop_bce_error_terminate(iop, p);
+            /* A COMMAND-SYNC WORD IN THE MIDDLE OF A RECEIVE: Table 1.2's
+             * Sync Error, "while executing a Receive Data Instruction, an
+             * input word with command sync was received". */
+            iop_bce_error_terminate(iop, p, BST_S);
             bce->recvActive = false;
             bce->recvErrored = true;
             return;
@@ -2039,7 +2059,10 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
                     now, (unsigned)bce->recvLeft, (int)bce->recvGotAny,
                     (now - bce->recvSinceUs) / 1000.0,
                     iop_recv_timeout_us(iop, p) / 1000.0);
-        iop_bce_error_terminate(iop, p);
+        /* WHICH TIMEOUT IT WAS.  Table 1.2 separates them: Initial Time Out
+         * is the first input word never arriving, Time Out is a later one,
+         * and recvGotAny is exactly that distinction. */
+        iop_bce_error_terminate(iop, p, bce->recvGotAny ? BST_TO : BST_ITO);
     }
     return false;
 }
