@@ -231,6 +231,7 @@ struct MtuModel {
     const double *offsetUs;      /* see mtumodel_set_clock_offset */
     uint16_t reply[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
+    int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
     int commander[MTU_NBUS];
@@ -358,6 +359,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         m->reply[b][r][2] = (uint16_t)msec;
         m->head[b][r] = 0;
         m->count[b][r] = MTU_WORDS;
+        m->mdm[b][r] = 0;            /* this transaction is the unit's own */
     }
     m->lastBus = b;
     m->reads++;
@@ -420,20 +422,22 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * (ledger #137). */
             unsigned cu = CMD_IUA(cmd);
             int nsp = (cu == MTU_IUA || cu == 12u) ? ff_nsp_words(cmd) : 0;
-            if (nsp > 0) {
-                /* The NSP is not powered: zero, the same word to every
-                 * computer on the bus, through the same per-reader path the
-                 * timing unit's own reply uses. */
-                memset(m->reply[b], 0, sizeof m->reply[b]);
-                for (int r = 0; r < MTU_READERS; r++) {
-                    m->head[b][r] = 0;
-                    m->count[b][r] = nsp;
-                }
-                m->nspReads++;
-            } else {
-                for (int r = 0; r < MTU_READERS; r++)
-                    m->count[b][r] = 0;
+            /* THE MDM'S ANSWER LIVES APART FROM THE TIMING UNIT'S REPLY.  It
+             * used to be written into `reply`, so an MDM read on one of these
+             * buses memset the time words the unit had just put there -- and
+             * a commander and a listener drain at different moments, so one
+             * computer got the time and another got zeros.  Two computers
+             * that disagree about the clock self-fail, which is exactly what
+             * a five-computer acid test did four seconds after its OPS 901
+             * transition, every member lighting its own diagonal cell.  The
+             * answer is all zeros, so it needs a COUNT and no buffer.  The
+             * unit's words are still DROPPED for a command that is not its
+             * own, as they always were (ledger #137), but never overwritten. */
+            for (int r = 0; r < MTU_READERS; r++) {
+                m->count[b][r] = 0;
+                m->mdm[b][r] = nsp;
             }
+            if (nsp > 0) m->nspReads++;
         } else {
             mtu_fill_time(m, b);
         }
@@ -474,7 +478,8 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
-        out->out.poll.available = m->echoPending[b][g] || (m->count[b][g] > 0);
+        out->out.poll.available = m->echoPending[b][g] ||
+                                  (m->count[b][g] > 0) || (m->mdm[b][g] > 0);
         break;
     case GPC_SVC_RECV_WORD:
         if (m->echoPending[b][g]) {
@@ -487,6 +492,10 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             m->count[b][g]--;
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
+        } else if (m->mdm[b][g] > 0) {
+            m->mdm[b][g]--;                 /* a box with nothing wired to it */
+            out->out.recv.available = true;
+            out->out.recv.word = 0;
         } else {
             out->out.recv.available = false;
             out->out.recv.word = 0;
