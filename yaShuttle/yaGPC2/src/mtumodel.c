@@ -142,7 +142,18 @@ static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
 
 /* How many words this model answers the command with, or 0 if it does not
  * speak for it. */
+/* YAGPC_NO_FC_MDM silences the forward and aft MDMs again, so that a vehicle
+ * with them can be measured against one without.  Answering is the default;
+ * this exists because the difference they make is the whole question and a
+ * switch is the only honest way to ask it twice. */
+static bool ff_mdm_off(void) {
+    static int inited = 0, off = 0;
+    if (!inited) { inited = 1; off = yagpc_getenv("YAGPC_NO_FC_MDM") != NULL; }
+    return off != 0;
+}
+
 static int ff_nsp_words(uint32_t cmd) {
+    if (ff_mdm_off()) return 0;
     for (size_t i = 0; i < sizeof FF_MDM_READS / sizeof FF_MDM_READS[0]; i++)
         if (FF_MDM_READS[i].cmd == (cmd & 0xffffffu))
             return FF_MDM_READS[i].words;
@@ -431,7 +442,21 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         m->commander[b] = g;
         m->echoCmd[b] = cmd;
         for (int r = 0; r < MTU_READERS; r++)
-            m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g);
+            /* NOT TO A READER THAT IS STILL TAKING THE LAST REPLY.  A
+             * command-sync word arriving in the middle of a receive is Table
+             * 1.2's Sync Error, and that is precisely what a listener gets
+             * when the commander's next command is echoed to it before it has
+             * drained the words from the previous one.  Measured: with the
+             * flight-critical reads answered, EVERY error left on a
+             * two-computer vehicle was one of these -- GPC1 on buses 15, 17
+             * and 23, GPC2 on 14 and 16, two apiece, on exactly the buses the
+             * other computer commands, and two is FIOERRLC's threshold.  Each
+             * computer therefore held errors its peer did not, FIOGPCWE was 1
+             * and the set broke.  A listener that is behind keeps its data and
+             * simply does not see this command, which is what a real one
+             * would do: it is still receiving. */
+            m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g &&
+                                    m->count[b][r] == 0);
         out->out.xmit.ok = true;
         break;
     }
