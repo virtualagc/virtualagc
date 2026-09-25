@@ -574,6 +574,38 @@ made from a CURRENT error every cycle rather than from a latched counter, so
 removing the error is sufficient and no un-latching is needed; and there is now
 a fast probe for any candidate fix -- restore with I/O RESET and see whether
 the element survives more than one cycle.
+  THE TIMING UNIT IS FIXED, BEHIND A SWITCH, AND ONE QUESTION REMAINS.
+YAGPC_FC_MDM has the forward and aft MDMs (IUA 10 and 12) answer their reads
+on all eight flight-critical buses, from the one shared model, so every
+computer gets the same words.  Exact lengths where they are known, harvested
+with YAGPC_FC_LEARN; a generous 64 for the rest, which is safe because every
+read on these buses is preceded by the listen command and a command for
+another IUA clears every reader's pending count.  NEVER the listen command
+itself (IUA 8) and never another unit -- answering FIOLMIUA is what wrecked
+the first attempt at this and left the vehicle unable to leave OPS 0.
+  NAMING COMMANDS ONE AT A TIME DOES NOT CONVERGE, which is why the model
+speaks for the BOX.  Answering a batch lets the chains run further and reveals
+the next: six known commands became seventeen in a single round, with the IMU
+(524c0d), the STU (524c42), the rendezvous radar (524c69) and the PROM
+segments (5082e8, 60836e) appearing behind the reads just answered.
+  MEASURED, fresh two-computer vehicle to OPS 201, against the same fixture
+without it: unanswered reads on the flight-critical buses 437 -> ZERO; MTU
+bypass events 6 -> ZERO on both computers; the timing unit read 186 to 244 a
+minute to the end of the run (last read t=415.1) where the control stops dead
+at t=242.  Nothing executes unprogrammed store.
+  AND IT GAINS TWO SYNC VOTES where that control has none, which is why it is
+off by default.  What is NOT yet known is whether the answering causes them or
+merely unmasks them.  That fixture has GPC1 commanding DK3 with no IDP
+assigned -- 729 error terminations against GPC2's 29 -- and with the
+flight-critical errors gone that asymmetry is what is left for FIOERRLC to
+find; ITEM 14 +0 does not remove it and neither does powering IDP3.  The
+five-computer RESTORED vehicle cannot settle it: there both the control and
+the change restore the slot at t=35.2 and neither re-bypasses it, because a
+restored machine has already configured itself, and it votes 12 times against
+the change's 9 -- the known restore flakiness of #180 swamping the signal.
+  THE DISCRIMINATING TEST IS A FRESH FIVE-COMPUTER ACID TEST, run twice with
+YAGPC_FC_MDM on and off, counting votes.  That is the one measurement this
+needs and it has not been made.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.

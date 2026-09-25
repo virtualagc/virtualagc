@@ -36,8 +36,16 @@
  * redundant set (ledger #145: eve1 GPC2, eve3 GPC3, 'ERRTERM bce=20
  * pc=1cc2e left=1', FIONSPPG FIOBYNC3+4). */
 #define MTU_READ_CMD   0x024C26u
-#define MTU_BUS_FIRST  20
-#define MTU_BUS_LAST   22
+/* ALL EIGHT FLIGHT-CRITICAL BUSES.  The timing unit answers on three, but
+ * the forward and aft MDMs this file also speaks for sit on all eight, and
+ * coverage that stops short is WORSE than none: a computer listens on the
+ * strings its peer commands, so answering only some buses leaves each machine
+ * holding I/O errors its peer does not have, FIOGPCWE is 1, and FIOERRLC
+ * self-fails it rather than commfaulting a string.  18 and 19 are mass
+ * memory, whose device IS modelled, so they stay out and a time-out there
+ * remains the real defect it is. */
+#define MTU_BUS_FIRST  14
+#define MTU_BUS_LAST   23
 
 /* The command word's IUA field, the same extraction iop.c's mia_xmit_cmd
  * uses. */
@@ -99,7 +107,8 @@
 #define FF_NSP2_PWR   0x138u    /* FIONSP2P, #MIN 0,0  -- one word  */
 #define FF_NSP_DISCR  0x128u    /* FIONSPDR, #MIN 1,0  -- one word  */
 #define FF_NSP_DATA   0x136u    /* FIONSPRD, #MIN 0,31 -- 32 words  */
-#define FF_REPLY_MAX  34
+#define FF_REPLY_MAX  64
+#define FF_FA_GENERIC 64
 
 /* AND THE MDM'S OWN READS.  With the NSP answered, YAGPC_FC_LEARN's list of
  * unanswered transfers on the flight-critical buses fell from about 437 in a
@@ -116,30 +125,53 @@
  * at IUA 10 and 34 at IUA 12, func 042 is 4 and 6.  They come from the bus
  * programs' own #MIN, harvested rather than guessed. */
 
-/* How many words the forward MDM answers this command with, or 0 if this
- * model does not know the command. */
+/* READS WHOSE LENGTH IS KNOWN EXACTLY, keyed on the WHOLE command word:
+ * function 126 alone is the timing unit, the IMU, the rendezvous radar and
+ * the STU, told apart only by the count field.  The lengths are what the bus
+ * programs' #MIN and #RDLI arm, harvested with YAGPC_FC_LEARN and not
+ * guessed -- the command's own count field is not the reply length,
+ * FIOMTURD's is 38 and its #MIN arms seven. */
+static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
+    { 0x5082c5u, 21 },   /* FF MDM (IUA 10) channel read */
+    { 0x508543u,  4 },   /* FF MDM (IUA 10) channel read */
+    { 0x531555u,  1 },   /* FF MDM (IUA 10) return word  */
+    { 0x6082a5u, 34 },   /* FA MDM (IUA 12) channel read */
+    { 0x608545u,  6 },   /* FA MDM (IUA 12) channel read */
+    { 0x631555u,  1 },   /* FA MDM (IUA 12) return word  */
+};
+
+/* How many words this model answers the command with, or 0 if it does not
+ * speak for it. */
 static int ff_nsp_words(uint32_t cmd) {
+    for (size_t i = 0; i < sizeof FF_MDM_READS / sizeof FF_MDM_READS[0]; i++)
+        if (FF_MDM_READS[i].cmd == (cmd & 0xffffffu))
+            return FF_MDM_READS[i].words;
     switch ((cmd >> 9) & 0x3ffu) {
     case FF_NSP1_PWR:  case FF_NSP2_PWR:  case FF_NSP_DISCR: return 1;
     case FF_NSP_DATA:  return 32;
-    /* AND NO FURTHER.  Two more steps were tried and
-     * because each cost the redundant set both computers where these four
-     * cost it nothing: the MDM's return word (func 18a), and its channel
-     * reads (func 041 and 042) answered with zeros.  Measured, same fixture,
-     * same script: these four alone give no votes at all; adding the return
-     * word gives two; adding the channel reads as well gives two -- and that
-     * stayed true after each reader was given its own copy of the words, so
-     * it is not an artefact of this model's buffering.  What the two
-     * computers disagree about is the CHANNEL DATA itself.
-     *
-     * The line is between what the INTERFACE says and what the SENSORS say.
-     * "The NSP is not powered" is true of this vehicle, is a statement about
-     * the interface, and is the same word on every computer.  "Every channel
-     * of this MDM reads zero" is a claim about the vehicle's sensors, and the
-     * flight software acts on it -- which is how it ends up disagreeing with
-     * itself across a redundant set. */
-    default:           return 0;
+    default: break;
     }
+    /* ANYTHING ELSE ADDRESSED TO ONE OF THESE TWO UNITS.  Naming commands one
+     * at a time does not converge: answering a batch lets the chains run
+     * further and reveals the next, and six became seventeen in one round --
+     * the IMU, the STU, the rendezvous radar and the PROM segments all
+     * appearing behind the reads just answered.  They are reads of the same
+     * two boxes, so this speaks for the BOX and not for a list of commands.
+     *
+     * NOT the listen command, and not any other unit.  FIOLMIUA is IUA 8 and
+     * "#CMDI FIOLMIUA,..." is a broadcast that sets listeners up, not a read;
+     * answering it puts words on the wire that the commander's own receive
+     * then takes as its data, which wrecked the first attempt at this and
+     * left the vehicle unable to leave OPS 0.
+     *
+     * The generous length is safe because every read here is preceded by that
+     * listen command, and a command for another IUA clears every reader's
+     * pending count, so nothing is left over when the next receive arms. */
+    {
+        unsigned iua = CMD_IUA(cmd);
+        if (iua == MTU_IUA || iua == 12u) return FF_FA_GENERIC;
+    }
+    return 0;
 }
 
 /* EVERY COMPUTER ON A BUS HEARS THE REPLY; NONE OF THEM USES IT UP.
@@ -205,6 +237,7 @@ void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs) {
 }
 
 bool mtumodel_owns_bus(int busID) {
+    if (busID == 18 || busID == 19) return false;      /* mass memory */
     return busID >= MTU_BUS_FIRST && busID <= MTU_BUS_LAST;
 }
 
