@@ -465,6 +465,47 @@ reachable through, the completion", not as an independent finding.
 that loses its redundant set is not a working vehicle, and the trade is not
 one to make silently on the strength of a mechanism that has not been seen to
 produce the symptom's cure.
+  THE DISPLAY, READ AT LAST, AND THE EARLIER "CANNOT SEE IT" WAS A TEST
+ERROR.  SPEC 2 PRO was typed UNPREFIXED, which sends it to KB1 and so to
+CRT1, and the script then sampled CRT2 -- which is why the TIME display never
+appeared.  Typing it on KB1 and reading CRT1 brings it straight up:
+'2011/002/ TIME 1 MISSION TIME TONE'.  discretePanel/screenwatch.py now reads
+whole frames as text from MEDS2's NSTS_ANNOUNCE_ROWS=all announcements, and on
+a two-computer OPS 201 vehicle SPEC 2 reads:
+       GPC TIME                                   GPC
+                           GMT             TRY   1 G1
+         MTU ACCUM 1                 M     34    2 G1
+                   2                 M     35    3 A1
+                   3                 M     36    4 A1
+               GPC   268/01:33:43.986      37    5 A
+The three accumulators are BLANK WITH STATUS M -- missing data -- while GPC
+time counts.  Note this is not identical to the owner's report of frozen
+values with a down arrow on the five-computer vehicle; same cause, the unit
+is never read, different presentation.  Do not assume the arrow without
+reading the frame.
+  AND THE SYNC LOSS IS NOW DIAGNOSED EXACTLY, WHICH MATTERS BECAUSE IT RULES
+OUT THE WHOLE CLASS.  With the completion on, BOTH computers store X'8000' to
+FIOICCFL from nia 19dc3 -- FIOERRLC's 'MASK FOR FORCE F-T-S' -- and call
+FCMSFAIL: each SELF-fails.  The reason is visible in the errors each holds in
+the three seconds before: GPC1 on BCE 15, 17, 21 and 23 and GPC2 on 14, 16, 20
+and 22, perfectly complementary, TWO on each, which is exactly FIOERRLC's
+threshold.  A computer listens on the strings its peer commands, so ANY
+answering scheme that depends on which bus a computer commands leaves each
+machine holding errors its peer does not have, FIOGPCWE is 1, and the self
+fail-to-sync path takes it out.  Four variants were tried and every one of
+them votes: complete at the message time-out; complete after a 60 us grace
+(which does fix the rate distortion -- the timing unit goes back to 186-239
+reads a minute instead of 1300); commander-only; and commander-and-listener.
+Taking CRT3 out of the NBAT (ITEM 14 +0, which the two-computer script omits
+and the five-computer one does twice) does not help either: GPC1 still
+commands DK3 and still collects ~780 errors its peer lacks.  Completing on the
+Table 1.2 SYNC ERROR path as well removes the last flight-critical errors --
+and breaks the bus programs outright, 14,740 'unknown instruction'.
+  SO NOTHING THAT BREAKS THE SET IS ENABLED.  The completion stays off, the
+timing unit stays unread, and the constraint any future fix must satisfy is
+now stated precisely: after it, NO COMPUTER MAY HOLD AN I/O ERROR ITS PEERS DO
+NOT SHARE.  That is why a device model, which answers the same words to every
+computer on the bus, is the only shape of fix left.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.
