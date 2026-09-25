@@ -43,7 +43,6 @@ import threading
 import sys
 import time
 import tkinter as tk
-import tkinter.filedialog as filedialog
 import tkinter.font as tkfont
 
 import crewscript
@@ -118,25 +117,25 @@ def running(port_base):
 
 
 # ---------------------------------------------------------------------------
-# A NATIVE FILE DIALOG WHERE ONE EXISTS.
+# THE FILE DIALOGS.
 #
-# Tk's own choosers are what tkinter.filedialog gives on X11 -- tkfbox.tcl,
-# whose file list is an IconList of icons and names, with no details mode, no
-# columns and no dates.  That is a limitation of the TOOLKIT and not of the
-# platform: PyQt6's QFileDialog is native on all three, and its Detail view
-# has the Date Modified column that makes one snapshot directory tellable
-# from another.  (Measured: a snapshot directory's mtime is within a second
-# of the capture time its vehicle.json records, so that column is the right
-# time and not merely a time.)
+# Qt's, not Tk's.  tkinter.filedialog on X11 is tkfbox.tcl, whose file list is
+# an IconList of icons and names -- no details mode, no columns, no dates --
+# and its directory chooser is plainer still.  QFileDialog is native on all
+# three platforms and its Detail view has the Date Modified column, which is
+# what tells one snapshot directory from another.
 #
-# IN A SUBPROCESS, DELIBERATELY.  Qt and Tk each want to own the event loop,
-# and a manager that has to keep a simulation's windows alive is the wrong
-# place to find out what happens when both try.  The child does nothing but
-# put up the dialog and print the answer.
+# PyQt6 IS ALREADY REQUIRED, so there is nothing to guard against: MEDS2.py
+# imports it at module level with no try around it, and MEDS2.py is what draws
+# every display unit.  A simulation with a CRT cannot start without it, and
+# this manager only ever runs as part of one.  An "in case it is absent"
+# fallback here would be a second implementation of every chooser, kept
+# working for a case that cannot arise.
 #
-# AND IT IS OPTIONAL.  PyQt6 is not a dependency of this program and must not
-# become one for the sake of a dialog: if it is not importable, or the child
-# fails for any reason at all, Tk's chooser is used exactly as before.
+# IN A SUBPROCESS, THOUGH.  Qt and Tk each want to own the event loop, and a
+# manager keeping a simulation's windows alive is the wrong place to discover
+# what happens when both try.  simulatePASS.py already asks Qt about the
+# screen the same way, in screen_info().
 _QT_DIALOG = r"""
 import sys
 from PyQt6.QtWidgets import QApplication, QFileDialog
@@ -162,16 +161,12 @@ if d.exec():
 
 
 def native_dialog(mode, title, start, pattern=""):
-    """A native chooser's answer, or None if there is no native chooser.
+    """The chooser's answer: a path, or "" if it was cancelled.
 
-    `mode` is "open", "save" or "dir".  None means "not available or it
-    failed" -- NOT "the user cancelled", which is an empty string, because
-    the caller must be able to tell a cancel from a fallback.
+    None means the child could not be run at all, which is a broken
+    installation rather than a cancel, and the caller says so instead of
+    quietly doing something else.
     """
-    try:
-        import PyQt6                                  # noqa: F401
-    except Exception:
-        return None
     try:
         out = subprocess.run([sys.executable, "-c", _QT_DIALOG,
                               mode, title, start or "", pattern],
@@ -383,38 +378,34 @@ class Manager(object):
                             os.path.join(HERE, "examples"),
                             "Crew scripts (*.script)")
         if got is None:
-            got = filedialog.askopenfilename(
-                title="Crew script", initialdir=os.path.join(HERE, "examples"),
-                filetypes=[("Crew scripts", "*.script"), ("All files", "*")])
-        if got:
+            self.say("Cannot open a file chooser")
+        elif got:
             self.script.set(got)
 
     def browse_layout(self):
         got = native_dialog("save", "Window layout", HERE, "Layouts (*.layout)")
         if got is None:
-            got = filedialog.asksaveasfilename(
-                title="Window layout", initialdir=HERE, confirmoverwrite=False,
-                filetypes=[("Layouts", "*.layout"), ("All files", "*")])
-        if got:
+            self.say("Cannot open a file chooser")
+        elif got:
             self.layout.set(got)
 
     def browse_snapshot(self):
         """CHOOSE A SNAPSHOT DIRECTORY -- to restore, or to save into.
 
-        This was a bespoke list for a while, because Tk's chooser on X11
-        cannot show WHEN a snapshot was taken and snapshots have deliberately
-        similar names.  It is gone, for two reasons the owner supplied.  What
-        a snapshot holds -- how many computers, what they were doing -- is the
-        business of whoever names it, not of the dialog that lists it.  And
-        the time is not actually missing from an ordinary chooser: a snapshot
+        This was a hand-written list for a while, because Tk's chooser cannot
+        show WHEN a snapshot was taken and snapshots have deliberately similar
+        names.  Both halves of that were wrong.  The limitation was the
+        TOOLKIT, not the platform.  And the time was never missing: a snapshot
         directory's mtime is within a second of the capture time its
-        vehicle.json records (measured across six of them), so a Detail view's
-        Date Modified column is the right time and not merely a time.
+        vehicle.json records, measured across six of them, so a Detail view's
+        Date Modified column is the right time and not merely a time.  What a
+        snapshot HOLDS -- how many computers, what they were doing -- is the
+        business of whoever names it, not of the dialog that lists it.
 
-        What was genuinely wrong was navigation -- the bespoke list could only
-        descend, and could not name a directory that did not exist yet, which
-        is half of what this box is for.  A native chooser does both, and
-        looks like the two buttons above it, which the bespoke one never did.
+        What was genuinely wrong was navigation: the list could only descend,
+        and could not name a directory that did not exist yet, which is half
+        of what this box is for, since it holds the snapshot to SAVE as well
+        as the one to restore.
         """
         current = self.snapshot.get().strip()
         # THE PARENT, not the snapshot itself.  Opening inside the last one
@@ -425,9 +416,8 @@ class Manager(object):
             start = HERE
         got = native_dialog("dir", "Snapshot directory", start)
         if got is None:
-            got = filedialog.askdirectory(title="Snapshot directory",
-                                          initialdir=start, mustexist=False)
-        if got:
+            self.say("Cannot open a file chooser")
+        elif got:
             self.snapshot.set(got)
 
     def _place_dialog(self, top, W, H):
