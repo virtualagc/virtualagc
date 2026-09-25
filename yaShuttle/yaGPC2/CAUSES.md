@@ -546,6 +546,34 @@ The next thing to try is per-reader QUEUES -- every reply appended for every
 reader and drained in order -- so that two computers see identical word
 streams no matter when each polls.  That is the property the redundant set is
 measuring, and no amount of extra coverage substitutes for it.
+  TWO CREW ACTIONS SETTLED, ONE OF THEM DECISIVE.
+  ITEM 34-37, THE "TRY" ITEMS, CANNOT HELP AND NEVER COULD.  The PASS User's
+Guide (pdf p.140) calls them MTU Accumulator 1/2/3 Try and GPC Time Try, and
+ASLTMC.hal's dispatch table says what that means: "34 THUR 37 TRY * 0C01 7000
+* 7- FORCE ACCUMULATOR OR GPC SELECTION".  Case 7 is two statements --
+CZ2B_TIME_SOURCE$(14 TO 16) = SUBBIT$(14 TO 16)(ASL_ITEM - 33), then
+ICC_CZ2B_TIME_SOURCE.  They SELECT which accumulator the computer uses as its
+reference and do nothing else: no re-read, no commfault clearing, no restore.
+With the read bypassed there is nothing to select, so the owner's ITEM 34 and
+35 doing nothing was the flight software behaving correctly.  DO NOT RETRY.
+  I/O RESET EXEC DOES RESTORE THE ELEMENT, AND IT IS UNDONE IN A HUNDRED
+MILLISECONDS.  FCMBUSCM services request types 1, 2, 3, 6 and 13 as "RESET
+TRANSACTION COUNTERS & BTU PORT FAILURE INDICATORS AND RESTORE BCE CHAINS
+ASSOCIATED WITH A SPECIFIC STRING/BUS OR ALL (FC,PL,LDB) BUSES", 6 and 13
+setting TFCMNOCH so that ALL elements on the string are restored.  Measured on
+the two-computer OPS 201 fixture, watching 1cc74 and typing I/O RESET EXEC
+three times on each keyboard: every single time the slot goes c022 -> f001cc78
+and then f001 -> c022c000 again within 0.1 s.  GPC1 at 266.3/266.4, 286.0/286.1,
+316.3/316.3; GPC2 at 211.3/211.4, 231.0/231.1, 261.3/261.3.
+  NOTE THE KEY NEEDS EXEC.  Sent bare it only sits in the scratch pad and
+nothing happens, which is what a first attempt at this measured and nearly
+wrote down as "I/O RESET does not work".
+  WHAT THAT BUYS.  The flight software's own repair path is reachable and
+works, so nothing needs to be invented to drive it; the bypass decision is
+made from a CURRENT error every cycle rather than from a latched counter, so
+removing the error is sufficient and no un-latching is needed; and there is now
+a fast probe for any candidate fix -- restore with I/O RESET and see whether
+the element survives more than one cycle.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.
