@@ -31,9 +31,13 @@ alignment, which subtitles.py keeps on its own window (_NSTS_SUBTITLES) and
 updates as they are changed in --edit.  simulatePASS.py --layout starts the
 box with exactly those options.
 
-SIZES.  Only the caption box is resized: the displays and the panel size
-themselves from --size, and forcing a different size on them would not scale
-what they draw.  'restore --with-sizes' resizes everything in the file.
+SIZES.  Every window is restored at the size it was saved at, not just moved.
+All of them are resizable by hand, and the usual reason to restore a layout is
+to undo a change made by accident -- a window dragged bigger is exactly such a
+change, so putting it back where it was without putting it back at the size it
+was does only half the job.  'restore --no-sizes' moves without resizing;
+'--with-sizes' is now what happens anyway and is accepted so that older command
+lines and scripts keep working.
 
 WHOSE WINDOWS.  'restore' moves whatever it finds by that name, so with two
 simulations running it may move the wrong one's; it says so when a name
@@ -65,10 +69,19 @@ import time
 TITLE_ROLES = [
     (re.compile(r"^Subtitles$"), "subtitles"),
     (re.compile(r"^CAM$"), "cam"),
-    (re.compile(r"^Panels O6\b"), "panel"),
+    # BOTH TITLES THE PANEL HAS WORN.  It is "Panel" now -- the task bar shows
+    # a few characters and a long title made every button look alike -- but a
+    # layout saved before that, or an older copy of panelO6.py, still says
+    # "Panels O6, ...".
+    (re.compile(r"^Panel$|^Panels O6\b"), "panel"),
     (re.compile(r"^GPC discrete panel"), "discretepanel"),
     (re.compile(r"^Manager\b"), "manager"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
+    # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
+    # command line is tried first and normally answers; this is the fallback
+    # for a window whose process cannot be read.
+    (re.compile(r"^(CRT|CDR|PLT|MFD|AFD)(\d)$", re.I),
+     lambda m: m.group(0).lower()),
 ]
 ROLE_PATTERNS = [
     # (what to look for in the command line, the name to give it)
@@ -84,7 +97,6 @@ ROLE_PATTERNS = [
     # window a layout could not put back.
     (re.compile(r"manager\.py"), lambda m: "manager"),
 ]
-RESIZE_BY_DEFAULT = ("subtitles",)
 
 
 HOSTNAME = os.uname().nodename
@@ -326,7 +338,7 @@ def look_in(path, role="subtitles"):
     return []
 
 
-def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=None,
+def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=None,
                    only_pids=None):
     """Put the windows where the file says.  only_ids, if given, is the set of
     window ids that may be moved; only_pids the set of processes whose windows
@@ -353,8 +365,11 @@ def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=No
             log("   %-12s %d windows have this name; taking %s (%s)"
                 % (role, len(got), got[0]["id"], got[0]["title"][:40]))
         w = got.pop(0)
-        size = ((want["w"], want["h"]) if (with_sizes or role in RESIZE_BY_DEFAULT)
-                else (None, None))
+        # SIZE AS WELL AS PLACE, for every window.  It used to be the caption
+        # box alone; but the windows a layout exists to protect are all
+        # resizable by hand, and a layout restored after a stray drag has to
+        # undo the size along with the position or it has not undone anything.
+        size = ((want.get("w"), want.get("h")) if with_sizes else (None, None))
         ok = place(w["id"], want["x"], want["y"], size[0], size[1], verbose)
         if ok is True:
             note = ""
@@ -374,7 +389,7 @@ def restore_layout(path, with_sizes=False, verbose=False, log=print, only_ids=No
 
 
 def cmd_restore(args):
-    restore_layout(args.file, args.with_sizes, args.verbose)
+    restore_layout(args.file, not args.no_sizes, args.verbose)
     return 0
 
 
@@ -404,7 +419,9 @@ def main(argv=None):
     r = sub.add_parser("restore", help="put the windows back where a file says")
     r.add_argument("file")
     r.add_argument("--with-sizes", action="store_true",
-                   help="resize every window, not just the caption box")
+                   help="accepted and ignored: sizes are restored anyway")
+    r.add_argument("--no-sizes", action="store_true",
+                   help="move the windows without resizing them")
     r.add_argument("--verbose", action="store_true", help="show each move and what came of it")
     r.set_defaults(func=cmd_restore)
     h = sub.add_parser("show", help="what is on screen now, or what a file holds")

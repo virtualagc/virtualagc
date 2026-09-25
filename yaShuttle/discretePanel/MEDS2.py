@@ -280,12 +280,20 @@ MCAST_GROUP = "239.255.1.1"
 PORT_BASE_DEFAULT = 6900
 PORT_BASE = PORT_BASE_DEFAULT
 
-# WHAT THE WINDOW IS CALLED, before the LRU's own name.  The orbiter has
-# eleven MDUs (CRT1-4, CDR1-2, PLT1-2, MFD1-2, AFD1) and a given GPC talks
-# only to some of them, so several may be on screen at once -- and with
-# --port-base there may be two whole simulations' worth.  "CRT1" alone does
-# not say which of those a window belongs to; --title does.
-WINDOW_TITLE = "MEDS2 MDU"
+# AN OPTIONAL PREFIX BEFORE THE LRU'S OWN NAME, EMPTY BY DEFAULT.  A window
+# is called "CRT1" and nothing more, because the desktop labels its hot-key
+# button with the title and shows only the first few characters: a prefix
+# every display shares makes every button read alike, which is the one thing
+# the title has to avoid.  --title puts one back for the case it was invented
+# for -- two whole simulations side by side under different --port-base, where
+# "CRT1" really is ambiguous -- and then the window is "<text> / CRT1".
+WINDOW_TITLE = ""
+
+
+def titled(lru):
+    """What to call a window showing that LRU: its own name, with --title's
+    prefix in front of it when one was given."""
+    return "%s / %s" % (WINDOW_TITLE, lru) if WINDOW_TITLE else lru
 
 
 def setPortBase(base):
@@ -10181,14 +10189,18 @@ class MDU(LRU):
         the title bar rather than disappearing."""
         name = MF_NAMES[(self.majorFunc or 0) & 3]
         lru = self.CONFIG.get('config', {}).get('lru')
-        if self.pane is None:
-            t = "%s / %s - MF %s" % (WINDOW_TITLE, lru, name)
-        else:
-            t = "%s / %s" % (WINDOW_TITLE, lru)
+        # THE TASK BAR GETS THE DISPLAY'S NAME AND NOTHING ELSE -- "CRT1".
+        # The desktop labels its hot-key button with the window title and has
+        # room for a few characters, so a shared prefix made every display's
+        # button read the same thing and there was no telling them apart.
+        # The window's OWN title strip is not that short, so with --no-pane it
+        # still carries the major function, which otherwise has nowhere left
+        # to appear.
         try:
             if self.win is not None:
-                self.win.setWindowTitle(t)
-                self.win.setChromeTitle(t)
+                self.win.setWindowTitle(titled(lru))
+                self.win.setChromeTitle(titled(lru) if self.pane is not None
+                                        else "%s - MF %s" % (titled(lru), name))
         except Exception:
             pass
         return name
@@ -11838,9 +11850,7 @@ class MDUWindow(QtWidgets.QWidget):
             self.move(int(win['x']), int(win['y']))
         if win.get('fullscreen'):
             self.showFullScreen()
-        self.setWindowTitle("%s / %s" % (WINDOW_TITLE,
-                                         lruConf.get('config', {}).get('lru')
-                                         or name))
+        self.setWindowTitle(titled(lruConf.get('config', {}).get('lru') or name))
 
     @staticmethod
     def _envPos():
@@ -12458,11 +12468,11 @@ def buildParser():
                    help='restore each IDP\'s display memory from a snapshot '
                         'directory (idp<N>.json and idp<N>.mem.bin)')
     p.add_argument('--title', metavar='<text>',
-                   help='what to call the windows, before each LRU\'s own '
-                        'name: "<text> / CRT1".  The orbiter has eleven MDUs '
-                        'and a GPC talks only to some of them, so several may '
-                        'be on screen at once -- and with --port-base there '
-                        'may be two simulations\' worth.  Default "MEDS2 MDU".')
+                   help='a prefix before each LRU\'s own name: "<text> / CRT1".  '
+                        'By default a window is called just "CRT1", which is '
+                        'what the desktop\'s task bar has room to show.  Give '
+                        'a prefix when two whole simulations are up under '
+                        'different --port-base and that is ambiguous.')
     p.add_argument('--port-base', dest='portBase', type=int, metavar='<n>',
                    help='base of the UDP port range the buses use: every bus '
                         'port moves with the base (default 6900).  The same option '

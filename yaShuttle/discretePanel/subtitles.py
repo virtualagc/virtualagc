@@ -141,7 +141,10 @@ class Subtitles(object):
             # manager (Marco, here) reads the hint only when a window is FIRST
             # mapped, so the window stays withdrawn until the hint is on it.
             root.withdraw()
-        root.attributes("-topmost", True)
+        # NOT ON TOP OF EVERYTHING.  It used to be, and that makes the
+        # desktop nearly unusable while a simulation is up: the captions sit
+        # over whatever else is being read or typed into.  A caption box is
+        # something to glance at, not something that outranks the work.
         root.configure(bg=args.bg)
         try:
             root.attributes("-alpha", args.opacity)
@@ -357,7 +360,6 @@ class Subtitles(object):
         if self.args.hide_when_empty and not self.args.edit:
             if shown:
                 self.root.deiconify()
-                self.root.attributes("-topmost", True)
             else:
                 self.root.withdraw()
 

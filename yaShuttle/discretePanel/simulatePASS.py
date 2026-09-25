@@ -1015,7 +1015,8 @@ def main():
                          "--crts 4 (the aft keyboard reaches only CRT4).  Which IDP each "
                          "forward keyboard reaches is panel C2's IDP/CRT SEL")
     ap.add_argument("--title", metavar="TEXT",
-                    help="display window title (default: GPCs <list>)")
+                    help="a prefix before each display's own name, as in "
+                         "\"<TEXT> / CRT1\" (default: none -- just \"CRT1\")")
     ap.add_argument("--major-func", choices=sorted(MAJOR_FUNC), default="GNC",
                     help="the IDP MAJ FUNC switch at start (default GNC)")
     ap.add_argument("--port-base", type=int, default=6900, metavar="N",
@@ -1281,7 +1282,12 @@ def main():
         # The manager is deliberately NOT in here: it is the window the
         # person is clicking, and it stays up across a resume.
         def bring_up(resume=None):
-            title = args.title or "GPC%s %s" % ("s" if multi else "", ",".join(map(str, gpcs)))
+            # NO PREFIX UNLESS ONE WAS ASKED FOR.  It used to name the GPCs,
+            # which made every display's task-bar button read "GPCs 1,2,3,4,..."
+            # with the one thing that tells them apart -- CRT1, CRT2, CRT3 --
+            # cut off.  MEDS2.py calls a window just "CRT1" when no --title
+            # comes down.
+            title_arg = ["--title", args.title] if args.title else []
             for k in range(args.crts):
                 e = dict(env)
                 e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
@@ -1294,8 +1300,8 @@ def main():
                 L.start("meds%d" % (k + 1),
                         [py, "MEDS2.py"] + meds_extra
                         + ["--port-base", str(args.port_base), "--size", str(size),
-                           "--scale", str(args.scale), "--title", title,
-                           "crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                           "--scale", str(args.scale)] + title_arg
+                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
                 time.sleep(1)
             if args.keyboards:
                 for k in range(args.keyboards):

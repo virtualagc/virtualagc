@@ -94,7 +94,12 @@ import tkinter.font as tkfont
 
 import crewscript
 
-TITLE_BASE = "Panels O6, C3, F6, C2, R11  \u2014  GPC / BFC / IDP"
+# JUST "Panel".  The desktop's task bar labels its button with the window
+# title and has room for a few characters, so a long one is indistinguishable
+# from its neighbours -- three buttons all reading "Panels O6, C3, F..." tell
+# nobody which window is which.  What the panel COLLECTS is documented; the
+# title's job here is to be recognised at a glance.
+TITLE_BASE = "Panel"
 import discretes as D
 
 GPCS = ("GPC1", "GPC2", "GPC3", "GPC4", "GPC5")
