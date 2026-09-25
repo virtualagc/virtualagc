@@ -336,6 +336,17 @@ class Manager(object):
         vehicle.json has recorded exactly that since the first one, so this
         reads it and lists them newest first.
 
+        AND NO, THE ORDINARY DIALOG CANNOT BE ASKED TO SHOW IT.  The natural
+        question is whether a standard chooser's "details" or "list" view
+        would do, and on Windows and macOS it might: there Tk calls the
+        native dialog.  On X11 it does not -- it uses its own, tkfbox.tcl,
+        whose file list is an IconList showing icons and names, with no
+        details mode, no columns and no dates; askdirectory is choosedir.tcl,
+        a plainer directory tree still.  Checked on Tk 8.6.14.  Even where a
+        details view exists it would show the directory's mtime, and not the
+        capture time, the GPCs in it, or whether it carries window and panel
+        state -- all of which come from reading the manifest.
+
         IT IS STILL A FILE BROWSER, THOUGH, and has to behave like one.  It
         used to list only the snapshots inside one directory, with no way to
         leave it: reaching a parent or a sibling meant editing the text box
