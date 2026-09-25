@@ -9804,9 +9804,32 @@ class KYBD(object):
             self.keyPress(k)
 
     def _setupBus(self):
+        # EVERY KEYBOARD THIS IDP IS WIRED TO, not just the first one.  IDP3
+        # is wired to both forward keyboards -- it has no keyboard of its own
+        # and borrows one through the IDP/CRT SEL switch -- and listening only
+        # to the first meant CRT3 never heard KYBD2 at all: the IDP queued the
+        # keystroke for the GPC, which acted on it, while the scratch pad line
+        # stayed empty.  Meanwhile KYBD2's other listener, the one belonging
+        # to CRT2, correctly suppressed the echo because CRT2's own IDP/CRT
+        # SEL no longer named that keyboard.  So the key was obeyed and echoed
+        # nowhere.  Measured in the owner's session: meds3 KYBD1 recv=3,
+        # KYBD2 recv=0, while meds2 saw KYBD2 recv=10 and showed none of them.
         self.busName = "_KYBD%s" % self.kybdBus
-        self.bus = Bus(self.busName, busConfig[self.busName])
-        self.bus.onReceive(self.recvKYBD)
+        self.buses = {}
+        for b in (self.mdu.kybdBuses() if self.mdu is not None
+                  else [self.kybdBus]):
+            name = "_KYBD%s" % b
+            if b is None or name not in busConfig or name in self.buses:
+                continue
+            bus = Bus(name, busConfig[name])
+            bus.onReceive(self.recvKYBD)
+            self.buses[name] = bus
+        # The one this window SENDS on, when nothing else says otherwise.
+        self.bus = self.buses.get(self.busName)
+        if self.bus is None:
+            self.bus = Bus(self.busName, busConfig[self.busName])
+            self.bus.onReceive(self.recvKYBD)
+            self.buses[self.busName] = self.bus
 
     def recvKYBD(self, _obj, busID, msg, remote):
         # Another keyboard on this bus -- stsKeyboard.py, or a second MDU
@@ -9817,7 +9840,11 @@ class KYBD(object):
         # IDP (IDP/CRT SEL): the IDP ignores it otherwise, so the scratch pad
         # must too.
         mask = getattr(self.mdu, 'kybdMask', None) if self.mdu else None
-        bit = {'1': 1, '2': 2}.get(str(self.kybdBus))
+        # FROM THE DATAGRAM'S OWN BUS.  With more than one keyboard wired to
+        # this IDP, `self.kybdBus` is merely the first of them and says
+        # nothing about which keyboard this key was struck on.
+        m = re.match(r'^_KYBD(\d)$', str(busID))
+        bit = {'1': 1, '2': 2}.get(m.group(1) if m else str(self.kybdBus))
         if mask is not None and bit is not None and not (mask & bit):
             return
         for w in msg.data16:
@@ -10169,15 +10196,26 @@ class MDU(LRU):
     def cycleMajorFunc(self):
         return self.setMajorFunc(((self.majorFunc or 0) + 1) % 4)
 
-    def kybdBus(self):
-        """Which keyboard drives this display.  An MDU has no keyboard of its
-        own: a keystroke reaches a GPC through the IDP that owns the DK bus, so
-        it has to go to a keyboard that IDP is listening to."""
+    def kybdBuses(self):
+        """EVERY keyboard wired to this display's IDP, in order.  IDP3 has
+        two: it owns no keyboard of its own and borrows a forward one through
+        the IDP/CRT SEL switch, so a display that listened to only the first
+        could never echo the other."""
         idp = MEDSConf['idps'].get("IDP%d" % self.priPortIDP) or {}
+        out = []
         for b in idp.get('busses', []):
             m = re.match(r'^_KYBD(\d)$', b)
-            if m:
-                return int(m.group(1))
+            if m and int(m.group(1)) not in out:
+                out.append(int(m.group(1)))
+        return out
+
+    def kybdBus(self):
+        """Which keyboard drives this display by default.  A keystroke reaches
+        a GPC through the IDP that owns the DK bus, so it has to go to a
+        keyboard that IDP is listening to; where there are several, this is
+        the first and `kybdBuses` is all of them."""
+        buses = self.kybdBuses()
+        return buses[0] if buses else None
         return 1
 
     def updateMduData(self):
