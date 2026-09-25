@@ -506,6 +506,46 @@ timing unit stays unread, and the constraint any future fix must satisfy is
 now stated precisely: after it, NO COMPUTER MAY HOLD AN I/O ERROR ITS PEERS DO
 NOT SHARE.  That is why a device model, which answers the same words to every
 computer on the bus, is the only shape of fix left.
+  REEVALUATION, AND THREE THINGS WE WERE MISSING.
+  (1) THE FIX BELONGS AT THE DEVICE LAYER, and the evidence is that
+everything tried at the I/O layer votes and everything at the device layer
+does not.  Completing a receive inside each computer's IOP is PER-COMPUTER
+fabrication: a commander and a listener arm at different moments, so the two
+machines' outcomes differ by construction, and a redundant set is the
+instrument that detects exactly that.  The timing unit's own model has always
+served commander and listener alike because ONE model hands the same words to
+every reader.
+  (2) PARTIAL COVERAGE IS WORSE THAN NONE.  With nothing answered every
+computer fails identically, FIOGPCWE exceeds one, FCOS commfaults the string
+and the set survives.  Answer some devices and the residue is asymmetric,
+FIOGPCWE is 1, and each computer SELF-fails through FCMSFAIL.  Every
+intermediate step of an incremental device model is therefore guaranteed to
+vote, which is what was being misread as "the data is wrong".
+  (3) AND THE FIRST STUB PROBABLY DIED OF SOMETHING STUPID: it answered EVERY
+command on those buses, including '#CMDI FIOLMIUA,...', the LISTEN command at
+IUA 8, which is a broadcast that sets listeners up and not a read.  Injecting
+words in reply to that would corrupt the commander's next receive, which fits
+"the vehicle never left OPS 0" exactly.  "Answer everything" was never really
+tested; only "answer everything including what must not be answered".
+  WHAT THE COMPLETE TABLE ACTUALLY LOOKS LIKE.  Keyed on the whole command
+word, a two-computer run to OPS 201 leaves SIX reads unanswered on the
+flight-critical buses -- FF MDM (IUA 10) 5082c5/21 words, 508543/4, 531555/1
+and FA MDM (IUA 12) 6082a5/34, 608545/6, 631555/1, eight occurrences each.
+Not "model the vehicle's sensors": a bounded table.
+  BUT ANSWERING PEELS LAYERS.  With those six answered and the model owning
+all eight flight-critical buses, the chains run further and the learner then
+reports SEVENTEEN commands -- the IMU (524c0d, 14 words), the STU (524c42),
+the rendezvous radar (524c69), PROM segments (5082e8/36, 60836e/54) and
+several input channels.  Finite, but iterative: each round reveals the next.
+  AND THE RESIDUAL ASYMMETRY IS A RACE, NOT A COVERAGE GAP.  Even at the
+device layer the listener path is timing-dependent: a listener is served only
+if its receive is armed when the commander's command passes, and its pending
+reply is WIPED by the next command whether or not it has drained.  Per-reader
+CURSORS and per-reader COPIES were both necessary and neither is sufficient.
+The next thing to try is per-reader QUEUES -- every reply appended for every
+reader and drained in order -- so that two computers see identical word
+streams no matter when each polls.  That is the property the redundant set is
+measuring, and no amount of extra coverage substitutes for it.
   - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.
