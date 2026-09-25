@@ -2103,10 +2103,16 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         if (!bce->recvGotAny && p >= 0 && p < 32 &&
             yagpc_getenv("YAGPC_FC_LEARN")) {
             uint32_t c = bce->recvCmd ? bce->recvCmd : iop->lastBusCmd[p];
-            fprintf(stderr, "FCLEN bce=%d iua=%u func=%03x words=%u t=%.1f\n",
-                    p, (unsigned)((c >> 19) & 0x1fu),
+            /* THE WHOLE COMMAND WORD, not iua and function alone: function
+             * 126 is the timing unit, the IMU, the rendezvous radar and the
+             * STU at four different lengths, told apart only by the count
+             * field.  A table keyed on iua+func cannot describe them. */
+            fprintf(stderr, "FCLEN bce=%d cmd=%06x iua=%u func=%03x words=%u "
+                            "listen=%d t=%.1f\n",
+                    p, (unsigned)(c & 0xffffffu), (unsigned)((c >> 19) & 0x1fu),
                     (unsigned)((c >> 9) & 0x3ffu),
-                    (unsigned)bce->recvCount, now);
+                    (unsigned)bce->recvCount,
+                    iop_proc_get(&iop->regXmitEna, p) ? 0 : 1, now);
         }
         /* NOTHING ON THIS FLIGHT-CRITICAL BUS ANSWERED, and this vehicle
          * models almost nothing that lives on one.  YAGPC_FC_ZERO completes
