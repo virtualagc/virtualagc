@@ -335,44 +335,63 @@ class Manager(object):
         the one a directory chooser will not show: when each was taken.
         vehicle.json has recorded exactly that since the first one, so this
         reads it and lists them newest first.
+
+        IT IS STILL A FILE BROWSER, THOUGH, and has to behave like one.  It
+        used to list only the snapshots inside one directory, with no way to
+        leave it: reaching a parent or a sibling meant editing the text box
+        by hand until it named the place you wanted, and only then pressing
+        Browse.  Nothing else in this program works that way and neither does
+        anything else on the desktop.  So the list now carries the
+        directories as well as the snapshots, `..` first.
         """
         current = self.snapshot.get().strip()
         parent = os.path.dirname(current.rstrip("/")) if current else HERE
         if not os.path.isdir(parent):
             parent = HERE
+        self._choose_snapshot(parent)
+
+    def _snapshot_entries(self, parent):
+        """What to list for `parent`: (kind, name, label) rows.
+
+        Kind is 'dir' to walk into or 'snap' to choose.  Directories come
+        first with `..` at the top, the way a file browser puts them; the
+        snapshots follow, newest first, which is the order someone looking
+        for the one they just saved wants.
+        """
+        dirs, snaps = [], []
+        for name in sorted(os.listdir(parent)):
+            path = os.path.join(parent, name)
+            if not os.path.isdir(path):
+                continue
+            man = os.path.join(path, "vehicle.json")
+            if not os.path.isfile(man):
+                dirs.append(("dir", name, "%s/" % name))
+                continue
+            try:
+                with open(man) as fh:
+                    v = json.load(fh)
+                when = float(v.get("epoch", 0))
+                gpcs = ",".join(str(g) for g in v.get("gpcs", []))
+            except (OSError, ValueError, TypeError):
+                when, gpcs = os.path.getmtime(path), "?"
+            extra = []
+            if os.path.isfile(os.path.join(path, "layout.json")):
+                extra.append("windows")
+            if os.path.isfile(os.path.join(path, "panel.json")):
+                extra.append("panel")
+            snaps.append((when, name, gpcs, ", ".join(extra)))
+        snaps.sort(reverse=True)
+        width = max([len(n) for _, n, _, _ in snaps] + [8])
         rows = []
-        try:
-            for name in os.listdir(parent):
-                path = os.path.join(parent, name)
-                man = os.path.join(path, "vehicle.json")
-                if not os.path.isfile(man):
-                    continue
-                try:
-                    with open(man) as fh:
-                        v = json.load(fh)
-                    when = float(v.get("epoch", 0))
-                    gpcs = ",".join(str(g) for g in v.get("gpcs", []))
-                except (OSError, ValueError, TypeError):
-                    when, gpcs = os.path.getmtime(path), "?"
-                extra = []
-                if os.path.isfile(os.path.join(path, "layout.json")):
-                    extra.append("windows")
-                if os.path.isfile(os.path.join(path, "panel.json")):
-                    extra.append("panel")
-                rows.append((when, name, gpcs, ", ".join(extra)))
-        except OSError as e:
-            self.say("Cannot list %s: %s" % (parent, e))
-            return
-        if not rows:
-            # Nothing to choose between; fall back to the ordinary chooser so
-            # somewhere else can be pointed at.
-            name = filedialog.askdirectory(title="Snapshot directory",
-                                           initialdir=parent, mustexist=False)
-            if name:
-                self.snapshot.set(name)
-            return
-        rows.sort(reverse=True)               # newest first
-        self._choose_snapshot(parent, rows)
+        if os.path.dirname(parent.rstrip("/")) not in ("", parent):
+            rows.append(("dir", "..", ".. (up one level)"))
+        rows += dirs
+        for when, name, gpcs, extra in snaps:
+            rows.append(("snap", name, "%-*s   %s   GPC %-6s %s" % (
+                width, name,
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(when)),
+                gpcs, extra)))
+        return rows
 
     def _place_dialog(self, top, W, H):
         """Put a dialog beside the manager, but ON THE SCREEN.
@@ -439,18 +458,25 @@ class Manager(object):
             else:
                 self.say("dialog: no modal grab (%s)" % e)
 
-    def _choose_snapshot(self, parent, rows):
-        """The list itself: name, when it was taken, and what is in it."""
+    def _choose_snapshot(self, parent):
+        """The list, and a NAME to go with it.
+
+        This one box is both the snapshot to restore and the snapshot to
+        save, so a chooser that can only pick things that already exist is
+        half a chooser: saving means naming a directory that is not there
+        yet.  Hence the name field, which is what every Save dialog has, and
+        a New Folder button that makes the named one and steps into it.
+        """
         base = tkfont.nametofont("TkDefaultFont", self.root)
         mono = tkfont.Font(family="monospace", size=abs(base.cget("size")))
-        W, H = 620, 400
+        W, H = 620, 440
         top = tk.Toplevel(self.root, bg=C_BG)
         top.title("Choose a snapshot")
         top.transient(self.root)
         self._place_dialog(top, W, H)
-        tk.Label(top, text="In %s" % parent, bg=C_BG, fg="#9a9a9a", font=base,
-                 anchor="w", justify="left", wraplength=W - 48
-                 ).pack(fill="x", padx=24, pady=(20, 6))
+        where = tk.Label(top, text="", bg=C_BG, fg="#9a9a9a", font=base,
+                         anchor="w", justify="left", wraplength=W - 48)
+        where.pack(fill="x", padx=24, pady=(20, 6))
         frame = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
                          highlightbackground="#4a4a4a")
         frame.pack(fill="both", expand=True, padx=24)
@@ -462,35 +488,124 @@ class Manager(object):
                          yscrollcommand=bar.set)
         box.pack(side="left", fill="both", expand=True, padx=8, pady=8)
         bar.config(command=box.yview)
-        width = max(len(r[1]) for r in rows)
-        for when, name, gpcs, extra in rows:
-            box.insert("end", "%-*s   %s   GPC %-6s %s" % (
-                width, name,
-                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(when)),
-                gpcs, extra))
-        box.selection_set(0)
-        box.focus_set()
 
-        def take(_e=None):
+        nameRow = tk.Frame(top, bg=C_BG)
+        nameRow.pack(fill="x", padx=24, pady=(10, 0))
+        tk.Label(nameRow, text="Name", bg=C_BG, fg=C_FG, font=base
+                 ).pack(side="left", padx=(0, 8))
+        nameVar = tk.StringVar()
+        nameBox = tk.Entry(nameRow, textvariable=nameVar, bg="#1b1b1b", fg=C_FG,
+                           insertbackground=C_FG, font=mono,
+                           highlightthickness=1, highlightbackground="#4a4a4a")
+        nameBox.pack(side="left", fill="x", expand=True)
+
+        state = {"dir": parent, "rows": []}
+
+        def populate(path, keepName=False):
+            try:
+                rows = self._snapshot_entries(path)
+            except OSError as e:
+                self.say("Cannot list %s: %s" % (path, e))
+                return
+            state["dir"], state["rows"] = path, rows
+            where.config(text="In %s" % path)
+            box.delete(0, "end")
+            for _kind, _name, label in rows:
+                box.insert("end", label)
+            if not keepName:
+                nameVar.set("")
+            box.focus_set()
+
+        def onSelect(_e=None):
             sel = box.curselection()
-            if sel:
-                self.snapshot.set(os.path.join(parent, rows[sel[0]][1]))
-                self.say("Chose %s" % rows[sel[0]][1])
+            if not sel:
+                return
+            kind, name, _label = state["rows"][sel[0]]
+            if kind == "snap":
+                nameVar.set(name)
+
+        def walkOrChoose(_e=None):
+            sel = box.curselection()
+            if not sel:
+                return choose()
+            kind, name, _label = state["rows"][sel[0]]
+            if kind == "dir":
+                # WALK, DO NOT CHOOSE.  `..` is the one entry whose target is
+                # not simply a child of where we are.
+                nxt = (os.path.dirname(state["dir"].rstrip("/")) if name == ".."
+                       else os.path.join(state["dir"], name))
+                populate(nxt or "/")
+                return
+            nameVar.set(name)
+            choose()
+
+        def choose(_e=None):
+            name = nameVar.get().strip().rstrip("/")
+            if not name:
+                sel = box.curselection()
+                if sel and state["rows"][sel[0]][0] == "snap":
+                    name = state["rows"][sel[0]][1]
+            if not name:
+                self.say("No snapshot named")
+                return
+            path = name if os.path.isabs(name) else os.path.join(state["dir"], name)
+            self.snapshot.set(path)
+            self.say("Chose %s" % os.path.basename(path.rstrip("/")))
             top.destroy()
+
+        def up(_e=None):
+            populate(os.path.dirname(state["dir"].rstrip("/")) or "/")
+
+        def newFolder():
+            """Make the named directory and step into it.
+
+            The name field is the prompt, deliberately: a second modal dialog
+            on top of this one is how the manager froze before, and asking
+            for a name in a box that is already on the screen avoids it.
+            """
+            name = nameVar.get().strip().rstrip("/")
+            if not name:
+                self.say("Type a name first, then New Folder")
+                nameBox.focus_set()
+                return
+            path = name if os.path.isabs(name) else os.path.join(state["dir"], name)
+            try:
+                os.makedirs(path, exist_ok=True)
+            except OSError as e:
+                self.say("Cannot create %s: %s" % (path, e))
+                return
+            self.say("Created %s" % path)
+            populate(path)
+
+        def anywhere():
+            # The ordinary chooser, for somewhere this list cannot reach --
+            # another filesystem, or a path someone would rather type whole.
+            top.destroy()
+            self._browse_snapshot_plain()
 
         row = tk.Frame(top, bg=C_BG)
         row.pack(fill="x", padx=24, pady=(12, 24))
-        for text, cmd in (("Open", take), ("Cancel", top.destroy)):
+        for text, cmd in (("Choose", choose), ("Cancel", top.destroy),
+                          ("New Folder", newFolder), ("Up", up),
+                          ("Browse...", anywhere)):
             tk.Button(row, text=text, command=cmd, width=10, bg="#3c3c3c",
                       fg=C_FG, activebackground="#505050", activeforeground=C_FG,
                       highlightbackground=C_BG, font=base
                       ).pack(side="right", padx=(8, 0))
-        box.bind("<Double-Button-1>", take)
-        top.bind("<Return>", take)
+        box.bind("<<ListboxSelect>>", onSelect)
+        box.bind("<Double-Button-1>", walkOrChoose)
+        top.bind("<Return>", walkOrChoose)
+        # BackSpace is what a file browser uses for "up" -- but not while the
+        # name is being typed in, where it has to delete a character.
+        top.bind("<BackSpace>", lambda e: None if e.widget is nameBox else up())
         top.bind("<Escape>", lambda _e: top.destroy())
         # AND THE WINDOW MANAGER'S OWN CLOSE BUTTON, which otherwise is not
         # one of the ways out of a modal dialog.
         top.protocol("WM_DELETE_WINDOW", top.destroy)
+        populate(parent)
+        cur = self.snapshot.get().strip().rstrip("/")
+        if cur and os.path.dirname(cur) == parent.rstrip("/"):
+            nameVar.set(os.path.basename(cur))
         self._grab_dialog(top)
 
     def _browse_snapshot_plain(self):
