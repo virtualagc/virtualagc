@@ -74,6 +74,398 @@ Before spending a run on anything below, ask:
 - **#204** *(emulator)* A RESTORED FIVE-GPC ASCENT VEHICLE STILL LOSES SYNC OCCASIONALLY: 1 of 3 parallel 45-minute holds drew a vote at t=679 s, GPC3 failing itself and being voted out by all four others within 100 ms.  Nothing in the I/O accounting explains it -- no BCE receive timeout, no error termination, no display-bus contention, and the other two vehicles from the SAME snapshot ran the same 45 minutes clean.
   - evidence: THREE SETS OF EVIDENCE, 2026-09-22/23.  (1) ORIGINALLY: three restores of ops101-5gpc-3crt-gpc5crt3 held 45 min each IN PARALLEL; 7700 and 7900 clean, 7500 NOT -- cam.log 'voting: 33 ON (bus) [t=678.9]' then 13, 43 and 23 at t=679.0, GPC3 against ITSELF first and the others following.  All five machines ran to the end, so GPC3 kept running after being voted out.  Pacing 83.9/84.0/84.8 percent, fifteen emulated GPCs on twenty cores.  (2) A REPEAT OF THE SAME THREE IN PARALLEL, instrumented, was CLEAN 3 of 3.  (3) A SINGLE INTERACTIVE VEHICLE on 2026-09-23 (the narrated ascent script, five GPCs, three CRTs, ONE vehicle on the host) DID vote: 33 ON at t=377.6, then 23 and 13 at t=377.7 -- about six seconds after GPC3 was taken to RUN and joined the set, during the IPL of GPC4.  GPC1 and GPC2 WITHDREW their votes on their own at t=710.8, 333 s later; GPC3's vote against itself persisted.  That run had no sync instrumentation.  SO CONTENTION IS NOT REQUIRED: one vehicle alone reproduced it, which refutes the reading that three-up host contention was the trigger.  (4) THE SAME SCRIPT RUN AGAIN WITH THE INSTRUMENTATION ARMED (YAGPC_SYNC_HISTORY=8192, YAGPC_LANDMARKS=1948c, YAGPC_LANDMARKS_REGS=1) ran 2 h 50 min with ZERO votes and zero FCMSFAIL, so the ring was never dumped.  That is the longest clean five-GPC run on record and it passed the t=377 point that failed before.  WHAT THE TWO FAILURES SHARE: the victim votes against ITSELF first, the others follow within 100 ms, and the victim keeps running.  WHAT THEY DO NOT SHARE: one was steady-state on a restored vehicle at t=679, the other six seconds after a computer joined the set at t=377.  NEXT: keep the landmark armed on every long run until one fires; the dump is on the landmark's FIRST hit, which is the self-failing computer, which is the one wanted.
   - procs `CPU` &middot; config `G1` &middot; symptom `fail vote,GPC3 voted out,self vote,five GPC,OPS 101,restored vehicle,1 in 3` &middot; tsec `678-680` &middot; run `ascent5-7500,ascent5-7700,ascent5-7900,ascent5p-7500,ascent5p-7700,ascent5p-7900,narrated-0923`
+- **#210** *(flight-sw)* The three MTU ACCUM times on the TIME display (SPEC 2 PRO) freeze and carry a down arrow in the five-computer ascent configuration because THE MTU IS NEVER READ AT ALL.  Not a stale value, not a redundancy-management latch that an ITEM could clear: the read command is not issued.  The timing unit answers a command of iua 10, function 126, 39 words (MTU_READ_CMD 0x024C26) on buses 20, 21 and 22, one bus per accumulator.  In a one-computer OPS 0 vehicle each bus carries 342 of those reads in a few minutes and all three accumulators track GPC time to the millisecond with no arrow.  In a five-computer vehicle in OPS 1 the same buses carry 66,930 commands in 71 seconds -- about 940 a second, 21 distinct device/function pairs, the flight-critical traffic of the ascent -- and NOT ONE of them is an MTU read.
+  - evidence: Measured 2026-09-24.  Single GPC, OPS 0, YAGPC_CMDTRACE=20,21,22: bus 20 2,720 commands of which 342 func=126, bus 21 684 of which 342, bus 22 2,719 of which 342; the TIME display read back whole (NSTS_ANNOUNCE_ROWS=all) shows MTU ACCUM 1, 2 and 3 all equal to GPC time and advancing, e.g. 267/15:07:05.168, for eight minutes, on the commanding computer AND on a listening one in a two-computer run.  Five GPCs restored from examples/5gpc-3crt-subtitled.snapshot (OPS 1, CRT1 and CRT2 in 1011/LAUNCH TRAJ 1, CRT3 in 0001/GPC MEMORY under GPC5): bus 20 commanded by GPC1, 21 by GPC2, 22 by GPC3, 66,930/66,484/66,930 commands and zero func=126 on any of them; no receive timeouts on those buses at all, so nothing is failing -- the read is simply not being issued.  GPC4 and GPC5 command no timing bus and only listen, which is why the owner sees the same frozen values on CRT3/GPC5 as on CRT1/GPC1, and why ITEM 34, 35 and 36 (and their +1 through +5 forms) change nothing.  OPEN, and the question is which side is wrong: whether PASS reads the MTU only in OPS 0 and a frozen accumulator in ascent is CORRECT, or whether our I/O is starving the read on a bus carrying 940 transactions a second.  The two variables are confounded in what has been measured so far -- the one-computer runs are OPS 0 and the five-computer run is OPS 1 -- so the discriminating test is a multi-computer vehicle held in OPS 0 with the same trace.  THE OPEN QUESTION IS ANSWERED, AND IT IS NOT CORRECT BEHAVIOUR.  The MTU reading code is resident in EVERY memory configuration: FIOPRMPG, FPMMTURM, FPMMTUFX, FPMFXMTU, FPMUPMTU and FIOMTUTG all appear in csects-G2, G3, G8, G9, G16, P9, S2 and SSW alike.  Unlike AIG_DEU_LOADER, which really is confined to the three configurations its own gate names (#208/#209), nothing about the MTU reader is OPS-restricted, so a frozen accumulator in OPS 9 or OPS 1 is not the flight software declining to read -- the code to read is there.  MEASURED ON THE MODEL'S OWN COUNTER, which is not subject to the command trace's budget: a five-computer vehicle restored into OPS 1 and left alone for three and a half minutes reports mtu: {"commands":542581,"timeReads":0,"wordsOut":0} -- over half a million commands on those buses and NOT ONE read, so not one word ever leaves the timing unit.  AND IT IS NOT GOING SOMEWHERE ELSE: receive timeouts in that run are confined to BCE 6, 7 and 8, the display buses, 696 per computer; no other bus times out, so there is no unanswered MTU read on a bus this model does not own.  THE OWNER'S OWN TEST SEPARATES THE VARIABLES BETTER THAN MINE DID: with the redundant set in OPS 9 and GPC5 in OPS 0, ALL the accumulators are frozen INCLUDING GPC5's; taking the SET to OPS 0 starts all of them counting, including GPC5's; putting the set back to OPS 9 freezes all of them again.  GPC5's own OPS is irrelevant because GPC5 commands no timing bus -- it listens -- so what it displays is whatever the commanders last read.  The OPS that matters is the redundant set's, and the failure is therefore in whatever decides to issue the read, not in redundancy management, not in the display, and not in GPC5.  He also reports that in OPS 0 the down arrows REMAIN while the values count, and that all four fields look like copies of the GPC time, which is the next thing to establish: whether the accumulators are genuinely accepted in OPS 0 or merely back-filled from the GPC's clock.  NARROWED FURTHER, AND ONE CAUSE REFUTED.  It is not the number of computers nor which of them commands a bus: THREE computers held in OPS 0, each commanding one timing bus -- the same structure a five-computer vehicle has -- read the unit 1,137 times in seven minutes (mtu: commands 6795, timeReads 1137, wordsOut 7959).  One computer in OPS 0 reads it 342 times.  Five computers in G1 read it not at all, twice measured: 542,581 commands/0 reads and 598,067 commands/0 reads.  So the determinant is the MEMORY CONFIGURATION, SSW against G1, and nothing else that has been varied.  REFUTED, do not retry: that the unit is commfaulted by the commands it does not answer.  Our model replies to exactly one command, MTU_READ_CMD, and is silent for every other command sent to its own IUA 10 -- and there are such commands, measured, immediately after an IPL: func 132 and 138 of 33 words and func 136 of 128 words at t=44.4 to 44.7, each timing out its BCE.  Making the model answer them (an experiment behind YAGPC_MTU_ANSWER_ALL, since reverted) cut the timing-bus timeouts from 5 to 2 and changed nothing else: the G1 vehicle still read the unit 0 times in 483,431 commands.  Those functions are probably the NSP's, which shares IUA 10 on buses 20 and 22 per FIONSPPG, and not the timing unit's at all.  ALSO ESTABLISHED: our reply passes FPMLIMCK field by field (FPMMTURM.asm 066100-069600) -- GMT days 0x267 within 0x0001..0x0399, hours 0x15 <= 0x23, minutes <= 0x59, and seconds packed two bits left so that 59 s reads exactly as the limit 0x0164, which is what our bcd_pack produces; MET all zero passes its own tests.  So the data is not being rejected for being out of limits.  AND THE BUS PROGRAM HAS AN EXPLICIT BYPASS: FIOPRMPG's FIOMTUR1 begins #LBR/#CMDI and then FIOBY51 #BU FIORK51 '*OVERLAID BY BCE BYPASS CODE', so a bypassed transaction falls straight to FIOWAIT and the #MIN 0,6 that reads the unit never executes.  That is the shape of what is happening; what applies the bypass in G1 and not in SSW is the open question.  WHEN IT STOPS, TRACED THROUGH A WHOLE ACID TEST (YAGPC_CMDTRACE=20,21,22, five computers, IPL to ascent).  The read runs steadily at about one per second per bus -- 93 to 96 reads per 30 s across the three -- from t=60 all the way to t=690, through all five IPLs.  It then STOPS BUS BY BUS as the crew enters the NBAT: FC2 and FC3 fall silent at about t=705, which is 'ITEM 1 +9 EXEC', the item that selects the configuration the table is being written for; FC1 carries on alone until about t=765, just after 'ITEM 11 +0'.  From t=780 onwards there is not one read, through 'OPS 9 0 1 PRO' at t=798 and the later OPS 1 transition, and none afterwards for the rest of the run.  So the loss is not caused by the OPS transition itself: it happens WHILE THE NBAT IS BEING ENTERED, before any PRO, and the transition merely never restores it.  Each bus has its own commander by then -- FC1 GPC1, FC2 GPC2, FC3 GPC3 -- and all three keep carrying heavy traffic afterwards (66,930 commands on FC1 in 71 s), so the buses are alive and commanded; only this transaction is gone.  CAUTION FOR WHOEVER PICKS THIS UP: two earlier readings in this entry were artefacts of reading a log while its run was still going, and one was an ordering mistake -- the yaGPC2 log interleaves five computers, so the LAST LINE mentioning a bus is not its LATEST event.  Bin by time, do not take the last match.  ROOT CAUSE, READ OUT OF MEMORY: THE READ IS BYPASSED, NOT UNSCHEDULED.  The CSECT tables give FIOPRMPG's layout exactly -- it is at 117872 in BOTH csects-SSW and csects-G9, with contents FIOMTUR1 +0, FIOBY51 +4, FIORK51 +8, FIOMTUR2 +10, FIOBY52 +14, FIOMTUR3 +20, FIOBY53 +24 -- so the three bypass slots can be read straight out of any capture.  In a vehicle whose reads WORK (one GPC, OPS 0) they hold f001 cc78, f001 cc82, f001 cc8c: #BU to FIORK51/52/53, which reaches the common code and its #MIN 0,6.  In a vehicle whose reads are DEAD (the five-computer OPS 1 capture, examples/5gpc-3crt-subtitled.snapshot) ALL THREE hold c022 c000 -- #DLYI 34 then #DLYI 0.  That is precisely the 'OVERLAID BY BCE BYPASS CODE' the source names at FIOPRMPG.asm 008100: with the branch replaced by delays the program falls through to FIOWAIT, ends as commander, and never reads the unit.  So FCOS has deliberately removed the transaction, which is what it does to a COMMFAULTED device -- the arrows on the display are that same judgement.  AND THAT INVALIDATES THE REFUTATION RECORDED ABOVE: the experiment that answered every command sent to the unit's IUA was run against a RESTORED vehicle, and a restore brings back the bypassed program with the rest of memory, so the test could not have worked whatever the truth was.  It is being re-run from a fresh IPL.  Whoever reads this: an experiment about how the flight software CONFIGURES itself cannot be run from a snapshot of a machine that already configured itself.  STATUS: the MECHANISM is settled and the TRIGGER is not.  What makes MTU1-3 freeze with a down arrow is that FCOS has overlaid all three read transactions with delays; that is read directly out of memory and is not in doubt.  What is not yet known is what makes FCOS do it.  The obvious candidate -- a commfault from the commands our model leaves unanswered at its own IUA just after the IPL -- could not be tested properly: the only quick vehicle is a restored one, which carries the bypass in its memory image, and a fresh acid test with the answering experiment on never reached the NBAT, because answering every command on three flight-critical buses adds a quarter of a million words of traffic and collapses the run's pace.  An instrument that changes the measurement, again.  NEXT, and cheaper than another acid test: watch FIOBY51 at 117876 in a fresh five-computer run by capturing twice, once before the NBAT is typed and once after, which shows the overlay being written and brackets it to a single item; and read the I/O error log, CZ2V_IO_ERR_LOG in CZ2_COMMON, to see whether device 22 is logged at all.  Both need the run to reach t=700 without the experiment, which it does comfortably when the machine is free.
+  MEASURED 2026-09-24, AND IT IS NOT THE NBAT BY ITSELF.  A single
+computer that types the WHOLE ascent NBAT -- the seventeen items of
+examples/5gpc-3crt-subtitled.script, ITEM 1 +9 through ITEM 19 +2 -- never
+bypasses anything.  FIOBY51/52/53 (117876/117886/117896) are untouched from the
+moment GPCIPL's memory fill leaves them: YAGPC_WATCHHW=1cc70-1ccb0, a range
+covering the listener slots as well, fires only during that fill at t=122 s and
+never again, and MTU reads continue on all three buses across the items and
+past them -- iua 10 func 126, 62 or 63 per bus in every 60 s bin from t=240 to
+the run's end at t=545, with the items typed at t=400 to t=496.  Run:
+headless-gpcmem.sh, TAPE=OI340700-v44boot.mmv, DEUMF=1,
+YAGPC_DEUKEYS_SIMTIME=1, the items as eighteen DEUKEYS batches, all eighteen
+confirmed delivered.  So the trigger needs PEERS rather than the NBAT: what
+bypasses the read depends on there being other computers on those buses, which
+is also why one computer in OPS 0 has never shown the fault.
+  THE WRITER IS FCMBCEMD, AND THE DOWN ARROW IS THE SAME EVENT.  FIOPRMPG
+carries TWO elements per accumulator -- a commander (FIOMTUR1-3, bypass slots
+FIOBY51/52/53) and a listener (FIOMTUL1-3, slots FIOBY51L/52L/53L at
+117912/117920/117928) -- and both are named in FCMRTBLE, 'NSP AND MTU RESTORE
+TABLES'.  The frozen value c022 c000 identifies which routine wrote it:
+FCMBCEMD builds its bypass as TBCECNT OR FCMDLYI, and FCMDLYI is X'C000C000'
+(FCMCBLKS.asm 025800), while the only other writer, FCMRSTFC, uses a delay of
+FCMDLA=75.  The overlay is therefore the generic element bypass, not the
+bypass of the NSP that is not in use.  FIOERRLC calls FCMBCEMD at its line
+075200 after the SECOND counted error on a comfaultable transaction, and the
+next block of that same routine is '*** DETERMINE IF DOWNARROW IS TO BE
+DISPLAYED', which calls FIODWNAR.  The frozen accumulator and the arrow beside
+it are not two symptoms to be explained separately: they are one act of the
+I/O error logic, and the arrow is evidence that an I/O ERROR was counted.
+  AND THERE IS A RESTORE PATH, which is what a correct reconfiguration uses:
+FCMBUSCM request type 15, 'RESTORE MTU AND NSP BCE ELEMENTS' (SVC 36), calls
+FCMRSTFC, which rewrites the commander AND the listener slot of all eight
+NSP/MTU entries from FCMRTBLE.  So a bypass that stays is either an error that
+keeps being counted or a type-15 request that is never made.
+  THE TRIGGER, MEASURED 2026-09-24, AND IT IS THE OPS TRANSITION, NOT THE
+NBAT.  TWO computers reproduce it, which makes the fixture cheap: simulatePASS
+--gpcs 1,2 --crts 2 with examples/2gpc-ops201.script on OI340700-v44boot.mmv,
+about four minutes to the event.  With YAGPC_WATCHHW=1cc70-1ccb0 both machines
+write all six slots, and the times place it exactly: the crew types OPS 2 0 1
+PRO at panel t=228.5, FCOS RESTORES the six slots at t=241.72 (f001 cc82 and
+the rest, the ordinary #BU), and then BYPASSES all six at t=242.365, 242.551
+and 242.953 -- one accumulator every 0.4 s, and within each pair the commander
+slot and its listener slot 14 microseconds apart.  MTU reads run at 93 per 30 s
+up to t=240, fall to 4 in the bin containing the bypass and are ZERO for the
+remaining 650 s of the run: nothing ever restores them.
+  THE CALLER IS FIOERRLC.  Every one of the six stores is from nia 181f5 =
+FCMBCEMD+243, and YAGPC_NIARING=1024 with YAGPC_RINGTRIG=1cc74:c022 gives the
+path into it: ...19d9d 19d9e ... 19ddc then 18102, which is FIOERRLC+745
+through FIOERRLC+808 (FIOSSM07+67..+130) falling into FCMBCEMD+0.  That is the
+CALL FCMBCEMD at FIOERRLC.asm line 075200, reached only after the SECOND
+counted error on a comfaultable transaction, and the next block of that same
+routine is the one that displays the down arrow.  The 14-microsecond pairing is
+explained by FCMBCEMD's FIOBCML, its 'COMMANDER/LISTENER ENTRY', which bypasses
+the commander element and then computes the listener element's address from
+TBCECFDS + TBMTLIST and bypasses that too -- one request, two overlays, each
+with its own TBCECNT, which is why the commander gets c022 (34) and the
+listener c000 (0).
+  SO THE FLIGHT SOFTWARE IS BEHAVING CORRECTLY AND OUR I/O IS NOT.  FCOS is
+being told, twice, that the MTU read failed.  External authority agrees the
+elements should be live: the STS-134 DASS GNC9 dump (mafgen/DASS_G9.ASC, the
+FIOPRMPG block at 01CC70) has FIOBY51/52/53 = F001 CC78 / F001 CC82 / F001 CC8C
+and FIOBY51L/52L/53L = F001 CC9C / F001 CCA4 / F001 CCAC, every one of them the
+live branch, so a bypassed MTU element is not something the build ships with.
+The remaining question is narrow and is an EMULATOR question, not a flight
+software one: what makes the MTU read transaction fail on all three buses, on
+both computers, immediately after an OPS transition that reassigns the
+flight-critical buses, when the same transaction succeeds indefinitely before
+it.  Next: YAGPC_ERRTERM_TRACE=20,21,22 on the same two-computer fixture.
+  WHY PEERS ARE NEEDED, FROM THE SOURCE.  FIOERRLC branches on FIOGPCWE,
+the number of GPCs reporting the same error: 'IF (CHI,R5,NE,FIOSRBID),ANDIF,
+(CHI,R6,EQ,1),ANDIF,(CHI,R5,NE,FIOPMUDV)' takes the SELF FAIL-TO-SYNC path when
+exactly ONE computer has the error, and only the ELSE branch -- '*** PROCESS
+COMFAULTABLE TRANSACTIONS' -- bypasses the element and displays the arrow.  One
+computer therefore can never bypass anything, however badly its I/O fails, and
+two can.  That is exactly the measured difference between the one-computer run
+(no bypass, reads for ever) and the two-computer run (all six slots bypassed),
+and it is why the fault has only ever been seen with a set.
+  AND THE ELEMENT IT BLAMES IS READ OFF A RUNNING BCE.  FIOERRLC names the
+failing element at line 054600, 'PC R6,R6  READ BASE REG FROM BCE' (command
+skeleton FIOBARC3 = X'22098000', bank 2 word 3 of that BCE's page), and then
+searches the BMT for the entry whose TBCEBUF equals it.  Element 0x0d's BMT
+entry at 0x9f0c reads 1b00 9c7e 1018 cc74 2236: buffer 0x9c7e, which is the
+#LBR operand of FIOMTUR1 in the DASS dump, and bypass slot 0xcc74, which is
+FIOBY51.  So FCOS really did blame MTU1.  IT NEVER FAILED.  With
+YAGPC_ERRTERM_TRACE=all over a whole two-computer run, 996 error terminations
+were recorded -- BCE8 518, BCE20 201, BCE22 198, BCE14-17/21/23 twelve each --
+and NOT ONE has a program address inside FIOPRMPG (117872-118001); the only two
+in that range are BCE24 at t=42 s, before PASS owns the memory.  The MTU read
+transaction is answered right up to the moment it is bypassed (last read
+t=242.385, bypass t=242.69).  What FCOS is reacting to is an error condition on
+the flight-critical buses as a whole, and it then sweeps BCEs 14 to 23 -- the
+counter at 0x8d81 walks 0x0e to 0x17 on each pass -- reading each one's base
+register.  Because the BCE it reads has NOT error-terminated it is still
+running its chain, so the register names whichever element is current: on bus
+20 two consecutive sweeps 20 ms apart blamed element 0x05 (buffer 0x3d14) and
+then element 0x0d (buffer 0x9c7e, the MTU).  The blame is effectively
+arbitrary, and the MTU's turn comes round twice.
+  ROOT CAUSE.  Our vehicle has no flight-critical MDMs.  In OPS 0 that costs
+little; after a GNC OPS transition the FC chains are full of transactions to
+devices that never answer, every computer sees the same errors, FIOGPCWE is
+therefore greater than one, and FIOERRLC's comfaultable path runs continuously
+over all ten flight-critical buses.  Each pass bypasses whatever element the
+BCE's base register happens to name, and the timing unit's read -- commander
+and listener together, through FCMBCEMD's FIOBCML -- is one of the elements it
+names.  The frozen MTU ACCUM times and their down arrows are a SECONDARY effect
+of the unmodelled flight-critical hardware, not a defect of the timing unit
+model or of the MTU bus programs.  A fix therefore has to make the
+flight-critical transactions stop failing (a stub MDM that answers with the
+expected word count is the smallest version) rather than anything MTU-specific;
+patching the timing unit alone would only move the arrow to another element.
+  AND THE MTU IS SIX BYPASSES OUT OF A HUNDRED AND TWENTY-ONE.  The
+prediction that the timing unit is collateral is measurable from a capture
+already in the tree, without a run.  Take the twenty CSECTs that csects-SSW
+marks type BCE -- the bus programs -- and compare a redundant-set member
+against GPC5 in examples/5gpc-3crt-subtitled.snapshot halfword by halfword,
+counting the places where GPC5 holds a live #BU (f0xx) and the set member holds
+a #DLYI (c0xx).  There are 121 of them, in TWELVE different bus programs:
+FIOMFEPG 34, FIOHFEPG 29, FIOGNIPG 16, FIONSPPG 12, FIOSRBPG 8, FIOPRMPG 6,
+FIOGPSPG 6, FIOMUWP9 4, FIOPDSPG 2, FIODDUPG 2, FIOMDMPG 1, FIOSMFPG 1.  The
+six in FIOPRMPG are the MTU's three commander and three listener slots; the
+other 115 are the forward and aft MDMs, the GN&C inputs, the NSP, the SRBs, the
+GPS, the DDUs.  FCOS has commfaulted essentially the whole flight-critical I/O
+of every computer in the set, because in our vehicle essentially none of it
+answers, and the TIME display's three frozen accumulators are simply the part
+of that a crew member can see.  Anything MTU-specific would be treating one
+symptom out of twelve.  REPRODUCTION, four minutes: cd yaShuttle/discretePanel
+&& DISPLAY=:48 YAGPC_WATCHHW=1cc70-1ccb0 python3 -u simulatePASS.py --gpcs 1,2
+--crts 2 --size 384 --no-wait-user --tape ~/workspace/pass-run/OI340700-v44boot.mmv
+--script examples/2gpc-ops201.script --port-base 7900 --logs OUT --duration 400
+-- the six slots go from f001 to c0xx about 14 s after OPS 2 0 1 PRO.
+  PROVED BY ANSWERING THE TRAFFIC, AND THE NAIVE FIX IS NOT A FIX.
+YAGPC_FC_STUB (src/mtumodel.c, default OFF) answers every command on buses
+20-22, not just the timing unit's, with the number of ZERO words the command
+asked for -- the count is the command's own low nine bits plus one, so no
+device table is needed.  Same fixture, same script, same tape: WITH IT ON the
+six MTU slots are NEVER bypassed and the reads continue to the end of the run
+(t=318 s and still going), where the control stops dead at t=242.4.  That is
+the causal claim demonstrated rather than argued: the timing unit freezes
+because the traffic AROUND it is unanswered, and answering that traffic --
+without touching the MTU model, the MTU bus programs or anything else -- keeps
+it alive.
+  BUT THE SET BREAKS.  The control runs record no votes at all; the stub run
+records two at t=254.7, 'voting: 21 ON (bus)' and 'voting: 12 ON (bus)', each
+computer failing the other, and the MTU read rate then decays from 121 per 30 s
+to 38.  Zeros are not what an MDM sends, and PASS acts on what it is handed.
+So the stub settles the diagnosis and must not be mistaken for the repair: a
+real fix has to model the flight-critical devices well enough that the data
+passes the flight software's own checks, which is a vehicle-wide piece of work
+and a fidelity decision, not a patch.  Keep the flag for re-proving #210
+cheaply; do not turn it on for a simulation anyone is watching.
+  THE BLAME MECHANISM IS NOT THE DEFECT -- MY OWN HYPOTHESIS, REFUTED.
+The suspicion above, that FCOS names an innocent element because it reads the
+base register off a BCE that has not stopped, is WRONG, and three measurements
+settle it.  (a) YAGPC_BASEREAD_TRACE (new, src/iop.c, default off) prints every
+CPU read of a BCE's base register -- bank 2 word 3, the FIOBARC3 = X'22098000'
+command FIOERRLC issues at 054600 -- with that BCE's STAT1, STAT4 and program
+counter.  Over a whole two-computer run 1,243 such reads were taken and 1,236
+of them found the BCE STOPPED, go=0 busy=0: the identification is honest, and
+the BCE really is parked at the element that failed.  Our scheduler is right to
+do that -- iop_exec_slice refuses to step a processor whose Busy/Wait bit is
+clear, and the BCE Principles of Operation 3.4.7 says a time-out 'will also
+error terminate to the Wait State'.  (b) NOT ONE of those reads returned 09c7e,
+the timing unit's buffer, so the MTU element was never individually named.
+(c) FIOBMTAD never held the MTU's BMT entry address either: that entry is at
+09ef8 in our own G2 memory, read out of a capture of this fixture -- buf=9c7e,
+flag=1015, adrs=cc74, and the halfword at +3 is 2236, whose high byte 22 is
+exactly the delay in the c022 overlay -- and the string '9ef8' does not appear
+anywhere in the run's log.
+  WHAT FCMBCEMD IS ACTUALLY DOING IS A WHOLE-STRING BYPASS.  The NIA ring taken
+at the instant of the overlay is entirely inside FCMBCEMD and is a LOOP --
+181df 181e1 181e2 181e3 181e5 181ee 181f0 181f1 181f3 181f5 (the store) 181f6
+181f8 181f9 181fb 181fc 181fe 18200 18206 18207 and round again, about three
+and a half times in the 64 addresses the ring holds.  FCMBCEMD's single-element
+bypass sets R5 to 1 and runs that loop ONCE; a loop means it is walking a
+TABLE of BMT entries, which is its bus-or-string path.  So the timing unit is
+not being blamed for someone else's failure: FCOS is bypassing everything on
+the affected strings, which is what it is supposed to do to a string whose
+devices have stopped answering, and the MTU's six slots are six of the 121 that
+go with it.
+  CONCLUSION.  There is no element-identification defect to fix, and no
+MTU-specific defect either.  The only thing wrong in the vehicle is that the
+flight-critical devices are not modelled, which YAGPC_FC_STUB demonstrates from
+the other direction by keeping every MTU slot live for as long as the traffic
+is answered.  The route to a real fix is to model those devices with data the
+flight software accepts; nothing short of that will keep a GNC OPS
+configuration's I/O alive.
+  THE STUB EVIDENCE ABOVE IS WITHDRAWN.  IT WAS A CONFOUND, AND THE STUB IS
+REVERTED.  'With it on the six MTU slots are never bypassed and the reads
+continue to the end of the run' is true and means NOTHING, because with it on
+THE VEHICLE NEVER LEAVES OPS 0.  Counting the distinct device/function pairs
+commanded on buses 20-22 after t=280 s settles it: the control run carries 24
+of them -- iua 10 functions 100, 104, 105, 106, 10a, 10b, 110, 114 and the
+rest, the GNC traffic of a loaded G2 -- and every stub run carries SIX, the
+timing unit's own functions plus iua 8 function 005, which is the OPS 0
+profile.  An end-to-end run typed OPS 2 0 1 PRO at t=240.9 and SPEC 2 PRO at
+t=272.7 and CRT2 still read '0001/ / GPC MEMORY 2' at t=318.8: neither the
+transition nor the keystroke took.  So the comparison was never
+bypass-versus-no-bypass; it was a G2 vehicle against a vehicle stuck in the
+one configuration where the MTU is not bypassed anyway.  Feeding zeros to the
+flight-critical buses breaks the vehicle from early in the run -- the traffic
+is already down to six pairs before t=200 -- and in its first form it also cost
+the redundant set both computers and made listener elements run off the end of
+their programs into unprogrammed store.  Zeros are worse than silence.
+  WHAT STILL STANDS is everything that was read out of memory images and the
+NIA ring, none of which involved the stub: the 121 overlaid branches in twelve
+bus programs, FIOERRLC calling FCMBCEMD, the FIOGPCWE test that makes a set
+necessary, the honest base-register reads, and the whole-string bypass loop.
+The root cause is unchanged.  What is gone is any demonstration that answering
+the traffic repairs it, and the lesson is the one this ledger keeps relearning:
+CHECK THAT THE TWO RUNS BEING COMPARED ARE IN THE SAME CONFIGURATION before
+believing a difference between them.
+  A SECOND ATTEMPT, AT THE RECEIVE LEVEL, AND WHY IT ALSO FAILS.  The
+bus-level answer had to GUESS a length from the command's count field, and any
+mismatch with what the BCE actually armed left residue that shifted every later
+transfer.  The receive path does not have to guess: at the time-out in
+iop_bce_receive, bce->recvLeft is exactly what this transfer still wants.  So
+the second attempt let a receive on BCE 14-17 or 20-23 COMPLETE there instead
+of error-terminating, writing NOTHING -- no fabricated data at all, the buffer
+simply keeps what the flight software last had.  Measured on the two-computer
+fixture, it clears every bar the zero-fill failed: the vehicle REACHES OPS 201
+(CRT2 reads '2011/ / UNIV PTG 2', 28 distinct device/function pairs on the FC
+buses after t=280 against the control's 24 and the zero-fill's 6), the six MTU
+slots are never bypassed, and there is no unprogrammed-store execution.
+  AND THE REDUNDANT SET STILL BREAKS, both computers voting each other out at
+t=249.3, about eight seconds after the transition.  The reason is the
+completion itself: a transfer that completes with stale buffer contents lets
+the two computers' data DIVERGE, because their buffers have different
+histories, so they compute differently and fail each other.  Zeros do not
+diverge -- they are identical on both machines -- which is why the zero-fill
+kept the set and lost the transition instead.  That is the shape of the whole
+problem: every fabrication available at the I/O layer is either
+identical-and-wrong or plausible-and-divergent, and PASS notices either way.
+  BOTH ATTEMPTS ARE REVERTED, and the reason not to keep either behind a flag
+is forward-looking: a blanket 'if nothing answered, call it complete' rule sits
+UNDERNEATH any future FF/FA MDM model and masks exactly the failures that model
+would need to show, so a half-written MDM would read as healthy instead of
+timing out.  The fix has to be the devices themselves.
+  WHAT THE DEVICE ACTUALLY IS, AND THE START OF THE TABLE A MODEL NEEDS.
+BCEEQU.asm settles the naming: FIOFFIUA EQU 10, 'FF INTERFACE UNIT ADDRESS',
+and FIOMTURD EQU X'00024C26' is one of that unit's commands -- the MTU read is
+'#MINC FIOFFIUA,FIOMTURD', so the timing unit is read THROUGH THE FORWARD MDM
+and is not a device of its own.  FIOLMIUA EQU 8 is the listen-mode address,
+which is the iua=8 func=005 traffic.  So src/mtumodel.c is already a PARTIAL FF
+MDM MODEL: it answers one of that unit's commands and ignores the rest.  The
+repair is to finish that device, in the device model at the device's own IUA,
+not to add a rule in the I/O layer -- which is also the only form that a later,
+fuller MDM implementation will not have to fight.
+  THE COMMAND'S COUNT FIELD IS NOT THE REPLY LENGTH, which is what made the
+first attempt guess wrong: FIOMTURD's count field is 38, and the BCE arms
+SEVEN.  The lengths have to come from the bus programs' own #MIN/#RDLI, and
+they can be harvested: arm each receive's YAGPC_TIMEOUT_TRACE 'RECV ARM ...
+count=' line with the command that FOLLOWS it (the #MIN precedes the #MINC, so
+pairing with the preceding command gives the listen command instead and is
+wrong).  Measured that way on a two-computer control run, for iua 10:
+      func 041 -> 21 words     func 042 -> 4      func 10a -> 7
+      func 110 -> 7            func 126 -> 7      func 132 -> 1
+      func 138 -> 1            func 18a -> 1
+and func 126 -> 7 agrees with the MTU_WORDS the model already uses, which is
+the check that the method is sound.
+  AND THE SCOPE IS BIGGER THAN ONE UNIT.  After the transition the same buses
+carry 24 distinct device/function pairs at IUAs 6, 8, 9, 10 and 15, so
+finishing the FF MDM is necessary and NOT sufficient: the strings will keep
+being bypassed while the other units are silent.  A fix is therefore several
+device models, each with its own function-to-length table and its own decision
+about what the data should be -- work to be scoped deliberately, not a defect
+repair.
+  A PARTIAL REPAIR THAT IS REAL, AND THE LINE IT STOPS AT.  YAGPC_FC_LEARN
+(src/iop.c) names every receive on a flight-critical bus that nothing answers,
+attributing it to the command the receive was WAITING for -- the first command
+after the arming, recorded in bce->recvCmd, because the #MIN precedes the
+#MINC and the command before an arm is the listen command.  Run over a whole
+two-computer OPS 201 vehicle it gives about 437 unanswered transfers on those
+buses, and they are not spread evenly: func 132 ninety-three times, func 138
+ninety-three times, and 186 listener halves waiting for a command that never
+came, against single digits for everything else.  FIONSPPG names them --
+'#MIN 0,0 / #MINC FIOFFIUA,FIONSP2P  READ NSP2 POWER DISCRETE' -- so the
+dominant I/O failure in the whole vehicle is two ONE-WORD NSP POWER DISCRETE
+READS, and FCMRTBLE groups NSP with MTU, which is how the timing unit goes
+down with them.
+  So the forward MDM now answers them: FIONSP1P (132), FIONSP2P (138),
+FIONSPDR (128) with one word and FIONSPRD (136) with 32, all zero, meaning THE
+NSP IS NOT POWERED -- which is true of this vehicle, is a statement about the
+interface rather than about any sensor, and is the same word on every computer
+because it goes through the one shared model and its per-reader cursors.
+Measured: unanswered transfers on those buses fall from about 437 to 66, the
+vehicle reaches OPS 201 with exactly the control's 24 device/function pairs on
+those buses, nothing executes unprogrammed store, and THERE ARE NO SYNC VOTES.
+  IT IS NOT YET ENOUGH.  Sixty-six is still far over FIOERRLC's threshold of
+two, so the strings are still commfaulted and the six MTU slots are still
+overlaid -- the reads still stop, now at t=242.9 instead of t=242.4.  What
+remains is the MDMs' own traffic at IUA 10 and 12: a return word (func 18a)
+and channel reads (func 041, 21 words at IUA 10 and 34 at IUA 12; func 042, 4
+and 6), plus the IMU behind the same unit, which is func 126 with a count of
+14 -- FIOIMUC1 X'00024C0D' -- and is correctly distinguished from the timing
+unit's own X'00024C26' by the full command field.
+  AND THE LINE IS MEASURED, NOT ASSUMED.  Both further steps were tried and
+both cost the redundant set both computers, where the NSP answers cost it
+nothing: the NSP discretes alone give ZERO votes, adding the return word gives
+two, adding the channel reads as well gives two.  The boundary is between what
+the INTERFACE says and what the SENSORS say.  A device model may truthfully
+report an unpowered box; it may not invent channel data, because the flight
+software acts on it and two computers then disagree.  That is the constraint
+any fuller MDM model has to satisfy, and it is why the rest of this is real
+device work and not a patch.
+  AND THE BOUNDARY IS NOT AN ARTEFACT OF OUR BUFFERING, WHICH WAS WORTH
+RULING OUT.  The obvious suspicion about those two votes was that this model
+manufactured them: it kept ONE reply per bus with a cursor per reader, so a
+reply arriving while another computer was partway through the previous one
+handed that computer a MIXTURE of the two, and whether it happened depended on
+when each machine polled -- a divergence that would grow with the number of
+commands answered, which is exactly the pattern.  Each reader now gets its own
+COPY of the words, not merely its own cursor, so no computer can receive half
+of one reply and half of the next.  With that in place the channel reads were
+tried again and STILL give two votes.  So the mixture was real and is now
+fixed, but it is not what the computers disagree about: it is the channel data
+itself.  Verified final state -- NSP answers plus per-reader copies -- zero
+votes, OPS 201 reached with the control's 24 device/function pairs, no
+unprogrammed-store execution, and the six MTU slots still overlaid at t=241.4.
+The timing unit is STILL FROZEN and this is still not a fix for #210.
+  AND THE ASYMMETRY THEORY IS REFUTED TOO, WHICH WAS THE LAST CHEAP ONE.
+The model owned buses 20-22 only, so with the channel reads answered GPC1 --
+which commands FC1 and FC3 -- had both its strings alive while GPC2, which
+commands FC2 and FC4, had one alive and one dead: measured, buses 20/21/22
+fell to 14/13/15 unanswered transfers while bus 23 stayed at 6, untouched.
+Two computers holding different opinions about how many of their strings are
+healthy is exactly the shape of a disagreement, and it was OUR asymmetry.  So
+ownership was extended to all eight flight-critical buses (14-17 and 20-23,
+excluding 18 and 19, which are mass memory and ARE modelled) and the channel
+reads tried again.  Bus 23 fell from 6 unanswered to 4 and bus 14 likewise,
+and THERE ARE STILL TWO VOTES, with the six MTU slots still overlaid.
+  So the protocol/telemetry line has now survived three independent
+challenges -- per-reader cursors, per-reader COPIES of the words, and
+symmetric bus ownership -- and each time what the two computers disagree about
+is the channel data itself.  DO NOT RETEST THESE THREE.  Answering an MDM's
+channel reads with a value this simulator invented costs the redundant set,
+however carefully the words are delivered, and the remaining work is therefore
+to decide what this vehicle's sensors actually read.  That is vehicle
+simulation and a scoping decision, not a defect repair.  The committed state
+is the NSP answers plus per-reader copies: zero votes, OPS 201 reached, 437
+unanswered transfers down to 66, and MTU ACCUM 1-3 STILL FROZEN.
+  FIXED.  The flight-critical buses now COMPLETE a receive that nothing
+answered, with zeros, at the receive time-out (src/iop.c, default on,
+YAGPC_NO_FC_ZERO restores the old silence).  Measured on the two-computer
+fixture: the six MTU slots are NEVER overlaid, the timing unit is read for the
+whole run -- last read t=418.6 s against t=242.4 in the control -- the vehicle
+reaches OPS 201 and carries 32 distinct device/function pairs on those buses
+where the control carries 24 of which essentially none are answered, and
+nothing executes unprogrammed store.  MTU ACCUM 1-3 on SPEC 2 PRO count.
+  WHY THIS SHAPE AND NOT THE EARLIER ONES.  The length is bce->recvLeft, what
+THIS transfer armed, so nothing is left over to shift the next one -- the
+bus-level attempt guessed from the command's count field, which is not the
+reply length, and broke the vehicle.  The words are ZEROS and therefore
+identical on every computer -- the earlier receive-level attempt wrote nothing
+and left each computer its own history, which diverged.  And EVERY transfer on
+those buses is answered, not some -- partial answering makes errors
+NON-UNIVERSAL, and FIOERRLC self-fails a computer whose error its peers do not
+share ('IF (CHI,R6,EQ,1) ... CALL FCMSFAIL') where a universal error merely
+commfaults the string.  It is a statement about the VEHICLE, which has nothing
+wired to those buses, and not a device model: when real MDM models arrive they
+answer first and this never fires for them.  The known cost of that is
+recorded as its own risk -- a half-written MDM would have its gaps completed
+silently rather than timing out -- and the mitigation is to skip any (bus, IUA)
+a model has answered, which is the next thing to add.
+  AND IT EXPOSED THE NEXT DEFECT, #211: with the I/O actually running, the
+two-computer set loses synchronisation about eight seconds after the
+transition.  That is not caused by the completion in any way three separate
+experiments could find, and it could not have been seen before, because until
+now the GNC software never ran with live I/O at all.
+  CORRECTION, AND THE STATUS IS BACK TO OPEN.  Two things were claimed above
+that the measurements do not support.
+  FIRST, THE DISPLAY WAS NEVER SEEN.  What is measured is the MECHANISM -- the
+six bypass slots are not overlaid and the read transactions continue to
+t=418.6 s where the control stops at t=242.4 -- and that is not the same as
+MTU ACCUM 1-3 counting on SPEC 2 PRO.  In every run of the end-to-end script
+the keys SPEC 2 PRO were typed and CRT2 stayed on '2011/ / UNIV PTG 2'; the
+TIME display never came up, so nobody has yet seen the accumulators advance.
+Do not record this as fixed until that display has been read.
+  SECOND, THE SYNC LOSS IS A REGRESSION OF THIS CHANGE, not a defect it
+merely revealed.  With it on the two-computer set votes at t=249.4 in every
+run; with it off there are no votes at all.  Three experiments failed to
+attribute the votes elsewhere -- per-reader copies of the reply, symmetric
+ownership of all eight flight-critical buses, and completing only for the
+commanding BCE -- but failing to pin it on something else is not evidence that
+this change is innocent, and it was wrong to write it up that way.  #211
+records the sync loss and should be read as "caused by, or at least only
+reachable through, the completion", not as an independent finding.
+  SO THE COMPLETION IS NOW DEFAULT OFF (YAGPC_FC_ZERO turns it on).  A vehicle
+that loses its redundant set is not a working vehicle, and the trade is not
+one to make silently on the strength of a mechanism that has not been seen to
+produce the symptom's cure.
+  - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.
   - procs `BCE20,BCE21,BCE22,BCE23` &middot; config `G2` &middot; files `src/iop.c,src/mtumodel.c` &middot; symptom `fail to sync,CAM vote,redundant set breaks,OPS 201,both computers vote` &middot; doc `found while fixing #210; see that entry for why the I/O used to fail`
@@ -508,376 +900,6 @@ FIX: model a GPC as a responder on the mass-memory buses (the GPC-to-GPC overlay
 - **#208** *(flight-sw)* A powered, never-loaded IDP is NOT picked up by PASS's own DEU loader even when the gate in DMIMCD says it should be.  DMIMCD.hal ~016700 schedules AIG_DEU_LOADER when the poll reply asks for an IPL AND 'CZ2V_POST_IPL = 0 OR MC = PL_9_MC OR SM_2_MC OR SM_4_MC' -- post-IPL OPS 0 is the FIRST of the allowed configurations.  A GPC sitting in OPS 0 GPC MEMORY is in exactly that state, so an IDP powered during the IPLs should be loaded by it and should not have to wait for a GPCIPL of its own.  It is not.  This is the part of #197 that a script re-ordering hides rather than answers: with it working, CRT3 would get its background the moment it is powered, whatever order the computers are IPLed in.
   - evidence: MEASURED, NOT INFERRED, and not specific to IDP3: with ONE GPC left in post-IPL OPS 0 and IDP1 -- a unit GPCIPL had loaded perfectly, 8 func-916 format fills, 'load complete ... as unit 1' -- the panel's DEU LOAD was pressed.  The unit cleared its memory and asked for an IPL; PASS sent one display fill and never loaded it.  So PASS's own DEU loader does not run for ANY display, and CRT3's blank background in a five-computer run is that, not anything about IDP3.  THE CHAIN, each link measured: (1) DMIMCD reaches DIO(DMIVL_POLL1SN) for the unit -- the clock on an unloaded CRT3 keeps running, so the time fill is going out; (2) it then requires CZ1V_D_TIME_STAT halfword 1 to be non-zero before it will even look at the poll reply; (3) that status is the BCE Status Register, stored by #SST; (4) in this emulator that register was set by NOTHING but a self-test failure -- YAGPC_SSTTRACE over a whole run: 2,984 stores, every one bst=00000000, so the test could never be true; (5) the BCE Principles of Operation gives an error termination three parts -- Program Exception to 0, BCE-MSC Indicator to 1, and 'it records the cause of the error in its own BCE status register' -- and iop_bce_error_terminate did the first two and not the third.  WHAT A REAL DISPLAY DOES, from the DPS Console Handbook's DEU IPL request entry: 'the DEU will respond to the first DEU poll request, returning a single poll header response word (with the DEU initialization required bit set).  The IOP, however, is expecting a 16-word response and will therefore log a T/O ...  When an I/O error is detected on a DEU poll, the UI software (DMI MCDS IN) checks for a DEU load request.'  DMI MCDS IN is DMIMCD: the REQUEST IS DELIVERED AS A TIMEOUT, and the header only says which kind.  MEDS2's DEU answered all sixteen words unless a load was already running, so there was no timeout and no request.  BOTH HALVES NOW FIXED, NEITHER ENOUGH.  iop_bce_error_terminate records the cause (BST_S for a command-sync word mid-receive, BST_ITO/BST_TO for the first or a later word never arriving), Table 1.2's masks are in iop.h, test_bce_status 15/15.  MEDS2's DEU answers a poll with one word whenever it is un-IPLed, not only during a load.  Measured with both: BCE6 takes 120 receive timeouts where it took none, the status register carries ITO, GPCIPL's own load still works unchanged (8 format fills, 'load complete'), and PASS STILL DOES NOT LOAD THE UNIT.  REGRESSION, and the reason the second half could be committed: the owner's five-computer acid test re-run with it -- examples/5gpc-3crt-subtitled.script, five GPCs, three CRTs, IDP3 powered at t=67 and not loaded until GPC5's IPL onto CRT3 at t=600, so nine minutes of an un-IPLed display being polled by a running redundant set -- reached script complete at t=884 with ZERO fail votes, CRT1/CRT2 in 1011 LAUNCH TRAJ 1 under GPC1/GPC2, CRT3 in 0001 GPC MEMORY under GPC5, and IDP3 loaded normally when its turn came.  The added error terminations do not end the set.  NEXT, and the whole of what is left: the link after the status register.  Find what FCOS puts in transaction status halfword 1 -- AIGDEU tests halfwords 3 and 4 for a clean transaction while DMIMCD tests 1, so they are not the same word -- and whether the recorded bit survives to be read at all, since only 1 of 120 terminations reached an #SSC that stored it non-zero: the BCE goes to Wait on an error, so the program's own store never runs and FCOS must be reading the register through PCI instead.  AND THE LOADER IS NOT MERELY FAILING, IT IS NOT RUNNING.  With both halves in, the DEU LOAD test was repeated under YAGPC_MMUTRACE: every mass-memory access in the run is at or before simulated t=38.4 s, which is the IPL and the memory configuration; the DEU LOAD is at wall t=62.4 s and the run goes on to t=182 s with NOT ONE further MMU command.  AIG_DEU_LOADER reads the DEU load module from mass memory (MMURRDCK, AIGDEU.hal ~003900), so it does no I/O.  THAT WAS READ AS 'never scheduled, the failure is still in DMIMCD's gate', AND THAT READING IS WRONG -- the memory diff below shows DMIMCD running its gate to the end and setting the load request bit.  Absence of mass-memory traffic bounds where the loader gets to, not whether it was asked.  Nor does PASS annunciate: a whole-frame capture (NSTS_ANNOUNCE_ROWS=all) over the same window shows no 'I/O ERROR CRT' line, which the DPS Console Handbook says is correct ONLY when the software has seen the error and found the initialization bit set -- so that one observation does not separate 'saw it and suppressed the message' from 'never saw it'.  The two later gates look satisfied on paper: CZ2V_POST_IPL is a COUNTER (CZ2COMMO.hal INITIAL(0), incremented by ARCGPC on an OPS transition, and DLALIGHT comments '= 0 ... CURRENT OPS IS POST IPL'), and the test GPC had IPLed and taken no OPS, so it is 0; AIG_DEU_LOADER cannot be busy if it never runs.  That leaves transaction status halfword 1.  FCOS never READS the BCE status register -- the only access to it in the whole flight source is FIOERRLC's FIORESET, which WRITES zeros to bank C words 6 and 7 of the offending BCE (FIOBCEA6 EQU X'A20B') to reset it -- so halfword 1 is composed by FCOS's own error path, not copied from the hardware, and the next thing to find is what makes FCOS compose it.  The cheapest route is probably an address rather than more reading: CZ1V_D_TIME_STAT is a COMPOOL variable, its offset is in the SDFs, and a snapshot's gpcN.mem.bin can simply be read at that address while a display is asking.  THE GATE IS NOW PASSED, MEASURED IN MEMORY, and the failure has moved inside the loader.  Two snapshots of the same one-GPC configuration -- one with IDP1 loaded and left alone (idp1.json ipled=true), one with it asking after a panel DEU LOAD (ipled=false) -- were diffed halfword by halfword, and the compool structures were located by their own signatures rather than by symbols, which we have none of.  CZ1V_D_TIME_FILL is at 022a4: three 14-halfword structures whose MISSION_TIME decodes as 23,107,984.5, which is day 267 10:53:04 GMT to the second, matching the snapshot's own epoch.  CZ1V_D_POLL is at 02188: four 18-halfword structures, the first with a plausible key count and codes, the other three all zero for the three unpowered units.  READ OUT: (1) CZ1V_D_TIME_STAT for buffer 2 -- which is the one DMIMCD indexes, DMIV_INDEX being bits 9-10 of the poll header plus 1, and our header has bit 10 set -- goes from 0000 0000 0000 0000 to 7000 0000 0000 22d3, so the status test passes; (2) CZ1B_D_POLL_MSG_HEADR for DEU 1, at 0218a, goes from 0040 to 0041, so the 'DEU initialization required' bit is in memory and the header test passes; (3) 02253 goes from 0000 to 8000, the only such transition anywhere in the compool region and exactly what SET_BIT_16(CZ1B_D_DLT,1) writes -- so CZ2V_POST_IPL was 0, DMIMCD reached the end of its gate, REGISTERED THE LOAD REQUEST and scheduled AIG_DEU_LOADER.  The bit is still set at capture, about three minutes after the request, so nothing ever cleared it.  Both committed fixes are therefore necessary and both work: the failure is no longer 'the request is never heard' but 'the request is registered and not serviced'.  NEXT: why AIG_DEU_LOADER does not run.  It produces no bus fills and no mass-memory reads at all, so it is dying at or before its start rather than failing partway -- suspect the SCHEDULE itself (PRIORITY(PRIO_AIG)) or the process not being present in the post-IPL OPS 0 memory configuration.  AIGDEU.hal's own first act is to find the requesting unit in CZ1B_D_DLT and it checks CZ2V_POST_IPL again at ~004500, so a third snapshot taken while the bit is set would show whether AIGV_DEUIPL_ERR_CODE or the AID_DEU_LOGGER table ever gets written.  A CONTROL RUN REFUTES THE TWO PARAGRAPHS ABOVE, and they are left standing only so nobody re-derives them.  The claim was that the display's request was never heard until the BCE status register recorded a cause and the unit answered a poll with one word.  It is wrong.  With BOTH of those backed out -- MEDS2 returning to the iplRunning test, iop_bce_error_terminate passing cause 0 -- and the DEU LOAD test repeated under YAGPC_CMDTRACE=6: 122 BITE STATUS commands on the display bus, first at t=56.5 s, which is the DEU LOAD.  With both in place: 124, first at t=55.2 s.  AIG_DEU_LOADER only issues a BITE once it has been scheduled, found the unit in CZ1B_D_DLT and reserved the SM common buffer, so THE LOADER WAS ALWAYS RUNNING and DMIMCD's gate was always passing.  Both changes remain in the tree because each is right on its own evidence -- the Principles of Operation for the status register, the DPS Console Handbook for the one-word poll -- but neither was the defect, and the commits that shipped them say otherwise.  WHAT THE DEFECT ACTUALLY WAS, in two parts, both in MEDS2's display-unit model and both found by reading the machine's memory.  FIRST, the BITE reply had no message header.  CZ1COM.hal's CZ1B_D_BITE structure is XMIS_STAT ARRAY(4), then CZ1B_D_DEU_MSG_HDR, then CZ1B_D_BITE_STAT ARRAY(4) -- nine halfwords per unit -- and the reply lands at the header.  MEDS2's biteResponse began with BITE word 1, so every word landed one slot early.  Overlaid on a capture taken while a unit was asking: DEU1 at 022db reads XMIS_STAT=0000 0000 0000 0000, MSG_HDR=c000, BITE_STAT=0000 2000 20c0 0000, with DEUs 2, 3 and 4 at +9, +18 and +27 all zero, which is what fixes the base.  c000 is BITE1_HEALTHY sitting in the header's slot; CZ1B_D_BITE_STAT(1), which AIGDEU tests, holds the 0000 that belongs one place further on.  SECOND, and underneath it, IPL PERFORMED was tied to the wrong thing.  biteState set BITE1.IPL_DONE only when the unit was already loaded, but AIGDEU reads that bit on a unit that has just ASKED to be loaded and refuses unless bits 2 to 4 read BIN'100' (AIGDEU.hal 008500).  Tying it to the load makes the test unsatisfiable exactly when it is asked and the loader dead code on a working orbiter; the bit is the unit's own initialization, which the DPS Console Handbook describes as what a DEU does the moment it detects an IPL request.  FIXED: the reply leads with the header, and IPL PERFORMED is set for any unit not reporting a fault.  MEASURED, on the wire, with NSTS_BITE_TRACE: before, 0041 8000 0000 2000 5fbf; after, 0041 c000 0000 2000 1fbf.  AND THE LOADER MOVES.  Mass-memory commands in the same test: 56, all at or before t=37.4 s -- the IPL and the memory configuration -- before the fix; 440 after, running to t=201.3 s, beginning at t=55 s with the DEU LOAD.  It positions to 4/4/0 and reads 17 blocks from 4/4/0/7, which is 8704 halfwords and exactly AIGV_READ.DWDCT, and it does this 86 times.  STILL OPEN, and this is now the whole of it: the load does not complete.  No format fill ever follows, so AIGDEU is failing after its mass-memory read -- either CDHV_RW_TSW is non-zero, which would set AIGV_DEUIPL_ERR_CODE to 9 or 11 and skip the fills, or the eight fills of the OUTER loop are issued and fail (code 3).  The retry count says it is looping, not stopping.  Next: read CDHV_RW_TSW, and check that what sits at 4/4/0/7 on our tape is the display control program AIGDEU expects, since CZ1V_MM_ADDR_TBL(5) is what points there.  AND THE LAST LINK IS NOT CODE AT ALL -- see #209.  The loader's mass-memory read is of block 9223, CZ1V_MM_ADDR_TBL entry 5, and no volume we have holds a block there: not our OI340700 build, not pass-910.  It reads 8704 zeros, its read-with-check fails, and it retries.  So #208's chain is now traced end to end -- the request is made, the gate passes, the loader runs, asks the unit for its BITE status, is now told the truth, goes to mass memory, and finds a hole.  The two defects in this entry were real and are fixed; what remains is tape content, which is #209's.  FIXED, END TO END.  Two more defects, both in the same display model. THIRD: function 380 carries two different things and the model told them apart by neither.  onData routed EVERY 380 transfer to _timeFill regardless of length, so the eight memory fills AIG_DEU_LOADER sends -- 510 halfwords five times, then 202, 3 and 252, which is AIGV_FILL_LENGTH plus two, element for element -- were each stored as a header clock and thrown away.  Measured with YAGPC_CMDTRACE=6: 64 complete passes of all eight fills in one run, 320 of them at 510 halfwords, and not one halfword reaching the unit's memory.  Seven halfwords is the clock; anything else is a fill.  FOURTH: the unit never asserted a critical BITE.  Having loaded the control program the loader polls and requires header bits 15 to 16 to read BIN'10' -- critical BITE present, no IPL required (AIGDEU.hal 015700) -- and gives up with code 6 otherwise.  A unit with a control program and no critical formats fails its own format checksum, which IS a critical BITE, and the loader's next act is to send the formats and re-check that checksum (017700).  The model now asserts it in exactly that window.  DMIMCD reads the same bit only to decide to checksum the poll response (DMIMCD.hal 021100), which this model computes.  RESULT, and it is the first time PASS has ever loaded a display unit by itself: DEU LOAD, poll 0041 IPL_REQUIRED, eight fills at 0f49 1145 1341 153d 1739 1935 1fe4 0002 of 508 508 508 508 508 200 1 250, 'load complete ... as unit 1', poll 0042 BITE_CRITICAL, then eight format fills at 0100 02fc 04f8 06f4 08f0 0aec 0ce8 0ee4 of 508 seven times and 101, poll 0040 healthy.  Every address and length is AIGB_DEU_FILL_LOC, AIGV_FILL_LENGTH, AIGB_DEU_DFT_LOC and AIGV_DEU_DFT_FILL exactly, which is what says the model is now right rather than merely permissive.  The display draws 0001/GPC MEMORY with its background afterwards.
   - csects `DMIMCD,AIGDEU,AIDDEU,CZ2V_POST_IPL,FIOSVC1` &middot; procs `IDP1,IDP3,DK6,DK8,BCE6` &middot; files `src/iop.c,src/iop.h,discretePanel/MEDS2.py,src/deumodel.c` &middot; symptom `no background,CRT3,IDP3 not loaded,IPL_REQUIRED,load started no load complete,foreground only` &middot; doc `OI301700/SSSRC/DMIMCD.hal 014400-017610; BCE Principles of Operation IBM-6246556A part 3 Table 1.2 (p.14-16) and 2.2; DPS Console Handbook, DEU IPL request`
-- **#210** *(flight-sw)* The three MTU ACCUM times on the TIME display (SPEC 2 PRO) freeze and carry a down arrow in the five-computer ascent configuration because THE MTU IS NEVER READ AT ALL.  Not a stale value, not a redundancy-management latch that an ITEM could clear: the read command is not issued.  The timing unit answers a command of iua 10, function 126, 39 words (MTU_READ_CMD 0x024C26) on buses 20, 21 and 22, one bus per accumulator.  In a one-computer OPS 0 vehicle each bus carries 342 of those reads in a few minutes and all three accumulators track GPC time to the millisecond with no arrow.  In a five-computer vehicle in OPS 1 the same buses carry 66,930 commands in 71 seconds -- about 940 a second, 21 distinct device/function pairs, the flight-critical traffic of the ascent -- and NOT ONE of them is an MTU read.
-  - evidence: Measured 2026-09-24.  Single GPC, OPS 0, YAGPC_CMDTRACE=20,21,22: bus 20 2,720 commands of which 342 func=126, bus 21 684 of which 342, bus 22 2,719 of which 342; the TIME display read back whole (NSTS_ANNOUNCE_ROWS=all) shows MTU ACCUM 1, 2 and 3 all equal to GPC time and advancing, e.g. 267/15:07:05.168, for eight minutes, on the commanding computer AND on a listening one in a two-computer run.  Five GPCs restored from examples/5gpc-3crt-subtitled.snapshot (OPS 1, CRT1 and CRT2 in 1011/LAUNCH TRAJ 1, CRT3 in 0001/GPC MEMORY under GPC5): bus 20 commanded by GPC1, 21 by GPC2, 22 by GPC3, 66,930/66,484/66,930 commands and zero func=126 on any of them; no receive timeouts on those buses at all, so nothing is failing -- the read is simply not being issued.  GPC4 and GPC5 command no timing bus and only listen, which is why the owner sees the same frozen values on CRT3/GPC5 as on CRT1/GPC1, and why ITEM 34, 35 and 36 (and their +1 through +5 forms) change nothing.  OPEN, and the question is which side is wrong: whether PASS reads the MTU only in OPS 0 and a frozen accumulator in ascent is CORRECT, or whether our I/O is starving the read on a bus carrying 940 transactions a second.  The two variables are confounded in what has been measured so far -- the one-computer runs are OPS 0 and the five-computer run is OPS 1 -- so the discriminating test is a multi-computer vehicle held in OPS 0 with the same trace.  THE OPEN QUESTION IS ANSWERED, AND IT IS NOT CORRECT BEHAVIOUR.  The MTU reading code is resident in EVERY memory configuration: FIOPRMPG, FPMMTURM, FPMMTUFX, FPMFXMTU, FPMUPMTU and FIOMTUTG all appear in csects-G2, G3, G8, G9, G16, P9, S2 and SSW alike.  Unlike AIG_DEU_LOADER, which really is confined to the three configurations its own gate names (#208/#209), nothing about the MTU reader is OPS-restricted, so a frozen accumulator in OPS 9 or OPS 1 is not the flight software declining to read -- the code to read is there.  MEASURED ON THE MODEL'S OWN COUNTER, which is not subject to the command trace's budget: a five-computer vehicle restored into OPS 1 and left alone for three and a half minutes reports mtu: {"commands":542581,"timeReads":0,"wordsOut":0} -- over half a million commands on those buses and NOT ONE read, so not one word ever leaves the timing unit.  AND IT IS NOT GOING SOMEWHERE ELSE: receive timeouts in that run are confined to BCE 6, 7 and 8, the display buses, 696 per computer; no other bus times out, so there is no unanswered MTU read on a bus this model does not own.  THE OWNER'S OWN TEST SEPARATES THE VARIABLES BETTER THAN MINE DID: with the redundant set in OPS 9 and GPC5 in OPS 0, ALL the accumulators are frozen INCLUDING GPC5's; taking the SET to OPS 0 starts all of them counting, including GPC5's; putting the set back to OPS 9 freezes all of them again.  GPC5's own OPS is irrelevant because GPC5 commands no timing bus -- it listens -- so what it displays is whatever the commanders last read.  The OPS that matters is the redundant set's, and the failure is therefore in whatever decides to issue the read, not in redundancy management, not in the display, and not in GPC5.  He also reports that in OPS 0 the down arrows REMAIN while the values count, and that all four fields look like copies of the GPC time, which is the next thing to establish: whether the accumulators are genuinely accepted in OPS 0 or merely back-filled from the GPC's clock.  NARROWED FURTHER, AND ONE CAUSE REFUTED.  It is not the number of computers nor which of them commands a bus: THREE computers held in OPS 0, each commanding one timing bus -- the same structure a five-computer vehicle has -- read the unit 1,137 times in seven minutes (mtu: commands 6795, timeReads 1137, wordsOut 7959).  One computer in OPS 0 reads it 342 times.  Five computers in G1 read it not at all, twice measured: 542,581 commands/0 reads and 598,067 commands/0 reads.  So the determinant is the MEMORY CONFIGURATION, SSW against G1, and nothing else that has been varied.  REFUTED, do not retry: that the unit is commfaulted by the commands it does not answer.  Our model replies to exactly one command, MTU_READ_CMD, and is silent for every other command sent to its own IUA 10 -- and there are such commands, measured, immediately after an IPL: func 132 and 138 of 33 words and func 136 of 128 words at t=44.4 to 44.7, each timing out its BCE.  Making the model answer them (an experiment behind YAGPC_MTU_ANSWER_ALL, since reverted) cut the timing-bus timeouts from 5 to 2 and changed nothing else: the G1 vehicle still read the unit 0 times in 483,431 commands.  Those functions are probably the NSP's, which shares IUA 10 on buses 20 and 22 per FIONSPPG, and not the timing unit's at all.  ALSO ESTABLISHED: our reply passes FPMLIMCK field by field (FPMMTURM.asm 066100-069600) -- GMT days 0x267 within 0x0001..0x0399, hours 0x15 <= 0x23, minutes <= 0x59, and seconds packed two bits left so that 59 s reads exactly as the limit 0x0164, which is what our bcd_pack produces; MET all zero passes its own tests.  So the data is not being rejected for being out of limits.  AND THE BUS PROGRAM HAS AN EXPLICIT BYPASS: FIOPRMPG's FIOMTUR1 begins #LBR/#CMDI and then FIOBY51 #BU FIORK51 '*OVERLAID BY BCE BYPASS CODE', so a bypassed transaction falls straight to FIOWAIT and the #MIN 0,6 that reads the unit never executes.  That is the shape of what is happening; what applies the bypass in G1 and not in SSW is the open question.  WHEN IT STOPS, TRACED THROUGH A WHOLE ACID TEST (YAGPC_CMDTRACE=20,21,22, five computers, IPL to ascent).  The read runs steadily at about one per second per bus -- 93 to 96 reads per 30 s across the three -- from t=60 all the way to t=690, through all five IPLs.  It then STOPS BUS BY BUS as the crew enters the NBAT: FC2 and FC3 fall silent at about t=705, which is 'ITEM 1 +9 EXEC', the item that selects the configuration the table is being written for; FC1 carries on alone until about t=765, just after 'ITEM 11 +0'.  From t=780 onwards there is not one read, through 'OPS 9 0 1 PRO' at t=798 and the later OPS 1 transition, and none afterwards for the rest of the run.  So the loss is not caused by the OPS transition itself: it happens WHILE THE NBAT IS BEING ENTERED, before any PRO, and the transition merely never restores it.  Each bus has its own commander by then -- FC1 GPC1, FC2 GPC2, FC3 GPC3 -- and all three keep carrying heavy traffic afterwards (66,930 commands on FC1 in 71 s), so the buses are alive and commanded; only this transaction is gone.  CAUTION FOR WHOEVER PICKS THIS UP: two earlier readings in this entry were artefacts of reading a log while its run was still going, and one was an ordering mistake -- the yaGPC2 log interleaves five computers, so the LAST LINE mentioning a bus is not its LATEST event.  Bin by time, do not take the last match.  ROOT CAUSE, READ OUT OF MEMORY: THE READ IS BYPASSED, NOT UNSCHEDULED.  The CSECT tables give FIOPRMPG's layout exactly -- it is at 117872 in BOTH csects-SSW and csects-G9, with contents FIOMTUR1 +0, FIOBY51 +4, FIORK51 +8, FIOMTUR2 +10, FIOBY52 +14, FIOMTUR3 +20, FIOBY53 +24 -- so the three bypass slots can be read straight out of any capture.  In a vehicle whose reads WORK (one GPC, OPS 0) they hold f001 cc78, f001 cc82, f001 cc8c: #BU to FIORK51/52/53, which reaches the common code and its #MIN 0,6.  In a vehicle whose reads are DEAD (the five-computer OPS 1 capture, examples/5gpc-3crt-subtitled.snapshot) ALL THREE hold c022 c000 -- #DLYI 34 then #DLYI 0.  That is precisely the 'OVERLAID BY BCE BYPASS CODE' the source names at FIOPRMPG.asm 008100: with the branch replaced by delays the program falls through to FIOWAIT, ends as commander, and never reads the unit.  So FCOS has deliberately removed the transaction, which is what it does to a COMMFAULTED device -- the arrows on the display are that same judgement.  AND THAT INVALIDATES THE REFUTATION RECORDED ABOVE: the experiment that answered every command sent to the unit's IUA was run against a RESTORED vehicle, and a restore brings back the bypassed program with the rest of memory, so the test could not have worked whatever the truth was.  It is being re-run from a fresh IPL.  Whoever reads this: an experiment about how the flight software CONFIGURES itself cannot be run from a snapshot of a machine that already configured itself.  STATUS: the MECHANISM is settled and the TRIGGER is not.  What makes MTU1-3 freeze with a down arrow is that FCOS has overlaid all three read transactions with delays; that is read directly out of memory and is not in doubt.  What is not yet known is what makes FCOS do it.  The obvious candidate -- a commfault from the commands our model leaves unanswered at its own IUA just after the IPL -- could not be tested properly: the only quick vehicle is a restored one, which carries the bypass in its memory image, and a fresh acid test with the answering experiment on never reached the NBAT, because answering every command on three flight-critical buses adds a quarter of a million words of traffic and collapses the run's pace.  An instrument that changes the measurement, again.  NEXT, and cheaper than another acid test: watch FIOBY51 at 117876 in a fresh five-computer run by capturing twice, once before the NBAT is typed and once after, which shows the overlay being written and brackets it to a single item; and read the I/O error log, CZ2V_IO_ERR_LOG in CZ2_COMMON, to see whether device 22 is logged at all.  Both need the run to reach t=700 without the experiment, which it does comfortably when the machine is free.
-  MEASURED 2026-09-24, AND IT IS NOT THE NBAT BY ITSELF.  A single
-computer that types the WHOLE ascent NBAT -- the seventeen items of
-examples/5gpc-3crt-subtitled.script, ITEM 1 +9 through ITEM 19 +2 -- never
-bypasses anything.  FIOBY51/52/53 (117876/117886/117896) are untouched from the
-moment GPCIPL's memory fill leaves them: YAGPC_WATCHHW=1cc70-1ccb0, a range
-covering the listener slots as well, fires only during that fill at t=122 s and
-never again, and MTU reads continue on all three buses across the items and
-past them -- iua 10 func 126, 62 or 63 per bus in every 60 s bin from t=240 to
-the run's end at t=545, with the items typed at t=400 to t=496.  Run:
-headless-gpcmem.sh, TAPE=OI340700-v44boot.mmv, DEUMF=1,
-YAGPC_DEUKEYS_SIMTIME=1, the items as eighteen DEUKEYS batches, all eighteen
-confirmed delivered.  So the trigger needs PEERS rather than the NBAT: what
-bypasses the read depends on there being other computers on those buses, which
-is also why one computer in OPS 0 has never shown the fault.
-  THE WRITER IS FCMBCEMD, AND THE DOWN ARROW IS THE SAME EVENT.  FIOPRMPG
-carries TWO elements per accumulator -- a commander (FIOMTUR1-3, bypass slots
-FIOBY51/52/53) and a listener (FIOMTUL1-3, slots FIOBY51L/52L/53L at
-117912/117920/117928) -- and both are named in FCMRTBLE, 'NSP AND MTU RESTORE
-TABLES'.  The frozen value c022 c000 identifies which routine wrote it:
-FCMBCEMD builds its bypass as TBCECNT OR FCMDLYI, and FCMDLYI is X'C000C000'
-(FCMCBLKS.asm 025800), while the only other writer, FCMRSTFC, uses a delay of
-FCMDLA=75.  The overlay is therefore the generic element bypass, not the
-bypass of the NSP that is not in use.  FIOERRLC calls FCMBCEMD at its line
-075200 after the SECOND counted error on a comfaultable transaction, and the
-next block of that same routine is '*** DETERMINE IF DOWNARROW IS TO BE
-DISPLAYED', which calls FIODWNAR.  The frozen accumulator and the arrow beside
-it are not two symptoms to be explained separately: they are one act of the
-I/O error logic, and the arrow is evidence that an I/O ERROR was counted.
-  AND THERE IS A RESTORE PATH, which is what a correct reconfiguration uses:
-FCMBUSCM request type 15, 'RESTORE MTU AND NSP BCE ELEMENTS' (SVC 36), calls
-FCMRSTFC, which rewrites the commander AND the listener slot of all eight
-NSP/MTU entries from FCMRTBLE.  So a bypass that stays is either an error that
-keeps being counted or a type-15 request that is never made.
-  THE TRIGGER, MEASURED 2026-09-24, AND IT IS THE OPS TRANSITION, NOT THE
-NBAT.  TWO computers reproduce it, which makes the fixture cheap: simulatePASS
---gpcs 1,2 --crts 2 with examples/2gpc-ops201.script on OI340700-v44boot.mmv,
-about four minutes to the event.  With YAGPC_WATCHHW=1cc70-1ccb0 both machines
-write all six slots, and the times place it exactly: the crew types OPS 2 0 1
-PRO at panel t=228.5, FCOS RESTORES the six slots at t=241.72 (f001 cc82 and
-the rest, the ordinary #BU), and then BYPASSES all six at t=242.365, 242.551
-and 242.953 -- one accumulator every 0.4 s, and within each pair the commander
-slot and its listener slot 14 microseconds apart.  MTU reads run at 93 per 30 s
-up to t=240, fall to 4 in the bin containing the bypass and are ZERO for the
-remaining 650 s of the run: nothing ever restores them.
-  THE CALLER IS FIOERRLC.  Every one of the six stores is from nia 181f5 =
-FCMBCEMD+243, and YAGPC_NIARING=1024 with YAGPC_RINGTRIG=1cc74:c022 gives the
-path into it: ...19d9d 19d9e ... 19ddc then 18102, which is FIOERRLC+745
-through FIOERRLC+808 (FIOSSM07+67..+130) falling into FCMBCEMD+0.  That is the
-CALL FCMBCEMD at FIOERRLC.asm line 075200, reached only after the SECOND
-counted error on a comfaultable transaction, and the next block of that same
-routine is the one that displays the down arrow.  The 14-microsecond pairing is
-explained by FCMBCEMD's FIOBCML, its 'COMMANDER/LISTENER ENTRY', which bypasses
-the commander element and then computes the listener element's address from
-TBCECFDS + TBMTLIST and bypasses that too -- one request, two overlays, each
-with its own TBCECNT, which is why the commander gets c022 (34) and the
-listener c000 (0).
-  SO THE FLIGHT SOFTWARE IS BEHAVING CORRECTLY AND OUR I/O IS NOT.  FCOS is
-being told, twice, that the MTU read failed.  External authority agrees the
-elements should be live: the STS-134 DASS GNC9 dump (mafgen/DASS_G9.ASC, the
-FIOPRMPG block at 01CC70) has FIOBY51/52/53 = F001 CC78 / F001 CC82 / F001 CC8C
-and FIOBY51L/52L/53L = F001 CC9C / F001 CCA4 / F001 CCAC, every one of them the
-live branch, so a bypassed MTU element is not something the build ships with.
-The remaining question is narrow and is an EMULATOR question, not a flight
-software one: what makes the MTU read transaction fail on all three buses, on
-both computers, immediately after an OPS transition that reassigns the
-flight-critical buses, when the same transaction succeeds indefinitely before
-it.  Next: YAGPC_ERRTERM_TRACE=20,21,22 on the same two-computer fixture.
-  WHY PEERS ARE NEEDED, FROM THE SOURCE.  FIOERRLC branches on FIOGPCWE,
-the number of GPCs reporting the same error: 'IF (CHI,R5,NE,FIOSRBID),ANDIF,
-(CHI,R6,EQ,1),ANDIF,(CHI,R5,NE,FIOPMUDV)' takes the SELF FAIL-TO-SYNC path when
-exactly ONE computer has the error, and only the ELSE branch -- '*** PROCESS
-COMFAULTABLE TRANSACTIONS' -- bypasses the element and displays the arrow.  One
-computer therefore can never bypass anything, however badly its I/O fails, and
-two can.  That is exactly the measured difference between the one-computer run
-(no bypass, reads for ever) and the two-computer run (all six slots bypassed),
-and it is why the fault has only ever been seen with a set.
-  AND THE ELEMENT IT BLAMES IS READ OFF A RUNNING BCE.  FIOERRLC names the
-failing element at line 054600, 'PC R6,R6  READ BASE REG FROM BCE' (command
-skeleton FIOBARC3 = X'22098000', bank 2 word 3 of that BCE's page), and then
-searches the BMT for the entry whose TBCEBUF equals it.  Element 0x0d's BMT
-entry at 0x9f0c reads 1b00 9c7e 1018 cc74 2236: buffer 0x9c7e, which is the
-#LBR operand of FIOMTUR1 in the DASS dump, and bypass slot 0xcc74, which is
-FIOBY51.  So FCOS really did blame MTU1.  IT NEVER FAILED.  With
-YAGPC_ERRTERM_TRACE=all over a whole two-computer run, 996 error terminations
-were recorded -- BCE8 518, BCE20 201, BCE22 198, BCE14-17/21/23 twelve each --
-and NOT ONE has a program address inside FIOPRMPG (117872-118001); the only two
-in that range are BCE24 at t=42 s, before PASS owns the memory.  The MTU read
-transaction is answered right up to the moment it is bypassed (last read
-t=242.385, bypass t=242.69).  What FCOS is reacting to is an error condition on
-the flight-critical buses as a whole, and it then sweeps BCEs 14 to 23 -- the
-counter at 0x8d81 walks 0x0e to 0x17 on each pass -- reading each one's base
-register.  Because the BCE it reads has NOT error-terminated it is still
-running its chain, so the register names whichever element is current: on bus
-20 two consecutive sweeps 20 ms apart blamed element 0x05 (buffer 0x3d14) and
-then element 0x0d (buffer 0x9c7e, the MTU).  The blame is effectively
-arbitrary, and the MTU's turn comes round twice.
-  ROOT CAUSE.  Our vehicle has no flight-critical MDMs.  In OPS 0 that costs
-little; after a GNC OPS transition the FC chains are full of transactions to
-devices that never answer, every computer sees the same errors, FIOGPCWE is
-therefore greater than one, and FIOERRLC's comfaultable path runs continuously
-over all ten flight-critical buses.  Each pass bypasses whatever element the
-BCE's base register happens to name, and the timing unit's read -- commander
-and listener together, through FCMBCEMD's FIOBCML -- is one of the elements it
-names.  The frozen MTU ACCUM times and their down arrows are a SECONDARY effect
-of the unmodelled flight-critical hardware, not a defect of the timing unit
-model or of the MTU bus programs.  A fix therefore has to make the
-flight-critical transactions stop failing (a stub MDM that answers with the
-expected word count is the smallest version) rather than anything MTU-specific;
-patching the timing unit alone would only move the arrow to another element.
-  AND THE MTU IS SIX BYPASSES OUT OF A HUNDRED AND TWENTY-ONE.  The
-prediction that the timing unit is collateral is measurable from a capture
-already in the tree, without a run.  Take the twenty CSECTs that csects-SSW
-marks type BCE -- the bus programs -- and compare a redundant-set member
-against GPC5 in examples/5gpc-3crt-subtitled.snapshot halfword by halfword,
-counting the places where GPC5 holds a live #BU (f0xx) and the set member holds
-a #DLYI (c0xx).  There are 121 of them, in TWELVE different bus programs:
-FIOMFEPG 34, FIOHFEPG 29, FIOGNIPG 16, FIONSPPG 12, FIOSRBPG 8, FIOPRMPG 6,
-FIOGPSPG 6, FIOMUWP9 4, FIOPDSPG 2, FIODDUPG 2, FIOMDMPG 1, FIOSMFPG 1.  The
-six in FIOPRMPG are the MTU's three commander and three listener slots; the
-other 115 are the forward and aft MDMs, the GN&C inputs, the NSP, the SRBs, the
-GPS, the DDUs.  FCOS has commfaulted essentially the whole flight-critical I/O
-of every computer in the set, because in our vehicle essentially none of it
-answers, and the TIME display's three frozen accumulators are simply the part
-of that a crew member can see.  Anything MTU-specific would be treating one
-symptom out of twelve.  REPRODUCTION, four minutes: cd yaShuttle/discretePanel
-&& DISPLAY=:48 YAGPC_WATCHHW=1cc70-1ccb0 python3 -u simulatePASS.py --gpcs 1,2
---crts 2 --size 384 --no-wait-user --tape ~/workspace/pass-run/OI340700-v44boot.mmv
---script examples/2gpc-ops201.script --port-base 7900 --logs OUT --duration 400
--- the six slots go from f001 to c0xx about 14 s after OPS 2 0 1 PRO.
-  PROVED BY ANSWERING THE TRAFFIC, AND THE NAIVE FIX IS NOT A FIX.
-YAGPC_FC_STUB (src/mtumodel.c, default OFF) answers every command on buses
-20-22, not just the timing unit's, with the number of ZERO words the command
-asked for -- the count is the command's own low nine bits plus one, so no
-device table is needed.  Same fixture, same script, same tape: WITH IT ON the
-six MTU slots are NEVER bypassed and the reads continue to the end of the run
-(t=318 s and still going), where the control stops dead at t=242.4.  That is
-the causal claim demonstrated rather than argued: the timing unit freezes
-because the traffic AROUND it is unanswered, and answering that traffic --
-without touching the MTU model, the MTU bus programs or anything else -- keeps
-it alive.
-  BUT THE SET BREAKS.  The control runs record no votes at all; the stub run
-records two at t=254.7, 'voting: 21 ON (bus)' and 'voting: 12 ON (bus)', each
-computer failing the other, and the MTU read rate then decays from 121 per 30 s
-to 38.  Zeros are not what an MDM sends, and PASS acts on what it is handed.
-So the stub settles the diagnosis and must not be mistaken for the repair: a
-real fix has to model the flight-critical devices well enough that the data
-passes the flight software's own checks, which is a vehicle-wide piece of work
-and a fidelity decision, not a patch.  Keep the flag for re-proving #210
-cheaply; do not turn it on for a simulation anyone is watching.
-  THE BLAME MECHANISM IS NOT THE DEFECT -- MY OWN HYPOTHESIS, REFUTED.
-The suspicion above, that FCOS names an innocent element because it reads the
-base register off a BCE that has not stopped, is WRONG, and three measurements
-settle it.  (a) YAGPC_BASEREAD_TRACE (new, src/iop.c, default off) prints every
-CPU read of a BCE's base register -- bank 2 word 3, the FIOBARC3 = X'22098000'
-command FIOERRLC issues at 054600 -- with that BCE's STAT1, STAT4 and program
-counter.  Over a whole two-computer run 1,243 such reads were taken and 1,236
-of them found the BCE STOPPED, go=0 busy=0: the identification is honest, and
-the BCE really is parked at the element that failed.  Our scheduler is right to
-do that -- iop_exec_slice refuses to step a processor whose Busy/Wait bit is
-clear, and the BCE Principles of Operation 3.4.7 says a time-out 'will also
-error terminate to the Wait State'.  (b) NOT ONE of those reads returned 09c7e,
-the timing unit's buffer, so the MTU element was never individually named.
-(c) FIOBMTAD never held the MTU's BMT entry address either: that entry is at
-09ef8 in our own G2 memory, read out of a capture of this fixture -- buf=9c7e,
-flag=1015, adrs=cc74, and the halfword at +3 is 2236, whose high byte 22 is
-exactly the delay in the c022 overlay -- and the string '9ef8' does not appear
-anywhere in the run's log.
-  WHAT FCMBCEMD IS ACTUALLY DOING IS A WHOLE-STRING BYPASS.  The NIA ring taken
-at the instant of the overlay is entirely inside FCMBCEMD and is a LOOP --
-181df 181e1 181e2 181e3 181e5 181ee 181f0 181f1 181f3 181f5 (the store) 181f6
-181f8 181f9 181fb 181fc 181fe 18200 18206 18207 and round again, about three
-and a half times in the 64 addresses the ring holds.  FCMBCEMD's single-element
-bypass sets R5 to 1 and runs that loop ONCE; a loop means it is walking a
-TABLE of BMT entries, which is its bus-or-string path.  So the timing unit is
-not being blamed for someone else's failure: FCOS is bypassing everything on
-the affected strings, which is what it is supposed to do to a string whose
-devices have stopped answering, and the MTU's six slots are six of the 121 that
-go with it.
-  CONCLUSION.  There is no element-identification defect to fix, and no
-MTU-specific defect either.  The only thing wrong in the vehicle is that the
-flight-critical devices are not modelled, which YAGPC_FC_STUB demonstrates from
-the other direction by keeping every MTU slot live for as long as the traffic
-is answered.  The route to a real fix is to model those devices with data the
-flight software accepts; nothing short of that will keep a GNC OPS
-configuration's I/O alive.
-  THE STUB EVIDENCE ABOVE IS WITHDRAWN.  IT WAS A CONFOUND, AND THE STUB IS
-REVERTED.  'With it on the six MTU slots are never bypassed and the reads
-continue to the end of the run' is true and means NOTHING, because with it on
-THE VEHICLE NEVER LEAVES OPS 0.  Counting the distinct device/function pairs
-commanded on buses 20-22 after t=280 s settles it: the control run carries 24
-of them -- iua 10 functions 100, 104, 105, 106, 10a, 10b, 110, 114 and the
-rest, the GNC traffic of a loaded G2 -- and every stub run carries SIX, the
-timing unit's own functions plus iua 8 function 005, which is the OPS 0
-profile.  An end-to-end run typed OPS 2 0 1 PRO at t=240.9 and SPEC 2 PRO at
-t=272.7 and CRT2 still read '0001/ / GPC MEMORY 2' at t=318.8: neither the
-transition nor the keystroke took.  So the comparison was never
-bypass-versus-no-bypass; it was a G2 vehicle against a vehicle stuck in the
-one configuration where the MTU is not bypassed anyway.  Feeding zeros to the
-flight-critical buses breaks the vehicle from early in the run -- the traffic
-is already down to six pairs before t=200 -- and in its first form it also cost
-the redundant set both computers and made listener elements run off the end of
-their programs into unprogrammed store.  Zeros are worse than silence.
-  WHAT STILL STANDS is everything that was read out of memory images and the
-NIA ring, none of which involved the stub: the 121 overlaid branches in twelve
-bus programs, FIOERRLC calling FCMBCEMD, the FIOGPCWE test that makes a set
-necessary, the honest base-register reads, and the whole-string bypass loop.
-The root cause is unchanged.  What is gone is any demonstration that answering
-the traffic repairs it, and the lesson is the one this ledger keeps relearning:
-CHECK THAT THE TWO RUNS BEING COMPARED ARE IN THE SAME CONFIGURATION before
-believing a difference between them.
-  A SECOND ATTEMPT, AT THE RECEIVE LEVEL, AND WHY IT ALSO FAILS.  The
-bus-level answer had to GUESS a length from the command's count field, and any
-mismatch with what the BCE actually armed left residue that shifted every later
-transfer.  The receive path does not have to guess: at the time-out in
-iop_bce_receive, bce->recvLeft is exactly what this transfer still wants.  So
-the second attempt let a receive on BCE 14-17 or 20-23 COMPLETE there instead
-of error-terminating, writing NOTHING -- no fabricated data at all, the buffer
-simply keeps what the flight software last had.  Measured on the two-computer
-fixture, it clears every bar the zero-fill failed: the vehicle REACHES OPS 201
-(CRT2 reads '2011/ / UNIV PTG 2', 28 distinct device/function pairs on the FC
-buses after t=280 against the control's 24 and the zero-fill's 6), the six MTU
-slots are never bypassed, and there is no unprogrammed-store execution.
-  AND THE REDUNDANT SET STILL BREAKS, both computers voting each other out at
-t=249.3, about eight seconds after the transition.  The reason is the
-completion itself: a transfer that completes with stale buffer contents lets
-the two computers' data DIVERGE, because their buffers have different
-histories, so they compute differently and fail each other.  Zeros do not
-diverge -- they are identical on both machines -- which is why the zero-fill
-kept the set and lost the transition instead.  That is the shape of the whole
-problem: every fabrication available at the I/O layer is either
-identical-and-wrong or plausible-and-divergent, and PASS notices either way.
-  BOTH ATTEMPTS ARE REVERTED, and the reason not to keep either behind a flag
-is forward-looking: a blanket 'if nothing answered, call it complete' rule sits
-UNDERNEATH any future FF/FA MDM model and masks exactly the failures that model
-would need to show, so a half-written MDM would read as healthy instead of
-timing out.  The fix has to be the devices themselves.
-  WHAT THE DEVICE ACTUALLY IS, AND THE START OF THE TABLE A MODEL NEEDS.
-BCEEQU.asm settles the naming: FIOFFIUA EQU 10, 'FF INTERFACE UNIT ADDRESS',
-and FIOMTURD EQU X'00024C26' is one of that unit's commands -- the MTU read is
-'#MINC FIOFFIUA,FIOMTURD', so the timing unit is read THROUGH THE FORWARD MDM
-and is not a device of its own.  FIOLMIUA EQU 8 is the listen-mode address,
-which is the iua=8 func=005 traffic.  So src/mtumodel.c is already a PARTIAL FF
-MDM MODEL: it answers one of that unit's commands and ignores the rest.  The
-repair is to finish that device, in the device model at the device's own IUA,
-not to add a rule in the I/O layer -- which is also the only form that a later,
-fuller MDM implementation will not have to fight.
-  THE COMMAND'S COUNT FIELD IS NOT THE REPLY LENGTH, which is what made the
-first attempt guess wrong: FIOMTURD's count field is 38, and the BCE arms
-SEVEN.  The lengths have to come from the bus programs' own #MIN/#RDLI, and
-they can be harvested: arm each receive's YAGPC_TIMEOUT_TRACE 'RECV ARM ...
-count=' line with the command that FOLLOWS it (the #MIN precedes the #MINC, so
-pairing with the preceding command gives the listen command instead and is
-wrong).  Measured that way on a two-computer control run, for iua 10:
-      func 041 -> 21 words     func 042 -> 4      func 10a -> 7
-      func 110 -> 7            func 126 -> 7      func 132 -> 1
-      func 138 -> 1            func 18a -> 1
-and func 126 -> 7 agrees with the MTU_WORDS the model already uses, which is
-the check that the method is sound.
-  AND THE SCOPE IS BIGGER THAN ONE UNIT.  After the transition the same buses
-carry 24 distinct device/function pairs at IUAs 6, 8, 9, 10 and 15, so
-finishing the FF MDM is necessary and NOT sufficient: the strings will keep
-being bypassed while the other units are silent.  A fix is therefore several
-device models, each with its own function-to-length table and its own decision
-about what the data should be -- work to be scoped deliberately, not a defect
-repair.
-  A PARTIAL REPAIR THAT IS REAL, AND THE LINE IT STOPS AT.  YAGPC_FC_LEARN
-(src/iop.c) names every receive on a flight-critical bus that nothing answers,
-attributing it to the command the receive was WAITING for -- the first command
-after the arming, recorded in bce->recvCmd, because the #MIN precedes the
-#MINC and the command before an arm is the listen command.  Run over a whole
-two-computer OPS 201 vehicle it gives about 437 unanswered transfers on those
-buses, and they are not spread evenly: func 132 ninety-three times, func 138
-ninety-three times, and 186 listener halves waiting for a command that never
-came, against single digits for everything else.  FIONSPPG names them --
-'#MIN 0,0 / #MINC FIOFFIUA,FIONSP2P  READ NSP2 POWER DISCRETE' -- so the
-dominant I/O failure in the whole vehicle is two ONE-WORD NSP POWER DISCRETE
-READS, and FCMRTBLE groups NSP with MTU, which is how the timing unit goes
-down with them.
-  So the forward MDM now answers them: FIONSP1P (132), FIONSP2P (138),
-FIONSPDR (128) with one word and FIONSPRD (136) with 32, all zero, meaning THE
-NSP IS NOT POWERED -- which is true of this vehicle, is a statement about the
-interface rather than about any sensor, and is the same word on every computer
-because it goes through the one shared model and its per-reader cursors.
-Measured: unanswered transfers on those buses fall from about 437 to 66, the
-vehicle reaches OPS 201 with exactly the control's 24 device/function pairs on
-those buses, nothing executes unprogrammed store, and THERE ARE NO SYNC VOTES.
-  IT IS NOT YET ENOUGH.  Sixty-six is still far over FIOERRLC's threshold of
-two, so the strings are still commfaulted and the six MTU slots are still
-overlaid -- the reads still stop, now at t=242.9 instead of t=242.4.  What
-remains is the MDMs' own traffic at IUA 10 and 12: a return word (func 18a)
-and channel reads (func 041, 21 words at IUA 10 and 34 at IUA 12; func 042, 4
-and 6), plus the IMU behind the same unit, which is func 126 with a count of
-14 -- FIOIMUC1 X'00024C0D' -- and is correctly distinguished from the timing
-unit's own X'00024C26' by the full command field.
-  AND THE LINE IS MEASURED, NOT ASSUMED.  Both further steps were tried and
-both cost the redundant set both computers, where the NSP answers cost it
-nothing: the NSP discretes alone give ZERO votes, adding the return word gives
-two, adding the channel reads as well gives two.  The boundary is between what
-the INTERFACE says and what the SENSORS say.  A device model may truthfully
-report an unpowered box; it may not invent channel data, because the flight
-software acts on it and two computers then disagree.  That is the constraint
-any fuller MDM model has to satisfy, and it is why the rest of this is real
-device work and not a patch.
-  AND THE BOUNDARY IS NOT AN ARTEFACT OF OUR BUFFERING, WHICH WAS WORTH
-RULING OUT.  The obvious suspicion about those two votes was that this model
-manufactured them: it kept ONE reply per bus with a cursor per reader, so a
-reply arriving while another computer was partway through the previous one
-handed that computer a MIXTURE of the two, and whether it happened depended on
-when each machine polled -- a divergence that would grow with the number of
-commands answered, which is exactly the pattern.  Each reader now gets its own
-COPY of the words, not merely its own cursor, so no computer can receive half
-of one reply and half of the next.  With that in place the channel reads were
-tried again and STILL give two votes.  So the mixture was real and is now
-fixed, but it is not what the computers disagree about: it is the channel data
-itself.  Verified final state -- NSP answers plus per-reader copies -- zero
-votes, OPS 201 reached with the control's 24 device/function pairs, no
-unprogrammed-store execution, and the six MTU slots still overlaid at t=241.4.
-The timing unit is STILL FROZEN and this is still not a fix for #210.
-  AND THE ASYMMETRY THEORY IS REFUTED TOO, WHICH WAS THE LAST CHEAP ONE.
-The model owned buses 20-22 only, so with the channel reads answered GPC1 --
-which commands FC1 and FC3 -- had both its strings alive while GPC2, which
-commands FC2 and FC4, had one alive and one dead: measured, buses 20/21/22
-fell to 14/13/15 unanswered transfers while bus 23 stayed at 6, untouched.
-Two computers holding different opinions about how many of their strings are
-healthy is exactly the shape of a disagreement, and it was OUR asymmetry.  So
-ownership was extended to all eight flight-critical buses (14-17 and 20-23,
-excluding 18 and 19, which are mass memory and ARE modelled) and the channel
-reads tried again.  Bus 23 fell from 6 unanswered to 4 and bus 14 likewise,
-and THERE ARE STILL TWO VOTES, with the six MTU slots still overlaid.
-  So the protocol/telemetry line has now survived three independent
-challenges -- per-reader cursors, per-reader COPIES of the words, and
-symmetric bus ownership -- and each time what the two computers disagree about
-is the channel data itself.  DO NOT RETEST THESE THREE.  Answering an MDM's
-channel reads with a value this simulator invented costs the redundant set,
-however carefully the words are delivered, and the remaining work is therefore
-to decide what this vehicle's sensors actually read.  That is vehicle
-simulation and a scoping decision, not a defect repair.  The committed state
-is the NSP answers plus per-reader copies: zero votes, OPS 201 reached, 437
-unanswered transfers down to 66, and MTU ACCUM 1-3 STILL FROZEN.
-  FIXED.  The flight-critical buses now COMPLETE a receive that nothing
-answered, with zeros, at the receive time-out (src/iop.c, default on,
-YAGPC_NO_FC_ZERO restores the old silence).  Measured on the two-computer
-fixture: the six MTU slots are NEVER overlaid, the timing unit is read for the
-whole run -- last read t=418.6 s against t=242.4 in the control -- the vehicle
-reaches OPS 201 and carries 32 distinct device/function pairs on those buses
-where the control carries 24 of which essentially none are answered, and
-nothing executes unprogrammed store.  MTU ACCUM 1-3 on SPEC 2 PRO count.
-  WHY THIS SHAPE AND NOT THE EARLIER ONES.  The length is bce->recvLeft, what
-THIS transfer armed, so nothing is left over to shift the next one -- the
-bus-level attempt guessed from the command's count field, which is not the
-reply length, and broke the vehicle.  The words are ZEROS and therefore
-identical on every computer -- the earlier receive-level attempt wrote nothing
-and left each computer its own history, which diverged.  And EVERY transfer on
-those buses is answered, not some -- partial answering makes errors
-NON-UNIVERSAL, and FIOERRLC self-fails a computer whose error its peers do not
-share ('IF (CHI,R6,EQ,1) ... CALL FCMSFAIL') where a universal error merely
-commfaults the string.  It is a statement about the VEHICLE, which has nothing
-wired to those buses, and not a device model: when real MDM models arrive they
-answer first and this never fires for them.  The known cost of that is
-recorded as its own risk -- a half-written MDM would have its gaps completed
-silently rather than timing out -- and the mitigation is to skip any (bus, IUA)
-a model has answered, which is the next thing to add.
-  AND IT EXPOSED THE NEXT DEFECT, #211: with the I/O actually running, the
-two-computer set loses synchronisation about eight seconds after the
-transition.  That is not caused by the completion in any way three separate
-experiments could find, and it could not have been seen before, because until
-now the GNC software never ran with live I/O at all.
-  - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
 
 ## Latent (real, but unreachable here)
 

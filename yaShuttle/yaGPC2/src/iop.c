@@ -1940,14 +1940,18 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
     }
 }
 
-/* Default ON; YAGPC_NO_FC_ZERO restores the old silence.  See the long
- * note at the receive time-out.  BCE 14-17 and
+/* DEFAULT OFF -- YAGPC_FC_ZERO turns it on.  It removes the bypass that
+ * freezes MTU ACCUM 1-3 (ledger #210) and it COSTS THE REDUNDANT SET: two
+ * computers vote each other out about eight seconds after an OPS 201
+ * transition, where a run without it records no votes at all.  That trade is
+ * not one to make silently, and a vehicle that loses its set is not a working
+ * vehicle.  See the long note at the receive time-out.  BCE 14-17 and
  * 20-23 are FC5-8 and FC1-4; the display, mass memory, payload, launch and
  * intercomputer buses are excluded because their devices ARE modelled and a
  * time-out there is a real defect. */
 static bool fc_zero_completes(IOP *iop, int p) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_NO_FC_ZERO") == NULL; }
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_ZERO") != NULL; }
     (void)iop;
     if (!on) return false;
     return (p >= 14 && p <= 17) || (p >= 20 && p <= 23);
