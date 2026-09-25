@@ -142,13 +142,23 @@ static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
 
 /* How many words this model answers the command with, or 0 if it does not
  * speak for it. */
-/* YAGPC_NO_FC_MDM silences the forward and aft MDMs again, so that a vehicle
- * with them can be measured against one without.  Answering is the default;
- * this exists because the difference they make is the whole question and a
- * switch is the only honest way to ask it twice. */
+/* OFF UNTIL A FIVE-COMPUTER ACID TEST CLEARS IT.  YAGPC_FC_MDM turns the
+ * forward and aft MDMs on.
+ *
+ * It does fix the timing unit -- measured twice on a two-computer OPS 201
+ * vehicle, six bypasses to none and the unit read for the whole run instead
+ * of stopping at t=253 -- and on that fixture it costs no votes.  But the
+ * owner's five-computer acid test, which looked well before this work, now
+ * loses the whole redundant set four seconds after the OPS 901 transition:
+ * GPC1 to GPC4 all self-fail at once (the CAM diagonal 11, 22, 33, 44) and
+ * GPC5, which runs PASS as a stand-in for BFS and so is in the common set,
+ * votes against 1, 2 and 3.  Whether this is the cause has NOT been
+ * established -- the acid-test measurements taken so far were made with the
+ * switch broken, so both arms ran the same binary -- and until it has, the
+ * default must not be the thing that breaks a vehicle that was working. */
 static bool ff_mdm_off(void) {
     static int inited = 0, off = 0;
-    if (!inited) { inited = 1; off = yagpc_getenv("YAGPC_NO_FC_MDM") != NULL; }
+    if (!inited) { inited = 1; off = yagpc_getenv("YAGPC_FC_MDM") == NULL; }
     return off != 0;
 }
 
