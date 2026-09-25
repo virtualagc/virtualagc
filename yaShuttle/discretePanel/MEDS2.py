@@ -1850,6 +1850,14 @@ class DEUUnit(object):
         if self.ipled is None:
             self.ipled = True
         self.iplRunning = False
+        # HERE AS WELL AS IN reset(), because a unit does not always reach
+        # reset(): one put back from a capture is ipled=True from the start,
+        # so header() skips the IPL-required branch and lands on the formats
+        # test.  Without this every restored display raised AttributeError on
+        # its first header, _guard swallowed it, and the unit then answered
+        # nothing at all -- pictures frozen as they were and not a keystroke
+        # acted on, 1084 tracebacks per IDP in one sitting.
+        self.formatsLoaded = False
         # MSG RESET and ACK are not keystrokes.  A press latches a header bit
         # that rides out on the next poll and is cleared once reported.
         self.msgResetPending = False
@@ -10761,6 +10769,10 @@ class IDP(LRU):
             'selfTest': bool(u.selfTest),
             'swStatus': int(u.swStatus),
             'deuId': u.deuId,
+            # WHETHER THE CRITICAL FORMATS ARE IN IT.  Without this a restored
+            # unit cannot tell a loaded display from a bare control program,
+            # and header() would have to guess.
+            'formatsLoaded': bool(u.formatsLoaded),
             'kybdSel': self.kybdSel,
             # The scratch pad, which is crew-paced and so may be half-typed at
             # any moment; waiting for it to be empty would be an unbounded
@@ -10788,6 +10800,12 @@ class IDP(LRU):
         u.selfTest = bool(state.get('selfTest', False))
         u.swStatus = int(state.get('swStatus', u.swStatus))
         u.deuId = state.get('deuId', u.deuId)
+        # A CAPTURE FROM BEFORE THIS TRAVELLED falls back on `ipled`: a unit
+        # that was loaded, in a vehicle running well enough to be captured,
+        # had its formats.  Guessing False would report a critical BITE at
+        # every restore and have PASS's display loader send them again for
+        # nothing.
+        u.formatsLoaded = bool(state.get('formatsLoaded', u.ipled))
         if state.get('kybdSel') is not None:
             self.kybdSel = int(state['kybdSel'])
         spl = state.get('spl')
