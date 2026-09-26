@@ -41,6 +41,21 @@
  * YAGPC_IDLE_CATCHUP_MS sets it, so the hypothesis is one run rather than
  * one rebuild, and YAGPC_IDLE_CATCHUP_TRACE reports any pass that repays
  * more than a millisecond, which is rare enough to leave on. */
+/* SET WHEN THERE ARE PEERS TO STAY IN STEP WITH.  The 5 ms default exists to
+ * keep a catch-up lump inside a bus receive time-out, which is a one-machine
+ * concern.  With a vehicle barrier running, the governing number is much
+ * smaller: the barrier is checked BETWEEN passes and never inside one, so a
+ * single pass is exactly how far a machine can overshoot its peers, and the
+ * flight software holds a sync code for only 103-188 us (FCMCTT3, FCMST3,
+ * FCMIT3).  Measured on a five-computer ascent, dropping the cap from 5 ms to
+ * 50 us cut the excursions past that window from 12,664 to 7,917 in 700
+ * million samples and the fail votes from 11 to 4 (#227). */
+static double idleCapOverrideNs = 0.0;
+
+void rtpacer_set_idle_cap_ns(double ns) {
+    if (ns > 0.0) idleCapOverrideNs = ns;
+}
+
 static double idle_catchup_max_ns(void) {
     static int init = 0;
     static double ns = IDLE_CATCHUP_MAX_NS;
@@ -53,6 +68,9 @@ static double idle_catchup_max_ns(void) {
             if (end != NULL && *end == '\0' && v > 0.0) ns = v * 1e6;
         }
     }
+    /* The environment still wins, so a measurement can override either. */
+    if (idleCapOverrideNs > 0.0 && yagpc_getenv("YAGPC_IDLE_CATCHUP_MS") == NULL)
+        return idleCapOverrideNs;
     return ns;
 }
 

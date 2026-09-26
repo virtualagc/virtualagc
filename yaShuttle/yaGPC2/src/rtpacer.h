@@ -155,6 +155,10 @@ void rtpacer_resync(RTPacer *p);
 void rtpacer_enter_idle(RTPacer *p);
 RTPaceResult rtpacer_advance_idle(RTPacer *p);
 
+/* Bound one wait-state pass, in nanoseconds of simulated time.  run.c sets
+ * this when a vehicle barrier is active; see the note in rtpacer.c. */
+void rtpacer_set_idle_cap_ns(double ns);
+
 /* Wall milliseconds since the pacer was created, for reporting. */
 double rtpacer_wall_ms(const RTPacer *p);
 

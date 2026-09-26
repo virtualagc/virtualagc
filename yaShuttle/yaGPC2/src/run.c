@@ -1142,6 +1142,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                  * a free wire the commander's '#MIN' went past it (#137).  Not
                  * the ICC buses -- held there the set broke sooner. */
                 iop_set_wire_hold_buses(&r->age.gpc.iop, 0xfu << 6);
+                /* AND BOUND THE WAIT-STATE CATCH-UP, because with peers the
+                 * governing number is the sync-code hold and not a bus
+                 * receive time-out -- see rtpacer_set_idle_cap_ns. */
+                rtpacer_set_idle_cap_ns(50000.0);   /* 50 us */
             }
             r->busRouter.deuOwner = veh->deuOwner;
             for (int d = 0; d < r->nDeuModelExtra; d++)
