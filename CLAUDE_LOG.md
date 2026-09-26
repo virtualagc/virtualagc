@@ -105,3 +105,19 @@ Applied and cleared 2026-09-16.
 - `make -j8` does not build the unit tests, and test_mtumodel printed a
   hard-coded "23/23" over sixteen checks.  Both hid a live defect behind a
   passing run.  Worth a line in the README's testing section.
+
+### [2026-09-26] Target: [yaShuttle/yaGPC2/README.md]
+- MTU ACCUM 2 and 3 have been SEEN COUNTING on SPEC 2 (CRT3/GPC5), stepping
+  0.960 s -- FPMMTURM's own stated cadence -- and equal to GPC time exactly.
+  ACCUM 1 stays at zero because GPC1 has only FIOBY51/FIOBY51L overlaid and
+  GPC1 commands bus 20, which is accumulator 1: display and memory image are
+  one fact read two ways.  Needs YAGPC_FC_SENSORS, which still costs the set.
+- NOTE FOR THE README'S TESTING SECTION: the acid script ENDS IN OPS 1, not
+  OPS 901 -- OPS 9 is a step on the way.  SPEC 2 does not work in G1, so the
+  TIME display has to be read on CRT3/GPC5, which stays in OPS 0.
+
+### [2026-09-26] Target: [yaShuttle/yaGPC2/CAUSES.md]
+- gpc-causes.py ignored unknown options in silence while still printing
+  "wrote CAUSES.md".  A night of --append-evidence calls wrote nothing.
+  Fixed: unknown options refused by name, --append-FIELD implemented, a set
+  that changes nothing returns non-zero.  All lost evidence restored.
