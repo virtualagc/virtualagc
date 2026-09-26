@@ -105,6 +105,25 @@ struct IccModel {
     int lagShown;
     double expireUs;              /* YAGPC_ICC_EXPIRE_US; <=0 never */
     unsigned long expired[YAGPC_ICC_BUS_LAST + 1][6];
+    /* WHEN did a queue first saturate -- BEFORE its reader was voted out, or
+     * AFTER it stopped reading because it had been?  The shutdown report is
+     * cumulative and cannot tell those apart, and they are opposite claims:
+     * the first makes the channel a CAUSE of the vote, the second makes it a
+     * harmless consequence.  This file's own note on the overflow policy says
+     * the only receiver ever seen to fill a queue was one that had ALREADY
+     * been voted out, so the burden is on the other reading.  -1 means the
+     * queue never filled at a moment when the sender had a clock to stamp it
+     * with, which for this purpose is the same as never. */
+    double firstFullUs[YAGPC_ICC_BUS_LAST + 1][6];
+    /* IS THE EXPIRY EVER BLOCKED AT THE HEAD?  sharedUs[] starts at -1 and is
+     * only set once that computer reports its time, so every word broadcast
+     * before its SENDER has reported is stamped at = -1 -- and the expiry
+     * loop below does "if (at < 0.0 ... ) break", which makes such a word a
+     * head it can never step past.  Whether that actually happens is a
+     * measurement, not an assumption: these two counters answer it, and if
+     * they stay zero the idea is dead for the cost of a counter. */
+    unsigned long unstamped[YAGPC_ICC_BUS_LAST + 1][6];   /* queued with at<0 */
+    unsigned long expiryBlocked[YAGPC_ICC_BUS_LAST + 1][6]; /* loop broke on at<0 */
     /* Which transfers carried a wanted header, by sequence number, so a
      * receiver taking the LAST word of one can be reported: sending a
      * message and a partner reading it are separate facts. */
@@ -149,6 +168,8 @@ IccModel *iccmodel_create(void) {
         if (e != NULL && *e != '\0') m->expireUs = atof(e);
     }
     for (int g = 0; g < 6; g++) m->sharedUs[g] = -1.0;
+    for (int b = 0; b <= YAGPC_ICC_BUS_LAST; b++)
+        for (int g = 0; g < 6; g++) m->firstFullUs[b][g] = -1.0;
     fprintf(stderr, "icc: intercomputer buses %d-%d wired between the "
                     "computers, each commanding its own\n",
             YAGPC_ICC_BUS_FIRST, YAGPC_ICC_BUS_LAST);
@@ -197,10 +218,13 @@ static void icc_broadcast(IccModel *m, int bus, int from, uint32_t word,
          * and stopped reading -- which is precisely the case this gets
          * right and the old policy got backwards. */
         if (m->q[bus][g].count >= ICC_QUEUE) {
+            if (m->firstFullUs[bus][g] < 0.0 && m->sharedUs[from] >= 0.0)
+                m->firstFullUs[bus][g] = m->sharedUs[from];
             m->q[bus][g].head = (m->q[bus][g].head + 1) % ICC_QUEUE;
             m->q[bus][g].count--;
             m->q[bus][g].dropped++;
         }
+        if (m->sharedUs[from] < 0.0) m->unstamped[bus][g]++;
         size_t at = (m->q[bus][g].head + m->q[bus][g].count) % ICC_QUEUE;
         m->q[bus][g].w[at] = word;
         m->q[bus][g].tag[at] = tag;
@@ -294,7 +318,8 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
         m->expireUs > 0.0 && m->sharedUs[gpcId] >= 0.0) {
         while (m->q[bus][gpcId].count > 0) {
             double at = m->q[bus][gpcId].at[m->q[bus][gpcId].head];
-            if (at < 0.0 || m->sharedUs[gpcId] - at <= m->expireUs) break;
+            if (at < 0.0) { m->expiryBlocked[bus][gpcId]++; break; }
+            if (m->sharedUs[gpcId] - at <= m->expireUs) break;
             if (yagpc_getenv("YAGPC_ICCORDER") != NULL)
                 fprintf(stderr, "ICCEXPIRE reader=GPC%d bus=%d sent=%.1f "
                                 "age=%.1f us tshared=%.1f\n",
@@ -512,6 +537,15 @@ void iccmodel_report(const IccModel *m) {
                     m->lagHist[b][g][0], m->lagHist[b][g][1], m->lagHist[b][g][2], m->lagHist[b][g][3],
                     m->lagHist[b][g][4], m->lagHist[b][g][5], m->lagHist[b][g][6], m->lagHist[b][g][7],
                     m->staleAtCmd[b][g], m->staleWords[b][g]);
+            if (m->firstFullUs[b][g] >= 0.0)
+                fprintf(stderr, "icc: bus %d read by GPC%d: queue FIRST FULL at "
+                        "shared t=%.6f s -- compare against when that computer "
+                        "was voted out\n", b, g, m->firstFullUs[b][g] / 1e6);
+            if (m->unstamped[b][g] > 0 || m->expiryBlocked[b][g] > 0)
+                fprintf(stderr, "icc: bus %d read by GPC%d: %lu word(s) queued "
+                        "before their sender had a shared time, and the expiry "
+                        "stopped at such a word %lu time(s)\n",
+                        b, g, m->unstamped[b][g], m->expiryBlocked[b][g]);
             if (m->expired[b][g] > 0)
                 fprintf(stderr, "icc: bus %d read by GPC%d: %lu word(s) expired unread "
                                 "(not taken within %.0f us of being sent)\n",

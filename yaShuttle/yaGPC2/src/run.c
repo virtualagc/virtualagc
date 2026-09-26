@@ -2242,6 +2242,13 @@ static bool mode_switch_held(BatchRunner *r) {
     if ((r->step & 0xfffL) == 0) mode_held_update(r);
     return r->modeHeldLast;
 }
+/* The clock YAGPC_LANDMARKS_AFTER is judged against. */
+static double landmark_now_us(const BatchRunner *r) {
+    double shared = (r->vehicle != NULL)
+                    ? vehicle_shared_us(r->vehicle, r->gpcId) : 0.0;
+    return (shared > 0.0) ? shared : r->age.gpc.cpu.elapsedTimeUs;
+}
+
 
 static bool batchrunner_step(BatchRunner *r) {
     /* Before anything else: in HALT the machine executes nothing at all. */
@@ -2485,9 +2492,22 @@ static bool batchrunner_step(BatchRunner *r) {
      * --dump-state, a stopping landmark dumps state AND memory at that
      * instant, which is the moment worth having. */
     {
+        /* ON THE SHARED CLOCK WHERE THERE IS ONE.  This gate used to compare
+         * YAGPC_LANDMARKS_AFTER against the machine's OWN elapsed time, and
+         * in a multi-computer run those clocks are not the same quantity:
+         * measured on two 5-GPC runs, GPC1's own clock WAS the shared frame
+         * while GPC2 read 602.8 and GPC3 read 657.9 at shared 715.0 and
+         * 880.9 -- offsets of 112 and 223 seconds.  So one AFTER value armed
+         * the machines at five different shared instants, and a computer
+         * that entered FCMSFAIL inside its own suppressed window left no
+         * landmark at all.  That is indistinguishable from never entering,
+         * and it was read as exactly that.  A per-machine clock cannot gate
+         * a question asked about the vehicle. */
+        /* The two cheap tests FIRST -- this is the per-instruction path, and
+         * the common case is no landmark armed at all. */
         if (r->trig.n > 0 &&
             (r->trig.maybe[(nia & 0x7ff) >> 3] & (1u << (nia & 7))) != 0 &&
-            r->age.gpc.cpu.elapsedTimeUs >= r->trig.afterUs) {
+            landmark_now_us(r) >= r->trig.afterUs) {
             for (int i = 0; i < r->trig.n; i++) {
                 if (nia != r->trig.addr[i]) continue;
                 r->trig.hits[i]++;
@@ -2926,7 +2946,50 @@ static bool batchrunner_step(BatchRunner *r) {
         /* And keep this machine within reach of the others in SIMULATED
          * time, which is the time the sync timeouts are measured in --
          * see the barrier note in vehicle.h. */
-        vehicle_barrier_wait(r->vehicle, r->gpcId, r->age.gpc.cpu.elapsedTimeUs);
+        /* YAGPC_BIGSTEP_US=<us>: what carried this machine that far in one
+         * go.  The barrier bounds the spread only as finely as it is
+         * consulted, and the histogram says 24,549 steps of 200 us or more
+         * happen in a run with a maximum of 286 us -- larger than any
+         * instruction and larger than the capped wait-state pass, so neither
+         * of the two paths that call the barrier accounts for them.  This
+         * prints the program counter and the wait state, which name the
+         * path.  Threshold-gated and capped; default off. */
+        {
+            static int inited = 0;
+            static double thresh = -1.0, bigStepAfterUs = 0.0;
+            static long said = 0;
+            if (!inited) {
+                inited = 1;
+                const char *e = yagpc_getenv("YAGPC_BIGSTEP_US");
+                if (e != NULL) thresh = atof(e);
+                /* AND NOT BEFORE YAGPC_BIGSTEP_AFTER SECONDS.  A flat budget
+                 * is spent entirely on GPCIPL: 275 of 300 reports at
+                 * #DDCISTK DCI0SAVE+46 between t=3.8 and t=20.7, steps of
+                 * ~40 ms, from the bootstrap loop in this file that advances
+                 * elapsedTimeUs with no barrier call at all.  Real, but it
+                 * happens before a machine joins the set and says nothing
+                 * about the in-set steps. */
+                const char *a = yagpc_getenv("YAGPC_BIGSTEP_AFTER");
+                bigStepAfterUs = (a != NULL) ? atof(a) * 1e6 : 0.0;
+            }
+            if (thresh >= 0.0) {
+                double now = r->age.gpc.cpu.elapsedTimeUs;
+                double d = now - r->bigStepLastUs;
+                if (r->bigStepLastUs > 0.0 && d >= thresh && said < 300 &&
+                    now >= bigStepAfterUs) {
+                    said++;
+                    fprintf(stderr, "BIGSTEP gpc=%d step=%.1f us pc=%05x "
+                                    "wait=%d nia=%05x t=%.6f\n",
+                            r->gpcId, d,
+                            (unsigned)(psw_get_nia(&r->age.gpc.cpu.psw) & 0x3ffffu),
+                            psw_get_wait_state(&r->age.gpc.cpu.psw) ? 1 : 0,
+                            (unsigned)psw_get_nia(&r->age.gpc.cpu.psw),
+                            now / 1e6);
+                }
+                r->bigStepLastUs = now;
+            }
+        }
+        vehicle_barrier_wait(r->vehicle, r->gpcId, r->age.gpc.cpu.elapsedTimeUs, 0);
     }
     /* AND STOP HERE IF A SNAPSHOT IS PENDING.  An instruction boundary is
      * the only clean point the CPU has, and this is the one every running
@@ -3059,8 +3122,39 @@ static bool batchrunner_step(BatchRunner *r) {
                  * being published for the length of one looks to the others
                  * like the slowest machine in the vehicle, frozen.  They
                  * would all stop to wait for it. */
+                /* THE SAME STEP CHECK AS THE INSTRUCTION PATH.  The barrier
+                 * is called from TWO places and vehicle.c's histogram counts
+                 * both, so both have to be seen to attribute a step.
+                 *
+                 * PER MACHINE.  The first version of this held ONE static
+                 * across all five threads, which cannot measure a step at
+                 * all: the barrier keeps the machines within 25 us of one
+                 * another, so a difference taken between whichever two
+                 * threads happened to pass through is bounded by the very
+                 * thing being looked for.  It read 34 here and 0 above and
+                 * both were the spread, not a step. */
+                {
+                    static double idleLast[6] = {0,0,0,0,0,0};
+                    static long saidI = 0;
+                    int gi = (r->gpcId >= 1 && r->gpcId <= 5) ? r->gpcId : 0;
+                    double nowI = r->age.gpc.cpu.elapsedTimeUs;
+                    const char *eI = yagpc_getenv("YAGPC_BIGSTEP_US");
+                    if (eI != NULL && idleLast[gi] > 0.0 && saidI < 200) {
+                        double di = nowI - idleLast[gi];
+                        const char *aI = yagpc_getenv("YAGPC_BIGSTEP_AFTER");
+                        if (di >= atof(eI) && nowI >= ((aI != NULL) ? atof(aI) * 1e6 : 0.0)) {
+                            saidI++;
+                            fprintf(stderr, "BIGSTEP-IDLE gpc=%d step=%.1f us "
+                                            "wait=%d t=%.6f\n",
+                                    r->gpcId, di,
+                                    psw_get_wait_state(&r->age.gpc.cpu.psw) ? 1 : 0,
+                                    nowI / 1e6);
+                        }
+                    }
+                    idleLast[gi] = nowI;
+                }
                 vehicle_barrier_wait(r->vehicle, r->gpcId,
-                                     r->age.gpc.cpu.elapsedTimeUs);
+                                     r->age.gpc.cpu.elapsedTimeUs, 1);
                 /* AND HERE TOO, for the same reason the barrier is: a wait
                  * state is where this machine spends most of its time, so
                  * most snapshots are asked for while it is in one. */

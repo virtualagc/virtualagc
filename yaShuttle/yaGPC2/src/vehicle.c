@@ -205,7 +205,7 @@ static void barrier_wake(Vehicle *v) {
 #endif
 }
 
-void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
+void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs, int site) {
     /* OFF unless there is somebody to wait for.  One computer is the case
      * every existing command line asks for, and it must not pay for this. */
     if (v == NULL || !vehicle_multi(v) || v->barDeltaUs <= 0.0) return;
@@ -215,6 +215,14 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
 
     double pub = machineUs + v->barOffsetUs[gpcId];
     v->barPubUs[gpcId] = pub;
+    /* EVERY CALL, gate or no gate -- see the note at the step histogram. */
+    {
+        double lastAny = v->barLastPubUs[gpcId];
+        v->barLastPubUs[gpcId] = pub;
+        v->barStepPrevUs[gpcId] = lastAny;
+        v->barStepPrevSite[gpcId] = v->barPrevSite[gpcId];
+        v->barPrevSite[gpcId] = (site != 0);
+    }
 
     /* WAKE ANYONE THIS MACHINE'S PROGRESS HAS RELEASED.  The ORDER matters:
      * the time is published above BEFORE the sleepers are looked at here,
@@ -268,11 +276,37 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
             }
             if (n >= v->barSpreadMinN) {
                 static const double EDGE[11] = {25,50,100,150,200,250,300,400,600,1000,2000};
+                /* NOTE: the step measurement below was WRONG until the last
+                 * published time was carried OUTSIDE this gate.  It lived in
+                 * here, so every period when the gate was shut -- fewer than
+                 * MINN machines up, or before AFTER -- was folded into the
+                 * next difference and counted as one enormous step.  It
+                 * reported 29,196 to 39,396 steps of 200 us or more in a run;
+                 * instrumenting the two call sites directly, which have no
+                 * such gate, found 34 and ZERO.  The gate created them. */
                 double sp = hi - lo;
                 int b = 11;
                 for (int k = 0; k < 11; k++) if (sp < EDGE[k]) { b = k; break; }
                 v->barSpreadHist[gpcId][b]++;
                 v->barSpreadN[gpcId]++;
+                {
+                    static const double SE[11] = {1,3,10,25,50,100,200,400,1000,5000,20000};
+                    double last = v->barStepPrevUs[gpcId];
+                    if (last > 0.0) {
+                        double d = pub - last;
+                        if (d < 0.0) d = 0.0;
+                        int sb = 11;
+                        for (int k = 0; k < 11; k++) if (d < SE[k]) { sb = k; break; }
+                        v->barStepHist[gpcId][sb]++;
+                        v->barStepN[gpcId]++;
+                        if (d >= 200.0) {
+                            int ps = v->barStepPrevSite[gpcId] ? 1 : 0;
+                            int cs = (site != 0) ? 1 : 0;
+                            v->barBigBySite[gpcId][ps][cs]++;
+                        }
+                        if (d > v->barStepMaxUs[gpcId]) v->barStepMaxUs[gpcId] = d;
+                    }
+                }
             }
             if (n >= v->barSpreadMinN && (hi - lo) > thresh) {
                 said++;
@@ -833,10 +867,57 @@ void vehicle_free(Vehicle *v) {
             if (spreadHist[k] > 0)
                 fprintf(stderr, " %s=%.3f%%", NAME[k],
                         100.0 * (double)spreadHist[k] / (double)spreadN);
+        long stepN = 0, stepHist[12] = {0};
+        double stepMax = 0.0;
+        for (int g = 1; g <= 5; g++) {
+            stepN += v->barStepN[g];
+            if (v->barStepMaxUs[g] > stepMax) stepMax = v->barStepMaxUs[g];
+            for (int k = 0; k < 12; k++) stepHist[k] += v->barStepHist[g][k];
+        }
+        /* OFF BY ONE UNTIL 2026-09-26, IN BOTH THIS AND THE STEP LINE BELOW.
+         * The bucketing is "first k with sp < EDGE[k]", so bucket 4 is named
+         * "<200" and holds 150 <= sp < 200 -- it is the last bucket BELOW the
+         * threshold, not the first above it.  Summing from k=4 therefore
+         * reported the 150-200 band as though it were past 200, and the step
+         * line did the same thing from k=6: it announced 29,225 steps of
+         * ">=200 us" in a run where the true count was 45, which is what sent
+         * a day into hunting for tens of thousands of excursions that had
+         * never happened.  Every excursion count quoted before that date
+         * includes the band below the threshold. */
         long past = 0;
-        for (int k = 4; k < 12; k++) past += spreadHist[k];   /* >= 200 us */
+        for (int k = 5; k < 12; k++) past += spreadHist[k];   /* >= 200 us */
         fprintf(stderr, "  |  past 200 us (the 211 us hold): %ld samples, %.5f%%\n",
                 past, 100.0 * (double)past / (double)spreadN);
+        if (stepN > 0) {
+            static const char *SN[12] = {"<1","<3","<10","<25","<50","<100",
+                                         "<200","<400","<1000","<5000","<20000",">=20000"};
+            long big = 0;
+            for (int k = 7; k < 12; k++) big += stepHist[k];   /* >= 200 us in ONE step */
+            fprintf(stderr, "vehicle: clock STEP between barrier checks over %ld"
+                            " samples (us):", stepN);
+            for (int k = 0; k < 12; k++)
+                if (stepHist[k] > 0)
+                    fprintf(stderr, " %s=%.3f%%", SN[k],
+                            100.0 * (double)stepHist[k] / (double)stepN);
+            fprintf(stderr, "  |  >=200 us in one step: %ld, max %.0f us\n",
+                    big, stepMax);
+            {
+                /* WHICH PAIR OF CALL SITES.  instr=the per-instruction call,
+                 * idle=the wait-state loop.  A step spanning one site to the
+                 * OTHER is invisible to a probe that watches a single site,
+                 * which is what made 32,640 big steps sit against probe
+                 * counts of 34 and 0. */
+                unsigned long t[2][2] = {{0,0},{0,0}};
+                for (int g = 1; g <= 5; g++)
+                    for (int a = 0; a < 2; a++)
+                        for (int b2 = 0; b2 < 2; b2++)
+                            t[a][b2] += v->barBigBySite[g][a][b2];
+                fprintf(stderr, "vehicle: those >=200 us steps by call site "
+                        "(from -> to): instr->instr %lu, instr->idle %lu, "
+                        "idle->instr %lu, idle->idle %lu\n",
+                        t[0][0], t[0][1], t[1][0], t[1][1]);
+            }
+        }
     }
     /* REPORTED EVEN WHEN ZERO IF ANY WAS ASKED FOR, because "abandoned" is
      * the answer that matters and a silent absence reads like success. */

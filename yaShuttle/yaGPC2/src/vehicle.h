@@ -178,6 +178,19 @@ typedef struct Vehicle {
      * instruments.  Indexed [gpcId][bucket]; only the owning thread writes. */
     long barSpreadHist[6][12]; /* <25,<50,<100,<150,<200,<250,<300,<400,<600,<1000,<2000,>= */
     long barSpreadN[6];
+    /* HOW FAR A MACHINE'S CLOCK MOVED BETWEEN TWO BARRIER CHECKS.  The
+     * barrier bounds the spread only as finely as it is consulted, so one
+     * step is exactly how far a machine can overshoot its peers.  Capping the
+     * wait-state pass cut the excursions past the sync hold by 40% (#227);
+     * this says what carries the rest.  Per machine, owning thread only. */
+    double barLastPubUs[6];
+    double barStepPrevUs[6];  /* the one before it, carried every call */
+    int barPrevSite[6];       /* which call site published barLastPubUs */
+    int barStepPrevSite[6];   /* ... and the one before that */
+    unsigned long barBigBySite[6][2][2];  /* [gpc][prev site][this site] */
+    long barStepHist[6][12];  /* <1,<3,<10,<25,<50,<100,<200,<400,<1000,<5000,<20000,>= */
+    long barStepN[6];
+    double barStepMaxUs[6];
     double barOffsetUs[6];
     bool barActive[6];        /* false while a machine is held in reset */
     unsigned long barHolds;   /* how often the barrier actually bound */
@@ -409,7 +422,13 @@ int vehicle_votes_against(const Vehicle *v, int gpcId);
 /* Hold this machine until it is no more than the barrier's delta of
  * simulated time ahead of the slowest running one.  Cheap and returning at
  * once in the ordinary case; call it once per instruction. */
-void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs);
+/* site: 0 = the per-instruction call, 1 = the wait-state idle loop.  It
+ * exists because the step histogram counts calls from BOTH sites while the
+ * two probes in run.c each measured only their own, so a step taken between
+ * a call at one site and the next call at the OTHER was invisible to both --
+ * which is how 32,640 steps of >=200 us came to sit against probe counts of
+ * 34 and 0.  Attribution has to happen where the steps are seen. */
+void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs, int site);
 
 /* THE STOP-THE-WORLD.  See the pause fields in Vehicle.
  *

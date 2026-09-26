@@ -280,6 +280,7 @@ typedef struct {
     /* --dump-state's triggers, armed from the environment in
      * batchrunner_init.  Per computer -- see Triggers. */
     Triggers trig;
+    double bigStepLastUs;   /* YAGPC_BIGSTEP_US; see run.c */
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts,
