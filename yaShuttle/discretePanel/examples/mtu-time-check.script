@@ -1,0 +1,27 @@
+# ASK GPC5 FOR THE TIME DISPLAY, and give it a keyboard to be asked with.
+# Played AFTER a five-GPC ascent script has finished, to read MTU ACCUM 1, 2
+# and 3 -- the displays this whole investigation is about (ledger #210):
+#
+#   python3 crewscript.py examples/mtu-time-check.script      (check it)
+#   ...then have panelO6 play it: crewscript.send_control("play <this file>")
+#
+# WHY GPC5 AND CRT3.  SPEC 2 is available in several major modes but NOT in
+# OPS 1 (nor OPS 3, and probably not OPS 6 -- owner, 2026-09-25; it is not
+# "an OPS 0 display", which is how this comment first read).  So in an ascent
+# configuration it cannot be asked of the redundant set at all: it has to go
+# to a computer that is not in OPS 1, which here is GPC5 -- the stand-in for
+# the BFS -- on CRT3.  Typing it at an ascent keyboard does nothing at all,
+# silently, which is worth knowing before spending a run finding out.
+#
+# AND THE KEYBOARD HAS TO BE GIVEN BACK.  5gpc-3crt-subtitled.script lends the
+# right-hand keyboard to CRT3 at t=546 and takes it back at t=669, so by the
+# time the script ends KB2 is driving CRT2 again and the keys would go to an
+# ascent display where SPEC 2 is invalid.
+#
+# READING THE ANSWER.  The values are in the BODY of the display, so the run
+# needs NSTS_ANNOUNCE_ROWS=all -- without it MEDS2 announces only the two
+# title rows and the accumulators cannot be seen at all.  screenwatch.py
+# prints the frames.
++0   kybdsel right 3
++3   keys KB2 SPEC 2 PRO
++5   subtitle MTU ACCUM 1-3 on CRT3: times, and no down arrow.

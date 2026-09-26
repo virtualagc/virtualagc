@@ -1587,7 +1587,16 @@ def main():
             try:
                 if args.duration:
                     log("running for %.0f s" % args.duration)
-                    while time.time() - t0 < args.duration and gpc.poll() is None:
+                    # AND A SESSION COMMAND ENDS THE WAIT, exactly as it does
+                    # in the no-duration branch below.  Without this a 'save'
+                    # sat in SESSION until the whole duration had run out, so
+                    # a script's 'snapshot' line was answered at the END of
+                    # the run or not at all -- a capture of the wrong vehicle,
+                    # or none.  The listener also raises SIGINT to break the
+                    # other branch out of input(); here there is nothing to
+                    # break out of but this sleep, so the flag is what counts.
+                    while (time.time() - t0 < args.duration and gpc.poll() is None
+                           and SESSION["action"] is None):
                         time.sleep(0.5)
                 else:
                     print("Everything is up.  Press Enter here to shut it all "
@@ -1602,10 +1611,18 @@ def main():
             action, snapdir = SESSION["action"], SESSION["dir"]
             SESSION["action"] = SESSION["dir"] = None
             if action in ("save", "save-and-quit"):
+                saving = time.time()
                 ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
                                         args.port_base, gpcs, args.crts,
                                         idps=range(1, args.crts + 1),
                                         tape=tape)
+                # THE VEHICLE WAS NOT RUNNING WHILE THAT WAS WRITTEN, so the
+                # time it took is not time the run had.  --duration is a
+                # budget for a SIMULATION, and a script instrumented with a
+                # dozen captures would otherwise find itself cut short by its
+                # own instrumentation -- the more carefully it was
+                # instrumented, the less of the run it would get.
+                t0 += time.time() - saving
                 # BACK TO WHOEVER ASKED.  A failure that only reaches this
                 # terminal is a failure nobody sees: the manager window exists
                 # so that nobody has to watch this terminal.
@@ -1667,6 +1684,35 @@ def main():
         log("shutting down")
         L.stop()
     return 0
+
+
+def _die_with_children(signum, _frame):
+    """SIGTERM and SIGHUP tear the run down, the way Ctrl-C does.
+
+    WHY THIS EXISTS.  Every child is started with start_new_session=True, so
+    it is in its OWN process group and does not get the signal that reaches
+    this process.  That is deliberate -- it is what lets a snapshot resume
+    replace the children without the terminal's Ctrl-C reaching them halfway
+    -- but Python does not run `finally` on SIGTERM, so a plain `kill` or
+    `pkill` on this process left a whole vehicle running with nobody holding
+    it: yaGPC2 with its GPC threads, the displays, the panel.
+
+    Measured the embarrassing way on 2026-09-25: a two-computer run aborted
+    at 07:34 was still burning two cores at 10:03, through every timing
+    measurement taken in between.  Nothing said so, because the one process
+    that knew about the children was the one that had been killed.
+
+    Raising KeyboardInterrupt lands in the handler above, which runs L.stop()
+    -- SIGINT to yaGPC2 first, so it ends the way it does for Ctrl-C, then
+    the process GROUPS."""
+    raise KeyboardInterrupt
+
+
+for _sig in ("SIGTERM", "SIGHUP"):
+    try:
+        signal.signal(getattr(signal, _sig), _die_with_children)
+    except (AttributeError, ValueError, OSError):
+        pass          # not every platform has both, and neither is essential
 
 
 if __name__ == "__main__":

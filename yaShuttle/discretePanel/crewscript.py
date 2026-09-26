@@ -58,6 +58,14 @@ MAX_SCRIPT_DEPTH = 8            # a script calling a script calling a script...
 WAIT_TIMEOUT_S = 600
 KEY_GAP_S = 0.35
 WAIT_POLL_MS = 100
+# HOW LONG A 'snapshot' LINE WAITS for simulatePASS.py to say it is written.
+# A capture stops every computer, writes each one's memory and each display's,
+# and starts them again; seconds, not minutes, but a loaded host and five
+# computers make "seconds" a wide word.  Long enough that a slow one is never
+# mistaken for a broken one, short enough that a broken one does not hold a
+# script for ever.
+SNAPSHOT_TIMEOUT_S = 300.0
+SNAPSHOT_POLL_MS = 200
 
 # DPS keyboard scan codes (stsKeyboard.py's SCAN, from MEDS2.py's KYBD.DEUKey).
 SCAN = {
@@ -206,6 +214,42 @@ HELP = """\
                         clears it.  The two characters \\n start a new line;
                         a leading <left>, <center> or <right> aligns that
                         caption.
+
+  capturing the vehicle as it goes:
+    snapshot DIR        capture the whole vehicle into DIR -- every computer's
+                        memory, every display's, the panel -- exactly as the
+                        manager's SNAPSHOT Save does, and hold the script
+                        until it is written.  DIR is relative to the script,
+                        like 'script FILE' and 'audio FILE', and the directory
+                        it will sit in must already exist, which is checked
+                        when the script is checked.  The times after it begin
+                        again, as they do after a wait, because the vehicle is
+                        stopped while it is written and the wall clock is not.
+                        Only the program that STARTED the run can do this, so
+                        a script played into a simulation launched some other
+                        way will say the capture timed out.
+
+                        TWO USES, and the second is why it is worth
+                        instrumenting a script heavily.  One is the obvious
+                        saving of time: restart from the last capture instead
+                        of paying the IPLs again.  The other is BISECTION -- a
+                        failure that appears near the end of a long run can
+                        only be studied by reaching it, and captures at each
+                        milestone let a later session start just before the
+                        interesting moment rather than forty minutes before
+                        it.  A capture that fails does NOT stop the script:
+                        losing the artefact is not a reason to lose the run.
+                        How many were written, and how many failed, is said
+                        when the script ends.
+    enable snapshots
+    disable snapshots   (no time prefix, like wait and keygap) turn every
+                        'snapshot' line AFTER this one on or off, in this
+                        script and in the scripts it calls.  Snapshots are on
+                        to begin with.  This is what makes heavy
+                        instrumentation practical: write as many captures as
+                        bisecting a failure needs, and silence the lot from
+                        one line when the run is wanted for something else --
+                        no editing, and nothing to put back afterwards.
 
   panel controls, by panel and legend.  The GPC controls act on the column
   chosen by 'gpc N' (at first the primary); case does not matter:
@@ -431,6 +475,26 @@ def parse(text, path=None, _depth=0, _seen=None):
             # NO TIME PREFIX, like 'wait': keygap does not HAPPEN at a moment,
             # it changes how the keys after it are typed.  Giving it a prefix
             # would invite '+2 keygap 1' and the question of what the 2 meant.
+            # NO TIME PREFIX, like 'wait' and 'keygap': these do not HAPPEN
+            # at a moment, they change what the snapshot lines AFTER them do.
+            # The point is to instrument a script with as many captures as
+            # bisecting a failure needs and then turn the lot off from one
+            # line, without editing any of them.
+            if first.lower() in ("enable", "disable") and not first[1:2].isdigit():
+                # A NEAR MISS IS A TYPO, NOT A TIMED STEP.  Without this
+                # 'enable snapshot' -- singular, which is the way it will be
+                # written -- fell through to the time parser and was reported
+                # as "expected '<seconds> <command>'", which points at the
+                # wrong half of the line entirely.
+                if rest.lower() != "snapshots":
+                    raise ScriptError("%r: the only thing that can be enabled or "
+                                      "disabled is 'snapshots' (plural)" % line)
+                entries.append({"kind": "step", "ms": last_ms, "verb": "snapshots",
+                                "arg": first.lower(),
+                                "on": first.lower() == "enable",
+                                "text": line, "line": n})
+                continue
+
             if first.lower() == "keygap":
                 try:
                     gap = float(rest)
@@ -489,6 +553,34 @@ def parse(text, path=None, _depth=0, _seen=None):
                     raise ScriptError("audio: no such file: %s" % arg)
                 entry["audio"] = snd
 
+            elif verb == "snapshot":
+                # WHERE, CHECKED NOW.  A capture is the one step in a script
+                # whose whole value is the file it leaves behind, so a name
+                # that cannot be written is worth knowing about before the
+                # run rather than thirty minutes into it.  Relative to the
+                # SCRIPT, as 'script FILE' and 'audio FILE' are: a script and
+                # the captures it takes belong together.
+                if not arg:
+                    raise ScriptError("snapshot needs a directory name")
+                if arg.split()[0] != arg:
+                    raise ScriptError("snapshot takes one directory name, got %r "
+                                      "-- quote it or take the spaces out" % arg)
+                where = arg
+                if not os.path.isabs(where):
+                    where = os.path.join(os.path.dirname(os.path.abspath(path or ".")),
+                                         where)
+                parent = os.path.dirname(os.path.abspath(where)) or "."
+                if not os.path.isdir(parent):
+                    raise ScriptError("snapshot: %s has no directory %s to write in"
+                                      % (arg, parent))
+                entry["snapdir"] = os.path.abspath(where)
+                # AND THE TIMES AFTER IT START AGAIN, as they do after a wait
+                # and after a called script.  A capture stops the vehicle for
+                # as long as it takes to write it, and the wall clock does not
+                # stop with it -- so a '+5' below this line has to mean five
+                # seconds after the capture finished, not five seconds after
+                # the line was due, which is already in the past by then.
+                last_ms = 0
             elif verb == "script":
                 if not arg:
                     raise ScriptError("script needs a file name")
@@ -842,7 +934,7 @@ class Player(object):
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None, gap=None):
+                 source=None, gap=None, snaps=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
@@ -881,6 +973,13 @@ class Player(object):
         # Shared with nested scripts, so a 'keygap' near the top of a script
         # governs the keys typed by the scripts it calls as well.
         self.gap = gap if gap is not None else [KEY_GAP_S]
+        # THE SAME FOR SNAPSHOTS, and for the same reason: 'disable snapshots'
+        # at the top of a script has to reach the captures inside the scripts
+        # it calls, or turning them off means finding every one of them.
+        # 'taken' and 'failed' are counted here so that the end of the run can
+        # say whether the captures it was instrumented for actually exist.
+        self.snaps = snaps if snaps is not None else {"on": True, "taken": 0,
+                                                      "failed": 0}
 
     def start(self):
         self.origin = time.monotonic()
@@ -946,6 +1045,35 @@ class Player(object):
             if due > 0:
                 self.after(int(due * 1000) + 1, lambda k=k: self._run(k))
                 return
+            if e["verb"] == "snapshots":
+                # Not a panel control either: it changes what the snapshot
+                # lines after it do, here and in any script this one calls.
+                self.snaps["on"] = e["on"]
+                self.log(e["text"])
+                k += 1
+                continue
+            if e["verb"] == "snapshot":
+                if not self.snaps["on"]:
+                    self.log("%s -- not taken ('disable snapshots' is in force)"
+                             % e["text"])
+                    # AND THE ORIGIN MOVES ANYWAY.  The parser restarts the
+                    # times after a snapshot line, as it does after a wait,
+                    # because a capture stops the vehicle for as long as it
+                    # takes to write.  That restart is decided when the script
+                    # is READ and 'disable snapshots' is a state at RUN time,
+                    # so the entries after this one carry times measured from
+                    # here whether the capture happened or not.  Without this
+                    # line they were measured from here against an origin set
+                    # somewhere further back, every one of them was already
+                    # overdue, and the whole rest of the script fired at once
+                    # -- which would have turned "disable snapshots" from a
+                    # way of silencing captures into a way of wrecking the run.
+                    self.origin = time.monotonic()
+                    k += 1
+                    continue
+                self.log(e["text"])
+                self._snapshot(k, e)
+                return
             if e["verb"] == "keygap":
                 # Not a panel control: it changes how the NEXT keys are
                 # typed, and the list is shared with any nested script.
@@ -980,7 +1108,16 @@ class Player(object):
             self.on_done(False)
             return
         if k >= len(self.entries) and not self.stopped:
-            self.log("script complete")
+            # WHETHER THE CAPTURES IT WAS INSTRUMENTED FOR EXIST.  A script
+            # whose snapshots all failed ends exactly like one whose snapshots
+            # all worked, and the difference is only discovered later, when
+            # the capture that was supposed to be bisected is not there.
+            note = ""
+            if self.snaps["taken"] or self.snaps["failed"]:
+                note = " (%d snapshot(s) written%s)" % (
+                    self.snaps["taken"],
+                    ", %d FAILED" % self.snaps["failed"] if self.snaps["failed"] else "")
+            self.log("script complete" + note)
 
     def _type(self, k, keys, i):
         if self.stopped:
@@ -1009,6 +1146,92 @@ class Player(object):
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
 
+    def _snapshot(self, k, e):
+        """Ask simulatePASS.py to capture the vehicle, and hold the script
+        until it says the capture is written.
+
+        WHY IT WAITS.  The capture stops every computer, and the wall clock
+        does not stop with them: a script that carried on would find every
+        step after it already overdue and would fire them all at once.  So the
+        script waits, and its times begin again from when the capture is
+        written -- the parser sets those times up for it (see 'snapshot' in
+        parse).
+
+        WHY IT DOES NOT STOP THE SCRIPT WHEN A CAPTURE FAILS.  The capture is
+        an artefact OF the run, not a step of it.  A script instrumented with
+        a dozen of them to bisect a failure that takes half an hour to reach
+        should not lose the half hour because a disk was full at minute six;
+        it should lose the capture, say so loudly, and go on to the failure it
+        was written to reach.  The count is reported when the script ends, so
+        a run whose captures all failed cannot be mistaken for one whose
+        captures are all there.  ('disable snapshots' is how you decline them
+        deliberately; a failure is not that.)"""
+        # THE SOCKET FIRST, THEN THE REQUEST.  An answer sent before anyone is
+        # listening is an answer lost, and the loss would read as a timeout --
+        # sending first left a race that showed up as a slow disk.
+        try:
+            sock = result_receiver()
+        except OSError as err:
+            self.log("snapshot: cannot listen for the answer: %s -- not taken" % err)
+            self.snaps["failed"] += 1
+            self.origin = time.monotonic()
+            self._run(k + 1)
+            return
+        sock.setblocking(False)
+        try:
+            send_session("save %s" % e["snapdir"])
+        except OSError as err:
+            sock.close()
+            self.log("snapshot: cannot ask for it: %s -- not taken" % err)
+            self.snaps["failed"] += 1
+            self.origin = time.monotonic()
+            self._run(k + 1)
+            return
+        self.log("snapshot: writing %s -- the vehicle is stopped while it is"
+                 % e["snapdir"])
+        self._snapshot_poll(k, e, sock, time.monotonic())
+
+    def _snapshot_poll(self, k, e, sock, begun):
+        if self.stopped:
+            sock.close()
+            return
+        waited = time.monotonic() - begun
+        while True:
+            try:
+                text = sock.recv(4096).decode("utf-8", "replace").strip()
+            except (BlockingIOError, OSError):
+                break
+            # THE ANSWER TO THIS QUESTION, not to somebody else's.  The result
+            # channel carries the manager's saves and window placements too,
+            # and a stray 'ok windows placed 7 window(s)' would otherwise be
+            # read as this capture succeeding.
+            word, _, rest = text.partition(" ")
+            what, _, why = rest.partition(" ")
+            if what != "save":
+                continue
+            sock.close()
+            self.origin = time.monotonic()
+            if word == "ok":
+                self.snaps["taken"] += 1
+                self.log("snapshot: written after %.1f s: %s" % (waited, e["snapdir"]))
+            else:
+                self.snaps["failed"] += 1
+                self.log("SNAPSHOT FAILED after %.1f s: %s (%s) -- the script "
+                         "carries on without it" % (waited, e["snapdir"], why or word))
+            self._run(k + 1)
+            return
+        if waited > SNAPSHOT_TIMEOUT_S:
+            sock.close()
+            self.snaps["failed"] += 1
+            self.origin = time.monotonic()
+            self.log("SNAPSHOT TIMED OUT after %.0f s: %s never answered -- is "
+                     "simulatePASS.py the program that started this run?  The "
+                     "script carries on without it." % (waited, e["snapdir"]))
+            self._run(k + 1)
+            return
+        self.after(SNAPSHOT_POLL_MS,
+                   lambda: self._snapshot_poll(k, e, sock, begun))
+
     def _call(self, k, e):
         """Play a called script, then carry on with this one.  The caller's
         remaining times count from the moment the called script finished, as
@@ -1028,7 +1251,8 @@ class Player(object):
         child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
-                       source=os.path.basename(e["path"]), gap=self.gap)
+                       source=os.path.basename(e["path"]), gap=self.gap,
+                       snaps=self.snaps)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):
@@ -1061,6 +1285,57 @@ class Player(object):
             self.after(WAIT_POLL_MS, lambda: self._poll_screen(k, e, begun, base))
 
 
+def self_test():
+    """Check the timing rules the snapshot commands depend on, with a fake
+    clock and a fake event loop -- no simulation, no windows, no waiting.
+
+    WHAT IT IS FOR.  'snapshot DIR' restarts the script's times where it
+    stands, as a wait does, because a capture stops the vehicle for as long as
+    it takes to write.  That restart is decided when the script is READ, while
+    'disable snapshots' is a state at RUN time -- so a skipped capture has to
+    move the clock exactly as a taken one would, or every line after it is
+    already overdue and the rest of the script fires at once.  That would turn
+    'disable snapshots' from a way of silencing captures into a way of
+    wrecking the run, which is the opposite of the point.  Measured before the
+    fix: 0, 3, 7 seconds where the script says 0, 5, 14."""
+    script = ("disable snapshots\n"
+              "+0   gpc 1\n"
+              "+2   snapshot /tmp\n"
+              "+3   gpc 2\n"
+              "+4   snapshot /tmp\n"
+              "+5   gpc 3\n")
+    entries = parse(script, "self-test")
+    pending, done, now = [], [], [0.0]
+
+    class FakeBus(object):
+        def send_subtitle(self, text): pass
+        def send_key(self, key): pass
+
+    player = Player(entries, lambda ms, fn: pending.append((now[0] + ms / 1000.0, fn)),
+                    lambda verb, arg: done.append((round(now[0], 2), verb)),
+                    lambda gpc: "RUN", lambda text: None, bus=FakeBus())
+    player.origin = 0.0
+    real = time.monotonic
+    time.monotonic = lambda: now[0]
+    try:
+        player._run(0)
+        for _ in range(500):
+            if not pending:
+                break
+            pending.sort()
+            now[0], fn = pending.pop(0)
+            fn()
+    finally:
+        time.monotonic = real
+    want = [(0.0, "gpc"), (5.0, "gpc"), (14.0, "gpc")]
+    if done != want:
+        print("FAIL: a disabled snapshot moved the clock wrongly\n"
+              "  wanted %s\n  got    %s" % (want, done))
+        return 1
+    print("ok: 'disable snapshots' silences the captures and nothing else")
+    return 0
+
+
 def main(argv=None):
     import argparse
     import sys
@@ -1070,7 +1345,11 @@ def main(argv=None):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="crew script commands:\n" + HELP)
     ap.add_argument("files", nargs="*", metavar="FILE", help="script to check")
+    ap.add_argument("--self-test", action="store_true",
+                    help="check this module's own timing rules and exit")
     args = ap.parse_args(argv)
+    if args.self_test:
+        return self_test()
     if not args.files:
         ap.print_help()
         return 0
