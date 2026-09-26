@@ -456,6 +456,17 @@ struct MtuModel {
     int armedWords;
     uint16_t reply[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
+    /* WORDS THIS READER HAS TAKEN OF THE CURRENT TRANSACTION, and nothing
+     * else -- the wire pacing's index.  It used to pace on `head`, which is
+     * the cursor into `reply` and is reset ONLY by mtu_fill_time, so after a
+     * seven-word timing-unit reply it sat at 7: an MDM answer that followed
+     * on the same bus was then withheld for 8 * 33 us instead of 33, and the
+     * commander's next command -- about 100 us later in FIONSPPG's chain --
+     * arrived first and cleared it.  The listener was handed a command sync
+     * where its data should have been, which is Table 1.2's Sync Error, and
+     * error-terminated with one word still wanted.  Measured: 2,240 command
+     * syncs against 8 data words at FIOBYNC3+4. */
+    int sent[MTU_NBUS][MTU_READERS];
     int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
     /* THE FOUR BITE WORDS THAT ARE NOT ZERO, kept apart from `reply` for the
      * same reason `mdm` is: the timing unit's words and an MDM's share these
@@ -673,6 +684,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         m->reply[b][r][1] = (uint16_t)mnsc;
         m->reply[b][r][2] = (uint16_t)msec;
         m->head[b][r] = 0;
+        m->sent[b][r] = 0;
         m->count[b][r] = MTU_WORDS;
         m->mdm[b][r] = 0;            /* this transaction is the unit's own */
         m->biteLeft[b][r] = 0;
@@ -767,6 +779,8 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             bool bite = (nsp > 0 && ff_is_bite4(cmd, nsp));
             for (int r = 0; r < MTU_READERS; r++) {
                 m->count[b][r] = 0;
+                m->head[b][r] = 0;      /* a new transaction starts at word 0 */
+                m->sent[b][r] = 0;
                 m->biteLeft[b][r] = 0;
                 m->mdm[b][r] = nsp;
                 if (bite) {
@@ -871,7 +885,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         {
             bool ready = true;
             if (!ff_mdm_off() && m->wireUs[b] >= 0.0 && m->sharedUs >= 0.0) {
-                int k = m->echoPending[b][g] ? 0 : (m->head[b][g] + 1);
+                int k = m->echoPending[b][g] ? 0 : (m->sent[b][g] + 1);
                 ready = (m->sharedUs >= m->wireUs[b] + (double)k * MTU_BUS_WORD_US);
             }
             out->out.poll.available = ready &&
@@ -890,15 +904,18 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             out->out.recv.available = true;
             out->out.recv.word = m->reply[b][g][m->head[b][g]++];
             m->count[b][g]--;
+            m->sent[b][g]++;
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
         } else if (m->biteLeft[b][g] > 0) {
             int idx = FF_BITE_WORDS - m->biteLeft[b][g];
             m->biteLeft[b][g]--;
+            m->sent[b][g]++;
             out->out.recv.available = true;
             out->out.recv.word = m->bite[b][g][idx];
         } else if (m->mdm[b][g] > 0) {
             m->mdm[b][g]--;                 /* a box with nothing wired to it */
+            m->sent[b][g]++;
             out->out.recv.available = true;
             out->out.recv.word = 0;
         } else {

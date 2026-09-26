@@ -46,8 +46,18 @@ static int failures;
  * model used to answer by function code and so answered both; it now answers
  * by command, and this constant had to become right. */
 #define NSP_READ  0x526420u
+/* mtumodel.c's MTU_BUS_WORD_US.  Kept in step by the check above:
+ * if the model's rate changes and this does not, the data word is
+ * asked for too early and the check fails loudly. */
+#define MTU_BUS_WORD_US_FOR_TEST 33.0
+
+/* COUNTED, NOT ASSERTED.  The summary used to print a fixed "23/23" while the
+ * file held eighteen checks, so adding one changed nothing on screen and a
+ * check that was never reached looked exactly like a check that passed. */
+static int checks;
 
 static void check(bool ok, const char *what) {
+    checks++;
     if (ok) return;
     failures++;
     printf("FAIL [mtumodel/%s]\n", what);
@@ -171,6 +181,65 @@ int main(void) {
         check((w1 & YAGPC_BUSWORD_CMD_SYNC) != 0,
               "the command first, or a Listen-Mode receive discards the lot");
         check(w2 == 0, "and it reads zero: the NSP is not powered");
+
+    /* ---- THE WIRE PACING MUST NOT CARRY AN INDEX BETWEEN TRANSACTIONS ---
+     *
+     * The unit puts its words on the wire at a wire rate from the moment the
+     * command was issued, so that a word becomes available at the same
+     * simulated instant on every computer.  The index into that rate is how
+     * many words of THIS transaction a reader has taken -- and it used to be
+     * `head`, the cursor into the timing unit's reply buffer, which only
+     * mtu_fill_time resets.  So after a seven-word MTU reply the index sat at
+     * 7, and the very next MDM answer on that bus was withheld for 8 * 33 us
+     * instead of 33.  FIONSPPG issues its next command about 100 us later,
+     * which cleared the answer first, and the listener was handed a command
+     * sync where its data belonged -- Table 1.2's Sync Error, error
+     * termination with one word still wanted.  Measured in a five-computer
+     * vehicle before the fix: 2,240 command syncs against 8 data words at
+     * FIOBYNC3+4, and the timing unit bypassed with it because FCMRTBLE
+     * groups the NSP with the MTU.
+     *
+     * The test needs the SHARED CLOCK, because that is what the pacing is
+     * measured against; with no shared clock every word is ready at once and
+     * this defect is invisible, which is how 23 checks passed over it. */
+    {
+        double t = 1000000.0;
+        uint32_t w;
+        int took;
+
+        mtumodel_set_shared_us(m, t);
+        command(1, 20, MTU_READ);              /* seven words, head -> 7 */
+        /* DRAIN IT WITH THE CLOCK RUNNING.  A word is not on the wire until
+         * its own word-time, so a drain at a standstill takes the command
+         * sync and stops -- which leaves the cursor at 0 and hides the very
+         * thing this case is about. */
+        for (int i = 0; i < 8; i++) {
+            t += MTU_BUS_WORD_US_FOR_TEST;
+            mtumodel_set_shared_us(m, t);
+            partial(2, 20, 1);
+        }
+
+        t += 500.0;                            /* well clear of that transfer */
+        mtumodel_set_shared_us(m, t);
+        command(1, 20, NSP_READ);              /* one word, on a clean wire */
+
+        /* The listener's command sync is on the wire at once. */
+        took = word(2, 20, &w);
+        check(took == 1 && (w & YAGPC_BUSWORD_CMD_SYNC) != 0,
+              "a listener is echoed the NSP command immediately");
+
+        /* And its single data word one word-time later -- NOT eight. */
+        t += MTU_BUS_WORD_US_FOR_TEST;
+        mtumodel_set_shared_us(m, t);
+        took = word(2, 20, &w);
+        check(took == 1 && w == 0,
+              "and the data word follows one word-time later, not eight");
+
+        /* AND PUT THE CLOCK BACK.  Every check after this one was written
+         * before the model had a shared clock and drains at a standstill;
+         * leaving one set paces them and they fail for the wrong reason. */
+        mtumodel_set_shared_us(m, -1.0);
+    }
     }
 
     /* ---- A NEW COMMAND ENDS THE LAST TRANSACTION, FOR EVERYONE --------- */
@@ -221,7 +290,7 @@ int main(void) {
     mtumodel_free(m);
 
     if (failures == 0) {
-        printf("23/23 timing-unit bus checks passed\n");
+        printf("%d/%d timing-unit bus checks passed\n", checks, checks);
         return 0;
     }
     printf("%d timing-unit bus check(s) failed\n", failures);
