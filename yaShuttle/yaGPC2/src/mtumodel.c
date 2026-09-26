@@ -491,6 +491,31 @@ struct MtuModel {
      * error-terminated with one word still wanted.  Measured: 2,240 command
      * syncs against 8 data words at FIOBYNC3+4. */
     int sent[MTU_NBUS][MTU_READERS];
+    /* ONE TRANSFER OF BACKLOG PER READER, and exactly one.
+     *
+     * A listener takes the command sync, and before it can come back for the
+     * data the commander issues its NEXT command -- 198 us apart at the
+     * median on these buses.  "Clear always" then hands it that command's
+     * sync in the middle of its receive, which is Table 1.2's Sync Error, and
+     * it error-terminates with every data word still wanted.  Measured on
+     * buses 14-17: pc=1dcbc took 48 words, ALL command sync, and failed 48
+     * times with left=6, while the COMMANDERS on those same buses took data
+     * normally (#218).
+     *
+     * On a real wire the words of the old transfer have already gone past
+     * before the new command does, so a listener that is ONE transfer behind
+     * has them.  That is what this is: when a new command arrives and a
+     * reader is MID-TRANSFER -- it has taken its sync and still wants words --
+     * whatever it still wants is moved here and delivered BEFORE the new
+     * command's sync.  A reader that has not yet taken its sync never began
+     * that transfer, so its words are dropped exactly as before.
+     *
+     * BOUNDED AT ONE, deliberately.  An unbounded queue was tried and buried
+     * a listener in backlog: 158,169 runaway BCE lines (#210).  A reader two
+     * transfers behind loses the older one, which is what it does today. */
+    uint16_t carry[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
+    int carryLeft[MTU_NBUS][MTU_READERS], carryHead[MTU_NBUS][MTU_READERS];
+    long carried, carryDropped;
     int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
     /* THE FOUR BITE WORDS THAT ARE NOT ZERO, kept apart from `reply` for the
      * same reason `mdm` is: the timing unit's words and an MDM's share these
@@ -598,6 +623,46 @@ static double mtu_skew_us(const struct MtuModel *m) {
     return (now >= after) ? skew : 0.0;
 }
 
+/* Move what this reader still wants of the CURRENT transfer into its backlog,
+ * so the next command does not cut it off.  Only when it is mid-transfer: a
+ * reader still holding its command sync never started, and keeping its words
+ * would deliver data with no sync in front of it. */
+static void mtu_carry_take(struct MtuModel *m, int b, int r) {
+    /* LISTENERS ONLY.  A commander that has just issued a command has
+     * finished the receive before it -- a real BCE does not issue one while
+     * it is still receiving -- so carrying its leftovers would push stale
+     * words into the read it just asked for.  m->commander[b] is still the
+     * PREVIOUS commander here, which is the one those words belonged to;
+     * reader 0 is the single-machine caller and is its own commander. */
+    /* WITH THE ANSWERING OFF, EXACTLY AS BEFORE.  This changes what a
+     * listener of the timing unit's OWN read receives, and that read is
+     * answered in every configuration -- so without this guard the backlog
+     * would be live in the default build, which is the one validated clean.
+     * It travels with the switch like the echo rule, the pacing and the
+     * shared clock (#213). */
+    if (ff_mdm_off()) return;
+    if (r == 0 || r == m->commander[b]) return;
+    if (m->echoPending[b][r]) return;        /* never began this transfer */
+    int n = 0;
+    while (m->count[b][r] > 0 && n < FF_REPLY_MAX) {
+        m->carry[b][r][n++] = m->reply[b][r][m->head[b][r]++];
+        m->count[b][r]--;
+    }
+    while (m->biteLeft[b][r] > 0 && n < FF_REPLY_MAX) {
+        m->carry[b][r][n++] = m->bite[b][r][FF_BITE_WORDS - m->biteLeft[b][r]];
+        m->biteLeft[b][r]--;
+    }
+    while (m->mdm[b][r] > 0 && n < FF_REPLY_MAX) {
+        m->carry[b][r][n++] = 0;
+        m->mdm[b][r]--;
+    }
+    if (n == 0) return;
+    if (m->carryLeft[b][r] > 0) m->carryDropped++;   /* two behind; it loses one */
+    m->carryLeft[b][r] = n;
+    m->carryHead[b][r] = 0;
+    m->carried++;
+}
+
 static void mtu_fill_time(struct MtuModel *m, int b) {
     /* THE UNIT'S OWN TIME, from the vehicle's shared clock where there is one
      * -- see mtumodel_set_shared_us.  Falling back to the caller's clock is
@@ -703,6 +768,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
      * FPMLIMCK's MET tests have no lower bound (days < X'365', hours
      * <= X'23', min <= X'59', sec <= X'164'), so all-zero passes. */
     memset(m->reply[b], 0, sizeof m->reply[b]);
+    for (int r = 0; r < MTU_READERS; r++) mtu_carry_take(m, b, r);
     for (int r = 0; r < MTU_READERS; r++) {
         m->reply[b][r][0] = (uint16_t)dyhr;
         m->reply[b][r][1] = (uint16_t)mnsc;
@@ -801,6 +867,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * unit's words are still DROPPED for a command that is not its
              * own, as they always were (ledger #137), but never overwritten. */
             bool bite = (nsp > 0 && ff_is_bite4(cmd, nsp));
+            for (int r = 0; r < MTU_READERS; r++) mtu_carry_take(m, b, r);
             for (int r = 0; r < MTU_READERS; r++) {
                 m->count[b][r] = 0;
                 m->head[b][r] = 0;      /* a new transaction starts at word 0 */
@@ -912,15 +979,28 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                 int k = m->echoPending[b][g] ? 0 : (m->sent[b][g] + 1);
                 ready = (m->sharedUs >= m->wireUs[b] + (double)k * MTU_BUS_WORD_US);
             }
-            out->out.poll.available = ready &&
-                                      (m->echoPending[b][g] ||
-                                       (m->count[b][g] > 0) ||
-                                       (m->biteLeft[b][g] > 0) ||
-                                       (m->mdm[b][g] > 0));
+            /* THE BACKLOG IS ALWAYS READY.  Its words belong to a transfer
+             * whose wire time is already past -- that is the whole reason it
+             * exists -- so the pacing has nothing left to say about them. */
+            out->out.poll.available = (m->carryLeft[b][g] > 0) ||
+                                      (ready &&
+                                       (m->echoPending[b][g] ||
+                                        (m->count[b][g] > 0) ||
+                                        (m->biteLeft[b][g] > 0) ||
+                                        (m->mdm[b][g] > 0)));
         }
         break;
     case GPC_SVC_RECV_WORD:
-        if (m->echoPending[b][g]) {
+        if (m->carryLeft[b][g] > 0) {
+            /* What it still wanted of the PREVIOUS transfer, ahead of this
+             * one's command word, which is the order the wire had them in.
+             * Not counted into `sent`: these are not this transaction's. */
+            out->out.recv.available = true;
+            out->out.recv.word = m->carry[b][g][m->carryHead[b][g]++];
+            m->carryLeft[b][g]--;
+            if (g == m->commander[b] || g == 0) m->wordsOut++;
+            else m->listenerWords++;
+        } else if (m->echoPending[b][g]) {
             m->echoPending[b][g] = false;
             out->out.recv.available = true;
             out->out.recv.word = m->echoCmd[b] | YAGPC_BUSWORD_CMD_SYNC;
@@ -966,6 +1046,10 @@ void mtumodel_report(struct MtuModel *m) {
         fprintf(stderr, "mtu: %ld MDM A/D BITE 4 read(s) answered with the "
                         "reference voltages (+2.00 V 3200, -2.00 V ce00)\n",
                 m->biteReads);
+    if (m->carried > 0)
+        fprintf(stderr, "mtu: %ld transfer(s) carried over a following command"
+                        " for a reader still taking them, %ld dropped as a"
+                        " second\n", m->carried, m->carryDropped);
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);

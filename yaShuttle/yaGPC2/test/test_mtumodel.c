@@ -50,6 +50,8 @@ static int failures;
  * if the model's rate changes and this does not, the data word is
  * asked for too early and the check fails loudly. */
 #define MTU_BUS_WORD_US_FOR_TEST 33.0
+/* mtumodel.c's FF_REPLY_MAX -- the bound on one transfer of backlog. */
+#define FF_REPLY_MAX_FOR_TEST 64
 
 /* COUNTED, NOT ASSERTED.  The summary used to print a fixed "23/23" while the
  * file held eighteen checks, so adding one changed nothing on screen and a
@@ -259,14 +261,45 @@ int main(void) {
      * so one that is not echoed can never drain, so it is "draining" for
      * ever.  Measured: 0 echoes in ten reads.  Losing the tail of one
      * transfer costs one transfer; latching costs all of them. */
+    /* AND IT KEEPS THE TAIL OF THE ONE IT WAS TAKING.  On a real wire the old
+     * transfer's words went past BEFORE the new command did, so a listener
+     * one transfer behind has them.  Withholding the echo is still forbidden
+     * -- that is what latches a Listen-Mode BCE -- so the order is: what it
+     * still wanted, THEN the new command's sync, THEN the new transfer.
+     * Before this, the new sync arrived in the middle of its receive and it
+     * error-terminated with every remaining word still wanted: measured on
+     * buses 14-17, pc=1dcbc took 48 words, ALL command sync, and failed 48
+     * times with left=6 (#218). */
     clk = 2000000.0;
     command(1, 21, MTU_READ);
     partial(2, 21, 4);                    /* the sync and three words */
     clk = 3000000.0;
     command(1, 21, MTU_READ);             /* while it is still draining */
+    {
+        uint32_t w;
+        int n = 0, sync_at = -1;
+        while (n < 40 && word(2, 21, &w)) {
+            if ((w & YAGPC_BUSWORD_CMD_SYNC) && sync_at < 0) sync_at = n;
+            n++;
+        }
+        check(n == 12, "a listener mid-receive gets the tail AND the next transfer");
+        check(sync_at == 4, "the four words it still wanted come BEFORE the new sync");
+    }
+
+    /* A SECOND command while it is still behind: it may be one transfer
+     * behind and no more, so the older tail is dropped rather than queued.
+     * An unbounded queue buried a listener in backlog -- 158,169 runaway BCE
+     * lines (#210) -- and that is the failure this bound exists to prevent. */
+    clk = 3500000.0;
+    command(1, 21, MTU_READ);
+    partial(2, 21, 2);                    /* barely starts it */
+    clk = 3600000.0;
+    command(1, 21, MTU_READ);
+    clk = 3700000.0;
+    command(1, 21, MTU_READ);
     drain(2, 21, &words, &syncs, &first);
-    check(syncs == 1, "the new command reaches it even mid-receive");
-    check(words == 8, "and it gets that transfer whole, from the command word");
+    check(words <= 8 + FF_REPLY_MAX_FOR_TEST,
+          "a listener two transfers behind does not accumulate a queue");
 
     /* ...and a reader that took NOTHING from the last one is in exactly the
      * same position: no reader can be starved by having ignored a transfer. */
