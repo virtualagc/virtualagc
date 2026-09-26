@@ -224,6 +224,52 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
      * reads are unlocked, which at worst costs one BARRIER_SLEEP_SEC. */
     if (v->barWaiters > 0 && pub >= v->barWakeAtUs) barrier_wake(v);
 
+    /* YAGPC_BARSPREAD_US=<us>: report whenever the machines' SIMULATED
+     * clocks are further apart than that, as the barrier itself sees them.
+     *
+     * WHY IT HAD TO BE HERE.  Separation was being inferred from the sync
+     * history -- each machine's last logged sim time, compared across
+     * machines -- and that is dominated by how often each happens to log:
+     * the event-gap distribution (median 0.013 ms, p90 0.242) tracked the
+     * apparent "separation" (0.027, 0.233) almost exactly, so most of it was
+     * STALENESS in the measurement, not divergence between the clocks.  This
+     * reads barPubUs[], which is every machine's time in one frame under one
+     * thread's view, at one instant -- the only place that can say what the
+     * spread really is. */
+    {
+        static int inited = 0;
+        static double thresh = -1.0;
+        static long said = 0;
+        if (!inited) {
+            inited = 1;
+            const char *e = yagpc_getenv("YAGPC_BARSPREAD_US");
+            if (e != NULL) thresh = atof(e);
+        }
+        if (thresh >= 0.0 && said < 4000) {
+            double lo = 0.0, hi = 0.0;
+            int n = 0;
+            for (int m = 1; m <= 5; m++) {
+                if (!v->barActive[m]) continue;
+                double x = v->barPubUs[m];
+                if (n == 0 || x < lo) lo = x;
+                if (n == 0 || x > hi) hi = x;
+                n++;
+            }
+            if (n >= 2 && (hi - lo) > thresh) {
+                said++;
+                fprintf(stderr, "BARSPREAD gpc=%d n=%d spread=%.1f us  "
+                                "1=%.1f 2=%.1f 3=%.1f 4=%.1f 5=%.1f  wall=%.6f\n",
+                        gpcId, n, hi - lo,
+                        v->barActive[1] ? v->barPubUs[1] : -1.0,
+                        v->barActive[2] ? v->barPubUs[2] : -1.0,
+                        v->barActive[3] ? v->barPubUs[3] : -1.0,
+                        v->barActive[4] ? v->barPubUs[4] : -1.0,
+                        v->barActive[5] ? v->barPubUs[5] : -1.0,
+                        yagpc_monotonic_seconds());
+            }
+        }
+    }
+
     if (pub - barrier_slowest(v, gpcId, pub) <= v->barDeltaUs) return;
 
     /* AHEAD OF THE GROUP.  Nobody deadlocks: the slowest machine never
