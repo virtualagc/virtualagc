@@ -166,6 +166,18 @@ typedef struct Vehicle {
     double barDeltaUs;        /* 0 disables; YAGPC_BARRIER_US overrides */
     bool barOn;
     double barPubUs[6];       /* each machine's time in the shared frame */
+    double barSpreadAfterUs;  /* YAGPC_BARSPREAD_AFTER: ignore reports before this */
+    int barSpreadMinN;        /* YAGPC_BARSPREAD_MINN: and with fewer machines up */
+    /* AN UNCONDITIONED HISTOGRAM of the spread, so the typical value can be
+     * stated.  A threshold-gated report can only ever describe its own tail:
+     * "median 267.6 us" from a 250 us threshold is the median of what
+     * exceeded 250, which says nothing about the median spread. */
+    /* PER MACHINE, so five threads never share a counter.  The first version
+     * was one shared array incremented without atomics and its buckets summed
+     * to 104% -- lost updates, in an instrument built to correct other
+     * instruments.  Indexed [gpcId][bucket]; only the owning thread writes. */
+    long barSpreadHist[6][12]; /* <25,<50,<100,<150,<200,<250,<300,<400,<600,<1000,<2000,>= */
+    long barSpreadN[6];
     double barOffsetUs[6];
     bool barActive[6];        /* false while a machine is held in reset */
     unsigned long barHolds;   /* how often the barrier actually bound */

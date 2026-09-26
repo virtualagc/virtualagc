@@ -244,8 +244,19 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
             inited = 1;
             const char *e = yagpc_getenv("YAGPC_BARSPREAD_US");
             if (e != NULL) thresh = atof(e);
+            const char *a = yagpc_getenv("YAGPC_BARSPREAD_AFTER");
+            v->barSpreadAfterUs = (a != NULL) ? atof(a) * 1e6 : 0.0;
+            const char *mn = yagpc_getenv("YAGPC_BARSPREAD_MINN");
+            v->barSpreadMinN = (mn != NULL) ? atoi(mn) : 2;
+            if (v->barSpreadMinN < 2) v->barSpreadMinN = 2;
         }
-        if (thresh >= 0.0 && said < 4000) {
+        /* AND NOT BEFORE YAGPC_BARSPREAD_AFTER SECONDS on the shared clock.
+         * A flat budget is spent entirely during the staggered IPLs, when
+         * only two machines are up and one is still being re-based onto the
+         * group's frame -- 4,000 reports of GPC2 2.4 ms ahead of GPC1, all
+         * before the third machine joined, and nothing at all from the
+         * moment a computer was actually failed. */
+        if (thresh >= 0.0 && said < 4000 && pub >= v->barSpreadAfterUs) {
             double lo = 0.0, hi = 0.0;
             int n = 0;
             for (int m = 1; m <= 5; m++) {
@@ -255,7 +266,15 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs) {
                 if (n == 0 || x > hi) hi = x;
                 n++;
             }
-            if (n >= 2 && (hi - lo) > thresh) {
+            if (n >= v->barSpreadMinN) {
+                static const double EDGE[11] = {25,50,100,150,200,250,300,400,600,1000,2000};
+                double sp = hi - lo;
+                int b = 11;
+                for (int k = 0; k < 11; k++) if (sp < EDGE[k]) { b = k; break; }
+                v->barSpreadHist[gpcId][b]++;
+                v->barSpreadN[gpcId]++;
+            }
+            if (n >= v->barSpreadMinN && (hi - lo) > thresh) {
                 said++;
                 fprintf(stderr, "BARSPREAD gpc=%d n=%d spread=%.1f us  "
                                 "1=%.1f 2=%.1f 3=%.1f 4=%.1f 5=%.1f  wall=%.6f\n",
@@ -795,6 +814,30 @@ void vehicle_free(Vehicle *v) {
                         "%lu released while spinning, %lu sleeps\n",
                 v->barHolds, v->barHeldSec, v->barAbandoned, v->barDeltaUs,
                 v->barSpinReleases, v->barSleeps);
+    /* THE SPREAD, UNCONDITIONED.  The threshold-gated BARSPREAD line can only
+     * describe its own tail; this is every sample, so the typical value and
+     * the tail can both be read honestly.  What matters is how much of it
+     * lies past the time the flight software HOLDS a sync code -- FCMST3 is
+     * 182 us and a measured SVC hold is 211 us -- because a machine further
+     * behind than that arrives after the pulse has come and gone. */
+    long spreadN = 0, spreadHist[12] = {0};
+    for (int g = 1; g <= 5; g++) {
+        spreadN += v->barSpreadN[g];
+        for (int k = 0; k < 12; k++) spreadHist[k] += v->barSpreadHist[g][k];
+    }
+    if (spreadN > 0) {
+        static const char *NAME[12] = {"<25","<50","<100","<150","<200","<250",
+                                       "<300","<400","<600","<1000","<2000",">=2000"};
+        fprintf(stderr, "vehicle: clock spread over %ld samples (us):", spreadN);
+        for (int k = 0; k < 12; k++)
+            if (spreadHist[k] > 0)
+                fprintf(stderr, " %s=%.3f%%", NAME[k],
+                        100.0 * (double)spreadHist[k] / (double)spreadN);
+        long past = 0;
+        for (int k = 4; k < 12; k++) past += spreadHist[k];   /* >= 200 us */
+        fprintf(stderr, "  |  past 200 us (the 211 us hold): %ld samples, %.5f%%\n",
+                past, 100.0 * (double)past / (double)spreadN);
+    }
     /* REPORTED EVEN WHEN ZERO IF ANY WAS ASKED FOR, because "abandoned" is
      * the answer that matters and a silent absence reads like success. */
     if (v->pauseTaken > 0 || v->pauseAbandoned > 0)
