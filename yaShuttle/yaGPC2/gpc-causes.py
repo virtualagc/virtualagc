@@ -227,14 +227,51 @@ def cmd_add(c, opts, rest):
     return cmd_write(c)
 
 
+def check_opts(opts, extra=()):
+    """Refuse a flag this tool does not know.
+
+    IT USED TO IGNORE THEM IN SILENCE and still print "wrote CAUSES.md", which
+    is indistinguishable from success.  A whole night's findings were appended
+    with a --append-evidence flag that did not exist: every call looked like it
+    worked, the file was rewritten each time, and not one word reached the
+    database.  The ledger is the durable record in this project, so a write
+    that does nothing must SAY so."""
+    known = set(COLNAMES) | set("append-" + k for k in COLNAMES) | set(extra)
+    bad = [k for k in opts if k not in known]
+    if bad:
+        print("unknown option(s): %s" % ", ".join("--" + b for b in sorted(bad)))
+        print("settable: %s" % ", ".join(COLNAMES))
+        print("appendable: %s" % ", ".join("append-" + k for k in COLNAMES))
+        return False
+    return True
+
+
 def cmd_set(c, ident, opts):
+    if not check_opts(opts):
+        return 1
+    row = c.execute("SELECT id FROM cause WHERE id=?", (int(ident),)).fetchone()
+    if row is None:
+        print("no entry #%s" % ident); return 1
+    wrote = 0
     for k in COLNAMES:
         if k in opts:
             if k == "status" and opts[k] not in STATUSES:
                 print("status must be one of %s" % (STATUSES,)); return 1
             c.execute("UPDATE cause SET %s=? WHERE id=?" % k,
                       (opts[k], int(ident)))
+            wrote += 1
+        ak = "append-" + k
+        if ak in opts:
+            cur = c.execute("SELECT %s FROM cause WHERE id=?" % k,
+                            (int(ident),)).fetchone()[0] or ""
+            sep = "  " if cur and not cur.endswith(" ") else ""
+            c.execute("UPDATE cause SET %s=? WHERE id=?" % k,
+                      (cur + sep + opts[ak], int(ident)))
+            wrote += 1
+    if wrote == 0:
+        print("nothing to set on #%s" % ident); return 1
     c.commit()
+    print("#%s: %d field(s) written" % (ident, wrote))
     return cmd_write(c)
 
 
