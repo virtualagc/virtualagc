@@ -76,6 +76,19 @@ void mtumodel_set_shared_us(struct MtuModel *m, double sharedUs);
  * call, like the clock. */
 void mtumodel_set_armed_words(struct MtuModel *m, int words);
 
+/* The buses this model services, as a bit per bus number.
+ *
+ * WHY IT IS A FUNCTION AND NOT A NUMBER IN run.c.  Those buses have to be
+ * marked for Listen Mode, because this model shows a listener the commander's
+ * command word and a Listen-Mode BCE waits for one before it starts timing
+ * out data.  The mask in run.c was written when this model answered only
+ * 20-22 and was NOT extended when it took over 14-17 and 23 -- so listeners
+ * there never awaited a command, timed out on the message time-out instead,
+ * were retried, and took a word every 40 ms where the ones on 20-22 take one
+ * every 33 us (ledger #131-#133 is the same defect on the ICC buses).
+ * Deriving it here means the two cannot drift apart again. */
+uint32_t mtumodel_bus_mask(void);
+
 /* True for the buses this unit answers on (20, 21, 22). */
 bool mtumodel_owns_bus(int busID);
 

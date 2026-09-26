@@ -569,6 +569,31 @@ void mtumodel_set_armed_words(struct MtuModel *m, int words) {
     if (m) m->armedWords = words;
 }
 
+uint32_t mtumodel_bus_mask(void) {
+    uint32_t mask = 0;
+    /* WITH THE ANSWERING OFF, ONLY THE BUSES IT ACTUALLY ANSWERS ON.
+     *
+     * Marking 14-17 as well is the correct thing for the configuration that
+     * answers the MDMs -- it takes a listener there from one word every 40 ms
+     * to one every 33 us (#219) -- but in the DEFAULT build it costs the
+     * redundant set: the gate took four votes against GPC1 at t=821.4, where
+     * the same gate with 20-22 alone has none, and bus traffic fell from
+     * about 11,000,000 commands to 3,160,776.  So it travels with the switch,
+     * like the echo rule, the pacing, the shared clock and the backlog.
+     *
+     * AND THAT LEAVES A CONTRADICTION WORTH WRITING DOWN: with the answering
+     * off this model still ECHOES a commander's command on 14-17, because its
+     * echo condition there (count == 0) is always true -- so it marks command
+     * sync on buses whose listeners are told not to expect one.  Making the
+     * echo match the mask is the other way to resolve it and has not been
+     * measured; see #219. */
+    int first = ff_mdm_off() ? 20 : MTU_BUS_FIRST;
+    int last  = ff_mdm_off() ? 22 : MTU_BUS_LAST;
+    for (int b = first; b <= last && b < 32; b++)
+        mask |= 1u << b;
+    return mask;
+}
+
 bool mtumodel_owns_bus(int busID) {
     if (busID == 18 || busID == 19) return false;      /* mass memory */
     return busID >= MTU_BUS_FIRST && busID <= MTU_BUS_LAST;

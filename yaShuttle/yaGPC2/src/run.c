@@ -1129,8 +1129,14 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
              * listeners are shown the commander's command word (#136).  One computer keeps its old
              * receives: with no second machine there is nobody to echo. */
             if (veh->icc != NULL) {
+                /* 1-5 the ICC, 6-9 the display units (#137), 18-19 the
+                 * mass memory, and the timing-unit model's OWN range for the
+                 * rest -- 14-23, not the 20-22 this used to name.  It answers
+                 * and echoes on all of them, so all of them must honour
+                 * Listen Mode; asking the model keeps the two in step. */
                 iop_set_bus_marks_sync(&r->age.gpc.iop,
-                                       0x3eu | (0xfu << 6) | (0x1fu << 18));
+                                       0x3eu | (0xfu << 6) | (0x3u << 18) |
+                                       mtumodel_bus_mask());
                 /* And the display buses take their wire time: FIODEUPG's
                  * listener delays for its commander's transmission, and with
                  * a free wire the commander's '#MIN' went past it (#137).  Not
