@@ -8,6 +8,10 @@
 #include <time.h>
 
 #include "busword.h"
+/* The bus programs' own (command, length) pairs and command names; see
+ * fc-bus-survey.py.  Used to NAME what goes past and to check the run-time
+ * armed count against what the flight source says, never as the answer. */
+#include "fcbustable.h"
 
 #include "envcache.h"
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
@@ -74,6 +78,9 @@
  * The extra word goes on the END, after GMT (0,1,2) and MET (3,4,5). */
 #define MTU_WORDS 7
 
+/* One word time on the serial bus, as mmumodel.c has it -- the same wire. */
+#define MTU_BUS_WORD_US 33.0
+
 /* THE FORWARD MDM ANSWERS FOR THE NETWORK SIGNAL PROCESSOR, WHICH THIS
  * VEHICLE DOES NOT HAVE.
  *
@@ -110,6 +117,81 @@
 #define FF_REPLY_MAX  64
 #define FF_FA_GENERIC 64
 
+/* BITE TEST 4: THE ONE MDM READ WHOSE ANSWER MAY NOT BE ZERO.
+ *
+ * Every other channel of an MDM with nothing wired to it reads zero, and that
+ * is a true statement about this vehicle.  These four words are not a channel
+ * reading -- they are the A/D converter measuring its OWN reference voltages.
+ * FPMIHPC2 forms REF = RW1 - RW2/2 over the two words of each channel, keeps
+ * the top five bits (NHI R6,X'F800'), and compares with FIOCDATG's table:
+ *
+ *   * MASKS FOR MDM A/D BITE RM REFERENCE VOLTAGE COMPARISONS
+ *   * WHERE:  - 2 REF = 1100 1XXX XXXX XXXX / + 2 REF = 0011 0XXX XXXX XXXX
+ *   FIOREFVT EQU *-1 / DC X'C800' MINUS 2 VOLT / DC X'3000' PLUS 2 VOLT
+ *
+ * THE ENCODING.  No scaling is documented in the flight software, but the
+ * hardware manual gives the range and that is enough to pin it down.  JSC-
+ * 12770 Vol. 5 (Shuttle Flight Operations Manual, Data Processing System,
+ * 1978-11, pdf p.32) on the MDM: the "analog input module conditions +5.11
+ * Vdc to -5.12 Vdc analog inputs ... for digital conversion by A/D", and the
+ * analog OUTPUT module "converts 10-bit digital commands into +5.11 Vdc to
+ * -5.12 Vdc analog outputs".
+ *
+ * +5.11 against -5.12 is the signature of a TWO'S COMPLEMENT field: one more
+ * step below zero than above it.  Full scale is 5.12 V, and the reading is
+ * LEFT-JUSTIFIED in the halfword, so a voltage is a signed fraction of full
+ * scale:
+ *
+ *     2.00 / 5.12 = 0.390625;  0.390625 x 32768 = 12800 = 0x3200
+ *                              and its negation        = 0xCE00
+ *
+ * and the five bits the comparison keeps are 00110 and 11001 -- FIOREFVT's
+ * two masks, exactly.  Right-justifying instead gives 00000 for +2 V, so
+ * left-justified it is.
+ *
+ * WHAT THIS DOES *NOT* ESTABLISH, and must not be read as establishing: the
+ * A/D's RESOLUTION.  JSC-12770 gives a bit count for the analog OUTPUT module
+ * only, and A/D and D/A were different technologies at the time with
+ * different achievable resolutions -- there is no reason to assume the
+ * converter matched the 10 bits of the D/A, even if encoding both the same
+ * way would have been sensible.  It does not matter here: a left-justified
+ * reading has the same high bits whatever its resolution, resolution changes
+ * only what lies below, and everything below the top five bits is discarded
+ * before the comparison.  So the values this model returns are right for an
+ * A/D of any width.
+ *
+ * (The masks are also one's complements of each other, which is a real
+ * coincidence rather than the format: 11001 is 824 >> 5, truncating toward
+ * zero, where a five-bit negation of 00110 would give 11010.)
+ *
+ * So `NHI X'F800'` is not a tolerance; it keeps the top five bits of a
+ * ten-bit reading and discards the rest, and the comparison is exact on
+ * those five -- a window of 32 counts, 0.32 V, about the nominal.
+ *
+ * WHICH IS WHY ZEROS WERE FATAL.  Zero is not neutral filler on these four
+ * words -- it is a reading, and it says the reference sits at 0 V, which for
+ * a +-2 V reference is a dead converter.  That is what this model told PASS
+ * about every forward and aft MDM, and PASS did what it is built to do:
+ * counted card failures and, at two per card, stored stopping instructions
+ * into the MFE and HFE bus programs to comfault that unit's PROM reads
+ * (FPMIHPC2, `ZH@# 0(R7,R2)  STORE ZERO INSTR IN BCE PROGRAM`).  Measured:
+ * 115,128 such stores in one five-computer run.
+ *
+ * The first word of each channel is therefore the NOMINAL reading for its
+ * reference -- +-2.00 V as a left-justified signed fraction -- and the second
+ * a zero offset,
+ * so REF reduces to the reading itself.  (The second word cannot be another
+ * reading of the same reference: two conversions of +2 V would give
+ * REF = 0x3200 - 0x1900 = 0x1900, top five bits 00011, which fails.)  Both
+ * bus programs arm exactly four words for this
+ * (FIOHFEPG "#MIN 0,3 ... 2 WDS FROM CH 12, 2 WDS FROM CH 13", FIOMFEPG
+ * "CHANS 15 & 16, READ 4 RESPONSE WORDS"), so four is the length. */
+#define FF_BITE_WORDS 4
+static const uint16_t FF_BITE_REPLY[FF_BITE_WORDS] = {
+    0x3200u, 0x0000u,     /* channel A: +2.00 V of 5.12 V full scale, no offset */
+    0xCE00u, 0x0000u,     /* channel B: -2.00 V of 5.12 V full scale, no offset */
+};
+
 /* AND THE MDM'S OWN READS.  With the NSP answered, YAGPC_FC_LEARN's list of
  * unanswered transfers on the flight-critical buses fell from about 437 in a
  * run to 66, and what remained was the MDMs themselves at IUA 10 and 12: a
@@ -131,6 +213,105 @@
  * programs' #MIN and #RDLI arm, harvested with YAGPC_FC_LEARN and not
  * guessed -- the command's own count field is not the reply length,
  * FIOMTURD's is 38 and its #MIN arms seven. */
+/* The BITE 4 commands, by the names BCEEQU gives them; the bus program
+ * prepends the interface unit address (FIOFFIUA 10, FIOFAIUA 12):
+ *     FIOBFC01 X'0001C581'   FIOBFC14 X'0001F981'   (forward)
+ *     FIOBAC06 X'0001D9E1'   FIOBAC14 X'0001F9E1'   (aft)
+ * A four-word read of either unit is this test whatever a build calls it;
+ * the names carry the ones that can be proved. */
+static bool ff_bite4_named(uint32_t cmd) {
+    static const uint32_t NAMED[] = {
+        (10u << 19) | 0x1C581u, (10u << 19) | 0x1F981u,
+        (12u << 19) | 0x1D9E1u, (12u << 19) | 0x1F9E1u,
+    };
+    for (size_t i = 0; i < sizeof NAMED / sizeof NAMED[0]; i++)
+        if (NAMED[i] == (cmd & 0xffffffu)) return true;
+    return false;
+}
+
+/* What the bus programs call this command, and how long they arm for it.
+ * NULL/-1 when the survey has never seen it. */
+static const char *fc_sym(uint32_t cmd, int *words) {
+    cmd &= 0xffffffu;
+    for (size_t i = 0; i < sizeof FC_BUS_READS / sizeof FC_BUS_READS[0]; i++)
+        if (FC_BUS_READS[i].cmd == cmd) {
+            if (words) *words = FC_BUS_READS[i].words;
+            return FC_BUS_READS[i].sym;
+        }
+    for (size_t i = 0; i < sizeof FC_BUS_COMMANDS / sizeof FC_BUS_COMMANDS[0]; i++)
+        if (FC_BUS_COMMANDS[i].cmd == cmd) {
+            if (words) *words = 0;      /* a command, not a read */
+            return FC_BUS_COMMANDS[i].sym;
+        }
+    if (words) *words = -1;
+    return NULL;
+}
+
+/* YAGPC_FC_CHECK: where the length the commander armed for differs from the
+ * one the flight source arms in its bus program.  They should agree, and a
+ * disagreement means either that this build's equates differ from the surveyed
+ * tree or that the run-time count is being read at the wrong moment -- both
+ * worth knowing and neither visible any other way. */
+static void fc_check(uint32_t cmd, int armed) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_CHECK") != NULL; }
+    if (!on || armed < 0) return;
+    int want = -1;
+    const char *sym = fc_sym(cmd, &want);
+    if (sym == NULL || want < 0 || want == armed) return;
+    static long said = 0;
+    if (said++ < 40)
+        fprintf(stderr, "mtu: FCCHECK cmd=%06x %-9s armed %d, bus program arms %d\n",
+                (unsigned)(cmd & 0xffffffu), sym, armed, want);
+}
+
+/* WHICH READS THIS VEHICLE CAN HONESTLY ANSWER, by the names the bus programs
+ * give them (fc-bus-survey.py).
+ *
+ * The old rule was "anything addressed to IUA 10 or 12", which answered for
+ * every box reached THROUGH the forward and aft MDMs as well as for the MDMs
+ * themselves -- the inertial measurement units, the GPS receiver, the payload
+ * signal processor.  Answering those with zeros says "the box is there and
+ * reading zero", which is the same lie as telling PASS an A/D converter's
+ * reference sits at 0 V, and that lie cost this project a day.  A read we
+ * cannot speak for is better left unanswered: every computer then fails it
+ * together, which commfaults the string -- a universal condition the flight
+ * software is built for -- instead of some computers succeeding and others
+ * not, which is what breaks a redundant set.
+ *
+ * So:
+ *   FIOMTURD            the timing unit itself, answered with the time.
+ *   FIOBFC01/14,        the MDM's own A/D BITE 4 reference voltages, which
+ *   FIOBAC06/14         must not be zero -- see FF_BITE_REPLY.
+ *   FIOMDMRT            the MDM's return word: protocol, one word.
+ *   FIOHI1Cn, FIOFFICn, the MDMs' own channel reads.  Zero here is TRUE: it
+ *   FIOFAICn, FIOINP0n  is what a channel with nothing wired to it reads, and
+ *                       this vehicle has nothing wired to them.
+ *   FIONSP1P/2P/DR/RD   the network signal processor, which this vehicle does
+ *                       not have and which reports itself unpowered -- a
+ *                       state the flight software is built to handle.
+ *
+ * Everything else at those addresses is a box we do not model, and is left to
+ * time out exactly as it did before any of this. */
+static bool fc_ours(const char *sym) {
+    static const char *const EXACT[] = {
+        "FIOMTURD", "FIOMDMRT",
+        "FIOBFC01", "FIOBFC14", "FIOBAC06", "FIOBAC14",
+        "FIONSP1P", "FIONSP2P", "FIONSPDR", "FIONSPRD",
+    };
+    static const char *const PREFIX[] = { "FIOHI1C", "FIOFFIC", "FIOFAIC", "FIOINP" };
+    for (size_t i = 0; i < sizeof EXACT / sizeof EXACT[0]; i++)
+        if (strcmp(sym, EXACT[i]) == 0) return true;
+    for (size_t i = 0; i < sizeof PREFIX / sizeof PREFIX[0]; i++)
+        if (strncmp(sym, PREFIX[i], strlen(PREFIX[i])) == 0) return true;
+    return false;
+}
+
+static bool ff_is_bite4(uint32_t cmd, int words) {
+    (void)words;
+    return ff_bite4_named(cmd);
+}
+
 static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
     { 0x5082c5u, 21 },   /* FF MDM (IUA 10) channel read */
     { 0x508543u,  4 },   /* FF MDM (IUA 10) channel read */
@@ -162,16 +343,19 @@ static bool ff_mdm_off(void) {
     return off != 0;
 }
 
-static int ff_nsp_words(uint32_t cmd) {
+static int ff_nsp_words(uint32_t cmd, int m_armed) {
     if (ff_mdm_off()) return 0;
     for (size_t i = 0; i < sizeof FF_MDM_READS / sizeof FF_MDM_READS[0]; i++)
         if (FF_MDM_READS[i].cmd == (cmd & 0xffffffu))
             return FF_MDM_READS[i].words;
-    switch ((cmd >> 9) & 0x3ffu) {
-    case FF_NSP1_PWR:  case FF_NSP2_PWR:  case FF_NSP_DISCR: return 1;
-    case FF_NSP_DATA:  return 32;
-    default: break;
-    }
+    /* THE FUNCTION-CODE SWITCH THAT USED TO BE HERE IS GONE.  It matched on
+     * (cmd >> 9) & 0x3ff, which is coarser than a command: FIOGPSRD and
+     * FIONSPRD share a function code, so answering "the NSP's data read" by
+     * function also answered the GPS receiver -- a box this vehicle does not
+     * have -- with thirty-two words of zero.  Measured directly.  The survey
+     * names all four NSP reads (FIONSP1P, FIONSP2P, FIONSPDR, FIONSPRD) and
+     * gives each its own length, so the coarse test has nothing left to do
+     * and one thing it got wrong. */
     /* ANYTHING ELSE ADDRESSED TO ONE OF THESE TWO UNITS.  Naming commands one
      * at a time does not converge: answering a batch lets the chains run
      * further and reveals the next, and six became seventeen in one round --
@@ -188,11 +372,39 @@ static int ff_nsp_words(uint32_t cmd) {
      * The generous length is safe because every read here is preceded by that
      * listen command, and a command for another IUA clears every reader's
      * pending count, so nothing is left over when the next receive arms. */
+    if (ff_bite4_named(cmd)) return FF_BITE_WORDS;
     {
         unsigned iua = CMD_IUA(cmd);
-        if (iua == MTU_IUA || iua == 12u) return FF_FA_GENERIC;
+        if (iua != MTU_IUA && iua != 12u) return 0;
+        /* BY NAME.  A read the survey has never seen, or one that belongs to
+         * a box this vehicle does not have, is not ours to answer. */
+        int surveyed = -1;
+        const char *sym = fc_sym(cmd, &surveyed);
+        if (sym == NULL || surveyed == 0 || !fc_ours(sym)) return 0;
+        /* THE LENGTH THE COMMANDER ARMED FOR, not a guess.  This used to
+         * return sixty-four for anything unrecognised -- "generous", because
+         * the true length was believed unknowable here.  It is not: a bus
+         * program arms its receive before it issues the command, so the count
+         * is in the BCE (iop_bce_armed_words).  Answering exactly that means
+         * nothing is ever left over for the next transfer and nothing ever
+         * falls short.
+         *
+         * AND NO RECEIVE ARMED MEANS NO ANSWER.  A '#CMDI' that only sets a
+         * listener's IUAR is not a read, and neither is the deliberately-bad
+         * one PASS branches to in order to stop a BCE -- FIOHFEPG: "THE
+         * INSTRUCTIONS ARE LEGAL BUT WILL CAUSE AN INITIAL TIMEOUT I/O ERROR
+         * WHICH WILL STOP THE BCE".  Answering by IUA alone answered both and
+         * so defeated the flight software's own isolation. */
+        fc_check(cmd, m_armed);
+        /* THE LENGTH THE COMMANDER ARMED FOR, with the bus program's own as
+         * the fallback for the moment a listener asks before any commander on
+         * this machine has.  No receive armed and nothing surveyed means this
+         * is not a read at all -- a '#CMDI' that only sets a listener's IUAR,
+         * or the deliberately-bad one PASS uses to stop a BCE. */
+        int n = (m_armed >= 0) ? m_armed : surveyed;
+        if (n <= 0) return 0;
+        return (n > FF_REPLY_MAX) ? FF_REPLY_MAX : n;
     }
-    return 0;
 }
 
 /* EVERY COMPUTER ON A BUS HEARS THE REPLY; NONE OF THEM USES IT UP.
@@ -229,18 +441,49 @@ struct MtuModel {
     const double *clockUs;
     const double *epochSec;      /* see mtumodel_set_epoch; NULL = elapsed only */
     const double *offsetUs;      /* see mtumodel_set_clock_offset */
+    /* The vehicle's shared clock as of this call, or negative when there is
+     * none -- see mtumodel_set_shared_us.  ONE oscillator for all three
+     * accumulators; the calling computer's own clock is not one. */
+    double sharedUs;
+    /* And the time base latched the first time this unit is read, so that the
+     * per-computer HALT offset of whoever happened to ask first does not make
+     * accumulator 1 and accumulator 2 disagree by it ever after. */
+    double baseUs;
+    bool haveBase;
+    /* Words the commanding BCE armed for, -1 for none; see
+     * mtumodel_set_armed_words.  A generic reply is exactly this long, so
+     * nothing is left over and nothing falls short. */
+    int armedWords;
     uint16_t reply[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
     int head[MTU_NBUS][MTU_READERS], count[MTU_NBUS][MTU_READERS];
     int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
+    /* THE FOUR BITE WORDS THAT ARE NOT ZERO, kept apart from `reply` for the
+     * same reason `mdm` is: the timing unit's words and an MDM's share these
+     * buses, and writing one into the other's buffer is what made a commander
+     * and a listener disagree about the clock. */
+    uint16_t bite[MTU_NBUS][MTU_READERS][FF_BITE_WORDS];
+    int biteLeft[MTU_NBUS][MTU_READERS];
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
+    /* WHEN THIS TRANSACTION WENT ON THE WIRE, on the VEHICLE'S shared clock --
+     * see GPC_SVC_RECV_POLL.  Negative when there is no shared clock, where it
+     * does not matter because there is nobody to agree with. */
+    double wireUs[MTU_NBUS];
     int commander[MTU_NBUS];
     int lastBus;                 /* the bus last filled, for the report */
-    long commands, reads, wordsOut, listenerWords, nspReads;
+    long commands, reads, wordsOut, listenerWords, nspReads, biteReads;
 };
 
 struct MtuModel *mtumodel_create(void) {
     struct MtuModel *m = (struct MtuModel *)calloc(1, sizeof *m);
+    if (m != NULL) m->armedWords = -1;
+    /* NEGATIVE MEANS "NO SHARED CLOCK", and calloc gives zero -- which is a
+     * perfectly good shared time meaning "the start of the run", so a unit
+     * nobody had told about the vehicle would report that time for ever. */
+    if (m != NULL) {
+        m->sharedUs = -1.0;
+        for (int b = 0; b < MTU_NBUS; b++) m->wireUs[b] = -1.0;
+    }
     return m;
 }
 
@@ -256,6 +499,14 @@ void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec) {
 
 void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs) {
     if (m) m->offsetUs = offsetUs;
+}
+
+void mtumodel_set_shared_us(struct MtuModel *m, double sharedUs) {
+    if (m) m->sharedUs = sharedUs;
+}
+
+void mtumodel_set_armed_words(struct MtuModel *m, int words) {
+    if (m) m->armedWords = words;
 }
 
 bool mtumodel_owns_bus(int busID) {
@@ -275,8 +526,73 @@ static unsigned bcd_pack(unsigned value, unsigned tensBits, unsigned onesBits,
     return out;
 }
 
+/* YAGPC_MTU_SKEW=<seconds>: report a time deliberately WRONG by that much.
+ *
+ * It answers a question the display cannot: whether PASS is really taking the
+ * unit's reading into MTU ACCUM 1-3, or merely back-filling those fields from
+ * the GPC's own clock.  On a healthy vehicle the accumulators and GPC time
+ * agree to the millisecond, which is what you would see EITHER way -- so skew
+ * the unit by a few seconds and look again.  Accumulators that move with the
+ * skew are reading the unit; accumulators that stay with GPC time never were.
+ *
+ * Diagnostic only.  It makes the vehicle's clock wrong on purpose. */
+static double mtu_skew_us(const struct MtuModel *m) {
+    static int inited = 0;
+    static double skew = 0.0, after = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_MTU_SKEW");
+        if (e != NULL) skew = atof(e) * 1.0e6;
+        /* YAGPC_MTU_SKEW_AT=<seconds>: hold the skew off until then.
+         *
+         * WHY IT IS NEEDED.  PASS sets its OWN clock from this unit at
+         * start-up -- AIBGPCLO reads it twice and calls TIME_MGT(INIT_CLK) --
+         * so a skew applied from the beginning moves the GPC's clock along
+         * with the accumulators and the two still agree.  Measured: a +1 h
+         * skew put BOTH at 02:02, proving the unit is read and believed at
+         * initialisation, and proving nothing about where the accumulator
+         * fields come from afterwards.  Skewing only AFTER the clock is set
+         * separates them: accumulators that jump are read from the unit,
+         * accumulators that stay with GPC time are filled from the GPC. */
+        const char *a = yagpc_getenv("YAGPC_MTU_SKEW_AT");
+        if (a != NULL) after = atof(a) * 1.0e6;
+    }
+    if (skew == 0.0) return 0.0;
+    double now = (m != NULL && m->sharedUs >= 0.0)
+                 ? m->sharedUs : (m && m->clockUs ? *m->clockUs : 0.0);
+    return (now >= after) ? skew : 0.0;
+}
+
 static void mtu_fill_time(struct MtuModel *m, int b) {
-    double us = m->clockUs ? *m->clockUs : 0.0;
+    /* THE UNIT'S OWN TIME, from the vehicle's shared clock where there is one
+     * -- see mtumodel_set_shared_us.  Falling back to the caller's clock is
+     * right for a single machine, where the two are the same thing. */
+    /* TWO QUANTITIES, NOT ONE.  'us' drives the mission accumulators and
+     * 'epochUs' the GMT the unit reports, and they are NOT the same: the
+     * halt offset is time the computer spent stopped, which belongs in the
+     * wall clock and not in an accumulator that counts only while running.
+     * Folding it into both -- which an earlier draft of this did -- moves
+     * every accumulator in the DEFAULT build, so the two are kept apart. */
+    double us, epochUs;
+    if (!ff_mdm_off() && m->sharedUs >= 0.0) {
+        if (!m->haveBase) {
+            /* Latch the offset ONCE.  It exists so the unit's time of day
+             * includes the time a computer spent held in HALT, which the unit
+             * itself ran through -- but each computer has its own, and taking
+             * the caller's every time would give each accumulator a different
+             * one.  A box has one time base. */
+            m->baseUs = (m->offsetUs != NULL) ? *m->offsetUs : 0.0;
+            m->haveBase = true;
+        }
+        us = m->sharedUs + m->baseUs;
+        epochUs = us;
+    } else {
+        us = m->clockUs ? *m->clockUs : 0.0;
+        epochUs = us + ((m->offsetUs != NULL) ? *m->offsetUs : 0.0);
+    }
+    double skewUs = mtu_skew_us(m);  /* diagnostic; see mtu_skew_us */
+    us += skewUs;
+    epochUs += skewUs;
     if (us < 0.0) us = 0.0;
     unsigned ms, sec, min, hr, days;
     if (m->epochSec != NULL && *m->epochSec > 0.0) {
@@ -295,8 +611,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         /* Plus the time the computer spent not running -- held in HALT
          * while the crew set up the IPL, most of all.  Without it PASS's
          * GMT ran behind the real time of day by exactly that long. */
-        double t = *m->epochSec +
-                   (us + (m->offsetUs != NULL ? *m->offsetUs : 0.0)) / 1e6;
+        double t = *m->epochSec + epochUs / 1e6;
         time_t whole = (time_t)floor(t);
         struct tm lt;
         gmtime_r(&whole, &lt);
@@ -360,6 +675,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         m->head[b][r] = 0;
         m->count[b][r] = MTU_WORDS;
         m->mdm[b][r] = 0;            /* this transaction is the unit's own */
+        m->biteLeft[b][r] = 0;
     }
     m->lastBus = b;
     m->reads++;
@@ -367,7 +683,11 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
 
 void mtumodel_service(void *ctx, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out) {
-    mtumodel_service_as((struct MtuModel *)ctx, 0, svc, in, out);
+    /* An unnamed caller is a single machine, which has no shared clock and
+     * whose own clock is the vehicle's. */
+    struct MtuModel *m = (struct MtuModel *)ctx;
+    if (m != NULL) m->sharedUs = -1.0;
+    mtumodel_service_as(m, 0, svc, in, out);
 }
 
 void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
@@ -409,6 +729,16 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                         in->busID, (unsigned)cmd, (unsigned)CMD_IUA(cmd),
                         (unsigned)((cmd >> 9) & 0x3ffu), (unsigned)((cmd & 0x1ffu) + 1u));
         }
+        /* WHETHER EACH READER IS STILL DRAINING, ASKED BEFORE THIS COMMAND'S
+         * REPLY IS BUILT.  The test below used to be made afterwards, and
+         * building the timing unit's reply sets every reader's count to seven
+         * -- so the condition was false for every listener on every MTU read
+         * and NO listener was ever echoed one.  A Listen-Mode BCE discards
+         * every word until it sees a command sync bearing its own IUA and
+         * waits for it indefinitely (iop.c, BCE PoO 4.1), so every listener
+         * threw the time away and waited for a command that never came, while
+         * the commander read the unit perfectly.  Verified by direct call:
+         * GPC2 and GPC3 took seven words and ZERO command syncs. */
         if (CMD_IUA(cmd) != MTU_IUA || CMD_FIELD(cmd) != MTU_READ_CMD) {
             /* A command for ANOTHER device on this bus -- the flight-critical
              * buses carry several, and only this one is modelled; a command
@@ -421,7 +751,8 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * a cursor per computer, not necessarily the same seven for each
              * (ledger #137). */
             unsigned cu = CMD_IUA(cmd);
-            int nsp = (cu == MTU_IUA || cu == 12u) ? ff_nsp_words(cmd) : 0;
+            int nsp = (cu == MTU_IUA || cu == 12u)
+                          ? ff_nsp_words(cmd, m->armedWords) : 0;
             /* THE MDM'S ANSWER LIVES APART FROM THE TIMING UNIT'S REPLY.  It
              * used to be written into `reply`, so an MDM read on one of these
              * buses memset the time words the unit had just put there -- and
@@ -433,11 +764,21 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * answer is all zeros, so it needs a COUNT and no buffer.  The
              * unit's words are still DROPPED for a command that is not its
              * own, as they always were (ledger #137), but never overwritten. */
+            bool bite = (nsp > 0 && ff_is_bite4(cmd, nsp));
             for (int r = 0; r < MTU_READERS; r++) {
                 m->count[b][r] = 0;
+                m->biteLeft[b][r] = 0;
                 m->mdm[b][r] = nsp;
+                if (bite) {
+                    /* The converter's own reference readings lead the reply;
+                     * see FF_BITE_REPLY for why they may not be zero. */
+                    memcpy(m->bite[b][r], FF_BITE_REPLY, sizeof FF_BITE_REPLY);
+                    m->biteLeft[b][r] = FF_BITE_WORDS;
+                    m->mdm[b][r] = (nsp > FF_BITE_WORDS) ? nsp - FF_BITE_WORDS : 0;
+                }
             }
             if (nsp > 0) m->nspReads++;
+            if (bite) m->biteReads++;
         } else {
             mtu_fill_time(m, b);
         }
@@ -455,6 +796,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
          * it is, which is the single-machine case. */
         m->commander[b] = g;
         m->echoCmd[b] = cmd;
+        m->wireUs[b] = m->sharedUs;      /* this transaction's place in time */
         for (int r = 0; r < MTU_READERS; r++)
             /* NOT TO A READER THAT IS STILL TAKING THE LAST REPLY.  A
              * command-sync word arriving in the middle of a receive is Table
@@ -469,8 +811,37 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * and the set broke.  A listener that is behind keeps its data and
              * simply does not see this command, which is what a real one
              * would do: it is still receiving. */
-            m->echoPending[b][r] = (g >= 1 && r >= 1 && r != g &&
-                                    m->count[b][r] == 0);
+            /* CLEAR ALWAYS, ECHO ALWAYS -- bcenet_framer.c's rule on every
+             * network bus, and the only listener delivery in this tree that
+             * demonstrably works across several computers:
+             *     ob->recvHead = ob->recvCount = 0;        (clear what they had)
+             *     queue_push(ob, busID, &marked, 1, true); (then the command)
+             * A new command ends the last transaction on the wire, so whatever
+             * a listener had not taken is gone and it begins this one at the
+             * command word -- with NO test of whether it was busy.
+             *
+             * Five designs here made that test conditional and all five
+             * failed, two ways that are really one: withholding the echo from
+             * a reader that still held words LATCHED it -- a Listen-Mode BCE
+             * stores nothing until it sees a command sync bearing its own IUA,
+             * so it could never drain, so it was draining for ever (proved: 0
+             * echoes in ten reads against 10 with this rule) -- and not
+             * clearing, to protect a part-taken transfer, buried it in a queue
+             * to wade through (158,169 runaway BCE lines).  A listener that
+             * loses the tail of one transfer loses one; a latched one loses
+             * all of them. */
+            /* WITH THE ANSWERING OFF, EXACTLY AS BEFORE.  Everything in this
+             * model beyond the timing unit's own reply is part of the MDM
+             * answering, which is experimental and off by default -- and the
+             * default configuration is one the owner has validated clean over
+             * an hour.  Measured 2026-09-25: leaving the new echo rule, the
+             * wire pacing and the shared clock active with the answering OFF
+             * cost that configuration four fail votes at t=1914 where it had
+             * none.  A correctness fix that perturbs a validated build is
+             * still a regression, so it travels with the switch. */
+            m->echoPending[b][r] = ff_mdm_off()
+                ? (g >= 1 && r >= 1 && r != g && m->count[b][r] == 0)
+                : (g >= 1 && r >= 1 && r != g);
         out->out.xmit.ok = true;
         break;
     }
@@ -478,8 +849,37 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
-        out->out.poll.available = m->echoPending[b][g] ||
-                                  (m->count[b][g] > 0) || (m->mdm[b][g] > 0);
+        /* A WORD IS NOT AVAILABLE UNTIL IT HAS HAD TIME TO GET HERE, measured
+         * on the vehicle's shared clock.
+         *
+         * THIS IS WHAT MAKES ANSWERING SAFE AT ALL.  A read nobody answers
+         * takes the SAME time on every computer -- its message time-out, a
+         * fixed number -- so an unanswered bus keeps a redundant set in step
+         * by accident.  An answered one used to complete whenever that
+         * particular computer's BCE next polled, a different moment on each of
+         * them, and I/O completion is one of the three points the set
+         * synchronises on (FCMISYNC).  SIX ways of DELIVERING the words were
+         * tried and all six lost the set, because the fault was never the
+         * route: answering at all made the DURATION of a transfer depend on
+         * the observer.
+         *
+         * So the unit puts its words on the wire at a wire rate from the
+         * moment the command was issued, and every computer sees a given word
+         * become available at the same simulated instant however often it
+         * happens to look.  mmumodel.c has paced its listeners this way from
+         * the start (tap_push's `due`); this model never did. */
+        {
+            bool ready = true;
+            if (!ff_mdm_off() && m->wireUs[b] >= 0.0 && m->sharedUs >= 0.0) {
+                int k = m->echoPending[b][g] ? 0 : (m->head[b][g] + 1);
+                ready = (m->sharedUs >= m->wireUs[b] + (double)k * MTU_BUS_WORD_US);
+            }
+            out->out.poll.available = ready &&
+                                      (m->echoPending[b][g] ||
+                                       (m->count[b][g] > 0) ||
+                                       (m->biteLeft[b][g] > 0) ||
+                                       (m->mdm[b][g] > 0));
+        }
         break;
     case GPC_SVC_RECV_WORD:
         if (m->echoPending[b][g]) {
@@ -492,6 +892,11 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             m->count[b][g]--;
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
+        } else if (m->biteLeft[b][g] > 0) {
+            int idx = FF_BITE_WORDS - m->biteLeft[b][g];
+            m->biteLeft[b][g]--;
+            out->out.recv.available = true;
+            out->out.recv.word = m->bite[b][g][idx];
         } else if (m->mdm[b][g] > 0) {
             m->mdm[b][g]--;                 /* a box with nothing wired to it */
             out->out.recv.available = true;
@@ -516,6 +921,10 @@ void mtumodel_report(struct MtuModel *m) {
     if (m->nspReads > 0)
         fprintf(stderr, "mtu: %ld NSP read(s) answered by the forward MDM "
                         "(the NSP is not powered in this vehicle)\n", m->nspReads);
+    if (m->biteReads > 0)
+        fprintf(stderr, "mtu: %ld MDM A/D BITE 4 read(s) answered with the "
+                        "reference voltages (+2.00 V 3200, -2.00 V ce00)\n",
+                m->biteReads);
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);

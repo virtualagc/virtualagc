@@ -56,6 +56,26 @@ void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec);
  * Set per call, like the clock.  NULL = none. */
 void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs);
 
+/* THE VEHICLE'S SHARED CLOCK, in simulated microseconds, or negative when
+ * there is none (a single machine, or one held in reset with no place in the
+ * group's frame).  run.c's router_shared_us.
+ *
+ * WHY THE UNIT NEEDS IT.  A real timing unit has ONE oscillator, and its
+ * three accumulators are three taps off it.  This model was given whichever
+ * COMPUTER happened to be calling -- mtumodel_set_clock(br->mtu, br->clockUs)
+ * -- so accumulator 1, read by GPC1 on bus 20, came from GPC1's clock while
+ * accumulator 2, read by GPC2 on bus 21, came from GPC2's.  FPMMTURM then
+ * compares the three, which is a comparison of three computers' clocks
+ * wearing a timing unit's name.  The mass memory model has been given the
+ * shared clock from the start (mmumodel_service_as takes it as an argument);
+ * this one never was. */
+void mtumodel_set_shared_us(struct MtuModel *m, double sharedUs);
+
+/* How many words the commanding BCE has armed a receive for, or -1 for none
+ * -- run.c gets it from iop_bce_armed_words, which explains why.  Set per
+ * call, like the clock. */
+void mtumodel_set_armed_words(struct MtuModel *m, int words);
+
 /* True for the buses this unit answers on (20, 21, 22). */
 bool mtumodel_owns_bus(int busID);
 
