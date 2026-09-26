@@ -293,7 +293,31 @@ static void fc_check(uint32_t cmd, int armed) {
  *
  * Everything else at those addresses is a box we do not model, and is left to
  * time out exactly as it did before any of this. */
+/* YAGPC_FC_SENSORS: answer EVERY surveyed read at these two units, including
+ * the ones fc_ours() declines because they are sensors rather than interface
+ * state.  AN EXPERIMENT, off by default and separate from YAGPC_FC_MDM.
+ *
+ * WHY IT IS WORTH TRYING NOW AND WAS NOT BEFORE.  Ledger #210 records that
+ * answering channel data cost the redundant set every time, and concluded a
+ * model may report an unpowered box but may not invent sensor readings.  That
+ * was measured when the answering was ASYMMETRIC: each computer held errors
+ * its peers did not, FIOGPCWE was 1, and FIOERRLC self-failed it.  With the
+ * pacing index fixed the errors that remain are UNIVERSAL -- GPC2, GPC3 and
+ * GPC4 error at the same vehicle instant -- which is the commfault path, and
+ * the set holds.  Every computer is handed the same words by the same model
+ * at the same paced instant, so the divergence that argument rests on has to
+ * be demonstrated again rather than assumed.
+ *
+ * It still never answers FIOHIBAD: that is in the no-receive table, so its
+ * surveyed length is 0 and the caller declines it before reaching here. */
+static bool ff_sensors(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_SENSORS") != NULL; }
+    return on != 0;
+}
+
 static bool fc_ours(const char *sym) {
+    if (ff_sensors()) return true;
     static const char *const EXACT[] = {
         "FIOMTURD", "FIOMDMRT",
         "FIOBFC01", "FIOBFC14", "FIOBAC06", "FIOBAC14",
