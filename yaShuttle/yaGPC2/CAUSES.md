@@ -667,10 +667,445 @@ the clobbering was A cause and not THE cause.
   STATUS: BACK TO OPEN, DEFAULT OFF.  The two-computer result stands -- six
 bypasses to none, the unit read for the whole run -- but it cannot be shipped
 until a five-computer acid test holds its set with it on.
-  - procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1` &middot; files `src/mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing` &middot; doc `SPEC 2 PRO, the TIME display; CZ1V_MM_ADDR_TBL is unrelated`
+
+THE LISTENERS WERE NEVER ECHOED THE READ, AND THAT IS WHY THE ANSWERING BROKE
+THE VEHICLE.  mtumodel.c decided whether to echo the commander's command to a
+listening computer with `count == 0` -- "this reader has nothing pending" --
+and evaluated it AFTER the reply had been built.  Building the timing unit's
+reply sets EVERY reader's count to seven, so the test was false for every
+listener on every MTU read and no listener was ever echoed one.  A Listen-Mode
+BCE discards every word it is handed until it sees one bearing command sync and
+its own IUA, and waits for that word INDEFINITELY -- no time-out runs until it
+arrives (iop.c bce_take_words; BCE Principles of Operation 4.1).  So each
+listener threw the whole transfer away and stayed armed for ever, while the
+commander read the unit perfectly.  Measured by direct call to the model, not
+inferred from a run: GPC2 and GPC3 took 7 words and ZERO command syncs; with
+the fix, 8 words and one sync each.
+
+THE SHAPE FITS THE COLLAPSE.  The more the unit is read, the more listeners are
+stranded -- so the change that made it readable at all is what broke a
+five-computer vehicle, and the arm with the answering OFF held its set only
+because the unit was bypassed early and never read.  In a five-computer vehicle
+GPC1 commands bus 20 and is stranded on 21 and 22, GPC2 the reverse, GPC4 and
+GPC5 on all three: errors NOT shared by every member, which is what FIOERRLC
+self-fails a computer for ("IF (CHI,R6,EQ,1) ... CALL FCMSFAIL") rather than
+commfaulting a string -- and the acid test's signature was every member lighting
+its own diagonal CAM cell.
+
+TWO MORE DEFECTS IN THE SAME LINE.  `head` was reset with `count` for every
+reader on every command, so a listener that had taken three words of one reply
+finished its seven-word receive out of the NEXT one: three words of one
+transfer and four of another, a divergence the model manufactured.  And a
+reader that was passed over had its words replaced anyway while the command
+sync was withheld, which is the worst of both -- it held a reply it could never
+begin.  A reader that is still receiving is now passed over ENTIRELY (not
+echoed, not overwritten) and re-synchronised on the following command, so it
+can be one transfer behind and no more; the commander is never passed over,
+since it asked for the read it just issued.
+
+test/test_mtumodel.c holds all of it -- 13 checks, and it fails 5 of them
+against the model as it was, so it can actually fail.  It sets YAGPC_FC_MDM
+itself rather than depending on the environment it is run in.
+
+NOT YET MEASURED ON A VEHICLE.  The five-computer acid test with
+YAGPC_FC_MDM=1 is the test that decides whether the default can flip, and it
+is running as this is written.
+
+AND THE OTHER IN-PROCESS DEVICE MODELS DO NOT HAVE THIS BUG, checked rather
+than assumed: iccmodel.c broadcasts the marked command word unconditionally,
+and mmumodel.c pushes it onto a per-reader tap queue with a wire time.
+deumodel.c always echoes too (`echoPending[r] = (r != g)`), so no listener is
+stranded there -- but it keeps ONE reply buffer with a cursor per reader and
+zeroes every listener's count on each command, which is the same
+mixture-of-two-transfers hazard the timing unit had.  Untested and NOT changed:
+the display buses are not what is being measured here, and an unverified change
+to them would be exactly the kind that has cost runs before.
+
+THE FIVE-COMPUTER ACID TEST WITH THE ANSWERING ON STILL LOSES THE SET, AND IT
+LEFT A SHARPER TRACK THAN ANY RUN BEFORE IT.  Owner's run 2026-09-25, whole
+acid test, YAGPC_FC_MDM=1, with the listener-echo fix above in the binary.
+GPC4 is voted out first by ALL FIVE at t=840.5 (cam 14, 24, 34, 44, 54 within
+0.4 s); those votes clear at t=841.2-841.7; then GPC2 is voted against by 1, 3
+and 5 at t=842.0, and at t=843.4-843.7 GPC1, GPC3 and GPC5 each light their own
+diagonal cell.  MTU ACCUM 1-3 read 000/00:00:00.000 with a down arrow -- zeros
+present, where the earlier symptom was blank and 'M'.
+
+996 RUNAWAY BCE LINES, AND NO OTHER RUN IN THE TREE HAS ONE.  "BCE20: unknown
+instruction 0000 at 1d828" 489 times and "BCE22: unknown instruction 0000 at
+1d8b4" 507 times; checked against four earlier runs including the owner's
+hour-long control, all zero.  They begin at t~558 -- nearly FIVE MINUTES before
+the collapse -- so they are a precursor and not wreckage.  That path
+deliberately does not advance NIA, so the BCE is parked on the zero for good.
+Buses 20 and 22 and not 21: those are the two that carry the NSP as well as the
+timing unit (FIONSPPG, IUA 10, buses 20 and 22), and bus 21, which has the
+timing unit and no NSP, is clean.
+
+WHAT IS AT THOSE ADDRESSES, from a snapshot the owner took while the vehicle
+was still in the failed state, against the working 5gpc-3crt-subtitled.snapshot
+of the same configuration.  FIFTEEN chain halfwords across four tables have
+been zeroed, and NOT ONE of them is zero in the healthy vehicle:
+
+    1d828 / 1d86e / 1d8b4 / 1d8fa  (stride 0x46)  healthy f001 in all five
+    1da06 / 1da42 / 1da7e / 1daba  (stride 0x3c)  healthy f300 in all five
+    1d5ae / 1d608 / 1d674 / 1d6a4                 healthy c000 in 1-4, f001 in 5
+    1d6fa / 1d71e / 1d742
+
+THE PATTERN IS PER-COMMANDED-BUS: computer N has zeroed the element for the bus
+IT COMMANDS -- GPC1 1d828 (BCE20), GPC2 1d86e (BCE21), GPC3 1d8b4 (BCE22), GPC4
+1d8fa (BCE23) -- and the two runaway BCEs are exactly the two whose element is
+zeroed in a computer that reached it.  GPC3 has ALSO zeroed GPC1's elements at
+1d5ae and 1d828, buses it only listens on; GPC3 is the computer with both BCEs
+dead and it self-failed.
+
+AND IT IS A SINGLE 16-BIT STORE, NOT A BYPASS.  Only the HIGH halfword of a
+two-halfword instruction goes to zero: the operand after it (d82c, d8b8, 0035)
+is intact and every neighbouring word matches the healthy image exactly.
+FCMBCEMD's bypass writes c022 c000 / c000 c000 over BOTH halfwords -- which is
+visible in the healthy image at 1d5ae, where c000 is the by-design bypassed
+form -- so whatever did this is not that.  Nor is it timing-unit data, which is
+time words; zeros are what the MDM model answers with, which is what
+YAGPC_FC_MDM turns on.
+
+THE QUESTION IS NOW NARROW: who stores one zero halfword at 1d828?  Both write
+paths are already watched -- YAGPC_WATCHHW covers CPU stores (cpu.c, with gpc=
+and nia=) and IOP stores (iop.c iop_watch_store, a BCE receive running past its
+buffer or a DMA store).  The IOP line now carries gpc= and pc= as well, and the
+runaway-BCE message now names its computer; without those a five-computer run
+cannot say whether a halfword zeroed is a configuration or a defect.  NEXT
+MEASUREMENT: YAGPC_WATCHHW=1d828 (or 1d5ae-1daba for the lot) with
+YAGPC_FC_MDM=1 on a run reaching t~560, which is well before the OPS transition
+and so does not need the whole acid test.
+
+CORRECTION, AND THE INSTRUMENTATION DEFECT BEHIND IT.  The entry above says the
+runaway BCE lines "begin at t~558 -- nearly FIVE MINUTES before the collapse --
+so they are a precursor and not wreckage".  THAT IS NOT SUPPORTED AND MUST NOT
+BE USED.  The "unknown instruction" line carried no timestamp, and the run's
+log has no other stamped line below it, so t~558 was read off the line's
+POSITION in the file relative to the last stamped line ABOVE it.  All the log
+supports is "some time after t=558", which includes the whole OPS 1 phase where
+the collapse happens.  The message now carries t= and gpc= for exactly this
+reason; a line that cannot be set beside a vote is half a line.
+
+AND THE MEASUREMENT THAT WRONG NUMBER SENT AFTER THE WRONG WINDOW.  A
+five-computer run of the same script with YAGPC_WATCHHW=1d5ae-1daba and
+YAGPC_FC_MDM=1, stopped at 750 s because 558 was believed to be the moment,
+reproduced NOTHING: all fifteen chain halfwords intact in all five computers,
+zero votes, the timing unit read 1,833 times with real data (lastTime 9a13 3358
+13b8), no runaway BCE, no store of zero to any watched address.  It is not
+evidence either way, because it never entered the traffic in which this
+happens.  THE NUMBER THAT SHOWS IT, and the one to check before believing any
+future run of this kind reproduced the conditions: bus commands.  The owner's
+2400 s run has 2,525,277 of them and 983 words delivered to listening
+computers; the 750 s run has 29,216 and ZERO.  Three times the duration, EIGHTY-
+SIX times the commands -- the G1 ascent rate of roughly 940 a second against a
+near-idle pre-OPS vehicle.  A run of this configuration that has not passed OPS
+901 PRO has not tested anything here, whatever its wall-clock length, and `mtu:
+{"commands":...}` in the run log is how to tell in one line.
+
+ROOT CAUSE FOUND, AND IT WAS NEVER AN EMULATOR DEFECT IN THE BUS PROGRAMS.
+The zeroed chain halfwords are PASS DELIBERATELY ISOLATING MDMs WE TOLD IT WERE
+BROKEN.  FPMIHPC2 (PROGRAM COUNTER 2 / interval timer interrupt handler) says
+so in its own comment block:
+
+  * THE FOLLOWING PROCESSING PERFORMS RM ON THE BITE TEST 4 DATA READ FROM THE
+  * FC MDMS AS A PART OF THE HFE AND MFE BCE PROGRAMS. ... FAIL COUNTERS AND
+  * FLAGS ARE MAINTAINED FOR EACH MDM AND CARD AND ILLEGAL BCE INSTRUCTIONS ARE
+  * STORED INTO THE MFE AND HFE BCE PROGRAMS FOR AN MDM WHEN BOTH ITS CARD
+  * COUNTERS REACH TWO.  THIS WILL CAUSE THE INPUT PROM READS FOR THAT MDM TO
+  * BE COMFAULTED THUS ISOLATING POTENTIALLY BAD DATA...
+
+and does it with `ZH@# 0(R7,R2)   STORE ZERO INSTR IN BCE PROGRAM`.  FIOHFEPG
+is the HFE BCE program named in that comment, which is why 1d828/1d8b4 sit in
+it.  THE INSTRUCTION IS NOT MISIMPLEMENTED -- ZH is exec_ZH -> cpu_s_eah(...,0)
+-> cpu_g_ea, the same effective-address path STH and every other short-form
+memory instruction uses millions of times a run; the owner asked and it was
+checked.
+
+WHY PASS THOUGHT THE CONVERTERS WERE DEAD: our MDM model answered BITE test 4
+with ZEROS.  Those four words are not a channel reading -- they are the A/D
+converter measuring its OWN reference voltages, and zero is not "nothing
+wired", it is "this converter is dead".  FIOCDATG:
+
+  * MASKS FOR MDM A/D BITE RM REFERENCE VOLTAGE COMPARISONS
+  * WHERE:  - 2 REF = 1100 1XXX XXXX XXXX / + 2 REF = 0011 0XXX XXXX XXXX
+  FIOREFVT EQU *-1 / DC X'C800' MINUS 2 VOLT MASK / DC X'3000' PLUS 2 VOLT MASK
+
+and FPMIHPC2 forms REF = RW1 - RW2/2 keeping the top five bits (NHI R6,X'F800').
+Zero matches neither mask, so every card of every MDM failed on every pass.
+
+THE A/B, both arms 2400 s, same script, switch verified in the binary:
+  YAGPC_FC_MDM ON : 115,128 ZH stores of zero, 15,215 runaway BCE lines, 12
+                    votes, set lost ~4 s after OPS 901 PRO (owner's run and
+                    mine agree).
+  YAGPC_FC_MDM OFF:      0  ZH stores,      0 runaway lines,  0 votes.
+The control also clears the listener-echo fix of any regression on the DEFAULT
+build, which that fix changes (it is not gated by YAGPC_FC_MDM): zero votes
+with it in.
+
+TWO FIXES.  (1) mtumodel.c answers BITE 4 with readings the test accepts --
+0x4000,0x2000 (REF 0x3000, +2 V) and 0xD000,0x1000 (REF 0xC800, -2 V) -- keyed
+on the four names the flight source gives the command (FIOBFC01/FIOBFC14/
+FIOBAC06/FIOBAC14) or on any four-word read of IUA 10 or 12, and with its TRUE
+length of four rather than the 64-word catch-all.  (2) iop_bce_instr.c
+error-terminates with BST_I on an unrecognised opcode.  BST_I -- bit 29,
+"illegal opcode" -- has been defined in iop.h from the start and was NEVER
+RAISED; the BCE printed and did not advance NIA, so it re-executed the word for
+the rest of the run.  PASS plants such a word ON PURPOSE and FIOHFEPG states
+the intent: "THE INSTRUCTIONS ARE LEGAL BUT WILL CAUSE AN INITIAL TIMEOUT I/O
+ERROR WHICH WILL STOP THE BCE", which is how the PROM reads get comfaulted.  A
+BCE that hangs instead is neither working nor failed, which is the shape that
+costs a redundant set its synchronisation.
+
+test/test_mtumodel.c now checks the model against PASS'S OWN ARITHMETIC rather
+than against itself: it forms REF = RW1 - RW2/2 & 0xF800 and compares with
+FIOREFVT's constants, and checks a listener gets the same four readings as the
+commander -- two computers that disagree about whether an MDM is healthy is the
+same class of defect one step removed.
+
+THE MDM A/D BITE 4 ENCODING, and why zeros were fatal rather than merely
+wrong.  No volts-to-counts scaling is documented anywhere in the flight
+source; FIOCDATG gives only two constants.  They decode (owner, 2026-09-25):
+they are ONE'S COMPLEMENTS of each other in the five bits that survive
+`NHI R6,X'F800'` -- +2 V is 00110 = +6 and -2 V is 11001 = -6 -- so the
+converter is FIVE BITS, one's complement, quantum 1/3 V, range +-15 quanta =
++-5 V, with 00000 and 11111 both meaning zero.  TWO CONSEQUENCES: the mask is
+not a tolerance, it strips eleven bits that are not converter output, so the
+comparison is EXACT on five; and zero is a READING, saying the reference sits
+at 0 V, which for a +-2 V reference is a dead converter.  Which of a channel's
+two words is which is still unknown -- they are not two conversions of the
+same quantity (that would need 0x6000 for +2 V and would then give 0xD000,
+top five bits 11010 against the mask's 11001) -- so the model answers with the
+reference code the flight software names and a zero offset, and no number
+appears in it that is not in FIOCDATG.
+
+AND THE SEPARATION THE OWNER POINTED OUT, WHICH CORRECTS THIS ENTRY'S EARLIER
+REASONING.  A bad A/D reading CANNOT cost synchronisation: all four redundant-
+set members listen to the same MDM response on the same bus, fail the same
+card on the same pass, reach two counts together and comfault that MDM
+together.  That is a universal condition and PASS answers it with an isolated
+unit and a fault message, not a fail-to-sync.  So the zeros explain the
+ISOLATION -- the ZH storm, the stopping instructions, the BCEs running into
+them -- and never explained the COLLAPSE.  The collapse is the emulator
+delivering transfers ASYMMETRICALLY.  Consistent with the measurement that was
+noted and not followed up: the first vote came at t=820 with NO error
+termination in the window and the last one sixty seconds earlier.  A universal
+fault does not vote; an asymmetric one does.
+
+FOUR DELIVERY DESIGNS TRIED, NONE OF WHICH HOLDS THE SET WITH THE ANSWERING
+ON.  Full 2400 s acid tests, switch verified in the binary each time:
+  pass over a reader holding any words       12 votes
+  ... holding DATA rather than padding       12 votes
+  ... that has TAKEN some words              12 votes
+  a per-listener queue of whole transfers     5 votes, but 158,169 runaway BCE
+      lines and 158,310 error terminations -- far worse.  A Listen-Mode BCE
+      churns every command's sync word looking for its own IUA and
+      bce_take_words consumes those WITHOUT decrementing recvLeft, so handing
+      it every transfer on the bus buries it.
+  control, answering OFF                      0 votes
+DO NOT RETRY these four.  The fault is not in choosing whom to skip; every
+one-slot rule only changes WHICH transfers are lost, and the queue changes
+what the listener has to wade through.  The suspicion to test next is that our
+computers are not in lockstep finely enough for this: with the answering off
+every computer fails the same reads (universal -> string commfault ->
+survivable), and with it on, success or failure depends on per-computer
+polling timing.  See #163 on the simulated-time barrier.
+
+THE SYNC LOSS IS TRANSFER DURATION, NOT THE DATA AND NOT THE ROUTE.  A read
+NOBODY ANSWERS takes the same time on every computer -- its message time-out,
+a fixed number -- so an unanswered bus keeps a redundant set in step by
+accident.  An answered one completed whenever that particular computer's BCE
+next polled, which is a different moment on each of them, and I/O completion
+is one of the three points the set synchronises on (FCMISYNC).  So answering
+at all made a transfer's DURATION depend on the observer.
+
+That is why SEVEN delivery designs were needed to find it and why the first
+six were wasted: every one of them rearranged WHICH WORDS REACH WHOM, and the
+route was never the fault.  Refuted, do not retry (all lost the set on the
+full 2400 s five-computer acid test): pass over a reader holding any words;
+holding DATA rather than padding; that has TAKEN words; a per-listener queue
+of whole transfers (5 votes but 158,169 runaway BCE lines -- a Listen-Mode BCE
+wades through every command's sync looking for its own IUA and
+bce_take_words consumes those WITHOUT decrementing recvLeft); the framer's own
+clear-always/echo-always rule copied verbatim; and an unbounded zero supply
+(hangs the machine outright, same bce_take_words loop).
+
+THE FIX: the unit puts its words on the wire at a WIRE RATE -- 33 us a word,
+mmumodel.c's figure for the same wire -- timed from the command, on the
+VEHICLE'S SHARED CLOCK.  Every computer then sees a given word become
+available at the same simulated instant however often it happens to look, so
+an answered transfer is as deterministic as an unanswered one.  mmumodel.c has
+paced its listeners this way since it was written (tap_push's `due`); this
+model never did, and that asymmetry between two device models in one tree was
+in plain sight all day.
+
+TWO THINGS HAD TO BE TRUE FIRST, which is why this is the seventh attempt and
+not the first.  (1) The unit needed a shared clock AT ALL: it was taking its
+time from whichever computer was calling, so its three accumulators were three
+different GPCs' clocks and FPMMTURM's comparison of them was a comparison of
+computers.  (2) Reply lengths had to be EXACT: pacing a 64-word guess at 33 us
+occupies 2.1 ms on a bus carrying commands every millisecond, so wire pacing
+is impossible until the lengths are right.  See iop_bce_armed_words and
+fc-bus-survey.py.
+
+FIRST CLEAN RESULT, 2026-09-25: the full 2400 s five-computer acid test with
+YAGPC_FC_MDM=1 -- LAUNCH TRAJ reached, script complete, ZERO fail votes, zero
+runaway BCEs, timing unit read 2,142 times to the end, and SPEC 002 PRO
+brought up on CRT3 (GPC5, OPS 0) for the last third of the run.  Ten earlier
+runs with the answering on all collapsed, earliest t=805, latest t=1489.
+
+NOT YET ESTABLISHED, and none of it should be skipped: it is ONE run; the
+DEFAULT-configuration gate (answering off) has not been run on this build, and
+three of the fixes are active either way -- an earlier echo change regressed
+the default and the gate is what caught it; the error terminations REMAIN and
+are still asymmetric (2,035 of them, all 57 distinct reads failing on a subset
+of computers) and there are now MORE than in the failing runs, which is
+consistent with duration rather than errors being the mechanism but is not
+explained; and MTU ACCUM 1-3 have not been READ -- the display was reachable
+but its body needs NSTS_ANNOUNCE_ROWS=all, so "the times count with no down
+arrow" is still unverified.
+
+SEEN AT LAST, AND THE CONFIGURATION IS ON THE DISPLAY.  MTU ACCUM 1, 2 and 3
+read, as text, from a FIVE-computer vehicle in OPS 0 with YAGPC_FC_MDM=1
+(2026-09-25):
+
+    GPC TIME                                   GPC
+                        GMT             TRY   1 A1
+      MTU ACCUM 1 269/00:44:15.607      34    2 A1
+                2 269/00:44:15.607      35    3 A1
+                3 269/00:44:15.607      36    4 A1
+            GPC   269/00:44:15.607      37    5 A1
+
+All three counting, NO down arrow, agreeing with GPC time.  After the OPS 1
+transition the same page reads "MTU ACCUM 1 269/00:20:54.947(down) ... GPC
+269/00:22:46.307" -- frozen two minutes behind while GPC time runs.  THE
+RIGHT-HAND COLUMN IS THE MEMORY CONFIGURATION AND IT IS PRINTED ON THE PAGE:
+A1 when they work, G1 when they do not.  The oldest finding in this entry --
+"the determinant is the MEMORY CONFIGURATION, SSW against G1" -- is therefore
+visible on the display rather than inferred from counters, and it survived a
+day of work on mechanisms stacked on top of it.
+
+HOW TO READ THE ACCUMULATORS AT ALL, since it cost hours to work out: SPEC 2
+is available in several major modes but NOT in OPS 1 -- nor OPS 3, and
+probably not OPS 6 (owner, 2026-09-25; it is NOT "an OPS 0 display", which is
+how this was first written down here).  So in an ascent configuration it
+cannot be asked of the redundant set at all and must go to a computer that is
+not in OPS 1 -- GPC5, on CRT3 -- and 5gpc-3crt-
+subtitled.script lends the right-hand keyboard to CRT3 at t=546 and TAKES IT
+BACK at t=669, so the keys go to an ascent display and do nothing, silently.
+examples/mtu-time-check.script gives the keyboard back first.  The values are
+in the BODY of the page, so the run needs NSTS_ANNOUNCE_ROWS=all;
+screenwatch.py prints the frames.
+
+AND THE AGREEMENT IS NOT YET EVIDENCE OF ANYTHING, which is the owner's point
+and was already open in this entry ("whether the accumulators are genuinely
+accepted in OPS 0 or merely back-filled from the GPC's clock").  Accumulators
+that equal GPC time to the millisecond look identical whether PASS is reading
+the unit or filling those fields from its own clock.  The discriminator is
+YAGPC_MTU_SKEW=<seconds>, which makes the unit report a time deliberately
+wrong by a known amount: accumulators that move with the skew are reading the
+unit, accumulators that stay with GPC time never were.  MEASURING NOW.
+
+WHICH CONFIGURATIONS CARRY THE TIME DISPLAY AT ALL (owner, 2026-09-25): SSW,
+G9, P9, S2, S4 (if there were one), G2 and G8.  NOT G1, and not G3.
+
+THAT CHANGES WHERE TO LOOK, in two ways.
+(1) The frozen page seen after an ascent transition is NOT G1 showing frozen
+    accumulators -- G1 has no TIME display.  It is GPC5's page, and GPC5 stays
+    in SSW.  GPC5 commands no timing bus and only listens, so what it shows is
+    whatever the redundant set last read.  Frozen there means the SET stopped
+    reading, which is the same conclusion but arrived at properly.
+(2) G2 carries BOTH the MTU reading code (FIOPRMPG and friends are resident in
+    G2, G3, G8, G9, G16, P9, S2 and SSW) AND the display.  So OPS 2 is a
+    configuration where the accumulators can be watched directly, in the
+    redundant set itself, with no listener in the way -- and it is reached by
+    examples/2gpc-ops201.script in about fifteen minutes with TWO computers
+    instead of five.  If the accumulators run in G2 and not in G1, the
+    difference is between those two configurations and not between OPS 0 and
+    everything else; if they freeze in G2 as well, the ascent transition is a
+    red herring and the trigger is something the set does on leaving SSW.
+
+THE ACCUMULATORS ARE READ FROM THE UNIT, NOT BACK-FILLED -- SETTLED.  The open
+question in this entry ("whether the accumulators are genuinely accepted in
+OPS 0 or merely back-filled from the GPC's clock") is answered.  Method:
+YAGPC_MTU_SKEW=3600 with YAGPC_MTU_SKEW_AT=400, so the unit reports a time one
+hour wrong only AFTER PASS has set its own clock from it (AIBGPCLO reads it
+twice then TIME_MGT(INIT_CLK) -- a skew applied from the start moves BOTH and
+proves nothing, which is what the first attempt did).  Two GPCs in OPS 0,
+2gpc-ops0-gpccrt.script:
+
+    MTU ACCUM 1 269/03:58:58.202(down)     34    2 G1
+          GPC   269/02:58:58.202           37    5 A1
+
+EXACTLY one hour apart.  The accumulator follows the unit; GPC time stays on
+its own base.  So the whole path works in OPS 0 -- FIOPRMPG reads, FPMMTURM
+processes, CZ2B_MTU_READ carries, ASG_CYCLIC_UPDATE (ASGCYCLI.hal) displays --
+and PASS ACCEPTS the reading.  The down arrow appearing is redundancy
+management working correctly: a timing unit an hour off IS failed.
+
+AND THE FAILURE IS WIDER THAN THE ASCENT TRANSITION.  Measured 2026-09-25:
+accumulators run in OPS 0, and read "M" in BOTH OPS 201 (G2) and OPS 1 (G1).
+So it is not something the OPS 901 transition does; OPS 201 is reached by a
+different route entirely.  RETRACTED: an earlier note here read the right-hand
+column of the TIME page as the memory configuration ("A1 when they work, G1
+when they do not").  It is not -- OPS 201 shows A1 with the accumulators dead,
+and the OPS 0 skew capture shows G1 and A1 on ADJACENT ROWS of one page.  That
+column is per-row, not the vehicle's configuration.
+
+THE "M" IS A NAMED BIT, not a blank: FCMCOM.hal declares TFCMMASB with bits
+0-2 "TMP FAILURE INDICATOR" for MTU 1-3, bit 3 GPC time, and bits 4-6 "DATA
+MISSING INDICATOR".  M is data-missing, so the flight software is saying no
+reading arrived -- consistent with the reads not being issued, and it rules
+out "the readings were rejected".
+
+NEXT: what drives the CYCLIC read.  AIBGPCLO's two DIO(AIBV_MTU_RD) calls are
+initialisation only.  Something reads the unit ~340 times in a few OPS 0
+minutes and does not in G2 or G1, and the reading code is resident in G2, G3,
+G8, G9, G16, P9, S2 and SSW alike -- so the question is what SCHEDULES it, not
+whether it is present.
+
+WHAT ACTUALLY ISSUES THE CYCLIC MTU READ -- FOUND, and it is the same routine
+as the A/D isolation above.  FPMMTURM's header names the cadence ("TMP (TIME
+MANAGEMENT PROCESSING) VALIDATING THE TIME SOURCE EVERY 960 MILLISECONDS"),
+which matches the measured rate of about one read a second.  The read itself
+is issued from FPMIHPC2 -- the Program Counter 2 interval-timer interrupt
+handler -- off a cycle counter, NOT from a TQE and NOT from an application:
+
+    *   CYCLE 15  - READ MTUS
+             LH   R5,FP$MTURM+6      GET CYCLE COUNT BACK
+             CHI  R5,15
+             BC   07-4,#@LB2122
+             L    R3,FIOSVCPL        LOAD Z-CON TO MTU READ I/O P/L
+             BAL  7,FIOSVC1          <-- the read
+    FPMMTURT DS   0H
+             SB   0(R2),TMPINDIC     SET FLAG FOR TMP
+
+Cycle 16 then copies the accumulators into the ICC buffer for TMP, and cycles
+15-19 inhibit re-entry (FPMIHPC2 "ZB 0(R0),TMPINDIC  INHIBIT TMP IF BETWEEN
+CYCLE 15-19").  FPMIHPC2 is at 1bed6-1c324 in SSW; FIOSVCPL, the Z-con to the
+read's I/O parameter list, is in FCMZCONS at 08bbe.
+
+WHY THAT IS THE RIGHT PLACE TO LOOK NEXT.  In G1 the measured count of
+func=126 commands is ZERO, so either this cycle-15 branch is not reached or
+the request it makes is not turned into a transfer.  The two are told apart by
+watching FIOSVCPL (08bbe) and the cycle counter: a counter that never reaches
+15, a branch not taken, or a request made and dropped are three different
+defects.  This is a cheap experiment -- YAGPC_WATCHHW on 08bbe, or landmarks
+on FPMIHPC2's cycle-15 path, in an OPS 0 run against an OPS 201 one, both of
+which are reachable in about fifteen minutes with two computers
+(2gpc-ops0-gpccrt.script and 2gpc-ops201.script).
+  - addrs `1d5ae,1d608,1d674,1d6a4,1d6fa,1d71e,1d742,1d828,1d86e,1d8b4,1d8fa,1da06,1da42,1da7e,1daba,1d5ae-1daba,1cc74,1cc7e,1cc88,1c217,181c0,1df02,08bbe,1bed6-1c324` &middot; csects `FPMIHPC2,FIOHFEPG,FIOMFEPG,FIOCDATG,FIOREFVT,FCMBCEMD,FIOPRMPG,FIONSPPG,FCMSFAIL,FIOERRLC,TFIVB506,TFCMFLCT,FIOADSKP,AIBGPCLO,FPMMTURM,ASGCYCLI,ASG_CYCLIC_UPDATE,TFCMMASB,CZ2B_MTU_READ` &middot; instrs `ZH,STH,#MIN,#MINC,#RDLI,#BU,#CMDI` &middot; procs `MTU,BCE20,BCE21,BCE22` &middot; config `G1,G2,G3,G8,G9,P9,S2,SSW` &middot; env `YAGPC_FC_MDM,YAGPC_FC_CHECK,YAGPC_MTU_SKEW,YAGPC_MTU_SKEW_AT,YAGPC_ERRTERM_TRACE,YAGPC_WATCHHW,NSTS_ANNOUNCE_ROWS,YAGPC_FC_LEARN` &middot; files `src/mtumodel.c,src/mtumodel.h,src/iop.c,src/iop.h,src/iop_bce_instr.c,src/run.c,src/run.h,src/cpu.c,src/fcbustable.h,fc-bus-survey.py,test/test_mtumodel.c` &middot; symptom `MTU ACCUM frozen,down arrow,TIME display,SPEC 2 PRO,accumulators not counting,ITEM 34 does nothing,A1 works G1 frozen,back-filled from GPC clock,MTU ACCUM agrees with GPC time` &middot; doc `FIOCDATG FIOREFVT table; FPMIHPC2 MDM A/D BITE RM; FIOHFEPG/FIOMFEPG BITE 4; BCE PoO 4.1 Listen Mode`
 - **#211** *(sync)* A two-computer redundant set loses synchronisation about eight seconds after an OPS 0 -> OPS 201 transition, once the flight-critical I/O actually completes. Both computers vote each other out (cam.log 'voting: 21 ON (bus)' and '12 ON (bus)' at t=249.4). It was invisible until #210's flight-critical completion landed, because until then every transfer on those buses failed on every computer, FCOS commfaulted the strings, and the GNC software never ran with live I/O at all.
   - evidence: Measured 2026-09-24 on simulatePASS --gpcs 1,2 --crts 2 with examples/2gpc-ops201.script and OI340700-v44boot.mmv.  Control runs, where the flight-critical I/O all fails, record NO votes at all -- but in those runs the vehicle never really executes OPS 201's I/O: after the transition its buses carry 24 distinct device/function pairs of which essentially none are answered.  With the transfers completing, the same fixture carries 32 pairs, reaches 2011/UNIV PTG, keeps the timing unit read for the whole run -- and votes at t=249.4, about eight seconds after OPS 2 0 1 PRO.  THREE explanations were tested and refuted.  (a) Our model handing one computer a MIXTURE of two replies: each reader was given its own COPY of the words, not merely its own cursor (commit fc03d16f2); the votes remain.  (b) Our answering being ASYMMETRIC between computers, GPC1 commanding FC1 and FC3 with both strings alive while GPC2 commanded FC2 and FC4 with one dead: bus ownership was extended to all eight flight-critical buses and bus 23's unanswered transfers fell from 6 to 4; the votes remain.  (c) A LISTENER being handed zeros where the commander got a modelled unit's real words, so the two copies of one transfer differed: the completion was restricted to the commanding BCE only (regXmitEna set); the votes remain.  The 55.1 s difference between the two computers' final simulated times is NOT evidence of anything -- it is the same in every run including the controls, and is just the offset between their IPLs.  NEXT: this is the first time the set has run OPS 201 with live I/O, so start from the sync codes and the I/O-completion history around t=249 (YAGPC_SYNCTRACE, and discretes_note_io_done's kind 2 and 3 records), and find which transfer one computer completed that the other did not.
   - procs `BCE20,BCE21,BCE22,BCE23` &middot; config `G2` &middot; files `src/iop.c,src/mtumodel.c` &middot; symptom `fail to sync,CAM vote,redundant set breaks,OPS 201,both computers vote` &middot; doc `found while fixing #210; see that entry for why the I/O used to fail`
+- **#212** *(emulator)* A COMMAND WORD IS NOT A UNIQUE DEVICE, so the MDM answering can reply to a command that armed no receive. fc_sym() in src/mtumodel.c resolves a command by its 24-bit word alone, searching FC_BUS_READS before FC_BUS_COMMANDS, and four words appear in BOTH tables -- FIOMDMRT at 331c20, 4b1c20 and 531c20, and FIOPDRSM at 980000. FIOMDMRT is in fc_ours()'s EXACT list, so it is a command we answer. When the BCE armed a receive the length comes from iop_bce_armed_words and is right; when it did NOT, armingWords is -1 and ff_nsp_words falls back to the SURVEY's length and answers one word to a transaction that asked for nothing. CANDIDATE HARDENING: answer only when m_armed >= 0, since a read is by definition a command with a receive and every one of the 75 surveyed reads is a #MIN/#MINC pair.
+  - evidence: Static, 2026-09-25, from the generated table src/fcbustable.h, parser checked against the raw entry count (75 reads, 32 commands, both fully parsed -- an earlier parse of the same file silently dropped a third by assuming the field order was {cmd,sym,words} when it is {cmd,words,sym}, which is why the count check is in the script). fcbustable.h's own header had already noted it: '531c20 (FIOMDMRT) is a one-word read in FIOIMUPG and a command elsewhere'. RELATED AND SETTLED THE OTHER WAY: FIOHIBAD (524be0, 624be0) is in FC_BUS_COMMANDS ONLY, so fc_sym returns words=0 and ff_nsp_words returns 0 -- the read PASS branches to deliberately to stop a BCE is never answered, which is correct and now verified rather than assumed. ALSO: numeric IUA is ambiguous across bus groups -- BCEEQU has FIOFFIUA EQU 10 'FF INTERFACE UNIT ADDRESS' and FIOPF1AD EQU 10 'PAYLOAD FORWARD 1 IUA', so the 18 reads at IUA 10/12 that fc_ours() declines include payload-bus traffic (FIOPFC15-19 via FIOPF2AD in FIOMS2PG/FIOMS4PG/FIOMVUPG, FIOPSPRD 'READ FROM PSP1') that cannot reach a model owning only buses 14-17 and 20-23. NOT YET TESTED -- deliberately not changed while the five-computer A/B of the answering was in flight, since an unmeasured change to the thing under test is how several earlier comparisons in this ledger were voided.
+  - addrs `531c20,4b1c20,331c20,980000,524be0,624be0` &middot; csects `FIOMDMRT,FIOPDRSM,FIOHIBAD,FIOIMUPG,FIOMS2PG,FIOMS4PG,FIOMVUPG,FIOPSPPG,BCEEQU` &middot; instrs `#MIN,#MINC,#CMDI,#RDLI` &middot; env `YAGPC_FC_MDM,YAGPC_FC_CHECK,YAGPC_FC_LEARN` &middot; files `src/mtumodel.c,src/fcbustable.h,fc-bus-survey.py,src/iop.c` &middot; symptom `answers a command with no receive,word count guessed from the survey,device ambiguity` &middot; doc `fcbustable.h header; SSSRC BCEEQU FIOFFIUA/FIOPF1AD equates`
+- **#213** *(emulator)* THE THREE MTU ACCUMULATORS ARE THREE DIFFERENT COMPUTERS' CLOCKS in the default build, not three taps off one oscillator. mtumodel was given whichever COMPUTER happened to be calling (mtumodel_set_clock(br->mtu, br->clockUs)), so accumulator 1, read by GPC1 on bus 20, comes from GPC1's clock while accumulator 2, read by GPC2 on bus 21, comes from GPC2's -- and FPMMTURM, whose header says it is 'VALIDATING THE TIME SOURCE EVERY 960 MILLISECONDS', is then comparing three computers' clocks wearing a timing unit's name. mtumodel_set_shared_us fixes it by handing the model the vehicle's shared clock (run.c router_shared_us), which is what mmumodel_service_as has taken as an argument since it was written. THE FIX IS PRESENTLY GATED BEHIND YAGPC_FC_MDM and so is NOT in the default build, which is a deliberate stop, not a judgement that it is wrong: see the evidence.
+  - evidence: The owner, looking at the three accumulators in OPS 0 on 2026-09-25: 'The almost-exact agreement is almost disturbing. I'm glad we saw one that was a millisecond off, or I might suspect those were just duplicates.' A millisecond apart is the signature of three separate computer clocks; one oscillator read three ways would agree exactly. WHY IT IS GATED RATHER THAN SHIPPED: the default-configuration gate (five computers, whole acid test, 2400 s, YAGPC_FC_MDM unset) took FOUR fail votes at t=1914.4, all four members against GPC2, with three behaviours active that the MDM work had made unconditional -- the shared clock, the wire pacing, and an unconditional listener echo. All three are now behind the switch and the default build is arithmetically what the owner validated clean over an hour. WHICH OF THE THREE COST THE VOTES IS NOT KNOWN: they were changed together and each test is a 40-minute run. The listener echo is the prime suspect, because with it the OFF arm delivered 3,063 words to listening computers where the baseline rule delivers essentially none (#210: 'no listener was ever echoed one'). THE DISCRIMINATING TEST is a gate run with the shared clock alone re-enabled, which is cheap to arrange behind its own flag and has not been done. A SEPARATE TRAP FOUND WHILE GATING, and worth stating because it is invisible: mtu_fill_time had folded the halt offset into 'us', which drives the mission ACCUMULATORS, where the baseline applies it only to the GMT epoch. That moved every accumulator in the DEFAULT build. 'us' and 'epochUs' are now kept apart.
+  - addrs `1cc74,1cc7e,1cc88` &middot; csects `FPMMTURM,FIOPRMPG,ASGCYCLI` &middot; procs `MTU,BCE20,BCE21,BCE22` &middot; config `SSW,G2,G9` &middot; env `YAGPC_FC_MDM,YAGPC_MTU_SKEW,YAGPC_MTU_SKEW_AT` &middot; files `src/mtumodel.c,src/mtumodel.h,src/run.c` &middot; symptom `accumulators agree to the millisecond but not exactly,three clocks not one oscillator,MTU ACCUM,SPEC 2 PRO` &middot; doc `FPMMTURM header; mmumodel_service_as takes the shared clock as an argument`
+- **#215** *(sync)* A FIVE-COMPUTER VEHICLE LOST GPC2 AT t=1914 WITH NO I/O ERRORS ANYWHERE NEAR IT, once, in the DEFAULT configuration (YAGPC_FC_MDM unset). GPC1, GPC3 and GPC4 each voted against GPC2 and GPC2's commfault lamp lit, all at t=1914.4 of a 2400 s run. It is recorded because it is the first time anything has looked that far into a run at all -- every previous arm stopped by t=1662 -- and NOT because it is understood. A repeat of the same configuration to the same duration held the set with zero votes, so it is intermittent, and one occurrence is not a mechanism.
+  - evidence: discretePanel/gate-final, 2026-09-25, five computers, examples/5gpc-3crt-subtitled.script, OI340700-v44boot.mmv, --duration 2400. THE CAM NOTATION MATTERS AND IS EASY TO MISREAD: cam.py drives the off-diagonal (row=voter, col=voted-against) from REG_FAILVOTE and the DIAGONAL from the commfault register, so '22' is GPC2's own commfault lamp, not a self-vote -- three real votes, not four. NOT A TEARDOWN ARTEFACT (#187): the run reached its full 2400 s (yaGPC2.log written 2403 s after the first log line, rate 1.00), so the votes are 486 s before the end. WHAT IT IS NOT. (a) Not flight-critical I/O: 2,729 error terminations, every one of them between t=62.3 and t=759.5, and NONE in the window 1850-1950 -- the trace has no budget, so that silence is real. The trace covered buses 14-17 and 20-23 only, so display-bus errors would have been invisible -- but (b) no display watchdog fired either: each of meds1/2/3 logs exactly one 'MDUMDU: port timeout -- no IDP heartbeat' and all three are at line 24, before the IDPs are powered. (c) Not the ICC: buses 1 and 2 are identical -- 13,590 commands out each, 25,731 dropped each -- and the drop counts fall in an exact arithmetic series 25731/25731/17154/8577/0, which is staggered IPLs, not a fault. (d) Not host load: rate 1.00. WHY IT WAS NEARLY MISATTRIBUTED. It was first read as a regression of three behaviours the MTU work had made unconditional (listener echo, wire pacing, shared clock), and they were gated behind YAGPC_FC_MDM because of it. That gating is right on its own merits -- the default build should be what was validated -- but it is NOT supported by this run: the MTU is bypassed from t~760, so all three are inert for the 1,150 s before the vote. The rerun with them gated (discretePanel/gate2) held the set, which is consistent with a fix AND with an intermittent, and cannot distinguish them. FOR WHOEVER PICKS THIS UP: the cheap next step is simply to run the default configuration to 2400 s a few times and find out how often it happens, since nothing before tonight ever ran that long.
+  - procs `BCE14,BCE15,BCE16,BCE17,BCE20,BCE21,BCE22,BCE23` &middot; config `G9` &middot; env `YAGPC_FC_MDM,YAGPC_ERRTERM_TRACE` &middot; files `src/mtumodel.c,yaShuttle/discretePanel/cam.py,yaShuttle/discretePanel/mtuscore.py` &middot; symptom `fail to sync,CAM vote,GPC2 voted out,commfault lamp,no I/O errors,long run,intermittent` &middot; tsec `1914` &middot; doc `cam.py _apply: REG_FAILVOTE off-diagonal, commfault diagonal` &middot; run `gate-final,gate2,acid-wire`
 
 ## Confirmed
 
@@ -882,6 +1317,9 @@ until a five-computer acid test holds its set with it on.
 - **#209** *(tape)* The DEU load module that PASS's own display loader reads is on NO volume we have.  AIG_DEU_LOADER reads 17 blocks -- 8704 halfwords, its AIGV_READ.DWDCT -- from CZ1V_MM_ADDR_TBL entry 5, and CZ1COM.hal declares that table INITIAL(9216,6144,858,8870,9223,9352,...), so entry 5 is block 9223, which is 4/4/0/7.  Neither our OI340700 build nor pass-910 has a block there.  The read therefore returns zeros -- mmumodel's do_read gives an absent block back as zeros and says nothing -- the read-with-check fails, and the loader retries for ever: 110 reads of that address in one 300 s run, never a format fill after any of them.  SEPARATELY, our tape build drops three regions pass-910 carries in the same neighbourhood: 9216 (table entry 1), 9339 (entry 12) and 9465 (entry 13), plus 9187 and 9440-9447.  Only entry 6, 9352, is present in both, and that is the critical formats -- DMACDFT1/2/3, three 8-block copies of SYS5, which is what GPCIPL actually loads a display from and why displays get their backgrounds at all.
   - evidence: Read straight out of the volumes, 2026-09-24.  OI340700-v44boot.mmv has 2,665 blocks; file 4 holds exactly three runs -- 8800-8854, 8960-9186 and 9352-9439 -- and CF_PAD 111e appears only in 9352-9375, which is three 8-block copies.  pass-910.mmv has 3,004 blocks and adds 9187, 9216, 9339, 9440-9447 and 9465, but still nothing at 9223.  The two addresses GPCIPL itself reads during an IPL, 9320 (17 blocks) and 9240 (8 blocks), are absent from BOTH volumes, so GPCIPL loads a display unit's control program out of zeros on every tape we own; it goes unnoticed because nothing here emulates the display unit's own processor, and the backgrounds come from 9352, which is real.  Traced from the MMU trace of a run in which a display asked to be loaded: position to 4/4/0, read 17 blocks from 4/4/0/7, 86 times, with no fill between them.  CONSEQUENCE: PASS's own DEU loader cannot complete on any volume we have, so a display powered up after the IPLs can only be loaded by IPLing a GPC onto it, which is what the scripts do.  CORRECTION, and it matters: THE 9223 IMAGE IS NOT PART FORMATS.  AIGDEU loads a display in two phases from two places.  Phase 1 is the DISPLAY CONTROL PROGRAM, read from entry 5 (9223) and sent as the eight fills AIGB_DEU_FILL_LOC names -- 0F49, 1145, 1341, 153D, 1739, 1935, 1FE4, 0002 -- which is the unit's own executable firmware, the background-top word and low memory; it then waits 300 ms and polls, requiring the unit to report INITIALIZATION PERFORMED with a good checksum, i.e. evidence that it RAN the new code.  Phase 2 is the formats, AIGB_DEU_DFT_LOC 0100, 02FC, 04F8, 06F4, 08F0, 0AEC, 0CE8, 0EE4, seven fills of 508 and one of 101, read from entry 6 (9352) -- which we have, and which is what draws a background.  So the missing 9223 image is ENTIRELY firmware we do not have and could not run; the backgrounds were never the gap.  What that means in practice is the opposite of discouraging: nothing here executes a display unit's processor, so the content at 9223 need not function, only exist and pass the read's check -- zeros would serve, with the model answering the verification poll.  That is a deliberate choice to put content of our own invention on a tape, not a recovery, and it is recorded here as a choice rather than taken.  DO NOT invent one without deciding that deliberately -- it would be tape content with no provenance.  WHY THE GPC REJECTS IT IS NOT THE BUS AND NOT A CHECKSUM WE CAN NAME. Measured: with YAGPC_TIMEOUT_TRACE over the failing window there is NO receive timeout on the mass-memory BCE and no MMU fault of any kind -- the 8704 words are delivered cleanly, they are simply all zero, because an absent block reads back as zeros.  The rejection is in the flight software's own read service: AIGDEU's private data area, #DAIGDEU at 0444e-04721, comes back from a capture taken while it was failing with 9223 at 0449a and 8704 at 04497 -- its DBLOCK and DWDCT, which is what fixes the identification -- and a 9 beside them, which is AIGDEU's code for MMU1 I/O ERROR ON DCP READ, the one it sets when CDHV_RW_TSW is non-zero.  No fill is ever issued, so the failure is at or before that test and not in the fills (code 3).  What the check actually tests is unknown: MMURRDCK is a macro, the service that sets CDHV_RW_TSW is FCOS assembler, and CDHV_RW_TSW is declared in a COMPOOL template we do not hold -- only AIGDEU.hal mentions it in the whole source tree.  THE CONSEQUENCE FOR ANY SYNTHETIC IMAGE: all-zero content is REJECTED, measured, so a made-up image would have to satisfy whatever that check wants -- probably a block header or a checksum convention -- and that is not known yet.  'Write zeros there' is not a fix.  AND THE MISSING BLOCK TURNS OUT NOT TO BE FATAL, which corrects this entry's own conclusion.  The read of 9223 is ACCEPTED: measured in the SM common buffer itself, #PCVNMMU in the post-IPL configuration at 197410, whose CDHV_RW_BUFR header (CSMCOM.hal: DUMMY, DGO_ADJ(3), RW_TSW, RWCT, ERRCD, then the data) reads RW_TSW = 0000 0000 while the loader runs, and whose data area holds EXACTLY 8704 zeros followed by other content -- the read landing precisely where and as asked, all zero because the block is absent.  So the flight software does not reject zeros; it loads them.  Nothing here executes a display unit's control program, so a zeroed one costs nothing and the load completes (see #208).  WHAT REMAINS TRUE: our tapes carry no display control program at 9223, and none at the 9320 and 9240 GPCIPL reads either, so every display in this emulator runs on a control program of zeros.  That is a real gap against the flight software's own address table and worth closing if the image is ever recovered, but it is not what kept a display from being loaded, and no synthetic image is needed to make the loader work.
   - csects `AIGDEU,DEUCFLM,DMACDFT1,CZ1V_MM_ADDR_TBL` &middot; procs `IDP1,IDP3,MM1` &middot; tape `v44,pass-910` &middot; files `src/mmumodel.c,tapebuild/build.sh,tools/build_deucflm.py` &middot; symptom `no background,DEU load module,9223,block absent,read returns zeros,loader retries,MMURRDCK,AIG_DEU_LOADER` &middot; doc `CZ1COM.hal 113600-113800 (the address table); AIGDEU.hal 009100-009400`
+- **#214** *(emulator)* WHY THE TIMING UNIT IS STILL FROZEN IN A FIVE-COMPUTER VEHICLE EVEN WITH THE MDM ANSWERING ON: it is the LISTENER half of the NSP power-discrete read, and it loses a race with the next command. The answering satisfies the COMMANDER's read of FIONSP1P/FIONSP2P with one zero word ('the box is not powered'), and that works. The listener's own element does not: mtumodel clears every reader's pending answer on EVERY command ('clear always, echo always'), and buses 20 and 22 carry about 940 commands a second, so a listener has roughly one millisecond to drain a word it is handed. It usually wins and sometimes does not, and FIOERRLC's threshold is TWO. Two counted errors call FCMBCEMD, which bypasses the whole STRING; FCMRTBLE is titled 'NSP AND MTU RESTORE TABLES' and groups the two, and FIONSPPG's elements sit immediately before FIOPRMPG's in store -- so the timing unit goes down with the NSP it has nothing to do with. THE FIX IS THE LISTENER DELIVERY, not more coverage: a listener must receive an answered read whether or not it polls before the next command.
+  - evidence: Measured 2026-09-25 on acid-wire, a five-computer acid test with YAGPC_FC_MDM ON (switch confirmed in the run's own output: nspReads 21548, biteReads 24; the OFF arm gate-final prints no such line at all -- that, and not the 7.0 words-per-read ratio, is the marker, since wordsOut counts MDM answers too). 2,035 error terminations, and 1,701 of them (84%) are just TWO program addresses: pc=1cc2e left=1 x831 on bus 20 and pc=1cc68 left=1 x870 on bus 22. Resolved against mafgen/csects-G9.json and csects-SSW.json (not recalled): 1cc2e = FIONSPPG FIOBYNC3+4 and 1cc68 = FIONSPPG FIOBYNC7+4, with FIOPRMPG FIOBY51 at 1cc74 immediately after. left=1 means the element armed for one word and got none. THE SHAPE IS STRUCTURAL AND CONFIRMS THE READING: GPC1 holds 303 (1cc68 only -- it COMMANDS bus 20 and only listens on 22), GPC3 holds 304 (1cc2e only -- it commands 22), and GPC2 and GPC4 hold 586 and 598, both addresses, because they command neither and listen on both. AND THE ANSWERING DOES NOT PREVENT THE BYPASS: acid-wire's errors cease at t=758.5 s and gate-final's at t=759.5 s -- the same moment -- and acid-wire's timeReads is 2142, IDENTICAL to the answering-OFF arm's 2142. The answering cut errors 25% (2035 against 2729) and kept the set (0 votes against 3) but left the timing unit exactly as dead. The two-computer fixture does not show this because it has at most one listener per bus and far less traffic. WHAT NOT TO DO: a per-reader QUEUE was tried and produced 158,169 runaway BCE lines by burying a listener in backlog, and withholding the echo from a busy reader LATCHES it for ever, since a Listen-Mode BCE stores nothing until it sees a command sync bearing its own IUA and waits indefinitely. The delivery has to be prompt AND bounded.
+  - addrs `1cc0a,1cc2e,1cc44,1cc68,1cc74,1cc7e,1cc88` &middot; csects `FIONSPPG,FIOBYNC1,FIOBYNC3,FIOBYNC5,FIOBYNC7,FIOPRMPG,FIOBY51,FCMRTBLE,FCMBCEMD,FIOERRLC` &middot; instrs `#RDS,#MIN,#MINC,#CMDI` &middot; procs `BCE20,BCE21,BCE22,MTU` &middot; config `G9,G2,SSW` &middot; env `YAGPC_FC_MDM,YAGPC_ERRTERM_TRACE` &middot; files `src/mtumodel.c,src/iop.c` &middot; symptom `MTU ACCUM blank with M,listener times out left=1,timeReads identical to control,string bypassed,FIOBYNC` &middot; tsec `364-759` &middot; doc `mafgen/csects-G9.json; FCMRTBLE 'NSP AND MTU RESTORE TABLES'; BCE PoO 4.1 Listen Mode` &middot; run `acid-wire,gate-final`
 
 ## Fixed
 
