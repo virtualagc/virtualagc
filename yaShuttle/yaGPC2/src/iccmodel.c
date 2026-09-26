@@ -115,6 +115,33 @@ struct IccModel {
      * queue never filled at a moment when the sender had a clock to stamp it
      * with, which for this purpose is the same as never. */
     double firstFullUs[YAGPC_ICC_BUS_LAST + 1][6];
+    /* AND HOW OLD IS THE WORD AT THE HEAD WHEN THAT HAPPENS?  The expiry is
+     * not blocked (#236 refuted) and each reader expires exactly one queue's
+     * worth, once, at its first read -- and then never again, while the queue
+     * sits at the bound.  Those cannot both be true innocently: for a full
+     * 2048-word queue to hold nothing older than the 10 ms expiry, words
+     * would have to arrive 146 times faster than the bus actually carries
+     * them.  Either the head IS old and the expiry is somehow not reaching
+     * it, or the age being computed is not the age.  This measures it at the
+     * one instant that matters, when a word is about to be dropped for want
+     * of room. */
+    double fullHeadAgeSum[YAGPC_ICC_BUS_LAST + 1][6];
+    double fullHeadAgeMin[YAGPC_ICC_BUS_LAST + 1][6];
+    double fullHeadAgeMax[YAGPC_ICC_BUS_LAST + 1][6];
+    unsigned long fullHeadAgeN[YAGPC_ICC_BUS_LAST + 1][6];
+    /* AND WHAT THE EXPIRY ITSELF SEES.  The head is 2.62 s old when a word is
+     * dropped for want of room, against a 10 ms expiry, and yet each reader
+     * expires exactly one queue's worth ONCE and never again.  Those can only
+     * both be true if the expiry is not running, or is running against a
+     * clock that does not see that age.  Neither existing counter can tell:
+     * expiryBlocked only catches at < 0, and unstamped only watches SENDERS.
+     * The one case both are blind to is a READER whose own shared time is
+     * negative -- router_shared_us returns -1 whenever that machine is not
+     * active in the barrier -- because the guard then skips the whole block
+     * silently. */
+    unsigned long expiryRuns[YAGPC_ICC_BUS_LAST + 1][6];
+    unsigned long expirySkipNoClock[YAGPC_ICC_BUS_LAST + 1][6];
+    double expiryHeadAgeMax[YAGPC_ICC_BUS_LAST + 1][6];
     /* IS THE EXPIRY EVER BLOCKED AT THE HEAD?  sharedUs[] starts at -1 and is
      * only set once that computer reports its time, so every word broadcast
      * before its SENDER has reported is stamped at = -1 -- and the expiry
@@ -220,6 +247,20 @@ static void icc_broadcast(IccModel *m, int bus, int from, uint32_t word,
         if (m->q[bus][g].count >= ICC_QUEUE) {
             if (m->firstFullUs[bus][g] < 0.0 && m->sharedUs[from] >= 0.0)
                 m->firstFullUs[bus][g] = m->sharedUs[from];
+            {
+                double hAt = m->q[bus][g].at[m->q[bus][g].head];
+                if (hAt >= 0.0 && m->sharedUs[from] >= 0.0) {
+                    double age = m->sharedUs[from] - hAt;
+                    if (m->fullHeadAgeN[bus][g] == 0 ||
+                        age < m->fullHeadAgeMin[bus][g])
+                        m->fullHeadAgeMin[bus][g] = age;
+                    if (m->fullHeadAgeN[bus][g] == 0 ||
+                        age > m->fullHeadAgeMax[bus][g])
+                        m->fullHeadAgeMax[bus][g] = age;
+                    m->fullHeadAgeSum[bus][g] += age;
+                    m->fullHeadAgeN[bus][g]++;
+                }
+            }
             m->q[bus][g].head = (m->q[bus][g].head + 1) % ICC_QUEUE;
             m->q[bus][g].count--;
             m->q[bus][g].dropped++;
@@ -315,7 +356,19 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
      * 10 ms sits far from both.  Without a shared clock there is no age to
      * judge, and nothing expires. */
     if ((svc == GPC_SVC_RECV_POLL || svc == GPC_SVC_RECV_WORD) &&
+        m->expireUs > 0.0 && m->sharedUs[gpcId] < 0.0)
+        m->expirySkipNoClock[bus][gpcId]++;
+    if ((svc == GPC_SVC_RECV_POLL || svc == GPC_SVC_RECV_WORD) &&
         m->expireUs > 0.0 && m->sharedUs[gpcId] >= 0.0) {
+        m->expiryRuns[bus][gpcId]++;
+        if (m->q[bus][gpcId].count > 0) {
+            double h = m->q[bus][gpcId].at[m->q[bus][gpcId].head];
+            if (h >= 0.0) {
+                double a = m->sharedUs[gpcId] - h;
+                if (a > m->expiryHeadAgeMax[bus][gpcId])
+                    m->expiryHeadAgeMax[bus][gpcId] = a;
+            }
+        }
         while (m->q[bus][gpcId].count > 0) {
             double at = m->q[bus][gpcId].at[m->q[bus][gpcId].head];
             if (at < 0.0) { m->expiryBlocked[bus][gpcId]++; break; }
@@ -541,6 +594,19 @@ void iccmodel_report(const IccModel *m) {
                 fprintf(stderr, "icc: bus %d read by GPC%d: queue FIRST FULL at "
                         "shared t=%.6f s -- compare against when that computer "
                         "was voted out\n", b, g, m->firstFullUs[b][g] / 1e6);
+            if (m->fullHeadAgeN[b][g] > 0)
+                fprintf(stderr, "icc: bus %d read by GPC%d: with the queue FULL "
+                        "the head word's age was min %.1f, mean %.1f, max %.1f us "
+                        "over %lu drop(s) -- the expiry is %.0f us\n",
+                        b, g, m->fullHeadAgeMin[b][g],
+                        m->fullHeadAgeSum[b][g] / (double)m->fullHeadAgeN[b][g],
+                        m->fullHeadAgeMax[b][g], m->fullHeadAgeN[b][g], m->expireUs);
+            if (m->expiryRuns[b][g] > 0 || m->expirySkipNoClock[b][g] > 0)
+                fprintf(stderr, "icc: bus %d read by GPC%d: the expiry ran %lu "
+                        "time(s), was skipped for want of a reader clock %lu "
+                        "time(s), and the oldest head it ever saw was %.1f us\n",
+                        b, g, m->expiryRuns[b][g], m->expirySkipNoClock[b][g],
+                        m->expiryHeadAgeMax[b][g]);
             if (m->unstamped[b][g] > 0 || m->expiryBlocked[b][g] > 0)
                 fprintf(stderr, "icc: bus %d read by GPC%d: %lu word(s) queued "
                         "before their sender had a shared time, and the expiry "
