@@ -14,6 +14,7 @@
 
 static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
                          int latch, int await, int left, int count);
+void (*iop_ring_hook)(double sinceUs) = NULL;
 /* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
 static void msc_ring_dump_once(IOP *iop, const char *why);
@@ -1723,6 +1724,30 @@ int iop_bce_armed_words(const IOP *iop, int p) {
 void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
     discretes_note_io_done(iop->discretes, p, true);
     bce_ring_put(iop, p, 'E', cause, 0, 0, 0, (int)iop->bce[p - 1].recvLeft, 0);
+    /* YAGPC_RING_ON_ERR=<bus>[,<bus>...]: dump both rings at the first error
+     * on those buses.  The timing unit's loss is a failure EVERY listener
+     * shares, which fails nobody to sync, so the FCMSFAIL trigger never
+     * fires for it and its rings were never seen. */
+    {
+        static int inited = 0; static unsigned mask = 0; static int fired = 0;
+        if (!inited) {
+            inited = 1;
+            const char *e = yagpc_getenv("YAGPC_RING_ON_ERR");
+            while (e != NULL && *e != '\0') {
+                int n = atoi(e); if (n > 0 && n < 32) mask |= 1u << n;
+                const char *c = strchr(e, ','); if (c == NULL) break; e = c + 1;
+            }
+        }
+        if (!fired && p > 0 && p < 32 && (mask & (1u << p)) && iop->cpu != NULL) {
+            fired = 1;
+            double now = (iop->vehicle != NULL)
+                ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) : iop->cpu->elapsedTimeUs;
+            fprintf(stderr, "RINGDUMP on error: gpc=%d bus=%d left=%u shared=%.1f\n",
+                    iop->cpu->gpcId, p, (unsigned)iop->bce[p - 1].recvLeft, now);
+            iop_dump_bce_ring(now - 30000.0);
+            if (iop_ring_hook != NULL) iop_ring_hook(now - 30000.0);
+        }
+    }
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
      * BCEs (all, if the list is empty), per computer, with the BCE's program
      * address.  A time-out has its own RECV TIMEOUT line; one without it is a

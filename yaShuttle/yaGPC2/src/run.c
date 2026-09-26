@@ -1093,6 +1093,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
                 veh->mmuBus[u] = r->busRouter.mmuBus[u];
             }
             r->busRouter.mtu = r->mtuModel;
+            iop_ring_hook = mtumodel_dump_ring;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
             r->busRouter.nDeuExtra = r->nDeuModelExtra;

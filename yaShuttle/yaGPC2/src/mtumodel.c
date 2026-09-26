@@ -418,6 +418,12 @@ static bool ff_mdm_off(void) {
     return off != 0;
 }
 
+static bool fc_answer_unnamed(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_ANSWER_UNNAMED") != NULL; }
+    return on != 0;
+}
+
 static int ff_nsp_words(uint32_t cmd, int m_armed) {
     if (ff_mdm_off()) return 0;
     for (size_t i = 0; i < sizeof FF_MDM_READS / sizeof FF_MDM_READS[0]; i++)
@@ -477,9 +483,17 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
                 fprintf(stderr, "UNANSWERED cmd=%06x iua=%u armed=%d -- no survey "
                         "name\n", (unsigned)(cmd & 0xffffffu), iua, m_armed);
             }
-            /* Answering it was tried (YAGPC_FC_ANSWER_ALL, ledger #249) and
-             * does NOT save the timing unit: the commander stops erring but
-             * the three listeners still do, which is still a commfault. */
+            /* YAGPC_FC_ANSWER_UNNAMED=1: answer it with the armed length.
+             * Seen from both ends in trial ringerr: commander GPC3 armed a
+             * one-word receive and issued 532aaa on bus 22, the three
+             * listeners took its echo as their sync and waited for one
+             * word, the model queued NOTHING, and exactly 2.0 ms later all
+             * four timed out together -- universal, so a commfault of the
+             * string, and the timing unit is bypassed with it.  An earlier
+             * trial of answering (aa-a) ran WITHOUT echo expiry, so its
+             * listener errors were the stale-echo kind and it could not
+             * test this; it must be judged together with echo expiry. */
+            if (fc_answer_unnamed()) return m_armed;
         }
         if (sym == NULL || surveyed == 0 || !fc_ours(sym)) return 0;
         /* THE LENGTH THE COMMANDER ARMED FOR, not a guess.  This used to
