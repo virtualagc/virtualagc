@@ -621,6 +621,11 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     }
     iop->recvTimeoutFloorUs = RECV_TIMEOUT_FLOOR_US;
     iop->recvFloorFromEnv = 0;
+    /* -1, NOT the zeroing's 0: zero is a perfectly good armed count meaning
+     * "one word", and a BCE that had never issued a read would look like one
+     * asking for a single word. */
+    for (size_t i = 0; i < sizeof iop->bce / sizeof iop->bce[0]; i++)
+        iop->bce[i].armingWords = -1;
     /* NO CHANNEL UNTIL ONE IS INSTALLED.  The IOP used to reach a process-wide
      * discrete bus through file statics, so nothing here had to name it; the
      * per-machine channel is a pointer, and a caller that declares its IOP on
@@ -1671,6 +1676,21 @@ void iop_bce_status_or(IOP *iop, int p, uint32_t bits) {
     register_set16(l, register_get16(l) | (bits & 0xffffu));
 }
 
+int iop_bce_armed_words(const IOP *iop, int p) {
+    if (iop == NULL || p < 1 || p > 24) return -1;
+    const BCE *bce = &iop->bce[p - 1];
+    /* THE STASH FIRST.  It is set immediately before a command is issued and
+     * cleared the moment the receive arms, so when it holds a value it is
+     * THIS command's length.  recvCount is only a fallback, and preferring it
+     * was wrong: a receive abandoned at some other PC is still "active", so a
+     * one-word read went out while recvCount held 32 from an earlier
+     * thirty-two-word one.  Caught by YAGPC_FC_CHECK against the bus
+     * programs' own lengths -- "FIONSPDR armed 32, bus program arms 1". */
+    if (bce->armingWords >= 0) return bce->armingWords;
+    if (bce->recvActive) return (int)bce->recvCount;
+    return -1;
+}
+
 void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
     discretes_note_io_done(iop->discretes, p, true);
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
@@ -1836,9 +1856,17 @@ static void iop_watch_store(IOP *iop, uint32_t addr, uint32_t value,
         inited = 1;
     }
     if (lo < 0 || (long)addr < lo || (long)addr > hi) return;
-    fprintf(stderr, "WATCHHW IOP-%s addr=%05x val=%04x pe=%d t=%.1f\n",
-            kind, (unsigned)addr, (unsigned)(value & 0xffff),
-            iop->curPE, iop_now_us(iop));
+    /* gpc= AS WELL AS pe=.  cpu.c's copy has said which computer from the
+     * start; this one said only which processing element, and in a
+     * five-computer vehicle that is the ambiguity that matters -- a halfword
+     * zeroed in EVERY computer is a configuration, and one zeroed in two of
+     * them is a defect, and the line could not tell them apart. */
+    fprintf(stderr, "WATCHHW IOP-%s gpc=%d addr=%05x val=%04x pe=%d pc=%05x t=%.1f\n",
+            kind, (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
+            (unsigned)addr, (unsigned)(value & 0xffff),
+            iop->curPE,
+            (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
+            iop_now_us(iop));
 }
 
 
@@ -2006,6 +2034,9 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
     uint32_t pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffffu;
     double now = (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs : 0.0;
 
+    /* ARMED NOW, so the stash that carried the count across the command is
+     * spent: a later bare '#CMDI' on this BCE must not look like a read. */
+    bce->armingWords = -1;
     if (!bce->recvActive || bce->recvPC != pc) {
         /* YAGPC_CLEARTRACE: the SSL's "CLEAR THE MIA BUFFER" read is a
          * one-word #RDLI meant to discard a STALE word.  Whether it gets

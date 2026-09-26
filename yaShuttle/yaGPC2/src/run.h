@@ -119,6 +119,9 @@ typedef struct {
      * other computers' -- see vehicle_bus_enter. */
     struct Vehicle *vehicle;
     int gpcId;
+    /* THIS COMPUTER'S IOP, so a device model can be told how many words the
+     * commanding BCE actually armed for -- see iop_bce_armed_words. */
+    struct IOP *iop;
 } BusRouter;
 
 typedef struct {

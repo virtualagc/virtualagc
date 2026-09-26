@@ -211,6 +211,14 @@ typedef struct {
      * instruction before this simulated time -- see iop_bce_wire_hold. */
     double wireHoldUntilUs;
     uint32_t recvCount;        /* the count the current receive was armed with */
+    /* WHAT THE COMMAND NOW GOING OUT WILL ARM FOR, or -1 when this is not a
+     * read at all.  '#MIN' issues its companion command BEFORE it arms the
+     * receive (see exec_MIN), so at the moment a device model is handed the
+     * command the count is not in recvCount yet -- it is in the instruction.
+     * Stashing it here is what lets a model answer with exactly the number of
+     * words asked for instead of guessing, and lets it tell a read from a
+     * bare '#CMDI' that arms nothing.  See iop_bce_armed_words. */
+    int armingWords;
 } BCE;
 
 void bce_init(BCE *b, int bceNum);
@@ -569,6 +577,28 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count);
 /* `cause` is the Table 1.2 bit(s) to record, or 0 for a termination whose
  * cause the modelled hardware does not yet distinguish. */
 void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause);
+
+/* HOW MANY WORDS THE BCE ON THIS BUS HAS ARMED A RECEIVE FOR, or -1 if it has
+ * none in progress.
+ *
+ * A device model is not told what the commander asked for: the command's own
+ * count field is NOT the reply length (FIOMTURD's says 38 and its '#MIN' arms
+ * seven), so a model that has to produce a reply either knows the length for
+ * that exact command or guesses.  Guessing was what this tree did -- sixty-
+ * four words, "generous", for anything it did not recognise.
+ *
+ * But the length is not unknowable, only unknowable from the COMMAND: a bus
+ * program arms its receive and THEN issues the command ('#MIN 0,6' before
+ * '#MINC FIOFFIUA,FIOMTURD'), so by the time a model sees the command the
+ * count is sitting in the BCE that sent it.
+ *
+ * It answers a second question as well.  A '#CMDI' that merely sets a
+ * listener's IUAR arms no receive, and neither does the deliberately-bad
+ * read PASS branches to in order to STOP a BCE (FIOHFEPG's 'FIOBADFF #CMDI
+ * FIOFFIUA,FIOHIBAD ... WILL CAUSE AN INITIAL TIMEOUT I/O ERROR').  A model
+ * that answers by IUA alone answers both of those and so defeats the flight
+ * software's own isolation; one that answers only an armed receive cannot. */
+int iop_bce_armed_words(const IOP *iop, int p);
 
 /* OR bits into BCE p's status register, wherever it is paged. */
 void iop_bce_status_or(IOP *iop, int p, uint32_t bits);

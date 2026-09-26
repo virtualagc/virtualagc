@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include "instr.h"
+#include "cpu.h"     /* struct CPU -- a runaway-BCE report names its computer */
 #include "util.h"
 
 #include "envcache.h"
@@ -515,11 +516,17 @@ static void exec_MIN(IOP *t, DInstr *v) {
      * reference on the display bus: 105,059 poll commands in 100 s
      * against its 176 in 60 -- about 440 times too many, which starved
      * the display fills and the clock. */
+    uint32_t count = df_get(v, 'c') + 1;
     if (iop_bce_receive_starting(t)) {
         uint32_t pc = register_get32(iopls_PC(&t->ls));
+        /* BEFORE THE COMMAND GOES OUT, because a device model is handed the
+         * command and has no other way to learn how many words this transfer
+         * wants -- the command's own count field is not it (FIOMTURD's says
+         * 38 and this '#MIN' arms seven).  See iop.h's armingWords. */
+        BCE *bce = iop_cur_bce(t);
+        if (bce != NULL) bce->armingWords = (int)count;
         bce_process_mio_command(t, pc);
     }
-    uint32_t count = df_get(v, 'c') + 1;
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base + df_get(v, 'd'), count)) iop_incr_nia(t, 4);
 }
@@ -767,12 +774,48 @@ void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2) {
         }
     }
 
-    /* Unrecognized instruction: matches the source exactly — logs to
-     * stdout (observable in `run`'s captured output) and does NOT
-     * advance NIA (unlike MSC's unrecognized-instruction path). */
+    /* AN UNRECOGNISED OPCODE ERROR-TERMINATES THE BCE.  It used to only
+     * print, and NOT advance NIA, so the processor sat on the word for the
+     * rest of the run re-executing it: one run produced 15,215 identical
+     * lines from four computers and the BCEs behind them never did anything
+     * again.  That is not a state a real BCE can be in, and it matters
+     * because PASS PUTS SUCH A WORD THERE ON PURPOSE.  FPMIHPC2's MDM
+     * redundancy management stores stopping instructions into the forward
+     * and aft MDM bus programs when a converter fails twice --
+     * `ZH@# 0(R7,R2)  STORE ZERO INSTR IN BCE PROGRAM` -- and FIOHFEPG says
+     * what is supposed to happen next: "THE INSTRUCTIONS ARE LEGAL BUT WILL
+     * CAUSE AN INITIAL TIMEOUT I/O ERROR WHICH WILL STOP THE BCE", which is
+     * how "THE INPUT PROM READS FOR THAT MDM [ARE] COMFAULTED".  A bare zero
+     * is not one of those legal pairs, but it must still STOP the processor
+     * rather than jam it: the comfault is what isolates the unit, and a BCE
+     * that merely hangs is one that is neither working nor failed, which is
+     * the shape that costs a redundant set its synchronisation.
+     *
+     * BST_I is bit 29 of the BCE status register, "illegal opcode" -- it has
+     * been defined in iop.h from the beginning and was never once raised. */
+    /* Logs to stdout (observable in `run`'s captured output). */
     /* Say WHICH processor and WHERE: an unknown opcode is almost always
      * a runaway PC rather than a genuinely missing instruction, and the
-     * address is what tells the two apart. */
-    fprintf(stderr, "BCE%d: unknown instruction %04x at %05x\n", iop->curPE,
-            (unsigned)hw1, (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu));
+     * address is what tells the two apart.
+     *
+     * AND WHICH COMPUTER.  Without it a five-computer run reports "BCE20:
+     * unknown instruction 0000 at 1d828" a few hundred times and there is no
+     * telling whether that is one machine stuck or all of them -- which is
+     * the whole question, since an error every computer has commfaults a
+     * string and an error one computer has fails that computer out of the
+     * redundant set.  Measured on a real one (2026-09-25) and the log could
+     * not answer it. */
+    /* AND WHEN.  This line had no time on it, and a run's log has no other
+     * timestamped line near it, so the only way to date a runaway was its
+     * POSITION in the file relative to the last stamped line above it.  That
+     * is not a time, and reading it as one put the start of a five-computer
+     * failure four minutes before it could have happened and sent a whole
+     * measurement after the wrong window (2026-09-25).  A line that cannot be
+     * set beside a vote is half a line. */
+    fprintf(stderr, "BCE%d: unknown instruction %04x at %05x (GPC%d) t=%.1f\n",
+            iop->curPE, (unsigned)hw1,
+            (unsigned)(register_get32(iopls_PC(&iop->ls)) & 0x3ffffu),
+            (iop->cpu != NULL) ? iop->cpu->gpcId : 0,
+            (iop->cpu != NULL) ? iop->cpu->elapsedTimeUs / 1e6 : 0.0);
+    iop_bce_error_terminate(iop, iop->curPE, BST_I);
 }

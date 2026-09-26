@@ -1302,13 +1302,26 @@ static void cpu_watch_store(CPU *cpu, uint32_t addr, uint32_t value,
     /* The protect bit and the pre-store contents both matter: cpu_store_fw
      * tests protection BEFORE writing and returns without writing, so a
      * refused store is otherwise indistinguishable from one that took. */
+    /* AND THE REGISTERS THE ADDRESS WAS BUILT FROM.  An operand that lands
+     * somewhere it has no business being is a question about the BASE
+     * REGISTER, not about the store: knowing that FPMIHPC2's `ZH 61(R2)`
+     * wrote 1d828 says nothing until R2 is known, because R2 + 61 = 1d828
+     * and R2 + 61 = a fail-counter table are the same instruction with
+     * different pointers, and only one of them is a defect.  R0-R3 are the
+     * base registers a short-form operand can name (Sec. 2.2.8), so all
+     * four go out; which one the instruction used is in its own bb field. */
     fprintf(stderr, "WATCHHW gpc=%d %s addr=%05x val=%08x was=%04x prot=%d%s "
-                    "nia=%05x t=%.1f\n",
+                    "nia=%05x r0=%04x r1=%04x r2=%04x r3=%04x t=%.1f\n",
             cpu->gpcId, kind, (unsigned)addr, (unsigned)value,
             (unsigned)membus_get16(cpu->ram, addr),
             (int)membus_get_store_protect(cpu->ram, addr),
             cpu->storeProtectOverride ? " ovr" : "",
-            (unsigned)psw_get_nia(&cpu->psw), cpu->elapsedTimeUs);
+            (unsigned)psw_get_nia(&cpu->psw),
+            (unsigned)(register_get32(cpu_r(cpu, 0)) >> 16),
+            (unsigned)(register_get32(cpu_r(cpu, 1)) >> 16),
+            (unsigned)(register_get32(cpu_r(cpu, 2)) >> 16),
+            (unsigned)(register_get32(cpu_r(cpu, 3)) >> 16),
+            cpu->elapsedTimeUs);
 }
 
 bool cpu_store_hw(CPU *cpu, uint32_t addr, uint32_t value) {

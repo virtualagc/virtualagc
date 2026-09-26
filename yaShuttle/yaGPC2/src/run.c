@@ -290,12 +290,28 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
         return;
     }
     if (br->mtu && mtumodel_owns_bus(in->busID)) {
-        /* The timing unit rewrites its whole reply on every command and has
-         * no transfer to walk into, so there is nothing to count here -- only
-         * the two threads to keep out of each other's way. */
+        /* NOT COUNTED AS A CLASH.  Each computer on one of these buses has
+         * its own copy of the unit's reply and its own cursor over it, so one
+         * arriving while another is still draining overwrites nothing -- the
+         * case vehicle_bus_enter's `inTransfer` exists to catch cannot happen
+         * here.  What is left is the two threads to keep out of each other's
+         * way, which is the lock. */
         vehicle_bus_enter(br->vehicle, in->busID, br->gpcId, false);
         mtumodel_set_clock(br->mtu, br->clockUs);
         mtumodel_set_clock_offset(br->mtu, br->writtenOffUs);
+        /* AND THE VEHICLE'S SHARED CLOCK, which the mass memory model has
+         * always been given and this one never was.  Without it the unit's
+         * three accumulators come from three different computers' clocks --
+         * see mtumodel_set_shared_us. */
+        mtumodel_set_shared_us(br->mtu, router_shared_us(br));
+        /* HOW MANY WORDS THIS COMMANDER ACTUALLY ASKED FOR.  A bus program
+         * arms its receive and then issues the command, so the count is in
+         * the BCE by the time the model sees it -- and a command with NO
+         * receive armed is not a read at all, which is how a '#CMDI' that
+         * only sets a listener's IUAR, and the deliberately-bad read PASS
+         * uses to stop a BCE, are told apart from a real one. */
+        mtumodel_set_armed_words(br->mtu,
+                                 iop_bce_armed_words(br->iop, in->busID));
         mtumodel_service_as(br->mtu, br->gpcId, svc, in, out);
         vehicle_bus_leave(br->vehicle, in->busID);
         return;
@@ -1080,6 +1096,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
              * traces print beside this machine's own (see iop.h). */
             r->age.gpc.iop.vehicle = veh;
             r->busRouter.gpcId = gpcId;
+            /* AND THE IOP, so the MTU model can be told the length the
+             * commanding BCE armed for rather than guessing one -- see
+             * iop_bce_armed_words. */
+            r->busRouter.iop = &r->age.gpc.iop;
             r->busRouter.deu = r->deuModel;
             /* One wire for the vehicle, built by the first machine, and only
              * when there is more than one computer to carry between.
