@@ -707,6 +707,12 @@ static bool mtu_echo_expire(void) {
     return on != 0;
 }
 
+static bool mtu_census_on(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_CENSUS") != NULL; }
+    return on != 0;
+}
+
 static bool mtu_iuar_local(void) {
     static int inited = 0, on = 0;
     if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_IUAR") != NULL; }
@@ -1118,10 +1124,12 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
     case GPC_SVC_XMIT_CMD: {
         uint32_t cmd = in->in.word & 0x00ffffffu;
         m->commands++;
-        {
-            int k;
-            for (k = 0; k < m->cmdN; k++) if (m->cmdSeen[k] == cmd) break;
-            if (k == m->cmdN && m->cmdN < 1024) m->cmdSeen[m->cmdN++] = cmd;
+        /* OFF unless YAGPC_MTU_CENSUS: it writes shared arrays, and only the
+         * locked path serialises this model. */
+        if (mtu_census_on()) {
+            int n = m->cmdN < 1024 ? m->cmdN : 1024, k;
+            for (k = 0; k < n; k++) if (m->cmdSeen[k] == cmd) break;
+            if (k == n && n < 1024) { m->cmdSeen[n] = cmd; m->cmdN = n + 1; }
             if (k < 1024) m->cmdCount[k]++;
         }
         /* A LISTENER SETTING ITS OWN IUA REGISTER IS NOT A BUS TRANSACTION.
@@ -1151,7 +1159,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
          * of the same code.  The armed count is this thread's own (tlArmed),
          * not the shared scalar another computer may have overwritten (#244).
          * YAGPC_MTU_IUAR=1 turns it on; off, nothing changes. */
-        {
+        if (mtu_census_on()) {
             int sv = -1;
             const char *sy = fc_sym(cmd, &sv);
             if (sy != NULL && strcmp(sy, "FIOMDMRT") == 0) {
@@ -1503,14 +1511,16 @@ void mtumodel_report(struct MtuModel *m) {
                     "5+=%lu -- only a count of ONE is fatal (FIOGPCWE)\n",
                     tc + tl + tb, tc, tl, tb, th[1], th[2], th[3], th[4], th[5]);
     }
+    if (mtu_census_on())
     fprintf(stderr, "mtu: FIOMDMRT commands by the issuer's armed count: "
             "unset %lu, 0 %lu, 1 %lu, 2-7 %lu, 8+ %lu, negative %lu; IUA-8 "
             "listen commands %lu\n", m->mdmrtArmed[0], m->mdmrtArmed[1],
             m->mdmrtArmed[2], m->mdmrtArmed[3], m->mdmrtArmed[4],
             m->mdmrtArmed[5], m->mdmrtUnnamed);
         if (m->cmdN > 0) {
-        fprintf(stderr, "mtu: %d distinct command code(s); IUA 10/12 ones:", m->cmdN);
-        for (int k = 0; k < m->cmdN; k++) {
+        int n = m->cmdN < 1024 ? m->cmdN : 1024;
+        fprintf(stderr, "mtu: %d distinct command code(s); IUA 10/12 ones:", n);
+        for (int k = 0; k < n; k++) {
             unsigned iua = CMD_IUA(m->cmdSeen[k]);
             if (iua == 10u || iua == 12u) {
                 int sv = -1; const char *sy = fc_sym(m->cmdSeen[k], &sv);
