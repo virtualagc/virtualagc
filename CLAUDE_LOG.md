@@ -121,3 +121,18 @@ Applied and cleared 2026-09-16.
   "wrote CAUSES.md".  A night of --append-evidence calls wrote nothing.
   Fixed: unknown options refused by name, --append-FIELD implemented, a set
   that changes nothing returns non-zero.  All lost evidence restored.
+
+### [2026-09-26] Target: [yaShuttle/yaGPC2/README.md]
+- #219: buses 14-17 were never in the Listen-Mode mask, so their listeners
+  never awaited a command and were served once every 40 ms instead of every
+  33 us.  Fixed, derived from the model's own bus range so it cannot drift
+  again -- but GATED, because unconditionally it costs the default gate four
+  votes.
+- The sensor-answering result is DETERMINISTIC, not variable: six runs split
+  perfectly by whether YAGPC_RECVWORD_TRACE was on.  Without it, 4/6/6/6
+  slots live on GPC1-GPC4 every time; with it, 0/0/0/0 every time.  An
+  earlier note in this log calling it "2 of 3" was comparing traced runs
+  against untraced ones.
+- #220: a device at IUA 13 on BUS 24 is read 13,999 times a run and never
+  answers -- 99% of all unanswered receives, on a bus outside the eight this
+  work has been counting.
