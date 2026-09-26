@@ -76,6 +76,15 @@ void mtumodel_set_shared_us(struct MtuModel *m, double sharedUs);
  * call, like the clock. */
 void mtumodel_set_armed_words(struct MtuModel *m, int words);
 
+/* The caller's clock and armed count, set and served as ONE step under the
+ * model's own lock -- see YAGPC_MTU_LOCKED in mtumodel.c. */
+bool mtumodel_locked_mode(void);
+/* YAGPC_MTU_RING: print the per-bus event ring once, events since sinceUs. */
+void mtumodel_dump_ring(double sinceUs);
+void mtumodel_service_locked(struct MtuModel *m, int gpcId, double sharedUs,
+                             int armedWords, GpcServiceNumber svc,
+                             const GpcServiceInput *in, GpcServiceOutput *out);
+
 /* The buses this model services, as a bit per bus number.
  *
  * WHY IT IS A FUNCTION AND NOT A NUMBER IN run.c.  Those buses have to be

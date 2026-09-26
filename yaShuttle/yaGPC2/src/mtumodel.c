@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef HAVE_PTHREADS
+#include <pthread.h>
+#endif
 
 #include "busword.h"
 /* The bus programs' own (command, length) pairs and command names; see
@@ -78,8 +81,56 @@
  * The extra word goes on the END, after GMT (0,1,2) and MET (3,4,5). */
 #define MTU_WORDS 7
 
-/* One word time on the serial bus, as mmumodel.c has it -- the same wire. */
-#define MTU_BUS_WORD_US 33.0
+/* One word time on the serial bus, as mmumodel.c has it -- the same wire.
+ *
+ * 33 US IS THE RATE FOR A WORD THE BCE TRANSMITS, AND A REPLY IS NOT THAT.
+ * The BCE Principles of Operation (IBM-6246556A part 3, 3.3.3) gives a bus
+ * word as 28 bits at 1 MHz and says that "for a Message Out instruction this
+ * gap is fixed at 5 microseconds" -- 28 + 5 = 33, and that fixed 5 us is the
+ * gap a BCE itself produces between words IT sends.  For words it RECEIVES
+ * the same book allows "a gap of at most 20 microseconds to occur between
+ * data words" before it raises its own error 21 - GAP, so a reply's word
+ * period is anywhere in 28..48 us depending on how fast the answering box
+ * is.  33 is one point in that range and this model charges it for both
+ * directions.
+ *
+ * THAT IS NOT A FREE CHOICE, because the flight software's own cadence
+ * bounds it: ledger #217 measured 27,122 command-to-command intervals and
+ * found that for a receive armed for 21 words the MEDIAN gap is 561 us,
+ * where 21 words at 33 us needs 693 -- so half of all 21-word reads have the
+ * bus reclaimed before the reply could physically have passed, and the
+ * receive is cut off by the next command's sync.  PASS flew, so the real
+ * hardware delivered those 21 words inside 561 us; our wire cannot, and the
+ * Sync Errors that follow are ours, not the software's.
+ *
+ * YAGPC_MTU_WORD_US sets it, so the rate is a measurement rather than a
+ * rebuild.  #217 named two possible remedies -- hold the BCE, or correct the
+ * rate -- and recorded the first as tried and WORSE (it holds the BCE after
+ * what it TRANSMITS, which is one command word, not after the reply it is
+ * waiting to receive).  This is the second. */
+#define MTU_BUS_WORD_US_DEFAULT 33.0
+
+/* YAGPC_MTU_ATOMIC=1: release a reply whole, at the instant the message
+ * would have finished on the wire, instead of word by word. */
+static bool mtu_atomic(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_ATOMIC") != NULL; }
+    return on != 0;
+}
+
+static double mtu_bus_word_us(void) {
+    static int inited = 0;
+    static double us = MTU_BUS_WORD_US_DEFAULT;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_MTU_WORD_US");
+        if (e != NULL && *e != '\0') {
+            double v = atof(e);
+            if (v > 0.0) us = v;
+        }
+    }
+    return us;
+}
 
 /* THE FORWARD MDM ANSWERS FOR THE NETWORK SIGNAL PROCESSOR, WHICH THIS
  * VEHICLE DOES NOT HAVE.
@@ -404,6 +455,32 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
          * a box this vehicle does not have, is not ours to answer. */
         int surveyed = -1;
         const char *sym = fc_sym(cmd, &surveyed);
+        /* A READ THE SURVEY NEVER SAW, BUILT AT RUN TIME.  Commands 532aaa
+         * and 632aaa reach these two units twice a run, once per string,
+         * with a one-word receive armed on the commander AND every listener
+         * -- and no equate in the build carries that value, so the static
+         * survey cannot name them and this line answered nobody.  All four
+         * computers then error on every string at the same instant (trials
+         * exl-a..h: left=1 at FIOHFE38+01fe on the commander and +021a on
+         * the listeners, all eight buses); that is universal, so nobody
+         * fails to sync, but the flight software commfaults every string
+         * and the timing unit is bypassed with its string (FCMRTBLE).  On
+         * the vehicle the MDM plainly answers, or the orbiter would lose
+         * every string twice a run.  YAGPC_FC_ANSWER_ALL answers any read
+         * addressed to these two units that a BCE has armed a receive for,
+         * named or not; the length is the armed count, as below. */
+        if (sym == NULL && m_armed > 0) {
+            static uint32_t said[64]; static int nSaid = 0;
+            int k; for (k = 0; k < nSaid; k++) if (said[k] == (cmd & 0xffffffu)) break;
+            if (k == nSaid && nSaid < 64) {
+                said[nSaid++] = cmd & 0xffffffu;
+                fprintf(stderr, "UNANSWERED cmd=%06x iua=%u armed=%d -- no survey "
+                        "name\n", (unsigned)(cmd & 0xffffffu), iua, m_armed);
+            }
+            /* Answering it was tried (YAGPC_FC_ANSWER_ALL, ledger #249) and
+             * does NOT save the timing unit: the commander stops erring but
+             * the three listeners still do, which is still a commfault. */
+        }
         if (sym == NULL || surveyed == 0 || !fc_ours(sym)) return 0;
         /* THE LENGTH THE COMMANDER ARMED FOR, not a guess.  This used to
          * return sixty-four for anything unrecognised -- "generous", because
@@ -529,10 +606,127 @@ struct MtuModel {
      * see GPC_SVC_RECV_POLL.  Negative when there is no shared clock, where it
      * does not matter because there is nobody to agree with. */
     double wireUs[MTU_NBUS];
+    int xferWords[MTU_NBUS];   /* words this transfer puts on the wire */
+    /* WHO IS CUT OFF WHEN A NEW COMMAND ARRIVES, the commander or a listener?
+     * This is the question that decides the fix and nothing measured so far
+     * answers it.  FIOGPCWE is counted PER BCE and FIOERRLC force-fails only
+     * on a count of exactly ONE, so an error that hits all three listeners
+     * together is harmless -- the count is 3 -- while one that hits the
+     * commander alone, or one listener alone, is fatal.  Cutting the total
+     * number of errors does not help if the survivors are the asymmetric
+     * ones, which is exactly what three runs now show: 151, 85 and 17 error
+     * terminations all cost precisely one computer. */
+    unsigned long cutCmdr[MTU_NBUS];       /* commander still owed words */
+    unsigned long cutListeners[MTU_NBUS];  /* a listener still owed words */
+    unsigned long cutBoth[MTU_NBUS];       /* both, in the same command */
+    unsigned long cutHist[MTU_NBUS][6];    /* how many readers at once */
     int commander[MTU_NBUS];
     int lastBus;                 /* the bus last filled, for the report */
     long commands, reads, wordsOut, listenerWords, nspReads, biteReads;
+    /* ONE MODEL, FIVE THREADS, AND NO LOCK OF ITS OWN.  run.c sets sharedUs
+     * and armedWords -- two scalars shared by every computer and every bus --
+     * and then calls mtumodel_service_as, holding only busLock[busID].  A
+     * computer on a DIFFERENT bus holds a different lock, so it can overwrite
+     * either scalar in between: a command then gets another bus's reply
+     * length, and a reader's readiness is judged against another machine's
+     * clock.  The second is a per-reader, per-poll error that lands on one
+     * computer at random -- the exact shape of the asymmetric fault that
+     * FIOERRLC punishes (#240) and that three runs showed does not scale
+     * with the error count (#243).  These count the collisions as seen at
+     * entry; one that lands mid-service is not counted, so they are a
+     * FLOOR. */
+    unsigned long raceShared, raceArmed, raceChecks;
+    unsigned long iuarLocal;    /* IUAR-setting #CMDIs kept off the wire */
+    unsigned long echoExpired;  /* stale command echoes withdrawn */
+    /* Every distinct command code reaching the model, whole run: the MDM
+     * RETURN WORD read (#MINC FIOxxIUA,FIOMDMRT) is what every computer
+     * fails on every string just after the OPS transition, and the
+     * FIOMDMRT histogram says no FIOMDMRT ever arrives -- this says what
+     * does. */
+    uint32_t cmdSeen[1024]; unsigned long cmdCount[1024]; int cmdN;
+    /* Every FIOMDMRT command, by what the issuing BCE had armed: the IUAR
+     * test above matched NOTHING in its first trial, so what it actually
+     * sees has to be looked at rather than assumed.  [0]=unset, [1]=0,
+     * [2]=1, [3]=2-7, [4]=8+, [5]=negative. */
+    unsigned long mdmrtArmed[6];
+    unsigned long mdmrtUnnamed;  /* ...and IUA-8 LISTEN commands, for scale */
+#ifdef HAVE_PTHREADS
+    pthread_mutex_t lock;        /* used only with YAGPC_MTU_LOCKED */
+#endif
 };
+
+/* YAGPC_MTU_RING: the last MTU_RING events on each bus -- every command and
+ * every word handed to every reader -- dumped once, at the first FCMSFAIL.
+ *
+ * WHY.  Run whocut separated the fatal errors from the harmless ones: of 58
+ * error clusters, 47 caught three or four computers together (which FIOERRLC
+ * tolerates) and 10 caught ONE, and every one-computer error in the second
+ * before the death was the same transaction -- a 34-word receive at
+ * FIOMFE02+017c/+01a0/+01c4/+01e8, one instruction per bus 14-17, which is
+ * FIOFAIC1, the aft MDM channel read.  The lone computer got NONE of the 34
+ * words (left=34) while its peers got all of them.  Only a record of who was
+ * handed what, and when, can say why.  Memory only, so unlike
+ * YAGPC_RECVWORD_TRACE (proved to change the outcome) it prints nothing
+ * until the failure has already happened. */
+#define MTU_RING 2048
+typedef struct {
+    double t;          /* the CALLER's own shared time -- see raceShared */
+    uint32_t word;
+    int8_t g;          /* the computer involved */
+    char kind;         /* C command, e echo, d data, c carry, b bite, m mdm, 0 nothing */
+    uint8_t owed;      /* on C: mask of readers still owed words, bit r */
+    int16_t sent, count;
+} MtuEv;
+static MtuEv mtuRing[MTU_NBUS][MTU_RING];
+static unsigned mtuRingN[MTU_NBUS];
+static int mtu_ring_on(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_RING") != NULL; }
+    return on;
+}
+
+/* YAGPC_MTU_ECHO_EXPIRE=1: a command echo is deliverable only while its
+ * transfer is still on the wire -- see mtu_expire_echo. */
+static bool mtu_echo_expire(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_ECHO_EXPIRE") != NULL; }
+    return on != 0;
+}
+
+static bool mtu_iuar_local(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_IUAR") != NULL; }
+    return on != 0;
+}
+
+/* What THIS thread asked for, so a collision can be recognised. */
+static __thread double tlShared = -2.0;
+static __thread int tlArmed = -2;
+static __thread int tlSet = 0;
+
+static void mtu_ring_put(int b, char kind, int g, uint32_t word, int sent,
+                         int count, unsigned owed) {
+    if (!mtu_ring_on() || b < 0 || b >= MTU_NBUS) return;
+    MtuEv *e = &mtuRing[b][mtuRingN[b]++ % MTU_RING];
+    e->t = tlShared; e->word = word; e->g = (int8_t)g; e->kind = kind;
+    e->owed = (uint8_t)owed; e->sent = (int16_t)sent; e->count = (int16_t)count;
+}
+
+void mtumodel_dump_ring(double sinceUs) {
+    static int done = 0;
+    if (!mtu_ring_on() || done) return;
+    done = 1;
+    for (int b = 0; b < MTU_NBUS; b++) {
+        unsigned n = mtuRingN[b], lo = (n > MTU_RING) ? n - MTU_RING : 0;
+        for (unsigned i = lo; i < n; i++) {
+            const MtuEv *e = &mtuRing[b][i % MTU_RING];
+            if (e->t < sinceUs) continue;
+            fprintf(stderr, "MTURING bus=%d t=%.1f gpc=%d %c word=%06x sent=%d "
+                    "count=%d owed=%02x\n", b + MTU_BUS_FIRST, e->t, e->g,
+                    e->kind, (unsigned)e->word, e->sent, e->count, e->owed);
+        }
+    }
+}
 
 struct MtuModel *mtumodel_create(void) {
     struct MtuModel *m = (struct MtuModel *)calloc(1, sizeof *m);
@@ -543,6 +737,9 @@ struct MtuModel *mtumodel_create(void) {
     if (m != NULL) {
         m->sharedUs = -1.0;
         for (int b = 0; b < MTU_NBUS; b++) m->wireUs[b] = -1.0;
+#ifdef HAVE_PTHREADS
+        pthread_mutex_init(&m->lock, NULL);
+#endif
     }
     return m;
 }
@@ -563,10 +760,37 @@ void mtumodel_set_clock_offset(struct MtuModel *m, const double *offsetUs) {
 
 void mtumodel_set_shared_us(struct MtuModel *m, double sharedUs) {
     if (m) m->sharedUs = sharedUs;
+    tlShared = sharedUs; tlSet |= 1;
 }
 
 void mtumodel_set_armed_words(struct MtuModel *m, int words) {
     if (m) m->armedWords = words;
+    tlArmed = words; tlSet |= 2;
+}
+
+/* YAGPC_MTU_LOCKED=1: set the caller's clock and armed count and serve the
+ * call as ONE step under the model's own lock, so no other computer can
+ * change either in between.  Off by default until measured. */
+bool mtumodel_locked_mode(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_LOCKED") != NULL; }
+    return on != 0;
+}
+
+void mtumodel_service_locked(struct MtuModel *m, int gpcId, double sharedUs,
+                             int armedWords, GpcServiceNumber svc,
+                             const GpcServiceInput *in, GpcServiceOutput *out) {
+    if (m == NULL) return;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&m->lock);
+#endif
+    m->sharedUs = sharedUs;
+    m->armedWords = armedWords;
+    tlShared = sharedUs; tlArmed = armedWords; tlSet = 3;
+    mtumodel_service_as(m, gpcId, svc, in, out);
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&m->lock);
+#endif
 }
 
 uint32_t mtumodel_bus_mask(void) {
@@ -817,17 +1041,128 @@ void mtumodel_service(void *ctx, GpcServiceNumber svc,
     mtumodel_service_as(m, 0, svc, in, out);
 }
 
+/* A COMMAND WORD PASSES ONCE.  echoPending never used to expire: a
+ * listener that was NOT listening when a command went by kept that command
+ * pending, and received it whenever it next polled -- milliseconds later,
+ * as though it were fresh.  If its IUA matched the listener's IUAR, the BCE
+ * took it as the start of the message it had just armed for, got no data,
+ * and was cut off by the next real command: Table 1.2's Sync Error, alone.
+ *
+ * Seen directly in the event ring of trial fix-a, bus 15, GPC2 commanding:
+ * 620040 issued at 55.916662 while GPC1 was not listening on that bus;
+ * 11 ms later GPC1 armed #RDLI 33 for FIOFAIC1 (FIOMFE38+01a0), polled, and
+ * was handed the STALE 620040 -- IUA 12, its own -- then nothing, then
+ * 400c0a's sync: left=34 at 55.928066, and GPC1 self-failed from FIOERRLC
+ * 10 ms later.  GPC3 and GPC4 had taken that old echo in time and received
+ * all 34 words.  Whether a listener gets ambushed depends only on whether
+ * it happened to poll in a window, which is the asymmetry FIOERRLC punishes
+ * (FIOGPCWE == 1).
+ *
+ * On a wire a command a computer was not listening for is simply gone --
+ * the same rule iccmodel.c applies to the ICC ("A BUS HOLDS NOTHING").  So
+ * a reader that never began a transfer loses its echo, and that transfer's
+ * data, once the transfer would have left the wire: the command word and
+ * every reply word at the wire rate, plus a margin for poll granularity and
+ * the barrier's clock spread.  A reader that has begun is untouched. */
+#define MTU_ECHO_MARGIN_US 200.0
+static void mtu_expire_echo(struct MtuModel *m, int b, int g) {
+    if (!mtu_echo_expire() || ff_mdm_off()) return;
+    if (!m->echoPending[b][g] || m->wireUs[b] < 0.0 || !(tlSet & 1) || tlShared < 0.0)
+        return;
+    double gone = m->wireUs[b]
+                + (double)(1 + (m->xferWords[b] > 0 ? m->xferWords[b] : 0)) * mtu_bus_word_us()
+                + MTU_ECHO_MARGIN_US;
+    if (tlShared <= gone) return;
+    m->echoPending[b][g] = false;
+    m->count[b][g] = 0;
+    m->biteLeft[b][g] = 0;
+    m->mdm[b][g] = 0;
+    __atomic_fetch_add(&m->echoExpired, 1, __ATOMIC_RELAXED);
+    mtu_ring_put(b, 'x', g, m->echoCmd[b], 0, 0, 0);
+    /* Each one, live: rare enough (a few hundred a run) not to perturb, and
+     * the only way to tie a later death to a withdrawal a whole cycle
+     * earlier, which is further back than either ring reaches. */
+    fprintf(stderr, "ECHOX gpc=%d bus=%d cmd=%06x late=%.1f us t=%.1f\n", g,
+            b + MTU_BUS_FIRST, (unsigned)m->echoCmd[b], tlShared - m->wireUs[b],
+            tlShared);
+}
+
 void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                          const GpcServiceInput *in, GpcServiceOutput *out) {
     if (!m || !in || !out) return;
     int g = (gpcId >= 0 && gpcId < MTU_READERS) ? gpcId : 0;
     int b = in->busID - MTU_BUS_FIRST;
+    if (g >= 1 && tlSet == 3) {
+        __atomic_fetch_add(&m->raceChecks, 1, __ATOMIC_RELAXED);
+        if (m->sharedUs != tlShared) __atomic_fetch_add(&m->raceShared, 1, __ATOMIC_RELAXED);
+        if (svc == GPC_SVC_XMIT_CMD && m->armedWords != tlArmed)
+            __atomic_fetch_add(&m->raceArmed, 1, __ATOMIC_RELAXED);
+    }
     if (b < 0 || b >= MTU_NBUS) b = 0;
 
     switch (svc) {
     case GPC_SVC_XMIT_CMD: {
         uint32_t cmd = in->in.word & 0x00ffffffu;
         m->commands++;
+        {
+            int k;
+            for (k = 0; k < m->cmdN; k++) if (m->cmdSeen[k] == cmd) break;
+            if (k == m->cmdN && m->cmdN < 1024) m->cmdSeen[m->cmdN++] = cmd;
+            if (k < 1024) m->cmdCount[k]++;
+        }
+        /* A LISTENER SETTING ITS OWN IUA REGISTER IS NOT A BUS TRANSACTION.
+         * The flight-critical listen entry points all begin
+         *     #CMDI FIOxxIUA,FIOMDMRT   SET IUAR FOR LISTENER
+         *     #RDLI n
+         * (FIOMFE02 FIOEL23L..., FIOHFEPG FIOELLR6...): a command instruction
+         * executed only to load the IUA register before listening.  This model
+         * treats every command as a transaction -- it makes the issuer the
+         * commander, clears every reader's pending reply, restarts the wire
+         * clock and echoes the command to everyone -- so a listener whose
+         * #CMDI lands AFTER the real commander's read destroys its own copy of
+         * the reply and then waits in #RDLI for a sync that has already gone
+         * by, and the stray echo lands on the real commander as a command sync
+         * in the middle of ITS receive.  The first is exactly the fatal
+         * signature measured in run whocut: one computer, alone, receiving
+         * NONE of FIOFAIC1's 34 words (left=34) at FIOMFE02+017c/+01a0/+01c4/
+         * +01e8 while its peers received all of them.
+         *
+         * NOT #224 AGAIN.  That blocked the servicer call for ANY command
+         * from a BCE whose transmit-enable was off, and judged the result by
+         * total error counts on single runs -- a metric today's runs show
+         * cannot see the fault (151, 85 and 17 errors each cost exactly one
+         * computer).  This recognises only the idiom: FIOMDMRT, named by the
+         * survey, with NO receive armed by the issuing BCE (armed <= 0) -- the same test
+         * that already tells this command apart from FIOIMUPG's one-word read
+         * of the same code.  The armed count is this thread's own (tlArmed),
+         * not the shared scalar another computer may have overwritten (#244).
+         * YAGPC_MTU_IUAR=1 turns it on; off, nothing changes. */
+        {
+            int sv = -1;
+            const char *sy = fc_sym(cmd, &sv);
+            if (sy != NULL && strcmp(sy, "FIOMDMRT") == 0) {
+                int k = !(tlSet & 2) ? 0 : tlArmed == 0 ? 1 : tlArmed == 1 ? 2
+                      : (tlArmed >= 2 && tlArmed <= 7) ? 3 : tlArmed >= 8 ? 4 : 5;
+                __atomic_fetch_add(&m->mdmrtArmed[k], 1, __ATOMIC_RELAXED);
+            } else if (CMD_IUA(cmd) == 8u) {
+                __atomic_fetch_add(&m->mdmrtUnnamed, 1, __ATOMIC_RELAXED);
+            }
+        }
+        /* "NO RECEIVE ARMED" IS -1, NOT 0: iop_bce_armed_words returns -1
+         * when the BCE has neither a stashed length nor an active receive,
+         * which is exactly the state before a listener's #RDLI.  The first
+         * version of this tested == 0 and matched nothing at all in its
+         * first trial (iuar-a), which therefore measured the baseline. */
+        if (mtu_iuar_local() && (tlSet & 2) && tlArmed <= 0) {
+            int surveyed = -1;
+            const char *sym = fc_sym(cmd, &surveyed);
+            if (sym != NULL && strcmp(sym, "FIOMDMRT") == 0) {
+                m->iuarLocal++;
+                mtu_ring_put(b, 'I', g, cmd, 0, 0, 0);
+                out->out.xmit.ok = true;
+                break;
+            }
+        }
         /* YAGPC_MTUTRACE: every command reaching these buses, with the IUA
          * it names.  This is what showed the MTU is IUA 10 rather than the
          * device number 22 FIOCBLKS calls it. */
@@ -907,10 +1242,12 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                     m->mdm[b][r] = (nsp > FF_BITE_WORDS) ? nsp - FF_BITE_WORDS : 0;
                 }
             }
+            m->xferWords[b] = nsp;
             if (nsp > 0) m->nspReads++;
             if (bite) m->biteReads++;
         } else {
             mtu_fill_time(m, b);
+            m->xferWords[b] = MTU_WORDS;
         }
         /* BUT THE COMMAND ITSELF IS ON THE WIRE, whoever it is for.  A
          * listener's Listen-Mode receive waits, with no time-out, for a
@@ -924,6 +1261,31 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
          * ignored by a waiting listener, so echoing it costs nothing.  Only
          * named computers listen; reader 0 is a caller that does not say who
          * it is, which is the single-machine case. */
+        {
+            /* Count who still has words the wire never got to them, BEFORE
+             * this command's sync lands on them.  m->commander[b] is still
+             * the PREVIOUS commander here, which is the point. */
+            int nCut = 0; bool cmdrCut = false, lisCut = false;
+            for (int r = 1; r < MTU_READERS; r++) {
+                if (m->count[b][r] + m->biteLeft[b][r] + m->mdm[b][r]
+                    + m->carryLeft[b][r] <= 0) continue;
+                nCut++;
+                if (r == m->commander[b]) cmdrCut = true; else lisCut = true;
+            }
+            {
+                unsigned owed = 0;
+                for (int r = 1; r < MTU_READERS; r++)
+                    if (m->count[b][r] + m->biteLeft[b][r] + m->mdm[b][r]
+                        + m->carryLeft[b][r] > 0) owed |= 1u << r;
+                mtu_ring_put(b, 'C', g, cmd, m->commander[b], 0, owed);
+            }
+            if (nCut > 0) {
+                if (cmdrCut && lisCut) m->cutBoth[b]++;
+                else if (cmdrCut) m->cutCmdr[b]++;
+                else m->cutListeners[b]++;
+                m->cutHist[b][nCut < 6 ? nCut : 5]++;
+            }
+        }
         m->commander[b] = g;
         m->echoCmd[b] = cmd;
         m->wireUs[b] = m->sharedUs;      /* this transaction's place in time */
@@ -979,6 +1341,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
+        mtu_expire_echo(m, b, g);
         /* A WORD IS NOT AVAILABLE UNTIL IT HAS HAD TIME TO GET HERE, measured
          * on the vehicle's shared clock.
          *
@@ -1001,8 +1364,40 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         {
             bool ready = true;
             if (!ff_mdm_off() && m->wireUs[b] >= 0.0 && m->sharedUs >= 0.0) {
-                int k = m->echoPending[b][g] ? 0 : (m->sent[b][g] + 1);
-                ready = (m->sharedUs >= m->wireUs[b] + (double)k * MTU_BUS_WORD_US);
+                /* A MESSAGE IS ATOMIC, AND WORD-AT-A-TIME IS WHAT SPLITS THE
+                 * SET.  Pacing each word separately lets a reader sit HALF
+                 * WAY THROUGH a reply, and half way through is the only
+                 * state from which the next command's sync can raise Table
+                 * 1.2's Sync Error.  Worse, which readers are half way
+                 * through depends on how often each happened to poll, so the
+                 * error lands on some computers and not others -- and
+                 * FIOERRLC force-fails the computer that holds an error its
+                 * peers do not (FIOGPCWE == 1, counted per BCE).  That
+                 * asymmetry is the whole loss of sync, ledger #240.
+                 *
+                 * On the wire a receive completes when the MESSAGE completes;
+                 * a BCE does not release a half-received message to its
+                 * program.  So the whole reply becomes available at one
+                 * instant -- the same instant for every computer on the bus,
+                 * which is what makes the duration observer-independent --
+                 * and no reader can be caught in between.
+                 *
+                 * The RATE is unchanged and still the documented 33 us
+                 * (IBM-6246556A part 3): this moves WHEN the words are
+                 * released, not how long the wire is busy.  Measured at 10 us
+                 * per word the word-at-a-time scheme dropped the error
+                 * terminations from 151 to 17 -- so the partially drained
+                 * reader is confirmed as the source -- but 10 us is below the
+                 * 28-bit word time and not a rate the hardware can have.
+                 * This gets the same effect at a legal rate. */
+                int k;
+                if (mtu_atomic()) {
+                    k = m->echoPending[b][g] ? 0 : (m->xferWords[b] > 0
+                                                    ? m->xferWords[b] : 1);
+                } else {
+                    k = m->echoPending[b][g] ? 0 : (m->sent[b][g] + 1);
+                }
+                ready = (m->sharedUs >= m->wireUs[b] + (double)k * mtu_bus_word_us());
             }
             /* THE BACKLOG IS ALWAYS READY.  Its words belong to a transfer
              * whose wire time is already past -- that is the whole reason it
@@ -1016,6 +1411,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         }
         break;
     case GPC_SVC_RECV_WORD:
+        mtu_expire_echo(m, b, g);
         if (m->carryLeft[b][g] > 0) {
             /* What it still wanted of the PREVIOUS transfer, ahead of this
              * one's command word, which is the order the wire had them in.
@@ -1023,17 +1419,20 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             out->out.recv.available = true;
             out->out.recv.word = m->carry[b][g][m->carryHead[b][g]++];
             m->carryLeft[b][g]--;
+            mtu_ring_put(b, 'c', g, out->out.recv.word, m->sent[b][g], m->carryLeft[b][g], 0);
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
         } else if (m->echoPending[b][g]) {
             m->echoPending[b][g] = false;
             out->out.recv.available = true;
             out->out.recv.word = m->echoCmd[b] | YAGPC_BUSWORD_CMD_SYNC;
+            mtu_ring_put(b, 'e', g, m->echoCmd[b], m->sent[b][g], m->count[b][g], 0);
         } else if (m->count[b][g] > 0) {
             out->out.recv.available = true;
             out->out.recv.word = m->reply[b][g][m->head[b][g]++];
             m->count[b][g]--;
             m->sent[b][g]++;
+            mtu_ring_put(b, 'd', g, out->out.recv.word, m->sent[b][g], m->count[b][g], 0);
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
         } else if (m->biteLeft[b][g] > 0) {
@@ -1042,9 +1441,11 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             m->sent[b][g]++;
             out->out.recv.available = true;
             out->out.recv.word = m->bite[b][g][idx];
+            mtu_ring_put(b, 'b', g, out->out.recv.word, m->sent[b][g], m->biteLeft[b][g], 0);
         } else if (m->mdm[b][g] > 0) {
             m->mdm[b][g]--;                 /* a box with nothing wired to it */
             m->sent[b][g]++;
+            mtu_ring_put(b, 'm', g, 0, m->sent[b][g], m->mdm[b][g], 0);
             out->out.recv.available = true;
             out->out.recv.word = 0;
         } else {
@@ -1075,6 +1476,49 @@ void mtumodel_report(struct MtuModel *m) {
         fprintf(stderr, "mtu: %ld transfer(s) carried over a following command"
                         " for a reader still taking them, %ld dropped as a"
                         " second\n", m->carried, m->carryDropped);
+    {
+        unsigned long tc = 0, tl = 0, tb = 0, th[6] = {0,0,0,0,0,0};
+        for (int b = 0; b < MTU_NBUS; b++) {
+            tc += m->cutCmdr[b]; tl += m->cutListeners[b]; tb += m->cutBoth[b];
+            for (int k = 0; k < 6; k++) th[k] += m->cutHist[b][k];
+        }
+        if (tc + tl + tb > 0)
+            fprintf(stderr, "mtu: a new command landed on a reader still owed "
+                    "words %lu time(s): the COMMANDER alone %lu, LISTENERS only "
+                    "%lu, both %lu; readers at once 1=%lu 2=%lu 3=%lu 4=%lu "
+                    "5+=%lu -- only a count of ONE is fatal (FIOGPCWE)\n",
+                    tc + tl + tb, tc, tl, tb, th[1], th[2], th[3], th[4], th[5]);
+    }
+    fprintf(stderr, "mtu: FIOMDMRT commands by the issuer's armed count: "
+            "unset %lu, 0 %lu, 1 %lu, 2-7 %lu, 8+ %lu, negative %lu; IUA-8 "
+            "listen commands %lu\n", m->mdmrtArmed[0], m->mdmrtArmed[1],
+            m->mdmrtArmed[2], m->mdmrtArmed[3], m->mdmrtArmed[4],
+            m->mdmrtArmed[5], m->mdmrtUnnamed);
+        if (m->cmdN > 0) {
+        fprintf(stderr, "mtu: %d distinct command code(s); IUA 10/12 ones:", m->cmdN);
+        for (int k = 0; k < m->cmdN; k++) {
+            unsigned iua = CMD_IUA(m->cmdSeen[k]);
+            if (iua == 10u || iua == 12u) {
+                int sv = -1; const char *sy = fc_sym(m->cmdSeen[k], &sv);
+                fprintf(stderr, " %06x%s%s=%lu", (unsigned)m->cmdSeen[k],
+                        sy ? ":" : "", sy ? sy : "", m->cmdCount[k]);
+            }
+        }
+        fprintf(stderr, "\n");
+    }
+        if (m->echoExpired > 0)
+        fprintf(stderr, "mtu: %lu stale command echo(es) withdrawn from readers "
+                "that were not listening when the command passed "
+                "(YAGPC_MTU_ECHO_EXPIRE)\n", m->echoExpired);
+        if (m->iuarLocal > 0)
+        fprintf(stderr, "mtu: %lu listener IUAR-setting command(s) kept off the "
+                "wire (YAGPC_MTU_IUAR)\n", m->iuarLocal);
+    if (m->raceChecks > 0)
+        fprintf(stderr, "mtu: %lu call(s) checked; another computer had changed "
+                "the shared clock underneath %lu of them and the armed count "
+                "under %lu command(s) -- a floor, collisions mid-call are not "
+                "seen%s\n", m->raceChecks, m->raceShared, m->raceArmed,
+                mtumodel_locked_mode() ? " (YAGPC_MTU_LOCKED: should be 0)" : "");
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);

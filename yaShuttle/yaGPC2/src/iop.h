@@ -641,4 +641,7 @@ void msc_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2);
 void bce_instr_table_init(void);
 void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2);
 
+/* YAGPC_BCE_RING: print the BCE-side ring once, events since sinceUs. */
+void iop_dump_bce_ring(double sinceUs);
+
 #endif

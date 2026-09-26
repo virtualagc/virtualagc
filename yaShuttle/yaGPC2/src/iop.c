@@ -11,6 +11,9 @@
 
 #include "envcache.h"
 #include "vehicle.h"
+
+static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
+                         int latch, int await, int left, int count);
 /* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
 static void msc_ring_dump_once(IOP *iop, const char *why);
@@ -1719,6 +1722,7 @@ int iop_bce_armed_words(const IOP *iop, int p) {
 
 void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
     discretes_note_io_done(iop->discretes, p, true);
+    bce_ring_put(iop, p, 'E', cause, 0, 0, 0, (int)iop->bce[p - 1].recvLeft, 0);
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
      * BCEs (all, if the list is empty), per computer, with the BCE's program
      * address.  A time-out has its own RECV TIMEOUT line; one without it is a
@@ -1742,10 +1746,17 @@ void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
             }
         }
         if (on && p >= 1 && p <= 24 && (mask == 0 || (mask & (1u << p))) && iop->cpu != NULL)
-            fprintf(stderr, "ERRTERM gpc=%d bce=%d pc=%05x left=%u t=%.1f\n",
+            /* shared= as well: without it a run where NOTHING fails has no
+             * FCMSFAIL landmark to take each computer's clock offset from,
+             * so its errors cannot be set beside one another -- and the
+             * question is precisely whether they coincide across computers
+             * (an error one computer holds alone is the fatal kind). */
+            fprintf(stderr, "ERRTERM gpc=%d bce=%d pc=%05x left=%u t=%.1f shared=%.1f\n",
                     iop->cpu->gpcId, p,
                     (unsigned)(register_get32(iopls_at(&iop->ls, p, 0, 2)) & 0x3ffffu),
-                    (unsigned)iop->bce[p - 1].recvLeft, iop->cpu->elapsedTimeUs);
+                    (unsigned)iop->bce[p - 1].recvLeft, iop->cpu->elapsedTimeUs,
+                    iop->vehicle != NULL
+                        ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) : -1.0);
     }
     iop_proc_set(&iop->regProgExcept, p, 0);
     iop_proc_set(&iop->regBusyWait, p, 0);
@@ -1901,6 +1912,56 @@ double iop_now_us(IOP *iop) {
 }
 
 /* Move every word the MIA has into the receive, up to its count. */
+/* YAGPC_BCE_RING: the BCE's side of every flight-critical transfer -- each
+ * receive armed (pc, count), each word taken (sync or data, from the bus
+ * or from the adapter latch, and whether listen mode was still waiting for
+ * a command), and each error -- in a per-bus ring, printed once beside
+ * mtumodel's at the first FCMSFAIL.  The model's ring shows what each
+ * computer was OFFERED; only this shows what its BCE DID with it, which is
+ * the question for a listener whose #RDS steps come out one message early
+ * (trial exl-c: GPC4 inside #RDLI 31 holding one word when 525000's sync
+ * arrived).  Memory only, unlike YAGPC_RECVWORD_TRACE. */
+#define BCE_RING 4096
+typedef struct {
+    double t; uint32_t word, pc; int8_t g; char kind; uint8_t sync, latch,
+    await; int16_t left, count;
+} BceEv;
+static BceEv bceRing[32][BCE_RING];
+static unsigned bceRingN[32];
+static int bce_ring_on(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_BCE_RING") != NULL; }
+    return on;
+}
+static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
+                         int latch, int await, int left, int count) {
+    if (!bce_ring_on() || p < 14 || p > 23 || iop->cpu == NULL) return;
+    unsigned i = __atomic_fetch_add(&bceRingN[p], 1u, __ATOMIC_RELAXED);
+    BceEv *e = &bceRing[p][i % BCE_RING];
+    e->t = (iop->vehicle != NULL) ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId)
+                                  : iop->cpu->elapsedTimeUs;
+    e->word = word; e->pc = register_get32(iopls_PC(&iop->ls)) & 0x3ffffu;
+    e->g = (int8_t)iop->cpu->gpcId; e->kind = kind; e->sync = (uint8_t)sync;
+    e->latch = (uint8_t)latch; e->await = (uint8_t)await;
+    e->left = (int16_t)left; e->count = (int16_t)count;
+}
+void iop_dump_bce_ring(double sinceUs) {
+    static int done = 0;
+    if (!bce_ring_on() || done) return;
+    done = 1;
+    for (int p = 14; p <= 23; p++) {
+        unsigned n = bceRingN[p], lo = (n > BCE_RING) ? n - BCE_RING : 0;
+        for (unsigned i = lo; i < n; i++) {
+            const BceEv *e = &bceRing[p][i % BCE_RING];
+            if (e->t < sinceUs) continue;
+            fprintf(stderr, "BCERING bus=%d t=%.1f gpc=%d %c pc=%05x word=%06x "
+                    "sync=%d latch=%d await=%d left=%d count=%d\n", p, e->t, e->g,
+                    e->kind, (unsigned)e->pc, (unsigned)(e->word & 0xffffffu),
+                    e->sync, e->latch, e->await, e->left, e->count);
+        }
+    }
+}
+
 static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
     while (bce->recvLeft > 0 && mia_data_available(iop, &bce->mia)) {
         bool wasLatch = bce->mia.latchValid;
@@ -1955,6 +2016,8 @@ static void bce_take_words(IOP *iop, BCE *bce, int p, double now) {
                         (int)bce->recvAwaitCmd, (int)bce->recvSkippedEcho, (int)bce->recvGotAny,
                         (unsigned)bce->recvLeft, (int)iop_proc_get(&iop->regXmitEna, p), now);
         }
+        bce_ring_put(iop, p, 'w', data, bce->mia.lastCmdSync, bce->mia.lastFromLatch,
+                     bce->recvAwaitCmd, (int)bce->recvLeft, (int)bce->recvCount);
         if (bce->recvAwaitCmd || bce->mia.lastCmdSync) {
             if (bce->recvAwaitCmd) {
                 if (bce->mia.lastCmdSync &&
@@ -2085,6 +2148,8 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvSkippedEcho = false;
         bce->recvErrored = false;
         bce->recvCmd = 0u;
+        bce_ring_put(iop, p, 'A', 0u, 0, bce->mia.latchValid, bce->recvAwaitCmd,
+                     (int)count, (int)count);
         if (yagpc_getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
             now >= timeout_trace_from_us()) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);

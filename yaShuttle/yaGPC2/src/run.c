@@ -303,6 +303,13 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
          * always been given and this one never was.  Without it the unit's
          * three accumulators come from three different computers' clocks --
          * see mtumodel_set_shared_us. */
+        if (mtumodel_locked_mode()) {
+            mtumodel_service_locked(br->mtu, br->gpcId, router_shared_us(br),
+                                    iop_bce_armed_words(br->iop, in->busID),
+                                    svc, in, out);
+            vehicle_bus_leave(br->vehicle, in->busID);
+            return;
+        }
         mtumodel_set_shared_us(br->mtu, router_shared_us(br));
         /* HOW MANY WORDS THIS COMMANDER ACTUALLY ASKED FOR.  A bus program
          * arms its receive and then issues the command, so the count is in
@@ -2547,6 +2554,12 @@ static bool batchrunner_step(BatchRunner *r) {
                      * enough that the failure stops happening (#190). */
                     if (r->trig.hits[i] == 1)
                         discretes_dump_history(r->discretes, r->trig.label[i]);
+                    /* And the model's own record of who was handed what on
+                     * each bus -- once, at the first FCMSFAIL anywhere. */
+                    if (r->trig.hits[i] == 1)
+                        mtumodel_dump_ring(landmark_now_us(r) - 30000.0);
+                    if (r->trig.hits[i] == 1)
+                        iop_dump_bce_ring(landmark_now_us(r) - 30000.0);
                     /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed
                      * INSIDE a routine, where the interesting value is
                      * whichever register that code happens to be using --
