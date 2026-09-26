@@ -1688,6 +1688,32 @@ int iop_bce_armed_words(const IOP *iop, int p) {
      * programs' own lengths -- "FIONSPDR armed 32, bus program arms 1". */
     if (bce->armingWords >= 0) return bce->armingWords;
     if (bce->recvActive) return (int)bce->recvCount;
+    /* YAGPC_ARMED_TRACE: WHY there is no length to give.  A device model that
+     * cannot learn the length falls back to a static survey, and the survey
+     * cannot know a command built at run time -- so the cases that reach here
+     * bound what any coverage rule can do (#222). */
+    {
+        static int inited = 0, on = 0;
+        static double from = 0.0;
+        static long said = 0;
+        if (!inited) {
+            inited = 1;
+            const char *e = yagpc_getenv("YAGPC_ARMED_TRACE");
+            on = e != NULL;
+            /* THE VALUE IS A START TIME IN SECONDS.  A flat budget is spent
+             * entirely at t=42, during the IPL, where recvActive=0 is
+             * expected and says nothing -- which is what a first attempt at
+             * this measured and nearly reported. */
+            if (on && *e != '\0') from = atof(e);
+        }
+        if (on && iop->cpu != NULL && iop->cpu->elapsedTimeUs / 1e6 >= from &&
+            said++ < 60)
+            fprintf(stderr, "ARMED gpc=%d bce=%d none: armingWords=%d recvActive=%d "
+                            "recvCount=%u recvLeft=%u pc=%05x t=%.1f\n",
+                    iop->cpu->gpcId, p, bce->armingWords, (int)bce->recvActive,
+                    (unsigned)bce->recvCount, (unsigned)bce->recvLeft,
+                    0u, iop->cpu->elapsedTimeUs / 1e6);
+    }
     return -1;
 }
 
