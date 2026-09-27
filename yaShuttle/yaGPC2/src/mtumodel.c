@@ -442,10 +442,34 @@ static bool ff_mdm_off(void) {
     return off != 0;
 }
 
+static bool fc_any_iua(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_FC_ANY_IUA"); }
+    return on != 0;
+}
+
 static bool fc_answer_unnamed(void) {
     static int inited = 0, on = 0;
     if (!inited) { inited = 1; on = env_default_on("YAGPC_FC_ANSWER_UNNAMED"); }
     return on != 0;
+}
+
+/* Every read a BCE has ARMED a receive for that the model then answers with
+ * nothing, once per code and reason.  The five-computer acid test still has
+ * universal left=1/6/32 errors in G9 (FIOHFE89, FIOMFEG9) that none of the
+ * UNANSWERED lines account for, so the other ways of declining have to be
+ * seen: the IUA gate in the caller, the survey calling the code a command
+ * with no receive, and a zero length at the end. */
+static void mtu_declined(uint32_t cmd, int armed, const char *why) {
+    static uint32_t seen[128]; static int n = 0;
+    if (armed <= 0) return;
+    uint32_t key = (cmd & 0xffffffu) ^ ((uint32_t)(why[0]) << 24);
+    for (int k = 0; k < n; k++) if (seen[k] == key) return;
+    if (n < 128) seen[n++] = key;
+    int sv = -1; const char *sym = fc_sym(cmd, &sv);
+    fprintf(stderr, "DECLINED cmd=%06x iua=%u armed=%d sym=%s surveyed=%d -- %s\n",
+            (unsigned)(cmd & 0xffffffu), (unsigned)CMD_IUA(cmd), armed,
+            sym ? sym : "-", sv, why);
 }
 
 static int ff_nsp_words(uint32_t cmd, int m_armed) {
@@ -480,7 +504,7 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
     if (ff_bite4_named(cmd)) return FF_BITE_WORDS;
     {
         unsigned iua = CMD_IUA(cmd);
-        if (iua != MTU_IUA && iua != 12u) return 0;
+        if (iua != MTU_IUA && iua != 12u && !fc_any_iua()) return 0;
         /* BY NAME.  A read the survey has never seen, or one that belongs to
          * a box this vehicle does not have, is not ours to answer. */
         int surveyed = -1;
@@ -517,9 +541,29 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
              * trial of answering (aa-a) ran WITHOUT echo expiry, so its
              * listener errors were the stale-echo kind and it could not
              * test this; it must be judged together with echo expiry. */
-            if (fc_answer_unnamed()) return m_armed;
+            if (fc_answer_unnamed() && (iua == MTU_IUA || iua == 12u)) return m_armed;
         }
-        if (sym == NULL || surveyed == 0 || !fc_ours(sym)) return 0;
+        /* FIOMDMRT: THE ARMED COUNT DECIDES, NOT THE SURVEY.  fcbustable.h
+         * says so itself -- "531c20 (FIOMDMRT) is a one-word read in
+         * FIOIMUPG and a command with no receive at all in twelve other bus
+         * programs.  Only the run-time state tells those apart" -- and the
+         * survey lists 631c20 only as a command, so this line declined it
+         * even when a BCE had armed a one-word receive.  Seen in the acid
+         * test: every remaining error (32 of 32 in acid-ai1) was a one-word
+         * receive on buses 14-17 that the commander (FIOHFE89+01fe) and all
+         * three listeners (+021a) waited for together.  ONLY this code: the
+         * survey's no-receive verdict still stands for everything else, and
+         * FIOHIBAD in particular is a read PASS sends on purpose to a
+         * channel that is not there, to stop a BCE -- answering it would
+         * defeat that.  Part of YAGPC_FC_ANY_IUA. */
+        if (fc_any_iua() && surveyed == 0 && m_armed > 0 && sym != NULL &&
+            strcmp(sym, "FIOMDMRT") == 0)
+            return (m_armed > FF_REPLY_MAX) ? FF_REPLY_MAX : m_armed;
+        if (sym == NULL || surveyed == 0 || !fc_ours(sym)) {
+            mtu_declined(cmd, m_armed, sym == NULL ? "no survey name"
+                         : surveyed == 0 ? "survey says no receive" : "not ours");
+            return 0;
+        }
         /* THE LENGTH THE COMMANDER ARMED FOR, not a guess.  This used to
          * return sixty-four for anything unrecognised -- "generous", because
          * the true length was believed unknowable here.  It is not: a bus
@@ -541,7 +585,7 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
          * is not a read at all -- a '#CMDI' that only sets a listener's IUAR,
          * or the deliberately-bad one PASS uses to stop a BCE. */
         int n = (m_armed >= 0) ? m_armed : surveyed;
-        if (n <= 0) return 0;
+        if (n <= 0) { mtu_declined(cmd, m_armed, "zero length"); return 0; }
         return (n > FF_REPLY_MAX) ? FF_REPLY_MAX : n;
     }
 }
@@ -706,7 +750,7 @@ struct MtuModel {
  * handed what, and when, can say why.  Memory only, so unlike
  * YAGPC_RECVWORD_TRACE (proved to change the outcome) it prints nothing
  * until the failure has already happened. */
-#define MTU_RING 2048
+#define MTU_RING 16384
 typedef struct {
     double t;          /* the CALLER's own shared time -- see raceShared */
     uint32_t word;
@@ -1286,8 +1330,22 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * a cursor per computer, not necessarily the same seven for each
              * (ledger #137). */
             unsigned cu = CMD_IUA(cmd);
-            int nsp = (cu == MTU_IUA || cu == 12u)
+            /* YAGPC_FC_ANY_IUA: surveyed reads at the OTHER flight-critical
+             * units too.  Run hk1a (five computers, every fix on) lost GPC2
+             * after two rounds in which ALL FOUR set members waited for
+             * b8401f -- FIOFAIC5, a surveyed 32-word read at IUA 23 in
+             * FIOMFEG9 -- and nobody answered it, because only IUAs 10 and
+             * 12 were ever answered.  #241 tried lifting this gate and was
+             * refuted, but it ran without echo expiry and without the lock,
+             * so its deaths were the stale-echo kind and it could not test
+             * the answering itself (the same confound as aa-a, #249).  Here
+             * only a read NAMED in the survey WITH a receive length, that a
+             * BCE has ARMED a receive for, is answered -- ff_nsp_words'
+             * by-name tests still decide it. */
+            int nsp = (cu == MTU_IUA || cu == 12u || fc_any_iua())
                           ? ff_nsp_words(cmd, m->armedWords) : 0;
+            if (cu != MTU_IUA && cu != 12u && !ff_mdm_off() && !fc_any_iua())
+                mtu_declined(cmd, m->armedWords, "IUA not 10 or 12");
             /* THE MDM'S ANSWER LIVES APART FROM THE TIMING UNIT'S REPLY.  It
              * used to be written into `reply`, so an MDM read on one of these
              * buses memset the time words the unit had just put there -- and

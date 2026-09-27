@@ -2250,6 +2250,17 @@ static bool mode_switch_held(BatchRunner *r) {
     if ((r->step & 0xfffL) == 0) mode_held_update(r);
     return r->modeHeldLast;
 }
+static double ring_window_us(void) {
+    static int inited = 0;
+    static double us = 30000.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_RING_WINDOW_US");
+        if (e != NULL && *e != '\0') { double v = atof(e); if (v > 0.0) us = v; }
+    }
+    return us;
+}
+
 /* The clock YAGPC_LANDMARKS_AFTER is judged against. */
 static double landmark_now_us(const BatchRunner *r) {
     double shared = (r->vehicle != NULL)
@@ -2557,10 +2568,14 @@ static bool batchrunner_step(BatchRunner *r) {
                         discretes_dump_history(r->discretes, r->trig.label[i]);
                     /* And the model's own record of who was handed what on
                      * each bus -- once, at the first FCMSFAIL anywhere. */
+                    /* YAGPC_RING_WINDOW_US: how far back to print.  30 ms
+                     * covers the transfer that failed; a listener parked
+                     * from a PREVIOUS cycle needs the cycle before, which
+                     * is further back than that (#247). */
                     if (r->trig.hits[i] == 1)
-                        mtumodel_dump_ring(landmark_now_us(r) - 30000.0);
+                        mtumodel_dump_ring(landmark_now_us(r) - ring_window_us());
                     if (r->trig.hits[i] == 1)
-                        iop_dump_bce_ring(landmark_now_us(r) - 30000.0);
+                        iop_dump_bce_ring(landmark_now_us(r) - ring_window_us());
                     /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed
                      * INSIDE a routine, where the interesting value is
                      * whichever register that code happens to be using --

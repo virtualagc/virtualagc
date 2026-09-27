@@ -1744,8 +1744,11 @@ void iop_bce_error_terminate(IOP *iop, int p, uint32_t cause) {
                 ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId) : iop->cpu->elapsedTimeUs;
             fprintf(stderr, "RINGDUMP on error: gpc=%d bus=%d left=%u shared=%.1f\n",
                     iop->cpu->gpcId, p, (unsigned)iop->bce[p - 1].recvLeft, now);
-            iop_dump_bce_ring(now - 30000.0);
-            if (iop_ring_hook != NULL) iop_ring_hook(now - 30000.0);
+            double win = 30000.0;
+            { const char *w = yagpc_getenv("YAGPC_RING_WINDOW_US");
+              if (w != NULL && atof(w) > 0.0) win = atof(w); }
+            iop_dump_bce_ring(now - win);
+            if (iop_ring_hook != NULL) iop_ring_hook(now - win);
         }
     }
     /* YAGPC_ERRTERM_TRACE=<n>[,<n>...]: every error termination of those
@@ -1946,7 +1949,7 @@ double iop_now_us(IOP *iop) {
  * the question for a listener whose #RDS steps come out one message early
  * (trial exl-c: GPC4 inside #RDLI 31 holding one word when 525000's sync
  * arrived).  Memory only, unlike YAGPC_RECVWORD_TRACE. */
-#define BCE_RING 4096
+#define BCE_RING 16384
 typedef struct {
     double t; uint32_t word, pc; int8_t g; char kind; uint8_t sync, latch,
     await; int16_t left, count;
