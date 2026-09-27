@@ -52,7 +52,21 @@ wait gpc $gpc mode-tb RUN timeout 120
 +0   subtitle Loaded. The MODE talkback for GPC $gpc now reads RUN.\n(Look at the row of indicators just above the\ncaption "MODE", Panel's lower-middle left.)
 +5   subtitle Release the BFC CRT.  (Look at\nthe top center of the Panel.)
 +2   crt 0
-+1   subtitle Flip the computer from STBY mode to RUN mode.\n(Look along the bottom left of the Panel.)
+# NOTHING ON THE PROGRAM NOTES' LISTS FOR TEN SECONDS EITHER SIDE OF 'mode RUN'.
+# PASS Program Note 42433, "POTENTIAL F-T-S DUE TO ICC CONTENTION AT NEW GPC
+# START-UP": a GPC/CRT key, a BFC CRT switch change, moding another GPC and
+# the rest "SHOULD NOT BE PERFORMED DURING THE TIME SPAN BEGINNING
+# APPROXIMATELY 10 SECONDS BEFORE MODING A SECONDARY GPC TO RUN UNTIL 10
+# SECONDS AFTER PLACING THE MODE SWITCH TO RUN OR UNTIL THE OUTPUT TALKBACK
+# GOES GRAY"; Program Note 37536 says the same of keyboard entries on the
+# system SPECs.  This script used to change the CRT switch a few seconds
+# before RUN and key GPC/CRT a few seconds after, and about one run in ten
+# that cost a computer (yaGPC2 ledger #256).  ../check-ten-second-rule.py
+# checks it, included scripts and all.
+# AFTER RUN the first listed act is the GPC/CRT key, 15 s on, and whatever
+# script called this one does nothing listed sooner than that either.
++1   subtitle Now touch nothing for about 10 seconds.  The\nflight software wants no switch or key activity\nfor 10 seconds either side of moding to RUN.
++6   subtitle Flip the computer from STBY mode to RUN mode.\n(Look along the bottom left of the Panel.)
 +5   mode RUN
 +1   subtitle Turn off the IPL SOURCE.  (Look at\nthe very middle of the Panel.)
 +5   source OFF

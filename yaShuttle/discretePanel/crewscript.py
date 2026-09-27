@@ -156,7 +156,8 @@ HELP = """\
                         timeout (default %(timeout)d s) stops the script.
     wait user           hold until someone clicks in the panel O6 window (the
                         cursor changes; the click moves no control).
-                        --wait-user puts one first.
+                        --wait-user puts one first; --no-wait-user makes
+                        every one, the script's own included, go straight on.
     wait crt N title TEXT [timeout S]
                         hold until TEXT appears anywhere in the top two lines
                         of CRT N's display (1-4), spaces squeezed and case
@@ -928,16 +929,19 @@ class Player(object):
     log(text)           report what happened
     wait_user(done)     optional: let a person say go, calling done() when
                         they do; without it a 'wait user' stops the script
+    unattended          nobody is there to click: every 'wait user' is met at
+                        once, in this script and every one it calls
     screens             optional: a ScreenWatch; without it a 'wait crt'
                         stops the script
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None, gap=None, snaps=None):
+                 source=None, gap=None, snaps=None, unattended=False):
         self.entries, self.after, self.panel = entries, after, panel
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
+        self.unattended = unattended
         self.screens = screens
         self.on_done = on_done         # called (stopped) when this script ends
         self.bus = bus or Bus()
@@ -1004,6 +1008,15 @@ class Player(object):
         while k < len(self.entries) and not self.stopped:
             e = self.entries[k]
             self._note(k, e)
+            if e["kind"] == "wait_user" and self.unattended:
+                # --no-wait-user means NO waiting for a person, whoever asked
+                # for it -- the script's own 'wait user' as much as the one
+                # --wait-user would have put first.  It used to cover only the
+                # latter, and an unattended run of a script with its own
+                # waited for ever (4gpc-startup-subtitled, 2026-09-27).
+                self.log("%s: unattended, going straight on" % e["text"])
+                k += 1
+                continue
             if e["kind"] == "wait_user":
                 if self.wait_user is None:
                     self.log("%s: nothing to click -- script stopped" % e["text"])
@@ -1252,7 +1265,7 @@ class Player(object):
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
                        source=os.path.basename(e["path"]), gap=self.gap,
-                       snaps=self.snaps)
+                       snaps=self.snaps, unattended=self.unattended)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):

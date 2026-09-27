@@ -54,7 +54,7 @@ wait user
 +1 subtitle Flip the spring-loaded toggle for IDP 1 LOAD.\nLook midway up the right-hand side.
 +2 idpload 1
 
-+1 subtitle Switch GPC1 from HALT mode to STBY mode
++1 subtitle Switch GPC 1 from HALT mode to STBY mode
 +2 mode STANDBY
 
 +1 subtitle And now we wait for the 2nd-stage bootloader to run ...
@@ -70,7 +70,19 @@ wait crt 1 title GPCIPL MENU
 wait gpc 1 mode-tb RUN timeout 300
 +2 subtitle Switch BFC CRT DISPLAY OFF
 +1 crt 0
-+2 subtitle Change GPC 1 mode from STBY to RUN
+# NOTHING ON THE PROGRAM NOTES' LISTS FOR TEN SECONDS EITHER SIDE OF 'mode RUN'.
+# PASS Program Note 42433, "POTENTIAL F-T-S DUE TO ICC CONTENTION AT NEW GPC
+# START-UP": a GPC/CRT key, a BFC CRT switch change, moding another GPC and
+# the rest "SHOULD NOT BE PERFORMED DURING THE TIME SPAN BEGINNING
+# APPROXIMATELY 10 SECONDS BEFORE MODING A SECONDARY GPC TO RUN UNTIL 10
+# SECONDS AFTER PLACING THE MODE SWITCH TO RUN OR UNTIL THE OUTPUT TALKBACK
+# GOES GRAY"; Program Note 37536 says the same of keyboard entries on the
+# system SPECs.  This script used to change the CRT switch a few seconds
+# before RUN and key GPC/CRT a few seconds after, and about one run in ten
+# that cost a computer (yaGPC2 ledger #256).  ../check-ten-second-rule.py
+# checks it, included scripts and all.
++1 subtitle Now touch nothing for about 10 seconds.  The\nflight software wants no switch or key activity\nfor 10 seconds either side of moding to RUN.
++9 subtitle Change GPC 1 mode from STBY to RUN
 +2 mode RUN
 wait crt 1 title "GPC MEMORY" 
 +0 subtitle It's up! Notice the title "GPC MEMORY"
@@ -99,7 +111,7 @@ wait crt 1 title "GPC MEMORY"
 +1 subtitle Flip the spring-loaded toggle for IDP 2 LOAD.
 +2 idpload 2
 
-+1 subtitle Switch GPC 1 from HALT mode to STBY mode
++1 subtitle Switch GPC 2 from HALT mode to STBY mode
 +2 mode STANDBY
 
 +1 subtitle And now we wait for the 2nd-stage bootloader to run ...
@@ -115,12 +127,14 @@ wait crt 2 title GPCIPL MENU
 wait gpc 2 mode-tb RUN timeout 300
 +2 subtitle Switch BFC CRT DISPLAY OFF
 +1 crt 0
-+2 subtitle Change GPC 2 mode from STBY to RUN
++1 subtitle Touch nothing for about 10 seconds, as before.
++9 subtitle Change GPC 2 mode from STBY to RUN
 +2 mode RUN
++1 subtitle And nothing for 10 seconds after RUN, either.
 # Give GPC 2 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
-+1 subtitle A GPC is given an IDP once it is in RUN,\nto show that it is running properly.
++6 subtitle A GPC is given an IDP once it is in RUN,\nto show that it is running properly.
 +3 subtitle <left>Use keys GPC/CRT 2 2 EXEC
 +2 keys KB1 GPC/CRT 2 2 EXEC
 wait crt 2 title "GPC MEMORY" 
@@ -165,12 +179,14 @@ wait crt 2 title GPCIPL MENU
 wait gpc 3 mode-tb RUN timeout 300
 +2 subtitle Switch BFC CRT DISPLAY OFF
 +1 crt 0
-+2 subtitle Change GPC 3 mode from STBY to RUN
++1 subtitle Touch nothing for about 10 seconds, as before.
++9 subtitle Change GPC 3 mode from STBY to RUN
 +2 mode RUN
++1 subtitle And nothing for 10 seconds after RUN, either.
 # Give GPC 3 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
-+1 subtitle <left>Use keys GPC/CRT 3 2 EXEC
++9 subtitle <left>Use keys GPC/CRT 3 2 EXEC
 +2 keys KB1 GPC/CRT 3 2 EXEC
 wait crt 2 title "GPC MEMORY"
 +0 subtitle It's up! Notice the title "GPC MEMORY"
@@ -214,12 +230,14 @@ wait crt 2 title GPCIPL MENU
 wait gpc 4 mode-tb RUN timeout 300
 +2 subtitle Switch BFC CRT DISPLAY OFF
 +1 crt 0
-+2 subtitle Change GPC 4 mode from STBY to RUN
++1 subtitle Touch nothing for about 10 seconds, as before.
++9 subtitle Change GPC 4 mode from STBY to RUN
 +2 mode RUN
++1 subtitle And nothing for 10 seconds after RUN, either.
 # Give GPC 4 the display now that it is in RUN -- "It is assigned an
 # IDP to ensure that it is running properly" -- before looking for its
 # GPC MEMORY page, which only appears once a GPC commands the CRT.
-+1 subtitle <left>Use keys GPC/CRT 4 2 EXEC
++9 subtitle <left>Use keys GPC/CRT 4 2 EXEC
 +2 keys KB1 GPC/CRT 4 2 EXEC
 wait crt 2 title "GPC MEMORY" 
 +0 subtitle It's up! Notice the title "GPC MEMORY"

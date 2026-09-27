@@ -2347,6 +2347,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
                                      wait_user=panel.wait_for_click,
+                                     unattended=getattr(panel, "unattended", False),
                                      screens=panel.screens,
                                      progress=show_progress,
                                      source=source)
@@ -2477,6 +2478,9 @@ def main(argv=None):
     ap.add_argument("--wait-user", action="store_true",
                     help="hold the --script until someone clicks in the panel window, "
                          "as if its first line were 'wait user' (and show the window)")
+    ap.add_argument("--no-wait-user", action="store_true",
+                    help="nobody is there to click: every 'wait user' in the "
+                         "--script, and in any script it calls, goes straight on")
     ap.add_argument("--quit-after", type=int, metavar="MS",
                     help="exit this many ms after startup (for scripted runs)")
     ap.add_argument("--restore", metavar="FILE",
@@ -2523,6 +2527,9 @@ def main(argv=None):
     entries, text = None, ""
     if args.wait_user and not args.script:
         raise SystemExit("panelO6: --wait-user holds a --script; there is none")
+    if args.wait_user and args.no_wait_user:
+        raise SystemExit("panelO6: --wait-user and --no-wait-user contradict each other")
+    panel.unattended = args.no_wait_user
     if args.script:
         with open(args.script) as f:
             text = f.read()
@@ -2539,7 +2546,8 @@ def main(argv=None):
     # window -- unless asked for one (--show, for a demonstration), or the
     # script waits for someone to click in it.
     _dont_steal_focus(root, mapWindow=(not args.script or args.show or args.wait_user
-                                       or crewscript.has_wait_user(text)))
+                                       or (crewscript.has_wait_user(text)
+                                           and not args.no_wait_user)))
     # The screen announcements and the script commands are wanted whether or
     # not a script was named: manager.py can start one at any moment.
     panel.screens = crewscript.ScreenWatch()

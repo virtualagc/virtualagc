@@ -1047,7 +1047,8 @@ def main():
                          "something only to whoever wrote the script")
     ap.add_argument("--no-wait-user", action="store_true",
                     help="start a --script run at once instead of waiting for "
-                         "a click in the panel window; for unattended runs, "
+                         "a click in the panel window, and let every 'wait user' "
+                         "in the script go straight on; for unattended runs, "
                          "which would otherwise wait for ever")
     ap.add_argument("--hide-panel", action="store_true",
                     help="do not show panelO6's window during a --script run; "
@@ -1434,14 +1435,13 @@ def main():
                 # recording.  --no-wait-user is for the unattended run, which
                 # would otherwise hang for ever; that is the exception, and
                 # the exception carries the flag.
+                # And the script's OWN 'wait user' lines with it: an unattended
+                # run has nobody to click either way.
                 if not args.no_wait_user:
                     panel_argv += ["--wait-user"]
-                try:
-                    with open(args.panel_script) as fh:
-                        waits_for_user = (not args.no_wait_user
-                                          or crewscript.has_wait_user(fh.read()))
-                except OSError:
-                    waits_for_user = not args.no_wait_user
+                else:
+                    panel_argv += ["--no-wait-user"]
+                waits_for_user = not args.no_wait_user
                 if waits_for_user and args.duration:
                     log("note: the script has a 'wait user', and --duration counts from "
                         "start-up -- including the time spent waiting")
