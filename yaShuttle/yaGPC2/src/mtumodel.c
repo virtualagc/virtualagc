@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <time.h>
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
@@ -346,7 +347,8 @@ static void fc_check(uint32_t cmd, int armed) {
  * time out exactly as it did before any of this. */
 /* YAGPC_FC_SENSORS: answer EVERY surveyed read at these two units, including
  * the ones fc_ours() declines because they are sensors rather than interface
- * state.  AN EXPERIMENT, off by default and separate from YAGPC_FC_MDM.
+ * state.  Separate from YAGPC_FC_MDM; ON by default since 2026-09-26 (see
+ * env_default_on), =0 to turn it off.
  *
  * WHY IT IS WORTH TRYING NOW AND WAS NOT BEFORE.  Ledger #210 records that
  * answering channel data cost the redundant set every time, and concluded a
@@ -361,9 +363,23 @@ static void fc_check(uint32_t cmd, int armed) {
  *
  * It still never answers FIOHIBAD: that is in the no-receive table, so its
  * surveyed length is 0 and the caller declines it before reaching here. */
+/* ON UNLESS SET TO 0.  The five switches below began as opt-in experiments
+ * and were made the default on 2026-09-26 after the validation recorded in
+ * the ledger (#249, #250 and the entries they cite): the timing unit kept
+ * live and the redundant set held on the flown four-computer, three-CRT
+ * vehicle, the five-computer acid test, and the owner's watched run.  Each
+ * still reads its variable, so YAGPC_xxx=0 (or off, no, false) restores the
+ * old behaviour for a measurement. */
+static bool env_default_on(const char *name) {
+    const char *e = yagpc_getenv(name);
+    if (e == NULL) return true;
+    return !(strcmp(e, "0") == 0 || strcasecmp(e, "off") == 0 ||
+             strcasecmp(e, "no") == 0 || strcasecmp(e, "false") == 0);
+}
+
 static bool ff_sensors(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_SENSORS") != NULL; }
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_FC_SENSORS"); }
     return on != 0;
 }
 
@@ -398,8 +414,16 @@ static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
 
 /* How many words this model answers the command with, or 0 if it does not
  * speak for it. */
-/* OFF UNTIL A FIVE-COMPUTER ACID TEST CLEARS IT.  YAGPC_FC_MDM turns the
- * forward and aft MDMs on.
+/* ON BY DEFAULT SINCE 2026-09-26; YAGPC_FC_MDM=0 turns the forward and aft
+ * MDMs off.  The history below is why it was held back, and it is kept
+ * because it is the case that had to be answered.  It was answered: with
+ * the stale-echo and race fixes beside it, the five-computer acid test ran
+ * clean in every trial (ledger #252) -- zero votes, the timing unit live on
+ * all five -- as did the flown four-computer three-CRT vehicle and the
+ * four-computer OPS 201 vehicle.  The acid-test loss described next came
+ * from the stale command echo (#247), not from answering as such.
+ *
+ * WHAT WAS HELD AGAINST IT.
  *
  * It does fix the timing unit -- measured twice on a two-computer OPS 201
  * vehicle, six bypasses to none and the unit read for the whole run instead
@@ -414,13 +438,13 @@ static const struct { uint32_t cmd; int words; } FF_MDM_READS[] = {
  * default must not be the thing that breaks a vehicle that was working. */
 static bool ff_mdm_off(void) {
     static int inited = 0, off = 0;
-    if (!inited) { inited = 1; off = yagpc_getenv("YAGPC_FC_MDM") == NULL; }
+    if (!inited) { inited = 1; off = !env_default_on("YAGPC_FC_MDM"); }
     return off != 0;
 }
 
 static bool fc_answer_unnamed(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_FC_ANSWER_UNNAMED") != NULL; }
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_FC_ANSWER_UNNAMED"); }
     return on != 0;
 }
 
@@ -703,7 +727,7 @@ static int mtu_ring_on(void) {
  * transfer is still on the wire -- see mtu_expire_echo. */
 static bool mtu_echo_expire(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_ECHO_EXPIRE") != NULL; }
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_MTU_ECHO_EXPIRE"); }
     return on != 0;
 }
 
@@ -790,10 +814,12 @@ void mtumodel_set_armed_words(struct MtuModel *m, int words) {
 
 /* YAGPC_MTU_LOCKED=1: set the caller's clock and armed count and serve the
  * call as ONE step under the model's own lock, so no other computer can
- * change either in between.  Off by default until measured. */
+ * change either in between.  ON by default since 2026-09-26: measured, the
+ * unlocked model saw another computer's clock under 4% of calls (#244); the
+ * lock is a leaf lock and cannot deadlock (#250).  =0 turns it off. */
 bool mtumodel_locked_mode(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_LOCKED") != NULL; }
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_MTU_LOCKED"); }
     return on != 0;
 }
 
@@ -1085,6 +1111,16 @@ void mtumodel_service(void *ctx, GpcServiceNumber svc,
  * every reply word at the wire rate, plus a margin for poll granularity and
  * the barrier's clock spread.  A reader that has begun is untouched. */
 #define MTU_ECHO_MARGIN_US 200.0
+static double mtu_echo_stale_us(void) {
+    static int inited = 0;
+    static double us = 5000.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_MTU_ECHO_STALE_US");
+        if (e != NULL && *e != '\0') { double v = atof(e); if (v >= 0.0) us = v; }
+    }
+    return us;
+}
 static void mtu_expire_echo(struct MtuModel *m, int b, int g) {
     if (!mtu_echo_expire() || ff_mdm_off()) return;
     if (!m->echoPending[b][g] || m->wireUs[b] < 0.0 || !(tlSet & 1) || tlShared < 0.0)
@@ -1092,6 +1128,21 @@ static void mtu_expire_echo(struct MtuModel *m, int b, int g) {
     double gone = m->wireUs[b]
                 + (double)(1 + (m->xferWords[b] > 0 ? m->xferWords[b] : 0)) * mtu_bus_word_us()
                 + MTU_ECHO_MARGIN_US;
+    /* BUT NEVER SOONER THAN A WHOLE TRANSACTION AGO.  The wire-time window
+     * alone was too tight: measured in run s201-all1, the listen command
+     * 401100 on bus 17 was withdrawn from GPCs 1, 2 and 3 every 40 ms, each
+     * 250-340 us late -- ordinary listener latency here (BCE wheel slices,
+     * the barrier's spread, the listener finishing the instruction before
+     * its #RDLI), which a listener already armed on the vehicle would never
+     * see as late.  The fatal stale echoes this exists for were 10.8 ms (the
+     * FA read, trial fix-a) and 960 ms (the timing unit's own read) old.  So
+     * an echo is stale only past a floor well clear of both: 5 ms, fifteen
+     * times the routine lateness and half the youngest fatal one.  A window
+     * that also caught the routine case is the likely source of the parked
+     * listener (#247) and of s201-all1's FCMISYNC loss, where all three
+     * peers failed to complete one I/O together.  YAGPC_MTU_ECHO_STALE_US
+     * overrides it. */
+    if (gone < m->wireUs[b] + mtu_echo_stale_us()) gone = m->wireUs[b] + mtu_echo_stale_us();
     if (tlShared <= gone) return;
     m->echoPending[b][g] = false;
     m->count[b][g] = 0;
@@ -1346,9 +1397,9 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * all of them. */
             /* WITH THE ANSWERING OFF, EXACTLY AS BEFORE.  Everything in this
              * model beyond the timing unit's own reply is part of the MDM
-             * answering, which is experimental and off by default -- and the
-             * default configuration is one the owner has validated clean over
-             * an hour.  Measured 2026-09-25: leaving the new echo rule, the
+             * answering (on by default since 2026-09-26; YAGPC_FC_MDM=0
+             * restores the configuration the owner had validated clean over
+             * an hour, and this rule with it).  Measured 2026-09-25: leaving the new echo rule, the
              * wire pacing and the shared clock active with the answering OFF
              * cost that configuration four fail votes at t=1914 where it had
              * none.  A correctness fix that perturbs a validated build is
