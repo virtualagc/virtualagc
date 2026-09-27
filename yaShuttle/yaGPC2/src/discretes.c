@@ -259,12 +259,12 @@ Discretes *discretes_create(int gpcId) {
     d->syncOutLast = 8u;
     for (int k = 0; k < 5; k++) d->syncInLast[k] = 8u;
     {
-        /* YAGPC_SYNC_HISTORY=N keeps the last N sync events per computer.
-         * Off by default: a run that is not investigating #190 should carry
-         * nothing, and 4096 events is about a second of conversation, which
-         * is ample either side of a 3.85 ms timeout. */
+        /* YAGPC_SYNC_HISTORY=N keeps the last N sync events per computer;
+         * 8192, about two and a half seconds of conversation, unless it
+         * says otherwise, and 0 keeps none.  It was off by default, and a
+         * failure that happened with it off had to be waited for again. */
         const char *e = yagpc_getenv("YAGPC_SYNC_HISTORY");
-        long n = (e != NULL && *e != '\0') ? atol(e) : 0;
+        long n = (e != NULL && *e != '\0') ? atol(e) : 8192;
         if (n > 0) {
             if (n > 1000000L) n = 1000000L;
             d->hist = calloc((size_t)n, sizeof *d->hist);
@@ -523,6 +523,16 @@ static void sync_record_x(Discretes *d, unsigned char kind, unsigned char who,
 #endif
 }
 
+/* WHAT A READ OF THE LINES RETURNED.  Kind 5, and only with
+ * YAGPC_SYNC_READS: a sync loop reads every 40 us or so, which would push the
+ * rest of the conversation out of the ring. */
+void discretes_note_read(Discretes *d, uint32_t value) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_SYNC_READS") != NULL; }
+    if (!on || d == NULL || d->hist == NULL) return;
+    sync_record_x(d, 5, 0, 0, value, 0, 0);
+}
+
 void discretes_dump_history(Discretes *d, const char *why) {
     if (d == NULL || d->hist == NULL) return;
 #ifdef HAVE_PTHREADS
@@ -549,7 +559,10 @@ void discretes_dump_history(Discretes *d, const char *why) {
                     d->gpcId, e->t, e->sim / 1e6, (unsigned)caller,
                     (unsigned)e->a, (unsigned)e->driven,
                     (unsigned)(e->x >> 16), (unsigned)(e->x & 0xffffu));
-        } else if (e->kind == 2 || e->kind == 3)
+        } else if (e->kind == 5)
+            fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f read A=%08x\n",
+                    d->gpcId, e->t, e->sim / 1e6, (unsigned)e->a);
+        else if (e->kind == 2 || e->kind == 3)
             fprintf(stderr, "SYNCHIST GPC%d t=%.6f sim=%.6f io BCE%u %s\n",
                     d->gpcId, e->t, e->sim / 1e6, (unsigned)e->who,
                     e->kind == 3 ? "ERROR-TERMINATED" : "done");

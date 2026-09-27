@@ -2252,7 +2252,9 @@ static bool mode_switch_held(BatchRunner *r) {
 }
 static double ring_window_us(void) {
     static int inited = 0;
-    static double us = 30000.0;
+    /* Two seconds: the listener that failed in run e2u had gone out of step a
+     * whole 160 ms cycle before its error, and 30 ms did not reach it. */
+    static double us = 2000000.0;
     if (!inited) {
         inited = 1;
         const char *e = yagpc_getenv("YAGPC_RING_WINDOW_US");
@@ -2268,6 +2270,72 @@ static double landmark_now_us(const BatchRunner *r) {
     return (shared > 0.0) ? shared : r->age.gpc.cpu.elapsedTimeUs;
 }
 
+
+/* THE FLIGHT SOFTWARE'S OWN SYNC TRACE, out of this computer's memory.
+ * FCMTRACE logs every SVC, I/O completion and timer interrupt that passes a
+ * sync point into a cyclic table of 8-halfword entries -- time, old PSW,
+ * detail, id and SVC number -- whose bounds are in the PSA (TPSATENT 0008,
+ * TPSATBGN 000A, TPSATEND 000B), and FCMSFAIL stops it.  It is what showed a
+ * failed computer to have executed one SVC twice (ledger #253); no trace of
+ * ours records which SVC a sync was for.  gpc-synctrace.py names the
+ * addresses.  The table's sector is not in the PSA, so the one whose entries
+ * carry valid ids is taken. */
+static void fcmtrace_dump(BatchRunner *r) {
+    const MemoryBus *ram = r->age.gpc.cpu.ram;
+    if (ram == NULL) return;
+    uint32_t ent = membus_get16(ram, 8) & 0xffffu, mod = membus_get16(ram, 9) & 0xffffu;
+    uint32_t bgn = membus_get16(ram, 10) & 0xffffu, end = membus_get16(ram, 11) & 0xffffu;
+    if (bgn < 0x8000u || end <= bgn || end - bgn > 0x1000u || ((end - bgn) & 7u)) return;
+    int best = -1, bestOk = 0;
+    for (int s = 1; s <= 15; s++) {
+        uint32_t base = (uint32_t)s * 0x8000u - 0x8000u;
+        int ok = 0;
+        for (uint32_t a = bgn; a < end; a += 8u) {
+            uint32_t id = membus_get16(ram, base + a + 6u) & 0xffffu;
+            if (id >= 1u && id <= 3u) ok++;
+        }
+        if (ok > bestOk) { bestOk = ok; best = s; }
+    }
+    if (best < 0 || bestOk * 2 < (int)((end - bgn) / 8u)) return;
+    uint32_t base = (uint32_t)best * 0x8000u - 0x8000u;
+    fprintf(stderr, "FCMTRACE GPC%d table %04x-%04x sector %d next %04x %s\n",
+            r->gpcId, (unsigned)bgn, (unsigned)end, best, (unsigned)ent,
+            mod == 0u ? "STOPPED" : "running");
+    for (uint32_t a = bgn; a < end; a += 8u) {
+        uint32_t w[8];
+        for (int k = 0; k < 8; k++) w[k] = membus_get16(ram, base + a + (uint32_t)k) & 0xffffu;
+        fprintf(stderr, "FCMTRACE GPC%d %04x t=%u psw1=%04x%04x detail=%04x%04x "
+                        "id=%u svc=%u\n", r->gpcId, (unsigned)a,
+                (unsigned)((w[0] << 16) | w[1]), (unsigned)w[2], (unsigned)w[3],
+                (unsigned)w[4], (unsigned)w[5], (unsigned)w[6], (unsigned)w[7]);
+    }
+}
+
+/* EVERYTHING A FAILURE LEAVES BEHIND, WRITTEN ONCE, WHETHER OR NOT ANYONE
+ * ASKED.  The trigger does not depend on the build: it is a computer raising
+ * a fail vote, or reaching a landmark called fcmsfail if one is set.  Each
+ * computer writes its own sync history and its own copy of the flight
+ * software's trace the first time it notices; the first to notice also
+ * writes the bus rings, which belong to the vehicle. */
+static void batchrunner_failure_record(BatchRunner *r, const char *why) {
+    if (r->failRecorded) return;
+    r->failRecorded = true;
+    Vehicle *v = r->vehicle;
+    int first = 0;
+    if (v != NULL) {
+        __atomic_store_n(&v->failureSeen, 1, __ATOMIC_RELEASE);
+        first = !__atomic_exchange_n(&v->failureRingsDone, 1, __ATOMIC_ACQ_REL);
+    }
+    fprintf(stderr, "FAILURE RECORD GPC%d (%s) t=%.6f s shared=%.6f%s\n",
+            r->gpcId, why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
+            landmark_now_us(r) / 1e6, first ? " -- first in the vehicle" : "");
+    fcmtrace_dump(r);
+    discretes_dump_history(r->discretes, why);
+    if (first) {
+        mtumodel_dump_ring(landmark_now_us(r) - ring_window_us());
+        iop_dump_bce_ring(landmark_now_us(r) - ring_window_us());
+    }
+}
 
 static bool batchrunner_step(BatchRunner *r) {
     /* Before anything else: in HALT the machine executes nothing at all. */
@@ -2564,6 +2632,10 @@ static bool batchrunner_step(BatchRunner *r) {
                      * wanted is what this machine had just heard from its
                      * peers -- and a full YAGPC_SYNCTRACE slows the vehicle
                      * enough that the failure stops happening (#190). */
+                    bool isFail = strcmp(r->trig.label[i], "fcmsfail") == 0;
+                    if (isFail)
+                        batchrunner_failure_record(r, "FCMSFAIL entered");
+                    else
                     if (r->trig.hits[i] == 1)
                         discretes_dump_history(r->discretes, r->trig.label[i]);
                     /* And the model's own record of who was handed what on
@@ -2572,9 +2644,9 @@ static bool batchrunner_step(BatchRunner *r) {
                      * covers the transfer that failed; a listener parked
                      * from a PREVIOUS cycle needs the cycle before, which
                      * is further back than that (#247). */
-                    if (r->trig.hits[i] == 1)
+                    if (!isFail && r->trig.hits[i] == 1)
                         mtumodel_dump_ring(landmark_now_us(r) - ring_window_us());
-                    if (r->trig.hits[i] == 1)
+                    if (!isFail && r->trig.hits[i] == 1)
                         iop_dump_bce_ring(landmark_now_us(r) - ring_window_us());
                     /* YAGPC_LANDMARKS_REGS: all eight, for a landmark placed
                      * INSIDE a routine, where the interesting value is
@@ -2725,6 +2797,13 @@ static bool batchrunner_step(BatchRunner *r) {
             msc->failDiscSeen = 0u;
             if (seen & ~fd) discretes_publish_failvote(r->discretes, fd | seen);
             discretes_publish_failvote(r->discretes, fd);
+            if (!r->failRecorded) {
+                if ((fd | seen) != 0u)
+                    batchrunner_failure_record(r, "fail vote raised");
+                else if (r->vehicle != NULL &&
+                         __atomic_load_n(&r->vehicle->failureSeen, __ATOMIC_ACQUIRE))
+                    batchrunner_failure_record(r, "a neighbour failed");
+            }
             /* AND THE DIAGONAL: this computer's Computer Fail lamp, which
              * FOLLOWS THE PRESENT STATE -- two or more votes against it now,
              * or its own RM voter failing its self test.  It used to latch,

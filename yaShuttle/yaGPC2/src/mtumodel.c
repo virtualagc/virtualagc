@@ -672,9 +672,32 @@ struct MtuModel {
      * BOUNDED AT ONE, deliberately.  An unbounded queue was tried and buried
      * a listener in backlog: 158,169 runaway BCE lines (#210).  A reader two
      * transfers behind loses the older one, which is what it does today. */
-    uint16_t carry[MTU_NBUS][MTU_READERS][FF_REPLY_MAX];
+    /* AND THE COMMAND ITSELF, FOR A LISTENER THAT WAS LISTENING.  The wire
+     * here holds ONE command per bus, so a listener that had not yet looked
+     * when the next command was issued never saw the first.  A real BCE is
+     * hardware and cannot miss a word while its receive is armed; ours looks
+     * when its computer's thread next runs it, and measured gaps between
+     * looks reach 365 us.  FIOMTUPG issues 526420, 525000 and 526c7f within
+     * 297 us and its listeners take them with #RDLI 1, #RDLI 1, #RDLI 32 --
+     * so a listener that misses the first takes the second in its place, is
+     * left waiting in the 32-word receive with no time-out, takes the NEXT
+     * cycle's 526420 as that receive's command, and is given a command sync
+     * where it expected data: one error, alone, and it fails itself (run
+     * e2u, GPC4, ledger #254).  So the untaken command is carried too, in
+     * front of its words, for a reader that has looked at this bus within
+     * MTU_LISTENING_US -- one that is not listening gets nothing, as before.
+     *
+     * STILL BOUNDED, by size and now by age: what is carried is dropped
+     * MTU_ECHO_STALE after the last of it was put there, so a listener
+     * cannot be buried the way #210's was. */
+#define MTU_CARRY_MAX (2 * FF_REPLY_MAX + 8)
+#define MTU_LISTENING_US 1000.0
+    uint32_t carry[MTU_NBUS][MTU_READERS][MTU_CARRY_MAX];
     int carryLeft[MTU_NBUS][MTU_READERS], carryHead[MTU_NBUS][MTU_READERS];
-    long carried, carryDropped;
+    double carryUs[MTU_NBUS][MTU_READERS];     /* when the last was added */
+    double lastLookUs[MTU_NBUS][MTU_READERS];  /* reader's last poll or take */
+    int issuer;                                /* who is issuing, for carry */
+    long carried, carryDropped, carriedCmds, carryExpired;
     int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
     /* THE FOUR BITE WORDS THAT ARE NOT ZERO, kept apart from `reply` for the
      * same reason `mdm` is: the timing unit's words and an MDM's share these
@@ -761,9 +784,19 @@ typedef struct {
 } MtuEv;
 static MtuEv mtuRing[MTU_NBUS][MTU_RING];
 static unsigned mtuRingN[MTU_NBUS];
+/* ON unless the variable says 0, off, no or false.  These cost a few stores an
+ * event and nothing is printed until a computer fails another, which is the
+ * one moment the record is wanted -- and a failure that happens with the
+ * record off has to be waited for again (2.6 hours on average, 2026-09-27). */
+static int ring_default_on(const char *name) {
+    const char *e = yagpc_getenv(name);
+    if (e == NULL) return 1;
+    return !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
+             !strcmp(e, "false"));
+}
 static int mtu_ring_on(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_MTU_RING") != NULL; }
+    if (!inited) { inited = 1; on = ring_default_on("YAGPC_MTU_RING"); }
     return on;
 }
 
@@ -962,6 +995,8 @@ static double mtu_skew_us(const struct MtuModel *m) {
     return (now >= after) ? skew : 0.0;
 }
 
+static double mtu_echo_stale_us(void);
+
 /* Move what this reader still wants of the CURRENT transfer into its backlog,
  * so the next command does not cut it off.  Only when it is mid-transfer: a
  * reader still holding its command sync never started, and keeping its words
@@ -980,23 +1015,52 @@ static void mtu_carry_take(struct MtuModel *m, int b, int r) {
      * It travels with the switch like the echo rule, the pacing and the
      * shared clock (#213). */
     if (ff_mdm_off()) return;
-    if (r == 0 || r == m->commander[b]) return;
-    if (m->echoPending[b][r]) return;        /* never began this transfer */
+    if (r == 0 || r == m->commander[b] || r == m->issuer) return;
+    /* What is already there stays in front; see MTU_CARRY_MAX. */
     int n = 0;
-    while (m->count[b][r] > 0 && n < FF_REPLY_MAX) {
+    if (m->carryLeft[b][r] > 0) {
+        if (m->carryHead[b][r] > 0)
+            memmove(m->carry[b][r], m->carry[b][r] + m->carryHead[b][r],
+                    (size_t)m->carryLeft[b][r] * sizeof m->carry[b][r][0]);
+        n = m->carryLeft[b][r];
+    }
+    int had = n;
+    int want = (m->echoPending[b][r] ? 1 : 0) + m->count[b][r]
+             + m->biteLeft[b][r] + m->mdm[b][r];
+    if (m->echoPending[b][r]) {
+        /* NEVER BEGAN THIS TRANSFER -- and keeps it only if it was listening
+         * when the command was issued, and the command is not itself stale. */
+        bool listening = m->sharedUs >= 0.0 && m->wireUs[b] >= 0.0 &&
+                         m->lastLookUs[b][r] > 0.0 &&
+                         m->wireUs[b] - m->lastLookUs[b][r] <= MTU_LISTENING_US &&
+                         m->sharedUs - m->wireUs[b] <= mtu_echo_stale_us();
+        if (!listening) return;
+    }
+    if (want <= 0) return;
+    if (n + want > MTU_CARRY_MAX) {
+        /* No room: it loses what it had, as a reader two behind always did. */
+        m->carryDropped++;
+        n = 0; had = 0;
+    }
+    if (m->echoPending[b][r]) {
+        m->carry[b][r][n++] = m->echoCmd[b] | YAGPC_BUSWORD_CMD_SYNC;
+        m->echoPending[b][r] = false;
+        m->carriedCmds++;
+    }
+    while (m->count[b][r] > 0 && n < MTU_CARRY_MAX) {
         m->carry[b][r][n++] = m->reply[b][r][m->head[b][r]++];
         m->count[b][r]--;
     }
-    while (m->biteLeft[b][r] > 0 && n < FF_REPLY_MAX) {
+    while (m->biteLeft[b][r] > 0 && n < MTU_CARRY_MAX) {
         m->carry[b][r][n++] = m->bite[b][r][FF_BITE_WORDS - m->biteLeft[b][r]];
         m->biteLeft[b][r]--;
     }
-    while (m->mdm[b][r] > 0 && n < FF_REPLY_MAX) {
+    while (m->mdm[b][r] > 0 && n < MTU_CARRY_MAX) {
         m->carry[b][r][n++] = 0;
         m->mdm[b][r]--;
     }
-    if (n == 0) return;
-    if (m->carryLeft[b][r] > 0) m->carryDropped++;   /* two behind; it loses one */
+    if (n == had) return;
+    m->carryUs[b][r] = m->sharedUs;
     m->carryLeft[b][r] = n;
     m->carryHead[b][r] = 0;
     m->carried++;
@@ -1202,6 +1266,20 @@ static void mtu_expire_echo(struct MtuModel *m, int b, int g) {
             tlShared);
 }
 
+/* This reader is looking at this bus NOW, which is the nearest thing the model
+ * has to knowing its receive is armed; and what was carried for it too long
+ * ago to be part of any transfer it could still be in is dropped first. */
+static void mtu_note_look(struct MtuModel *m, int b, int g) {
+    if (ff_mdm_off() || !(tlSet & 1) || tlShared < 0.0) return;
+    if (m->carryLeft[b][g] > 0 &&
+        tlShared - m->carryUs[b][g] > mtu_echo_stale_us()) {
+        m->carryLeft[b][g] = 0;
+        m->carryHead[b][g] = 0;
+        __atomic_fetch_add(&m->carryExpired, 1, __ATOMIC_RELAXED);
+    }
+    m->lastLookUs[b][g] = tlShared;
+}
+
 void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                          const GpcServiceInput *in, GpcServiceOutput *out) {
     if (!m || !in || !out) return;
@@ -1219,6 +1297,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
     case GPC_SVC_XMIT_CMD: {
         uint32_t cmd = in->in.word & 0x00ffffffu;
         m->commands++;
+        m->issuer = g;
         /* OFF unless YAGPC_MTU_CENSUS: it writes shared arrays, and only the
          * locked path serialises this model. */
         if (mtu_census_on()) {
@@ -1472,6 +1551,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
+        mtu_note_look(m, b, g);
         mtu_expire_echo(m, b, g);
         /* A WORD IS NOT AVAILABLE UNTIL IT HAS HAD TIME TO GET HERE, measured
          * on the vehicle's shared clock.
@@ -1542,6 +1622,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         }
         break;
     case GPC_SVC_RECV_WORD:
+        mtu_note_look(m, b, g);
         mtu_expire_echo(m, b, g);
         if (m->carryLeft[b][g] > 0) {
             /* What it still wanted of the PREVIOUS transfer, ahead of this
@@ -1550,7 +1631,9 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             out->out.recv.available = true;
             out->out.recv.word = m->carry[b][g][m->carryHead[b][g]++];
             m->carryLeft[b][g]--;
-            mtu_ring_put(b, 'c', g, out->out.recv.word, m->sent[b][g], m->carryLeft[b][g], 0);
+            mtu_ring_put(b, (out->out.recv.word & YAGPC_BUSWORD_CMD_SYNC) ? 'k' : 'c',
+                         g, out->out.recv.word & 0x00ffffffu, m->sent[b][g],
+                         m->carryLeft[b][g], 0);
             if (g == m->commander[b] || g == 0) m->wordsOut++;
             else m->listenerWords++;
         } else if (m->echoPending[b][g]) {
@@ -1606,7 +1689,10 @@ void mtumodel_report(struct MtuModel *m) {
     if (m->carried > 0)
         fprintf(stderr, "mtu: %ld transfer(s) carried over a following command"
                         " for a reader still taking them, %ld dropped as a"
-                        " second\n", m->carried, m->carryDropped);
+                        " second; %ld untaken command(s) carried with them for a"
+                        " listener that had not yet looked, %ld backlog(s)"
+                        " dropped as stale\n", m->carried, m->carryDropped,
+                m->carriedCmds, m->carryExpired);
     {
         unsigned long tc = 0, tl = 0, tb = 0, th[6] = {0,0,0,0,0,0};
         for (int b = 0; b < MTU_NBUS; b++) {

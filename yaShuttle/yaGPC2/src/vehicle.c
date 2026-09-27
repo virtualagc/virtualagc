@@ -40,12 +40,23 @@ void vehicle_init(Vehicle *v) {
     v->barDeltaUs = BARRIER_DELTA_US;
     const char *e = yagpc_getenv("YAGPC_BARRIER_US");
     if (e != NULL && *e != '\0') v->barDeltaUs = atof(e);
+    v->syncStamped = true;
+    v->syncLagUs = 0.0;
+    {
+        const char *st = yagpc_getenv("YAGPC_SYNC_STAMPED");
+        if (st != NULL && (!strcmp(st, "0") || !strcmp(st, "off") ||
+                           !strcmp(st, "no") || !strcmp(st, "false")))
+            v->syncStamped = false;
+        const char *lg = yagpc_getenv("YAGPC_SYNC_LAG_US");
+        if (lg != NULL && *lg != '\0') v->syncLagUs = atof(lg);
+    }
     v->barSpinUs = BARRIER_SPIN_US;
     const char *sp = yagpc_getenv("YAGPC_BARRIER_SPIN_US");
     if (sp != NULL && *sp != '\0') v->barSpinUs = atof(sp);
     v->barWakeAtUs = 1e300;
 #ifdef HAVE_PTHREADS
     pthread_mutex_init(&v->barLock, NULL);
+    for (int m = 0; m < 6; m++) pthread_mutex_init(&v->lagLock[m], NULL);
     pthread_cond_init(&v->barCond, NULL);
     pthread_mutex_init(&v->pauseLock, NULL);
     pthread_cond_init(&v->pauseCond, NULL);
@@ -182,11 +193,69 @@ void vehicle_bus_leave(Vehicle *v, int busID) {
 #endif
 }
 
+static void lag_lock(Vehicle *v, int m) {
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&v->lagLock[m]);
+#else
+    (void)v; (void)m;
+#endif
+}
+
+static void lag_unlock(Vehicle *v, int m) {
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&v->lagLock[m]);
+#else
+    (void)v; (void)m;
+#endif
+}
+
+/* Hand receiver m every queued change whose time has come; all of them if
+ * `all`.  In queue order, which is each sender's own order -- and a sender's
+ * stamps only rise, so a change that is not yet due has none due behind it
+ * from the same computer.  Changes from different senders touch different
+ * bits, so their order against each other does not matter. */
+/* YAGPC_SYNC_STAMP_TRACE: every stamped change as it is queued and as it is
+ * taken, in the shared frame, for checking the delivery against itself. */
+static int stamp_trace(void) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_SYNC_STAMP_TRACE") != NULL; }
+    return on;
+}
+
+static void lag_deliver(Vehicle *v, int m, double nowUs, bool all) {
+    if (__atomic_load_n(&v->lagCount[m], __ATOMIC_ACQUIRE) == 0) return;
+    /* The history stamps what it hears with this machine's clock as last
+     * noted, which between two instructions can be some way behind. */
+    if (!all && v->lines[m] != NULL)
+        discretes_note_sim_us(v->lines[m], nowUs - v->barOffsetUs[m]);
+    lag_lock(v, m);
+    int n = v->lagCount[m], kept = 0;
+    for (int k = 0; k < n; k++) {
+        struct VehicleLagEv e = v->lagQ[m][k];
+        if (all || e.dueUs <= nowUs) {
+            if (v->lines[m] != NULL)
+                discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A,
+                                              e.set, e.clr);
+            if (all) v->lagFlushed++;
+            if (stamp_trace())
+                fprintf(stderr, "STAMP take gpc=%d due=%.1f now=%.1f set=%08x clr=%08x%s\n",
+                        m, e.dueUs, nowUs, (unsigned)e.set, (unsigned)e.clr,
+                        all ? " FLUSH" : "");
+        } else
+            v->lagQ[m][kept++] = e;
+    }
+    __atomic_store_n(&v->lagCount[m], kept, __ATOMIC_RELEASE);
+    lag_unlock(v, m);
+}
+
 void vehicle_barrier_leave(Vehicle *v, int gpcId) {
     if (v == NULL || gpcId < 1 || gpcId > 5 || !v->barActive[gpcId]) return;
     barrier_lock(v);
     v->barActive[gpcId] = false;
     barrier_unlock(v);
+    /* What was on its way to this machine arrives now: it has stopped
+     * keeping the time the rest was waiting for. */
+    lag_deliver(v, gpcId, 0.0, true);
     /* Whoever was waiting on this machine is waiting on nothing now. */
     barrier_wake(v);
 }
@@ -205,6 +274,33 @@ static void barrier_wake(Vehicle *v) {
 #endif
 }
 
+void vehicle_sync_read_gate(Vehicle *v, int gpcId) {
+    if (v == NULL || !v->syncStamped || !vehicle_multi(v) ||
+        v->barDeltaUs <= 0.0) return;
+    if (gpcId < 1 || gpcId > 5 || !v->barActive[gpcId]) return;
+    double pub = v->barPubUs[gpcId];
+    v->gateCalls++;
+    /* NOBODY DEADLOCKS, for the barrier's own reason: the computer furthest
+     * behind waits for no one here, and the barrier never holds it either.
+     * A capture is the exception -- the others park and wait for THIS one to
+     * reach an instruction boundary -- so a pending one lets it go. */
+    if (barrier_slowest(v, gpcId, pub) < pub) {
+        double t0 = yagpc_monotonic_seconds();
+        double spinUntil = t0 + BARRIER_SPIN_US * 1e-6;
+        v->gateWaits++;
+        for (unsigned i = 0;; i++) {
+            if (barrier_slowest(v, gpcId, pub) >= pub) break;
+            if (v->pauseRequest) { v->gateForPause++; break; }
+            if ((i & 63u) != 63u) continue;
+            double now = yagpc_monotonic_seconds();
+            if (now - t0 > BARRIER_MAX_HOLD_SEC) { v->gateAbandoned++; break; }
+            if (now >= spinUntil) yagpc_sleep_seconds(20e-6);
+        }
+        v->gateWaitSec += yagpc_monotonic_seconds() - t0;
+    }
+    lag_deliver(v, gpcId, pub, false);
+}
+
 void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs, int site) {
     /* OFF unless there is somebody to wait for.  One computer is the case
      * every existing command line asks for, and it must not pay for this. */
@@ -215,6 +311,7 @@ void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs, int site) {
 
     double pub = machineUs + v->barOffsetUs[gpcId];
     v->barPubUs[gpcId] = pub;
+    lag_deliver(v, gpcId, pub, false);
     /* EVERY CALL, gate or no gate -- see the note at the step histogram. */
     {
         double lastAny = v->barLastPubUs[gpcId];
@@ -594,6 +691,10 @@ bool vehicle_pause_enter(Vehicle *v, int gpcId) {
                         "written\n", gpcId, PAUSE_MAX_WAIT_SEC, v->pauseGroup);
     }
     pthread_mutex_unlock(&v->pauseLock);
+    /* A CAPTURE TAKES THE LINES AS THEY WILL BE.  Every machine is parked, so
+     * nothing more is coming; what is queued for this one is at most the lag
+     * away, and a capture that left it in the queue would lose it. */
+    if (ok) lag_deliver(v, gpcId, 0.0, true);
     return ok;
 #else
     /* Without threads there is one machine, and it is already stopped. */
@@ -632,6 +733,52 @@ bool vehicle_multi(const Vehicle *v) {
 
 void vehicle_expect_machines(Vehicle *v, int n) {
     if (v != NULL) v->nExpected = n;
+}
+
+/* One change to one neighbour's copy of a computer's lines: stamped and
+ * queued between machines that are both keeping the barrier's time -- see
+ * syncStamped in vehicle.h -- and at once otherwise, since a machine in reset
+ * or still loading has no clock to take it by.  EVERYTHING that writes a
+ * neighbour's lines comes through here.  vehicle_refresh_lines did not at
+ * first, and wrote the sender's PRESENT code straight into the neighbour: a
+ * sender 76 us ahead handed GPC2 a null that GPC3 had not yet raised on
+ * GPC2's clock, in the middle of an I/O sync, and GPC2 failed the set (run
+ * w200, barrier 200 us). */
+static void line_put(Vehicle *v, int sourceGpc, int m, uint32_t set, uint32_t clr) {
+    if ((set | clr) == 0u || v->lines[m] == NULL) return;
+    if (!(v->syncStamped && v->barDeltaUs > 0.0 &&
+          v->barActive[sourceGpc] && v->barActive[m])) {
+        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, set, clr);
+        return;
+    }
+    double due = v->barPubUs[sourceGpc] + v->syncLagUs;
+    double ahead = v->barPubUs[m] - due;
+    lag_lock(v, m);
+    if (ahead > 0.0) {
+        v->lagLate++;
+        if (ahead > v->lagLateMaxUs) v->lagLateMaxUs = ahead;
+    }
+    if (v->lagCount[m] >= VEHICLE_LAG_Q) {
+        /* Full: the receiver has stopped taking them.  Everything it is
+         * owed, in order, and then this one. */
+        v->lagOverflow++;
+        for (int k = 0; k < v->lagCount[m]; k++)
+            discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A,
+                                          v->lagQ[m][k].set, v->lagQ[m][k].clr);
+        __atomic_store_n(&v->lagCount[m], 0, __ATOMIC_RELEASE);
+        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, set, clr);
+    } else {
+        int k = v->lagCount[m];
+        v->lagQ[m][k].dueUs = due;
+        v->lagQ[m][k].set = set;
+        v->lagQ[m][k].clr = clr;
+        v->lagQueued++;
+        if (stamp_trace())
+            fprintf(stderr, "STAMP put from=%d to=%d due=%.1f topub=%.1f set=%08x clr=%08x\n",
+                    sourceGpc, m, due, v->barPubUs[m], (unsigned)set, (unsigned)clr);
+        __atomic_store_n(&v->lagCount[m], k + 1, __ATOMIC_RELEASE);
+    }
+    lag_unlock(v, m);
 }
 
 /* ONE COMPUTER'S OUTPUT IS THE OTHERS' INPUT.  Its STBY/BFS RUN/RUN/SYNC
@@ -697,7 +844,9 @@ static void vehicle_route_out(void *ctx, int sourceGpc, uint32_t before,
         /* Both halves of the code in ONE indivisible step -- see
          * discretes_apply_external_pair.  The datagrams follow, separately,
          * because they are only for monitors. */
-        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, set, clr);
+        /* ...AND AT THE SAME SIMULATED INSTANT FOR EVERY NEIGHBOUR -- see
+         * line_put. */
+        line_put(v, sourceGpc, m, set, clr);
         if (set) discretes_publish_to(from, m, DISCRETES_REG_A, set, true);
         if (clr) discretes_publish_to(from, m, DISCRETES_REG_A, clr, false);
     }
@@ -713,7 +862,7 @@ void vehicle_refresh_lines(Vehicle *v, int gpcId, uint32_t outValue) {
          * this is the level the neighbour must keep seeing. */
         uint32_t on = discretes_rotate_out(gpcId, m, outValue);
         uint32_t off = discretes_rotate_out(gpcId, m, ~outValue);
-        discretes_apply_external_pair(v->lines[m], DISCRETES_REG_A, on, off);
+        line_put(v, gpcId, m, on, off);
     }
 }
 
@@ -842,6 +991,16 @@ void vehicle_free(Vehicle *v) {
             fprintf(stderr, "\n");
         }
     }
+    if (v->lagQueued > 0)
+        fprintf(stderr, "vehicle: sync lines carried %lu stamped change(s), "
+                        "lag %.0f us; %lu reached a machine already past the "
+                        "stamp (worst %.1f us), %lu overflowed, %lu flushed "
+                        "at a capture or a halt; %lu read(s) of the lines "
+                        "gated, %lu had to wait (%.3f s in all), %lu gave up, "
+                        "%lu let go for a capture\n",
+                v->lagQueued, v->syncLagUs, v->lagLate, v->lagLateMaxUs,
+                v->lagOverflow, v->lagFlushed, v->gateCalls, v->gateWaits,
+                v->gateWaitSec, v->gateAbandoned, v->gateForPause);
     if (v->barHolds > 0)
         fprintf(stderr, "vehicle: simulated-time barrier held %lu times, "
                         "%.3f s total, %lu abandoned (delta %.0f us); "
@@ -937,6 +1096,7 @@ void vehicle_free(Vehicle *v) {
     }
 #ifdef HAVE_PTHREADS
     pthread_mutex_destroy(&v->barLock);
+    for (int m = 0; m < 6; m++) pthread_mutex_destroy(&v->lagLock[m]);
     pthread_cond_destroy(&v->barCond);
     for (int b = 0; b <= YAGPC_BUS_MAX; b++)
         pthread_mutex_destroy(&v->busLock[b]);

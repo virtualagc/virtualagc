@@ -130,6 +130,56 @@ typedef struct Vehicle {
      * means "halt/standby/dead" to the flight software. */
     struct Discretes *lines[6];
 
+    /* THE SYNC LINES HAVE A PROPAGATION TIME, AND IT IS THE SAME FOR EVERYONE.
+     *
+     * A computer's sync code used to reach its neighbours the instant it
+     * changed -- in WALL time.  But the machines' SIMULATED clocks differ by
+     * up to the barrier delta at any wall instant, so in the time the flight
+     * software measures, a code arrived anywhere from 24 us BEFORE it was
+     * sent to 33 us after (measured, run d4b, 18,000 deliveries), and
+     * differently at each neighbour.  FCMSSYNC reads the lines a second time
+     * 87 us (FCMST5) after it first sees the set in step, and each computer
+     * holds its code 182 us (FCMST3): 95 us of margin, less one pass of the
+     * polling loop.  Two deliveries skewed opposite ways use all of it --
+     * and the computer whose second read fails completes its SVC one round
+     * late, against its neighbours' NEXT one, so that from then on it is
+     * one SVC behind a conversation that cannot tell SVCs apart, until it
+     * issues one nobody answers (ledger #253).
+     *
+     * So a change is stamped with the sender's time in the shared frame, and
+     * a neighbour takes it when ITS OWN clock reaches that stamp -- never
+     * before.  And a computer about to READ the lines first waits until
+     * every other computer's clock has reached its own
+     * (vehicle_sync_read_gate), so that everything stamped earlier has been
+     * sent.  Together: what a read returns depends only on simulated time.
+     *
+     * NOT BY ADDING A LAG.  The first version stamped each change 50 us into
+     * the future, so that it would always be in the neighbour's future
+     * without anyone waiting.  It lost a computer in its first run (g1a,
+     * 364.6 s), by the mirror image of the fault it was for: the flight
+     * software's second look exists so that a computer that was LAST to
+     * raise its code, and so saw the set in step at once, notices that its
+     * neighbours have meanwhile taken a timer interrupt and dropped theirs.
+     * They must be seen to have dropped it within FCMST5 = 87 us, and a wire
+     * 50 us long each way is 100 us.  YAGPC_SYNC_LAG_US remains for
+     * measuring that; it is 0.  YAGPC_SYNC_STAMPED=0 is the old delivery. */
+    bool syncStamped;
+    /* THE FAILURE RECORD -- see batchrunner_failure_record in run.c.  Set by
+     * the first computer to fail another; every computer then writes its own
+     * part once, and the buses' rings are written once for the vehicle. */
+    int failureSeen, failureRingsDone;
+    double syncLagUs;
+    unsigned long gateCalls, gateWaits, gateAbandoned, gateForPause;
+    double gateWaitSec;
+#define VEHICLE_LAG_Q 64
+    struct VehicleLagEv { double dueUs; uint32_t set, clr; } lagQ[6][VEHICLE_LAG_Q];
+    int lagCount[6];              /* per RECEIVER; read unlocked as a hint */
+    unsigned long lagQueued, lagLate, lagOverflow, lagFlushed;
+    double lagLateMaxUs;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_t lagLock[6];
+#endif
+
     /* THE SIMULATED-TIME BARRIER.
      *
      * Each machine paces itself to the WALL clock, which keeps the group
@@ -429,6 +479,10 @@ int vehicle_votes_against(const Vehicle *v, int gpcId);
  * which is how 32,640 steps of >=200 us came to sit against probe counts of
  * 34 and 0.  Attribution has to happen where the steps are seen. */
 void vehicle_barrier_wait(Vehicle *v, int gpcId, double machineUs, int site);
+/* Called by a computer about to read its sync lines: waits until no other
+ * computer is behind it, then hands it every change stamped at or before its
+ * own time.  See syncStamped. */
+void vehicle_sync_read_gate(Vehicle *v, int gpcId);
 
 /* THE STOP-THE-WORLD.  See the pause fields in Vehicle.
  *

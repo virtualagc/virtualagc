@@ -1956,9 +1956,19 @@ typedef struct {
 } BceEv;
 static BceEv bceRing[32][BCE_RING];
 static unsigned bceRingN[32];
+/* ON unless the variable says 0, off, no or false.  These cost a few stores an
+ * event and nothing is printed until a computer fails another, which is the
+ * one moment the record is wanted -- and a failure that happens with the
+ * record off has to be waited for again (2.6 hours on average, 2026-09-27). */
+static int ring_default_on(const char *name) {
+    const char *e = yagpc_getenv(name);
+    if (e == NULL) return 1;
+    return !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
+             !strcmp(e, "false"));
+}
 static int bce_ring_on(void) {
     static int inited = 0, on = 0;
-    if (!inited) { inited = 1; on = yagpc_getenv("YAGPC_BCE_RING") != NULL; }
+    if (!inited) { inited = 1; on = ring_default_on("YAGPC_BCE_RING"); }
     return on;
 }
 static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
@@ -2835,7 +2845,14 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
             if (!iop->intForceTest) register_set32(registerfile_r(&iop->regInterrupts, 5), 0x0);
             break;
         case 0x08180000: /* READ DISCRETE INPUT A (1-32) */
+            /* The neighbours' sync codes are in this register, and what is
+             * read must not depend on which thread ran first -- see
+             * syncStamped in vehicle.h. */
+            if (iop->vehicle != NULL && iop->cpu != NULL)
+                vehicle_sync_read_gate(iop->vehicle, iop->cpu->gpcId);
             register_set32(&iop->regCCData, iop_discrete_in_a(iop));
+            discretes_note_read(iop->discretes,
+                                (uint32_t)register_get32(&iop->regCCData));
             break;
         case 0x081c0000: /* READ DISCRETE INPUTS B (33-40) */
             /* Register B, not A -- this read the A register, so discrete
