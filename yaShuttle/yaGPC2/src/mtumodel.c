@@ -1170,7 +1170,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
     us += skewUs;
     epochUs += skewUs;
     if (us < 0.0) us = 0.0;
-    unsigned ms, sec, min, hr, days;
+    unsigned eighths, sec, min, hr, days;   /* eighths: 0.125 ms units */
     if (m->epochSec != NULL && *m->epochSec > 0.0) {
         /* THE TIME OF DAY, not seconds since start-up.  The unit is a clock:
          * PASS initialises GMT from it (FPMMTURM) and shows it on every
@@ -1191,15 +1191,15 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         time_t whole = (time_t)floor(t);
         struct tm lt;
         gmtime_r(&whole, &lt);
-        ms = (unsigned)((t - (double)whole) * 1000.0) % 1000u;
+        eighths = (unsigned)((t - (double)whole) * 8000.0) % 8000u;
         sec = (unsigned)lt.tm_sec % 60u;     /* a leap second reads as :59 */
         min = (unsigned)lt.tm_min;
         hr = (unsigned)lt.tm_hour;
         days = (unsigned)(lt.tm_yday + 1);
     } else {
-        unsigned long long totalMs = (unsigned long long)(us / 1000.0);
-        ms   = (unsigned)(totalMs % 1000ull);
-        unsigned long long totalSec = totalMs / 1000ull;
+        unsigned long long totalEighths = (unsigned long long)(us / 125.0);
+        eighths = (unsigned)(totalEighths % 8000ull);
+        unsigned long long totalSec = totalEighths / 8000ull;
         sec  = (unsigned)(totalSec % 60ull);
         unsigned long long totalMin = totalSec / 60ull;
         min  = (unsigned)(totalMin % 60ull);
@@ -1223,8 +1223,19 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
     mnsc |= bcd_pack(min, 3, 4, &s2);
     mnsc |= bcd_pack(sec, 3, 4, &s2);
 
-    /* MILLISECONDS in 0.125 ms units, thirteen bits. */
-    unsigned msec = (ms * 8u) & 0x1fffu;
+    /* MILLISECONDS in 0.125 ms units, thirteen bits -- and all thirteen are
+     * used.  FPMMTUFX multiplies the whole field by 125 us ('MH R4,FPM125'),
+     * so the unit's resolution is an eighth of a millisecond.  This used to
+     * truncate to whole milliseconds and multiply by eight, which threw away
+     * up to 1 ms on every read.  PASS re-derives its clock from the unit every
+     * 960 ms (FPMMTURM), so the discarded fraction became a step in the
+     * vehicle's clock: the set's minor-cycle grid walked +1/3, +1/3, -2/3 ms
+     * in shared time with a period of 2.88 s.  A computer joining the set
+     * zeroes its clock on the set's SSIP and schedules its first SIP 2.33 ms
+     * ahead of a boundary (AIBGPCLO '.31767 - RUNTIME'); a step of that size
+     * inside the join put the SCHEDULE AT on the wrong side of the boundary,
+     * and the new member took one SIP too many (ledger #259). */
+    unsigned msec = eighths & 0x1fffu;
 
     /* The six transferred halfwords are GMT at 0,1,2 and MET at 3,4,5 --
      * the buffer's very start, not offset 2.  FIOPRMPG's commander points

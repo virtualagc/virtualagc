@@ -1,0 +1,14 @@
+# One graceful excursion of GPC $gpc out of the common set and back.
+#   script stby-one.script gpc=2
+# RUN -> STANDBY is the flight software's own graceful departure (FCMSWMON
+# puts out sync code 000, so the set drops the computer rather than voting
+# against it; it notices the switch about 1.2 s later).  STANDBY -> RUN
+# re-enters initialisation and rejoins the common set in OPS 0, through the
+# same AIBGPCLO join a freshly IPL'd computer makes (ledger #175, #259).
+# Nothing else is touched for at least 12 s either side of each mode change
+# (Program Note 42433; ledger #256).
++0     gpc $gpc
++12    mode STANDBY
++15    mode RUN
+wait gpc $gpc mode-tb RUN timeout 300
++60    gpc $gpc
