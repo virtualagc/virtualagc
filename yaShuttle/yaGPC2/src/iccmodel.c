@@ -100,6 +100,7 @@ struct IccModel {
     unsigned long lagN[YAGPC_ICC_BUS_LAST + 1][6];
     unsigned long lagHist[YAGPC_ICC_BUS_LAST + 1][6][8];
     double lagMin[YAGPC_ICC_BUS_LAST + 1][6], lagMax[YAGPC_ICC_BUS_LAST + 1][6];
+    unsigned long lagNeg[YAGPC_ICC_BUS_LAST + 1][6];   /* read before it was sent */
     unsigned long staleAtCmd[YAGPC_ICC_BUS_LAST + 1][6];
     unsigned long staleWords[YAGPC_ICC_BUS_LAST + 1][6];
     int lagShown;
@@ -327,6 +328,37 @@ static long icctrace_max(void) {
     return v > 0 ? v : LONG_MAX;
 }
 
+/* A WORD IS NOT THERE UNTIL THE RECEIVER'S CLOCK REACHES THE TIME IT WAS SENT
+ * -- the wire model's rule (mtumodel.c) for the intercomputer buses.  A word
+ * used to be available the moment the sender's thread wrote it, which for a
+ * sender ahead of the receiver in simulated time is before it was sent.  That
+ * was not rare: at the default 25 us barrier about one transfer in five
+ * reached its reader early, by up to 29 us, on every bus and every reader;
+ * at 200 us, by up to 201 us (ledger #260, which has the measurements, and
+ * the end-of-run report's "read before they were sent" count).  With this
+ * rule none does, and rate, joins and stress runs are unchanged.
+ * YAGPC_ICC_TIMEGATE=0 restores the old delivery. */
+static int icc_timegate(void) {
+    static int inited = 0, on = 1;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_ICC_TIMEGATE");
+        if (e != NULL && (!strcmp(e, "0") || !strcmp(e, "off") ||
+                          !strcmp(e, "no") || !strcmp(e, "false")))
+            on = 0;
+    }
+    return on;
+}
+
+static bool icc_head_due(const IccModel *m, int bus, int gpcId) {
+    if (m->q[bus][gpcId].count == 0) return false;
+    if (!icc_timegate()) return true;
+    double at = m->q[bus][gpcId].at[m->q[bus][gpcId].head];
+    double now = m->sharedUs[gpcId];
+    if (at < 0.0 || now < 0.0) return true;      /* no clock to judge by */
+    return at <= now;
+}
+
 void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out) {
     if (m == NULL || in == NULL || out == NULL) return;
@@ -487,11 +519,11 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
         break;
     case GPC_SVC_RECV_POLL:
         m->recvPolls++;
-        out->out.poll.available = (m->q[bus][gpcId].count > 0);
+        out->out.poll.available = icc_head_due(m, bus, gpcId);
         break;
     case GPC_SVC_RECV_WORD:
         m->recvCalls++;
-        if (m->q[bus][gpcId].count > 0) {
+        if (icc_head_due(m, bus, gpcId)) {
             out->out.recv.available = true;
             out->out.recv.word = m->q[bus][gpcId].w[m->q[bus][gpcId].head];
             {
@@ -506,6 +538,7 @@ void iccmodel_service(IccModel *m, int gpcId, GpcServiceNumber svc,
                     if (m->lagN[bus][gpcId] == 0 || lag < m->lagMin[bus][gpcId]) m->lagMin[bus][gpcId] = lag;
                     if (m->lagN[bus][gpcId] == 0 || lag > m->lagMax[bus][gpcId]) m->lagMax[bus][gpcId] = lag;
                     m->lagN[bus][gpcId]++;
+                    if (lag < 0.0) m->lagNeg[bus][gpcId]++;
                     if (m->lagShown < 60 && yagpc_getenv("YAGPC_ICCLAG") != NULL) {
                         m->lagShown++;
                         fprintf(stderr, "ICCLAG bus=%d rx=GPC%d transfer=%u sent=%.1f read=%.1f lag_us=%.1f queued_after=%lu\n",
@@ -583,10 +616,10 @@ void iccmodel_report(const IccModel *m) {
                 b, b, m->busXmit[b], m->busRecv[b], pend, drop);
         for (int g = 1; g <= 5; g++) {
             if (m->lagN[b][g] == 0) continue;
-            fprintf(stderr, "icc: bus %d read by GPC%d: %lu transfers, lag us min %.0f max %.0f, "
+            fprintf(stderr, "icc: bus %d read by GPC%d: %lu transfers (%lu read before they were sent), lag us min %.0f max %.0f, "
                             "hist [<1ms %lu, <10ms %lu, <100ms %lu, <150ms %lu, <170ms %lu, <330ms %lu, <1s %lu, >=1s %lu]; "
                             "%lu new commands found older words still queued (%lu words)\n",
-                    b, g, m->lagN[b][g], m->lagMin[b][g], m->lagMax[b][g],
+                    b, g, m->lagN[b][g], m->lagNeg[b][g], m->lagMin[b][g], m->lagMax[b][g],
                     m->lagHist[b][g][0], m->lagHist[b][g][1], m->lagHist[b][g][2], m->lagHist[b][g][3],
                     m->lagHist[b][g][4], m->lagHist[b][g][5], m->lagHist[b][g][6], m->lagHist[b][g][7],
                     m->staleAtCmd[b][g], m->staleWords[b][g]);
