@@ -830,10 +830,14 @@ bool bcenet_transport_send(BceNetTransport *t, int busID, int gpcId, int iua,
  *
  * Falls back to the caller's per-datagram loop when there is no transmit
  * socket, because that path has to record each datagram for the byte-exact
- * self-echo filter. */
+ * self-echo filter.
+ *
+ * sendmmsg() and struct mmsghdr are Linux-only (macOS and the BSDs have
+ * neither), so elsewhere this returns 0 and the caller sends every datagram
+ * through the per-datagram path instead. */
 static size_t transport_send_batch(BceNetTransport *t, BceNetBusSocket *b, int busID,
                                    const OutDatagram *batch, size_t n) {
-#ifdef BCENET_HAVE_POSIX_SOCKETS
+#if defined(BCENET_HAVE_POSIX_SOCKETS) && defined(__linux__)
     (void)t;
     if (n == 0) return 0;
     enum { MAXB = (size_t)BUS_BURST_MAX };
