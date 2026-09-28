@@ -33,6 +33,11 @@ typedef struct BceNetFramer BceNetFramer;
  * it separately (same lifetime discipline as any other servicerCtx). */
 BceNetFramer *bcenet_framer_create(BceNetTransport *transport, int gpcId);
 void bcenet_framer_free(BceNetFramer *f);
+/* EVERYTHING THIS MODEL HOLDS FOR ONE COMPUTER TO READ, DISCARDED.  Called
+ * when that computer leaves HALT and at its IPL: nothing that reached the
+ * wire while it was not executing may be handed to its software afterwards.
+ * Returns how many words went. */
+size_t bcenet_framer_clear_input(BceNetFramer *f);
 
 /* The GpcServicerFn itself -- install via ap101_set_servicer()/
  * iop_set_servicer() with servicerCtx = the BceNetFramer*. */

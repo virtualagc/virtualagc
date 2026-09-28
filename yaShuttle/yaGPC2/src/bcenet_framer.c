@@ -443,3 +443,17 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
     if (heldMs) *heldMs = (t - t0) * 1000.0;
     return got;
 }
+
+size_t bcenet_framer_clear_input(BceNetFramer *f) {
+    if (f == NULL) return 0;
+    size_t n = 0;
+    for (int busID = 0; busID <= FRAMER_MAX_BUS_ID; busID++) {
+        BceNetBusState *b = &f->buses[busID];
+        if (!b->used) continue;
+        if (fanout_bus(busID)) fan_lock(busID);
+        n += b->recvCount;
+        b->recvHead = b->recvCount = 0;
+        if (fanout_bus(busID)) fan_unlock(busID);
+    }
+    return n;
+}

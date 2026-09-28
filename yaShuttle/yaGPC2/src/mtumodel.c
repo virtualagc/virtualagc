@@ -460,9 +460,22 @@ static bool fc_answer_unnamed(void) {
  * UNANSWERED lines account for, so the other ways of declining have to be
  * seen: the IUA gate in the caller, the survey calling the code a command
  * with no receive, and a zero length at the end. */
+/* YAGPC_MTU_DIAG: the model's live diagnostics -- DECLINED, UNANSWERED and
+ * ECHOX lines as they happen.  OFF BY DEFAULT, like every debugging aid; a
+ * run of 25 minutes wrote 172,707 ECHOX lines with it on. */
+static int mtu_diag(void) {
+    static int inited = 0, on = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_MTU_DIAG");
+        on = e != NULL && *e != '\0' && strcmp(e, "0") != 0 && strcmp(e, "off") != 0;
+    }
+    return on;
+}
+
 static void mtu_declined(uint32_t cmd, int armed, const char *why) {
     static uint32_t seen[128]; static int n = 0;
-    if (armed <= 0) return;
+    if (armed <= 0 || !mtu_diag()) return;
     uint32_t key = (cmd & 0xffffffu) ^ ((uint32_t)(why[0]) << 24);
     for (int k = 0; k < n; k++) if (seen[k] == key) return;
     if (n < 128) seen[n++] = key;
@@ -526,7 +539,11 @@ static int ff_nsp_words(uint32_t cmd, int m_armed) {
         if (sym == NULL && m_armed > 0) {
             static uint32_t said[64]; static int nSaid = 0;
             int k; for (k = 0; k < nSaid; k++) if (said[k] == (cmd & 0xffffffu)) break;
-            if (k == nSaid && nSaid < 64) {
+            /* ONLY THE MESSAGE is a diagnostic.  The rest of this block is
+             * the answer, and gating the block on YAGPC_MTU_DIAG stopped
+             * the unnamed reads being answered: every computer bypassed the
+             * timing unit at the OPS 2 transition (runs fin1, fin2). */
+            if (mtu_diag() && k == nSaid && nSaid < 64) {
                 said[nSaid++] = cmd & 0xffffffu;
                 fprintf(stderr, "UNANSWERED cmd=%06x iua=%u armed=%d -- no survey "
                         "name\n", (unsigned)(cmd & 0xffffffu), iua, m_armed);
@@ -697,6 +714,39 @@ struct MtuModel {
     double carryUs[MTU_NBUS][MTU_READERS];     /* when the last was added */
     double lastLookUs[MTU_NBUS][MTU_READERS];  /* reader's last poll or take */
     int issuer;                                /* who is issuing, for carry */
+    /* THE WIRE LOG -- YAGPC_MTU_WIRELOG.
+     *
+     * Everything above decides who is handed a word by the ORDER IN WHICH
+     * THE COMPUTERS' THREADS HAPPEN TO CALL: one command per bus, replaced by
+     * the next; a reader that has not yet looked has not heard.  But the
+     * computers' simulated clocks differ by up to the barrier delta at any
+     * wall instant, so that order is not the order on the wire.  Run y400
+     * (barrier 400 us): GPC3 armed its receive at 343233939.5 on its own
+     * clock, 241 us BEFORE GPC1 issued 526420 on its own -- and never saw
+     * it, because in wall time its first look came after GPC1, 226 us ahead,
+     * had already issued that command and the next.
+     *
+     * So the wire is kept as what it is: a sequence of words, each with the
+     * simulated time it is on the bus, command syncs included.  Each reader
+     * has a place in it.  A word is there for a reader when the reader's OWN
+     * clock reaches the word's time -- never before -- and stays there until
+     * taken, however late the reader looks.  A receive armed by a listener
+     * that was not already receiving starts at the words on the wire at or
+     * after the arm; one armed straight after another carries on from the
+     * last word taken, because that is what the BCE's program does and the
+     * reader's clock at that moment may be late.  Nothing is withdrawn,
+     * carried or expired: there is nothing a reader was not listening for
+     * left in front of it, and nothing it was listening for is lost. */
+#define MTU_WL 2048
+#define MTU_WL_CONTINUE_US 100.0
+    struct MtuWire { double us; uint32_t word; int issuer; } wl[MTU_NBUS][MTU_WL];
+    unsigned long wlN[MTU_NBUS];                 /* words ever put on the bus */
+    unsigned long wlCur[MTU_NBUS][MTU_READERS];  /* the next one for a reader */
+    double wlArmUs[MTU_NBUS][MTU_READERS];
+    double wlTakenUs[MTU_NBUS][MTU_READERS];
+    double wlLookUs[MTU_NBUS][MTU_READERS];
+    long wlPut, wlTaken, wlBeforeArm, wlOverrun, wlCut, wlFresh, wlContinued;
+    double wlLateMaxUs;
     long carried, carryDropped, carriedCmds, carryExpired;
     int mdm[MTU_NBUS][MTU_READERS];   /* pending zero words; see the note */
     /* THE FOUR BITE WORDS THAT ARE NOT ZERO, kept apart from `reply` for the
@@ -784,15 +834,19 @@ typedef struct {
 } MtuEv;
 static MtuEv mtuRing[MTU_NBUS][MTU_RING];
 static unsigned mtuRingN[MTU_NBUS];
-/* ON unless the variable says 0, off, no or false.  These cost a few stores an
- * event and nothing is printed until a computer fails another, which is the
- * one moment the record is wanted -- and a failure that happens with the
- * record off has to be waited for again (2.6 hours on average, 2026-09-27). */
+/* OFF BY DEFAULT, like every debugging aid: a production run keeps and writes
+ * nothing it was not asked for.  The variable itself turns it on or off;
+ * unset, YAGPC_FAILURE_RECORD decides for the whole failure record at once
+ * (see batchrunner_failure_record in run.c). */
+static int switch_on(const char *e) {
+    return e != NULL && *e != '\0' &&
+           !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
+             !strcmp(e, "false"));
+}
 static int ring_default_on(const char *name) {
     const char *e = yagpc_getenv(name);
-    if (e == NULL) return 1;
-    return !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
-             !strcmp(e, "false"));
+    if (e != NULL) return switch_on(e);
+    return switch_on(yagpc_getenv("YAGPC_FAILURE_RECORD"));
 }
 static int mtu_ring_on(void) {
     static int inited = 0, on = 0;
@@ -849,6 +903,8 @@ void mtumodel_dump_ring(double sinceUs) {
     }
 }
 
+static struct MtuModel *mtuTheModel;
+
 struct MtuModel *mtumodel_create(void) {
     struct MtuModel *m = (struct MtuModel *)calloc(1, sizeof *m);
     if (m != NULL) m->armedWords = -1;
@@ -856,6 +912,7 @@ struct MtuModel *mtumodel_create(void) {
      * perfectly good shared time meaning "the start of the run", so a unit
      * nobody had told about the vehicle would report that time for ever. */
     if (m != NULL) {
+        mtuTheModel = m;
         m->sharedUs = -1.0;
         for (int b = 0; b < MTU_NBUS; b++) m->wireUs[b] = -1.0;
 #ifdef HAVE_PTHREADS
@@ -996,6 +1053,22 @@ static double mtu_skew_us(const struct MtuModel *m) {
 }
 
 static double mtu_echo_stale_us(void);
+
+static struct MtuModel *mtuTheModel = NULL;     /* for mtumodel_note_arm */
+
+/* THE WIRE MODEL -- see wl[] in struct MtuModel.  ON BY DEFAULT since
+ * 2026-09-27: 5 of 5 full runs clean at the normal barrier and 10 of 12 at
+ * 200 us, where the delivery it replaces lost a computer at 400 us.  It is
+ * not logging, whatever its name: it is how the words are delivered.
+ * YAGPC_MTU_WIRELOG=0 restores the old per-transaction delivery. */
+static int mtu_wirelog(void) {
+    static int inited = 0, on = 0;
+    if (!inited) {
+        inited = 1;
+        on = env_default_on("YAGPC_MTU_WIRELOG");
+    }
+    return on;
+}
 
 /* Move what this reader still wants of the CURRENT transfer into its backlog,
  * so the next command does not cut it off.  Only when it is mid-transfer: a
@@ -1261,6 +1334,7 @@ static void mtu_expire_echo(struct MtuModel *m, int b, int g) {
     /* Each one, live: rare enough (a few hundred a run) not to perturb, and
      * the only way to tie a later death to a withdrawal a whole cycle
      * earlier, which is further back than either ring reaches. */
+    if (mtu_diag())
     fprintf(stderr, "ECHOX gpc=%d bus=%d cmd=%06x late=%.1f us t=%.1f\n", g,
             b + MTU_BUS_FIRST, (unsigned)m->echoCmd[b], tlShared - m->wireUs[b],
             tlShared);
@@ -1278,6 +1352,82 @@ static void mtu_note_look(struct MtuModel *m, int b, int g) {
         __atomic_fetch_add(&m->carryExpired, 1, __ATOMIC_RELAXED);
     }
     m->lastLookUs[b][g] = tlShared;
+}
+
+static bool wl_active(const struct MtuModel *m, int g) {
+    return mtu_wirelog() && !ff_mdm_off() && g >= 1 && m->sharedUs >= 0.0 &&
+           (tlSet & 1) && tlShared >= 0.0;
+}
+
+static void wl_put(struct MtuModel *m, int b, double us, uint32_t word, int issuer) {
+    struct MtuWire *e = &m->wl[b][m->wlN[b] % MTU_WL];
+    e->us = us; e->word = word; e->issuer = issuer;
+    m->wlN[b]++;
+    m->wlPut++;
+}
+
+/* The next word on bus b that reader g is to be given, or NULL.  Its own
+ * commands are not echoed to it, and what passed before it armed is not its. */
+static struct MtuWire *wl_next(struct MtuModel *m, int b, int g) {
+    unsigned long *cur = &m->wlCur[b][g];
+    if (*cur > m->wlN[b]) *cur = m->wlN[b];
+    if (m->wlN[b] - *cur > MTU_WL) {
+        /* The log has wrapped past this reader.  Say who, how far, and
+         * whether anything it could have WANTED went: the words that went
+         * are all older than the oldest one kept, so if that is still before
+         * this reader armed, none of them was for it. */
+        unsigned long skip = m->wlN[b] - MTU_WL - *cur;
+        double oldest = m->wl[b][(m->wlN[b] - MTU_WL) % MTU_WL].us;
+        fprintf(stderr, "WLOVERRUN bus=%d gpc=%d skipped=%lu cur=%lu lastlook=%.1f "
+                        "arm=%.1f oldest-kept=%.1f now=%.1f -- %s\n",
+                b + MTU_BUS_FIRST, g, skip, *cur, m->wlLookUs[b][g],
+                m->wlArmUs[b][g], oldest, tlShared,
+                (m->wlArmUs[b][g] > oldest) ? "none of it was for this reader"
+                                             : "SOME MAY HAVE BEEN WANTED");
+        *cur = m->wlN[b] - MTU_WL; m->wlOverrun++;
+    }
+    while (*cur < m->wlN[b]) {
+        struct MtuWire *e = &m->wl[b][*cur % MTU_WL];
+        if (e->issuer == g) { (*cur)++; continue; }
+        if (e->us < m->wlArmUs[b][g]) { (*cur)++; m->wlBeforeArm++; continue; }
+        return e;
+    }
+    return NULL;
+}
+
+void mtumodel_note_arm(int gpcId, int busID, bool listen, double sharedUs) {
+    struct MtuModel *m = mtuTheModel;
+    if (m == NULL || !mtu_wirelog() || !mtumodel_owns_bus(busID)) return;
+    if (gpcId < 1 || gpcId >= MTU_READERS || !listen) return;
+    int b = busID - MTU_BUS_FIRST;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&m->lock);
+#endif
+    if (m->wlLookUs[b][gpcId] > 0.0 &&
+        sharedUs - m->wlLookUs[b][gpcId] <= MTU_WL_CONTINUE_US) {
+        m->wlContinued++;            /* the next receive of the same program */
+    } else {
+        m->wlArmUs[b][gpcId] = sharedUs;
+        m->wlFresh++;
+        /* A FRESH ARM TAKES ITS PLACE AT THE WIRE AS IT IS NOW.  A computer
+         * that was not executing -- in HALT, or not yet IPLed -- held no
+         * place in the log, as a real one holds nothing but its MIA latch:
+         * its place was left at word 0 and the ring wrapped past it, which
+         * the log counted as an overrun although none of the words was ever
+         * for it (run ov1: GPCs 2, 3 and 4, first look at buses 20 and 22 at
+         * the OPS 2 transition, 13,521 and 92,391 words behind).  So the
+         * place moves to the first word at or after this arm, keeping any
+         * that a computer ahead of this one in simulated time has already
+         * put there; it never moves back. */
+        unsigned long c = m->wlN[b];
+        unsigned long lo = (c > MTU_WL) ? c - MTU_WL : 0;
+        while (c > lo && m->wl[b][(c - 1) % MTU_WL].us >= sharedUs) c--;
+        if (m->wlCur[b][gpcId] < c) m->wlCur[b][gpcId] = c;
+    }
+    m->wlLookUs[b][gpcId] = sharedUs;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&m->lock);
+#endif
 }
 
 void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
@@ -1544,6 +1694,40 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             m->echoPending[b][r] = ff_mdm_off()
                 ? (g >= 1 && r >= 1 && r != g && m->count[b][r] == 0)
                 : (g >= 1 && r >= 1 && r != g);
+        if (wl_active(m, g)) {
+            /* ONTO THE WIRE, ONCE, FOR EVERYBODY.  What was composed above
+             * for each reader separately is the same transfer; the
+             * commander's copy of it goes into the log and the rest is
+             * cleared, so that nothing is served from two places. */
+            double T = m->sharedUs, w = mtu_bus_word_us();
+            /* A command ends the transfer before it: what the device had not
+             * yet put on the wire by now it never does. */
+            while (m->wlN[b] > 0) {
+                struct MtuWire *last = &m->wl[b][(m->wlN[b] - 1) % MTU_WL];
+                if (last->issuer >= 0 || last->us <= T) break;
+                m->wlN[b]--;
+                m->wlCut++;
+            }
+            wl_put(m, b, T, cmd | YAGPC_BUSWORD_CMD_SYNC, g);
+            unsigned long first = m->wlN[b];
+            int k = 0;
+            for (int i = 0; i < m->count[b][g]; i++)
+                wl_put(m, b, T + (double)(++k) * w,
+                       m->reply[b][g][m->head[b][g] + i], -1);
+            for (int i = FF_BITE_WORDS - m->biteLeft[b][g]; i < FF_BITE_WORDS; i++)
+                wl_put(m, b, T + (double)(++k) * w, m->bite[b][g][i], -1);
+            for (int i = 0; i < m->mdm[b][g]; i++)
+                wl_put(m, b, T + (double)(++k) * w, 0u, -1);
+            for (int r = 0; r < MTU_READERS; r++) {
+                m->count[b][r] = 0; m->biteLeft[b][r] = 0; m->mdm[b][r] = 0;
+                m->echoPending[b][r] = false;
+                m->carryLeft[b][r] = 0; m->carryHead[b][r] = 0;
+            }
+            /* The commander reads the answer to THIS command. */
+            m->wlCur[b][g] = first;
+            m->wlArmUs[b][g] = T;
+            m->wlLookUs[b][g] = T;
+        }
         out->out.xmit.ok = true;
         break;
     }
@@ -1551,6 +1735,12 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
+        if (wl_active(m, g)) {
+            struct MtuWire *e = wl_next(m, b, g);
+            m->wlLookUs[b][g] = tlShared;
+            out->out.poll.available = (e != NULL && e->us <= tlShared);
+            break;
+        }
         mtu_note_look(m, b, g);
         mtu_expire_echo(m, b, g);
         /* A WORD IS NOT AVAILABLE UNTIL IT HAS HAD TIME TO GET HERE, measured
@@ -1622,6 +1812,28 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         }
         break;
     case GPC_SVC_RECV_WORD:
+        if (wl_active(m, g)) {
+            struct MtuWire *e = wl_next(m, b, g);
+            m->wlLookUs[b][g] = tlShared;
+            if (e == NULL || e->us > tlShared) {
+                out->out.recv.available = false;
+                out->out.recv.word = 0;
+                break;
+            }
+            out->out.recv.available = true;
+            out->out.recv.word = e->word;
+            m->wlCur[b][g]++;
+            m->wlTakenUs[b][g] = e->us;
+            m->wlTaken++;
+            if (tlShared - e->us > m->wlLateMaxUs) m->wlLateMaxUs = tlShared - e->us;
+            mtu_ring_put(b, (e->word & YAGPC_BUSWORD_CMD_SYNC) ? 'e' : 'd', g,
+                         e->word & 0x00ffffffu, 0, 0, 0);
+            if (e->issuer < 0) {
+                if (g == m->commander[b]) m->wordsOut++;
+                else m->listenerWords++;
+            }
+            break;
+        }
         mtu_note_look(m, b, g);
         mtu_expire_echo(m, b, g);
         if (m->carryLeft[b][g] > 0) {
@@ -1686,6 +1898,14 @@ void mtumodel_report(struct MtuModel *m) {
         fprintf(stderr, "mtu: %ld MDM A/D BITE 4 read(s) answered with the "
                         "reference voltages (+2.00 V 3200, -2.00 V ce00)\n",
                 m->biteReads);
+    if (m->wlPut > 0)
+        fprintf(stderr, "mtu: wire log -- %ld word(s) put on the buses, %ld "
+                        "taken (the latest %.1f us after its time), %ld passed "
+                        "before the reader armed, %ld cut off by a following "
+                        "command, %ld lost to a reader more than %d behind; "
+                        "%ld fresh arm(s), %ld continued\n",
+                m->wlPut, m->wlTaken, m->wlLateMaxUs, m->wlBeforeArm, m->wlCut,
+                m->wlOverrun, MTU_WL, m->wlFresh, m->wlContinued);
     if (m->carried > 0)
         fprintf(stderr, "mtu: %ld transfer(s) carried over a following command"
                         " for a reader still taking them, %ld dropped as a"
@@ -1826,4 +2046,26 @@ bool mtumodel_load(struct MtuModel *m, const char *path) {
     json_free(root);
     fprintf(stderr, "mtu: pending replies restored\n");
     return true;
+}
+
+size_t mtumodel_clear_input(struct MtuModel *m, int gpcId) {
+    if (m == NULL || gpcId < 1 || gpcId >= MTU_READERS) return 0;
+    size_t n = 0;
+#ifdef HAVE_PTHREADS
+    pthread_mutex_lock(&m->lock);
+#endif
+    for (int b = 0; b < MTU_NBUS; b++) {
+        n += (size_t)(m->count[b][gpcId] + m->biteLeft[b][gpcId] + m->mdm[b][gpcId]
+                      + m->carryLeft[b][gpcId] + (m->echoPending[b][gpcId] ? 1 : 0));
+        if (m->wlN[b] > m->wlCur[b][gpcId]) n += m->wlN[b] - m->wlCur[b][gpcId];
+        m->count[b][gpcId] = 0; m->biteLeft[b][gpcId] = 0; m->mdm[b][gpcId] = 0;
+        m->carryLeft[b][gpcId] = 0; m->carryHead[b][gpcId] = 0;
+        m->echoPending[b][gpcId] = false; m->sent[b][gpcId] = 0;
+        m->wlCur[b][gpcId] = m->wlN[b];
+        m->wlLookUs[b][gpcId] = 0.0;
+    }
+#ifdef HAVE_PTHREADS
+    pthread_mutex_unlock(&m->lock);
+#endif
+    return n;
 }

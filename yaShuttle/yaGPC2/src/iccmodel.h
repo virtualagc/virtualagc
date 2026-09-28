@@ -59,6 +59,11 @@ typedef struct IccModel IccModel;
 
 IccModel *iccmodel_create(void);
 void iccmodel_free(IccModel *m);
+/* EVERYTHING THIS MODEL HOLDS FOR ONE COMPUTER TO READ, DISCARDED.  Called
+ * when that computer leaves HALT and at its IPL: nothing that reached the
+ * wire while it was not executing may be handed to its software afterwards.
+ * Returns how many words went. */
+size_t iccmodel_clear_input(IccModel *m, int gpcId);
 
 /* Serve one intercomputer-bus transaction for the named computer.  Words
  * transmitted on a bus go to every OTHER computer's queue FOR THAT BUS;

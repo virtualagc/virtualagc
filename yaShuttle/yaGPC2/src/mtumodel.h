@@ -36,6 +36,11 @@ struct MtuModel;
 
 struct MtuModel *mtumodel_create(void);
 void mtumodel_free(struct MtuModel *m);
+/* EVERYTHING THIS MODEL HOLDS FOR ONE COMPUTER TO READ, DISCARDED.  Called
+ * when that computer leaves HALT and at its IPL: nothing that reached the
+ * wire while it was not executing may be handed to its software afterwards.
+ * Returns how many words went. */
+size_t mtumodel_clear_input(struct MtuModel *m, int gpcId);
 
 /* The MTU reports elapsed time, so it needs the same simulated clock the
  * rest of the machine runs on. */
@@ -100,6 +105,10 @@ uint32_t mtumodel_bus_mask(void);
 
 /* True for the buses this unit answers on (20, 21, 22). */
 bool mtumodel_owns_bus(int busID);
+
+/* A BCE has armed a receive on one of these buses -- see the wire log in
+ * mtumodel.c.  Installed as iop_arm_hook. */
+void mtumodel_note_arm(int gpcId, int busID, bool listen, double sharedUs);
 
 void mtumodel_service(void *ctx, GpcServiceNumber svc,
                       const GpcServiceInput *in, GpcServiceOutput *out);

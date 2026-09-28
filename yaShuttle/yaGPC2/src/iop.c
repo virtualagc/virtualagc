@@ -15,6 +15,7 @@
 static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
                          int latch, int await, int left, int count);
 void (*iop_ring_hook)(double sinceUs) = NULL;
+void (*iop_arm_hook)(int gpcId, int busID, bool listen, double sharedUs) = NULL;
 /* YAGPC_MSCRING helpers, defined beside iop_write_main16(). */
 static void msc_ring_record(IOP *iop, uint32_t pc, uint32_t hw1, uint32_t hw2);
 static void msc_ring_dump_once(IOP *iop, const char *why);
@@ -1956,15 +1957,19 @@ typedef struct {
 } BceEv;
 static BceEv bceRing[32][BCE_RING];
 static unsigned bceRingN[32];
-/* ON unless the variable says 0, off, no or false.  These cost a few stores an
- * event and nothing is printed until a computer fails another, which is the
- * one moment the record is wanted -- and a failure that happens with the
- * record off has to be waited for again (2.6 hours on average, 2026-09-27). */
+/* OFF BY DEFAULT, like every debugging aid: a production run keeps and writes
+ * nothing it was not asked for.  The variable itself turns it on or off;
+ * unset, YAGPC_FAILURE_RECORD decides for the whole failure record at once
+ * (see batchrunner_failure_record in run.c). */
+static int switch_on(const char *e) {
+    return e != NULL && *e != '\0' &&
+           !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
+             !strcmp(e, "false"));
+}
 static int ring_default_on(const char *name) {
     const char *e = yagpc_getenv(name);
-    if (e == NULL) return 1;
-    return !(!strcmp(e, "0") || !strcmp(e, "off") || !strcmp(e, "no") ||
-             !strcmp(e, "false"));
+    if (e != NULL) return switch_on(e);
+    return switch_on(yagpc_getenv("YAGPC_FAILURE_RECORD"));
 }
 static int bce_ring_on(void) {
     static int inited = 0, on = 0;
@@ -1973,7 +1978,10 @@ static int bce_ring_on(void) {
 }
 static void bce_ring_put(IOP *iop, int p, char kind, uint32_t word, int sync,
                          int latch, int await, int left, int count) {
-    if (!bce_ring_on() || p < 14 || p > 23 || iop->cpu == NULL) return;
+    /* EVERY BUS, 1-23.  It was the flight-critical ones only, 14-23, and the
+     * first failure that was not theirs (a display bus, runs z400..z400-4)
+     * left nothing to read. */
+    if (!bce_ring_on() || p < 1 || p > 23 || iop->cpu == NULL) return;
     unsigned i = __atomic_fetch_add(&bceRingN[p], 1u, __ATOMIC_RELAXED);
     BceEv *e = &bceRing[p][i % BCE_RING];
     e->t = (iop->vehicle != NULL) ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId)
@@ -1987,7 +1995,7 @@ void iop_dump_bce_ring(double sinceUs) {
     static int done = 0;
     if (!bce_ring_on() || done) return;
     done = 1;
-    for (int p = 14; p <= 23; p++) {
+    for (int p = 1; p <= 23; p++) {
         unsigned n = bceRingN[p], lo = (n > BCE_RING) ? n - BCE_RING : 0;
         for (unsigned i = lo; i < n; i++) {
             const BceEv *e = &bceRing[p][i % BCE_RING];
@@ -2188,6 +2196,14 @@ bool iop_bce_receive(IOP *iop, uint32_t addr, uint32_t count) {
         bce->recvCmd = 0u;
         bce_ring_put(iop, p, 'A', 0u, 0, bce->mia.latchValid, bce->recvAwaitCmd,
                      (int)count, (int)count);
+        /* A bus model cannot see a receive being armed -- it sees only the
+         * looks that follow, and those come when this thread next runs.
+         * See the wire log in mtumodel.c. */
+        if (iop_arm_hook != NULL && iop->cpu != NULL)
+            iop_arm_hook(iop->cpu->gpcId, bce->bceNum, bce->recvAwaitCmd,
+                         (iop->vehicle != NULL)
+                             ? vehicle_shared_us(iop->vehicle, iop->cpu->gpcId)
+                             : now);
         if (yagpc_getenv("YAGPC_TIMEOUT_TRACE") && timeout_trace_pe(p) &&
             now >= timeout_trace_from_us()) {
             Register *r = iopls_at(&iop->ls, p, 1, 3);

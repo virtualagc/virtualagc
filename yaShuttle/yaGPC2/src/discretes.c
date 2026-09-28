@@ -259,12 +259,16 @@ Discretes *discretes_create(int gpcId) {
     d->syncOutLast = 8u;
     for (int k = 0; k < 5; k++) d->syncInLast[k] = 8u;
     {
-        /* YAGPC_SYNC_HISTORY=N keeps the last N sync events per computer;
-         * 8192, about two and a half seconds of conversation, unless it
-         * says otherwise, and 0 keeps none.  It was off by default, and a
-         * failure that happened with it off had to be waited for again. */
+        /* YAGPC_SYNC_HISTORY=N keeps the last N sync events per computer.
+         * OFF BY DEFAULT, like every debugging aid; YAGPC_FAILURE_RECORD
+         * turns it on at 8192, about two and a half seconds of
+         * conversation, with the rest of the failure record. */
         const char *e = yagpc_getenv("YAGPC_SYNC_HISTORY");
-        long n = (e != NULL && *e != '\0') ? atol(e) : 8192;
+        const char *fr = yagpc_getenv("YAGPC_FAILURE_RECORD");
+        bool frOn = fr != NULL && *fr != '\0' && strcmp(fr, "0") != 0 &&
+                    strcmp(fr, "off") != 0 && strcmp(fr, "no") != 0 &&
+                    strcmp(fr, "false") != 0;
+        long n = (e != NULL && *e != '\0') ? atol(e) : (frOn ? 8192 : 0);
         if (n > 0) {
             if (n > 1000000L) n = 1000000L;
             d->hist = calloc((size_t)n, sizeof *d->hist);

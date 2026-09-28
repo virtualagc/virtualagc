@@ -48,6 +48,11 @@ typedef struct MmuModel MmuModel;
  * cannot be read, having said why on stderr. */
 MmuModel *mmumodel_create(int unit, const char *volumePath);
 void mmumodel_free(MmuModel *m);
+/* EVERYTHING THIS MODEL HOLDS FOR ONE COMPUTER TO READ, DISCARDED.  Called
+ * when that computer leaves HALT and at its IPL: nothing that reached the
+ * wire while it was not executing may be handed to its software afterwards.
+ * Returns how many words went. */
+size_t mmumodel_clear_input(MmuModel *m, int gpcId);
 
 /* Hands the model the emulated clock (&cpu.elapsedTimeUs), which is what
  * lets a read behave like a transfer down a wire instead of a handover of

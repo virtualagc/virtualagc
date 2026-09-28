@@ -645,5 +645,6 @@ void bce_instr_exec(IOP *iop, uint32_t hw1, uint32_t hw2);
 void iop_dump_bce_ring(double sinceUs);
 /* Set by run.c to mtumodel_dump_ring, so an IOP-side trigger dumps both. */
 extern void (*iop_ring_hook)(double sinceUs);
+extern void (*iop_arm_hook)(int gpcId, int busID, bool listen, double sharedUs);
 
 #endif

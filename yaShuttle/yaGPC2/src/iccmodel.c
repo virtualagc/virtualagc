@@ -768,3 +768,14 @@ bool iccmodel_load(IccModel *m, const char *path, double nowUs) {
     json_free(root);
     return true;
 }
+
+size_t iccmodel_clear_input(IccModel *m, int gpcId) {
+    if (m == NULL || gpcId < 1 || gpcId > 5) return 0;
+    size_t n = 0;
+    for (int bus = 1; bus <= YAGPC_ICC_BUS_LAST; bus++) {
+        n += m->q[bus][gpcId].count;
+        m->q[bus][gpcId].head = m->q[bus][gpcId].count = 0;
+        m->q[bus][gpcId].haveLast = 0;
+    }
+    return n;
+}

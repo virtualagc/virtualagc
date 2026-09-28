@@ -440,6 +440,8 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
 /* Re-tie the pacer to the wall clock after the machine was stopped, and
  * remember what that forgave: the computer's clock does not count time it
  * was not running, but the vehicle's time of day does (mtumodel). */
+static void batchrunner_clear_input(BatchRunner *r, const char *why);
+
 static void batchrunner_resync(BatchRunner *r) {
     rtpacer_resync(&r->rtPacer);
     r->writtenOffUs = r->rtPacer.statRebaseLostMs * 1000.0 * r->rtPacer.factor;
@@ -1094,6 +1096,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
             }
             r->busRouter.mtu = r->mtuModel;
             iop_ring_hook = mtumodel_dump_ring;
+            iop_arm_hook = mtumodel_note_arm;
             for (int d = 0; d < r->nDeuModelExtra; d++)
                 r->busRouter.deuExtra[d] = r->deuModelExtra[d];
             r->busRouter.nDeuExtra = r->nDeuModelExtra;
@@ -1674,6 +1677,7 @@ static void firmware_ipl(BatchRunner *r) {
      * that machine's pending interrupts, timers and whole IOP -- see
      * cpu_system_reset() and iop_system_reset(). */
     ap101_system_reset(&r->age.gpc);
+    batchrunner_clear_input(r, "IPL");
     if (!r->age.gpc.iop.servicer) {
         mode_log(r, "MODE: IPL, but no mass memory is attached; "
                         "nothing to read a bootstrap from\n");
@@ -1992,6 +1996,7 @@ static bool mode_switch_held_uncached(BatchRunner *r) {
             /* The release.  Reload the whole PSW pair from the System
              * Reset vector, which is what hands control to FCMBOOT. */
             cpu_reset(&r->age.gpc.cpu);
+            batchrunner_clear_input(r, "HALT -> STBY");
             ipl_talkback(r, false);
             mode_log(r, "MODE: HALT -> STBY; reset released, "
                             "starting at 0x%05x\n",
@@ -2311,12 +2316,28 @@ static void fcmtrace_dump(BatchRunner *r) {
     }
 }
 
-/* EVERYTHING A FAILURE LEAVES BEHIND, WRITTEN ONCE, WHETHER OR NOT ANYONE
- * ASKED.  The trigger does not depend on the build: it is a computer raising
- * a fail vote, or reaching a landmark called fcmsfail if one is set.  Each
+/* YAGPC_FAILURE_RECORD=1: everything a failure leaves behind, kept in memory
+ * as the run goes and written once when it happens.  OFF BY DEFAULT, like every
+ * debugging aid -- a production run keeps and writes nothing it was not asked
+ * for.  It turns on the bus rings and the sync history too, unless their own
+ * variables say otherwise.  The landmark fcmsfail and YAGPC_RECORD_AT write it
+ * whenever they are set, since those are requests in themselves.  The
+ * trigger does not depend on the build: it is a computer raising a fail vote,
+ * or reaching a landmark called fcmsfail if one is set.  Each
  * computer writes its own sync history and its own copy of the flight
  * software's trace the first time it notices; the first to notice also
  * writes the bus rings, which belong to the vehicle. */
+static bool failure_record_on(void) {
+    static int inited = 0, on = 0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_FAILURE_RECORD");
+        on = e != NULL && *e != '\0' && strcmp(e, "0") != 0 &&
+             strcmp(e, "off") != 0 && strcmp(e, "no") != 0 && strcmp(e, "false") != 0;
+    }
+    return on != 0;
+}
+
 static void batchrunner_failure_record(BatchRunner *r, const char *why) {
     if (r->failRecorded) return;
     r->failRecorded = true;
@@ -2330,11 +2351,81 @@ static void batchrunner_failure_record(BatchRunner *r, const char *why) {
             r->gpcId, why, r->age.gpc.cpu.elapsedTimeUs / 1e6,
             landmark_now_us(r) / 1e6, first ? " -- first in the vehicle" : "");
     fcmtrace_dump(r);
+    /* YAGPC_ICCSYT=<hex address of FCMICCAD>: each computer's copy of every
+     * computer's time at the last common-set sync (TICCSYTM/TICCSYTH, +45
+     * and +46 in an ICC buffer) and its own software clock.  A joining
+     * computer sets its clock from the difference between the prime's and
+     * its own (FPMMTURM, FPMISSIP), so if the two are not from the SAME sync
+     * it joins out of phase. */
+    {
+        const char *e = yagpc_getenv("YAGPC_ICCSYT");
+        const MemoryBus *ram = r->age.gpc.cpu.ram;
+        if (e != NULL && ram != NULL) {
+            uint32_t tab = (uint32_t)strtoul(e, NULL, 16);
+            for (int id = 1; id <= 5; id++) {
+                uint32_t buf = membus_get16(ram, tab + (uint32_t)id) & 0xffffu;
+                if (buf == 0u) continue;
+                uint32_t m = membus_get16(ram, buf + 0x45u) & 0xffffu;
+                uint32_t h = ((membus_get16(ram, buf + 0x46u) & 0xffffu) << 16) |
+                             (membus_get16(ram, buf + 0x47u) & 0xffffu);
+                uint32_t gh = ((membus_get16(ram, buf + 0x0cu) & 0xffffu) << 16) |
+                              (membus_get16(ram, buf + 0x0du) & 0xffffu);
+                fprintf(stderr, "ICCSYT GPC%d copy-of-GPC%d buf=%04x sync-time "
+                                "halfhours=%u us=%u my-time us=%u\n",
+                        r->gpcId, id, (unsigned)buf, (unsigned)m, (unsigned)h,
+                        (unsigned)gh);
+            }
+            fprintf(stderr, "ICCSYT GPC%d software clock halfhours=%u us=%u\n",
+                    r->gpcId, (unsigned)(membus_get16(ram, 0x196u) & 0xffffu),
+                    (unsigned)(((membus_get16(ram, 0x194u) & 0xffffu) << 16) |
+                               (membus_get16(ram, 0x195u) & 0xffffu)));
+        }
+    }
     discretes_dump_history(r->discretes, why);
     if (first) {
         mtumodel_dump_ring(landmark_now_us(r) - ring_window_us());
         iop_dump_bce_ring(landmark_now_us(r) - ring_window_us());
     }
+}
+
+/* NOTHING THAT ARRIVED WHILE THIS COMPUTER WAS NOT EXECUTING REACHES ITS
+ * SOFTWARE.  In HALT it runs nothing -- no BCE takes a word -- but the bus
+ * models kept hearing the other computers and queued what they heard for it:
+ * a display bus up to 16384 words, an intercomputer bus 2048 per receiver,
+ * the mass memory's tap, the timing unit's per-reader state.  On the hardware
+ * all of that is one receive latch per MIA, holding at most the last word --
+ * and that goes too: with every queue behind it guaranteed empty, a word in
+ * the latch could only be one that arrived while the machine was not
+ * executing, which is exactly what must not be read.  (The IPL's system
+ * reset already clears the latches; leaving HALT did not.)  Called when the
+ * machine leaves HALT and at its IPL. */
+static void batchrunner_clear_input(BatchRunner *r, const char *why) {
+    BusRouter *br = &r->busRouter;
+    size_t n = 0;
+    if (r->bceFramer != NULL) n += bcenet_framer_clear_input(r->bceFramer);
+    if (br->icc != NULL) {
+        for (int bus = 1; bus <= YAGPC_ICC_BUS_LAST; bus++)
+            vehicle_bus_enter(br->vehicle, bus, 0, false);
+        n += iccmodel_clear_input(br->icc, r->gpcId);
+        for (int bus = YAGPC_ICC_BUS_LAST; bus >= 1; bus--)
+            vehicle_bus_leave(br->vehicle, bus);
+    }
+    for (int u = 0; u < 2; u++)
+        if (br->mmu[u] != NULL) {
+            vehicle_bus_enter(br->vehicle, br->mmuBus[u], 0, false);
+            n += mmumodel_clear_input(br->mmu[u], r->gpcId);
+            vehicle_bus_leave(br->vehicle, br->mmuBus[u]);
+        }
+    if (br->mtu != NULL) n += mtumodel_clear_input(br->mtu, r->gpcId);
+    for (int i = 0; i < 24; i++) {
+        MIA *mia = &r->age.gpc.iop.bce[i].mia;
+        if (mia->latchValid) n++;
+        mia->latchValid = false;
+        mia->latch = 0;
+    }
+    if (n > 0)
+        mode_log(r, "MODE: %s; discarded %zu word(s) queued while it was "
+                    "not executing\n", why, n);
 }
 
 static bool batchrunner_step(BatchRunner *r) {
@@ -2797,7 +2888,20 @@ static bool batchrunner_step(BatchRunner *r) {
             msc->failDiscSeen = 0u;
             if (seen & ~fd) discretes_publish_failvote(r->discretes, fd | seen);
             discretes_publish_failvote(r->discretes, fd);
+            /* YAGPC_RECORD_AT=<shared seconds>: write the same record at a
+             * chosen moment of a run in which nothing failed, so that a
+             * failure can be compared with what SHOULD have happened. */
             if (!r->failRecorded) {
+                static int raInit = 0; static double raUs = -1.0;
+                if (!raInit) {
+                    raInit = 1;
+                    const char *e = yagpc_getenv("YAGPC_RECORD_AT");
+                    if (e != NULL && *e != '\0') raUs = atof(e) * 1e6;
+                }
+                if (raUs > 0.0 && landmark_now_us(r) >= raUs)
+                    batchrunner_failure_record(r, "requested");
+            }
+            if (!r->failRecorded && failure_record_on()) {
                 if ((fd | seen) != 0u)
                     batchrunner_failure_record(r, "fail vote raised");
                 else if (r->vehicle != NULL &&

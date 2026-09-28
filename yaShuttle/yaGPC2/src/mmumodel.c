@@ -1333,3 +1333,13 @@ bool mmumodel_load(MmuModel *m, const char *dir, double nowUs) {
             m->unit, m->track, m->file, m->subfile, (unsigned)got);
     return true;
 }
+
+size_t mmumodel_clear_input(MmuModel *m, int gpcId) {
+    /* Its LISTENER tap only.  A commander's reply queue is the unit's own
+     * state, shared with whoever commands next; the IPL drains it for the
+     * bootstrap (run.c firmware_ipl), and nothing else reads it. */
+    if (m == NULL || gpcId < 1 || gpcId > 5) return 0;
+    size_t n = m->tap[gpcId].count;
+    m->tap[gpcId].head = m->tap[gpcId].count = 0;
+    return n;
+}
