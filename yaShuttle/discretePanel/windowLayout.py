@@ -325,12 +325,51 @@ def _mac_place(wid, x, y, w=None, h=None, verbose=False):
     return (x - now[0], y - now[1])
 
 
+# WSLg.  Its window manager (Weston's) keeps no _NET_CLIENT_LIST, so wmctrl
+# can list nothing -- "Cannot get client list properties" -- and every window
+# was "not on screen".  xdotool finds them without it; what it finds is Tk's
+# wrapper and Qt's top level, the windows wmctrl names elsewhere, and both
+# carry _NET_WM_PID (Tk's from claim()).  Moving and measuring were never
+# wmctrl's, so only the listing needs another source.  Used only when the
+# property is missing, so a desktop that keeps it takes the path it always did.
+#
+# WSLg HONOURS A PLACE ONLY INSIDE A MONITOR'S WORK AREA, first placement or
+# move alike, and puts the window somewhere near the top left otherwise.  Its
+# idea of the monitors follows Windows', and a KVM switch (the monitors going
+# away and coming back) has left it with one monitor and a 1024x768 work area,
+# every place outside that ignored, until the display changed again -- the
+# switch back restored it.
+
+
+def _no_client_list():
+    # BY WHAT IS THERE, not by how its absence is worded: xprop says "not
+    # found" once some client has interned the atom, and "no such atom on any
+    # window" before (PASS-IDLE, measured on a bare Xvfb).
+    return "_NET_CLIENT_LIST(WINDOW)" not in run(["xprop", "-root", "_NET_CLIENT_LIST"])
+
+
+def _listing_without_wmctrl():
+    """wmctrl -lpG's lines, built from xdotool: id, desktop, pid, x, y, w, h,
+    machine and title.  The position and size are placeholders -- windows()
+    measures every window for itself -- and so is the desktop."""
+    lines = []
+    for wid in run(["xdotool", "search", "--onlyvisible", "--name", "."]).split():
+        pid = run(["xdotool", "getwindowpid", wid]).strip()
+        title = run(["xdotool", "getwindowname", wid]).strip()
+        lines.append("0x%08x 0 %s 0 0 0 0 N/A %s"
+                     % (int(wid), pid if pid.isdigit() else "0", title))
+    return "\n".join(lines)
+
+
 def windows():
     """Every managed window: {id, pid, x, y, w, h, title, role, cmd}."""
     if MAC:
         return _mac_windows()
     out = []
-    for line in run(["wmctrl", "-lpG"]).splitlines():
+    listing = run(["wmctrl", "-lpG"])
+    if not listing.strip() and _no_client_list():
+        listing = _listing_without_wmctrl()
+    for line in listing.splitlines():
         parts = line.split(None, 7)
         if len(parts) < 8:
             continue
