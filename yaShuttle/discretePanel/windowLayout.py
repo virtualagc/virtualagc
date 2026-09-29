@@ -65,6 +65,8 @@ import subprocess
 import sys
 import time
 
+import procinfo
+
 # Tk tells nobody its process id, so its windows are named by title instead.
 TITLE_ROLES = [
     (re.compile(r"^Subtitles$"), "subtitles"),
@@ -111,6 +113,8 @@ def run(cmd, timeout=10):
 
 
 def cmdline(pid):
+    if not os.path.isdir("/proc"):
+        return procinfo.cmdline(pid)            # macOS
     try:
         with open("/proc/%d/cmdline" % pid, "rb") as fh:
             return " ".join(fh.read().decode("utf-8", "replace").split("\0")).strip()
@@ -128,7 +132,9 @@ def descendants(root):
     (2026-09-19).  Ancestry is what separates them, and it survives a
     restore, because the relaunched children are simulatePASS's too."""
     children = {}
-    for d in os.listdir("/proc"):
+    if not os.path.isdir("/proc"):
+        children = procinfo.children()          # macOS
+    for d in (os.listdir("/proc") if os.path.isdir("/proc") else ()):
         if not d.isdigit():
             continue
         try:
@@ -192,8 +198,124 @@ def role_of(pid, title):
     return "other:" + title, cmd
 
 
+# ---------------------------------------------------------------------------
+# macOS.  There is no wmctrl or xdotool there; the Accessibility interface,
+# reached through System Events with osascript, lists, measures, moves and
+# resizes any application's windows -- Tk's and Qt's alike.  Positions and
+# sizes are in points from the top left of the main screen, the units every
+# window is placed in there, and cover the whole window, title bar included.
+# A window is named by its process and its title, "mac:<pid>:<title>".
+#
+# THE PERMISSION.  Moving another program's windows needs Accessibility access
+# for whatever runs this -- System Settings > Privacy & Security >
+# Accessibility, for Terminal -- and macOS asks once for leave to script
+# System Events.  Without them every call below fails, and a layout places
+# nothing and says so, which is what happened before this existed.
+
+MAC = sys.platform == "darwin"
+
+_MAC_LIST = """
+function run(argv) {
+  // By process id: processes picked out by name all resolve to the FIRST
+  // process of that name, and every Python program here is named "Python".
+  var se = Application("System Events"), out = [];
+  var pids = se.processes.whose({name: "Python"}).unixId();
+  for (var i = 0; i < pids.length; i++) {
+    try {
+      var ws = se.processes.whose({unixId: pids[i]})[0].windows;
+      var names = ws.name(), pos = ws.position(), sz = ws.size();
+      for (var j = 0; j < names.length; j++)
+        out.push({pid: pids[i], title: names[j] || "", x: pos[j][0], y: pos[j][1],
+                  w: sz[j][0], h: sz[j][1]});
+    } catch (e) {}
+  }
+  return JSON.stringify(out);
+}
+"""
+
+_MAC_WINDOW = """
+function run(argv) {
+  var se = Application("System Events");
+  // Left as specifiers: resolving them first names the process "Python",
+  // which is the first Python process rather than this one.
+  var p = se.processes.whose({unixId: parseInt(argv[0])})[0];
+  var w = p.windows.whose({name: argv[1]})[0];
+  if (argv.length > 2) {
+    if (argv[4] !== "") w.size = [parseInt(argv[4]), parseInt(argv[5])];
+    w.position = [parseInt(argv[2]), parseInt(argv[3])];
+  }
+  var pos = w.position(), sz = w.size();
+  return JSON.stringify([pos[0], pos[1], sz[0], sz[1]]);
+}
+"""
+
+
+def _osascript(script, *args):
+    out = run(["osascript", "-l", "JavaScript", "-e", script] + [str(a) for a in args])
+    try:
+        return json.loads(out) if out.strip() else None
+    except ValueError:
+        return None
+
+
+def _mac_id(wid):
+    _mac, pid, title = wid.split(":", 2)
+    return int(pid), title
+
+
+def _mac_windows():
+    out = []
+    for w in _osascript(_MAC_LIST) or []:
+        role, cmd = role_of(w["pid"], w["title"])
+        entry = {"id": "mac:%d:%s" % (w["pid"], w["title"]), "pid": w["pid"],
+                 "x": int(w["x"]), "y": int(w["y"]), "w": int(w["w"]), "h": int(w["h"]),
+                 "title": w["title"], "role": role, "cmd": cmd}
+        if role == "subtitles":
+            entry["look"] = _mac_look(w["pid"])
+        out.append(entry)
+    return out
+
+
+def _mac_look(pid):
+    """The caption box's look: on macOS it keeps it in a file named for its
+    process (subtitles.look_file()), there being no X11 property to use."""
+    import tempfile
+    try:
+        with open(os.path.join(tempfile.gettempdir(), "nsts-subtitles-%d.look" % pid)) as fh:
+            return fh.read().strip()
+    except OSError:
+        return ""
+
+
+def _mac_geometry(wid, x=None, y=None, w=None, h=None):
+    pid, title = _mac_id(wid)
+    extra = [] if x is None else [x, y, "" if w is None else w, "" if h is None else h]
+    got = _osascript(_MAC_WINDOW, pid, title, *extra)
+    return tuple(int(v) for v in got) if got else None
+
+
+def _mac_place(wid, x, y, w=None, h=None, verbose=False):
+    """As place(): True when it is where it was asked to be, None if it has
+    gone, else how far out it finished.  macOS may pull a window back onto
+    the screen or out from under the menu bar, so it is measured, not
+    assumed."""
+    now = None
+    for attempt in range(3):
+        now = _mac_geometry(wid, x, y, w, h)
+        if now is None:
+            return None
+        if verbose:
+            print("    try %d: asked %d,%d got %d,%d" % (attempt + 1, x, y, now[0], now[1]))
+        if abs(now[0] - x) <= 1 and abs(now[1] - y) <= 1:
+            return True
+        time.sleep(0.2)
+    return (x - now[0], y - now[1])
+
+
 def windows():
     """Every managed window: {id, pid, x, y, w, h, title, role, cmd}."""
+    if MAC:
+        return _mac_windows()
     out = []
     for line in run(["wmctrl", "-lpG"]).splitlines():
         parts = line.split(None, 7)
@@ -237,6 +359,8 @@ def look_of(wid):
 
 def geometry(wid):
     """Where the window manager actually has it now."""
+    if MAC:
+        return _mac_geometry(wid)
     text = run(["xdotool", "getwindowgeometry", "--shell", wid])
     g = dict(re.findall(r"^(\w+)=(-?\d+)$", text, re.M))
     if not g:
@@ -250,6 +374,8 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     Without xdotool's --sync: that waits for the window manager to confirm,
     and waits for ever when the move is refused, which hung a whole run.  The
     loop below measures for itself instead."""
+    if MAC:
+        return _mac_place(wid, x, y, w, h, verbose)
     if w and h:
         run(["xdotool", "windowsize", wid, str(w), str(h)], timeout=5)
         time.sleep(0.15)
@@ -432,7 +558,7 @@ def main(argv=None):
     if not args.what:
         ap.print_help()
         return 1
-    for tool in ("wmctrl", "xdotool"):
+    for tool in (("osascript",) if MAC else ("wmctrl", "xdotool")):
         if not any(os.access(os.path.join(p, tool), os.X_OK)
                    for p in os.environ.get("PATH", "").split(":")):
             sys.exit("windowLayout: %s is not installed" % tool)

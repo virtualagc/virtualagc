@@ -27,7 +27,7 @@
  *
  * It opens REAL SOCKETS, so a machine that forbids them makes this a skip
  * rather than a failure. */
-/* pthread_barrier_* are POSIX 2001 and hidden by a strict -std=c11. */
+/* pthreads are POSIX and hidden by a strict -std=c11. */
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdio.h>
@@ -44,14 +44,38 @@ static BceNetTransport *g_t;
 static int g_opened;
 
 #ifdef HAVE_PTHREADS
-static pthread_barrier_t g_start;
+/* The starting gate.  Not a pthread_barrier_t: barriers are an optional part
+ * of POSIX, and macOS does not have them.  Each opener checks in and waits;
+ * main waits until every one has checked in, then releases them together.
+ * Unlike a barrier sized for THREADS, this also cannot hang when fewer
+ * threads could be started -- main just opens the gate for those there are. */
+static pthread_mutex_t g_gateLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t g_gateCond = PTHREAD_COND_INITIALIZER;
+static int g_arrived;
+static int g_gateOpen;
+
+static void gate_wait(void) {
+    pthread_mutex_lock(&g_gateLock);
+    g_arrived++;
+    pthread_cond_broadcast(&g_gateCond);
+    while (!g_gateOpen) pthread_cond_wait(&g_gateCond, &g_gateLock);
+    pthread_mutex_unlock(&g_gateLock);
+}
+
+static void gate_open_when(int count) {
+    pthread_mutex_lock(&g_gateLock);
+    while (g_arrived < count) pthread_cond_wait(&g_gateCond, &g_gateLock);
+    g_gateOpen = 1;
+    pthread_cond_broadcast(&g_gateCond);
+    pthread_mutex_unlock(&g_gateLock);
+}
 
 /* Every thread opens a DIFFERENT bus, so they contend only over starting
  * the transmit thread -- which is the thing under test -- and not over one
  * bus slot. */
 static void *opener(void *arg) {
     int busID = (int)(long)arg;
-    pthread_barrier_wait(&g_start);      /* all at once, or there is no race */
+    gate_wait();                         /* all at once, or there is no race */
     if (bcenet_transport_open_bus(g_t, busID, 1)) {
         __atomic_add_fetch(&g_opened, 1, __ATOMIC_SEQ_CST);
     }
@@ -71,7 +95,6 @@ int main(void) {
     }
 
     pthread_t th[THREADS];
-    pthread_barrier_init(&g_start, NULL, THREADS);
     int made = 0;
     for (int i = 0; i < THREADS; i++) {
         /* Buses 6..13: display and payload, well inside the valid range. */
@@ -80,6 +103,7 @@ int main(void) {
         else
             break;
     }
+    gate_open_when(made);
     if (made != THREADS) {
         for (int i = 0; i < made; i++) pthread_join(th[i], NULL);
         printf("SKIP [bcenet/txthread]: could not start %d threads\n", THREADS);
@@ -87,7 +111,6 @@ int main(void) {
         return 0;
     }
     for (int i = 0; i < THREADS; i++) pthread_join(th[i], NULL);
-    pthread_barrier_destroy(&g_start);
 
     if (g_opened == 0) {
         printf("SKIP [bcenet/txthread]: no bus would open (sockets not "

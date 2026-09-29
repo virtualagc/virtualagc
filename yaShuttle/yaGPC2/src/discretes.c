@@ -310,6 +310,15 @@ Discretes *discretes_create(int gpcId) {
         free(d);
         return NULL;
     }
+#if defined(SO_REUSEPORT) && !defined(__linux__)
+    /* macOS and the BSDs: see the same call in bcenet_transport.c. */
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof reuse) < 0) {
+        fprintf(stderr, "discretes: SO_REUSEPORT failed: %s\n", strerror(errno));
+        close(fd);
+        free(d);
+        return NULL;
+    }
+#endif
 
     struct sockaddr_in addr = {0};
     addr.sin_family = AF_INET;

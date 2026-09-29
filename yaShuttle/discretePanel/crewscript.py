@@ -303,6 +303,23 @@ HELP = """\
        "keys": _wrap(_KEY_NAMES, " " * 24)}
 
 
+# 'audio' ON OR OFF.  Playing a sound uses Linux's players (AUDIO_PLAYERS), so
+# on another system a script with 'audio' lines could not be used at all:
+# every one of them is checked for its file as the script is read.  --no-audio
+# (simulatePASS.py, panelO6.py) turns them off: they are accepted without
+# looking for the file, and skipped when reached.  It travels as
+# NSTS_NO_AUDIO=1, which simulatePASS.py passes on to everything it starts,
+# so the panel, the manager and any script they load all agree.
+AUDIO = os.environ.get("NSTS_NO_AUDIO") != "1"
+
+
+def disable_audio():
+    """--no-audio: ignore every 'audio' line, here and in child processes."""
+    global AUDIO
+    AUDIO = False
+    os.environ["NSTS_NO_AUDIO"] = "1"
+
+
 class ScriptError(Exception):
     pass
 
@@ -545,14 +562,15 @@ def parse(text, path=None, _depth=0, _seen=None):
                 # CHECKED HERE, with the rest of the script, because the
                 # alternative is finding out that the file was misspelt at
                 # the moment it was supposed to tell you something.
-                if not arg:
-                    raise ScriptError("audio needs a file name")
-                snd = arg
-                if not os.path.isabs(snd):
-                    snd = os.path.join(os.path.dirname(os.path.abspath(path or ".")), snd)
-                if not os.path.isfile(snd):
-                    raise ScriptError("audio: no such file: %s" % arg)
-                entry["audio"] = snd
+                if AUDIO:                 # --no-audio: not looked for, not played
+                    if not arg:
+                        raise ScriptError("audio needs a file name")
+                    snd = arg
+                    if not os.path.isabs(snd):
+                        snd = os.path.join(os.path.dirname(os.path.abspath(path or ".")), snd)
+                    if not os.path.isfile(snd):
+                        raise ScriptError("audio: no such file: %s" % arg)
+                    entry["audio"] = snd
 
             elif verb == "snapshot":
                 # WHERE, CHECKED NOW.  A capture is the one step in a script
@@ -733,7 +751,7 @@ def result_receiver(port_base=None):
     """The socket manager.py listens on for those answers."""
     base = D.PORT_BASE if port_base is None else port_base
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", base + RESULT_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -804,7 +822,7 @@ def progress_receiver(port_base=None):
     """The socket manager.py listens on for those reports."""
     base = D.PORT_BASE if port_base is None else port_base
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", base + PROGRESS_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -833,7 +851,7 @@ def meds_receiver(port_base=None):
     """The socket each MEDS2 listens on for those."""
     base = D.PORT_BASE if port_base is None else port_base
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", base + MEDS_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -845,7 +863,7 @@ def session_receiver(port_base=None):
     """The socket simulatePASS.py listens on for those."""
     base = D.PORT_BASE if port_base is None else port_base
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", base + SESSION_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -857,7 +875,7 @@ def control_receiver(port_base=None):
     """The socket panelO6.py listens on for those commands."""
     base = D.PORT_BASE if port_base is None else port_base
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", base + CONTROL_OFFSET))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP), socket.inet_aton(D.IFACE)))
@@ -893,7 +911,7 @@ class ScreenWatch(object):
     def _listen(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            D.share_port(s)
             s.bind(("", D.PORT_BASE + SCREEN_OFFSET))
             s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                          struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -1100,7 +1118,10 @@ class Player(object):
                 return
             self.log(e["text"])
             if e["verb"] == "audio":
-                play_audio(e["audio"], self.log)
+                if AUDIO and "audio" in e:
+                    play_audio(e["audio"], self.log)
+                else:
+                    self.log("audio: skipped (--no-audio)")
                 k += 1
                 continue
             if e["verb"] == "subtitle":

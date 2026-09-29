@@ -83,6 +83,7 @@ Usage:
 import argparse
 import json
 import os
+import sys
 import select
 import socket
 import struct
@@ -315,6 +316,21 @@ RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
 REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + MARGIN   # 1684
 REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
+# TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
+# because macOS Tk measures in points (two physical pixels on a Retina
+# screen) where Linux Tk measures physical pixels.  The text must not shrink
+# with it: macOS Tk ignores `tk scaling`, so its text already comes out the
+# size a HiDPI Linux desktop's Tk scaling makes it.  simulatePASS.py passes
+# NSTS_TK_FONT_SCALE to put it back; unset, as on Linux, it is 1.
+try:
+    FONT_SCALE = float(os.environ.get("NSTS_TK_FONT_SCALE") or 1)
+except ValueError:
+    FONT_SCALE = 1.0
+# macOS ROUNDS A WINDOW'S BOTTOM CORNERS -- by about 11 points on macOS 27 --
+# and whatever is drawn under them is cut off.  There is no switching that off
+# for a window with a title bar, so the drawing is kept clear of them with
+# this much of the window's own colour below it.
+BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
 FULL_SIZE = 768        # --size units: 768 is the design (full) window
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
@@ -411,6 +427,7 @@ class PanelO6:
         self.root = root
         root.title(TITLE_BASE)
         root.configure(bg=C_WINDOW)
+
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
 
@@ -444,6 +461,24 @@ class PanelO6:
         cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
                             width=cw, height=ch)
+        if sys.platform == "darwin":
+            # AN EDGE DOWN EACH SIDE, in the title bar's colour (the system's,
+            # so it follows dark mode): a macOS window has no border of its
+            # own, and this one is dark to its edges, so on a black desktop it
+            # had none at all.  Not along the bottom, where macOS clips its
+            # rounded corners through any line; these just end where the
+            # corners begin, and the title bar marks the top.
+            for side in ("left", "right"):
+                tk.Frame(root, width=1, bg="systemWindowBackgroundColor"
+                         ).pack(side=side, fill="y")
+        if BOTTOM_MARGIN:
+            # In the panes' colour, not the window's dark one, so the rounded
+            # corners cut into what reads as the bottom of the panel -- and
+            # set off from the lowest pane (which runs to the drawing's very
+            # bottom) by the same dark gap that separates the panes.
+            tk.Frame(root, height=BOTTOM_MARGIN, bg=C_PANEL).pack(side="bottom", fill="x")
+            gap = max(1, int(round(PANE_GAP * size / float(FULL_SIZE))))
+            tk.Frame(root, height=gap, bg=C_WINDOW).pack(side="bottom", fill="x")
         self.cv.pack(fill="both", expand=True)
 
         self._hits = []          # (kind, index, x1, y1, x2, y2)
@@ -849,7 +884,7 @@ class PanelO6:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,
                                   socket.IPPROTO_UDP)
-                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                D.share_port(s)
                 s.bind(("", port))
                 s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                              struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -947,7 +982,7 @@ class PanelO6:
     def _tkfont(self, size, bold=True):
         # Tk: positive size is points.  Used only for metrics; _font() is
         # what create_text gets, and must stay in the same units.
-        pts = max(1, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s * FONT_SCALE)))
         key = (pts, bold)
         font = self._font_cache.get(key)
         if font is None:
@@ -957,7 +992,7 @@ class PanelO6:
         return font
 
     def _font(self, size, bold=True):
-        pts = max(1, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s * FONT_SCALE)))
         return ("Helvetica", pts, "bold" if bold else "normal")
 
     def _th(self, size):
@@ -2472,6 +2507,8 @@ def main(argv=None):
                          "option as on yaGPC2 and MEDS2.py. "
                          "NSTS_BUS_PORT_BASE sets it too.")
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
+    ap.add_argument("--no-audio", action="store_true",
+                    help="ignore 'audio' lines in scripts: no file check, no sound")
     ap.add_argument("--show", action="store_true",
                     help="show the panel window during a --script run too (it is "
                          "hidden otherwise, unless the script has a 'wait user')")
@@ -2489,6 +2526,8 @@ def main(argv=None):
                          "published, so restoring a running simulation does "
                          "not halt it")
     args = ap.parse_args(argv)
+    if args.no_audio:
+        crewscript.disable_audio()
     if args.size <= 0:
         raise SystemExit("panelO6: --size must be a positive integer")
     if not 1 <= args.gpc_id <= N_GPC:
@@ -2501,6 +2540,7 @@ def main(argv=None):
     # listener subscribes to.
     D.set_gpc(args.gpc_id)
 
+    import macdock; macdock.set_app_name("Panel")                     # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)

@@ -20,6 +20,10 @@ port = int(sys.argv[1]) + 91
 want = sys.argv[2] if len(sys.argv) > 2 else None
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+# macOS/BSD need SO_REUSEPORT too to share the port; Linux does not
+# (see discretes.share_port).
+if not sys.platform.startswith("linux") and hasattr(socket, "SO_REUSEPORT"):
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 s.bind(('', port))
 s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
              struct.pack('4s4s', socket.inet_aton('239.255.1.1'),
