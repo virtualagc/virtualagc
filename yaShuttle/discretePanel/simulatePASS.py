@@ -1271,10 +1271,10 @@ def main():
         """Physical pixels as this platform's Tk takes them."""
         return int(round(v / float(mac_scale))) if mac_scale != 1 else v
     # ...and their text drawn the size Linux draws it.  NOT the display's
-    # scale: macOS Tk ignores `tk scaling` and fixes its own at 1.33 pixels
-    # per point, where the HiDPI Linux desktop these sizes were chosen on runs
-    # Tk at 2.67 -- so text there is twice what it is here, on any Mac display,
-    # Retina or not (see FONT_SCALE in panelO6.py).
+    # scale: the Linux desktop these sizes were chosen on renders fonts at
+    # Xft.dpi 192 -- twice what Tk's own 96-dpi `tk scaling` of 1.33 implies --
+    # and macOS has no counterpart, so text there is twice what it is here on
+    # any Mac display, Retina or not (see FONT_SCALE in panelO6.py).
     tk_font_scale = 2 if sys.platform == "darwin" else 1
     size = args.size
     # MEDS2's IDP pane, in Qt pixels: hidden unless NSTS_MDU_PANE=1, since
