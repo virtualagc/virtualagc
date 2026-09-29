@@ -165,7 +165,20 @@ def claim(root, delay_ms=300):
     manager lists -- and after the window exists; never fatal.  NOT on
     wm_frame(): once the window manager has reparented the window, that
     names the manager's decoration frame, and a PID put there is never seen
-    (measured: frame 0xbf3481, listed window 0x05e00004)."""
+    (measured: frame 0xbf3481, listed window 0x05e00004).
+
+    Also where NSTS_TK_CURSOR takes effect: a pointer for the window, and for
+    any Toplevel it opens, in place of the one inherited from the window
+    manager's frame.  simulatePASS.py sets it on WSL only, where that
+    inherited arrow is 24 px beside Tk's and Qt's own themed 48."""
+    cursor = os.environ.get("NSTS_TK_CURSOR")
+    if cursor:
+        try:
+            root.configure(cursor=cursor)
+            root.option_add("*Toplevel.cursor", cursor)
+        except Exception:
+            pass
+
     def stamp():
         try:
             root.update_idletasks()

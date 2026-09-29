@@ -1881,7 +1881,7 @@ class PanelO6:
     # this window -- the time to arrange windows and start a recording before
     # a demonstration.  The cursor says so, and the click that carries on is
     # taken here, so it moves no control.
-    WAIT_CURSOR = "target"
+    WAIT_CURSOR = "question_arrow"
 
     def wait_for_click(self, done):
         self._user_wait = done

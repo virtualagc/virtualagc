@@ -879,6 +879,98 @@ def screen_info():
         return 1, None, None
 
 
+def on_wsl():
+    """Running under Windows Subsystem for Linux (WSLg supplies the display)."""
+    if not sys.platform.startswith("linux"):
+        return False
+    try:
+        with open("/proc/sys/kernel/osrelease") as fh:
+            return "microsoft" in fh.read().lower()
+    except OSError:
+        return "WSL_DISTRO_NAME" in os.environ
+
+
+# WSLg PRESENTS AN UNSCALED 96-DPI DESKTOP, whatever scaling Windows itself
+# uses: Qt sees device-pixel ratio 1 and Tk sees 1.33 pixels per point.  The
+# --size values were chosen on a HiDPI Linux desktop (MATE, window scaling 2)
+# where three things hold at once: Qt runs at device-pixel ratio 2, Tk's FONTS
+# render at Xft.dpi 192 (2.67 px/pt), and Tk's GEOMETRY stays at 96 dpi.  On
+# WSL the same picture needs all three put back by hand -- QT_SCALE_FACTOR for
+# MEDS2, and Xft.dpi for Tk through XENVIRONMENT, which Xlib reads alongside
+# the server's resources, so that only Tk's fonts double, as on Linux, and
+# every Tk program (the manager and its dialogs too) follows without code of
+# its own.  Raising `tk scaling` instead would double the geometry as well.
+WSL_SCALE = 2
+# Helvetica's metric family.  panelO6.py lays its rows out by line spacing,
+# and DejaVu Sans -- all a stock WSL Ubuntu has -- is tall enough that at the
+# Linux text size the panel runs off the bottom of its window.
+HELVETICA_METRIC = ("nimbus sans", "liberation sans", "arial", "helvetica", "tex gyre heros")
+
+
+def wslg_prepare():
+    """Before the display is measured: have Qt use X11 as on the Linux
+    desktop, falling back to Wayland.  Under Wayland MEDS2 cannot place its
+    own windows, and its title bars differ from every Tk window's."""
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb;wayland")
+    probe = ("from PyQt6.QtWidgets import QApplication\n"
+             "import sys\n"
+             "print(QApplication(sys.argv[:1]).platformName())\n")
+    try:
+        out = subprocess.run([sys.executable or "python3", "-c", probe], capture_output=True,
+                             text=True, timeout=20).stdout.split()
+    except Exception:
+        out = []
+    if not out:
+        # Seen after a WSL restart, run from a shell without the venv: every
+        # MEDS2 dies at its import, and says so only in its own log.
+        log("WSL: this Python (%s) cannot start Qt, so the displays will not appear; "
+            "is PyQt6 installed here, or is a venv not activated?" % (sys.executable or "python3"))
+    elif out[-1] != "xcb" and "xcb" in os.environ["QT_QPA_PLATFORM"]:
+        log("WSL: Qt cannot use X11, so the displays cannot be placed and their title "
+            "bars differ; to fix:  sudo apt install libxcb-cursor0 libxkbcommon-x11-0 "
+            "libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 "
+            "libxcb-shape0 libxcb-xkb1")
+    # windowLayout.py (--layout, and the manager's layout buttons), the caption
+    # box's borderless frame, and handing focus back after a click on the
+    # keyboard or the panel all use these; a stock WSL Ubuntu has none.
+    missing = [t for t in ("wmctrl", "xdotool", "xprop", "xwininfo") if not shutil.which(t)]
+    if missing:
+        log("WSL: %s not installed, so layouts are neither saved nor restored and focus "
+            "is not handed back; to fix:  sudo apt install wmctrl xdotool x11-utils"
+            % ", ".join(missing))
+    try:
+        family = subprocess.run(["fc-match", "-f", "%{family}", "Helvetica"], capture_output=True,
+                                text=True, timeout=20).stdout.split(",")[0].strip()
+    except Exception:
+        family = ""
+    if family and family.lower() not in HELVETICA_METRIC:
+        log("WSL: Helvetica is standing in as %s, which crowds the panel; to fix:  "
+            "sudo apt install fonts-urw-base35" % family)
+
+
+def wslg_scale(logs):
+    """After the display is measured at scale 1: double Qt, and Tk's fonts."""
+    os.environ["QT_SCALE_FACTOR"] = str(WSL_SCALE)
+    # The pointer too.  Tk and Qt already draw their own themed pointers at
+    # 48 px, but a Tk window that sets none inherits the WSLg window manager's
+    # 24-px arrow -- where MATE's is 48 -- and XCURSOR_SIZE does not reach
+    # that one.  windowLayout.claim() gives every Tk window this instead.
+    os.environ.setdefault("NSTS_TK_CURSOR", "left_ptr")
+    # And its size, for Tk and Qt alike.  Adwaita's 48 -- which libXcursor
+    # picks for a 2160-line screen -- stood half again as large as Windows'
+    # own arrow at the usual 150%; 36 matches it (Ron's eye, 2026-09-29).
+    os.environ.setdefault("XCURSOR_SIZE", "36")
+    # XENVIRONMENT takes the place of a ~/.Xdefaults-<hostname> file (the
+    # server's own resources are still read), so one set there is not seen.
+    if "XENVIRONMENT" not in os.environ:
+        path = os.path.join(logs, "wslg.Xresources")
+        with open(path, "w") as fh:
+            fh.write("Xft.dpi: %d\n" % (96 * WSL_SCALE))
+        os.environ["XENVIRONMENT"] = path
+    log("WSL: display scale %d (Qt scale factor, and Tk fonts at Xft.dpi %d)"
+        % (WSL_SCALE, 96 * WSL_SCALE))
+
+
 def left_inset():
     """How far in from the screen's left edge a window may start, in points
     (macOS only): the Dock's width when it is on the left, else 0.  macOS
@@ -1241,7 +1333,15 @@ def main():
         log("previous run's logs -> %s" % prev)
 
     # -- window placement ----------------------------------------------------
+    wsl = on_wsl()
+    if wsl:
+        wslg_prepare()
     ws_auto, screen_w, screen_h = screen_info()
+    if wsl and ws_auto == 1 and not os.environ.get("QT_SCALE_FACTOR"):
+        # Only when nothing is scaled yet: a WSLg set to scale on its own, or
+        # a QT_SCALE_FACTOR given by hand, is left as it is.
+        wslg_scale(logs)
+        ws_auto = WSL_SCALE
     ws = args.window_scale or ws_auto
     # macOS MEASURES Tk WINDOWS IN POINTS, not physical pixels.  Everything
     # below is worked out in Linux's terms -- the displays (Qt) in
