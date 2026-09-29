@@ -123,7 +123,7 @@ TEST_BIN_DIR := $(BUILD_DIR)/test
 
 UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_bce_status test_volsource test_bcenet_txthread test_mtumodel
 
-TEST_SCRIPTS := test/run_all.sh test/test_debugger.sh test/test_scheduler.sh \
+TEST_SCRIPTS := test/test_debugger.sh test/test_scheduler.sh \
                 test/test_io_read.sh test/test_random.sh test/test_rtl.sh
 
 # Every stage RUNS, then the target fails if any of them did.
@@ -284,7 +284,7 @@ $(TEST_BIN_DIR)/example_gpcops_paced_run: test/example_gpcops_paced_run.c $(LIB)
 
 # Shorthand for `make build/test/example_gpcops_paced_run` -- builds just
 # the library and this one example, without any of the other 14 unit
-# test binaries or run_all.sh/test_debugger.sh (those only run as part
+# test binaries or the test scripts (those only run as part
 # of the `test` target's own recipe, never pulled in as a prerequisite
 # here).
 paced-example: $(TEST_BIN_DIR)/example_gpcops_paced_run
