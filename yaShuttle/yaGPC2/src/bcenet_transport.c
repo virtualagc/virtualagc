@@ -530,6 +530,18 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
         close(fd);
         return false;
     }
+#if defined(SO_REUSEPORT) && !defined(__linux__)
+    /* macOS and the BSDs share a UDP port between processes only when every
+     * socket on it also sets SO_REUSEPORT; without it the displays' and
+     * panel's binds fail with "Address already in use".  Not on Linux, where
+     * SO_REUSEADDR already suffices and SO_REUSEPORT would form a reuseport
+     * group instead (see tools/dksniff.py). */
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof reuse) < 0) {
+        fprintf(stderr, "bcenet: bus %d: SO_REUSEPORT failed: %s\n", busID, strerror(errno));
+        close(fd);
+        return false;
+    }
+#endif
 
     struct sockaddr_in addr = {0};
     addr.sin_family = AF_INET;

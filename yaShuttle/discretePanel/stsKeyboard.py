@@ -30,6 +30,7 @@ import argparse
 import os
 import queue
 import socket
+import sys
 import struct
 import subprocess
 import threading
@@ -66,6 +67,21 @@ GAP_RATIO = 1.0 / 8.0
 GAP_REF = KEY_REF * GAP_RATIO
 REF_W = int(round(NCOL * KEY_REF + (NCOL + 1) * GAP_REF))
 REF_H = int(round(NROW * KEY_REF + (NROW + 1) * GAP_REF))
+# TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
+# because macOS Tk measures in points (two physical pixels on a Retina
+# screen) where Linux Tk measures physical pixels.  The text must not shrink
+# with it: macOS Tk ignores `tk scaling`, so its text already comes out the
+# size a HiDPI Linux desktop's Tk scaling makes it.  simulatePASS.py passes
+# NSTS_TK_FONT_SCALE to put it back; unset, as on Linux, it is 1.
+try:
+    FONT_SCALE = float(os.environ.get("NSTS_TK_FONT_SCALE") or 1)
+except ValueError:
+    FONT_SCALE = 1.0
+# macOS ROUNDS A WINDOW'S BOTTOM CORNERS -- by about 11 points on macOS 27 --
+# and whatever is drawn under them is cut off.  There is no switching that off
+# for a window with a title bar, so the drawing is kept clear of them with
+# this much of the window's own colour below it.
+BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
 FULL_SIZE = 768        # --size units: 768 is the design (full) window, as in panelO6.py
 
 # Same gull grey as panelO6.py; keys are black on that surface.
@@ -194,6 +210,10 @@ class KeyboardBus:
     def receiver(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # macOS/BSD need SO_REUSEPORT too to share the port; Linux does not
+        # (see discretes.share_port).
+        if not sys.platform.startswith("linux") and hasattr(socket, "SO_REUSEPORT"):
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         s.bind(("", self.port))
         s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                      struct.pack("4s4s", socket.inet_aton(MCAST_GROUP),
@@ -305,7 +325,7 @@ class STSKeyboard:
         cw, ch = scaled_wh(REF_W, REF_H, size)
         self.cv = tk.Canvas(root, bg=C_PANEL, highlightthickness=0,
                             width=cw, height=ch)
-        self.cv.pack(fill="both", expand=True)
+        self.cv.pack(fill="both", expand=True, pady=(0, BOTTOM_MARGIN))
         self.cv.bind("<ButtonPress-1>", self._on_press)
         self.cv.bind("<ButtonRelease-1>", self._on_release)
         self.cv.bind("<Motion>", self._on_motion)
@@ -404,6 +424,11 @@ class STSKeyboard:
         return font
 
     def _pts_for(self, kind, k, lines=()):
+        # FONT_SCALE ON THE KEY, BEFORE ANY ROUNDING.  Applied to the finished
+        # size instead, it doubled macOS's rounding loss as well: keys half the
+        # size round 2.5 points down to 2, and twice that is 4 where Linux
+        # draws 5 -- and the hex digits 6 where Linux draws 8.
+        k = k * FONT_SCALE
         other = max(1, int(round(OTHER_PTS_REF * k / float(KEY_REF))))
         if kind == "hex":
             return max(1, int(round(other * HEX_FONT_SCALE)))
@@ -527,6 +552,7 @@ def main(argv=None):
     if args.size <= 0:
         raise SystemExit("stsKeyboard: --size must be a positive integer")
 
+    import macdock; macdock.set_app_name("Keyboard %s" % args.kybd)   # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     kb = STSKeyboard(root, size=args.size, bus=KeyboardBus(args.kybd),
