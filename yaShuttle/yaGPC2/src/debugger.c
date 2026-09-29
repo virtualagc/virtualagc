@@ -465,7 +465,7 @@ static void format_current_location(Debugger *dbg, AGEHarness *age, char *out, s
 }
 
 static void show_current_location(Debugger *dbg, AGEHarness *age) {
-    char line[300];
+    char line[512];
     format_current_location(dbg, age, line, sizeof line);
     printf("%s\n", line);
 }
@@ -484,7 +484,7 @@ static void show_current_location(Debugger *dbg, AGEHarness *age) {
  * spanning several instructions" is a meaningful single display. Per
  * user feedback on both the placement and the layout. */
 static void show_stop_location_and_registers(Debugger *dbg, AGEHarness *age) {
-    char line[300];
+    char line[512];
     format_current_location(dbg, age, line, sizeof line);
 
     if (dbg->instructionsThisResume != 1) {
@@ -1481,7 +1481,8 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
     instr_to_str(hw1, hw2, disasm, sizeof disasm);
     RecentInstr *slot = &dbg->recent[dbg->recentHead];
     slot->addr = nia;
-    snprintf(slot->disasm, sizeof slot->disasm, "%s", disasm);
+    /* The backtrace keeps only what fits; cut it here, on purpose. */
+    snprintf(slot->disasm, sizeof slot->disasm, "%.*s", (int)sizeof slot->disasm - 1, disasm);
     dbg->recentHead = (dbg->recentHead + 1) % DEBUGGER_BACKTRACE_SIZE;
     if (dbg->recentCount < DEBUGGER_BACKTRACE_SIZE) dbg->recentCount++;
 

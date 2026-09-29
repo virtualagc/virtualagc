@@ -303,6 +303,7 @@ void ageharness_configure_from_opts(AGEHarness *age, const char *fcmPath, const 
     free(age->lastSymbolsPath);
     age->lastSymbolsPath = symbolsPath ? yagpc_strdup(symbolsPath) : NULL;
     free(autoSymbols);
+    autoSymbols = NULL;
 
     bool hasEntryPoint = false;
     uint32_t entryPoint = 0;

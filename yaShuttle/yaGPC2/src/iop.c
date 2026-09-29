@@ -647,7 +647,14 @@ void iop_init(IOP *iop, struct CPU *cpu) {
     iop->peerWaitCtx = NULL;
 
     msc_init(&iop->msc);
-    for (int i = 0; i < 24; i++) bce_init(&iop->bce[i], i + 1);
+    /* The MIA's latch and pacing state start empty.  mia_init() sets only
+     * the bus number, so a stack-declared IOP would otherwise start with a
+     * "latched" word of garbage -- which clang happened to leave zero and
+     * gcc did not, failing test_gpcops's no-servicer check. */
+    for (int i = 0; i < 24; i++) {
+        iop->bce[i].mia = (MIA){0};
+        bce_init(&iop->bce[i], i + 1);
+    }
 
     iop->curPE = 0;
 
@@ -1089,7 +1096,7 @@ void iop_exec_dma_queue(IOP *iop) {
      * reading main store to put a word on the bus) occupies it; a receive is
      * the peripheral's transmission and is paced at the far end. */
     double wordUs = bus_word_us();
-    DMARequest req;
+    DMARequest req = {0};   /* always filled below; zeroed to quiet gcc */
     if (wordUs > 0.0 && iop->cpu != NULL) {
         /* PER BUS, and WITHOUT HEAD-OF-LINE BLOCKING.  Each BCE drives its own
          * serial line, so transmits on different buses are concurrent -- but
@@ -1361,7 +1368,7 @@ void iop_exec_processors(IOP *iop) {
     if (page == 0) msc_ring_record(iop, pc, hw1, hw2);
 
     if (yagpc_getenv("YAGPC_IOPTRACE")) {
-        char who[8];
+        char who[16];
         if (page == 0) snprintf(who, sizeof who, "MSC");
         else snprintf(who, sizeof who, "BCE%d", page);
         fprintf(stderr, "%12.1f us IOPT %-6s %05x  %04x %04x  A=%08x BST=%08x BASE=%05x\n",

@@ -1875,7 +1875,7 @@ static void apply_read_positioning(HalUCP *h) {
             if (advance > h->inputBufferLen) return; /* not buffered yet -- retry later */
             ib_consume_prefix(h, advance);
         } else if (target < h->inputColumn) {
-            char msg[96];
+            char msg[128];
             snprintf(msg, sizeof msg,
                      "HalUCP: COLUMN(%d) requests rewind before already-consumed column %zu (not supported)\n",
                      h->readColumnPending, h->inputColumn);
