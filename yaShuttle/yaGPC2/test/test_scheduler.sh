@@ -19,6 +19,28 @@ YAGPC2="../yaGPC2"
 
 fail=0
 
+# --pacing=signal needs POSIX real-time timers (timer_create), which the
+# Makefile probes for and leaves out where they are missing -- macOS, for
+# one.  Such a build refuses the mode at startup with a fixed message
+# (run.c), so ask it once and skip the signal cases instead of failing them.
+have_signal=1
+if "$YAGPC2" --interactive --no-trace --no-verbose --max-steps 1 --pacing signal \
+        --symbols fixtures/countup-lnk101.json \
+        fixtures/countup.fcm 2>&1 >/dev/null |
+        grep -q 'compiled without POSIX real-time timer support'; then
+    have_signal=0
+fi
+
+# Returns 0 (after reporting the skip) when this case needs signal pacing
+# and the build has none.
+skip_signal_case() {
+    if [ "$2" = signal ] && [ "$have_signal" = 0 ]; then
+        echo "SKIP [scheduler/$1]: this build has no POSIX real-time timers"
+        return 0
+    fi
+    return 1
+}
+
 # --time-scale: yaGPC2's standalone CLI now paces SCHEDULE/WAIT against
 # real wall-clock time by default (--time-scale 1.0, matching
 # yaHALMAT2's own default -- see run.c's batchrunner_pace()), so a
@@ -31,13 +53,14 @@ fail=0
 run_case() {
     label="$1"; pacing="$2"; fcm="$3"; sym="$4"; golden="$5"
     shift 5 || true
+    skip_signal_case "$label" "$pacing" && return
     extra_args=("$@")
 
     act_out=$(mktemp)
     act_err=$(mktemp)
 
     "$YAGPC2" --interactive --no-trace --no-verbose --symbols "$sym" --line-width 240 --max-steps 200000 \
-        --time-scale 1000000 --pacing "$pacing" "${extra_args[@]}" "$fcm" >"$act_out" 2>"$act_err"
+        --time-scale 1000000 --pacing "$pacing" ${extra_args[@]+"${extra_args[@]}"} "$fcm" >"$act_out" 2>"$act_err"
     act_code=$?
 
     ok=1
@@ -76,13 +99,14 @@ run_case() {
 run_case_with_stderr() {
     label="$1"; pacing="$2"; fcm="$3"; sym="$4"; golden="$5"; errGolden="$6"
     shift 6 || true
+    skip_signal_case "$label" "$pacing" && return
     extra_args=("$@")
 
     act_out=$(mktemp)
     act_err=$(mktemp)
 
     "$YAGPC2" --interactive --no-trace --no-verbose --symbols "$sym" --line-width 240 --max-steps 200000 \
-        --time-scale 1000000 --pacing "$pacing" "${extra_args[@]}" "$fcm" >"$act_out" 2>"$act_err"
+        --time-scale 1000000 --pacing "$pacing" ${extra_args[@]+"${extra_args[@]}"} "$fcm" >"$act_out" 2>"$act_err"
     act_code=$?
 
     ok=1
