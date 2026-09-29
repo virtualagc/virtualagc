@@ -22,3 +22,11 @@ bool vehicle_multi(const Vehicle *v) {
     (void)v;
     return yagpc_test_vehicle_multi;
 }
+
+/* iop_recv_from_cpu calls this before READ DISCRETE INPUT A, and only when
+ * the IOP has a vehicle.  A test IOP has none, so there is nothing to wait
+ * for. */
+void vehicle_sync_read_gate(Vehicle *v, int gpcId) {
+    (void)v;
+    (void)gpcId;
+}

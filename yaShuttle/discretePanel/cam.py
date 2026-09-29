@@ -83,6 +83,21 @@ SZ_FAILED = 6
 SZ_NUM = 6
 SZ_DIAG = 15
 SZ_VTEXT = 6
+# TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
+# because macOS Tk measures in points (two physical pixels on a Retina
+# screen) where Linux Tk measures physical pixels.  The text must not shrink
+# with it: macOS Tk ignores `tk scaling`, so its text already comes out the
+# size a HiDPI Linux desktop's Tk scaling makes it.  simulatePASS.py passes
+# NSTS_TK_FONT_SCALE to put it back; unset, as on Linux, it is 1.
+try:
+    FONT_SCALE = float(os.environ.get("NSTS_TK_FONT_SCALE") or 1)
+except ValueError:
+    FONT_SCALE = 1.0
+# macOS ROUNDS A WINDOW'S BOTTOM CORNERS -- by about 11 points on macOS 27 --
+# and whatever is drawn under them is cut off.  There is no switching that off
+# for a window with a title bar, so the drawing is kept clear of them with
+# this much of the window's own colour below it.
+BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
 FULL_SIZE = 512        # --size units: 512 is the design window.  NOT 768
                        # like panelO6.py and stsKeyboard.py: this is a small
                        # annunciator matrix beside their full-height panels,
@@ -156,7 +171,7 @@ class CamPanel:
         cw, ch = scaled_wh(REF_W, self.REF_H, size)
         self.cv = tk.Canvas(root, bg=C_PANEL, highlightthickness=0,
                             width=cw, height=ch)
-        self.cv.pack(fill="both", expand=True)
+        self.cv.pack(fill="both", expand=True, pady=(0, BOTTOM_MARGIN))
         self.cv.bind("<Configure>", self._on_configure)
         self.cv.bind("<ButtonPress-1>", self._on_press)
         self.cv.bind("<Motion>", self._on_motion)
@@ -166,6 +181,14 @@ class CamPanel:
         self.cv.bind("<Key>", self._on_key)
         root.after_idle(lambda: self.cv.focus_set())
 
+        # Tk on macOS can lose a new window's first paint and leave it white
+        # until something redraws it -- measured on Tk 9.0, where a CAM with 76
+        # canvas items drawn showed nothing at all until it was resized.  So
+        # redraw once it is up, and again in case a busy start was slow.
+        if sys.platform == "darwin":
+            root.after(300, self.redraw)
+            root.after(1000, self.redraw)
+
         self._dump_state("startup")
         if bus:
             self._start_bus()
@@ -173,7 +196,7 @@ class CamPanel:
     # ---- fonts / scale --------------------------------------------------
 
     def _tkfont(self, size, bold=True):
-        pts = max(1, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s * FONT_SCALE)))
         key = (pts, bold)
         font = self._font_cache.get(key)
         if font is None:
@@ -183,7 +206,7 @@ class CamPanel:
         return font
 
     def _font(self, size, bold=True):
-        pts = max(1, int(round(size * self.s)))
+        pts = max(1, int(round(size * self.s * FONT_SCALE)))
         return ("Helvetica", pts, "bold" if bold else "normal")
 
     def _th(self, size):
@@ -426,7 +449,7 @@ class CamPanel:
         """A socket on one computer's discrete channel (discretes.receiver()
         binds the module's single PORT; the CAM needs all five)."""
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        D.share_port(s)
         s.bind(("", port))
         s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                      struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -609,6 +632,7 @@ def main(argv=None):
     if args.port_base is not None:
         D.set_port_base(args.port_base)
 
+    import macdock; macdock.set_app_name("CAM")                       # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     root.resizable(True, True)

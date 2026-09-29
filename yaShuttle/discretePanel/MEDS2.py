@@ -11809,6 +11809,21 @@ class MDUWindow(QtWidgets.QWidget):
         # the display.
         self.frameless = bool(envnum('NSTS_MDU_FRAMELESS', 0)) or bool(win.get('fullscreen'))
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, self.frameless)
+        # Nothing kept clear at the bottom for macOS's rounded corners: they
+        # clip the ends of the edgekey strip, which was judged better than a
+        # band of background under it.
+        self.bottomInset = 0
+        # AND AN EDGE, on macOS.  There the window has no border of its own,
+        # so a display on a black desktop had no visible edge at all.  One
+        # point of the system's window colour -- the title bar's, and it
+        # follows dark mode -- is kept clear of the display on the left and
+        # right and drawn down both sides (paintEvent).  Not along the
+        # bottom: macOS clips the rounded corners through any line drawn
+        # there, and following their curve would mean copying a shape macOS
+        # is free to change.  The side lines simply end where the corners
+        # begin; the title bar marks the top.
+        self.edge = 1 if sys.platform == "darwin" and not self.frameless else 0
+        self.edgeColor = QtWidgets.QApplication.palette().color(QtGui.QPalette.ColorRole.Window)
         bg = win.get('backgroundColor') or "#101336"
         self.setAutoFillBackground(True)
         pal = self.palette()
@@ -11838,8 +11853,10 @@ class MDUWindow(QtWidgets.QWidget):
         # is in flight, then the window snaps back to the exact ratio.
         self.canvas = None
         self._aspect = float(w) / float(h) if h else 1.0
-        self.resize(w + 2 * self.chromeInset, h + self.chrome)
-        self.setMinimumSize(160 + 2 * self.chromeInset, 160 + self.chrome)
+        self.resize(w + 2 * (self.chromeInset + self.edge),
+                    h + self.chrome + self.bottomInset)
+        self.setMinimumSize(160 + 2 * (self.chromeInset + self.edge),
+                            160 + self.chrome + self.bottomInset)
         self._snapTimer = QTimer(self)
         self._snapTimer.setSingleShot(True)
         self._snapTimer.timeout.connect(self._snapToAspect)
@@ -11913,15 +11930,15 @@ class MDUWindow(QtWidgets.QWidget):
         """The canvas and the pane beside it, as one block centred in the
         room the window has: the canvas keeps its aspect ratio, and the pane
         is as tall as the canvas and _paneK() times that wide."""
-        availW = max(1, self.width() - 2 * self.chromeInset)
-        availH = max(1, self.height() - self.chrome)
+        availW = max(1, self.width() - 2 * (self.chromeInset + self.edge))
+        availH = max(1, self.height() - self.chrome - self.bottomInset)
         k = self._paneK()
         sk = self._stripK() * self._aspect     # strip height per unit canvas height
         tall = availH / (1.0 + sk)
         ch = min(tall, availW / (self._aspect + k)) if (self._aspect + k) else tall
         cw = ch * self._aspect
         pw = ch * k
-        x = self.chromeInset + (availW - (cw + pw)) / 2.0
+        x = self.chromeInset + self.edge + (availW - (cw + pw)) / 2.0
         y = self.chrome + (availH - ch * (1.0 + sk)) / 2.0
         return x, y, cw, ch, pw
 
@@ -11944,7 +11961,7 @@ class MDUWindow(QtWidgets.QWidget):
             # To the window's right edge, whatever the rounding: a pixel of
             # window background between pane and frame shows as a dark line.
             px, py, _pw, ph = self.paneBox()
-            self.sidePane.setGeometry(px, py, max(1, self.width() - self.chromeInset - px), ph)
+            self.sidePane.setGeometry(px, py, max(1, self.width() - self.chromeInset - self.edge - px), ph)
         if self.edgeStrip is not None:
             self.edgeStrip.setGeometry(*self.stripBox())
         if self.titleBar is not None:
@@ -11959,6 +11976,15 @@ class MDUWindow(QtWidgets.QWidget):
             panel.move(max(0, min(panel.x(), self.width() - panel.width())),
                        max(0, min(panel.y(), self.height() - panel.height())))
 
+    def paintEvent(self, ev):
+        QtWidgets.QWidget.paintEvent(self, ev)
+        if self.edge:
+            painter = QtGui.QPainter(self)
+            painter.setPen(self.edgeColor)
+            painter.drawLine(0, 0, 0, self.height() - 1)
+            painter.drawLine(self.width() - 1, 0, self.width() - 1, self.height() - 1)
+            painter.end()
+
     def resizeEvent(self, ev):
         self.layoutCanvas()
         # Snap the window itself to the ratio once the drag settles, so the
@@ -11972,7 +11998,8 @@ class MDUWindow(QtWidgets.QWidget):
         _x, _y, cw, ch = self.canvasBox()
         pw = self.paneBox()[2] if self.sidePane is not None else 0
         sh = self.stripBox()[3] if self.edgeStrip is not None else 0
-        want = QtCore.QSize(cw + pw + 2 * self.chromeInset, ch + sh + self.chrome)
+        want = QtCore.QSize(cw + pw + 2 * (self.chromeInset + self.edge),
+                            ch + sh + self.chrome + self.bottomInset)
         if want != self.size():
             self.resize(want)
 
@@ -12570,6 +12597,10 @@ def main(argv=None):
     fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)
     QSurfaceFormat.setDefaultFormat(fmt)
 
+    # Its Dock name on macOS, from the display it shows ("CRT1").
+    import macdock
+    macdock.set_app_name(next((n.upper() for n in (opts.get('lrus') or [])
+                               if n.lower().startswith(("crt", "mdu"))), "MEDS2"))
     app = QtWidgets.QApplication(sys.argv[:1])
     app.setApplicationName('MEDS2')
     app.setQuitOnLastWindowClosed(True)

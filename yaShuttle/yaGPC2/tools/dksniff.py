@@ -56,6 +56,10 @@ def main():
         # reuseport group with MEDS's, and the whole point of the tool is
         # that it cannot take anything away from the run it is watching.
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # macOS/BSD are the exception: there every socket sharing the port needs
+        # SO_REUSEPORT, and it forms no such group, so it takes nothing away.
+        if not sys.platform.startswith("linux") and hasattr(socket, "SO_REUSEPORT"):
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         s.bind(("", a.port_base + b))
         s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                      struct.pack("4s4s", socket.inet_aton(GROUP),

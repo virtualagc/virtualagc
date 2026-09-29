@@ -62,10 +62,12 @@ import argparse
 import os
 import queue
 import re
+import sys
 import socket
 import struct
 import subprocess
 import threading
+import time
 import tkinter as tk
 import tkinter.font as tkfont
 
@@ -95,7 +97,7 @@ def subtitle_port():
 
 def receiver(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    D.share_port(s)
     s.bind(("", port))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(D.GROUP),
@@ -116,6 +118,12 @@ def send(text, port=None, sock=None):
     finally:
         if own:
             sock.close()
+
+
+def look_file(pid):
+    """Where a caption box on macOS keeps its look (see _publish_look)."""
+    import tempfile
+    return os.path.join(tempfile.gettempdir(), "nsts-subtitles-%d.look" % pid)
 
 
 class Subtitles(object):
@@ -255,6 +263,12 @@ class Subtitles(object):
         self.shift = max(0, min(over, self.top))
         self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.top - self.shift))
         self._asked = (self.w, self.h, self.x, self.top - self.shift)
+        # macOS reports the steps on the way there -- the old height while
+        # growing to the new one -- and each looked like a resize from outside;
+        # whichever came last became the least height, so a five-line caption
+        # left the box five lines deep for good.  So its own changes are given
+        # a moment to settle before a report is believed.
+        self._own_until = time.monotonic() + 0.3
 
     def options(self):
         """The command-line options that make this box again."""
@@ -271,6 +285,24 @@ class Subtitles(object):
             self.args.fg, self.args.bg, self.args.opacity, self.align)
 
     def _publish_look(self):
+        if sys.platform == "darwin":
+            # No X11 window to hang it on: a file named for this process,
+            # which windowLayout.py reads beside the window's place.
+            path = look_file(os.getpid())
+            try:
+                with open(path, "w") as fh:
+                    fh.write(self.look() + "\n")
+                if not getattr(self, "_look_cleanup", False):
+                    # Removed at exit -- including SIGTERM, which is how
+                    # simulatePASS.py stops it and which skips atexit alone.
+                    import atexit
+                    import signal
+                    atexit.register(lambda: os.path.exists(path) and os.remove(path))
+                    signal.signal(signal.SIGTERM, lambda *_a: sys.exit(0))
+                    self._look_cleanup = True
+            except OSError:
+                pass
+            return
         try:
             subprocess.run(["xprop", "-id", self._wm_window(),
                             "-f", "_NSTS_SUBTITLES", "8u",
@@ -284,13 +316,29 @@ class Subtitles(object):
         log("options: " + self.options())
         self._publish_look()
 
+    def _where(self):
+        """(x, y) of the window, in the terms geometry() sets it in.
+
+        ON macOS THOSE ARE NOT winfo_rootx/rooty.  The box cannot be
+        undecorated there (the _MOTIF_WM_HINTS request is X11's), so it has a
+        title bar; geometry() places the FRAME, while winfo_rooty() is the
+        inside, a title bar's height lower.  Taken as a move from outside,
+        that difference became the box's new top, and the next caption
+        placed it from there: the box walked down the screen a title bar at a
+        time until the stay-on-screen rule threw it back up."""
+        if sys.platform == "darwin":
+            m = re.match(r"\d+x\d+([+-]-?\d+)([+-]-?\d+)$", self.root.wm_geometry())
+            if m:
+                return int(m.group(1)), int(m.group(2))
+        return self.root.winfo_rootx(), self.root.winfo_rooty()
+
     def _sync_place(self):
         """Take the box's place from the window itself: the window manager may
         have put it somewhere other than where it was asked to go."""
         self.root.update_idletasks()
         if self.root.winfo_ismapped():
-            self.x = self.root.winfo_rootx()
-            self.top = self.root.winfo_rooty() + self.shift
+            self.x, y = self._where()
+            self.top = y + self.shift
 
     def _drag_start(self, e):
         self._sync_place()
@@ -327,8 +375,15 @@ class Subtitles(object):
     def _configured(self, e):
         if e.widget is not self.root or self._asked is None:
             return
-        now = (self.root.winfo_width(), self.root.winfo_height(),
-               self.root.winfo_rootx(), self.root.winfo_rooty())
+        if sys.platform == "darwin" and time.monotonic() < getattr(self, "_own_until", 0):
+            return                    # our own change, still settling (see _fit)
+        if sys.platform == "darwin":
+            # From the event: macOS delivers the new frame position in it
+            # before wm_geometry() -- and so _where() -- has caught up.
+            now = (e.width, e.height, e.x, e.y)
+        else:
+            now = (self.root.winfo_width(), self.root.winfo_height(),
+                   self.root.winfo_rootx(), self.root.winfo_rooty())
         if now == self._asked:
             return                    # our own geometry call coming back
         self._asked = now
@@ -495,6 +550,7 @@ def main(argv=None):
     if args.port_base is not None:
         D.set_port_base(args.port_base)
 
+    import macdock; macdock.set_app_name("Captions")                  # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:

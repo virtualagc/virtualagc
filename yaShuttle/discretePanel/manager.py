@@ -47,6 +47,7 @@ import tkinter.font as tkfont
 
 import crewscript
 import discretes as D
+import procinfo
 import windowLayout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -63,6 +64,20 @@ C_NOTE = "#b0c4de"
 C_STATUS = "#c0c0c0"
 # The space around a button, used again between rows of them.
 BUTTON_GAP = 2
+# macOS COUNTS IN POINTS, two physical pixels each on a Retina screen, where
+# Linux Tk counts physical pixels -- so every margin and gap below, written in
+# Linux's pixels, came out twice as big there.  pad() halves them on macOS.
+MAC = sys.platform == "darwin"
+
+
+def pad(n):
+    return int(round(n / 2.0)) if MAC else n
+
+
+# macOS also rounds the window's bottom corners, by about 11 points on macOS
+# 27, cutting off what is under them; the status bar is made that much deeper
+# at the bottom so they cut into its colour and not its text.
+BOTTOM_MARGIN = 12 if MAC else 0
 C_STATUS_FG = "#101010"
 
 
@@ -82,9 +97,12 @@ def shrink_fonts(root, points):
             f.configure(size=min(-1, size + points))
 
 
-def running(port_base):
-    """Which of the simulation's programs are up on this port base."""
-    found = []
+def _argvs():
+    """(pid, argv) of every process: from /proc on Linux, and from
+    procinfo.py where there is no /proc (macOS)."""
+    if not os.path.isdir("/proc"):
+        yield from procinfo.argvs()
+        return
     for entry in os.listdir("/proc"):
         if not entry.isdigit():
             continue
@@ -93,6 +111,13 @@ def running(port_base):
                 argv = [a for a in fh.read().decode("utf-8", "replace").split("\0") if a]
         except OSError:
             continue
+        yield int(entry), argv
+
+
+def running(port_base):
+    """Which of the simulation's programs are up on this port base."""
+    found = []
+    for pid, argv in _argvs():
         if not argv or "--port-base" not in argv:
             continue
         try:
@@ -111,7 +136,7 @@ def running(port_base):
                 name = base
                 break
         if name:
-            found.append((name, int(entry)))
+            found.append((name, pid))
     return sorted(set(found))
 
 
@@ -191,8 +216,10 @@ class Manager(object):
         # in the status line instead, where there is a whole width for it.
         root.title("Manager")
         root.configure(bg=C_BG)
-        shrink_fonts(root, 2)
-        bold = tkfont.Font(family="Helvetica", size=8, weight="bold")
+        # One point further on macOS, whose system font is that much larger
+        # than Linux's at the same setting.
+        shrink_fonts(root, 3 if MAC else 2)
+        bold = tkfont.Font(family="Helvetica", size=7 if MAC else 8, weight="bold")
 
         self.script = tk.StringVar(value=args.script or self._first_script())
         self.layout = tk.StringVar(value=args.layout)
@@ -269,7 +296,7 @@ class Manager(object):
         # doing rather than offering anything to do, so they read as a status
         # bar and are given their own background to say so.
         bar = tk.Frame(root, bg=C_STATUS)
-        bar.pack(fill="x", side="bottom", pady=(10, 0))
+        bar.pack(fill="x", side="bottom", pady=(pad(10), 0))
         # width=1 IS WHY THE WINDOW STOPS BREATHING.  A label asks for room
         # enough to show its text, and this one's text changes every three
         # seconds -- so the window grew and shrank under a person who had
@@ -277,7 +304,7 @@ class Manager(object):
         # filling the width instead means the text never drives the size.
         tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg=C_STATUS_FG,
                  anchor="w", justify="left", width=1
-                 ).pack(fill="x", padx=10, pady=6)
+                 ).pack(fill="x", padx=pad(10), pady=(pad(6), pad(6) + BOTTOM_MARGIN))
         root.bind_all("<Control-q>", lambda _e: root.quit())
         # AND PINNED ONCE, at the size the controls actually need.  Without
         # this the toplevel keeps taking its size from its contents, and any
@@ -294,7 +321,7 @@ class Manager(object):
         # the natural width already carries it; a little is added for the
         # SCRIPT heading, which is text rather than a widget and so asks for
         # nothing.
-        want = root.winfo_reqwidth() + 24
+        want = root.winfo_reqwidth() + pad(24)
         root.minsize(want, root.winfo_reqheight())
         if not args.geometry:
             root.geometry("%dx%d" % (want, root.winfo_reqheight()))
@@ -308,7 +335,7 @@ class Manager(object):
     def _section(self, text, font):
         lab = tk.Label(self.root, text=text, bg=C_BG, fg="#8fbc8f", font=font,
                        anchor="w")
-        lab.pack(fill="x", padx=10, pady=(10, 2))
+        lab.pack(fill="x", padx=pad(10), pady=(pad(10), pad(2)))
         return lab
 
     def _row(self):
@@ -317,7 +344,7 @@ class Manager(object):
         # "Browse | Save" and "Save & Quit | Restore" read as one block of
         # four rather than as two rows.
         row = tk.Frame(self.root, bg=C_BG)
-        row.pack(fill="x", padx=10, pady=BUTTON_GAP)
+        row.pack(fill="x", padx=pad(10), pady=BUTTON_GAP)
         return row
 
     def _path_box(self, var):
@@ -326,7 +353,7 @@ class Manager(object):
         entry = tk.Entry(self.root, textvariable=var, bg="#1b1b1b", fg=C_FG,
                          insertbackground=C_FG, highlightthickness=1,
                          highlightbackground="#4a4a4a", highlightcolor="#7a9a7a")
-        entry.pack(fill="x", padx=10, pady=(0, 2))
+        entry.pack(fill="x", padx=pad(10), pady=(0, pad(2)))
         show_end = lambda *_a: entry.after_idle(lambda: entry.xview_moveto(1.0))
         var.trace_add("write", show_end)
         entry.bind("<Configure>", show_end)      # and when the window is resized
@@ -340,12 +367,41 @@ class Manager(object):
         # The minimum is now 6, which is what lets the four SNAPSHOT buttons
         # share one row; `wide` is kept so existing calls still read sensibly
         # but no longer changes the width, since the label decides it.
+        if sys.platform == "darwin":
+            b = self._mac_button(row, text, command)
+            b.pack(side="left", padx=BUTTON_GAP)
+            return b
         b = tk.Button(row, text=text, command=command,
                       width=max(6, len(text)),
                       bg="#3c3c3c", fg=C_FG, activebackground="#505050",
                       activeforeground=C_FG, highlightbackground=C_BG,
                       relief="raised")
         b.pack(side="left", padx=BUTTON_GAP)
+        return b
+
+    def _mac_button(self, row, text, command, width=None, font=None):
+        """A LABEL DRAWN AS A BUTTON, on macOS only.  Tk's buttons there are
+        the system's own, which ignore the colours above and wrap every label
+        in about 34 points of padding that padx/pady cannot remove -- "Save/
+        Quit" is 51 points of text in a 97-point button.  Four to a row, that
+        made this window about 1.6 times the width it is on Linux, relative to
+        the rest of the simulation.  A label has no such padding, and looks
+        and behaves as the Linux button does: raised, lighter under the
+        pointer, sunken while pressed, firing on release over it."""
+        b = tk.Label(row, text=text, width=width or max(6, len(text)),
+                     bg="#3c3c3c", fg=C_FG, relief="raised", bd=2,
+                     padx=3, pady=1, cursor="hand2")
+        if font is not None:
+            b.configure(font=font)
+        b.bind("<Enter>", lambda _e: b.configure(bg="#505050"))
+        b.bind("<Leave>", lambda _e: b.configure(bg="#3c3c3c", relief="raised"))
+        b.bind("<ButtonPress-1>", lambda _e: b.configure(relief="sunken"))
+
+        def release(e):
+            b.configure(relief="raised")
+            if 0 <= e.x < b.winfo_width() and 0 <= e.y < b.winfo_height():
+                command()
+        b.bind("<ButtonRelease-1>", release)
         return b
 
     def _first_script(self):
@@ -562,27 +618,53 @@ class Manager(object):
         if os.path.isfile(path) and not self._layout_overwrite_ok(path):
             self.say("Save cancelled; %s is untouched" % os.path.basename(path))
             return
-        try:
-            n = windowLayout.save_layout(path, log=lambda _t: None,
-                                          only_pids=windowLayout.descendants(os.getppid()))
-        except OSError as e:
-            self.say("Cannot save: %s" % e)
-            return
-        self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
+        def work():
+            try:
+                return windowLayout.save_layout(path, log=lambda _t: None,
+                                                only_pids=windowLayout.descendants(os.getppid()))
+            except OSError as e:
+                return e
+
+        def done(n):
+            if isinstance(n, OSError):
+                self.say("Cannot save: %s" % n)
+            else:
+                self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
+        self._window_work(work, done)
 
     def restore_layout(self):
         path = self.layout.get().strip()
         if not os.path.isfile(path):
             self.say("No such layout file: %s" % path)
             return
-        placed, missing, inexact = windowLayout.restore_layout(
-            path, log=lambda _t: None,
-            # This simulation's windows only: the manager is simulatePASS's
-            # child, so its parent's process tree is the simulation.
-            only_pids=windowLayout.descendants(os.getppid()))
-        self.say("Placed %d window(s)%s%s" % (
-            placed, ", %d not running" % missing if missing else "",
-            ", %d not exactly" % inexact if inexact else ""))
+        def work():
+            return windowLayout.restore_layout(
+                path, log=lambda _t: None,
+                # This simulation's windows only: the manager is simulatePASS's
+                # child, so its parent's process tree is the simulation.
+                only_pids=windowLayout.descendants(os.getppid()))
+
+        def done(result):
+            placed, missing, inexact = result
+            self.say("Placed %d window(s)%s%s" % (
+                placed, ", %d not running" % missing if missing else "",
+                ", %d not exactly" % inexact if inexact else ""))
+        self._window_work(work, done)
+
+    def _window_work(self, work, done):
+        """Run work() and hand its result to done().
+
+        OFF THIS THREAD ON macOS.  There windowLayout.py moves and measures
+        windows through the Accessibility interface, which asks each window's
+        own application -- this one included, for this window -- and an
+        application answers on its main thread.  Run here, the manager was
+        busy waiting on itself: every other window moved and this one did
+        not, and a saved layout left it out.  On Linux, as always, directly."""
+        if not MAC:
+            done(work())
+            return
+        threading.Thread(target=lambda: (lambda r: self.root.after(0, lambda: done(r)))(work()),
+                         daemon=True).start()
 
     # ---- what came back -------------------------------------------------
 
@@ -763,10 +845,16 @@ class Manager(object):
             top.destroy()
 
         def button(text, ok, default):
-            b = tk.Button(row, text=text, command=lambda: close(ok),
-                          width=max(10, len(text)), bg="#3c3c3c", fg=C_FG,
-                          activebackground="#505050", activeforeground=C_FG,
-                          highlightbackground=C_BG, font=body)
+            if MAC:
+                # Not the system's button: its white face under this light
+                # text is unreadable -- see _mac_button.
+                b = self._mac_button(row, text, lambda: close(ok),
+                                     width=max(10, len(text)), font=body)
+            else:
+                b = tk.Button(row, text=text, command=lambda: close(ok),
+                              width=max(10, len(text)), bg="#3c3c3c", fg=C_FG,
+                              activebackground="#505050", activeforeground=C_FG,
+                              highlightbackground=C_BG, font=body)
             b.pack(side="right", padx=(8, 0))
             if default:
                 b.focus_set()
@@ -830,10 +918,14 @@ class Manager(object):
         row = tk.Frame(top, bg=C_BG)
         row.pack(fill="x", padx=pad, pady=(12, pad))
         if cancellable:
-            tk.Button(row, text="Cancel", command=self._cancel_busy, width=10,
-                      bg="#3c3c3c", fg=C_FG, activebackground="#505050",
-                      activeforeground=C_FG, highlightbackground=C_BG, font=base
-                      ).pack(side="right")
+            if MAC:
+                self._mac_button(row, "Cancel", self._cancel_busy, width=10,
+                                 font=base).pack(side="right")
+            else:
+                tk.Button(row, text="Cancel", command=self._cancel_busy, width=10,
+                          bg="#3c3c3c", fg=C_FG, activebackground="#505050",
+                          activeforeground=C_FG, highlightbackground=C_BG, font=base
+                          ).pack(side="right")
         # NO OK, and the window manager's close button does nothing: the only
         # way out is Cancel or the operation finishing.  Half-answering a
         # modal that exists to stop meddling would defeat it.
@@ -1119,6 +1211,7 @@ def main(argv=None):
         D.set_port_base(args.port_base)
     else:
         args.port_base = D.PORT_BASE
+    import macdock; macdock.set_app_name("Manager")                   # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:

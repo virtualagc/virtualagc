@@ -95,6 +95,7 @@ IFACE = os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")
 # The DPS keyboard scan codes and MDU -> IDP messages live with the crew script
 # language, which --keys playback below shares.
 import crewscript
+import procinfo
 import windowLayout
 from crewscript import SCAN, IDP_MSG
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
@@ -775,18 +776,14 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
     return True, ""
 
 
-def running_programs(port_base):
-    """[(name, pid)] of the simulation's programs on this port base (Linux).
-
-    Which of them are up is not a detail: a snapshot taken with the crew
-    panel closed cannot be restored, because a panel that comes up without
-    panel.json comes up with its DEFAULTS -- POWER OFF and MODE HALT -- and
-    halts the vehicle it was restored beside.
-    """
+def _argvs():
+    """(pid, argv) of every process but this one: from /proc on Linux, and
+    from procinfo.py where there is no /proc (macOS)."""
     if not os.path.isdir("/proc"):
-        return []
-    names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py")
-    found = []
+        for pid, argv in procinfo.argvs():
+            if pid != os.getpid():
+                yield pid, argv
+        return
     for entry in os.listdir("/proc"):
         if not entry.isdigit() or int(entry) == os.getpid():
             continue
@@ -795,6 +792,20 @@ def running_programs(port_base):
                 argv = [a.decode(errors="replace") for a in fh.read().split(b"\0") if a]
         except OSError:
             continue
+        yield int(entry), argv
+
+
+def running_programs(port_base):
+    """[(name, pid)] of the simulation's programs on this port base.
+
+    Which of them are up is not a detail: a snapshot taken with the crew
+    panel closed cannot be restored, because a panel that comes up without
+    panel.json comes up with its DEFAULTS -- POWER OFF and MODE HALT -- and
+    halts the vehicle it was restored beside.
+    """
+    names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py")
+    found = []
+    for entry, argv in _argvs():
         if not argv:
             continue
         prog = os.path.basename(argv[0])
@@ -839,6 +850,23 @@ def screen_info():
             return max(1, int(round(float(out[0])))), int(out[1]), int(out[2])
     except Exception:
         pass
+    if sys.platform == "darwin":
+        # NOT IN THIS PROCESS ON macOS.  A process that has opened a Tk window
+        # there, even a withdrawn one, is an application with its own Dock
+        # icon, and choosing Quit on it ends this process without running
+        # the finally that stops the children -- which left a whole vehicle
+        # running on 2026-09-28.  So ask a throwaway process, as for Qt.
+        probe = ("import tkinter\n"
+                 "r = tkinter.Tk(); r.withdraw()\n"
+                 "print(r.winfo_fpixels('1i'), r.winfo_screenwidth(), r.winfo_screenheight())\n")
+        try:
+            out = subprocess.run([sys.executable or "python3", "-c", probe], capture_output=True,
+                                 text=True, timeout=20).stdout.split()
+            if len(out) >= 3:
+                return max(1, int(round(float(out[0]) / 96.0))), int(out[1]), int(out[2])
+        except Exception:
+            pass
+        return 1, None, None
     try:
         import tkinter
         r = tkinter.Tk()
@@ -849,6 +877,23 @@ def screen_info():
         return max(1, int(round(dpi / 96.0))), w, h
     except Exception:
         return 1, None, None
+
+
+def left_inset():
+    """How far in from the screen's left edge a window may start, in points
+    (macOS only): the Dock's width when it is on the left, else 0.  macOS
+    moves any window placed under the Dock out from under it, so without this
+    the first display lands on top of the second."""
+    probe = ("from PyQt6.QtWidgets import QApplication\n"
+             "import sys\n"
+             "a = QApplication(sys.argv[:1])\n"
+             "print(a.primaryScreen().availableGeometry().x())\n")
+    try:
+        out = subprocess.run([sys.executable or "python3", "-c", probe], capture_output=True,
+                             text=True, timeout=20).stdout.split()
+        return max(0, int(out[0])) if out else 0
+    except Exception:
+        return 0
 
 
 WAIT_TIMEOUT_S = 600
@@ -1030,7 +1075,8 @@ def main():
                     help="where the logs go (default ./simulatePASS-logs)")
     ap.add_argument("--window-scale", type=int, metavar="N",
                     help="physical pixels per Qt pixel, for window placement (default: "
-                         "from the screen's DPI)")
+                         "from the screen's DPI).  On macOS it also sets how much the Tk "
+                         "windows' --size is scaled into points; 2 on a Retina display")
     ap.add_argument("--no-keyboard", action="store_true", help="no stsKeyboard.py "
                     "(--keyboards 0)")
     ap.add_argument("--instructions", action="store_true",
@@ -1072,6 +1118,10 @@ def main():
                          "box and none is running, one is started first: subtitles.py "
                          "--font-size 14 --bg #404040 --edit")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
+    ap.add_argument("--no-audio", action="store_true",
+                    help="ignore every 'audio' line in a crew script: the file is not "
+                         "looked for and nothing is played (playback needs Linux's audio "
+                         "players).  Passed on to the panel and manager")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
                     help="shut down after this long instead of waiting for Enter")
     args = ap.parse_args()
@@ -1090,6 +1140,8 @@ def main():
         print(procedure_text(gpcs, args.crts))
         return 0
 
+    if args.no_audio:
+        crewscript.disable_audio()      # here, and in everything started below
     # A crew script with a mistake stops panelO6.py as it starts, which left
     # everything else running without a panel.  Read it here first, with the
     # same parser, and start nothing if it is wrong.
@@ -1191,6 +1243,39 @@ def main():
     # -- window placement ----------------------------------------------------
     ws_auto, screen_w, screen_h = screen_info()
     ws = args.window_scale or ws_auto
+    # macOS MEASURES Tk WINDOWS IN POINTS, not physical pixels.  Everything
+    # below is worked out in Linux's terms -- the displays (Qt) in
+    # device-independent pixels, the Tk windows in physical ones -- which is
+    # what the --size values were chosen for.  On macOS, Qt's points are the
+    # same as Linux's device-independent pixels, so the displays need nothing;
+    # tk_px() turns the Tk windows' sizes and positions into points as they
+    # are launched, so that one --size looks the same on both.  And every
+    # window starts right of a Dock on the left, which macOS would otherwise
+    # push the first display out from under -- onto the second.
+    mac_scale = (args.window_scale or ws_auto) if sys.platform == "darwin" else 1
+    if sys.platform == "darwin":
+        # SAID, because a wrong one is otherwise only seen as oddly sized
+        # windows.  A monitor that is waking up can report itself for a moment
+        # as a plain 1920x1080 display at scale 1 -- which measured this once,
+        # on a pair of 4K monitors that are normally at 2.
+        log("display scale %d (%s)" % (mac_scale, "--window-scale" if args.window_scale
+                                       else "measured"))
+        if mac_scale == 1 and not args.window_scale:
+            log("  scale 1 is not a Retina display; if yours is, a monitor may have been "
+                "waking -- rerun, or give --window-scale 2")
+    inset = left_inset() if sys.platform == "darwin" else 0
+    if screen_w is not None:
+        screen_w -= inset * mac_scale
+
+    def tk_px(v):
+        """Physical pixels as this platform's Tk takes them."""
+        return int(round(v / float(mac_scale))) if mac_scale != 1 else v
+    # ...and their text drawn the size Linux draws it.  NOT the display's
+    # scale: macOS Tk ignores `tk scaling` and fixes its own at 1.33 pixels
+    # per point, where the HiDPI Linux desktop these sizes were chosen on runs
+    # Tk at 2.67 -- so text there is twice what it is here, on any Mac display,
+    # Retina or not (see FONT_SCALE in panelO6.py).
+    tk_font_scale = 2 if sys.platform == "darwin" else 1
     size = args.size
     # MEDS2's IDP pane, in Qt pixels: hidden unless NSTS_MDU_PANE=1, since
     # panelO6.py has those switches.
@@ -1241,7 +1326,16 @@ def main():
         x = ox + o6_w + 20
         cam_geom = "+%d+0" % stack_x(x, cam_w)
 
+    if sys.platform == "darwin":
+        def to_points(geom):
+            gx, gy = geom.lstrip("+").split("+")
+            return "+%d+%d" % (tk_px(int(gx)) + inset, tk_px(int(gy)))
+        crt_pos = [(cx + inset, cy) for cx, cy in crt_pos]      # Qt: already points
+        kb_geom, o6_geom, cam_geom = to_points(kb_geom), to_points(o6_geom), to_points(cam_geom)
+
     env = dict(os.environ)
+    if tk_font_scale != 1:
+        env.setdefault("NSTS_TK_FONT_SCALE", str(tk_font_scale))
     env["NSTS_MAJOR_FUNC"] = str(MAJOR_FUNC[args.major_func])
     # How far apart in simulated time the computers may drift.  25 us is what
     # every verified multi-GPC run used through OPS 2; the built-in 200 has not
@@ -1307,16 +1401,16 @@ def main():
             if args.keyboards:
                 for k in range(args.keyboards):
                     kx, ky = kb_geom.lstrip("+").split("+")
-                    geom = "+%d+%d" % (int(kx) + k * (kb_w + 20 if kb_side_by_side else 60),
-                                       int(ky) + (0 if kb_side_by_side else k * 60))
+                    geom = "+%d+%d" % (int(kx) + tk_px(k * (kb_w + 20 if kb_side_by_side else 60)),
+                                       int(ky) + tk_px(0 if kb_side_by_side else k * 60))
                     L.start("keyboard%d" % (k + 1),
                             [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
                              str(k + 1), "--port-base",
-                             str(args.port_base), "--size", str(size), "--geometry", geom],
+                             str(args.port_base), "--size", str(tk_px(size)), "--geometry", geom],
                             HERE, env)
             if multi:
                 L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
-                                "--size", str(cam_size), "--geometry", cam_geom],
+                                "--size", str(tk_px(cam_size)), "--geometry", cam_geom],
                         HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
@@ -1385,7 +1479,7 @@ def main():
             # OFF and MODE HALT within a quarter second and halt it.
             panel_restore = os.path.join(resume, "panel.json") if resume else None
             panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
-                          "--gpc-id", str(gpcs[0]), "--size", str(size), "--geometry", o6_geom]
+                          "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size)), "--geometry", o6_geom]
             if panel_restore and os.path.isfile(panel_restore):
                 panel_argv += ["--restore", panel_restore]
             if args.wait_user and not args.panel_script:
@@ -1469,6 +1563,13 @@ def main():
             # not by hand.
             if args.debug:
                 manager_argv += ["--debug"]
+            if sys.platform == "darwin" and not args.layout:
+                # macOS puts an unplaced window at the top left, which is on
+                # top of the displays; a Linux window manager finds it free
+                # space.  So say where: just under the displays.
+                manager_argv += ["--geometry", "+%d+%d" % (
+                    crt_pos[0][0] if crt_pos else 0,
+                    max([cy for _cx, cy in crt_pos] or [0]) + size + edge_h + 60)]
             L.start("manager", manager_argv, HERE, env)
 
         # THE WINDOWS WHERE THEY WERE PUT LAST TIME.  A run does not start the

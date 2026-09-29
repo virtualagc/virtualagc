@@ -40,6 +40,7 @@ stale level forever.  REPUBLISH_MS is that period.
 
 import os
 import socket
+import sys
 import struct
 
 GROUP = "239.255.1.1"
@@ -189,6 +190,19 @@ def request(sock, reg):
     publish(sock, REQUEST, reg, 0)
 
 
+def share_port(s):
+    """Let several programs on one machine bind the same multicast port.
+
+    SO_REUSEADDR is enough on Linux.  macOS and the BSDs also need
+    SO_REUSEPORT on EVERY socket sharing the port, or the second bind fails
+    with "Address already in use".  It is left off on Linux, where it puts
+    the sockets in a reuseport group instead -- see yaGPC2/tools/dksniff.py
+    -- so Linux runs are exactly as before."""
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if not sys.platform.startswith("linux") and hasattr(socket, "SO_REUSEPORT"):
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
+
 def sender(iface=IFACE):
     """A socket for publishing discretes."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -203,7 +217,7 @@ def sender(iface=IFACE):
 def receiver(iface=IFACE, timeout=None):
     """A socket subscribed to the discrete bus."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    share_port(s)
     s.bind(("", PORT))
     s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
                  struct.pack("4s4s", socket.inet_aton(GROUP),
