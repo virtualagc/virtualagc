@@ -341,6 +341,30 @@ def _mac_place(wid, x, y, w=None, h=None, verbose=False):
 # switch back restored it.
 
 
+# Set once windows() has had to list without a client list -- WSLg -- and
+# read by geometry().  Never set on a desktop that keeps the list.  So
+# windows() must run before geometry() is trusted on WSL; every flow here
+# (show, save, restore, place) lists first.
+_WESTON = False
+
+
+def _undecorated(wid):
+    """Has the window asked for no frame (_MOTIF_WM_HINTS, decorations off)?"""
+    # Decimal on WSLg ("2, 0, 0, 0, 0"), hex elsewhere ("0x2, 0x0, ...").
+    num = r"((?:0x)?[0-9a-fA-F]+)"
+    m = re.search(r"=\s*%s,\s*%s,\s*%s" % (num, num, num),
+                  run(["xprop", "-id", wid, "_MOTIF_WM_HINTS"]))
+    return bool(m) and (int(m.group(1), 0) & 2) != 0 and int(m.group(3), 0) == 0
+
+
+def _absolute_xy(wid):
+    """Where the window itself is on the screen, as xwininfo has it."""
+    text = run(["xwininfo", "-id", wid])
+    x = re.search(r"Absolute upper-left X:\s*(-?\d+)", text)
+    y = re.search(r"Absolute upper-left Y:\s*(-?\d+)", text)
+    return (int(x.group(1)), int(y.group(1))) if x and y else None
+
+
 def _no_client_list():
     # BY WHAT IS THERE, not by how its absence is worded: xprop says "not
     # found" once some client has interned the atom, and "no such atom on any
@@ -368,6 +392,8 @@ def windows():
     out = []
     listing = run(["wmctrl", "-lpG"])
     if not listing.strip() and _no_client_list():
+        global _WESTON
+        _WESTON = True
         listing = _listing_without_wmctrl()
     for line in listing.splitlines():
         parts = line.split(None, 7)
@@ -417,6 +443,16 @@ def geometry(wid):
     g = dict(re.findall(r"^(\w+)=(-?\d+)$", text, re.M))
     if not g:
         return None
+    # xdotool's X and Y are the window's position plus its offset inside the
+    # window manager's frame, so a saved place carries the saving desktop's
+    # frame.  Marco gives a window without decorations no offset; Weston still
+    # gives it the 32-px invisible margin it keeps round every frame, which
+    # put a Linux layout's caption box 32 px up and to the left on WSL.  There,
+    # such a window is measured where it really is.
+    if _WESTON and _undecorated(wid):
+        xy = _absolute_xy(wid)
+        if xy is not None:
+            return xy[0], xy[1], int(g["WIDTH"]), int(g["HEIGHT"])
     return int(g["X"]), int(g["Y"]), int(g["WIDTH"]), int(g["HEIGHT"])
 
 
