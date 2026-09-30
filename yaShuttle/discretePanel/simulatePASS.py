@@ -971,6 +971,65 @@ def wslg_scale(logs):
         % (WSL_SCALE, 96 * WSL_SCALE))
 
 
+# WSLg STOPS SHOWING SOME WINDOWS AFTER A MONITOR COMES BACK.  When a monitor
+# is disconnected and reconnected -- a KVM switch, measured 2026-09-30 -- WSLg
+# goes on taking the windows' contents from X but stops passing some of them
+# to Windows: the program paints, X holds the new picture, and the screen
+# keeps the old one.  Which windows is arbitrary (CRT2 and CRT3 but not CRT1,
+# all on the reconnected monitor), and it lasts until the window's size
+# changes -- which is why moving one by hand, the owner's discovery, cured
+# it.  So on WSL a thread follows WSLg's log, and a few seconds after the
+# monitors change it resizes each of this run's windows by a pixel and back.
+# Only this run's: windowLayout.descendants() picks them by process, never
+# the owner's own terminals.
+WESTON_LOG = "/mnt/wslg/weston.log"
+WSLG_SETTLE_S = 3.0             # the monitors arrive in several changes
+
+
+def wslg_redraw_watcher(stop_event):
+    """Thread: nudge this run's windows after WSLg's monitors change."""
+    try:
+        pos = os.path.getsize(WESTON_LOG)
+    except OSError:
+        return
+    due = None
+    while not stop_event.wait(0.5):
+        try:
+            size = os.path.getsize(WESTON_LOG)
+            if size < pos:
+                pos = 0         # WSLg restarted and began a new log
+            if size > pos:
+                with open(WESTON_LOG, errors="replace") as fh:
+                    fh.seek(pos)
+                    text = fh.read()
+                    pos = fh.tell()
+                if "DisplayLayoutChange" in text:
+                    due = time.monotonic() + WSLG_SETTLE_S
+        except OSError:
+            continue
+        if due is not None and time.monotonic() >= due:
+            due = None
+            n = 0
+            mine = windowLayout.descendants(os.getpid())
+            for w in windowLayout.windows():
+                # NOT THE CAPTION BOX: subtitles.py takes any size or place it
+                # did not ask for as the user's, and would keep its grown
+                # height as its new minimum and its current top as its
+                # anchor.  (The Linux yaGPC2 session's review.)
+                if (w["pid"] not in mine or w["role"] == "subtitles"
+                        or not w["w"] or not w["h"]):
+                    continue
+                windowLayout.run(["xdotool", "windowsize", w["id"],
+                                  str(w["w"] + 1), str(w["h"])], timeout=5)
+                # Well inside MEDS2's 250-ms aspect snap, so the size is back
+                # before the snap looks at it.
+                time.sleep(0.1)
+                windowLayout.run(["xdotool", "windowsize", w["id"],
+                                  str(w["w"]), str(w["h"])], timeout=5)
+                n += 1
+            log("WSL: the monitors changed; redrew %d window(s)" % n)
+
+
 def left_inset():
     """How far in from the screen's left edge a window may start, in points
     (macOS only): the Dock's width when it is on the left, else 0.  macOS
@@ -1775,6 +1834,9 @@ def main():
                       else None)
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
+        if wsl:
+            threading.Thread(target=wslg_redraw_watcher, args=(stop_event,),
+                             daemon=True).start()
         if args.keys:
             threading.Thread(target=send_keys_thread,
                              args=(args.port_base, os.path.abspath(args.keys), t0, stop_event,
