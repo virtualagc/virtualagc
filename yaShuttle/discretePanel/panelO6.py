@@ -301,9 +301,15 @@ C_LAMP = {"OFF": C_PANEL, "READY": "#1fbf2a", "BUSY": "#e02418"}# Tk reports no 
 # Nimbus Sans it nearly equals the caps; with Arial it is 1/4 taller).
 # Advance widths are reliable, and the Helvetica metric family (Helvetica,
 # Arial, Nimbus Sans, Liberation Sans) shares them: every digit is 0.556
-# em, and caps are about 0.72 em.
-HELV_DIGIT_EM = 0.556
-HELV_CAP_EM = 0.72
+# em, and caps are about 0.72 em.  Menlo's digits are 0.602 em and its caps
+# 0.730 (both bold faces measured with CoreText; the Helvetica figures come
+# out exactly).  A family not listed is taken to be Helvetica's shape.
+FONT_EM = {"helvetica": (0.556, 0.72), "menlo": (0.602, 0.730)}
+
+
+def font_em(family):
+    """(digit width, cap height) of family, in ems."""
+    return FONT_EM.get(family.lower(), FONT_EM["helvetica"])
 
 # Window margin on every side equals the original top inset.
 MARGIN = 28
@@ -319,9 +325,12 @@ REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
 # screen) where Linux Tk measures physical pixels.  The text must not shrink
-# with it: macOS Tk ignores `tk scaling`, so its text already comes out the
-# size a HiDPI Linux desktop's Tk scaling makes it.  simulatePASS.py passes
-# NSTS_TK_FONT_SCALE to put it back; unset, as on Linux, it is 1.
+# with it, and the font sizes follow the halved drawing scale, so
+# simulatePASS.py passes NSTS_TK_FONT_SCALE=2 to put them back; unset, as on
+# Linux, it is 1.  Tk 9 then draws an N-point font at N times `tk scaling`
+# (4/3) points, 2.67 physical pixels a point on a Retina screen -- the same
+# as the Linux desktop's Xft.dpi 192.  (Tk 8.6 on macOS ignored tk scaling,
+# which is what an earlier version of this note said.)
 try:
     FONT_SCALE = float(os.environ.get("NSTS_TK_FONT_SCALE") or 1)
 except ValueError:
@@ -331,6 +340,18 @@ except ValueError:
 # for a window with a title bar, so the drawing is kept clear of them with
 # this much of the window's own colour below it.
 BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
+# THE LEGENDS' TYPEFACE.  Helvetica, except on macOS, where it is Menlo.
+# macOS Tk places text only on whole points -- two physical pixels on a
+# Retina screen -- and centres each letter on its width rounded up to a whole
+# point.  Letters of different widths therefore land up to a pixel and a
+# half apart, which shows in the stacked legends (STBY, NORMAL): measured,
+# S and Y sat a pixel left of T and B.  A monospaced face gives every letter
+# the same width and so the same rounding, and the stacks line up exactly;
+# Menlo for every legend, since two faces on one panel would show.  Linux
+# and Windows place text on single pixels and need no such thing.  --font, or
+# NSTS_PANEL_FONT, names a family anywhere.
+FONT_FAMILY = (os.environ.get("NSTS_PANEL_FONT")
+               or ("Menlo" if sys.platform == "darwin" else "Helvetica"))
 FULL_SIZE = 768        # --size units: 768 is the design (full) window
 
 # Position legends (ON/OFF, BACKUP/NORMAL/TERMINATE, RUN/STBY/HALT,
@@ -986,14 +1007,14 @@ class PanelO6:
         key = (pts, bold)
         font = self._font_cache.get(key)
         if font is None:
-            font = tkfont.Font(family="Helvetica", size=pts,
+            font = tkfont.Font(family=FONT_FAMILY, size=pts,
                                weight="bold" if bold else "normal")
             self._font_cache[key] = font
         return font
 
     def _font(self, size, bold=True):
         pts = max(1, int(round(size * self.s * FONT_SCALE)))
-        return ("Helvetica", pts, "bold" if bold else "normal")
+        return (FONT_FAMILY, pts, "bold" if bold else "normal")
 
     def _th(self, size):
         """Half-height of a centre-anchored caption, in reference coords.
@@ -1668,8 +1689,9 @@ class PanelO6:
         f = self._tkfont(size)
         ascent = float(f.metrics("ascent"))
         descent = float(f.metrics("descent"))
-        em = f.measure("0123456789") / (10 * HELV_DIGIT_EM)
-        cap = HELV_CAP_EM * em
+        digit_em, cap_em = font_em(FONT_FAMILY)
+        em = f.measure("0123456789") / (10 * digit_em)
+        cap = cap_em * em
         s = max(self.s, 0.01)
         d = cap / s
         gap = 0.5 * d
@@ -1853,10 +1875,17 @@ class PanelO6:
                    fill=fill, outline=C_PADDLE_LO, width=1)
         if not label:
             return
-        # Anchor=c uses the full em box, so digits sit high.  Shift down by
-        # half the descent to centre the ink in the inner face.
+        # Anchor=c centres Tk's ascent-plus-descent box, which is not where
+        # a digit's ink is: the digit runs from the baseline, (ascent -
+        # descent)/2 below the anchor, up by the cap height.  Put that centre
+        # on the face's.  (This shifted by half the descent, which is the same
+        # thing only where the ascent is the cap height -- Nimbus Sans on
+        # Linux, nearly -- and left the numerals 2.5 points low on macOS.)
         f = self._tkfont(14)
-        y_fix = (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+        digit_em, cap_em = font_em(FONT_FAMILY)
+        cap = cap_em * f.measure("0123456789") / (10 * digit_em)
+        y_fix = (cap / 2.0 - (f.metrics("ascent") - f.metrics("descent")) / 2.0) \
+            / max(self.s, 0.01)
         self._text((x1 + x2) / 2.0 + dx, (iy1 + iy2) / 2.0 + y_fix,
                    label, size=14)
 
@@ -2492,6 +2521,9 @@ def main(argv=None):
     ap.add_argument("--geometry", metavar="SPEC", default=None,
                     help="Tk geometry, e.g. 948x1250+80+20 (overrides --size; "
                          "also NSTS_O6_GEOMETRY)")
+    ap.add_argument("--font", metavar="FAMILY", default=None,
+                    help="typeface for every legend (default $NSTS_PANEL_FONT, or "
+                         "Menlo on macOS and Helvetica elsewhere)")
     ap.add_argument("--gpc-id", type=int, metavar="N", default=DEFAULT_GPC_ID,
                     help="the GPC this panel treats as primary: the column "
                          "the log marks, and the discrete channel it listens "
@@ -2526,6 +2558,9 @@ def main(argv=None):
                          "published, so restoring a running simulation does "
                          "not halt it")
     args = ap.parse_args(argv)
+    if args.font:
+        global FONT_FAMILY
+        FONT_FAMILY = args.font
     if args.no_audio:
         crewscript.disable_audio()
     if args.size <= 0:
