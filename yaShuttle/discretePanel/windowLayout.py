@@ -341,6 +341,25 @@ def _mac_place(wid, x, y, w=None, h=None, verbose=False):
 # switch back restored it.
 
 
+# THE OFFSET A LAYOUT'S NUMBERS CARRY for a decorated window: what xdotool
+# adds to the client's position on the desktop the layouts are made on --
+# MATE's Marco, theme Mint-Y, scale 2 -- where the client sits 22,80 inside
+# its frame window (a 20-px invisible resize border, then a 2-px border and a
+# 60-px title bar).  Weston's is 38,59 (a 32-px invisible margin, a 6-px
+# border, a 27-px title bar), and with that a Linux layout put every decorated
+# window 21 px lower and 16 px further left on WSL, over the caption box they
+# clear on Linux.  An undecorated or override-redirect window's is 0,0 on
+# Marco, Weston's 32,32.
+#
+# SCALE 2 ONLY: the layouts are made at scale 2.  A layout saved on a scale-1
+# MATE desktop carries 11,40 (a 10-px invisible border, then 1 and 30) and
+# would restore 11,40 off on WSL.
+#
+# Measured on Marco by the Linux yaGPC2 Claude session, 2026-09-29: a Tk
+# window on Xvfb under marco, cross-checked against a window on Ron's
+# desktop.  Weston's from xwininfo on WSLg.
+MARCO_FRAME_OFFSET = (22, 80)
+
 # Set once windows() has had to list without a client list -- WSLg -- and
 # read by geometry().  Never set on a desktop that keeps the list.  So
 # windows() must run before geometry() is trusted on WSL; every flow here
@@ -358,11 +377,15 @@ def _undecorated(wid):
 
 
 def _absolute_xy(wid):
-    """Where the window itself is on the screen, as xwininfo has it."""
+    """Where the window itself is on the screen, as xwininfo has it, and
+    whether it is override-redirect -- never framed by any window manager
+    (subtitles.py --no-taskbar), and carrying no Motif hints to say so."""
     text = run(["xwininfo", "-id", wid])
     x = re.search(r"Absolute upper-left X:\s*(-?\d+)", text)
     y = re.search(r"Absolute upper-left Y:\s*(-?\d+)", text)
-    return (int(x.group(1)), int(y.group(1))) if x and y else None
+    if not (x and y):
+        return None
+    return int(x.group(1)), int(y.group(1)), "Override Redirect State: yes" in text
 
 
 def _no_client_list():
@@ -445,14 +468,15 @@ def geometry(wid):
         return None
     # xdotool's X and Y are the window's position plus its offset inside the
     # window manager's frame, so a saved place carries the saving desktop's
-    # frame.  Marco gives a window without decorations no offset; Weston still
-    # gives it the 32-px invisible margin it keeps round every frame, which
-    # put a Linux layout's caption box 32 px up and to the left on WSL.  There,
-    # such a window is measured where it really is.
-    if _WESTON and _undecorated(wid):
+    # frame.  On WSLg the window is measured where it really is and given
+    # MARCO's offset instead of Weston's, so that one layout file means the
+    # same on both -- see MARCO_FRAME_OFFSET.
+    if _WESTON:
         xy = _absolute_xy(wid)
         if xy is not None:
-            return xy[0], xy[1], int(g["WIDTH"]), int(g["HEIGHT"])
+            frameless = xy[2] or _undecorated(wid)
+            dx, dy = (0, 0) if frameless else MARCO_FRAME_OFFSET
+            return xy[0] + dx, xy[1] + dy, int(g["WIDTH"]), int(g["HEIGHT"])
     return int(g["X"]), int(g["Y"]), int(g["WIDTH"]), int(g["HEIGHT"])
 
 
