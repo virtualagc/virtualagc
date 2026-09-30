@@ -10678,8 +10678,23 @@ class IDP(LRU):
             msg.data16[1 + i] = int(w) & 0xffff
         self.mduCmdBus.sendMsg(msg)
 
+    # macOS REFUSES A UDP DATAGRAM OVER 9216 BYTES (net.inet.udp.maxdgram),
+    # where Linux takes up to 64 KB.  A whole-memory fill -- _clearMDUs, at
+    # every IDP POWER ON and DEU LOAD -- is 8192 halfwords, so on macOS it
+    # failed ("Message too long") and every MDU kept its OLD copy of the
+    # display memory under the IDP's cleared one: the next computer IPLed
+    # through that IDP had its GPCIPL menu drawn over the last one's screen.
+    # A fill carries its own address, so splitting it is the same fill.
+    MAX_FILL_WORDS = 4000 if sys.platform == "darwin" else None
+
     def _sendToMDUs(self, addr, words):
-        self._sendMDU(MDUMsg.FILL, [addr] + list(words))
+        words = list(words)
+        step = self.MAX_FILL_WORDS
+        if step is None or len(words) <= step:
+            self._sendMDU(MDUMsg.FILL, [addr] + words)
+            return
+        for i in range(0, len(words), step):
+            self._sendMDU(MDUMsg.FILL, [(addr + i) & 0xffff] + words[i:i + step])
 
     def _sendPollTick(self):
         """The GPC polled this unit.  This drives POLL FAIL on the MDU's DPS

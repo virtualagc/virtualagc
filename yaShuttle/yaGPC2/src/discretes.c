@@ -707,6 +707,25 @@ static void apply(Discretes *d, const uint8_t *b, size_t n) {
      * hearing.  Ignored rather than applied. */
     if (op == OP_VALUE) return;
     if (op != OP_SET && op != OP_RESET) return;
+    /* NOR A REGISTER THIS GPC OWNS.  The output, fail-vote and computer-fail
+     * registers are this computer's alone: it changes them, publishes every
+     * change, and nothing else drives them -- the tools only REQUEST them.
+     * But it publishes to the group on its OWN port with loopback on, so the
+     * monitors can hear it, and so its own datagrams come back here one drain
+     * later (DISCRETES_POLL_MIN_SECONDS and up).  Applied, they rewound the
+     * register to a code the computer had already left -- the same fault the
+     * localWired mask below cures for the neighbours' bits of input A, which
+     * never covered these.  vehicle_refresh_lines re-asserts this copy of the
+     * output register to the neighbours, so a computer that had moved from
+     * 111 null to 100 SVC could send its old null again: a neighbour's T5
+     * second look caught the phantom, went round again, held its 100 straight
+     * through the others' real null and matched their NEXT SVC sync, one SVC
+     * behind, and the set failed it at the OPS 2 transition.  Every 4-GPC run
+     * on macOS, whose multicast loopback is slow enough to widen the window;
+     * 70 of 2588 refreshes carried a stale code there (2026-09-29). */
+    if (reg == DISCRETES_REG_OUT || reg == DISCRETES_REG_FAILVOTE ||
+        reg == DISCRETES_REG_CFAIL)
+        return;
     int r = reg_index((int)reg);
     /* NOT A LINE THIS PROCESS WIRES DIRECTLY.  A neighbour in the same
      * vehicle writes its code into this register at once, both halves in one

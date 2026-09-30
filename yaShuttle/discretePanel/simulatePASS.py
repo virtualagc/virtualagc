@@ -1167,8 +1167,8 @@ def main():
                     help="where the logs go (default ./simulatePASS-logs)")
     ap.add_argument("--window-scale", type=int, metavar="N",
                     help="physical pixels per Qt pixel, for window placement (default: "
-                         "from the screen's DPI).  On macOS it also sets how much the Tk "
-                         "windows' --size is scaled into points; 2 on a Retina display")
+                         "from the screen's DPI).  On macOS, how much the Tk windows' "
+                         "--size is scaled into points (default 2, on any display)")
     ap.add_argument("--no-keyboard", action="store_true", help="no stsKeyboard.py "
                     "(--keyboards 0)")
     ap.add_argument("--instructions", action="store_true",
@@ -1346,23 +1346,29 @@ def main():
     # macOS MEASURES Tk WINDOWS IN POINTS, not physical pixels.  Everything
     # below is worked out in Linux's terms -- the displays (Qt) in
     # device-independent pixels, the Tk windows in physical ones -- which is
-    # what the --size values were chosen for.  On macOS, Qt's points are the
-    # same as Linux's device-independent pixels, so the displays need nothing;
-    # tk_px() turns the Tk windows' sizes and positions into points as they
-    # are launched, so that one --size looks the same on both.  And every
-    # window starts right of a Dock on the left, which macOS would otherwise
-    # push the first display out from under -- onto the second.
-    mac_scale = (args.window_scale or ws_auto) if sys.platform == "darwin" else 1
+    # what the --size values were chosen for, on a Linux desktop at scale 2.
+    # On macOS, Qt's points are the same as Linux's device-independent pixels,
+    # so the displays need nothing; tk_px() turns the Tk windows' sizes and
+    # positions into points as they are launched, so that one --size looks
+    # the same on both.  And every window starts right of a Dock on the left,
+    # which macOS would otherwise push the first display out from under --
+    # onto the second.
+    #
+    # THAT CONVERSION IS ALWAYS BY 2 ON macOS, whatever the monitor's own
+    # scale.  Points already hide the monitor: a 384-point MDU is the same
+    # size beside a 421-point panel on a Retina display and on a plain one.
+    # Dividing by the monitor's scale instead left the Tk windows twice as
+    # large as the MDUs on a scale-1 display (2026-09-29).  So on macOS the
+    # layout is done at scale 2, on a screen measured in points times 2.
+    mac_scale = 1
     if sys.platform == "darwin":
-        # SAID, because a wrong one is otherwise only seen as oddly sized
-        # windows.  A monitor that is waking up can report itself for a moment
-        # as a plain 1920x1080 display at scale 1 -- which measured this once,
-        # on a pair of 4K monitors that are normally at 2.
-        log("display scale %d (%s)" % (mac_scale, "--window-scale" if args.window_scale
-                                       else "measured"))
-        if mac_scale == 1 and not args.window_scale:
-            log("  scale 1 is not a Retina display; if yours is, a monitor may have been "
-                "waking -- rerun, or give --window-scale 2")
+        mac_scale = args.window_scale or 2
+        log("display scale %d (%s); windows laid out at scale %d"
+            % (ws_auto, "measured", mac_scale))
+        if screen_w is not None:
+            screen_w = screen_w * mac_scale // ws_auto
+            screen_h = screen_h * mac_scale // ws_auto
+        ws = mac_scale
     inset = left_inset() if sys.platform == "darwin" else 0
     if screen_w is not None:
         screen_w -= inset * mac_scale

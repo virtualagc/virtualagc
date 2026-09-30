@@ -75,6 +75,22 @@
  * and found only because five computers produced four sockets. */
 #define BCENET_SLOTS  (BCENET_MAX_BUS_ID + 1 + 6)
 
+/* READINESS WITHOUT A SYSCALL, on macOS.  The sockets are checked every
+ * BUS_SERVICE_US (2 us) of simulated time -- half a million times a
+ * simulated second per computer.  poll() over the ~22 bus sockets costs
+ * about 1 us on Linux, which that rate was tuned against, and about 16 us
+ * on macOS (measured, M1 Max; kevent() with the sockets registered is no
+ * better at 14 us), so on macOS the checks alone took several wall seconds
+ * per simulated second: the vehicle ran at 0.4 of real time, and every
+ * real-time peer -- displays, panel, crew scripts -- fell out of step with
+ * it.  Instead a watcher thread blocks in kevent() and counts arrivals per
+ * socket, and the check compares two counters.  What is drained, and when
+ * in simulated time, is unchanged.  Linux keeps its poll(). */
+#if defined(__APPLE__) && defined(BCENET_HAVE_TX_THREAD)
+#define BCENET_KQ 1
+#include <sys/event.h>
+#endif
+
 static int bcenet_slot(int busID, int gpcId) {
     if (busID == BCENET_IP_BUS && gpcId >= 0 && gpcId <= 5)
         return BCENET_MAX_BUS_ID + 1 + gpcId;
@@ -325,6 +341,13 @@ typedef struct {
 
     /* Set by bcenet_transport_poll_ready(): a datagram is waiting. */
     bool rxReady;
+#ifdef BCENET_KQ
+    /* macOS: datagrams seen arriving (the kqueue watcher counts them) and
+     * the count a drain last found the socket empty at -- see
+     * bcenet_transport_poll_ready. */
+    unsigned long rxGen;
+    unsigned long rxSeen;
+#endif
 
     /* Outbound pacing: a FIFO plus a token bucket in wall time. */
     OutDatagram outQ[BCENET_OUT_QUEUE];
@@ -399,6 +422,12 @@ struct BceNetTransport {
      * between threads.  ThreadSanitizer names it outright. */
     bool txStop;
 #endif
+#ifdef BCENET_KQ
+    int kq;                 /* every open receive socket, EVFILT_READ */
+    pthread_t kqThread;
+    bool kqRunning;
+    bool kqStop;
+#endif
 };
 
 /* The FIFO and its token bucket are the only shared state: the emulation
@@ -406,6 +435,27 @@ struct BceNetTransport {
  * are not shared -- receives use fd on the emulation thread, sends use
  * txFd on the transmit thread -- and both are stable once the bus is
  * open, so neither needs the lock. */
+#ifdef BCENET_KQ
+/* The arrival counter: blocks until a socket has something, and counts it.
+ * EV_CLEAR makes each report an edge -- new data since the last report --
+ * so a socket left partly drained does not spin this thread; the drain
+ * that finds it empty is what lowers readiness (bcenet_transport_recv). */
+static void *kq_thread_main(void *arg) {
+    BceNetTransport *t = (BceNetTransport *)arg;
+    struct kevent ev[BCENET_SLOTS];
+    const struct timespec tick = {0, 100 * 1000 * 1000};   /* notice a stop */
+    while (!__atomic_load_n(&t->kqStop, __ATOMIC_ACQUIRE)) {
+        int n = kevent(t->kq, NULL, 0, ev, BCENET_SLOTS, &tick);
+        for (int k = 0; k < n; k++) {
+            intptr_t slot = (intptr_t)ev[k].udata;
+            if (slot >= 0 && slot < BCENET_SLOTS)
+                __atomic_add_fetch(&t->buses[slot].rxGen, 1, __ATOMIC_RELEASE);
+        }
+    }
+    return NULL;
+}
+#endif
+
 #ifdef BCENET_HAVE_TX_THREAD
 static void *tx_thread_main(void *arg);
 #endif
@@ -443,6 +493,15 @@ BceNetTransport *bcenet_transport_create(int gpcId) {
     t->txThreadRunning = false;
     __atomic_store_n(&t->txStop, false, __ATOMIC_RELAXED);
 #endif
+#ifdef BCENET_KQ
+    t->kq = kqueue();
+    t->kqRunning = false;
+    __atomic_store_n(&t->kqStop, false, __ATOMIC_RELAXED);
+    for (int i = 0; i < BCENET_SLOTS; i++) {
+        t->buses[i].rxGen = 1;      /* != rxSeen: drain once to begin with */
+        t->buses[i].rxSeen = 0;
+    }
+#endif
     return t;
 }
 
@@ -456,6 +515,14 @@ void bcenet_transport_free(BceNetTransport *t) {
         pthread_join(t->txThread, NULL);
         t->txThreadRunning = false;
     }
+#ifdef BCENET_KQ
+    if (t->kqRunning) {
+        __atomic_store_n(&t->kqStop, true, __ATOMIC_RELEASE);
+        pthread_join(t->kqThread, NULL);
+        t->kqRunning = false;
+    }
+    if (t->kq >= 0) close(t->kq);
+#endif
     pthread_mutex_destroy(&t->lock);
 #endif
 #ifdef BCENET_HAVE_POSIX_SOCKETS
@@ -668,6 +735,19 @@ bool bcenet_transport_open_bus(BceNetTransport *t, int busID, int gpcId) {
     b->txPort = newTxPort;
     b->selfEchoCount = 0;
     __atomic_store_n(&b->fd, fd, __ATOMIC_RELEASE);   /* last, and visibly */
+#ifdef BCENET_KQ
+    if (t->kq >= 0) {
+        struct kevent kev;
+        EV_SET(&kev, fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0,
+               (void *)(intptr_t)(b - t->buses));
+        if (kevent(t->kq, &kev, 1, NULL, 0, NULL) < 0)
+            fprintf(stderr, "bcenet: bus %d: kqueue registration failed: %s\n",
+                    busID, strerror(errno));
+        if (!t->kqRunning &&
+            pthread_create(&t->kqThread, NULL, kq_thread_main, t) == 0)
+            t->kqRunning = true;
+    }
+#endif
     transport_unlock(t);
 
 #ifdef BCENET_HAVE_TX_THREAD
@@ -931,9 +1011,16 @@ static void pump_once(BceNetTransport *t) {
     /* The drain rate WITHIN one transfer, which is what matters and what
      * a per-second average hides: the span from the queue first going
      * non-empty to it going empty again.  A 511-word fill has 10.7 ms. */
-    static double burstStart[BCENET_MAX_BUS_ID + 1];
-    static long burstSent[BCENET_MAX_BUS_ID + 1];
-    static int burstOpen[BCENET_MAX_BUS_ID + 1];
+    /* BCENET_SLOTS, like the loop below and t->buses -- not
+     * BCENET_MAX_BUS_ID + 1, which left out the six intercomputer slots
+     * (25-30) and so read and wrote past the end of all three for every
+     * intercomputer bus.  Where that landed depended on the linker: on
+     * macOS it was cpu_instr.c's decode table, and valid instructions
+     * stopped decoding in a multi-GPC run as soon as a second computer
+     * started (AddressSanitizer: global-buffer-overflow, burstOpen). */
+    static double burstStart[BCENET_SLOTS];
+    static long burstSent[BCENET_SLOTS];
+    static int burstOpen[BCENET_SLOTS];
 
     for (int i = 0; i < BCENET_SLOTS; i++) {
         BceNetBusSocket *b = &t->buses[i];
@@ -1029,9 +1116,22 @@ static void *tx_thread_main(void *arg) {
  * MSVC target.) */
 void bcenet_transport_poll_ready(BceNetTransport *t) {
     if (!t) return;
+#ifdef BCENET_KQ
+    if (t->kqRunning) {
+        for (int i = 0; i < BCENET_SLOTS; i++) {
+            BceNetBusSocket *b = &t->buses[i];
+            b->rxReady = b->fd >= 0 &&
+                __atomic_load_n(&b->rxGen, __ATOMIC_ACQUIRE) !=
+                __atomic_load_n(&b->rxSeen, __ATOMIC_ACQUIRE);
+        }
+        return;
+    }
+#endif
 #ifdef BCENET_HAVE_POSIX_SOCKETS
-    struct pollfd pfd[BCENET_MAX_BUS_ID + 1];
-    int idx[BCENET_MAX_BUS_ID + 1];
+    /* One per open slot, and there are BCENET_SLOTS of them: the six
+     * intercomputer slots included (see pump_once). */
+    struct pollfd pfd[BCENET_SLOTS];
+    int idx[BCENET_SLOTS];
     int n = 0;
     for (int i = 0; i < BCENET_SLOTS; i++) {
         BceNetBusSocket *b = &t->buses[i];
@@ -1092,11 +1192,26 @@ bool bcenet_transport_recv(BceNetTransport *t, int busID, int gpcId, int iua, bo
     unsigned char buf[2 + 1024 * 2];
     struct sockaddr_in from;
     socklen_t fromLen = sizeof from;
+#ifdef BCENET_KQ
+    /* Taken BEFORE the read: anything that arrives after it counts past
+     * this, so an empty socket found now cannot hide it (see poll_ready). */
+    unsigned long genBefore = __atomic_load_n(&b->rxGen, __ATOMIC_ACQUIRE);
+#endif
     ssize_t n = recvfrom(b->fd, buf, sizeof buf, 0, (struct sockaddr *)&from, &fromLen);
     if (n < 0) {
         if (errno != EAGAIN && errno != EWOULDBLOCK) {
             fprintf(stderr, "bcenet: bus %d: recv failed: %s\n", busID, strerror(errno));
         }
+#ifdef BCENET_KQ
+        else {
+            /* Empty as of genBefore.  Raised, never lowered: two machines
+             * can drain one shared bus, and the later count must stand. */
+            unsigned long seen = __atomic_load_n(&b->rxSeen, __ATOMIC_ACQUIRE);
+            while (seen < genBefore &&
+                   !__atomic_compare_exchange_n(&b->rxSeen, &seen, genBefore, false,
+                                                __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) {}
+        }
+#endif
         return false;
     }
     /* Ours if it came from our own transmit socket -- exact, and it
