@@ -1312,8 +1312,9 @@ def main():
     ap.add_argument("--gpcs", type=parse_gpcs, default=[1], metavar="LIST",
                     help="which GPCs: 1 (default), 1,2, 1-3, 1-4")
     ap.add_argument("--tape", metavar="FILE",
-                    help="the mass memory volume (.mmv); both units hold it.  Default "
-                         "$NSTS_PASS_TAPE, or OI340700-OPS0.mmv beside this program")
+                    help="the mass memory volume (.mmv, or an encrypted .7z of one); both "
+                         "units hold it.  Default $NSTS_PASS_TAPE, or OI340700-OPS0.7z "
+                         "beside this program")
     ap.add_argument("--size", type=int, default=512, metavar="PX",
                     help="MDU size; the panel, keyboard and CAM scale with it (default 512)")
     ap.add_argument("--scale", type=float, default=0.8, metavar="F",
@@ -1448,7 +1449,13 @@ def main():
         # never another simulation's (they are named the same).
         windows_before = windowLayout.window_ids()
 
-    tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.mmv")
+    # THE LEAST RESTRICTED TAPE, AS THE REPOSITORY SHIPS IT.  Every tape is
+    # distributed encrypted, at three levels of access -- OPS0 (the system
+    # software) < OPS2 < OPS1 (everything) -- and a password is given out for
+    # the level a person is approved for.  The plain OI340700-OPS0.mmv that
+    # this used to name is not in the repository, so the default only ever
+    # produced "no volume".
+    tape = args.tape or os.environ.get("NSTS_PASS_TAPE") or os.path.join(HERE, "OI340700-OPS0.7z")
     tape = os.path.abspath(tape)
     # A RESTORED RUN NEEDS ITS VOLUME TOO.  This used to excuse a resume,
     # reasoning that its computers are past their IPL -- but the mass memory
