@@ -27,6 +27,7 @@ starts with "python", as it does on Linux, so that path is reported as
 "python3".
 """
 
+import os
 import subprocess
 import sys
 
@@ -252,6 +253,26 @@ def children():
     for pid, ppid in rows:
         kids.setdefault(ppid, []).append(pid)
     return kids
+
+
+def parent_pid():
+    """The program that started this one: os.getppid(), except on Windows
+    when this program runs from a virtual environment.  There its parent is
+    the venv's python.exe launcher, which started it with the same arguments
+    and is waiting for it, and the program that ran the launcher is one
+    further up.
+
+    It matters to the manager, which picks out its own simulation's windows
+    as the ones descended from its parent (simulatePASS.py).  Asking about
+    the launcher instead found only the manager's own children, so a layout
+    restore moved nothing but a caption box started from the manager."""
+    ppid = os.getppid()
+    if sys.platform != "win32":
+        return ppid
+    me, up = _win_argv(os.getpid()), _win_argv(ppid)
+    if me and up and _win_is_python(me) and _win_is_python(up) and me[1:] == up[1:]:
+        return dict(_win_processes()).get(ppid, ppid)
+    return ppid
 
 
 def send_signal(pid, name):

@@ -620,8 +620,9 @@ class Manager(object):
             return
         def work():
             try:
-                return windowLayout.save_layout(path, log=lambda _t: None,
-                                                only_pids=windowLayout.descendants(os.getppid()))
+                return windowLayout.save_layout(
+                    path, log=lambda _t: None,
+                    only_pids=windowLayout.descendants(procinfo.parent_pid()))
             except OSError as e:
                 return e
 
@@ -642,7 +643,8 @@ class Manager(object):
                 path, log=lambda _t: None,
                 # This simulation's windows only: the manager is simulatePASS's
                 # child, so its parent's process tree is the simulation.
-                only_pids=windowLayout.descendants(os.getppid()))
+                # (parent_pid, not os.getppid: see procinfo.py for Windows.)
+                only_pids=windowLayout.descendants(procinfo.parent_pid()))
 
         def done(result):
             placed, missing, inexact = result
