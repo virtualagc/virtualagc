@@ -30,8 +30,9 @@ So on Windows the three programs take their metrics from here instead:
         how many pixels higher to draw a caption so that its ink lands where
         Nimbus Sans would have put it, given Tk's anchor
 
-Everywhere else these are Tk's own figures and a lift of nothing, so Linux
-and macOS draw exactly as they did.
+For any family other than Arial, and everywhere but Windows, these are Tk's
+own figures and a lift of nothing, so Linux and macOS draw exactly as they
+did.
 """
 
 import math
@@ -44,14 +45,23 @@ _cache = {}
 
 
 def _both(font):
-    """((real ascent, real descent), (reference ascent, reference descent))."""
+    """((real ascent, real descent), (reference ascent, reference descent)),
+    or None when this font is left alone: anything but Arial.
+
+    ONLY ARIAL, because Arial is what Windows gives for "Helvetica", and it is
+    only in standing in for Helvetica that its heights are wrong.  A panel
+    drawn in some other family on purpose -- a --font option -- is laid out by
+    that family's own figures, whatever they are."""
     key = str(font)
-    # The cache is by the font's name, and a named font can be resized, so
-    # the size is part of what is remembered.
-    size = font.cget("size")
+    # The cache is by the font's name, and a named font can be resized or
+    # given another family, so both are part of what is remembered.
+    size, family = font.cget("size"), font.actual("family")
     hit = _cache.get(key)
-    if hit is not None and hit[0] == size:
+    if hit is not None and hit[0] == (size, family):
         return hit[1]
+    if family.lower() != "arial":
+        _cache[key] = ((size, family), None)
+        return None
     real = (int(font.metrics("ascent")), int(font.metrics("descent")))
     if size < 0:
         em = float(-size)                       # a size in pixels
@@ -60,36 +70,33 @@ def _both(font):
         import tkinter
         em = size * float(tkinter._get_default_root().winfo_fpixels("1p"))
     ref = (int(math.ceil(ASCENT_EM * em - 1e-6)), int(math.ceil(DESCENT_EM * em - 1e-6)))
-    _cache[key] = (size, (real, ref))
+    _cache[key] = ((size, family), (real, ref))
     return real, ref
 
 
 def ascent(font):
-    if not FAKE:
-        return int(font.metrics("ascent"))
-    return _both(font)[1][0]
+    both = _both(font) if FAKE else None
+    return int(font.metrics("ascent")) if both is None else both[1][0]
 
 
 def descent(font):
-    if not FAKE:
-        return int(font.metrics("descent"))
-    return _both(font)[1][1]
+    both = _both(font) if FAKE else None
+    return int(font.metrics("descent")) if both is None else both[1][1]
 
 
 def linespace(font):
-    if not FAKE:
-        return int(font.metrics("linespace"))
-    ref = _both(font)[1]
-    return ref[0] + ref[1]
+    both = _both(font) if FAKE else None
+    return int(font.metrics("linespace")) if both is None else both[1][0] + both[1][1]
 
 
 def lift(font, anchor="c"):
     """Pixels to take off a caption's y so its baseline is where the
     reference font's would be.  One line of text; Tk's anchor as given to
     create_text."""
-    if not FAKE:
+    both = _both(font) if FAKE else None
+    if both is None:
         return 0.0
-    (ra, rd), (fa, fd) = _both(font)
+    (ra, rd), (fa, fd) = both
     a = str(anchor).lower()
     if a.startswith("n"):
         return float(ra - fa)           # hung from the top: the top is higher
