@@ -24,12 +24,15 @@ Anything can send one:
     python3 -c "import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); \\
       s.sendto(b'OPS 2 transition', ('239.255.1.1', 6990))"
 
-THE BOX GROWS TO FIT.  The width stays as given; a caption that wraps to more
-lines than the height holds makes the box taller, DOWNWARD, so its top edge
-stays put and the extra lines cover nothing above the caption, and a shorter
-caption brings it back to the height given (never less).  Only if the box
-would run off the bottom of the screen is it moved up, and only by as much as
-that needs.
+THE BOX STAYS PUT.  Its place and size are the ones it was given, and a
+caption never changes either: text is wrapped to the width, and a caption with
+more lines than the height holds is cut off, not given a bigger box.  A box
+that resized and moved itself with every caption was one more thing on the
+screen for a viewer to follow, and a recording shows it doing so.  The place
+and size change only when someone changes them: by dragging it (with --edit),
+or by a layout being restored (windowLayout.py, the manager's Restore,
+simulatePASS.py --layout).  So choose a height for the longest caption the
+script has.
 
 TRYING SIZES: --edit.  The box takes the keyboard, so captions can be typed
 straight into it to find a geometry and font size that suit a recording:
@@ -38,7 +41,7 @@ straight into it to find a geometry and font size that suit a recording:
     Ctrl + / Ctrl - font size up or down by 2 points
     Ctrl L / E / R  align left, centre or right
     drag            move the box
-    Shift-drag      change its width and its (minimum) height
+    Shift-drag      change its width and height
     Ctrl P          print the options that reproduce the box
     Ctrl H          hide or show the cursor (it shows only while the box
                     has the keyboard anyway, so clicking another window
@@ -48,8 +51,10 @@ After any change of size, place, font size or alignment it prints the
 equivalent options -- '--geometry WxH+X+Y --font-size N --align A' -- to
 paste into the command line.  Captions from the bus still arrive meanwhile.
 
-THE WINDOW has no title bar, so it is moved by dragging it with the left
-button; the right button offers Clear and Quit, and Ctrl+Q quits.  It stays
+THE WINDOW has no title bar.  With --edit it is moved by dragging it with the
+left button; without, a click does nothing to it, so a recording cannot
+knock it out of place.  The right button offers Clear and Quit, and Ctrl+Q
+quits.  It stays
 above the other windows so a recording always shows it.  It is an ordinary
 window the desktop manages -- listed in the taskbar as "Subtitles" -- that
 asks not to be decorated (_MOTIF_WM_HINTS); --no-taskbar makes it an
@@ -120,6 +125,26 @@ def send(text, port=None, sock=None):
             sock.close()
 
 
+# How often the box looks at the desktop's arrangement, and how long that
+# must have stayed put before an outside move is believed again (Windows).
+SCREEN_POLL_MS = 500
+SCREEN_SETTLE_S = 5.0
+
+
+def virtual_screen():
+    """Windows: the whole desktop's extent across every monitor, as (x, y,
+    width, height) -- which changes when a monitor goes away or comes back.
+    None anywhere else, where nothing here uses it."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+        m = ctypes.windll.user32.GetSystemMetrics
+        return (m(76), m(77), m(78), m(79))    # SM_[XY]VIRTUALSCREEN, SM_C[XY]VIRTUALSCREEN
+    except Exception:
+        return None
+
+
 def look_file(pid):
     """Where a caption box on macOS or Windows keeps its look (see
     _publish_look)."""
@@ -129,17 +154,21 @@ def look_file(pid):
 
 class Subtitles(object):
     def __init__(self, root, args, box):
-        """box: (width, minimum height, x, y) -- y the top at that height."""
+        """box: (width, height, x, y)."""
         self.root = root
         self.args = args
         # The box is kept here rather than read back from the window, which
-        # has no size of its own until it is mapped: width, least height, the
-        # left edge, and the TOP edge, which stays put as the box grows.
+        # has no size of its own until it is mapped: width, height, left edge
+        # and top edge -- all fixed until someone moves or resizes it.
         self.w, self.min_h, self.x, self.top = box
-        self.shift = 0                        # moved up this far to stay on screen
         self.h = None
         self._wm_id = None            # the window the desktop deals with
         self._asked = None            # the geometry this program last set
+        # The desktop this box was placed on, and whether it has gone
+        # (Windows only; None elsewhere -- see _watch_screens).
+        self._screens = self._seen = virtual_screen()
+        self._screens_changed = 0.0
+        self._displaced = False
         self.align = args.align
         self.text = ""
         root.title("Subtitles")
@@ -165,10 +194,12 @@ class Subtitles(object):
                               padx=PAD_X, pady=PAD_Y)
         self.label.pack(fill="both", expand=True)
         # Bound on the toplevel only: its bindings already see the label's
-        # events, so binding both ran every handler twice.
-        root.bind("<ButtonPress-1>", self._drag_start)
-        root.bind("<B1-Motion>", self._drag)
-        root.bind("<ButtonRelease-1>", self._drag_end)
+        # events, so binding both ran every handler twice.  Moving it by hand
+        # is for --edit; otherwise a stray click in a recording cannot move it.
+        if args.edit:
+            root.bind("<ButtonPress-1>", self._drag_start)
+            root.bind("<B1-Motion>", self._drag)
+            root.bind("<ButtonRelease-1>", self._drag_end)
         root.bind("<ButtonPress-3>", self._menu)
         # A move or resize from outside -- a window manager, wmctrl, or
         # windowLayout.py restoring a saved placement -- becomes the box's own
@@ -196,6 +227,7 @@ class Subtitles(object):
         if not args.no_taskbar:
             self._undecorate()               # before anything can map the window
         self.text = args.text or ""
+        self._fit()                          # its place and size, once
         self.show(self.text)
         if not args.no_taskbar and (args.edit or not (args.hide_when_empty
                                                       and not self.text.strip())):
@@ -208,6 +240,44 @@ class Subtitles(object):
         root.after(300, self._publish_look)
         threading.Thread(target=self._listen, daemon=True).start()
         root.after(50, self._poll)
+        if self._screens is not None:
+            root.after(SCREEN_POLL_MS, self._watch_screens)
+
+    # -- the monitors going away and coming back (Windows) -------------------
+    def _watch_screens(self):
+        """HOME AGAIN WHEN THE MONITORS ARE.
+
+        A KVM switch, or a monitor turned off, makes Windows move every window
+        onto what is left -- a stand-in display, often at another scale -- and
+        put it back when the monitors return.  This box is the one window that
+        takes a move from outside as its new home (see _configured) and then
+        places ITSELF there with every caption, so it stayed wherever Windows
+        had parked it, while every other window went home (2026-09-30).
+
+        So while the desktop is not the one the box was placed on -- or has
+        only just changed -- an outside move is not taken as a new home; and
+        once the same desktop has been back for SCREEN_SETTLE_S, the box puts
+        itself back where it was.  A drag by hand records whatever desktop it
+        is on as the right one, so a monitor unplugged for good strands
+        nothing."""
+        now = virtual_screen()
+        t = time.monotonic()
+        if now != self._seen:
+            self._seen, self._screens_changed = now, t
+        if now != self._screens:
+            self._displaced = True
+        elif self._displaced and t - self._screens_changed >= SCREEN_SETTLE_S:
+            self._displaced = False
+            log("the desktop is as it was again; back to %d,%d" % (self.x, self.top))
+            self._fit()
+        self.root.after(SCREEN_POLL_MS, self._watch_screens)
+
+    def _unsettled(self):
+        """Is an outside move now most likely the desktop rearranging itself?"""
+        if self._screens is None:
+            return False
+        return (self._displaced or virtual_screen() != self._screens
+                or time.monotonic() - self._screens_changed < SCREEN_SETTLE_S)
 
     def _wm_window(self):
         """The window the desktop deals with: Tk's WRAPPER, the parent of
@@ -278,22 +348,17 @@ class Subtitles(object):
 
     # -- size and place ---------------------------------------------------
     def _fit(self):
-        """Wrap to the width, then make the box as tall as the text needs, but
-        no shorter than the height given, growing downward from its top edge
-        -- moved up only if it would otherwise run off the bottom of the
-        screen."""
+        """Put the box where it belongs, at the size it has been given, and
+        wrap the text to that width.  Called when it is first shown, while it
+        is dragged or resized in --edit, and when it goes home after the
+        desktop has changed -- never for a caption (see THE BOX STAYS PUT)."""
         self.label.configure(wraplength=max(50, self.w - 2 * PAD_X - 8))
-        self.root.update_idletasks()
-        self.h = max(self.min_h, self.label.winfo_reqheight())
-        over = self.top + self.h - self.root.winfo_screenheight()
-        self.shift = max(0, min(over, self.top))
-        self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.top - self.shift))
-        self._asked = (self.w, self.h, self.x, self.top - self.shift)
-        # macOS reports the steps on the way there -- the old height while
-        # growing to the new one -- and each looked like a resize from outside;
-        # whichever came last became the least height, so a five-line caption
-        # left the box five lines deep for good.  So its own changes are given
-        # a moment to settle before a report is believed.
+        self.h = self.min_h
+        self.root.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.top))
+        self._asked = (self.w, self.h, self.x, self.top)
+        # macOS reports the steps on the way to a new size, and each looked
+        # like a resize from outside.  So its own changes are given a moment
+        # to settle before a report is believed.
         self._own_until = time.monotonic() + 0.3
 
     def options(self):
@@ -364,7 +429,7 @@ class Subtitles(object):
         self.root.update_idletasks()
         if self.root.winfo_ismapped():
             self.x, y = self._where()
-            self.top = y + self.shift
+            self.top = y
 
     def _drag_start(self, e):
         self._sync_place()
@@ -380,6 +445,10 @@ class Subtitles(object):
         self._fit()
 
     def _drag_end(self, _e):
+        if self._moved or self._resize_from is not None:
+            # Put here by hand: this desktop is the right one (_watch_screens).
+            self._screens = self._seen = virtual_screen()
+            self._displaced = False
         if (self._moved or self._resize_from is not None) and self.args.edit:
             self._report()
         self._moved = False
@@ -412,10 +481,12 @@ class Subtitles(object):
                    self.root.winfo_rootx(), self.root.winfo_rooty())
         if now == self._asked:
             return                    # our own geometry call coming back
+        if self._unsettled():
+            return                    # Windows moving it off a departed monitor
         self._asked = now
         self.w, self.x = now[0], now[2]
-        self.h = self.min_h = now[1]  # a size set from outside is the new least
-        self.top, self.shift = now[3], 0
+        self.h = self.min_h = now[1]  # a size set from outside is the new size
+        self.top = now[3]
         self.label.configure(wraplength=max(50, self.w - 2 * PAD_X - 8))
         self._report() if self.args.edit else None
 
@@ -436,8 +507,8 @@ class Subtitles(object):
             shown = shown[tag.end():]
         if self.args.edit and self.cursor_wanted and self.focused:
             shown += EDIT_CURSOR
+        # The text only: the box keeps its place and size (THE BOX STAYS PUT).
         self.label.configure(text=shown, justify=align, anchor=ANCHORS[align])
-        self._fit()
         if self.args.hide_when_empty and not self.args.edit:
             if shown:
                 self.root.deiconify()
@@ -519,10 +590,9 @@ captions:
   <left>, <center> or <right> to align that caption alone.
 
 the box:
-  grows downward, top edge fixed, when a caption wraps past its height, and
-  returns to the --geometry height (never less) for a shorter one.  It moves
-  up only as far as it must to stay on the screen.
-  drag            move it
+  keeps its --geometry place and size whatever the caption; a caption with
+  more lines than the height holds is cut off.  Only dragging (--edit) or
+  restoring a window layout moves or resizes it.
   right button    Clear / Quit
   Ctrl Q          quit
 
@@ -531,10 +601,11 @@ editing controls (--edit only):
   Enter           new line
   Backspace       delete the last character
   Escape          clear the caption
+  drag            move the box
   Ctrl + / Ctrl = font size up 2 points
   Ctrl -          font size down 2 points
   Ctrl L / E / R  align left, centre, right
-  Shift-drag      set width (left-right) and minimum height (up-down)
+  Shift-drag      set width (left-right) and height (up-down)
   Ctrl P          print the options that reproduce the box
   Ctrl H          hide or show the cursor; it shows only while the box has
                   the keyboard, so clicking another window also hides it
@@ -552,9 +623,8 @@ def main(argv=None):
                     help="base of the UDP port range (default 6900, or NSTS_BUS_PORT_BASE); "
                          "captions arrive on base+%d" % SUBTITLE_OFFSET)
     ap.add_argument("--geometry", metavar="WxH+X+Y", default=None,
-                    help="width, least height and place (default %dx%d, bottom centre); "
-                         "the box grows taller, downward, for a caption that needs it"
-                         % (DEFAULT_W, DEFAULT_H))
+                    help="size and place (default %dx%d, bottom centre); the box "
+                         "keeps them whatever the caption" % (DEFAULT_W, DEFAULT_H))
     ap.add_argument("--font", default="Helvetica", help="font family (default Helvetica)")
     ap.add_argument("--font-size", type=int, default=28, metavar="PT")
     ap.add_argument("--fg", default="#ffffff", help="text colour (default white)")
