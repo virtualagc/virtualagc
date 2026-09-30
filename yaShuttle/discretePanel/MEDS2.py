@@ -544,9 +544,20 @@ class BusPump(object):
         self._calls = []
         self._timers = []                # heap of [due, seq, periodS, fn, live]
         self._seq = 0
-        self._wakeR, self._wakeW = os.pipe()
-        os.set_blocking(self._wakeR, False)
-        os.set_blocking(self._wakeW, False)
+        if sys.platform == "win32":
+            # A PAIR OF SOCKETS THERE, NOT A PIPE.  Windows' select() takes
+            # sockets and nothing else; given a pipe it fails on every call,
+            # which the loop below reads as "no events" -- so the pump spun
+            # at full speed and never serviced a bus, and no display answered
+            # a poll.
+            self._wakeSockR, self._wakeSockW = socket.socketpair()
+            self._wakeSockR.setblocking(False)
+            self._wakeSockW.setblocking(False)
+            self._wakeR = self._wakeSockR
+        else:
+            self._wakeR, self._wakeW = os.pipe()
+            os.set_blocking(self._wakeR, False)
+            os.set_blocking(self._wakeW, False)
         self._sel.register(self._wakeR, selectors.EVENT_READ, None)
         # A thread that wants the GIL waits for the holder to give it up, and
         # CPython asks the holder only once per switch interval: 5 ms by
@@ -562,7 +573,10 @@ class BusPump(object):
         with self._lock:
             self._calls.append(fn)
         try:
-            os.write(self._wakeW, b'x')
+            if sys.platform == "win32":
+                self._wakeSockW.send(b'x')
+            else:
+                os.write(self._wakeW, b'x')
         except (BlockingIOError, InterruptedError):
             pass                         # full: a wake is already pending
 
@@ -645,8 +659,12 @@ class BusPump(object):
             for key, _mask in events:
                 if key.data is None:
                     try:
-                        while os.read(self._wakeR, 4096):
-                            pass
+                        if sys.platform == "win32":
+                            while self._wakeSockR.recv(4096):
+                                pass
+                        else:
+                            while os.read(self._wakeR, 4096):
+                                pass
                     except (BlockingIOError, InterruptedError):
                         pass
                 elif key.data.server is not None:

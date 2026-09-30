@@ -54,6 +54,7 @@ import tkinter.font as tkfont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import discretes as D  # noqa: E402
+import helvetica  # noqa: E402
 
 N = 5
 # A lit lamp stays lit at least this long, however briefly the computer drove
@@ -211,7 +212,7 @@ class CamPanel:
 
     def _th(self, size):
         """Half-height of a centre-anchored caption, in reference coords."""
-        ls = float(self._tkfont(size).metrics("linespace"))
+        ls = float(helvetica.linespace(self._tkfont(size)))
         return 0.5 * ls / max(self.s, 0.01)
 
     def _on_configure(self, event):
@@ -247,13 +248,15 @@ class CamPanel:
                             **kw)
 
     def _text(self, x, y, text, size=11, fill=C_INK, bold=True, anchor="c"):
-        self.cv.create_text(self.X(x), self.Y(y), text=text, fill=fill,
+        # helvetica.lift: nothing on Linux or macOS; see helvetica.py.
+        lift = helvetica.lift(self._tkfont(size, bold), anchor)
+        self.cv.create_text(self.X(x), self.Y(y) - lift, text=text, fill=fill,
                             font=self._font(size, bold), anchor=anchor)
 
     def _ink_y(self, y, size):
         """Shift a centre-anchored y so the glyph ink, not the em box, is centred."""
         f = self._tkfont(size)
-        return y + (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+        return y + (helvetica.descent(f) / 2.0) / max(self.s, 0.01)
 
     def _vtext_packed(self, x, y, text, size=6, fill=C_INK):
         """Stacked caption centred on y.
@@ -262,7 +265,8 @@ class CamPanel:
         just the 30% gap, so VOTING / GPC stay two words without a hole.
         """
         font = self._font(size)
-        ascent = float(self._tkfont(size).metrics("ascent"))
+        ascent = float(helvetica.ascent(self._tkfont(size)))
+        lift = helvetica.lift(self._tkfont(size))
         gap = 0.30 * ascent
         slots = []
         for ch in text:
@@ -277,7 +281,7 @@ class CamPanel:
         for ch, h in slots:
             cy = y0 + acc + h / 2.0
             if ch is not None:
-                self.cv.create_text(cx, cy, text=ch, fill=fill,
+                self.cv.create_text(cx, cy - lift, text=ch, fill=fill,
                                     font=font, anchor="c")
             acc += h
 

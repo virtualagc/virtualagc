@@ -14,13 +14,38 @@ The name comes from CFBundleName in the running process's copy of the
 bundle's Info.plist, which AppKit reads when the application starts -- so it
 must be changed first.  Reached through the Objective-C runtime with ctypes,
 so nothing needs installing.  Anything that goes wrong leaves the name as it
-was: this is a convenience, never a reason to fail.  A no-op off macOS.
+was: this is a convenience, never a reason to fail.  A no-op on Linux.
+
+Windows has the same trouble with its taskbar, and the same call cures it
+there by another means; see set_app_name.
 """
 
 import sys
 
 
 def set_app_name(name):
+    if sys.platform == "win32" and name:
+        # THE TASKBAR HAS THE SAME HABIT AS THE DOCK.  Windows groups buttons
+        # by application, and every program here is python.exe, so the
+        # displays, the keyboards and the panel would share one button.  An
+        # application id of its own gives each its own.  Called before Tk()
+        # or QApplication, as on macOS, and as harmless if it fails.
+        #
+        # AND DPI AWARENESS, here because this is the one call every program
+        # makes before it has a window, which is the only time it can be
+        # declared.  See windowLayout.win_dpi_aware for what it is for.
+        try:
+            import windowLayout
+            windowLayout.win_dpi_aware()
+        except Exception:
+            pass
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                "VirtualAGC.yaShuttle." + "".join(c for c in name if c.isalnum()))
+        except Exception:
+            pass
+        return
     if sys.platform != "darwin" or not name:
         return
     try:

@@ -101,7 +101,196 @@ ROLE_PATTERNS = [
 ]
 
 
-HOSTNAME = os.uname().nodename
+HOSTNAME = os.uname().nodename if hasattr(os, "uname") else ""   # X11 only
+
+
+# ---------------------------------------------------------------------------
+# Windows.  Its own window functions, through ctypes: EnumWindows lists the
+# windows, each of which knows its process, and SetWindowPos moves them.
+#
+# WHAT A LAYOUT'S NUMBERS MEAN THERE.  The same as everywhere else, so that
+# one layout file serves every platform: x and y are where the INSIDE of the
+# window is -- its client area, the part the program draws -- plus the offset
+# a Linux layout carries for a decorated window (MARCO_FRAME_OFFSET, below),
+# and w and h are the inside's size.  So a layout made on Linux puts each
+# window's contents on the same pixels here.  The frames around them are
+# Windows' own and a little thinner than Marco's, which shows as slightly
+# wider gaps between windows and nothing else.
+#
+# PHYSICAL PIXELS, or none of that is true.  A Windows program that has not
+# declared itself DPI-aware is shown a make-believe 96-dpi screen and has its
+# windows stretched to fit the real one: at 150% every coordinate it sees is
+# two-thirds of the truth, and its text is blurred.  Python's Tk is such a
+# program until told otherwise.  So this module declares it on import, which
+# every program here does before it makes a window -- "per monitor", the
+# same as Qt declares for itself, so MEDS2.py is not asked for two different
+# things.  After that Tk's geometry is in real pixels, as on Linux.
+
+WIN = sys.platform == "win32"
+_WIN = None
+
+
+def win_dpi_aware():
+    """Declare this process DPI-aware (Windows), before it has a window.
+    Harmless to repeat, and a no-op anywhere else."""
+    if not WIN:
+        return
+    import ctypes
+    try:
+        # Per-monitor, version 2 (Windows 10 1703): -4 is its context handle.
+        ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4))
+    except (AttributeError, OSError):
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)      # Windows 8.1
+        except (AttributeError, OSError):
+            pass
+
+
+win_dpi_aware()
+
+
+def _win():
+    """user32 and dwmapi with the argument types that matter on 64 bits,
+    where a window handle passed as a plain int would be cut in half."""
+    global _WIN
+    if _WIN is None:
+        import ctypes
+        from ctypes import wintypes
+        u = ctypes.WinDLL("user32", use_last_error=True)
+        d = ctypes.WinDLL("dwmapi")
+        proc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        u.EnumWindows.argtypes = [proc, wintypes.LPARAM]
+        u.IsWindowVisible.argtypes = [wintypes.HWND]
+        u.IsWindow.argtypes = [wintypes.HWND]
+        u.IsIconic.argtypes = [wintypes.HWND]
+        u.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+        u.GetWindowTextLengthW.argtypes = [wintypes.HWND]
+        u.GetWindowTextW.argtypes = [wintypes.HWND, wintypes.LPWSTR, ctypes.c_int]
+        u.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
+        u.GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+        u.GetClientRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+        u.ClientToScreen.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.POINT)]
+        u.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
+        u.GetWindowLongW.restype = wintypes.LONG
+        u.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int,
+                                   ctypes.c_int, ctypes.c_int, wintypes.UINT]
+        d.DwmGetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD,
+                                            ctypes.c_void_p, wintypes.DWORD]
+        _WIN = (ctypes, wintypes, u, d, proc)
+    return _WIN
+
+
+def _win_hwnd(wid):
+    return int(wid, 16)
+
+
+def _win_windows():
+    ctypes, wintypes, u, d, proc = _win()
+    found = []
+
+    def each(hwnd, _lparam):
+        if not u.IsWindowVisible(hwnd):
+            return True
+        n = u.GetWindowTextLengthW(hwnd)
+        if n <= 0:
+            return True
+        # "Cloaked": there as far as EnumWindows is concerned and not on
+        # screen -- a window on another virtual desktop, or one of the shell's
+        # own that is kept ready and never shown.
+        cloaked = wintypes.DWORD(0)
+        d.DwmGetWindowAttribute(hwnd, 14, ctypes.byref(cloaked), ctypes.sizeof(cloaked))
+        if cloaked.value:
+            return True
+        buf = ctypes.create_unicode_buffer(n + 1)
+        u.GetWindowTextW(hwnd, buf, n + 1)
+        pid = wintypes.DWORD(0)
+        u.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        found.append((hwnd, int(pid.value), buf.value))
+        return True
+
+    u.EnumWindows(proc(each), 0)
+    out = []
+    for hwnd, pid, title in found:
+        wid = "0x%08x" % hwnd
+        where = _win_geometry(wid)
+        if where is None:
+            continue
+        role, cmd = role_of(pid, title)
+        entry = {"id": wid, "pid": pid, "x": where[0], "y": where[1],
+                 "w": where[2], "h": where[3], "title": title, "role": role, "cmd": cmd}
+        if role == "subtitles":
+            entry["look"] = _mac_look(pid)      # a file there too; see subtitles.py
+        out.append(entry)
+    return out
+
+
+def _win_inside(hwnd):
+    """(left, top, width, height) of the window's client area on the screen,
+    and whether the window has a title bar."""
+    ctypes, wintypes, u, _d, _proc = _win()
+    if not u.IsWindow(hwnd):
+        return None
+    rect, origin = wintypes.RECT(), wintypes.POINT(0, 0)
+    if not u.GetClientRect(hwnd, ctypes.byref(rect)):
+        return None
+    if not u.ClientToScreen(hwnd, ctypes.byref(origin)):
+        return None
+    GWL_STYLE, WS_CAPTION = -16, 0x00C00000
+    framed = (u.GetWindowLongW(hwnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION
+    return origin.x, origin.y, rect.right - rect.left, rect.bottom - rect.top, framed
+
+
+def _win_geometry(wid):
+    inside = _win_inside(_win_hwnd(wid))
+    if inside is None:
+        return None
+    x, y, w, h, framed = inside
+    dx, dy = MARCO_FRAME_OFFSET if framed else (0, 0)
+    return x + dx, y + dy, w, h
+
+
+def _win_place(wid, x, y, w=None, h=None, verbose=False):
+    """As place(): True when it is where it was asked to be, None if it has
+    gone, else how far out it finished.  Windows will not let a window's
+    title bar leave the screen altogether and a program may refuse a size,
+    so it is measured afterwards, not assumed."""
+    ctypes, wintypes, u, _d, _proc = _win()
+    hwnd = _win_hwnd(wid)
+    SWP_NOSIZE, SWP_NOZORDER, SWP_NOACTIVATE = 0x0001, 0x0004, 0x0010
+    now = None
+    for attempt in range(3):
+        if u.IsIconic(hwnd):
+            u.ShowWindow(hwnd, 4)               # SW_SHOWNOACTIVATE: a minimised
+            time.sleep(0.2)                     # window has no place to measure
+        inside = _win_inside(hwnd)
+        outer = wintypes.RECT()
+        if inside is None or not u.GetWindowRect(hwnd, ctypes.byref(outer)):
+            return None
+        cx, cy, cw, ch, framed = inside
+        dx, dy = MARCO_FRAME_OFFSET if framed else (0, 0)
+        # The frame's own share: how far the inside sits within the whole
+        # window, and how much bigger the whole window is than the inside.
+        # SetWindowPos places the whole window, invisible resize borders and
+        # all, so both are taken off the inside that is wanted.
+        left, top = cx - outer.left, cy - outer.top
+        extra_w = (outer.right - outer.left) - cw
+        extra_h = (outer.bottom - outer.top) - ch
+        flags = SWP_NOZORDER | SWP_NOACTIVATE
+        if w and h:
+            size = (int(w) + extra_w, int(h) + extra_h)
+        else:
+            size, flags = (0, 0), flags | SWP_NOSIZE
+        u.SetWindowPos(hwnd, None, int(x) - dx - left, int(y) - dy - top,
+                       size[0], size[1], flags)
+        time.sleep(0.2)
+        now = _win_geometry(wid)
+        if now is None:
+            return None
+        if verbose:
+            print("    try %d: asked %d,%d got %d,%d" % (attempt + 1, x, y, now[0], now[1]))
+        if abs(now[0] - x) <= 1 and abs(now[1] - y) <= 1:
+            return True
+    return (x - now[0], y - now[1])
 
 
 def run(cmd, timeout=10):
@@ -114,7 +303,7 @@ def run(cmd, timeout=10):
 
 def cmdline(pid):
     if not os.path.isdir("/proc"):
-        return procinfo.cmdline(pid)            # macOS
+        return procinfo.cmdline(pid)            # macOS, Windows
     try:
         with open("/proc/%d/cmdline" % pid, "rb") as fh:
             return " ".join(fh.read().decode("utf-8", "replace").split("\0")).strip()
@@ -170,7 +359,22 @@ def claim(root, delay_ms=300):
     Also where NSTS_TK_CURSOR takes effect: a pointer for the window, and for
     any Toplevel it opens, in place of the one inherited from the window
     manager's frame.  simulatePASS.py sets it on WSL only, where that
-    inherited arrow is 24 px beside Tk's and Qt's own themed 48."""
+    inherited arrow is 24 px beside Tk's and Qt's own themed 48.
+
+    And, on Windows, where NSTS_TK_SCALING takes effect: Tk's pixels per
+    point, which simulatePASS.py sets so that text is the size it is on the
+    Linux desktop the windows were drawn for.  Here because this is called
+    straight after Tk() in every program, before any font exists to have
+    been sized the old way.  Nothing else is needed on Windows: a window
+    there already says whose it is."""
+    if WIN:
+        scaling = os.environ.get("NSTS_TK_SCALING")
+        if scaling:
+            try:
+                root.tk.call("tk", "scaling", float(scaling))
+            except Exception:
+                pass
+        return
     cursor = os.environ.get("NSTS_TK_CURSOR")
     if cursor:
         try:
@@ -510,6 +714,8 @@ def nudge(wid):
     """Resize a window by one X pixel and back -- which makes WSLg show it
     again after a monitor change (see simulatePASS.py).  In X's own units,
     whatever the scale."""
+    if MAC or WIN:
+        return False            # a WSLg fault; nothing to cure elsewhere
     g = dict(re.findall(r"^(\w+)=(-?\d+)$",
                         run(["xdotool", "getwindowgeometry", "--shell", wid]), re.M))
     if "WIDTH" not in g:
@@ -566,6 +772,8 @@ def windows():
     """Every managed window: {id, pid, x, y, w, h, title, role, cmd}."""
     if MAC:
         return _mac_windows()
+    if WIN:
+        return _win_windows()
     out = []
     listing = run(["wmctrl", "-lpG"])
     if not listing.strip() and _no_client_list():
@@ -616,6 +824,8 @@ def geometry(wid):
     """Where the window manager actually has it now."""
     if MAC:
         return _mac_geometry(wid)
+    if WIN:
+        return _win_geometry(wid)
     text = run(["xdotool", "getwindowgeometry", "--shell", wid])
     g = dict(re.findall(r"^(\w+)=(-?\d+)$", text, re.M))
     if not g:
@@ -646,6 +856,8 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     loop below measures for itself instead."""
     if MAC:
         return _mac_place(wid, x, y, w, h, verbose)
+    if WIN:
+        return _win_place(wid, x, y, w, h, verbose)
     # x, y, w, h are real pixels; xdotool asks in X's units, which on a
     # scaled WSLg are s of them -- so the asks are divided by s, and a place
     # within s pixels of the target is as close as X can put it.
@@ -842,7 +1054,7 @@ def main(argv=None):
     if not args.what:
         ap.print_help()
         return 1
-    for tool in (("osascript",) if MAC else ("wmctrl", "xdotool")):
+    for tool in (("osascript",) if MAC else () if WIN else ("wmctrl", "xdotool")):
         if not any(os.access(os.path.join(p, tool), os.X_OK)
                    for p in os.environ.get("PATH", "").split(":")):
             sys.exit("windowLayout: %s is not installed" % tool)

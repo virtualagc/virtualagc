@@ -94,6 +94,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 
 import crewscript
+import helvetica
 
 # JUST "Panel".  The desktop's task bar labels its button with the window
 # title and has room for a few characters, so a long one is indistinguishable
@@ -1022,7 +1023,7 @@ class PanelO6:
         Layout y values are the centres of the glyphs.  Neighbouring
         objects have to clear this plus PAD, or the ink collides.
         """
-        ls = float(self._tkfont(size).metrics("linespace"))
+        ls = float(helvetica.linespace(self._tkfont(size)))
         return 0.5 * ls / max(self.s, 0.01)
 
     def _on_configure(self, event):
@@ -1058,7 +1059,9 @@ class PanelO6:
                             **kw)
 
     def _text(self, x, y, text, size=11, fill=C_INK, bold=True, anchor="c"):
-        self.cv.create_text(self.X(x), self.Y(y), text=text, fill=fill,
+        # helvetica.lift: nothing on Linux or macOS; see helvetica.py.
+        lift = helvetica.lift(self._tkfont(size, bold), anchor)
+        self.cv.create_text(self.X(x), self.Y(y) - lift, text=text, fill=fill,
                             font=self._font(size, bold), anchor=anchor)
 
     def _vtext(self, x, y, text, size=SETTING_SIZE, fill=C_INK):
@@ -1066,12 +1069,12 @@ class PanelO6:
         previous extra leading, so the letters stay separate without a
         large hole between them."""
         font = self._font(size)
-        ascent = int(self._tkfont(size).metrics("ascent"))
+        ascent = int(helvetica.ascent(self._tkfont(size)))
         fh = ascent + 2
         chars = [ch for ch in text if not ch.isspace()]
         n = len(chars) or 1
         total = n * fh
-        y0 = self.Y(y) - total / 2.0 + fh / 2.0
+        y0 = self.Y(y) - total / 2.0 + fh / 2.0 - helvetica.lift(self._tkfont(size))
         cx = self.X(x)
         for i, ch in enumerate(chars):
             self.cv.create_text(cx, y0 + i * fh, text=ch, fill=fill,
@@ -1687,8 +1690,8 @@ class PanelO6:
         is on the caps' centre rather than on the em box's.
         """
         f = self._tkfont(size)
-        ascent = float(f.metrics("ascent"))
-        descent = float(f.metrics("descent"))
+        ascent = float(helvetica.ascent(f))
+        descent = float(helvetica.descent(f))
         digit_em, cap_em = font_em(FONT_FAMILY)
         em = f.measure("0123456789") / (10 * digit_em)
         cap = cap_em * em
@@ -1859,7 +1862,7 @@ class PanelO6:
             # Anchor=c centres the em box, which puts the capitals high; as in
             # _pushbutton, move down by half the descent to centre the ink.
             f = self._tkfont(TB_WORD_SIZE)
-            y_fix = (f.metrics("descent") / 2.0) / max(self.s, 0.01)
+            y_fix = (helvetica.descent(f) / 2.0) / max(self.s, 0.01)
             self._text((x1 + x2) / 2.0, (y1 + y2) / 2.0 + y_fix, word,
                        size=TB_WORD_SIZE)
 
@@ -1884,7 +1887,7 @@ class PanelO6:
         f = self._tkfont(14)
         digit_em, cap_em = font_em(FONT_FAMILY)
         cap = cap_em * f.measure("0123456789") / (10 * digit_em)
-        y_fix = (cap / 2.0 - (f.metrics("ascent") - f.metrics("descent")) / 2.0) \
+        y_fix = (cap / 2.0 - (helvetica.ascent(f) - helvetica.descent(f)) / 2.0) \
             / max(self.s, 0.01)
         self._text((x1 + x2) / 2.0 + dx, (iy1 + iy2) / 2.0 + y_fix,
                    label, size=14)

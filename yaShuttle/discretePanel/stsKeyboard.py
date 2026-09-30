@@ -38,6 +38,8 @@ import time
 import tkinter as tk
 import tkinter.font as tkfont
 
+import helvetica
+
 # Each key is one or two legend lines, centered in the button.
 KEYS = (
     (("FAULT", "SUMM"), ("SYS", "SUMM"), ("MSG", "RESET"), ("ACK",)),
@@ -477,14 +479,17 @@ class STSKeyboard:
                                 fill=legend, outline="")
             return
         font = self._tkfont(self._pts_for(kind, k, lines))
-        ls = font.metrics("linespace")
+        # helvetica: Tk's own figures on Linux and macOS, and a lift of
+        # nothing; see helvetica.py.
+        ls = helvetica.linespace(font)
+        lift = helvetica.lift(font)
         n = len(lines)
         if n == 1:
-            self.cv.create_text(cx, cy, text=lines[0], fill=legend,
+            self.cv.create_text(cx, cy - lift, text=lines[0], fill=legend,
                                 font=font, anchor="c")
         else:
             total = n * ls
-            y0 = cy - total / 2.0 + ls / 2.0
+            y0 = cy - total / 2.0 + ls / 2.0 - lift
             for i, line in enumerate(lines):
                 self.cv.create_text(cx, y0 + i * ls, text=line, fill=legend,
                                     font=font, anchor="c")

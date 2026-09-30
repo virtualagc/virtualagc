@@ -121,7 +121,8 @@ def send(text, port=None, sock=None):
 
 
 def look_file(pid):
-    """Where a caption box on macOS keeps its look (see _publish_look)."""
+    """Where a caption box on macOS or Windows keeps its look (see
+    _publish_look)."""
     import tempfile
     return os.path.join(tempfile.gettempdir(), "nsts-subtitles-%d.look" % pid)
 
@@ -233,7 +234,32 @@ class Subtitles(object):
         window is first mapped: _MOTIF_WM_HINTS flags=2 (decorations given),
         decorations=0, on Tk's WRAPPER -- the parent of winfo_id(), which is
         what the window manager manages.  wm_frame() names the inner window
-        until the window has been mapped, so it cannot be used here."""
+        until the window has been mapped, so it cannot be used here.
+
+        Windows has no such hint.  There the frame goes with overrideredirect,
+        which also takes the window off the taskbar, and the taskbar entry is
+        put back by marking Tk's wrapper an "application window" -- while it
+        is still withdrawn, since the taskbar decides when a window is
+        shown."""
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                from ctypes import wintypes
+                user32 = ctypes.WinDLL("user32")
+                user32.GetParent.restype = wintypes.HWND
+                user32.GetParent.argtypes = [wintypes.HWND]
+                user32.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
+                user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, wintypes.LONG]
+                self.root.overrideredirect(True)
+                self.root.update_idletasks()
+                wrapper = user32.GetParent(self.root.winfo_id())
+                GWL_EXSTYLE, WS_EX_TOOLWINDOW, WS_EX_APPWINDOW = -20, 0x00000080, 0x00040000
+                style = user32.GetWindowLongW(wrapper, GWL_EXSTYLE)
+                user32.SetWindowLongW(wrapper, GWL_EXSTYLE,
+                                      (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW)
+            except (OSError, AttributeError, tk.TclError) as e:
+                log("cannot ask for an undecorated window (it will have a title bar): %s" % e)
+            return
         try:
             self.root.update_idletasks()
             wrapper = self._wm_window()
@@ -285,7 +311,7 @@ class Subtitles(object):
             self.args.fg, self.args.bg, self.args.opacity, self.align)
 
     def _publish_look(self):
-        if sys.platform == "darwin":
+        if sys.platform in ("darwin", "win32"):
             # No X11 window to hang it on: a file named for this process,
             # which windowLayout.py reads beside the window's place.
             path = look_file(os.getpid())

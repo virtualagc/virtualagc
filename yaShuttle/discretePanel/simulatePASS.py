@@ -274,7 +274,9 @@ class Launcher(object):
         self.logs = logs
         self.procs = []
 
-    def start(self, name, argv, cwd, env=None, pass_fds=()):
+    def start(self, name, argv, cwd, env=None, pass_fds=(), stdin_text=None):
+        """stdin_text, if given, is written to the child's standard input,
+        which is then closed; otherwise the child has none."""
         path = os.path.join(self.logs, name + ".log")
         fh = open(path, "w")
         kw = {}
@@ -283,9 +285,19 @@ class Launcher(object):
         if os.name == "posix":
             kw["start_new_session"] = True          # its own group, so it can be killed whole
         else:
+            # Its own group here too, which on Windows means the terminal's
+            # Ctrl-C does not reach it: this program stops the children, in
+            # its own order.
             kw["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
         p = subprocess.Popen(argv, cwd=cwd, env=env, stdout=fh, stderr=subprocess.STDOUT,
-                             stdin=subprocess.DEVNULL, **kw)
+                             stdin=(subprocess.DEVNULL if stdin_text is None
+                                    else subprocess.PIPE), **kw)
+        if stdin_text is not None:
+            try:
+                p.stdin.write(stdin_text.encode())
+                p.stdin.close()
+            except OSError:
+                pass                # it has gone already, and its log says why
         self.procs.append((name, p, fh))
         log("%-9s started (pid %d, log %s)" % (name, p.pid, path))
         return p
@@ -306,7 +318,7 @@ class Launcher(object):
         for name, p, fh in self.procs:
             if name == "yaGPC2" and p.poll() is None:
                 try:
-                    p.send_signal(signal.SIGINT)
+                    signal_gpc(p, "SIGINT")
                 except OSError:
                     pass
                 deadline = time.time() + 10
@@ -318,7 +330,7 @@ class Launcher(object):
                     if os.name == "posix":
                         os.killpg(p.pid, signal.SIGTERM)
                     else:
-                        p.terminate()
+                        win_stop_tree(p.pid, force=False)
                 except OSError:
                     pass
         deadline = time.time() + 5
@@ -330,11 +342,35 @@ class Launcher(object):
                     if os.name == "posix":
                         os.killpg(p.pid, signal.SIGKILL)
                     else:
-                        p.kill()
+                        win_stop_tree(p.pid, force=True)
                 except OSError:
                     pass
             fh.close()
         self.procs = kept
+
+
+def signal_gpc(gpc, name):
+    """Send yaGPC2 "SIGINT" (end the run in good order) or "SIGUSR1" (take a
+    snapshot).  Raises OSError if it cannot be delivered.
+
+    On Windows neither is a signal that one process can send another, so the
+    emulator listens for each as a named event instead; see procinfo.py."""
+    if os.name == "posix":
+        gpc.send_signal(getattr(signal, name))
+    elif not procinfo.send_signal(gpc.pid, name):
+        raise OSError("no emulator with pid %d is listening for %s" % (gpc.pid, name))
+
+
+def win_stop_tree(pid, force):
+    """Windows: stop a child and everything it started.
+
+    A TREE, because a program started from a virtual environment is two
+    processes -- venv's python.exe starts the real interpreter and waits for
+    it -- and there is no process group to kill them by.  Asked first
+    (taskkill without /F closes a program's windows, as clicking their close
+    buttons would, so it ends in its own way), then made to."""
+    subprocess.run(["taskkill", "/PID", str(pid), "/T"] + (["/F"] if force else []),
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
 
 
 # WHAT THE CONTROL PORT ASKED FOR, read by the main thread.
@@ -385,10 +421,35 @@ def session_listener(port_base, stop_event):
             continue
         SESSION["action"], SESSION["dir"] = word, rest
         log("session command: %s %s" % (word, rest))
+        if os.name == "nt":
+            # NOT ON WINDOWS, where os.kill with anything but a console
+            # event is TerminateProcess: it would end this program on the
+            # spot, children still running.  The main thread is not parked in
+            # input() there; it looks at SESSION itself (wait_for_enter).
+            continue
         try:
             os.kill(os.getpid(), signal.SIGINT)
         except OSError:
             pass
+
+
+def win_wait_for_enter():
+    """Windows: return when Enter is pressed at the console, or when the
+    session listener has left a request in SESSION.  Raises EOFError if
+    there is no console to press it at, as input() does.
+
+    In place of input(), which cannot be woken there: the listener has no
+    signal to send that would break a console read without ending the
+    process, so this looks for a key and for a request by turns."""
+    import msvcrt
+    if not sys.stdin or not sys.stdin.isatty():
+        raise EOFError
+    while SESSION["action"] is None:
+        if msvcrt.kbhit():
+            if msvcrt.getwch() in ("\r", "\n"):
+                return
+        else:
+            time.sleep(0.1)
 
 
 def snapshot_shortfall(snapdir, gpcs, crts):
@@ -474,6 +535,20 @@ def tape_password(path):
     return TAPE_PASSWORD
 
 
+def sevenzip():
+    """The 7z program: on the PATH if it is there, and otherwise, on Windows,
+    where 7-Zip's installer puts it -- which is not on the PATH.  yaGPC2 looks
+    in the same places (volsource.c)."""
+    found = shutil.which("7z")
+    if found or os.name != "nt":
+        return found or "7z"
+    for var in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"):
+        exe = os.path.join(os.environ.get(var, ""), "7-Zip", "7z.exe")
+        if os.path.isfile(exe):
+            return exe
+    return "7z"
+
+
 def tape_digest(path):
     """SHA-256 of a volume, or None if it cannot be read.
 
@@ -487,7 +562,7 @@ def tape_digest(path):
         h = hashlib.sha256()
         if tape_is_archive(path):
             pw = tape_password(path)
-            proc = subprocess.Popen(["7z", "x", "-so", "--", path],
+            proc = subprocess.Popen([sevenzip(), "x", "-so", "--", path],
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.DEVNULL)
@@ -656,7 +731,7 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
 
     epoch = time.time()
     try:
-        gpc.send_signal(signal.SIGUSR1)
+        signal_gpc(gpc, "SIGUSR1")
     except OSError as e:
         log("snapshot: cannot signal yaGPC2: %s" % e)
         return False, "cannot signal yaGPC2: %s" % e
@@ -978,6 +1053,32 @@ def wslg_scale(logs, s=1):
     log("WSL: display scale %d, of which WSLg does %d (Qt scale factor %s, Tk fonts at "
         "Xft.dpi %d)" % (WSL_SCALE, s, os.environ.get("QT_SCALE_FACTOR", "1"),
                          96 * WSL_SCALE // s))
+
+
+# WINDOWS SCALES BY FRACTIONS -- 125%, 150%, 175% -- and gives each toolkit
+# its own idea of what that means: Qt would run MEDS2 at a device-pixel ratio
+# of 1.5, and Tk, once it has declared itself DPI-aware (windowLayout.py),
+# would draw text at 2 pixels per point.  Neither is the Linux picture the
+# --size values were chosen for, where the ratio is a whole number, Tk's
+# geometry is in real pixels and its text is at 1.33 pixels per point times
+# that number.  So the scale is rounded to a whole number here, as the Linux
+# desktop's is one, and both toolkits are told it outright:
+#
+#   Qt     its own reading of the monitor switched off, and the ratio given
+#          (QT_ENABLE_HIGHDPI_SCALING=0, QT_SCALE_FACTOR);
+#   Tk     its pixels per point given (NSTS_TK_SCALING, applied by
+#          windowLayout.claim); its geometry is real pixels already.
+#
+# At 150% that is scale 2, and the windows are, pixel for pixel, the size
+# they are on a 4K Linux desktop at scale 2.  A QT_SCALE_FACTOR or
+# NSTS_TK_SCALING already in the environment is left alone.
+def win_scale(ws, measured):
+    os.environ.setdefault("QT_ENABLE_HIGHDPI_SCALING", "0")
+    os.environ.setdefault("QT_SCALE_FACTOR", str(ws))
+    os.environ.setdefault("NSTS_TK_SCALING", "%.4f" % (96.0 * ws / 72.0))
+    log("Windows: display scale %d (Windows' own rounds to %d): Qt scale factor %s, "
+        "Tk at %s pixels per point" % (ws, measured, os.environ["QT_SCALE_FACTOR"],
+                                       os.environ["NSTS_TK_SCALING"]))
 
 
 # WSLg STOPS SHOWING SOME WINDOWS AFTER A MONITOR COMES BACK.  When a monitor
@@ -1428,6 +1529,8 @@ def main():
         wslg_scale(logs, wslg_s)
         ws_auto = WSL_SCALE
     ws = args.window_scale or ws_auto
+    if sys.platform == "win32":
+        win_scale(ws, ws_auto)
     # macOS MEASURES Tk WINDOWS IN POINTS, not physical pixels.  Everything
     # below is worked out in Linux's terms -- the displays (Qt) in
     # device-independent pixels, the Tk windows in physical ones -- which is
@@ -1567,6 +1670,12 @@ def main():
     # Unbuffered, so each program's log shows what it said when it said it.
     py = sys.executable or "python3"
     env["PYTHONUNBUFFERED"] = "1"
+    if os.name == "nt":
+        # UTF-8 for the programs' files and logs, as on Linux and macOS.
+        # Windows' Python otherwise reads and writes text in the machine's
+        # own code page, in which a caption with a character outside it
+        # either arrives garbled or stops the program that printed it.
+        env.setdefault("PYTHONUTF8", "1")
     # WHERE SAVE PUTS THINGS, and where the emulator writes them first.
     #
     # They are different directories on purpose.  yaGPC2 is told its snapshot
@@ -1664,15 +1773,21 @@ def main():
             # cannot ask.  It goes down a pipe whose read end the child
             # inherits -- never in argv, where ps would show it, and never in
             # the environment, which /proc exposes to the same people.
-            if tape_is_archive(tape):
+            gpc_pass_fds, gpc_stdin = (), None
+            if tape_is_archive(tape) and os.name == "nt":
+                # Windows cannot hand a child a descriptor by number, so there
+                # the pipe is the emulator's standard input -- descriptor 0,
+                # which it otherwise has no use for.  Still not in argv, and
+                # still not in the environment.
+                gpc_argv += ["--tape-password-fd", "0"]
+                gpc_stdin = tape_password(tape) + "\n"
+            elif tape_is_archive(tape):
                 pw_r, pw_w = os.pipe()
                 os.write(pw_w, (tape_password(tape) + "\n").encode())
                 os.close(pw_w)
                 os.set_inheritable(pw_r, True)
                 gpc_argv += ["--tape-password-fd", str(pw_r)]
                 gpc_pass_fds = (pw_r,)
-            else:
-                gpc_pass_fds = ()
             if resume and multi:
                 gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
             elif resume:
@@ -1687,7 +1802,7 @@ def main():
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
                          "--verbose"] + shlex.split(args.yagpc_extra)
             gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,
-                          pass_fds=gpc_pass_fds)
+                          pass_fds=gpc_pass_fds, stdin_text=gpc_stdin)
             for _fd in gpc_pass_fds:        # ours to close once it is inherited
                 os.close(_fd)
             time.sleep(3)
@@ -1929,7 +2044,10 @@ def main():
                     print("Everything is up.  Press Enter here to shut it all "
                           "down (Ctrl-C also works).")
                     try:
-                        input()
+                        if os.name == "nt":
+                            win_wait_for_enter()
+                        else:
+                            input()
                     except EOFError:
                         while gpc.poll() is None and SESSION["action"] is None:
                             time.sleep(0.5)
