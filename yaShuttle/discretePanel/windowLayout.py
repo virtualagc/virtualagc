@@ -227,6 +227,32 @@ def role_of(pid, title):
 
 MAC = sys.platform == "darwin"
 
+# WHAT A LAYOUT'S NUMBERS MEAN ON macOS: the same as everywhere else, so one
+# file serves every platform -- x and y where the window's INSIDE is plus
+# Marco's frame offset for a titled window (MARCO_FRAME_OFFSET; none for the
+# caption box, which is untitled on Linux), w and h the inside's size, all in
+# the physical pixels of a scale-2 desktop.  The Accessibility interface
+# works in points and in whole windows, title bar included, so the macOS
+# functions below turn one into the other: MAC_UNIT pixels a point, as
+# simulatePASS.py lays macOS out (tk_unit_scale), and the inside begins
+# MAC_TITLE_BAR points below the window's top, with no border at the sides
+# (measured on macOS 27, Tk and Qt alike).
+#
+# CLOSE, NOT EXACT, FROM LINUX.  A layout made on Linux puts each window's
+# inside where it was there, but three things differ.  macOS pushes a window
+# out from under the Dock.  The caption box has a title bar on macOS and not
+# on Linux, so its bar stands above the place.  And the panels carry a
+# margin at the bottom for the rounded corners that Linux has no need of.
+# Windows laid out edge to edge on Linux may therefore overlap a little.
+#
+# OLD macOS LAYOUTS, saved before this, hold whole windows in points.  A file
+# does not say which it holds, but its sizes do: at the same --size a window
+# is about twice as many pixels as points.  restore_layout() compares the
+# file's sizes with the windows on screen and takes an old file as it was
+# meant.
+MAC_UNIT = 2
+MAC_TITLE_BAR = 32
+
 _MAC_LIST = """
 function run(argv) {
   // By process id: processes picked out by name all resolve to the FIRST
@@ -280,8 +306,10 @@ def _mac_windows():
     out = []
     for w in _osascript(_MAC_LIST) or []:
         role, cmd = role_of(w["pid"], w["title"])
+        frame = (int(w["x"]), int(w["y"]), int(w["w"]), int(w["h"]))
+        x, y, ww, hh = _mac_to_layout(role, frame)
         entry = {"id": "mac:%d:%s" % (w["pid"], w["title"]), "pid": w["pid"],
-                 "x": int(w["x"]), "y": int(w["y"]), "w": int(w["w"]), "h": int(w["h"]),
+                 "x": x, "y": y, "w": ww, "h": hh, "frame": frame,
                  "title": w["title"], "role": role, "cmd": cmd}
         if role == "subtitles":
             entry["look"] = _mac_look(w["pid"])
@@ -300,21 +328,83 @@ def _mac_look(pid):
         return ""
 
 
-def _mac_geometry(wid, x=None, y=None, w=None, h=None):
+def _mac_offset(role):
+    """The frame offset a layout carries for this window: Marco's for a
+    titled one, none for the caption box (untitled on Linux)."""
+    return (0, 0) if role == "subtitles" else MARCO_FRAME_OFFSET
+
+
+def _mac_role(wid):
+    pid, title = _mac_id(wid)
+    return role_of(pid, title)[0]
+
+
+def _mac_to_layout(role, frame):
+    """A whole window in points -> a layout's (x, y, w, h)."""
+    fx, fy, fw, fh = frame
+    dx, dy = _mac_offset(role)
+    return (int(round(fx * MAC_UNIT + dx)), int(round((fy + MAC_TITLE_BAR) * MAC_UNIT + dy)),
+            int(round(fw * MAC_UNIT)), int(round((fh - MAC_TITLE_BAR) * MAC_UNIT)))
+
+
+def _mac_from_layout(role, x, y, w=None, h=None):
+    """A layout's (x, y, w, h) -> the whole window in points; w and h stay
+    None when not given."""
+    dx, dy = _mac_offset(role)
+    fx = int(round((x - dx) / float(MAC_UNIT)))
+    fy = int(round((y - dy) / float(MAC_UNIT) - MAC_TITLE_BAR))
+    fw = int(round(w / float(MAC_UNIT))) if w else None
+    fh = int(round(h / float(MAC_UNIT) + MAC_TITLE_BAR)) if h else None
+    return fx, fy, fw, fh
+
+
+def _mac_geometry(wid):
+    frame = _mac_frame(wid)
+    return None if frame is None else _mac_to_layout(_mac_role(wid), frame)
+
+
+def _mac_place(wid, x, y, w=None, h=None, verbose=False):
+    """place() in a layout's units: True, None if gone, else how far out, in
+    those units."""
+    fx, fy, fw, fh = _mac_from_layout(_mac_role(wid), x, y, w, h)
+    ok = _mac_place_frame(wid, fx, fy, fw, fh, verbose)
+    if ok is True or ok is None:
+        return ok
+    return (ok[0] * MAC_UNIT, ok[1] * MAC_UNIT)
+
+
+def _mac_legacy(layout, here):
+    """Does this layout hold whole windows in points, as macOS layouts did
+    before they were made portable?  Compared with the windows on screen:
+    their widths in points against the file's -- about 1 for an old file,
+    about MAC_UNIT for a layout."""
+    ratios = []
+    for want in layout.get("windows", []):
+        got = here.get(want.get("role")) or []
+        if got and want.get("w") and got[0].get("frame") and got[0]["frame"][2]:
+            ratios.append(float(want["w"]) / got[0]["frame"][2])
+    if not ratios:
+        return False
+    ratios.sort()
+    return ratios[len(ratios) // 2] < (1.0 + MAC_UNIT) / 2.0
+
+
+def _mac_frame(wid, x=None, y=None, w=None, h=None):
+    """The whole window in points, moved and sized first if asked."""
     pid, title = _mac_id(wid)
     extra = [] if x is None else [x, y, "" if w is None else w, "" if h is None else h]
     got = _osascript(_MAC_WINDOW, pid, title, *extra)
     return tuple(int(v) for v in got) if got else None
 
 
-def _mac_place(wid, x, y, w=None, h=None, verbose=False):
-    """As place(): True when it is where it was asked to be, None if it has
-    gone, else how far out it finished.  macOS may pull a window back onto
-    the screen or out from under the menu bar, so it is measured, not
-    assumed."""
+def _mac_place_frame(wid, x, y, w=None, h=None, verbose=False):
+    """As place(), for the whole window in points: True when it is where it
+    was asked to be, None if it has gone, else how far out it finished.
+    macOS may pull a window back onto the screen, out from under the menu bar
+    or the Dock, so it is measured, not assumed."""
     now = None
     for attempt in range(3):
-        now = _mac_geometry(wid, x, y, w, h)
+        now = _mac_frame(wid, x, y, w, h)
         if now is None:
             return None
         if verbose:
@@ -665,6 +755,11 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
         if only_pids is not None and w["pid"] not in only_pids:
             continue
         here.setdefault(w["role"], []).append(w)
+    # AN OLD macOS FILE -- whole windows in points -- is told by its sizes:
+    # about the windows' own in points, where a layout's are twice that.
+    legacy = MAC and _mac_legacy(layout, here)
+    if legacy:
+        log("   (an older macOS layout, in points: placed as it was saved)")
     done = missing = failed = 0
     for want in layout["windows"]:
         role = want["role"]
@@ -682,7 +777,10 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
         # resizable by hand, and a layout restored after a stray drag has to
         # undo the size along with the position or it has not undone anything.
         size = ((want.get("w"), want.get("h")) if with_sizes else (None, None))
-        ok = place(w["id"], want["x"], want["y"], size[0], size[1], verbose)
+        if legacy:
+            ok = _mac_place_frame(w["id"], want["x"], want["y"], size[0], size[1], verbose)
+        else:
+            ok = place(w["id"], want["x"], want["y"], size[0], size[1], verbose)
         if ok is True:
             note = ""
         elif ok is None:
