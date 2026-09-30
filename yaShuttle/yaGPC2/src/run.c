@@ -720,7 +720,7 @@ static void batchrunner_write_capture(BatchRunner *r) {
         }
         int snapTries = r->snapRetries;
         r->snapRetries = 0;
-        fprintf(stderr, "GPC%d SNAPSHOT at t=%.6f s step=%ld -> %s\n",
+        fprintf(stderr, "GPC%d SNAPSHOT at t=%.6f s step=%lld -> %s\n",
                 r->gpcId, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step,
                 r->opts->snapshotDir);
         snprintf(path, sizeof path, "%s/gpc%d.json",
@@ -763,7 +763,7 @@ static void batchrunner_write_capture(BatchRunner *r) {
     /* SAY SO.  A trigger that fired used to leave no trace but a file, so a
      * capture that landed at the wrong instant, or twice, or not at all,
      * looked exactly like one that worked. */
-    fprintf(stderr, "GPC%d CAPTURE %s at t=%.6f s step=%ld\n",
+    fprintf(stderr, "GPC%d CAPTURE %s at t=%.6f s step=%lld\n",
             r->gpcId, tag, r->age.gpc.cpu.elapsedTimeUs / 1e6, r->step);
     char path[512];
     snprintf(path, sizeof path, "%s-gpc%d-%s.json",
@@ -831,11 +831,11 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
     bce_instr_table_init();
     msc_instr_table_init();
     r->opts = opts;
-    r->maxSteps = atol(opts->maxSteps);
+    r->maxSteps = atoll(opts->maxSteps);
     /* 0 means "no limit", as `gpc run --max-steps 0` does -- which is how
      * a --real-time run against live peripherals is started, since there
      * is no sensible instruction count for "until I stop it". */
-    if (r->maxSteps == 0) r->maxSteps = LONG_MAX;
+    if (r->maxSteps == 0) r->maxSteps = LLONG_MAX;
     if (opts->breakAddr) {
         const char *s = opts->breakAddr;
         if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -1261,23 +1261,23 @@ static void batchrunner_fatal(BatchRunner *r, const char *msg) {
     exit(1);
 }
 
-static void reg_dump_lines(BatchRunner *r, long step, char lines[TRACE_REGDUMP_LINES][200]) {
+static void reg_dump_lines(BatchRunner *r, long long step, char lines[TRACE_REGDUMP_LINES][200]) {
     trace_format_reg_dump(&r->age.gpc.cpu, (int)step, &TRACE_COLOR_PLAIN, lines, sizeof(lines[0]));
 }
 
-static void write_reg_dump(BatchRunner *r, long step) {
+static void write_reg_dump(BatchRunner *r, long long step) {
     char lines[TRACE_REGDUMP_LINES][200];
     reg_dump_lines(r, step, lines);
     for (int i = 0; i < TRACE_REGDUMP_LINES; i++) batchrunner_write(r, lines[i]);
 }
 
-static void info_reg_dump(BatchRunner *r, long step) {
+static void info_reg_dump(BatchRunner *r, long long step) {
     char lines[TRACE_REGDUMP_LINES][200];
     reg_dump_lines(r, step, lines);
     for (int i = 0; i < TRACE_REGDUMP_LINES; i++) batchrunner_info(r, lines[i]);
 }
 
-static void batchrunner_format_trace_line(BatchRunner *r, long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
+static void batchrunner_format_trace_line(BatchRunner *r, long long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
                                            const char *disasm, int instrLen, const RegChange *changes, int changeCount,
                                            char *out, size_t outSize) {
     /* Elapsed time and wrapping are both --debug-only presentation
@@ -1469,7 +1469,7 @@ static WatchAddrs build_watch_addrs(const Options *opts) {
 }
 
 static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before, uint16_t after16,
-                                   const char *disasm, uint32_t nia, long step, const RegSnapshot *after,
+                                   const char *disasm, uint32_t nia, long long step, const RegSnapshot *after,
                                    char *out, size_t outSize) {
     char addrHex[16], beforeHex[16], afterHex[16], niaHex[16];
     as_hex(addrHex, sizeof addrHex, (long long)addr, 5);
@@ -1493,7 +1493,7 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
         used += (size_t)n;
     }
     snprintf(out, outSize,
-             "memory watchpoint: HW 0x%s changed 0x%s -> 0x%s by %s at NIA=0x%s step=%ld%s%s",
+             "memory watchpoint: HW 0x%s changed 0x%s -> 0x%s by %s at NIA=0x%s step=%lld%s%s",
              addrHex, beforeHex, afterHex, disasm, niaHex, step, sectionPart, regPart);
 }
 
@@ -1506,7 +1506,7 @@ static void format_watchpoint_msg(BatchRunner *r, uint32_t addr, uint16_t before
  * batchrunner_step(), which has to poll for Ctrl-C itself. */
 static volatile sig_atomic_t g_sigint_received;
 static void on_sigint(int sig);
-static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode);
+static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long long step, int exitCode);
 
 /* The GPC MODE switch -- HALT / STBY / RUN -- modelled as the reset line
  * it actually is.
@@ -2710,7 +2710,7 @@ static bool batchrunner_step(BatchRunner *r) {
                     }
                     if (r->trig.hits[i] <= lmMax)
                     fprintf(stderr, "GPC%d LANDMARK %s #%ld at %05x t=%.6f s "
-                                    "shared=%.6f step=%ld r0=%08x r7=%08x\n",
+                                    "shared=%.6f step=%lld r0=%08x r7=%08x\n",
                             r->gpcId, r->trig.label[i], r->trig.hits[i], (unsigned)nia,
                             r->age.gpc.cpu.elapsedTimeUs / 1e6,
                             vehicle_shared_us(r->vehicle, r->gpcId) / 1e6, r->step,
@@ -3394,7 +3394,7 @@ static bool batchrunner_step(BatchRunner *r) {
                  * says it is for. */
                 if (g_sigint_received) {
                     snprintf(r->stopReason, sizeof r->stopReason,
-                             "interrupted (SIGINT) after %ld steps in a wait state",
+                             "interrupted (SIGINT) after %lld steps in a wait state",
                              r->step);
                     r->hasStopReason = true;
                     rtpacer_note_idle_loop(&r->rtPacer,
@@ -3803,13 +3803,13 @@ static int batchrunner_report_stop(BatchRunner *r) {
                         (unsigned)membus_get16(r->age.gpc.cpu.ram, (uint32_t)a));
         }
     if (!r->hasStopReason) {
-        snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%ld)", r->maxSteps);
+        snprintf(r->stopReason, sizeof r->stopReason, "max steps reached (%lld)", r->maxSteps);
         }
         r->hasStopReason = true;
     }
 
     char msg[700];
-    snprintf(msg, sizeof msg, "--- STOPPED after %ld steps (reason: %s) ---", r->step, r->stopReason);
+    snprintf(msg, sizeof msg, "--- STOPPED after %lld steps (reason: %s) ---", r->step, r->stopReason);
     batchrunner_info(r, msg);
     /* Simulated AP-101S time, so a run can be compared against another
      * simulator's (or against the real hardware's own duty-cycle
@@ -3863,7 +3863,7 @@ int batchrunner_run(BatchRunner *r) {
     as_hex(epHex, sizeof epHex, (long long)r->entryPoint, 4);
     snprintf(msg, sizeof msg, "Entry: 0x%s", epHex);
     batchrunner_info(r, msg);
-    snprintf(msg, sizeof msg, "Max steps: %ld", r->maxSteps);
+    snprintf(msg, sizeof msg, "Max steps: %lld", r->maxSteps);
     batchrunner_info(r, msg);
     snprintf(msg, sizeof msg, "Trace: %s", r->traceEnabled ? "on" : "off");
     batchrunner_info(r, msg);
@@ -3917,7 +3917,7 @@ int batchrunner_run(BatchRunner *r) {
             if (nowS >= sampleNext) {
                 sampleNext = nowS + sampleEvery;
                 CPU *sc = &r->age.gpc.cpu;
-                fprintf(stderr, "NIASAMPLE step=%-12ld nia=%05x t=%.0fus wait=%d",
+                fprintf(stderr, "NIASAMPLE step=%-12lld nia=%05x t=%.0fus wait=%d",
                         r->step, (unsigned)psw_get_nia(&sc->psw),
                         sc->elapsedTimeUs, psw_get_wait_state(&sc->psw) ? 1 : 0);
                 for (int i = 0; i < 8; i++)
@@ -3928,7 +3928,7 @@ int batchrunner_run(BatchRunner *r) {
         }
         if (g_sigint_received) {
             snprintf(r->stopReason, sizeof r->stopReason,
-                     "interrupted (SIGINT) after %ld steps", r->step);
+                     "interrupted (SIGINT) after %lld steps", r->step);
             r->hasStopReason = true;
             break;
         }
@@ -4014,7 +4014,7 @@ static void on_sigint(int sig) {
     g_sigint_received = 1;
 }
 
-static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long step, int exitCode) {
+static void interactive_report_and_exit(BatchRunner *r, const char *headerFmt, long long step, int exitCode) {
     /* A third distinct way the run loop can end besides max-steps and the
      * program's own HALT/EOF -- Ctrl-C -- and this calls exit() directly,
      * bypassing batchrunner_run_interactive()'s own post-loop flush. Same

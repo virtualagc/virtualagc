@@ -127,11 +127,11 @@ void trace_format_changes_wrapped(int lineWidth, const char *prefix, const RegCh
     }
 }
 
-void trace_format_debug_line(char *out, size_t outSize, long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
+void trace_format_debug_line(char *out, size_t outSize, long long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
                               const char *disasm, int instrLen, const RegChange *changes, int changeCount,
                               const SymbolTable *sym, const double *elapsedTimeUs, int lineWidth) {
     char stepNum[32];
-    snprintf(stepNum, sizeof stepNum, "%ld", step);
+    snprintf(stepNum, sizeof stepNum, "%lld", step);
     char stepStr[32];
     str_lpad(stepStr, sizeof stepStr, stepNum, " ", 5);
 

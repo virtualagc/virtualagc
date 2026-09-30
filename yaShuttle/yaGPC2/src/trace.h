@@ -64,7 +64,7 @@ void trace_format_changes_wrapped(int lineWidth, const char *prefix, const RegCh
  * loaded" / "not tracking elapsed time here" respectively); lineWidth
  * <=0 disables register-change wrapping (see
  * trace_format_changes_wrapped()). */
-void trace_format_debug_line(char *out, size_t outSize, long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
+void trace_format_debug_line(char *out, size_t outSize, long long step, uint32_t nia, uint32_t hw1, uint32_t hw2,
                               const char *disasm, int instrLen, const RegChange *changes, int changeCount,
                               const SymbolTable *sym, const double *elapsedTimeUs, int lineWidth);
 

@@ -127,7 +127,7 @@ typedef struct {
 typedef struct {
     const Options *opts;
 
-    long maxSteps;
+    long long maxSteps;
     bool hasBreakpoint;
     uint32_t breakpoint;
     bool watchLog;
@@ -147,7 +147,7 @@ typedef struct {
 
     uint32_t entryPoint;
 
-    long step;
+    long long step;
     bool hasStopReason;
     char stopReason[600];
     bool hasLastSection;

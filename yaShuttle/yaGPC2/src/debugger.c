@@ -68,7 +68,7 @@ struct Debugger {
 
     /* >0: hook returns true silently for this many more instructions
      * before stopping again ('step N'/'next'/'run' all drive this). */
-    long stepsRemaining;
+    long long stepsRemaining;
     bool hasTempBreakpoint; /* one-shot breakpoint used by 'next' */
     uint32_t tempBreakpoint;
 
@@ -1058,10 +1058,10 @@ static void cmd_next(Debugger *dbg, uint32_t nia, uint32_t hw1, uint32_t hw2) {
         dbg->hasTempBreakpoint = true;
         dbg->tempBreakpoint = nextAddr;
     }
-    dbg->stepsRemaining = LONG_MAX;
+    dbg->stepsRemaining = LLONG_MAX;
 }
 
-static void cmd_run(Debugger *dbg) { dbg->stepsRemaining = LONG_MAX; }
+static void cmd_run(Debugger *dbg) { dbg->stepsRemaining = LLONG_MAX; }
 
 /* ---------------------------------------------------------------------
  * Command dispatch / REPL
@@ -1418,7 +1418,7 @@ bool debugger_wants_htrace(const Debugger *dbg) { return dbg->htraceEnabled; }
 
 int debugger_line_width(const Debugger *dbg) { return dbg->lineWidth; }
 
-bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long step) {
+bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long long step) {
     dbg->currentStep = step;
 
     /* Checked on every call, including the first one after a resume
@@ -1500,7 +1500,7 @@ bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, u
     dbg->hasTempBreakpoint = false;
     dbg->stepsRemaining = 0;
 
-    if (shouldStop) printf("--- stopped: %s (%ld steps) ---\n", stopMsg, step);
+    if (shouldStop) printf("--- stopped: %s (%lld steps) ---\n", stopMsg, step);
     show_stop_location_and_registers(dbg, age);
     show_source_line_if_changed(dbg, age, nia);
     if (dbg->watchCount > 0) show_watches(dbg, age);

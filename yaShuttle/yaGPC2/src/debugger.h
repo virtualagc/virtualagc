@@ -62,6 +62,6 @@ int debugger_line_width(const Debugger *dbg);
  * (hw1/hw2 already fetched by the caller); a false return is reserved for
  * a future stop-the-loop path -- Stage 1 never returns false ('quit'
  * exits the process directly, matching the CoffeeScript original). */
-bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long step);
+bool debugger_hook(Debugger *dbg, AGEHarness *age, uint32_t nia, uint32_t hw1, uint32_t hw2, long long step);
 
 #endif
