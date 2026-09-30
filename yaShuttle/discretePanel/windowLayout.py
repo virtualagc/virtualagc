@@ -367,6 +367,70 @@ MARCO_FRAME_OFFSET = (22, 80)
 _WESTON = False
 
 
+# WSLg's OWN SCALE.  At a whole-number Windows scaling -- 200%, 300% -- WSLg
+# scales Linux windows itself: X measures in units of that many real pixels
+# (two 3840x2160 monitors are a 3840x1080 X desktop at 200%) and every window
+# is drawn that much larger.  At 100% or 150% it scales nothing.  A layout's
+# numbers are real pixels, as on Linux, so on WSLg they are divided by the
+# scale going to X and multiplied coming back.  Read from WSLg's log, whose
+# latest monitor layout gives each monitor's scale; cached by the log's size,
+# which changes only when something is written to it.
+WESTON_LOG = "/mnt/wslg/weston.log"
+_scale_cache = (None, 1)
+
+
+def wslg_output_scale():
+    """1 when WSLg scales nothing, N when every monitor is at N, 0 when the
+    monitors differ (unsupported: X's coordinates are then irregular)."""
+    global _scale_cache
+    try:
+        st = os.stat(WESTON_LOG)
+    except OSError:
+        return 1
+    # By inode AND size: a restarted WSLg writes a new log, which could
+    # happen to be as long as the old one.
+    size = (st.st_ino, st.st_size)
+    if _scale_cache[0] == size:
+        return _scale_cache[1]
+    try:
+        with open(WESTON_LOG, errors="replace") as fh:
+            text = fh.read()
+    except OSError:
+        return 1
+    i = text.rfind("disp_monitor_validate_and_compute_layout:---OUTPUT---")
+    scales = {}
+    if i >= 0:
+        for line in text[i:].splitlines()[1:60]:
+            m = re.search(r"rdpMonitor\[(\d+)\]: scale:(\d+), clientScale", line)
+            if m:
+                scales[m.group(1)] = int(m.group(2))
+    vals = set(scales.values())
+    s = vals.pop() if len(vals) == 1 else (1 if not vals else 0)
+    _scale_cache = (size, s)
+    return s
+
+
+def _xscale():
+    """The factor between X's units and real pixels on this path."""
+    s = wslg_output_scale() if _WESTON else 1
+    return s if s >= 1 else 1
+
+
+def nudge(wid):
+    """Resize a window by one X pixel and back -- which makes WSLg show it
+    again after a monitor change (see simulatePASS.py).  In X's own units,
+    whatever the scale."""
+    g = dict(re.findall(r"^(\w+)=(-?\d+)$",
+                        run(["xdotool", "getwindowgeometry", "--shell", wid]), re.M))
+    if "WIDTH" not in g:
+        return False
+    w, h = g["WIDTH"], g["HEIGHT"]
+    run(["xdotool", "windowsize", wid, str(int(w) + 1), h], timeout=5)
+    time.sleep(0.1)
+    run(["xdotool", "windowsize", wid, w, h], timeout=5)
+    return True
+
+
 def _undecorated(wid):
     """Has the window asked for no frame (_MOTIF_WM_HINTS, decorations off)?"""
     # Decimal on WSLg ("2, 0, 0, 0, 0"), hex elsewhere ("0x2, 0x0, ...").
@@ -471,12 +535,16 @@ def geometry(wid):
     # frame.  On WSLg the window is measured where it really is and given
     # MARCO's offset instead of Weston's, so that one layout file means the
     # same on both -- see MARCO_FRAME_OFFSET.
+    # At a WSLg scale, X's figures are multiplied up to real pixels first --
+    # Marco's offset is in real pixels already.
     if _WESTON:
         xy = _absolute_xy(wid)
         if xy is not None:
+            s = _xscale()
             frameless = xy[2] or _undecorated(wid)
             dx, dy = (0, 0) if frameless else MARCO_FRAME_OFFSET
-            return xy[0] + dx, xy[1] + dy, int(g["WIDTH"]), int(g["HEIGHT"])
+            return (xy[0] * s + dx, xy[1] * s + dy,
+                    int(g["WIDTH"]) * s, int(g["HEIGHT"]) * s)
     return int(g["X"]), int(g["Y"]), int(g["WIDTH"]), int(g["HEIGHT"])
 
 
@@ -488,10 +556,15 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     loop below measures for itself instead."""
     if MAC:
         return _mac_place(wid, x, y, w, h, verbose)
+    # x, y, w, h are real pixels; xdotool asks in X's units, which on a
+    # scaled WSLg are s of them -- so the asks are divided by s, and a place
+    # within s pixels of the target is as close as X can put it.
+    s = _xscale()
     if w and h:
-        run(["xdotool", "windowsize", wid, str(w), str(h)], timeout=5)
+        run(["xdotool", "windowsize", wid, str(int(round(w / float(s)))),
+             str(int(round(h / float(s))))], timeout=5)
         time.sleep(0.15)
-    ask_x, ask_y = x, y                # x, y stay the target; the ask moves
+    ask_x, ask_y = (int(round(x / float(s))), int(round(y / float(s)))) if s > 1 else (x, y)
     dx = dy = None
     for attempt in range(5):
         run(["xdotool", "windowmove", wid, str(ask_x), str(ask_y)], timeout=5)
@@ -503,9 +576,10 @@ def place(wid, x, y, w=None, h=None, verbose=False):
         if verbose:
             print("    try %d: asked %d,%d got %d,%d (want %d,%d)"
                   % (attempt + 1, ask_x, ask_y, now[0], now[1], x, y))
-        if dx == 0 and dy == 0:
+        if abs(dx) < s and abs(dy) < s:
             return True
-        ask_x, ask_y = ask_x + dx, ask_y + dy    # off by that much: ask for less
+        # off by that much: ask for less
+        ask_x, ask_y = ask_x + int(round(dx / float(s))), ask_y + int(round(dy / float(s)))
     return (dx, dy)                    # how far out it finished
 
 

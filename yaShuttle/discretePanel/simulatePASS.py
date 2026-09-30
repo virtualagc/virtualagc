@@ -948,9 +948,15 @@ def wslg_prepare():
             "sudo apt install fonts-urw-base35" % family)
 
 
-def wslg_scale(logs):
-    """After the display is measured at scale 1: double Qt, and Tk's fonts."""
-    os.environ["QT_SCALE_FACTOR"] = str(WSL_SCALE)
+def wslg_scale(logs, s=1):
+    """After the display is measured at scale 1: double Qt, and Tk's fonts.
+
+    s is WSLg's own scale (windowLayout.wslg_output_scale): 1 at Windows'
+    100% or 150%, 2 at 200%.  WSLg then draws every window s times larger
+    itself, so only what is left of Linux's doubling is applied here -- none
+    of it at 200% -- and Xft.dpi is shared out the same way."""
+    if WSL_SCALE != s:
+        os.environ["QT_SCALE_FACTOR"] = ("%g" % (float(WSL_SCALE) / s))
     # The pointer too.  Tk and Qt already draw their own themed pointers at
     # 48 px, but a Tk window that sets none inherits the WSLg window manager's
     # 24-px arrow -- where MATE's is 48 -- and XCURSOR_SIZE does not reach
@@ -958,17 +964,20 @@ def wslg_scale(logs):
     os.environ.setdefault("NSTS_TK_CURSOR", "left_ptr")
     # And its size, for Tk and Qt alike.  Adwaita's 48 -- which libXcursor
     # picks for a 2160-line screen -- stood half again as large as Windows'
-    # own arrow at the usual 150%; 36 matches it (Ron's eye, 2026-09-29).
-    os.environ.setdefault("XCURSOR_SIZE", "36")
+    # own arrow at the usual 150%; 36 matches it (Ron's eye, 2026-09-29).  At
+    # a WSLg scale the pointer is drawn s times larger too, and 24 of X's
+    # pixels is Windows' own arrow at 24*s.
+    os.environ.setdefault("XCURSOR_SIZE", "36" if s == 1 else "24")
     # XENVIRONMENT takes the place of a ~/.Xdefaults-<hostname> file (the
     # server's own resources are still read), so one set there is not seen.
     if "XENVIRONMENT" not in os.environ:
         path = os.path.join(logs, "wslg.Xresources")
         with open(path, "w") as fh:
-            fh.write("Xft.dpi: %d\n" % (96 * WSL_SCALE))
+            fh.write("Xft.dpi: %d\n" % (96 * WSL_SCALE // s))
         os.environ["XENVIRONMENT"] = path
-    log("WSL: display scale %d (Qt scale factor, and Tk fonts at Xft.dpi %d)"
-        % (WSL_SCALE, 96 * WSL_SCALE))
+    log("WSL: display scale %d, of which WSLg does %d (Qt scale factor %s, Tk fonts at "
+        "Xft.dpi %d)" % (WSL_SCALE, s, os.environ.get("QT_SCALE_FACTOR", "1"),
+                         96 * WSL_SCALE // s))
 
 
 # WSLg STOPS SHOWING SOME WINDOWS AFTER A MONITOR COMES BACK.  When a monitor
@@ -986,8 +995,9 @@ WESTON_LOG = "/mnt/wslg/weston.log"
 WSLG_SETTLE_S = 3.0             # the monitors arrive in several changes
 
 
-def wslg_redraw_watcher(stop_event):
-    """Thread: nudge this run's windows after WSLg's monitors change."""
+def wslg_redraw_watcher(stop_event, start_scale=1):
+    """Thread: nudge this run's windows after WSLg's monitors change.
+    start_scale is WSLg's scale when the programs were started."""
     try:
         pos = os.path.getsize(WESTON_LOG)
     except OSError:
@@ -1019,15 +1029,22 @@ def wslg_redraw_watcher(stop_event):
                 if (w["pid"] not in mine or w["role"] == "subtitles"
                         or not w["w"] or not w["h"]):
                     continue
-                windowLayout.run(["xdotool", "windowsize", w["id"],
-                                  str(w["w"] + 1), str(w["h"])], timeout=5)
-                # Well inside MEDS2's 250-ms aspect snap, so the size is back
-                # before the snap looks at it.
-                time.sleep(0.1)
-                windowLayout.run(["xdotool", "windowsize", w["id"],
-                                  str(w["w"]), str(w["h"])], timeout=5)
-                n += 1
+                # In X's own units (w["w"] is real pixels, which differ at a
+                # WSLg scale), and back within 0.1 s -- well inside MEDS2's
+                # 250-ms aspect snap, so the size is back before it looks.
+                if windowLayout.nudge(w["id"]):
+                    n += 1
             log("WSL: the monitors changed; redrew %d window(s)" % n)
+            # A SCALE CHANGED UNDER A RUNNING SIMULATION -- Windows' scaling
+            # altered, or a KVM back to monitors set differently.  The
+            # programs were sized for the old one at start-up and cannot
+            # follow, while windowLayout would now place by the new one.
+            # (The Linux yaGPC2 session's review.)
+            now = windowLayout.wslg_output_scale()
+            if now != start_scale:
+                log("WSL: WSLg's display scale changed from %d to %d; restart the "
+                    "simulation for correct sizes" % (start_scale, now))
+                start_scale = now
 
 
 def left_inset():
@@ -1393,13 +1410,22 @@ def main():
 
     # -- window placement ----------------------------------------------------
     wsl = on_wsl()
+    wslg_s = wslg_raw = 1
     if wsl:
         wslg_prepare()
+        wslg_s = wslg_raw = windowLayout.wslg_output_scale()
+        if wslg_s == 0:
+            log("WSL: the monitors are at different Windows scales, with one or more at a "
+                "whole-number scale such as 200%; the windows will be sized and placed as if "
+                "unscaled, and some wrongly.  Give every monitor the same scale.")
+            wslg_s = 1
     ws_auto, screen_w, screen_h = screen_info()
     if wsl and ws_auto == 1 and not os.environ.get("QT_SCALE_FACTOR"):
-        # Only when nothing is scaled yet: a WSLg set to scale on its own, or
-        # a QT_SCALE_FACTOR given by hand, is left as it is.
-        wslg_scale(logs)
+        # Only when nothing is scaled yet: a QT_SCALE_FACTOR given by hand is
+        # left as it is.  WSLg's own scale (200% and up) shows here as
+        # ws_auto 1 too -- X is in its units -- and wslg_scale shares the
+        # doubling with it.
+        wslg_scale(logs, wslg_s)
         ws_auto = WSL_SCALE
     ws = args.window_scale or ws_auto
     # macOS MEASURES Tk WINDOWS IN POINTS, not physical pixels.  Everything
@@ -1419,28 +1445,55 @@ def main():
     # Dividing by the monitor's scale instead left the Tk windows twice as
     # large as the MDUs on a scale-1 display (2026-09-29).  So on macOS the
     # layout is done at scale 2, on a screen measured in points times 2.
-    mac_scale = 1
+    tk_unit_scale = 1
     if sys.platform == "darwin":
-        mac_scale = args.window_scale or 2
+        tk_unit_scale = args.window_scale or 2
         log("display scale %d (%s); windows laid out at scale %d"
-            % (ws_auto, "measured", mac_scale))
+            % (ws_auto, "measured", tk_unit_scale))
         if screen_w is not None:
-            screen_w = screen_w * mac_scale // ws_auto
-            screen_h = screen_h * mac_scale // ws_auto
-        ws = mac_scale
+            screen_w = screen_w * tk_unit_scale // ws_auto
+            screen_h = screen_h * tk_unit_scale // ws_auto
+        ws = tk_unit_scale
+    # WSLg AT A WHOLE-NUMBER SCALE IS macOS AGAIN: X measures in units of
+    # wslg_s real pixels, as macOS Tk measures in points, and draws every
+    # window that much larger.  So the Tk windows' sizes and places go
+    # through tk_px() the same way, and the screen measured in X's units is
+    # scaled up to the real pixels everything here is worked in.  Qt needs
+    # nothing: wslg_scale() already left it only what WSLg does not do.
+    if wsl and wslg_s >= 2:
+        tk_unit_scale = wslg_s
+        if screen_w is not None:
+            screen_w, screen_h = screen_w * wslg_s, screen_h * wslg_s
+        # SIZED RIGHT BUT NOT SHARP.  WSLg draws X windows at 1/wslg_s of the
+        # screen's resolution and enlarges them, so MEDS2's strokes and the
+        # panel's switches come out coarse; nothing a program does changes
+        # that.  WSLg can be told not to scale (WESTON_RDP_HI_DPI_SCALING=false
+        # in .wslgconfig), but that changes every Linux program the user runs,
+        # which is not this program's to ask; below 200% (175% was checked)
+        # WSLg does not scale at all, and everything is sharp.
+        log("WSL: at %d%% Windows scaling WSLg draws Linux windows at reduced resolution "
+            "and enlarges them: the windows are sized and placed correctly, but coarse.  "
+            "Scaling of 175%% or less looks sharp." % (100 * wslg_s))
     inset = left_inset() if sys.platform == "darwin" else 0
     if screen_w is not None:
-        screen_w -= inset * mac_scale
+        screen_w -= inset * tk_unit_scale
 
     def tk_px(v):
         """Physical pixels as this platform's Tk takes them."""
-        return int(round(v / float(mac_scale))) if mac_scale != 1 else v
+        return int(round(v / float(tk_unit_scale))) if tk_unit_scale != 1 else v
     # ...and their text drawn the size Linux draws it.  NOT the display's
     # scale: macOS Tk ignores `tk scaling` and fixes its own at 1.33 pixels
     # per point, where the HiDPI Linux desktop these sizes were chosen on runs
     # Tk at 2.67 -- so text there is twice what it is here, on any Mac display,
     # Retina or not (see FONT_SCALE in panelO6.py).
     tk_font_scale = 2 if sys.platform == "darwin" else 1
+    # On a scaled WSLg the fonts themselves are right -- Xft.dpi times WSLg's
+    # scale is Linux's 2.67 px/pt -- but panelO6, stsKeyboard and cam size
+    # their text from their windows, which tk_px() has divided by the scale,
+    # so their text is divided too and has to be put back, as on macOS.  The
+    # manager sets its sizes directly and needs nothing.
+    if wsl and wslg_s >= 2:
+        tk_font_scale = wslg_s
     size = args.size
     # MEDS2's IDP pane, in Qt pixels: hidden unless NSTS_MDU_PANE=1, since
     # panelO6.py has those switches.
@@ -1497,6 +1550,11 @@ def main():
             return "+%d+%d" % (tk_px(int(gx)) + inset, tk_px(int(gy)))
         crt_pos = [(cx + inset, cy) for cx, cy in crt_pos]      # Qt: already points
         kb_geom, o6_geom, cam_geom = to_points(kb_geom), to_points(o6_geom), to_points(cam_geom)
+    elif wsl and wslg_s >= 2:
+        def to_x(geom):
+            gx, gy = geom.lstrip("+").split("+")
+            return "+%d+%d" % (tk_px(int(gx)), tk_px(int(gy)))
+        kb_geom, o6_geom, cam_geom = to_x(kb_geom), to_x(o6_geom), to_x(cam_geom)
 
     env = dict(os.environ)
     if tk_font_scale != 1:
@@ -1835,7 +1893,7 @@ def main():
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
         if wsl:
-            threading.Thread(target=wslg_redraw_watcher, args=(stop_event,),
+            threading.Thread(target=wslg_redraw_watcher, args=(stop_event, wslg_raw),
                              daemon=True).start()
         if args.keys:
             threading.Thread(target=send_keys_thread,
