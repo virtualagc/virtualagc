@@ -178,7 +178,11 @@ int main(void) {
     command(1, 20, NSP_READ);
     {
         uint32_t w1 = 0xffffffffu, w2 = 0xffffffffu;
-        int got = word(2, 20, &w1) + word(2, 20, &w2);
+        /* Two statements, not `word(&w1) + word(&w2)`: C leaves the order
+         * of the two calls to the compiler, and MSVC makes the second one
+         * first, which hands w1 the data and w2 the command. */
+        int got = word(2, 20, &w1);
+        got += word(2, 20, &w2);
         check(got == 2, "an NSP read reaches a listener as well");
         check((w1 & YAGPC_BUSWORD_CMD_SYNC) != 0,
               "the command first, or a Listen-Mode receive discards the lot");

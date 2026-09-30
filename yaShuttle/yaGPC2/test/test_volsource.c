@@ -20,10 +20,24 @@
 
 #include "../src/volsource.h"
 
-#define PLAIN "/tmp/yagpc2-volsource-plain.bin"
-#define ARCHIVE "/tmp/yagpc2-volsource-test.7z"
-#define MISSING "/tmp/yagpc2-volsource-no-such-file.7z"
-#define STDERR_LOG "/tmp/yagpc2-volsource-stderr.txt"
+/* Where the scratch files go, and how the shell that runs 7z quotes an
+ * argument and discards output.  Windows has no /tmp and its shell is
+ * cmd.exe; the test runs from the directory above build\, which by then
+ * exists. */
+#ifdef _WIN32
+#define TMP "build\\test\\"
+#define QUOTE "\""
+#define DEVNULL "NUL"
+#else
+#define TMP "/tmp/"
+#define QUOTE "'"
+#define DEVNULL "/dev/null"
+#endif
+
+#define PLAIN TMP "yagpc2-volsource-plain.bin"
+#define ARCHIVE TMP "yagpc2-volsource-test.7z"
+#define MISSING TMP "yagpc2-volsource-no-such-file.7z"
+#define STDERR_LOG TMP "yagpc2-volsource-stderr.txt"
 #define PASSWORD "correct horse battery staple"
 
 static int failures;
@@ -69,7 +83,8 @@ int main(void) {
     remove(ARCHIVE);
     char cmd[512];
     snprintf(cmd, sizeof cmd,
-             "7z a -t7z -mhe=on -p'%s' %s %s >/dev/null 2>&1", PASSWORD, ARCHIVE, PLAIN);
+             "7z a -t7z -mhe=on -p" QUOTE "%s" QUOTE " %s %s >" DEVNULL " 2>&1",
+             PASSWORD, ARCHIVE, PLAIN);
     int made = system(cmd);
     if (made != 0 || access(ARCHIVE, R_OK) != 0) {
         printf("SKIP [volsource]: no working 7z, so an encrypted volume "

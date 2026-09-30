@@ -1,13 +1,11 @@
-/* See bcenet_transport.h. POSIX sockets only -- this project's Makefile
- * targets Linux for `gpc run`'s own test environment, and this is a new,
- * optional (`--bce-network`-gated) feature, not something any existing
- * fixture or Windows build path depends on. A Windows (Winsock2) port is
- * real future work (see NMakefile's own existing HAVE_POSIX_TIMERS-style
- * precedent for how this project handles a POSIX-only feature: fail
- * loudly at the call site that would need it, not silently do nothing --
- * bcenet_transport_open_bus() below follows the same discipline via the
- * #else branch's hard error). */
-#ifndef _WIN32
+/* See bcenet_transport.h. POSIX sockets only.  The native Windows build
+ * (NMakefile) supplies them: src/win32/ answers for the headers below with
+ * Winsock under the BSD names, and defines YAGPC_POSIX_SHIMS to say so.
+ * Any other Windows compiler gets the #else branch's hard error in
+ * bcenet_transport_open_bus() -- this project's discipline for a feature a
+ * build cannot provide: fail loudly at the call site that would need it,
+ * not silently do nothing. */
+#if !defined(_WIN32) || defined(YAGPC_POSIX_SHIMS)
 #define _DEFAULT_SOURCE /* struct ip_mreq under -std=c11's strict mode */
 #define _GNU_SOURCE     /* sendmmsg(), likewise -- see transport_send_batch */
 #endif
@@ -22,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(YAGPC_POSIX_SHIMS)
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -85,8 +83,12 @@
  * real-time peer -- displays, panel, crew scripts -- fell out of step with
  * it.  Instead a watcher thread blocks in kevent() and counts arrivals per
  * socket, and the check compares two counters.  What is drained, and when
- * in simulated time, is unchanged.  Linux keeps its poll(). */
-#if defined(__APPLE__) && defined(BCENET_HAVE_TX_THREAD)
+ * in simulated time, is unchanged.  Linux keeps its poll().
+ *
+ * AND ON WINDOWS, where the same poll is WSAPoll() at 4.9 us (measured,
+ * Windows 11, 24 sockets).  The native build has no kqueue, so
+ * src/win32/sys/event.h provides what this uses of one. */
+#if (defined(__APPLE__) || defined(YAGPC_POSIX_SHIMS)) && defined(BCENET_HAVE_TX_THREAD)
 #define BCENET_KQ 1
 #include <sys/event.h>
 #endif
