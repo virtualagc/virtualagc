@@ -727,6 +727,16 @@ class Manager(object):
         name, _, line = where.rpartition(":")
         if name.endswith(".script"):
             name = name[:-len(".script")]
+        step = parts[3] if len(parts) > 3 else ""
+        if step.lower().split()[:2] == ["wait", "user"]:
+            # SAY WHAT IT IS WAITING FOR.  A 'wait user' holds until someone
+            # clicks in the panel, and the count alone -- "SCRIPT 1/281" --
+            # looked like a script that had stuck (Ron, 2026-09-30).  The
+            # next step's report puts the count back.
+            self.script_heading.configure(
+                text="SCRIPT %s/%s: click the Panel to %s"
+                % (done, total, "start" if done == "1" else "go on"))
+            return
         self.script_heading.configure(
             text="SCRIPT %s/%s:%s %s" % (done, total, line, name)
             if name else "SCRIPT %s/%s" % (done, total))
@@ -740,7 +750,6 @@ class Manager(object):
         # a second is a status line nobody can read.
         if not getattr(self.args, "debug", False):
             return
-        step = parts[3] if len(parts) > 3 else ""
         if step and step != getattr(self, "_last_step", None):
             self._last_step = step
             self.say(step[:70])
