@@ -13,6 +13,7 @@
  */
 /* setenv, which -std=c11 alone does not declare. */
 #define _POSIX_C_SOURCE 200809L
+#define _DARWIN_C_SOURCE   /* macOS: IP_MULTICAST_* hidden under _POSIX_C_SOURCE alone */
 
 #include <arpa/inet.h>
 #include <netinet/in.h>

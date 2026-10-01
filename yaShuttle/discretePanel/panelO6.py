@@ -1782,28 +1782,52 @@ class PanelO6:
         for i, st in enumerate(ADI_STATIONS):
             y = self._draw_adi(x0, y, x1, i, st) + PANE_GAP
 
+    def _tw(self, text, size=SETTING_SIZE):
+        """A caption's width in design units, as this host's font draws it."""
+        return self._tkfont(size).measure(text) / max(self.s, 0.01)
+
     def _draw_adi(self, x0, y0, x1, i, st):
         """One station's ADI ATTITUDE / ERROR / RATE switches and ATT REF
         pushbutton, laid out as SCOM printed page 2.7-5 draws them; on A6U,
-        SENSE beside ATT REF (page 2.7-7).  Returns the inset's bottom."""
+        SENSE beside ATT REF (page 2.7-7).  Returns the inset's bottom.
+
+        EVERY HORIZONTAL POSITION COMES FROM MEASURED TEXT.  Fixed offsets
+        fitted to Linux's fonts ran ERROR into RATE, overprinted ATT REF and
+        pushed MED onto the edge under macOS's wider ones (Mac-integrate,
+        2026-10-01); this inset is narrow enough that a few units decide it."""
         pad = 10
+        gap = 6                                  # least air between captions
         th10 = self._th(10)
         ths = self._th(SETTING_SIZE)
         gw, gh = 40, 104
-        b = 40                                   # ATT REF, as RHC ENGAGE
         sgw, sgh = 40, 64                        # SENSE, two positions
-        w = x1 - x0
-        # ATTITUDE is the long caption: its switch sits further from ERROR's
-        # than RATE's does, as on the panels.
-        cols = [x0 + w * k / 6.0 for k in (1.30, 3.45, 5.00)]
-        # The vertical rhythm first, so the body can be drawn behind it.
+        well = gw * 1.08 / 2.0                   # the round well's radius
+        side = self._tw("M") + 4                 # a stacked LVLH / MED column
+        wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
+        # ATTITUDE from the left edge, RATE from the right, each far enough in
+        # for its caption and for the stacked labels beside its well; ERROR as
+        # near RATE as its caption allows, which is where the panels put it.
+        c0 = x0 + 8 + max(wA / 2.0, well + side)
+        c2 = x1 - 8 - max(wR / 2.0, well + side)
+        c1 = min(c2 - (wE + wR) / 2.0 - gap, c2 - 2 * well - 8)
+        c1 = max(c1, c0 + (wA + wE) / 2.0 + gap)
+        cols = [c0, c1, c2]
+        # A line of SETTING_SIZE text, baseline to baseline, in this font.
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        # ATT REF: big enough for its two-line legend in this font.
+        b = max(40.0, self._tw("ATT") + 16, 2 * ls + 16)
         y_title = y0 + pad + th10
         y_cap = y_title + th10 + pad + ths
         y_top = y_cap + ths + pad / 2.0 + ths
         top = y_top + ths + pad / 2.0
         y_bot = top + gh + pad / 2.0 + ths
         row = y_bot + ths + pad
-        y1 = row + (max(b, sgh) if st == "A" else b) + pad
+        bottom = row + b
+        if st == "A":
+            # SENSE stands in its own column, captioned above and below as on
+            # A6U: SENSE, then -Z, the switch, then -X.
+            bottom = max(bottom, row + 2 * ls + 4 + sgh + 4 + ls)
+        y1 = bottom + pad
         self._rect_panel(x0, y0, x1, y1)
         self._text((x0 + x1) / 2.0, y_title,
                    "%s    ADI" % ADI_STATION_NAME[st], size=10)
@@ -1816,26 +1840,27 @@ class PanelO6:
             pos = positions.index(self.adi["%s_%s" % (st, f)])
             self._guarded_toggle(gx - gw / 2, top, gx + gw / 2, top + gh, pos, npos=3)
             self._hit("adi", (st, f), gx - gw / 2, top, gx + gw / 2, top + gh)
-        self._vtext(cols[0] - gw / 2 - 8, top + gh / 2.0, "LVLH")
-        self._vtext(cols[2] + gw / 2 + 8, top + gh / 2.0, "MED")
+        self._vtext(cols[0] - well - side / 2.0, top + gh / 2.0, "LVLH")
+        self._vtext(cols[2] + well + side / 2.0, top + gh / 2.0, "MED")
         self._text(cols[0], y_bot, "REF", size=SETTING_SIZE)
         self._text((cols[1] + cols[2]) / 2.0, y_bot, "LOW", size=SETTING_SIZE)
-        # ATT REF under ATTITUDE, as on F6, F8 and A6U.
+        # ATT REF under ATTITUDE, as on F6, F8 and A6U; its legend is two
+        # lines a line apart about the face's centre.
         bx = cols[0]
         self._pushbutton(bx - b / 2, row, bx + b / 2, row + b, "", down=self.attref[i])
-        self._text(bx, row + b * 0.37, "ATT", size=SETTING_SIZE)
-        self._text(bx, row + b * 0.65, "REF", size=SETTING_SIZE)
+        mid = row + b / 2.0
+        self._text(bx, mid - ls * 0.5, "ATT", size=SETTING_SIZE)
+        self._text(bx, mid + ls * 0.5, "REF", size=SETTING_SIZE)
         self._hit("attref", i, bx - b / 2, row, bx + b / 2, row + b)
         if st == "A":
-            # SENSE, captioned as on A6U: the name and -Z above, -X below.
             sx = (cols[1] + cols[2]) / 2.0
-            lx = sx - sgw / 2 - 6
-            self._text(lx, row + ths * 0.6, "SENSE", size=SETTING_SIZE, anchor="e")
-            self._text(lx, row + ths * 1.9, "-Z", size=SETTING_SIZE, anchor="e")
-            self._text(lx, row + sgh - ths * 0.6, "-X", size=SETTING_SIZE, anchor="e")
+            self._text(sx, row + ls * 0.5, "SENSE", size=SETTING_SIZE)
+            self._text(sx, row + ls * 1.5, "-Z", size=SETTING_SIZE)
+            stop = row + 2 * ls + 4
             pos = SENSE_POS.index(self.sense)
-            self._guarded_toggle(sx - sgw / 2, row, sx + sgw / 2, row + sgh, pos, npos=2)
-            self._hit("sense", None, sx - sgw / 2, row, sx + sgw / 2, row + sgh)
+            self._guarded_toggle(sx - sgw / 2, stop, sx + sgw / 2, stop + sgh, pos, npos=2)
+            self._hit("sense", None, sx - sgw / 2, stop, sx + sgw / 2, stop + sgh)
+            self._text(sx, stop + sgh + 4 + ls * 0.5, "-X", size=SETTING_SIZE)
         return y1
 
     def _lamp(self, gx, y, caption, state, size=10):
