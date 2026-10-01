@@ -1624,9 +1624,17 @@ class PanelO6:
         cur = getattr(self, attr, default)
         if abs(need - cur) <= 0.01 * cur:
             return
-        if getattr(self, "_fit_passes", 0) >= self.FIT_PASSES:
+        passes = getattr(self, "_fit_passes", 0)
+        if passes >= self.FIT_PASSES:
+            # Logged, because a fit that runs out of passes leaves content
+            # outside the design area -- cut off at an edge (WSL-integration
+            # saw the DAP column truncated at the right, 2026-10-01).
+            log("fit: %s wants %.0f, has %.0f, scale %.4f -- out of passes, left as is"
+                % (attr[5:], need, cur, self.s))
             return
-        self._fit_passes = getattr(self, "_fit_passes", 0) + 1
+        self._fit_passes = passes + 1
+        log("fit: %s %.0f -> %.0f at scale %.4f (pass %d)"
+            % (attr[5:], cur, need, self.s, self._fit_passes))
         setattr(self, attr, need)
         self.root.after_idle(self.redraw)
 
