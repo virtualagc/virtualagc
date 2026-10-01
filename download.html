@@ -90,8 +90,10 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
 
 
 
+
                     -hashfile VirtualAGC-VM64-Release.7z MD5</code></font></li>
               <li>In Linux or Mac OS:&nbsp; <code><font color="#663300">md5sum
+
 
 
 
@@ -315,6 +317,7 @@ document.write(headerTemplate.replace("@TITLE@","Downloads").replace("@SUBTITLE@
 
 
 
+
                       Fusion Pro</a></td>
                   <td valign="middle"><font color="#ff0000">No<br>
                     </font></td>
@@ -479,6 +482,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
 
 
 
+
             of the VM</a><br>
         </li>
         <li><a href="#Installation_of_the_Virtual_AGC_VM_">Installation
@@ -502,7 +506,8 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
         </li>
         <li><a href="#CMake-Based_Builds">CMake-Based Builds</a><br>
         </li>
-        <li><a href="#Linux_">Linux</a></li>
+        <li><a href="#Linux_">Linux or Windows+WSL<br>
+          </a></li>
         <li><a href="#Raspberry_Pi_Raspbian_">Raspberry Pi (Raspbian)</a></li>
         <li><a href="#FreeBSD">FreeBSD</a></li>
         <li><a href="#Solaris">Solaris</a></li>
@@ -685,6 +690,7 @@ href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-
 
 
 
+
     If you click it, a new window will pop up that lists a number of the
     Apollo Guidance Computer software versions available, though by no
     means all (or even most) of them.&nbsp; These are just the AGC
@@ -797,6 +803,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
 
 
 
+
     However, if you do subsequently perform an update of the VM, it will
     reset the last-performed simulation to the default one, so you'll
     lose your last simulation if you haven't saved it before updating.<br>
@@ -826,7 +833,9 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
 
 
 
+
         0020</code></font> at address 4077, <font color="#663300"><code>AD
+
 
 
 
@@ -921,6 +930,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">h
         computer system.&nbsp; The Virtual AGC virtual machine (VM) you
         will download was created with <a
           href="https://www.virtualbox.org/wiki/Download_Old_Builds_4_3">VirtualBox
+
 
 
 
@@ -1279,10 +1289,12 @@ href="https://github.com/virtualagc/virtualagc/wiki/DevelopmentWithCodeBlocks">t
 
 
 
+
         instructions for development using Code::Blocks on our GitHub
         wiki</a>, as well as <a
         href="https://github.com/virtualagc/virtualagc/wiki/VisualDebugging">the
 instructions
+
 
 
 
@@ -1439,11 +1451,13 @@ the
 
 
 
+
       Source Code<br>
     </h3>
     <p>The complete up-to-the-moment source code is available from <a
         href="https://github.com/virtualagc/virtualagc">GitHub</a>.&nbsp;
 There
+
 
 
 
@@ -1536,6 +1550,7 @@ href="https://github.com/virtualagc/virtualagc/archive/master.zip">in a
     sections.&nbsp; It's also possible though increasingly unlikely that
     <a
 href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">the
+
 
 
 
@@ -1713,6 +1728,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       If <b>wish</b> already works for you, then you can just skip this
       section.<br>
     </p>
@@ -1782,6 +1798,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
 
 
 
+
       This environment variable must be assigned a value which is the
       path to your preferred correctly-working installation of
       Tcl/Tk.&nbsp; Specifically, it's the name of the folder in which
@@ -1802,6 +1819,7 @@ href="https://github.com/rburkey2005/virtualagc/blob/master/README.md#linux-1">t
     <p><b>wxWidgets</b> is a cross-platform toolkit, suitable for
       writing software have a graphical user interface (GUI) that can be
       used with a simple recompilation on any platform supported by <b>wxWidgets</b>.&nbsp;
+
 
 
 
@@ -1940,6 +1958,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
 
 
 
+
         for the CMake-based build process can be found in our GitHub
         repository's wiki</a>.&nbsp; Whether those instructions are
       up-to-date or not is a question I'd prefer not to address.<br>
@@ -1952,7 +1971,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       to Michael's tag (@scivision).<br>
     </p>
     <h3> </h3>
-    <h3><a name="Linux_" id="Linux_"></a>Linux</h3>
+    <h3><a name="Linux_" id="Linux_"></a>Linux or Windows+WSL<br>
+    </h3>
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
@@ -1966,6 +1986,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
                         2025-04-30<br>
                         Last verified (Linux Mint 21.3): 2024-12-29</i></small></small></small></big></big><big><big><small><small><small><i><br>
                         Last verified (Linux Mint 22.1): 2025-04-30<br>
+                        Last verified (Win 11 Pro + WSL + Ubuntu):
+                        2026-09-29<br>
                       </i></small></small></small></big></big></td>
         </tr>
       </tbody>
@@ -1993,7 +2015,8 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       </ul>
       <li>If wxWidgets 3.2 is available in the package repository,
         install its development package in the same manner described
-        above.&nbsp; Otherwise, <a moz-do-not-send="true"
+        above. (For me in Linux Mint, that package was
+        libwxgtk-3.2.)&nbsp; Otherwise, <a moz-do-not-send="true"
           href="https://www.wxwidgets.org/downloads/">download its
           source code directly from the web</a>, and build/install it
         from source according to the instructions found there.</li>
@@ -2046,6 +2069,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
       which respectively override the C compiler and the C++
       compiler.&nbsp; See the comments in <a
         href="https://github.com/virtualagc/virtualagc/blob/master/Makefile">the
+
 
 
 
@@ -2185,6 +2209,7 @@ href="https://github.com/virtualagc/virtualagc/wiki/Building-Virtual-AGC-Using-C
     The instructions here relate to building Virtual AGC using <a
       href="http://pcbsd.org/download/">PC-BSD 10.3, desktop version</a>.&nbsp;
 That
+
 
 
 
@@ -2406,6 +2431,7 @@ href="http://www.oracle.com/technetwork/server-storage/developerstudio/downloads
 
 
 
+
           Oracle Developer Studio tools</a>.&nbsp; I used version 12.5,
         and only installed the tools rather than the complete IDE.&nbsp;
         This is to give you the C and C++ compilers ('cc' and 'CC'),
@@ -2552,6 +2578,7 @@ version
 
 
 
+
           of Xcode for your version of Mac OS X</a> ... of course!<br>
       </li>
       <li><a href="https://www.macports.org/">Install MacPorts</a>.</li>
@@ -2598,6 +2625,7 @@ version
         installed.&nbsp; In my case, I found that the location was
         /opt/local/Library/Frameworks/wxWidgets.framework/Versions/wxGTK/2.8/bin.&nbsp;
 You
+
 
 
 
@@ -2857,6 +2885,7 @@ You
 
 
 
+
         The first time you run <b>VirtualAGC</b> from its desktop icon
         after installation, it may take a considerable amount of time to
         start up.&nbsp; There will be no such delays on subsequent
@@ -2952,9 +2981,11 @@ href="https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-
 
 
 
+
           its source code</a>, and building it from source according to
         <a moz-do-not-send="true"
 href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">the
+
 
 
 
@@ -3046,12 +3077,14 @@ href="https://github.com/wxWidgets/wxWidgets/blob/master/docs/osx/install.md">th
 
 
 
+
           Or more specifically, if Macports has installed some of the
           libraries (such as libjpeg) that wxWidgets requires, because
           those libraries will be of incompatible versions.&nbsp; On
           solutions is to uninstall Macports and all of the packages
           Macports had installed.&nbsp; <a moz-do-not-send="true"
 href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">The
+
 
 
 
@@ -3128,6 +3161,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
           can read about here</a> to make a decision whether that's
         satisfactory to you.&nbsp; Better from my point of view,
         installation of a correctly-working version of Tcl/Tk can
@@ -3135,6 +3169,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         in a position to try any of those approaches, but I have reason
         to believe that <a moz-do-not-send="true"
           href="https://www.tcl.tk/software/tcltk/download.html">building
+
 
 
 
@@ -3277,6 +3312,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
         If you do decide to use <b>ApoDisKey</b> and discover some
         problem or think of a suggestion, report it directly to Gavin
         and not to me!&nbsp; I've got enough problems of my own to worry
@@ -3343,6 +3379,9 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       <blockquote> </blockquote>
     </blockquote>
     <h3><a name="Windows"></a>Windows</h3>
+    <p align="center"><b><i><font size="+1">(<a moz-do-not-send="true"
+              href="#Linux_">For WSL, see the entry for Linux above</a>.)</font></i></b><br>
+    </p>
     <table summary="" cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
@@ -3371,6 +3410,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
       Linux/Mac-like process which created them.<br>
     </p>
     <blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp;
+
 
 
 
@@ -3465,6 +3505,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
           standard Linux build instructions</a> could be a better place
         to start than these Windows build instructions.&nbsp; On the
         other hand, my guess about that has essentially zero value.</font><br>
@@ -3473,6 +3514,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
     </p>
     <ol>
       <li><a moz-do-not-send="true" href="https://www.msys2.org/">Install
+
 
 
 
@@ -3603,6 +3645,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
           to problem report #1260 for more info.</a>)&nbsp; So depending
         on the version of your <b>MSYS2</b> installation, if you find
         that builds fail when using the commands given above, you may
@@ -3628,6 +3671,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
             size="-1"> constant, then add</font><font size="-1"><font
               size="-1"> <tt>HAS_ERRNO_H</tt>=yes to the <tt>make</tt>
               command.&nbsp; For example, "</font><font size="-1"><tt>make
+
 
 
 
@@ -3702,6 +3746,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
     where <i>username</i> is your personal user name (and not the
     literal string "username").&nbsp; If VirtualAGC.installed has in
     fact gone elsewhere for some reason, find it and alter the
@@ -3711,6 +3756,7 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
         New/Shortcut from the pop-up menu.</li>
       <li>You'll be prompted to enter the location of the program you're
         creating a shortcut for.&nbsp; That will be C:\Users\<i>username</i>\VirtualAGC.installed\Resources\VirtualAGC.bat.
+
 
 
 
@@ -3823,9 +3869,11 @@ href="https://guide.macports.org/chunked/installing.macports.uninstalling.html">
 
 
 
+
       have to read Polkan's own README</a>, or the <a
       moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/Docker/DEPLOYMENT.md">DEPLOYMENT
+
 
 
 
@@ -3896,6 +3944,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Docker/start.sh">the
 
 
 
+
             start.sh script</a> to give the resolution you want.</li>
         <li>Rebuild the docker image, according to Polkan's
           instructions.&nbsp; This will be very quick; not like the
@@ -3952,6 +4001,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Docker/start.sh">the
     </p>
     WebAssembly builds of Virtual AGC don't provide the entire Virtual
     AGC suite of programs, but merely the AGC CPU emulation (<b>yaAGC</b>).&nbsp;
+
 
 
 
@@ -4091,6 +4141,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Docker/start.sh">the
 
 
 
+
         demo</a>), which runs the Colossus 249 AGC program (Apollo 9
       CM).&nbsp; Moonjs is based on <a href="http://asmjs.org/">a
         subset of JavaScript called asm.js</a>, which is optimized to
@@ -4109,6 +4160,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Docker/start.sh">the
     <p>But as far as the WebAssembly port is concerned, here's my
       interpretation of <a
         href="https://github.com/virtualagc/virtualagc#webassembly">Michael's
+
 
 
 
@@ -4224,6 +4276,7 @@ https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/wasi-sdk-1
     </ul>
     Now, you may wonder why there's a need to run an HTTP server at all,
     when one could simply browse to "file:///<i>PathToWebAGC</i>/demo/index.html"
+
 
 
 
@@ -4448,10 +4501,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-04-05<br>
+          2026-09-29<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

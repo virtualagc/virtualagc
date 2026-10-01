@@ -20,8 +20,9 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       <li><a moz-do-not-send="true" href="#PASS">PASS, BFS, and Other
           Shuttle Source Code</a></li>
       <li><a moz-do-not-send="true" href="#EBCDIC">Is this the Original
-          Source Code?</a><br>
-      </li>
+          Source Code?</a></li>
+      <li><a moz-do-not-send="true" href="#simulatorTour">A Brief Tour
+          of PASS in the Simulator</a></li>
       <li><a moz-do-not-send="true" href="#HALS">HAL/S</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Versioning">Software
@@ -29,6 +30,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       <li><a moz-do-not-send="true" href="#Display">Multi-Function
           Display Formatting and Versioning</a></li>
       <li><a moz-do-not-send="true" href="#Messaging">Computer-to-Peripheral
+
 
 
 
@@ -159,6 +161,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -190,6 +193,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         embedded version of the IBM System/360 mainframe, in that it
         shared <i>roughly</i> the same assembly language, known as <i>Basic
 
+
           Assembly Language (BAL)</i>.<br>
         <blockquote><font size="-1"><b>Aside:</b>&nbsp; To be perfectly
             <strike>pedantic</strike>accurate, the GPCs were originally
@@ -207,6 +211,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
 
 
 
@@ -304,12 +309,14 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
 
 
 
@@ -498,6 +505,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -510,6 +518,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
 
 
 
@@ -578,6 +587,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>Here's a rough summary of the Shuttle flight software that I do
       have on hand <a moz-do-not-send="true" href="HAL.html#wildThings">(see
+
         here</a> for more information):<br>
     </p>
     <ul>
@@ -622,6 +632,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS
         and BFS.&nbsp; More specifically, <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC
+
 
 
 
@@ -719,12 +730,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
           y</tt>" in the original HAL/S source code or documentation,
         we'd expect "<tt>x ~= y</tt>" instead! </li>
       <li>A compiler directive of the form "<tt>D VERSION <i>v</i></tt>"
         was sometimes used in original HAL/S source code or
         template-library files.&nbsp; Here, "<i><tt>v</tt></i>" is a
         numerical version code in the range of 1 through 255, <i>represented
+
 
 
 
@@ -2109,9 +2122,93 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
     </i>sequences 0xC2 0xAC and 0xC2 0xA2, respectively, and they don't
     appear at all among the 128 characters of ASCII, but do appear among
     the 256 characters of <i>some</i> versions of EBCDIC.<br>
+    <h1><a name="simulatorTour"></a>A Brief Tour of PASS in the
+      Simulator</h1>
+    <p>So, I mentioned above that some versions of PASS source code are
+      "available", along with development tools to compile/assemble it,
+      and that it's my long-term goal for you to be able to run it via a
+      simulation of the Shuttle's on-board computers and peripherals.
+      While the <i>ultimate</i> goal is to do that within a competent
+      spaceflight-simulation system like Orbiter, that's very tricky
+      currently due to the potential ITAR restrictions I mentioned.
+      However, here within Virtual AGC, we do have our own versions of
+      these simulation systems, and hopefully they'll suffice for at
+      least somewhat of a tour of the simulation in action. PASS is far
+      too big for me even to show you every menu screen, let along to
+      demonstrate in any detail how to use them. So the tour is what it
+      is: A birds-eye view, consisting mainly of a walkthrough of a lot
+      (but not all) of PASS's menu screens.<br>
+    </p>
+    <blockquote>
+      <p><b><font size="-1">Note:</font></b><font size="-1"> A lot of
+          credit for what you're about to see belongs to Don Schmidt,
+          who independently created the AP-101S linker that's crucial to
+          building the PASS software, along with the initial version of
+          the AP-101S and MEDS emulators, <i>and</i> working out almost
+          all of the IPL process, including how to create the MMU tapes.
+          Good job, Don!</font><br>
+      </p>
+    </blockquote>
+    <p>I've devoted <a moz-do-not-send="true" href="BuildingPASS.html">an
+        entire page</a> to how to perform an Initial Program Load (IPL)
+      of the PASS software from the "tape" in the Shuttle's Mass Memory
+      Units (MMU), as well as how to build that tape from the PASS
+      source code in the first place, and you can see videos of the IPL
+      process for either a single GPC or multiple GPCs there. There's no
+      need to retrace all of that here.&nbsp; So we'll simplify and just
+      start out in OPS 0 <i>after</i> the IPL, using a single GPC for
+      illustration.&nbsp; I used flight software version OI-34.07
+      (STS-134) in the video below:<br>
+    </p>
+    <p><video controls="controls" style="height:600px; width:auto;
+        display:block; margin:0 auto"> <source src="simulatorTour.mp4"
+          type="video/mp4"> </video></p>
+    <p>If you're one of the lucky to whom I've provided the necessary
+      passwords for one or the other of the MMU tapes we've prepared,
+      you can in fact try out the simulation for yourself, and maybe
+      make your own videos if you're so inclined.&nbsp; <br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <p>A word about "port ranges": As I've mentioned before, the devices
+      in the physical Orbiter's Data Processing System (DPS, which
+      include the computers and most of their peripheral devices) mostly
+      intercommunicated over a set of MIL-STD-1553 "databuses". Those
+      databuses had logical properties similar to the networking in
+      modern computer systems via what are known as UDP datagrams, so in
+      the simulation system the databuses are in fact modeled via
+      network UDP ports. If you have enough computing power, you can in
+      fact run multiple simulations at once, but each one of those
+      requires a non-overlapping block of UDP ports, and which block is
+      used is determined by the command-line parameters used when the
+      simulation is started.&nbsp; Here are the rules of thumb for
+      selecting port blocks you can use:<br>
+    </p>
+    <ul>
+      <li>If you specify a port base of (say) <i>N</i>, that means that
+        port numbers in the range <i>N</i>-400 through <i>N</i>+99 are
+        reserved for the simulator.</li>
+      <li>I'd suggest using only the port bases 1900, 2400, 2900, 3400,
+        ..., 31900.&nbsp; (Port numbers below 1024 are privileged, and
+        port numbers 32768 and above may be randomly assigned by the
+        operating system, depending on which particular operating system
+        you run.<br>
+      </li>
+      <li>The simulator's default port base is 6900 — i.e., port numbers
+        6500-6999.</li>
+      <li>There's no guarantee that the ports in the suggested ranges
+        are actually free on your computer, so it's up to you to choose
+        a range that is! For example, Virtual AGC's Apollo simulations
+        by default use port numbers in the vicinity of 19600-19800, so a
+        port base of 19900 would likely conflict with them. (Why you
+        would be simultaneously running an Apollo simulation and a
+        Shuttle simulation, I don't know.)<br>
+      </li>
+    </ul>
     <h1><a name="HALS"></a>HAL/S<br>
     </h1>
     <p>HAL/S is a high-level programming language in which the PASS and
@@ -2144,6 +2241,7 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
 
 
 
@@ -2225,12 +2323,14 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
           in HAL/S</a>" by Michael Ryer, which was intended as an
         introduction to programming in HAL/S and is organized as a
         tutorial.</li>
       <li>A great supplement to Ryer is the course material for "<a
           moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
 
 
 
@@ -2245,6 +2345,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
         of the language, and recommends proceeding afterward to the <a
           moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
 
 
 
@@ -2308,9 +2409,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
 
 
 
@@ -2381,6 +2484,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
 
 
 
@@ -2482,6 +2586,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -2494,6 +2599,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2540,6 +2646,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -2547,6 +2654,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2632,6 +2740,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -2655,7 +2764,9 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2702,10 +2813,12 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2785,6 +2898,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
     <br>
     <br>
     And '<tt>-</tt>' isn't the only datatype-related character that can
@@ -2809,6 +2923,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -2906,6 +3021,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -2917,6 +3033,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
 
 
 
@@ -3285,6 +3402,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -3297,6 +3415,7 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
           that said, there's actually quite a lot of information PASS
           source code about display-screen formats.&nbsp; <a
             moz-do-not-send="true" href="HAL.html#morePreprocessors">Refer
+
             to the HAL/S page's discussion of preprocessors</a>.</font><br>
       </p>
     </blockquote>
@@ -3384,11 +3503,13 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
 
 
 
@@ -3490,6 +3611,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -3532,6 +3654,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           available in two forms:&nbsp; A command-line version (<b>gps-batch</b>)
           and a full-screen version (<b>gps-gui</b>).&nbsp; <a
             moz-do-not-send="true" href="HALLINK101S.html#scenario1">Both
+
 
             are discussed on our linker page</a>.</li>
         <li>Another true AP-101S emulator, written by Dan Weaver.&nbsp;
