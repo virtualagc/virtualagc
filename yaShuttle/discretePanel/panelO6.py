@@ -422,6 +422,7 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
+PBI_LAMP_H = 6                # the DAP lamp strip's height
 C_PBI_DARK = "#8a8676"       # a DAP lamp unlit
 C_PBI_LIT = "#f4f0c8"        # a DAP lamp lit (to be tuned against photographs)
 # ACTIVITY lamps.  Unpowered is the pane grey, so a dark lamp is just its rim.
@@ -1291,8 +1292,9 @@ class PanelO6:
         cw = max(self.cv.winfo_width(), 40)
         ch = max(self.cv.winfo_height(), 40)
         ref_h = getattr(self, "_ref_h", REF_H)
-        self.s = min(cw / float(REF_W), ch / float(ref_h))
-        self.ox = (cw - REF_W * self.s) / 2.0
+        ref_w = getattr(self, "_ref_w", REF_W)
+        self.s = min(cw / float(ref_w), ch / float(ref_h))
+        self.ox = (cw - ref_w * self.s) / 2.0
         self.oy = (ch - ref_h * self.s) / 2.0
 
     def X(self, x):
@@ -1455,7 +1457,7 @@ class PanelO6:
         L["ipl_title"] = y
         y += th10 + pad
         L["ipl_btn"] = y
-        y += 50 + bezel + pad
+        y += self.pb + bezel + pad
         # About one pushbutton's height of air before the MODE talkbacks
         # (owner, 2026-09-15): they report what the GPC is doing, not the
         # state of the IPL button above them, and sat too close to read so.
@@ -1486,6 +1488,7 @@ class PanelO6:
         self.cv.delete("all")
         self._hits = []
         self._bp_cache = {}
+        self.pb = self._pb_size()
         L = self._layout()
         self.L = L
 
@@ -1572,7 +1575,7 @@ class PanelO6:
         act_y1 = my1
         act_y0 = act_y1 - (3 * pad + 4 * th10)
         rhc_y1 = act_y0 - PANE_GAP
-        rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + RHC_BTN)
+        rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + self.pb)
         self._draw_rhc(f6_x0, rhc_y0, f6_x1, rhc_y1)
         self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
         # The IDP column, right of C3/F6: C2 at the top, the O6 IDP LOAD
@@ -1587,15 +1590,24 @@ class PanelO6:
         self._panel_tag(idp_x0, load_y1 + PANE_GAP, "R11")
         # The ADI and SENSE switches: their own column, right of the IDP one.
         adi_x0 = idp_x1 + PANE_GAP
-        adi_y1 = self._draw_crew(adi_x0, my0, adi_x0 + ADI_COL_W)
+        adi_w = max(ADI_COL_W, self._adi_width())
+        adi_y1 = self._draw_crew(adi_x0, my0, adi_x0 + adi_w)
         # The ORBITAL DAP pushbuttons: C3 over A6U, a column of their own.
-        dap_x0 = adi_x0 + ADI_COL_W + PANE_GAP
+        dap_x0 = adi_x0 + adi_w + PANE_GAP
+        dap_w = max(DAP_COL_W, self._dap_width())
         y = my0
         for st in DAP_STATIONS:
-            y1 = self._draw_dap(dap_x0, y, dap_x0 + DAP_COL_W, st)
+            y1 = self._draw_dap(dap_x0, y, dap_x0 + dap_w, st)
             self._panel_tag(dap_x0, y, DAP_PANEL[st])
             y = y1 + PANE_GAP
         adi_y1 = max(adi_y1, y1)
+        # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
+        # their measured text needs, which under macOS's wider fonts is more
+        # than at Linux's (Mac-integrate, 2026-10-01).
+        need_w = dap_x0 + dap_w + MARGIN
+        if need_w > getattr(self, "_ref_w", REF_W) + 0.5:
+            self._ref_w = need_w
+            self.root.after_idle(self.redraw)
         if adi_y1 + 12 > getattr(self, "_ref_h", REF_H) + 0.5:
             self._ref_h = adi_y1 + 12
             self.root.after_idle(self.redraw)
@@ -1662,7 +1674,7 @@ class PanelO6:
         self._line(70, L["ipl_line"], 624, L["ipl_line"],
                    fill=C_INK_DIM, width=1)
         self._text(347, L["ipl_title"], "INITIAL PROGRAM LOAD", size=10)
-        btn = PB_SIZE
+        btn = self.pb
         y1 = L["ipl_btn"]
         for i, cx in enumerate(self.col):
             x1, x2 = cx - btn / 2, cx + btn / 2
@@ -1802,11 +1814,11 @@ class PanelO6:
         for i, (name, down) in enumerate(zip(RHCS, self.rhc)):
             bx = cx + (2 * i - 1) * quarter
             self._text(bx, y, name, size=10)
-            bx1, bx2 = bx - RHC_BTN / 2.0, bx + RHC_BTN / 2.0
+            bx1, bx2 = bx - self.pb / 2.0, bx + self.pb / 2.0
             # IPL's grey, not the vehicle's red: the ACTIVITY lamps are the
             # only colour on the panel, so they are what the eye goes to.
-            self._pushbutton(bx1, top, bx2, top + RHC_BTN, "", down=down)
-            self._hit("rhc", i, bx1, top, bx2, top + RHC_BTN)
+            self._pushbutton(bx1, top, bx2, top + self.pb, "", down=down)
+            self._hit("rhc", i, bx1, top, bx2, top + self.pb)
 
     def _draw_activity(self, x0, y0, x1, y1):
         """MM1 / MM2 ACTIVITY lamps, each captioned on its left."""
@@ -1973,6 +1985,49 @@ class PanelO6:
                       sw_top + gh)
         return y1
 
+    def _pb_size(self):
+        """THE pushbutton size, shared by every pushbutton on the panel
+        (owner, 2026-10-01): IPL's 50, or larger if this host's font needs it
+        to hold the widest DAP legend, or two legend lines over a lamp strip.
+        Fonts that are wider in design units (macOS's) grow every button
+        alike rather than shrinking the legends to illegibility."""
+        lines = set()
+        for leg, _w, _m, _c in DAP_PB.values():
+            lines.update(l for l in leg.split("\n") if l)
+        lines.update(("ATT", "REF"))
+        widest = max(self._tw(l) for l in lines)
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        face_w = widest + 8
+        face_h = 2 * ls + 4 + PBI_LAMP_H + 4
+        return max(PB_SIZE, face_w + 12, face_h + 12)
+
+    def _adi_geom(self):
+        """The ADI inset's horizontal plan: switch centres relative to its left
+        edge, and the width that holds them with margins."""
+        gap = 18
+        gw = 58
+        well = gw * 1.08 / 2.0
+        side = gw / 2.0 + 14 + self._tw("M")
+        wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
+        step = max(2 * well + gap, (wA + wE) / 2.0 + gap, (wE + wR) / 2.0 + gap)
+        left = 12 + max(side + self._tw("M") / 2.0, wA / 2.0)
+        right = 12 + max(side + self._tw("M") / 2.0, wR / 2.0)
+        return left, step, left + 2 * step + right
+
+    def _adi_width(self):
+        return self._adi_geom()[2]
+
+    def _dap_plan(self):
+        """The DAP grid's button gap and the pane width that holds it: the gap
+        is wide enough that no two column captions touch."""
+        caps = ("X", "Y", "Z", "ROLL", "PITCH", "YAW")
+        widest = max(self._tw(c) for c in caps)
+        g = max(16.0, widest - self.pb + 12)
+        return g, 6 * self.pb + 5 * g + 2 * 24
+
+    def _dap_width(self):
+        return self._dap_plan()[1]
+
     def _draw_crew(self, x0, y0, x1):
         """The three ADI switch groups -- F6 (CDR), F8 (PLT), A6U (aft) --
         one above the other, each with its ATT REF pushbutton, and A6U's
@@ -1986,26 +2041,27 @@ class PanelO6:
 
     def _pbi(self, x1, y1, x2, y2, legend, down, lit):
         """A lighted pushbutton indicator, the DAP's: the panel's pushbutton
-        with its legend in the upper part of the face and a lamp strip below,
-        which PASS lights."""
+        with its legend centred in the face above a lamp strip, which PASS
+        lights.  The button is sized (_pb_size) so the legend fits at
+        SETTING_SIZE, and the lamp has its own space below it -- it no longer
+        paints over a second legend line."""
         self._pushbutton(x1, y1, x2, y2, "", down=down)
         dx = 2 if down else 0
         cx = (x1 + x2) / 2.0 + dx
-        face = (x2 - x1) - 12
-        lines = [l for l in legend.split("\n") if l]
-        size = SETTING_SIZE
-        while size > 5 and lines and max(self._tw(l, size) for l in lines) > face - 4:
-            size -= 1
-        ls = self._tkfont(size).metrics("linespace") / max(self.s, 0.01)
-        top = y1 + 6 + dx + 3
-        for j, l in enumerate(lines):
-            self._text(cx, top + ls * (j + 0.5), l, size=size)
-        # The lamp: a strip across the lower face.
+        fy1, fy2 = y1 + 6 + dx, y2 - 6 + dx          # the face
+        ly2 = fy2 - 3
+        ly1 = ly2 - PBI_LAMP_H
         lx1, lx2 = x1 + 6 + dx + 5, x2 - 6 + dx - 5
-        ly2 = y2 - 6 + dx - 4
-        ly1 = ly2 - 7
         self._rect(lx1, ly1, lx2, ly2, fill=C_PBI_LIT if lit else C_PBI_DARK,
                    outline=C_PADDLE_LO, width=1)
+        lines = [l for l in legend.split("\n") if l]
+        if not lines:
+            return
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        mid = (fy1 + 2 + ly1 - 2) / 2.0
+        top = mid - ls * len(lines) / 2.0
+        for j, l in enumerate(lines):
+            self._text(cx, top + ls * (j + 0.5), l, size=SETTING_SIZE)
 
     def _draw_dap(self, x0, y0, x1, st):
         """One station's ORBITAL DAP pushbuttons, as panel C3 (forward) or A6U
@@ -2013,8 +2069,8 @@ class PanelO6:
         pad = 10
         th10 = self._th(10)
         ths = self._th(SETTING_SIZE)
-        b = PB_SIZE
-        g = 16                                   # between buttons
+        b = self.pb
+        g = self._dap_plan()[0]                  # between buttons
         n = 6
         grid_w = n * b + (n - 1) * g
         gx0 = (x0 + x1) / 2.0 - grid_w / 2.0
@@ -2087,15 +2143,12 @@ class PanelO6:
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
         gw, gh = 58, 136                         # O6 OUTPUT's 3-position guard
         sgw, sgh = 58, 124                       # O6 POWER's 2-position guard
-        b = PB_SIZE
+        b = self.pb
         well = gw * 1.08 / 2.0                   # the round well's radius
         # The stacked LVLH / MED legends sit as C2's SM does: 14 beyond the
         # guard's edge, plus their own half-width.
-        side = gw / 2.0 + 14 + self._tw("M")
-        wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
-        step = max(2 * well + gap, (wA + wE) / 2.0 + gap, (wE + wR) / 2.0 + gap)
-        span = 2 * step + 2 * max(side, wA / 2.0, wR / 2.0)
-        c0 = (x0 + x1) / 2.0 - span / 2.0 + max(side, wA / 2.0)
+        left, step, width = self._adi_geom()
+        c0 = x0 + left + ((x1 - x0) - width) / 2.0
         cols = [c0, c0 + step, c0 + 2 * step]
         y_title = y0 + pad + th10
         y_cap = y_title + th10 + pad + ths
