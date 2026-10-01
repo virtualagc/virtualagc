@@ -1288,6 +1288,7 @@ class PanelO6:
         self._wh = (event.width, event.height)
         self._fit_passes = 0
         self._fit_grow = 0
+        self._fit_trimmed = set()
         self.redraw()
 
     def _scale(self):
@@ -1650,12 +1651,22 @@ class PanelO6:
             new = need * self.FIT_GROW_MARGIN
         elif need < cur * 0.99:
             passes = getattr(self, "_fit_passes", 0)
-            # Once it has had to grow since the last resize, it does not
-            # shrink again: that is how it oscillated.
-            if passes >= self.FIT_PASSES or getattr(self, "_fit_grow", 0) > 0:
-                return                    # loose, which is fine
-            self._fit_passes = passes + 1
-            new = need
+            if getattr(self, "_fit_grow", 0) > 0:
+                # Once it has had to grow since the last resize it does not
+                # shrink freely -- that is how it oscillated -- but it may
+                # TRIM ONCE, to just over what it needs: growing in 2% steps
+                # through moving font sizes had left ~9% of the height empty
+                # at Xft.dpi 192 (Mac-integrate, 2026-10-01).  If the trim
+                # proves too tight, growing (always allowed) takes it back.
+                if getattr(self, "_fit_trimmed", set()) and attr in self._fit_trimmed:
+                    return
+                self._fit_trimmed = getattr(self, "_fit_trimmed", set()) | {attr}
+                new = need * 1.005
+            else:
+                if passes >= self.FIT_PASSES:
+                    return                # loose, which is fine
+                self._fit_passes = passes + 1
+                new = need
         else:
             return
         log("fit: %s %.0f -> %.0f at scale %.4f" % (attr[5:], cur, new, self.s))
