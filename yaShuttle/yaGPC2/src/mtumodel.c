@@ -1092,6 +1092,15 @@ static int mtu_wirelog(void) {
  * would deliver data with no sync in front of it. */
 static uint16_t mdm_word(const struct MtuModel *m, int b, int r);
 
+/* THE VEHICLE'S TIME FOR THE DEVICES BEHIND THE MDMs: the shared clock where
+ * there is one, and otherwise the calling computer's own -- with a single
+ * machine (no barrier, so no shared clock) its clock IS the vehicle's, as
+ * mtu_fill_time already assumes.  Negative only if there is neither. */
+static double mdm_time_us(const struct MtuModel *m) {
+    if (m->sharedUs >= 0.0) return m->sharedUs;
+    return (m->clockUs != NULL) ? *m->clockUs : -1.0;
+}
+
 /* THE FC MDM RETURN-WORD PATTERN CHECK (ledger #262).  Every cycle FCOS reads
  * a forward and an aft MDM's return word with a command whose low fourteen
  * bits are a test pattern -- 2AAA or 1555, alternated by FIOFCHNG (FIOUTPAT,
@@ -1649,7 +1658,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * words, and stored after it. */
             uint16_t devWords[FF_REPLY_MAX];
             bool dev = nsp > 0 && !bite && nsp <= FF_REPLY_MAX &&
-                       mdmdev_reply(in->busID, cmd, nsp, devWords, m->sharedUs);
+                       mdmdev_reply(in->busID, cmd, nsp, devWords, mdm_time_us(m));
             if (!dev && nsp > 0 && !bite && mdm_rtwd_pattern(cmd)) {
                 memset(devWords, 0, sizeof devWords);
                 devWords[0] = (uint16_t)((cmd & 0x3fffu) << 2);
@@ -1822,7 +1831,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                 m->outBuf[b][m->outHave[b]] = (uint16_t)(in->in.word & 0xffffu);
             if (++m->outHave[b] >= m->outWant[b]) {
                 int n = m->outHave[b] < 32 ? m->outHave[b] : 32;
-                mdmdev_output(in->busID, m->outCmd[b], m->outBuf[b], n, m->sharedUs);
+                mdmdev_output(in->busID, m->outCmd[b], m->outBuf[b], n, mdm_time_us(m));
                 m->outWant[b] = 0;
             }
         }

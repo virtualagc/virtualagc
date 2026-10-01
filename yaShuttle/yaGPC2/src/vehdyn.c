@@ -245,6 +245,29 @@ void vehdyn_reset(double t) {
     memset(sensedDv, 0, sizeof sensedDv);
     mass_properties();
     phys_init_circular(&st, 6378137.0, 400e3, 51.6 * VD_PI / 180.0, 0.0, 0.0, t);
+    /* YAGPC_VEHDYN_ATT=roll,pitch,yaw (degrees): the starting attitude, as a
+     * yaw-pitch-roll sequence from M50; and YAGPC_VEHDYN_RATE=p,q,r (deg/s)
+     * the starting body rates.  For tests: see that the IMU and the flight
+     * software follow a vehicle that is not at the identity, or is turning. */
+    {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_ATT");
+        double r = 0, p = 0, y = 0;
+        if (e != NULL && sscanf(e, "%lf,%lf,%lf", &r, &p, &y) >= 1) {
+            double cr = cos(r * VD_PI / 360), sr = sin(r * VD_PI / 360),
+                   cp = cos(p * VD_PI / 360), sp = sin(p * VD_PI / 360),
+                   cy = cos(y * VD_PI / 360), sy = sin(y * VD_PI / 360);
+            /* q = qz(yaw) * qy(pitch) * qx(roll) */
+            st.q[0] = cy * cp * cr + sy * sp * sr;
+            st.q[1] = cy * cp * sr - sy * sp * cr;
+            st.q[2] = cy * sp * cr + sy * cp * sr;
+            st.q[3] = sy * cp * cr - cy * sp * sr;
+        }
+        const char *w = yagpc_getenv("YAGPC_VEHDYN_RATE");
+        double a = 0, b = 0, c = 0;
+        if (w != NULL && sscanf(w, "%lf,%lf,%lf", &a, &b, &c) >= 1) {
+            st.w[0] = a * VD_PI / 180; st.w[1] = b * VD_PI / 180; st.w[2] = c * VD_PI / 180;
+        }
+    }
     haveTime = true;
     fireChanges = 0;
 }
