@@ -285,6 +285,19 @@ int main(void) {
             if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
         }
         check(ok, "a RESET clears the contact");
+        /* A contact on a word the device model also writes -- DSCRT4, the
+         * forward THC's +X, beside the model's chamber-pressure bits -- must
+         * survive it (it was wiped, the model's words being assigned after
+         * the contacts were ORed in). */
+        crew_send(1, 1, 6, 0, 0x0100u);     /* SET: THC +X on FF1 DSCRT4 */
+        ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(20, FF(0x082E8u), 36, h1);
+            ok = (h1[3] & 0x0100u) != 0;
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        check(ok, "a THC contact on DSCRT4 survives the device model's words");
+        crew_send(1, 2, 6, 0, 0x0100u);
     }
 
     mtumodel_free(m);

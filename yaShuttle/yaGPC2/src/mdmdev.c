@@ -309,6 +309,14 @@ static uint16_t fa_jets_b(int k) { return (uint16_t)(faOut[k][10][0] & fa_jet_ma
 #define CREW_OP_RESET 2
 #define CREW_OP_VALUE 4
 static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
+/* The RHCs' analog inputs: AID card 1 channels 0-7 and card 14 channels 0-6,
+ * in the HFE read at words 21-28 and 29-35 (CGBIH1.hal 555-594, 2950-2975).
+ * Signed halfwords, 6400 counts a volt; 0 is in detent.  Sent by
+ * handcontrollers.py as op 4 VALUE records of type 6 (AID). */
+#define CREW_TYPE_AID 6
+#define CREW_AID_NCH 8
+static int16_t crewAid[CREW_NUNIT + 1][CREW_NCARD][CREW_AID_NCH];
+static bool crewAidHeard;
 static int crewFd[CREW_NUNIT + 1] = { -1, -1, -1, -1, -1 };
 static bool crewOpen, crewHeard, crewTrace;
 static int crewPortBase;
@@ -359,9 +367,32 @@ void mdmdev_crew_open(int portBase) {
 static void crew_apply(int k, const uint8_t *buf, int len) {
     if (len < 8) return;
     unsigned op = ((unsigned)buf[0] << 8) | buf[1];
+    unsigned type = ((unsigned)buf[2] << 8) | buf[3];
     unsigned card = buf[4], ch = buf[5];
     int cnt = ((int)buf[6] << 8) | buf[7];
+    if (type == CREW_TYPE_AID) {
+        if (op != CREW_OP_VALUE) return;
+        if (cnt > (len - 8) / 2) cnt = (len - 8) / 2;
+        for (int i = 0; i < cnt; i++) {
+            unsigned c = ch + (unsigned)i;
+            if (card >= CREW_NCARD || c >= CREW_AID_NCH) break;
+            int16_t v = (int16_t)(((unsigned)buf[8 + 2 * i] << 8) | buf[9 + 2 * i]);
+            if (crewTrace && v != crewAid[k][card][c] &&
+                (v == 0 || crewAid[k][card][c] == 0))
+                fprintf(stderr, "mdmdev: FF%d AID card %u ch %u %s\n", k, card, c,
+                        v ? "out of zero" : "back to zero");
+            crewAid[k][card][c] = v;
+        }
+        crewAidHeard = true;
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
     if (op != CREW_OP_SET && op != CREW_OP_RESET && op != CREW_OP_VALUE) return;
+    /* Only INPUT cards are crew contacts: DIL (1) and DIH (2).  The output
+     * VALUE records this module sends itself (DOH, 4) come back on the same
+     * group, and were being filed here as contacts. */
+    if (type != 1 && type != 2) return;
     if (cnt > (len - 8) / 2) cnt = (len - 8) / 2;
     for (int i = 0; i < cnt; i++) {
         unsigned c = ch + (unsigned)i;
@@ -440,11 +471,17 @@ static void crew_dscrt(int k, uint16_t d[13]) {
     for (int i = 0; i < 13; i++) d[i] |= crewIn[k][CARD[i]][CHAN[i]];
 }
 
+/* The RHC analogs into an HFE read's words 21-35. */
+static void crew_aid_hfe(int k, uint16_t *b, int nb) {
+    if (k < 1 || k > CREW_NUNIT || !crewAidHeard) return;
+    for (int c = 0; c < 8 && 21 + c < nb; c++) b[21 + c] = (uint16_t)crewAid[k][1][c];
+    for (int c = 0; c < 7 && 29 + c < nb; c++) b[29 + c] = (uint16_t)crewAid[k][14][c];
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
     memset(d, 0, 13 * sizeof d[0]);
-    crew_dscrt(k, d);
     /* Manifold isolation valves, all OPEN: bit 8 open, bit 9 closed, fuel in
      * DSCRT1 and oxidizer in DSCRT9 (GR8RCS.hal:180-184); manifold 5 in FF3's
      * bits 12-13 (:200-203).  Neither-open-nor-closed is a power failure and
@@ -463,6 +500,10 @@ static void ff_discretes(int k, uint16_t d[13]) {
     /* The IMU discretes (DIL card 15 ch 0) come in here too, for the IMU
      * behind this MDM. */
     if (k <= 3) d[11] = IMU_DSCRT_ALL_GOOD;
+    /* The crew's contacts LAST: the words above are assigned, not ORed, so
+     * contacts added first were wiped -- DSCRT4's THC and DSCRT6's DAP
+     * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
+    crew_dscrt(k, d);
 }
 
 static void ff_hfe(int k, uint16_t *w, int n) {
@@ -473,6 +514,7 @@ static void ff_hfe(int k, uint16_t *w, int n) {
     /* Words 13-20: the four jets' oxidizer then fuel injector temperatures
      * (GRRRCS.hal:184-215). */
     for (int i = 13; i <= 20; i++) b[i] = INJ_WARM;
+    crew_aid_hfe(k, b, 36);
     for (int i = 0; i < n; i++) w[i] = (i < 36) ? b[i] : 0;
 }
 
@@ -619,6 +661,11 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         uint16_t d[13] = {0};
         crew_dscrt(u, d);
         for (int i = 0; i < n; i++) out[i] = (i >= at && i < at + 13) ? d[i - at] : 0;
+        if (at == 0) {
+            uint16_t b[36] = {0};
+            crew_aid_hfe(u, b, 36);
+            for (int i = 21; i < n && i < 36; i++) out[i] = b[i];
+        }
         return true;
     }
     if (vehdyn_enabled()) vehdyn_advance(sharedUs);   /* time passes for the vehicle */

@@ -1109,6 +1109,9 @@ which are reachable in about fifteen minutes with two computers
 - **#266** *(emulator)* An undecodable halfword halts the run ('invalid instruction', cpu.c decodeFailed / run.c) where the AP-101S takes an operation-exception program check (code 0000) to FCOS's handler. Upstream gpc did this in 818df88. Bears on ledger #1 (0xc6c6 stop at 0x648da) and #56.
   - evidence: tools/gpc-upstream.py review 2026-10-01; src/cpu.c:1600-1607, src/run.c:2865-2879.
   - instrs `operation exception` &middot; files `src/cpu.c,src/run.c` &middot; symptom `invalid instruction, run stops`
+- **#270** *(emulator)* At the OPS 0 -> OPS 201 transition, with YAGPC_MDM_DEVICES=1 YAGPC_VEHDYN=1 and the vehicle at rest, PASS fires F1D F2D L1U R1U for about 2.5 s (pitch rate 0 -> +3.2 deg/s), then F1U L2D R2D to brake it, and a smaller roll pair (L2D R2D, p -0.22 deg/s) after -- before any crew input. A real orbiter does not kick itself at an OPS transition, so suspect what the device model or vehdyn hands PASS at OPS 2 entry (initial fire-command / lamp words, jet feedback, IMU attitude/rates at initialisation).
+  - evidence: YAGPC_VEHDYN_TRACE runs mdm/thc3, mdm/thc4 (2026-10-01): vehdyn 't=218.542 s fire: F1D F2D L1U R1U ... t=221.022 q +3.204 deg/s'; same burst at ~224-228 s in thc2/thc3. Not investigated yet.
+  - env `YAGPC_MDM_DEVICES,YAGPC_VEHDYN,YAGPC_VEHDYN_TRACE` &middot; files `src/vehdyn.c,src/mdmdev.c` &middot; symptom `jets fire at OPS 2 entry, pitch rate 3.2 deg/s, vehicle kicked at rest` &middot; run `mdm/thc3,mdm/thc4`
 
 ## Confirmed
 

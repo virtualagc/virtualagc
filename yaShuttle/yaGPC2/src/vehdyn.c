@@ -318,7 +318,22 @@ void vehdyn_set_fire_words(const uint16_t ff[5], const uint16_t fa[5], double sh
         if (now != on[k]) changed = true;
         on[k] = now;
     }
-    if (changed) fireChanges++;
+    if (changed) {
+        fireChanges++;
+        /* YAGPC_VEHDYN_TRACE=1: every change of the fire command, with the
+         * jets then on -- which jets a THC pulse or an RHC deflection fired,
+         * and when. */
+        static int trace = -1;
+        if (trace < 0) trace = yagpc_getenv("YAGPC_VEHDYN_TRACE") != NULL;
+        if (trace) {
+            fprintf(stderr, "vehdyn: t=%.3f s fire:", st.t);
+            int n = 0;
+            for (int k = 0; k < VEHDYN_NJETS; k++)
+                if (on[k]) { fprintf(stderr, " %s", JETS[k].name); n++; }
+            fprintf(stderr, "%s   rates p q r %+.3f %+.3f %+.3f deg/s\n", n ? "" : " none",
+                    st.w[0] * 57.29578, st.w[1] * 57.29578, st.w[2] * 57.29578);
+        }
+    }
 }
 
 const PhysState *vehdyn_state(void) { return &st; }

@@ -1286,6 +1286,7 @@ class PanelO6:
         if event.width < 40 or event.height < 40:
             return
         self._wh = (event.width, event.height)
+        self._fit_passes = 0
         self.redraw()
 
     def _scale(self):
@@ -1505,10 +1506,8 @@ class PanelO6:
         # the design height grows to hold them and the picture is redrawn at
         # the scale that fits.  It only grows, so it cannot oscillate; at
         # Linux's sizes the panes end near 1100 and nothing changes.
-        need = my1 + 6 + 6
-        if need > getattr(self, "_ref_h", REF_H) + 0.5:
-            self._ref_h = need
-            self.root.after_idle(self.redraw)
+        # (The design height is fitted further down, once the ADI and DAP
+        # columns are laid out: O6 or those columns, whichever is taller.)
         ex1 = 790
         ey0 = L["out_backup"] - 10
         ey1 = L["mode_line"] + 4
@@ -1604,13 +1603,26 @@ class PanelO6:
         # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
         # their measured text needs, which under macOS's wider fonts is more
         # than at Linux's (Mac-integrate, 2026-10-01).
-        need_w = dap_x0 + dap_w + MARGIN
-        if need_w > getattr(self, "_ref_w", REF_W) + 0.5:
-            self._ref_w = need_w
-            self.root.after_idle(self.redraw)
-        if adi_y1 + 12 > getattr(self, "_ref_h", REF_H) + 0.5:
-            self._ref_h = adi_y1 + 12
-            self.root.after_idle(self.redraw)
+        self._fit("_ref_w", REF_W, dap_x0 + dap_w + MARGIN)
+        self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
+
+    FIT_PASSES = 4
+
+    def _fit(self, attr, default, need):
+        """Make the design width or height (attr) the laid-out content's,
+        either way.  Growing only, as this did, kept the widest of several
+        passes -- font rounding differs a little from one scale to the next
+        -- and left ~150 units of dark at the right under macOS (Mac-
+        integrate, 2026-10-01).  A change under 1% is ignored, and only a
+        few refits follow one resize, so it settles and cannot oscillate."""
+        cur = getattr(self, attr, default)
+        if abs(need - cur) <= 0.01 * cur:
+            return
+        if getattr(self, "_fit_passes", 0) >= self.FIT_PASSES:
+            return
+        self._fit_passes = getattr(self, "_fit_passes", 0) + 1
+        setattr(self, attr, need)
+        self.root.after_idle(self.redraw)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
