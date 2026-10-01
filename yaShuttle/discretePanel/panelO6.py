@@ -546,6 +546,9 @@ except ValueError:
 # for a window with a title bar, so the drawing is kept clear of them with
 # this much of the window's own colour below it.
 BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
+# NSTS_PANEL_FITTRACE=1: log every canvas Configure and every scale, to see
+# what a window manager does to the fit and the snug.
+FIT_TRACE = bool(os.environ.get("NSTS_PANEL_FITTRACE"))
 # THE LEGENDS' TYPEFACE.  Helvetica, except on macOS, where it is Menlo.
 # macOS Tk places text only on whole points -- two physical pixels on a
 # Retina screen -- and centres each letter on its width rounded up to a whole
@@ -1413,23 +1416,43 @@ class PanelO6:
         if event.width < 40 or event.height < 40:
             return
         self._wh = (event.width, event.height)
+        # The snug's new design size, on the FIRST Configure after it,
+        # whatever that reports: on macOS (BOTTOM_MARGIN and side frames
+        # around the canvas) waiting for the exact predicted size left the
+        # drawing cropped at the top with a band below (Mac-integrate,
+        # 2026-10-01).  A canvas a little off the prediction only moves the
+        # scale a little, and the fit corrects that.
         pending, self._snug_pending = getattr(self, "_snug_pending", None), None
-        if pending and pending[0] == self._wh:
+        if pending:
             for attr, v in pending[1].items():
                 setattr(self, attr, v)
+        if FIT_TRACE:
+            r = self.root
+            log("fittrace: Configure canvas %dx%d (winfo %dx%d, predicted %s), "
+                "root %dx%d%s" % (event.width, event.height, self.cv.winfo_width(),
+                                  self.cv.winfo_height(), pending[0] if pending else "-",
+                                  r.winfo_width(), r.winfo_height(),
+                                  ", snug applied" if pending else ""))
         self._fit_passes = 0
         self._fit_grow = 0
         self._fit_bracket = {}
         self.redraw()
 
     def _scale(self):
-        cw = max(self.cv.winfo_width(), 40)
-        ch = max(self.cv.winfo_height(), 40)
+        # The size the last Configure reported, which is the canvas's as
+        # drawn: winfo can still give the previous size while the window
+        # manager settles one.
+        cw, ch = self._wh if self._wh[0] >= 40 else (self.cv.winfo_width(),
+                                                     self.cv.winfo_height())
+        cw, ch = max(cw, 40), max(ch, 40)
         ref_h = getattr(self, "_ref_h", REF_H)
         ref_w = getattr(self, "_ref_w", REF_W)
         self.s = min(cw / float(ref_w), ch / float(ref_h))
         self.ox = (cw - ref_w * self.s) / 2.0
         self.oy = (ch - ref_h * self.s) / 2.0
+        if FIT_TRACE:
+            log("fittrace: scale canvas %dx%d design %.0fx%.0f s=%.4f ox=%.1f oy=%.1f"
+                % (cw, ch, ref_w, ref_h, self.s, self.ox, self.oy))
 
     def X(self, x):
         return self.ox + x * self.s
