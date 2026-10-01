@@ -647,6 +647,9 @@ class PanelO6:
         self._bp_cache = {}
         self._font_cache = {}
         self._wh = (0, 0)
+        self._fit_passes = 0
+        self._fit_grow = 0
+        self._fit_bracket = {}
         self._cursor_hits = False
 
         self.cv.bind("<ButtonPress-1>", self._on_press)
@@ -1288,7 +1291,7 @@ class PanelO6:
         self._wh = (event.width, event.height)
         self._fit_passes = 0
         self._fit_grow = 0
-        self._fit_trimmed = set()
+        self._fit_bracket = {}
         self.redraw()
 
     def _scale(self):
@@ -1622,53 +1625,54 @@ class PanelO6:
         self._fit("_ref_w", REF_W, dap_x0 + dap_w + MARGIN)
         self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
 
-    FIT_PASSES = 4          # shrinking refits after one resize
-    FIT_GROW_PASSES = 12    # growing refits: content must never be clipped
-    FIT_GROW_MARGIN = 1.02  # overshoot when growing, so it settles
+    FIT_PASSES = 16         # refits after one resize, growing or bisecting
+    FIT_GROW_PASSES = 12    # extra growing refits: content is never clipped
+    FIT_GROW_MARGIN = 1.02  # overshoot when growing past the largest tried
+    FIT_TOL = 0.01          # bisection stops when the bracket is this tight
 
     def _fit(self, attr, default, need):
         """Make the design width or height (attr) hold the laid-out content.
 
         CLIPPING IS NEVER THE ANSWER.  Text-driven widths do not scale
-        linearly with the drawing scale -- font sizes are whole points, and
-        at Xft.dpi 192 the step is coarse -- so the fit chases a moving
-        target.  With growing and shrinking alike limited to four passes it
-        could stop with the content 9% wider than the area it was fitted
-        to, and the ORBITAL DAP column cut off at the right (WSL-integration,
-        2026-10-01; reproduced here at Xft.dpi 192 in an 842x650 window).
-        So too small always grows, 2% past what is needed so that it
-        settles, with a generous cap; too large shrinks only within the
-        first few passes after a resize, and a loose fit is acceptable.
-        A change under 1% is ignored either way."""
+        linearly with the drawing scale -- font sizes are whole points, so
+        the need JUMPS as the scale crosses a rounding boundary.  Growing in
+        2% steps left 8-9% empty (Mac-integrate, 2026-10-01); trimming once
+        to the need raised the scale, a font rounded up, and it grew back
+        LARGER (reproduced here at 96 dpi, NSTS_TK_FONT_SCALE=2, --size 192:
+        w 2870 -> 2755 -> 2965).  So each dimension is BISECTED between the
+        largest size found too small (lo) and the smallest found to fit
+        (hi), and always finishes on one that fits.  Before a bracket
+        exists it grows 2% past the need, or trims to the need."""
         cur = getattr(self, attr, default)
+        br = self._fit_bracket.setdefault(attr, [None, None])   # [lo, hi]
         if need > cur * 1.005:
-            passes = getattr(self, "_fit_grow", 0)
-            if passes >= self.FIT_GROW_PASSES:
-                log("fit: %s wants %.0f, has %.0f, scale %.4f -- out of growing passes"
-                    % (attr[5:], need, cur, self.s))
-                return
-            self._fit_grow = passes + 1
-            new = need * self.FIT_GROW_MARGIN
-        elif need < cur * 0.99:
-            passes = getattr(self, "_fit_passes", 0)
-            if getattr(self, "_fit_grow", 0) > 0:
-                # Once it has had to grow since the last resize it does not
-                # shrink freely -- that is how it oscillated -- but it may
-                # TRIM ONCE, to just over what it needs: growing in 2% steps
-                # through moving font sizes had left ~9% of the height empty
-                # at Xft.dpi 192 (Mac-integrate, 2026-10-01).  If the trim
-                # proves too tight, growing (always allowed) takes it back.
-                if getattr(self, "_fit_trimmed", set()) and attr in self._fit_trimmed:
-                    return
-                self._fit_trimmed = getattr(self, "_fit_trimmed", set()) | {attr}
-                new = need * 1.005
+            br[0] = cur if br[0] is None else max(br[0], cur)
+        else:
+            br[1] = cur if br[1] is None else min(br[1], cur)
+        lo, hi = br
+        passes = self._fit_passes
+        if need > cur * 1.005:
+            if hi is not None and hi > lo and passes < self.FIT_PASSES:
+                new = hi if (hi - lo) <= hi * self.FIT_TOL else (lo + hi) / 2.0
             else:
-                if passes >= self.FIT_PASSES:
-                    return                # loose, which is fine
-                self._fit_passes = passes + 1
-                new = need
+                grows = self._fit_grow
+                if grows >= self.FIT_GROW_PASSES:
+                    log("fit: %s wants %.0f, has %.0f, scale %.4f -- out of growing passes"
+                        % (attr[5:], need, cur, self.s))
+                    return
+                self._fit_grow = grows + 1
+                new = (hi if hi is not None and hi > cur
+                       else max(need, cur) * self.FIT_GROW_MARGIN)
+        elif need < cur * 0.99 and passes < self.FIT_PASSES:
+            if lo is None:
+                new = need * 1.005
+            elif (cur - lo) <= cur * self.FIT_TOL:
+                return                    # bracket tight; cur fits
+            else:
+                new = (lo + cur) / 2.0
         else:
             return
+        self._fit_passes = passes + 1
         log("fit: %s %.0f -> %.0f at scale %.4f" % (attr[5:], cur, new, self.s))
         setattr(self, attr, new)
         self.root.after_idle(self.redraw)
