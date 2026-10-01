@@ -182,7 +182,8 @@ MAJ_FUNC_POS = ("GNC", "SM", "PL")              # up, mid, down
 # / Pilot's / Aft ADI Switches and ATT REF Pushbutton on Panel F6 / F8 /
 # A6U", and 2.7-7, "SENSE Switch on Panel A6U".
 ADI_STATIONS = ("L", "R", "A")                  # CDR F6, PLT F8, aft A6U
-ADI_STATION_NAME = {"L": "F6  CDR", "R": "F8  PLT", "A": "A6U  AFT"}
+ADI_STATION_NAME = {"L": "F6 CDR", "R": "F8 PLT", "A": "A6U AFT"}   # logs
+ADI_PANEL = {"L": "F6", "R": "F8", "A": "A6U"}
 ADI_UNIT = {"L": 1, "R": 2, "A": 3}
 ADI_ATT_POS = ("INRTL", "LVLH", "REF")          # up, mid, down
 ADI_LEVEL_POS = ("HIGH", "MED", "LOW")          # up, mid, down (ERROR, RATE)
@@ -359,12 +360,14 @@ C2_W = 720             # the IDP column: panel C2 over the O6 IDP LOAD inset
 R11_W = 5 + 230 + 5 + 4  # the R11 inset: C2's margins round a 230-wide set
 # ENGAGE pushbuttons.  Smaller than IPL's 50: at 50 the pane leaves only
 # ~5 px under the IPL SOURCE tab at some --size values; at 40, 15 or more.
-RHC_BTN = 40
+PB_SIZE = 50           # EVERY pushbutton: IPL's size (owner, 2026-10-01)
+RHC_BTN = PB_SIZE      # was 40; one pushbutton size throughout (owner)
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
-ADI_COL_W = 300        # the ADI column, right of the IDP column (260 crowded under
-                       # macOS's wider fonts by about a character)
+ADI_COL_W = 340        # the ADI column, right of the IDP column: three full-size
+                       # 3-position switches abreast, with their stacked legends
+PANEL_TAG_COLOR = "#d0661a"   # the panel numbers in the panes' corners
 REF_W = (O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + PANE_GAP + ADI_COL_W
-         + MARGIN)     # 2000; 1684 before the ADI column
+         + MARGIN)     # 2040; 1684 before the ADI column
 REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
@@ -1174,6 +1177,13 @@ class PanelO6:
         return self.cv.create_rectangle(
             self.X(x1), self.Y(y1), self.X(x2), self.Y(y2), **kw)
 
+    def _panel_tag(self, x0, y0, text):
+        """The crew panel a pane comes from -- O6, C3, F6 ... -- in its upper
+        left corner: small and orange, so it is never read as one of the
+        panel's own captions (owner, 2026-10-01)."""
+        self._text(x0 + 5, y0 + 3, text, size=SETTING_SIZE, fill=PANEL_TAG_COLOR,
+                   anchor="nw")
+
     def _rect_panel(self, x0, y0, x1, y1):
         """A rectangular crew-panel body, same surface as O6."""
         ow = max(2, int(2 * self.s))
@@ -1368,6 +1378,7 @@ class PanelO6:
         self.side_l_out = self.col[0] - 29 - 14
         self.side_r_out = self.col[-1] + 29 + 14
 
+        self._panel_tag(mx0, my0, "O6")
         self._draw_title()
         self._draw_power()
         self._draw_output_talkbacks()
@@ -1393,14 +1404,16 @@ class PanelO6:
         f6_y0 = c3_y1 + PANE_GAP
         f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
         self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
+        self._panel_tag(c3_x0, c3_y0, "C3")
         self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
+        self._panel_tag(f6_x0, f6_y0, "F6")
         # Below the IPL SOURCE tab, in the same column: ACTIVITY with its
         # bottom on O6's bottom edge, and RHC BFC ENGAGE directly above it.
         # Heights follow _draw_activity / _draw_rhc.
         act_y1 = my1
         act_y0 = act_y1 - (3 * pad + 4 * th10)
         rhc_y1 = act_y0 - PANE_GAP
-        rhc_y0 = rhc_y1 - (5 * pad + 6 * th10 + RHC_BTN)
+        rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + RHC_BTN)
         self._draw_rhc(f6_x0, rhc_y0, f6_x1, rhc_y1)
         self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
         # The IDP column, right of C3/F6: C2 at the top, the O6 IDP LOAD
@@ -1408,11 +1421,17 @@ class PanelO6:
         idp_x0 = c3_x1 + PANE_GAP
         idp_x1 = idp_x0 + C2_W
         c2_y1 = self._draw_c2(idp_x0, my0, idp_x1)
+        self._panel_tag(idp_x0, my0, "C2")
         load_y1 = self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
+        self._panel_tag(idp_x0, c2_y1 + PANE_GAP, "O6")
         self._draw_r11(idp_x0, load_y1 + PANE_GAP, idp_x1)
+        self._panel_tag(idp_x0, load_y1 + PANE_GAP, "R11")
         # The ADI and SENSE switches: their own column, right of the IDP one.
         adi_x0 = idp_x1 + PANE_GAP
-        self._draw_crew(adi_x0, my0, adi_x0 + ADI_COL_W)
+        adi_y1 = self._draw_crew(adi_x0, my0, adi_x0 + ADI_COL_W)
+        if adi_y1 + 12 > getattr(self, "_ref_h", REF_H) + 0.5:
+            self._ref_h = adi_y1 + 12
+            self.root.after_idle(self.redraw)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -1476,7 +1495,7 @@ class PanelO6:
         self._line(70, L["ipl_line"], 624, L["ipl_line"],
                    fill=C_INK_DIM, width=1)
         self._text(347, L["ipl_title"], "INITIAL PROGRAM LOAD", size=10)
-        btn = 50
+        btn = PB_SIZE
         y1 = L["ipl_btn"]
         for i, cx in enumerate(self.col):
             x1, x2 = cx - btn / 2, cx + btn / 2
@@ -1606,11 +1625,10 @@ class PanelO6:
         pad = 10
         th10 = self._th(10)
         cx = (x0 + x1) / 2.0
-        # Two lines, like BFC / DISENGAGE: one is wider than the pane.
+        # One line: it fits, and the line saved is what made room for
+        # pushbuttons of IPL's size.
         y = y0 + pad + th10
-        self._text(cx, y, "RHC", size=10)
-        y += th10 + pad + th10
-        self._text(cx, y, "BFC ENGAGE", size=10)
+        self._text(cx, y, "RHC BFC ENGAGE", size=10)
         y += th10 + pad + th10
         quarter = (x1 - x0) / 4.0
         top = y + th10 + pad
@@ -1791,10 +1809,13 @@ class PanelO6:
     def _draw_crew(self, x0, y0, x1):
         """The three ADI switch groups -- F6 (CDR), F8 (PLT), A6U (aft) --
         one above the other, each with its ATT REF pushbutton, and A6U's
-        SENSE switch."""
+        SENSE switch.  Returns the bottom of the last."""
         y = y0
         for i, st in enumerate(ADI_STATIONS):
-            y = self._draw_adi(x0, y, x1, i, st) + PANE_GAP
+            y1 = self._draw_adi(x0, y, x1, i, st)
+            self._panel_tag(x0, y, ADI_PANEL[st])
+            y = y1 + PANE_GAP
+        return y1
 
     def _tw(self, text, size=SETTING_SIZE):
         """A caption's width in design units, as this host's font draws it."""
@@ -1802,51 +1823,51 @@ class PanelO6:
 
     def _draw_adi(self, x0, y0, x1, i, st):
         """One station's ADI ATTITUDE / ERROR / RATE switches and ATT REF
-        pushbutton, laid out as SCOM printed page 2.7-5 draws them; on A6U,
-        SENSE beside ATT REF (page 2.7-7).  Returns the inset's bottom.
+        pushbutton, as SCOM printed page 2.7-5 arranges them; on A6U, SENSE
+        beside ATT REF, captioned SENSE and -Z above it and -X below (page
+        2.7-7).  Returns the inset's bottom.
 
-        EVERY HORIZONTAL POSITION COMES FROM MEASURED TEXT.  Fixed offsets
-        fitted to Linux's fonts ran ERROR into RATE, overprinted ATT REF and
-        pushed MED onto the edge under macOS's wider ones (Mac-integrate,
-        2026-10-01); this inset is narrow enough that a few units decide it."""
+        THE CONTROLS ARE THE PANEL'S STANDARD SIZES -- the 58 x 136
+        three-position and 58 x 124 two-position guards and the IPL
+        pushbutton -- and the pane is made to hold them: the SCOM drawings
+        are not to scale, so copying each one's proportions gives a panel
+        whose like controls differ (owner, 2026-10-01).  Every horizontal
+        position comes from text measured in this host's font."""
         pad = 10
-        gap = 6                                  # least air between captions
+        gap = 18                                 # least air between captions and rings
         th10 = self._th(10)
         ths = self._th(SETTING_SIZE)
-        gw, gh = 40, 104
-        sgw, sgh = 40, 64                        # SENSE, two positions
-        well = gw * 1.08 / 2.0                   # the round well's radius
-        clear = 5                                # air between a ring and a legend
-        side = self._tw("M") + 2 * clear         # a stacked LVLH / MED column
-        wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
-        # ATTITUDE from the left edge, RATE from the right, each far enough in
-        # for its caption and for the stacked labels beside its well; ERROR as
-        # near RATE as its caption allows, which is where the panels put it.
-        c0 = x0 + 8 + max(wA / 2.0, well + side)
-        c2 = x1 - 8 - max(wR / 2.0, well + side)
-        # ERROR is as near RATE as BOTH its caption and the two rings allow.
-        c1 = c2 - max((wE + wR) / 2.0 + gap, 2 * well + 8)
-        c1 = max(c1, c0 + (wA + wE) / 2.0 + gap)
-        cols = [c0, c1, c2]
-        # A line of SETTING_SIZE text, baseline to baseline, in this font.
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
-        # ATT REF: big enough for its two-line legend in this font.
-        b = max(40.0, self._tw("ATT") + 16, 2 * ls + 16)
+        gw, gh = 58, 136                         # O6 OUTPUT's 3-position guard
+        sgw, sgh = 58, 124                       # O6 POWER's 2-position guard
+        b = PB_SIZE
+        well = gw * 1.08 / 2.0                   # the round well's radius
+        # The stacked LVLH / MED legends sit as C2's SM does: 14 beyond the
+        # guard's edge, plus their own half-width.
+        side = gw / 2.0 + 14 + self._tw("M")
+        wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
+        step = max(2 * well + gap, (wA + wE) / 2.0 + gap, (wE + wR) / 2.0 + gap)
+        span = 2 * step + 2 * max(side, wA / 2.0, wR / 2.0)
+        c0 = (x0 + x1) / 2.0 - span / 2.0 + max(side, wA / 2.0)
+        cols = [c0, c0 + step, c0 + 2 * step]
         y_title = y0 + pad + th10
         y_cap = y_title + th10 + pad + ths
-        y_top = y_cap + ths + pad / 2.0 + ths
-        top = y_top + ths + pad / 2.0
-        y_bot = top + gh + pad / 2.0 + ths
-        row = y_bot + ths + pad
-        bottom = row + b
+        y_top = y_cap + ths + pad + ths
+        top = y_top + ths + pad
+        y_bot = top + gh + pad + ths
+        row = y_bot + ths + 2 * pad
         if st == "A":
-            # SENSE stands in its own column, captioned above and below as on
-            # A6U: SENSE, then -Z, the switch, then -X.
-            bottom = max(bottom, row + 2 * ls + 4 + sgh + 4 + ls)
+            # SENSE, -Z, the switch, -X: its column sets the row's height.
+            s_cap = row + ls * 0.5
+            s_z = s_cap + ls
+            s_top = s_z + ls * 0.5 + pad / 2.0
+            s_x = s_top + sgh + pad / 2.0 + ls * 0.5
+            bottom = max(row + b, s_x + ls * 0.5)
+        else:
+            bottom = row + b
         y1 = bottom + pad
         self._rect_panel(x0, y0, x1, y1)
-        self._text((x0 + x1) / 2.0, y_title,
-                   "%s    ADI" % ADI_STATION_NAME[st], size=10)
+        self._text((x0 + x1) / 2.0, y_title, "ADI", size=10)
         for gx, cap in zip(cols, ("ATTITUDE", "ERROR", "RATE")):
             self._text(gx, y_cap, cap, size=SETTING_SIZE)
         self._text(cols[0], y_top, "INRTL", size=SETTING_SIZE)
@@ -1856,29 +1877,35 @@ class PanelO6:
             pos = positions.index(self.adi["%s_%s" % (st, f)])
             self._guarded_toggle(gx - gw / 2, top, gx + gw / 2, top + gh, pos, npos=3)
             self._hit("adi", (st, f), gx - gw / 2, top, gx + gw / 2, top + gh)
-        self._vtext(cols[0] - well - side / 2.0, top + gh / 2.0, "LVLH")
-        self._vtext(cols[2] + well + side / 2.0, top + gh / 2.0, "MED")
-        # (side / 2 from the ring is clear + half a letter: the legend's own
-        # width is measured, so it clears the ring by `clear` in any font.)
+        self._vtext(cols[0] - gw / 2 - 14 - self._tw("M") / 2.0, top + gh / 2.0, "LVLH")
+        self._vtext(cols[2] + gw / 2 + 14 + self._tw("M") / 2.0, top + gh / 2.0, "MED")
         self._text(cols[0], y_bot, "REF", size=SETTING_SIZE)
         self._text((cols[1] + cols[2]) / 2.0, y_bot, "LOW", size=SETTING_SIZE)
-        # ATT REF under ATTITUDE, as on F6, F8 and A6U; its legend is two
-        # lines a line apart about the face's centre.
+        # ATT REF under ATTITUDE.  Its legend is the largest size whose two
+        # lines fit the face (the face is the button less its 6-unit bezel).
         bx = cols[0]
         self._pushbutton(bx - b / 2, row, bx + b / 2, row + b, "", down=self.attref[i])
-        mid = row + b / 2.0
-        self._text(bx, mid - ls * 0.5, "ATT", size=SETTING_SIZE)
-        self._text(bx, mid + ls * 0.5, "REF", size=SETTING_SIZE)
+        face = b - 12 - 4
+        lsize = 10
+        while lsize > 6:
+            lls = self._tkfont(lsize).metrics("linespace") / max(self.s, 0.01)
+            if 2 * lls <= face and self._tw("ATT", lsize) <= face:
+                break
+            lsize -= 1
+        lls = self._tkfont(lsize).metrics("linespace") / max(self.s, 0.01)
+        dx = 2 if self.attref[i] else 0
+        mid = row + b / 2.0 + dx
+        self._text(bx + dx, mid - lls * 0.5, "ATT", size=lsize)
+        self._text(bx + dx, mid + lls * 0.5, "REF", size=lsize)
         self._hit("attref", i, bx - b / 2, row, bx + b / 2, row + b)
         if st == "A":
             sx = (cols[1] + cols[2]) / 2.0
-            self._text(sx, row + ls * 0.5, "SENSE", size=SETTING_SIZE)
-            self._text(sx, row + ls * 1.5, "-Z", size=SETTING_SIZE)
-            stop = row + 2 * ls + 4
+            self._text(sx, s_cap, "SENSE", size=SETTING_SIZE)
+            self._text(sx, s_z, "-Z", size=SETTING_SIZE)
             pos = SENSE_POS.index(self.sense)
-            self._guarded_toggle(sx - sgw / 2, stop, sx + sgw / 2, stop + sgh, pos, npos=2)
-            self._hit("sense", None, sx - sgw / 2, stop, sx + sgw / 2, stop + sgh)
-            self._text(sx, stop + sgh + 4 + ls * 0.5, "-X", size=SETTING_SIZE)
+            self._guarded_toggle(sx - sgw / 2, s_top, sx + sgw / 2, s_top + sgh, pos, npos=2)
+            self._hit("sense", None, sx - sgw / 2, s_top, sx + sgw / 2, s_top + sgh)
+            self._text(sx, s_x, "-X", size=SETTING_SIZE)
         return y1
 
     def _lamp(self, gx, y, caption, state, size=10):
