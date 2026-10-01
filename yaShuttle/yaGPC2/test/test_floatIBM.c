@@ -8,7 +8,16 @@
  * Fixtures regenerated via:
  *   node test/gen_floatIBM_fixtures.cjs > fixtures.json
  *   python3 test/gen_floatIBM_fixtures_header.py fixtures.json > test/floatIBM_fixtures.h
- */
+  *
+ * CVFX OVERFLOW IS PATCHED, not regenerated: 45 CVFX_FIXTURES entries whose
+ * exc is 10 (convert overflow) carry the truncated result AP-101S sec.8.13
+ * specifies -- "placed into general register R1 (truncated if necessary)",
+ * the low 32 bits of the two's complement Q16.16 value -- where gpc records
+ * 0 (ledger #267).  Each patched value was computed by an independent
+ * exact-integer reference of that rule, which also reproduces all 418
+ * non-overflow entries, and equals what fibm_cvfx now returns.  A blind
+ * regeneration from gpc reintroduces 45 failures.
+*/
 #include <stdio.h>
 #include <string.h>
 
@@ -116,6 +125,19 @@ int main(void) {
         if (r.result != fx->result || r.exc != fx->exc) {
             printf("FAIL cvfx(%08x%08x): result=%d(exp %d) exc=%d(exp %d)\n",
                    fx->hi, fx->lo, r.result, fx->result, r.exc, fx->exc);
+            failures++;
+        }
+    }
+
+    /* 3**11 = 177147.0: Q16.16 0x2B3FB0000 truncates to 0xB3FB0000, integer
+     * part 177147 & 0xFFFF, with convert overflow (AP-101S sec.8.13). */
+    {
+        FloatIBM x = fibm_from32(0x452B3FB0u);
+        FloatIBMCvfxResult r = fibm_cvfx(&x);
+        total++;
+        if ((uint32_t)r.result != 0xB3FB0000u || r.exc != FP_EXC_CONVERT_OVERFLOW) {
+            printf("FAIL cvfx(452b3fb0): result=%08x exc=%d, expected b3fb0000 with convert overflow\n",
+                   (uint32_t)r.result, r.exc);
             failures++;
         }
     }

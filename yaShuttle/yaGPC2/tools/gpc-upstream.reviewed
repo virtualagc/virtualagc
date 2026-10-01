@@ -3,7 +3,7 @@
 f4cf76de3 n/a #RDL operand field letter c->a, relocation only; yaGPC2 reads the 18-bit fullword count per BCE PoO (src/iop_bce_instr.c:480-510), ahead of upstream
 4d68a612f n/a timing from OBJECTGE.xpl (src/timing.c), not IBM tables; counters/PSW2 i-field already (src/cpu.c:1871-1944, src/regmem.c:109); own rtpacer.c
 af9c4b901 already HalUCP ON ERROR cells, READALL, SKIP(0), BIT input all in src/halucp.c
-a7c2b7ea4 open CVFX on convert overflow: upstream leaves R1 and CC unchanged (AP-101 C/M PoO IBM-6246156B 8-12 'The value of R1 is unchanged'); yaGPC2 stores the truncated result (src/cpu_instr.c:1141-1165, issues-db #9/#81). AP-101S manual silent. @LAR, BCT, #MOUT@/#MIN@ already
+a7c2b7ea4 n/a CVFX overflow leaving R1 unchanged is the AP-101 C/M rule, not AP-101S (sec.8.13: stored truncated) -- deliberately not ported, ledger #267; @LAR, BCT, #MOUT@/#MIN@ already
 f42f424f6 already LDM/STDM don't-care bits, from our PR #31; src/cpu_instr.c:2306-2318
 b6a74b054 already MVS = ledger #264 (d88d97631); bare program halt never needed IOINIT in src/halucp.c; flight images protected by --no-halucp-svc
 71f80716a already original MEDS port; MEDS2.py descends from it

@@ -643,49 +643,37 @@ FloatIBMCvfxResult fibm_cvfx(const FloatIBM *x) {
     uint64_t mant = fibm_gfracbits(&work);
 
     int shift = 4 * chr - 296;
+
+    /* OVERFLOW STILL STORES, AND WHAT IT STORES IS THE TRUNCATION.  AP-101S
+     * sec.8.13: the operand is unnormalized to characteristic 44, "then
+     * converted to a twos complement representation and placed into general
+     * register R1 (truncated if necessary)" -- the low-order 32 bits of the
+     * two's complement value, whatever was lost above them.  This used to
+     * store 0 whenever the value needed more than 32 bits, and to clear the
+     * sign bit when it needed exactly 32: neither is a truncation.  For 3**11
+     * = 177147.0 (Q16.16 0x2B3FB0000) the register now gets 0xB3FB0000 --
+     * integer part 177147 & 0xFFFF -- where it got 0 (ledger #267).  The
+     * overflow test is unchanged; only the stored value is.  (The AP-101 C/M
+     * PoO's "the value of R1 is unchanged" is a predecessor's rule, which
+     * the AP-101S text leaves out.) */
+    bool overflow;
+    uint32_t low;
     if (shift > 8) {
-        res.result = 0;
-        res.exc = FP_EXC_CONVERT_OVERFLOW;
-        return res;
-    }
-
-    uint64_t mag64;
-    if (shift >= 0) {
-        mag64 = mant << shift;
+        overflow = true;
+        low = (shift >= 64) ? 0 : (uint32_t)(mant << shift);
     } else {
-        int rs = -shift;
-        mag64 = (rs >= 64) ? 0 : (mant >> rs);
-    }
-    uint32_t magHi = (uint32_t)(mag64 >> 32);
-    uint32_t magLo = (uint32_t)(mag64 & 0xFFFFFFFFu);
-
-    if (magHi != 0) {
-        res.result = 0;
-        res.exc = FP_EXC_CONVERT_OVERFLOW;
-        return res;
-    }
-    if (sign) {
-        if (magLo > 0x80000000u) {
-            res.result = (int32_t)(uint32_t)(-(magLo & 0x7FFFFFFFu));
-            res.exc = FP_EXC_CONVERT_OVERFLOW;
-            return res;
+        uint64_t mag64;
+        if (shift >= 0) {
+            mag64 = mant << shift;
+        } else {
+            int rs = -shift;
+            mag64 = (rs >= 64) ? 0 : (mant >> rs);
         }
-        if (magLo == 0) {
-            res.result = 0;
-            res.exc = FP_EXC_OK;
-            return res;
-        }
-        res.result = (int32_t)(uint32_t)(-magLo);
-        res.exc = FP_EXC_OK;
-        return res;
+        low = (uint32_t)(mag64 & 0xFFFFFFFFu);
+        overflow = (mag64 >> 32) != 0 || (sign ? low > 0x80000000u : low > 0x7FFFFFFFu);
     }
-    if (magLo > 0x7FFFFFFFu) {
-        res.result = (int32_t)(uint32_t)(magLo & 0x7FFFFFFFu);
-        res.exc = FP_EXC_CONVERT_OVERFLOW;
-        return res;
-    }
-    res.result = (int32_t)magLo;
-    res.exc = FP_EXC_OK;
+    res.result = (int32_t)(sign ? (uint32_t)(0u - low) : low);
+    res.exc = overflow ? FP_EXC_CONVERT_OVERFLOW : FP_EXC_OK;
     return res;
 }
 
