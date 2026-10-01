@@ -630,7 +630,10 @@ class VirtualControls:
             s.blit(img, (x, y))
             return img.get_height()
 
-        text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
+        # Unfocused, the warning takes the headings' band: anywhere lower it
+        # ran over the dial and the THC column (Mac-integrate, 2026-10-01).
+        if self.focused:
+            text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
         # UPPER CASE ONLY: lower case at these sizes was too small to read
         # (Ron, via Mac-integrate, 2026-10-01).
         hint = ("DRAG KNOB: PITCH/ROLL   DRAG RING: YAW" if self.style == "split" else
@@ -645,7 +648,8 @@ class VirtualControls:
         # and the aft station; the PLT has none.
         x0, y0 = int(330 * k), int(40 * k)
         if self.thc_name:
-            text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
+            if self.focused:
+                text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
         for i, (name, d) in enumerate(THC_KEYS if self.thc_name else ()):
             on = bool(bits & THC_BITS[d])
             r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
@@ -658,16 +662,17 @@ class VirtualControls:
             # corners do not cut the frame (Ron, via Mac-integrate).
             pg.draw.rect(full, (200, 40, 40),
                          pg.Rect(0, 0, self.W, self.H - self.margin), max(3, int(4 * k)))
-            # The longest line that fits the window.
+            # The longest line that fits the design's width, in the band
+            # above the dial where the headings are when focused.
             msg = None
             for f, t in ((self.font, "NO KEYBOARD FOCUS -- CLICK HERE; KEYS INACTIVE"),
+                         (self.font, "NO KEYBOARD FOCUS -- CLICK HERE"),
                          (self.small, "NO KEYBOARD FOCUS -- CLICK HERE"),
                          (self.small, "NO FOCUS -- CLICK")):
                 msg = f.render(t, True, (255, 90, 90))
-                if msg.get_width() <= self.W - int(12 * k):
+                if msg.get_width() <= cw - int(16 * k):
                     break
-            full.blit(msg, ((self.W - msg.get_width()) // 2,
-                            self.oy + int(6 * k) + self.font.get_height()))
+            s.blit(msg, ((cw - msg.get_width()) // 2, int(6 * k)))
         if self.win is not None:
             self.win.flip()
         else:
