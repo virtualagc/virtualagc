@@ -18,6 +18,7 @@
 #include "fcbustable.h"
 
 #include "envcache.h"
+#include "mdmdev.h"
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
  * The BUS address comes from the BCE program that reads it, FIOPRMPG:
@@ -755,6 +756,20 @@ struct MtuModel {
      * and a listener disagree about the clock. */
     uint16_t bite[MTU_NBUS][MTU_READERS][FF_BITE_WORDS];
     int biteLeft[MTU_NBUS][MTU_READERS];
+    /* WHAT A DEVICE BEHIND THE MDM PUT ON THE WIRE FOR THIS TRANSFER, when
+     * mdmdev.c knows it (YAGPC_MDM_DEVICES); otherwise the `mdm` words are
+     * zero, as they always were.  One copy per bus: every reader of one
+     * transfer is handed the same words, and a reader's place in them is
+     * mdmTotal - mdm[b][r]. */
+    uint16_t mdmData[MTU_NBUS][FF_REPLY_MAX];
+    int mdmTotal[MTU_NBUS];
+    bool mdmHasData[MTU_NBUS];
+    /* AND WHAT THE COMPUTERS WRITE TO THOSE DEVICES: a write command's data
+     * words, collected from the computer that issued it and handed to
+     * mdmdev.c once the whole message has gone. */
+    uint32_t outCmd[MTU_NBUS];
+    int outWant[MTU_NBUS], outHave[MTU_NBUS], outIssuer[MTU_NBUS];
+    uint16_t outBuf[MTU_NBUS][32];
     bool echoPending[MTU_NBUS][MTU_READERS];
     uint32_t echoCmd[MTU_NBUS];
     /* WHEN THIS TRANSACTION WENT ON THE WIRE, on the VEHICLE'S shared clock --
@@ -1074,6 +1089,8 @@ static int mtu_wirelog(void) {
  * so the next command does not cut it off.  Only when it is mid-transfer: a
  * reader still holding its command sync never started, and keeping its words
  * would deliver data with no sync in front of it. */
+static uint16_t mdm_word(const struct MtuModel *m, int b, int r);
+
 static void mtu_carry_take(struct MtuModel *m, int b, int r) {
     /* LISTENERS ONLY.  A commander that has just issued a command has
      * finished the receive before it -- a real BCE does not issue one while
@@ -1129,7 +1146,7 @@ static void mtu_carry_take(struct MtuModel *m, int b, int r) {
         m->biteLeft[b][r]--;
     }
     while (m->mdm[b][r] > 0 && n < MTU_CARRY_MAX) {
-        m->carry[b][r][n++] = 0;
+        m->carry[b][r][n++] = mdm_word(m, b, r);
         m->mdm[b][r]--;
     }
     if (n == had) return;
@@ -1137,6 +1154,13 @@ static void mtu_carry_take(struct MtuModel *m, int b, int r) {
     m->carryLeft[b][r] = n;
     m->carryHead[b][r] = 0;
     m->carried++;
+}
+
+/* The value of the next `mdm` word for reader r: the device's, or zero. */
+static uint16_t mdm_word(const struct MtuModel *m, int b, int r) {
+    if (!m->mdmHasData[b]) return 0;
+    int i = m->mdmTotal[b] - m->mdm[b][r];
+    return (i >= 0 && i < FF_REPLY_MAX) ? m->mdmData[b][i] : 0;
 }
 
 static void mtu_fill_time(struct MtuModel *m, int b) {
@@ -1598,7 +1622,16 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * unit's words are still DROPPED for a command that is not its
              * own, as they always were (ledger #137), but never overwritten. */
             bool bite = (nsp > 0 && ff_is_bite4(cmd, nsp));
+            /* A DEVICE BEHIND THE MDM MAY HAVE SOMETHING TO SAY -- asked
+             * before the carry below, which still needs the last transfer's
+             * words, and stored after it. */
+            uint16_t devWords[FF_REPLY_MAX];
+            bool dev = nsp > 0 && !bite && nsp <= FF_REPLY_MAX &&
+                       mdmdev_reply(in->busID, cmd, nsp, devWords, m->sharedUs);
             for (int r = 0; r < MTU_READERS; r++) mtu_carry_take(m, b, r);
+            m->mdmHasData[b] = dev;
+            m->mdmTotal[b] = dev ? nsp : 0;
+            if (dev) memcpy(m->mdmData[b], devWords, (size_t)nsp * sizeof devWords[0]);
             for (int r = 0; r < MTU_READERS; r++) {
                 m->count[b][r] = 0;
                 m->head[b][r] = 0;      /* a new transaction starts at word 0 */
@@ -1618,7 +1651,18 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             if (bite) m->biteReads++;
         } else {
             mtu_fill_time(m, b);
+            m->mdmHasData[b] = false;
             m->xferWords[b] = MTU_WORDS;
+        }
+        /* A WRITE TO ONE OF THE TWO MDMs: its data words follow from the
+         * computer that issued it, and go to mdmdev.c when all have come. */
+        m->outWant[b] = 0;
+        if (mdmdev_enabled() && (CMD_IUA(cmd) == MTU_IUA || CMD_IUA(cmd) == 12u) &&
+            ((cmd >> 14) & 0xfu) == 8u) {
+            m->outCmd[b] = cmd;
+            m->outWant[b] = (int)((cmd & 0x1fu) + 1u);
+            m->outHave[b] = 0;
+            m->outIssuer[b] = g;
         }
         /* BUT THE COMMAND ITSELF IS ON THE WIRE, whoever it is for.  A
          * listener's Listen-Mode receive waits, with no time-out, for a
@@ -1728,7 +1772,9 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             for (int i = FF_BITE_WORDS - m->biteLeft[b][g]; i < FF_BITE_WORDS; i++)
                 wl_put(m, b, T + (double)(++k) * w, m->bite[b][g][i], -1);
             for (int i = 0; i < m->mdm[b][g]; i++)
-                wl_put(m, b, T + (double)(++k) * w, 0u, -1);
+                wl_put(m, b, T + (double)(++k) * w,
+                       m->mdmHasData[b] ? m->mdmData[b][m->mdmTotal[b] - m->mdm[b][g] + i]
+                                        : 0u, -1);
             for (int r = 0; r < MTU_READERS; r++) {
                 m->count[b][r] = 0; m->biteLeft[b][r] = 0; m->mdm[b][r] = 0;
                 m->echoPending[b][r] = false;
@@ -1743,6 +1789,15 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         break;
     }
     case GPC_SVC_XMIT_WORD:
+        if (m->outWant[b] > 0 && g == m->outIssuer[b]) {
+            if (m->outHave[b] < (int)(sizeof m->outBuf[b] / sizeof m->outBuf[b][0]))
+                m->outBuf[b][m->outHave[b]] = (uint16_t)(in->in.word & 0xffffu);
+            if (++m->outHave[b] >= m->outWant[b]) {
+                int n = m->outHave[b] < 32 ? m->outHave[b] : 32;
+                mdmdev_output(in->busID, m->outCmd[b], m->outBuf[b], n, m->sharedUs);
+                m->outWant[b] = 0;
+            }
+        }
         out->out.xmit.ok = true;
         break;
     case GPC_SVC_RECV_POLL:
@@ -1880,11 +1935,12 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             out->out.recv.word = m->bite[b][g][idx];
             mtu_ring_put(b, 'b', g, out->out.recv.word, m->sent[b][g], m->biteLeft[b][g], 0);
         } else if (m->mdm[b][g] > 0) {
-            m->mdm[b][g]--;                 /* a box with nothing wired to it */
+            uint16_t v = mdm_word(m, b, g);  /* zero: a box with nothing wired */
+            m->mdm[b][g]--;
             m->sent[b][g]++;
-            mtu_ring_put(b, 'm', g, 0, m->sent[b][g], m->mdm[b][g], 0);
+            mtu_ring_put(b, 'm', g, v, m->sent[b][g], m->mdm[b][g], 0);
             out->out.recv.available = true;
-            out->out.recv.word = 0;
+            out->out.recv.word = v;
         } else {
             out->out.recv.available = false;
             out->out.recv.word = 0;
@@ -1972,6 +2028,7 @@ void mtumodel_report(struct MtuModel *m) {
     if (m->listenerWords > 0)
         fprintf(stderr, "mtu: %ld word(s) delivered to listening computers\n",
                 m->listenerWords);
+    mdmdev_report();
 }
 
 /* ---------------------------------------------------------------------

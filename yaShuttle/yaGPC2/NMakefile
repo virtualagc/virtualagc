@@ -126,6 +126,7 @@ LIB_OBJS = \
 	$(BUILD_DIR)\iop_msc_instr.obj \
 	$(BUILD_DIR)\json.obj \
 	$(BUILD_DIR)\mcm.obj \
+	$(BUILD_DIR)\mdmdev.obj \
 	$(BUILD_DIR)\membus.obj \
 	$(BUILD_DIR)\mmumodel.obj \
 	$(BUILD_DIR)\mtumodel.obj \
@@ -201,7 +202,8 @@ UNIT_TESTS = \
 	$(TEST_BIN_DIR)\test_bce_status.exe \
 	$(TEST_BIN_DIR)\test_volsource.exe \
 	$(TEST_BIN_DIR)\test_bcenet_txthread.exe \
-	$(TEST_BIN_DIR)\test_mtumodel.exe
+	$(TEST_BIN_DIR)\test_mtumodel.exe \
+	$(TEST_BIN_DIR)\test_mdmdev.exe
 
 # Every test RUNS, then the target fails if any of them did -- as the GNU
 # Makefile's `test` does, and for its reason: one failure must not hide
@@ -234,6 +236,7 @@ test: all $(TEST_BIN_DIR) $(UNIT_TESTS) $(TEST_BIN_DIR)\example_gpcops_paced_run
 	@$(TEST_BIN_DIR)\test_volsource.exe || echo test_volsource>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_bcenet_txthread.exe || echo test_bcenet_txthread>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_mtumodel.exe || echo test_mtumodel>> "$(FAILED)"
+	@$(TEST_BIN_DIR)\test_mdmdev.exe || echo test_mdmdev>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\example_gpcops_paced_run.exe || echo example_gpcops_paced_run>> "$(FAILED)"
 	@if exist "$(FAILED)" (echo. & echo FAILED STAGES: & type "$(FAILED)" & exit /b 1)
 	@echo.
@@ -300,8 +303,11 @@ $(TEST_BIN_DIR)\test_iop_discretes.exe: test\test_iop_discretes.c $(IOP_TEST_DEP
 $(TEST_BIN_DIR)\test_bce_status.exe: test\test_bce_status.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c src\iop.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_bce_status.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c $(W32) $(LDLIBS)
 
-$(TEST_BIN_DIR)\test_mtumodel.exe: test\test_mtumodel.c src\mtumodel.c src\mtumodel.h src\envcache.c src\json.c $(TEST_BIN_DIR)
-	$(TEST_CC) test\test_mtumodel.c src\mtumodel.c src\envcache.c src\json.c $(W32) $(LDLIBS)
+$(TEST_BIN_DIR)\test_mtumodel.exe: test\test_mtumodel.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\envcache.c src\json.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_mtumodel.c src\mtumodel.c src\mdmdev.c src\envcache.c src\json.c $(W32) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_mdmdev.exe: test\test_mdmdev.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\envcache.c src\json.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_mdmdev.c src\mtumodel.c src\mdmdev.c src\envcache.c src\json.c $(W32) $(LDLIBS)
 
 $(TEST_BIN_DIR)\test_iop_dkbuses.exe: test\test_iop_dkbuses.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c src\iop.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_iop_dkbuses.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c $(W32) $(LDLIBS)
