@@ -198,14 +198,18 @@ int main(void) {
         if (worst >= 2e-4) printf("imu round trip worst element error %.3g\n", worst);
         check(worst < 2e-4, "imu attitude round trip through PASS's decoding");
 
-        /* AND ITS ACCELEROMETERS: L1A + R1A (+X) for 4 s, attitude identity
-         * so body X is platform X.  The counts must be 2 F t / m in pulses of
-         * 0.0344488 ft/s along X only. */
+        /* AND ITS ACCELEROMETERS, AS PASS COMPENSATES THEM: L1A + R1A (+X)
+         * for 4 s, attitude identity so body X is platform X.  IMU 2 is in
+         * high gain (commanded above), so a pulse weighs a tenth of
+         * 0.0344488 ft/s times (1 + SFLO 1e-6), and each axis has its BILO
+         * bias.  GMHACP's compensation -- counts x weight - bias x dt, Z
+         * negated first -- must give back the true delta-V: 2 F t / m along X
+         * and nothing along Y or Z. */
         double ident[4] = { 1, 0, 0, 0 };
         vehdyn_reset(0.0);
         vehdyn_set_attitude(ident, NULL);
         read_words(21, FF(0x24C0Du), 14, w);
-        uint16_t x0 = w[9], y0 = w[10], z0 = w[11];
+        uint16_t c0[3] = { w[9], w[10], w[11] };
         double m0 = vehdyn_state()->mass;
         uint16_t ffw[5] = { 0 }, faw[5] = { 0 };
         faw[1] = 0x8000 | 0x1000;
@@ -213,12 +217,17 @@ int main(void) {
         faw[1] = 0;
         vehdyn_set_fire_words(ffw, faw, 4e6);
         read_words(21, FF(0x24C0Du), 14, w);
-        double want = 2.0 * 3870.0 * 4.0 / m0 / 0.3048 / 0.0344488;
-        int dx = (int16_t)(uint16_t)(w[9] - x0), dy = (int16_t)(uint16_t)(w[10] - y0),
-            dz = (int16_t)(uint16_t)(w[11] - z0);
-        if (fabs(dx - want) > 0.01 * want) printf("imu counts %d want %.1f\n", dx, want);
-        check(fabs(dx - want) <= 0.01 * want, "imu X velocity counts from a +X burn");
-        check(dy == 0 && dz == 0, "imu Y and Z counts unchanged");
+        const double SF[3] = { -35780.0, -34250.0, -48240.0 };   /* IMU 2 */
+        const double BI[3] = { -17842.0, -13376.0, -32666.0 };
+        double truth[3] = { 2.0 * 3870.0 * 4.0 / m0 / 0.3048, 0.0, 0.0 };
+        for (int ax = 0; ax < 3; ax++) {
+            int d = (int16_t)(uint16_t)(w[9 + ax] - c0[ax]);
+            if (ax == 2) d = -d;
+            double comp = d * (1.0 + SF[ax] * 1e-6) * 0.00344488 - BI[ax] * 1e-6 * 32.174 * 4.0;
+            if (fabs(comp - truth[ax]) > 0.01)
+                printf("axis %d: compensated %.4f ft/s, truth %.4f\n", ax, comp, truth[ax]);
+            check(fabs(comp - truth[ax]) <= 0.01, "PASS-compensated accelerometer delta-V equals the truth");
+        }
     }
 
     mtumodel_free(m);

@@ -113,9 +113,22 @@ static Imu imu[4];            /* [1..3] */
  *
  * The accelerometers count the non-gravitational delta-v in the platform
  * frame (= M50 here) at 0.0344488 ft/s a pulse, low gain, Z negated
- * (GMCACP.hal:62, 100); the remainder is carried between reads.  The
- * compiled scale-factor and bias I-loads (SFLO, BILO) are NOT inverted --
- * they look like placeholders; see vehdyn's notes.
+ * (GMCACP.hal:62, 100); the remainder is carried between reads.
+ *
+ * AND EACH ACCELEROMETER HAS THE ERRORS PASS CALIBRATES OUT.  The flight
+ * software turns its I-loads into a pulse weight and a bias per IMU and axis
+ * (GMRTRA.hal:205-220): weight = (1 + SFLO 1e-6) x 0.0344488 ft/s, bias =
+ * BILO 1e-6 x 32.174 ft/s^2, and compensates delta-V = counts x weight -
+ * bias x dt (GMHACP).  A real IMU's raw counts contain the bias and the
+ * scale error that those numbers describe, so that the compensated result is
+ * the true delta-V; an emulated one that counted ideal pulses showed PASS a
+ * constant phantom acceleration of up to 1.4 ft/s^2 (SPEC 21 ACC -0.59 +0.54
+ * -1.20 on a coasting vehicle).  So the counts here are
+ *     n = (delta-V + bias x dt) / weight,
+ * with the I-load values as compiled (CGMCOM.hal:440-456; the same values
+ * are in memory on this tape -- read with tools/pasvar.py).  High gain
+ * weights a pulse at a tenth of that (CGMMC9.hal:658), and carries the same
+ * calibration (SFHI = SFLO, BIHI = BILO).
  * ------------------------------------------------------------------- */
 static const double TNBBODY[3][3] = {
     { 0.98293535, 0.0, -0.18395135 },
@@ -146,7 +159,20 @@ static void resolver_words(double deg, uint16_t *w1x, uint16_t *w8x) {
     *w8x = (uint16_t)(c8 << 3);
 }
 
-typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; } ImuAcc;
+/* CGMS_ACC_SFLO and CGMS_ACC_BILO, (IMU, axis), ppm and micro-g. */
+static const double ACC_SF_PPM[3][3] = {
+    {  45890.0, -42360.0,  54480.0 },
+    { -35780.0, -34250.0, -48240.0 },
+    {  39680.0,  30080.0, -58080.0 },
+};
+static const double ACC_BIAS_UG[3][3] = {
+    {  18280.0, -16789.0,  37444.0 },
+    { -17842.0, -13376.0, -32666.0 },
+    {  14332.0,  12666.0, -39545.0 },
+};
+#define G0_FTS2 32.174
+
+typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; double t; } ImuAcc;
 static ImuAcc imuAcc[4];
 
 static void imu_dynamic(int n, uint16_t w[14]) {
@@ -171,10 +197,15 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     ImuAcc *a = &imuAcc[n];
     double dv[3];
     vehdyn_sensed_dv(dv);
+    double dt = a->started ? s->t - a->t : 0.0;
+    if (dt < 0.0) dt = 0.0;
+    double k = (imu[n].cmd2 & IMU_CMD2_HIGAIN) ? IMU_FT_PER_PULSE / 10.0 : IMU_FT_PER_PULSE;
     for (int i = 0; i < 3; i++) {
         double ft = dv[i] / FT_M;
         if (!a->started) { a->dvFt[i] = ft; continue; }
-        double pulses = (ft - a->dvFt[i]) / IMU_FT_PER_PULSE + a->carry[i];
+        double weight = (1.0 + ACC_SF_PPM[n - 1][i] * 1e-6) * k;
+        double bias = ACC_BIAS_UG[n - 1][i] * 1e-6 * G0_FTS2;
+        double pulses = (ft - a->dvFt[i] + bias * dt) / weight + a->carry[i];
         double whole = floor(pulses);
         a->carry[i] = pulses - whole;
         a->dvFt[i] = ft;
@@ -183,6 +214,7 @@ static void imu_dynamic(int n, uint16_t w[14]) {
         a->count[i] = (uint16_t)(a->count[i] + (unsigned)d);
     }
     a->started = true;
+    a->t = s->t;
     w[9] = a->count[0]; w[10] = a->count[1]; w[11] = a->count[2];
 }
 
