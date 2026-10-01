@@ -148,8 +148,10 @@ class Status:
         rhc = "  ".join("%s %+6.1f" % (a.upper(), counts[a] * RHC_DEG_PER_COUNT[a])
                         for a in RHC_AXES)
         thc = " ".join(d for d, b in THC_BITS.items() if thc_bits & b) or "-"
-        line = "RHC %s  %s deg   THC %s  %s%s" % (self.rhc.upper(), rhc,
-                                                   self.thc.upper(), thc, raw)
+        line = "RHC %s  %s deg" % (self.rhc.upper(), rhc)
+        if self.thc:
+            line += "   THC %s  %s" % (self.thc.upper(), thc)
+        line += raw
         now = time.monotonic()
         if self.tty:
             if line != self.last and now - self.when >= STATUS_S:
@@ -169,15 +171,19 @@ def log(msg):
 
 
 class Publisher:
+    """The THC's contacts; station None (the PLT's, who has no THC) sends
+    nothing."""
     def __init__(self, station):
         self.station = station
-        self.card, self.ch = THC_CARD[station]
+        self.card, self.ch = THC_CARD[station] if station else (None, None)
         self.sock = D.sender()
         self.bits = 0
         self.sent = None
         self.last_send = 0.0
 
     def send(self, force=False):
+        if self.station is None:
+            return
         now = time.monotonic()
         if not force and self.bits == self.sent and now - self.last_send < REPUBLISH_S:
             return
@@ -325,6 +331,8 @@ THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
 # RHC LH" -- so two instances (the CDR's and the aft station's) can be told
 # apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
 def window_title(thc, rhc):
+    if not thc:
+        return "RHC %s" % rhc.upper()
     return "THC %s / RHC %s" % (thc.upper(), rhc.upper())
 
 
@@ -340,7 +348,9 @@ class VirtualControls:
         self.style = style
         self.k = scale
         self.rhc_name, self.thc_name = rhc_name, thc_name
-        self.W, self.H = int(560 * scale), int(380 * scale)
+        # The PLT's station has no THC, and its window no THC panel: only as
+        # wide as the RHC (Ron, 2026-10-01).
+        self.W, self.H = int((560 if thc_name else 300) * scale), int(380 * scale)
         self.screen = pg.display.set_mode((self.W, self.H), pg.RESIZABLE)
         pg.display.set_caption(window_title(thc_name, rhc_name))
         self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(9, int(13 * scale)))
@@ -473,7 +483,7 @@ class VirtualControls:
         return dict((a, _clip(v)) for a, v in out.items())
 
     def thc_bits(self):
-        if not self.focused:
+        if not self.focused or not self.thc_name:
             return 0
         keys = self.pg.key.get_pressed()
         want = set(d for name, d in THC_KEYS if keys[self.pg.key.key_code(name)])
@@ -528,13 +538,16 @@ class VirtualControls:
         text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
         hint = ("drag knob: pitch/roll   drag ring: yaw" if self.style == "split" else
                 "left-drag: pitch/roll   right-drag: yaw")
-        text(hint + "   keys: arrows, Q/E", int(10 * k), self.H - int(36 * k))
+        text(hint, int(10 * k), self.H - int(52 * k))
+        text("keys: arrows, Q/E", int(10 * k), self.H - int(36 * k))
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
         text(degs + " deg", int(10 * k), self.H - int(20 * k))
-        # THC: six contacts, lit when closed, with their keys.
+        # THC: six contacts, lit when closed, with their keys -- at the CDR's
+        # and the aft station; the PLT has none.
         x0, y0 = int(330 * k), int(40 * k)
-        text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
-        for i, (name, d) in enumerate(THC_KEYS):
+        if self.thc_name:
+            text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
+        for i, (name, d) in enumerate(THC_KEYS if self.thc_name else ()):
             on = bool(bits & THC_BITS[d])
             r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
             pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
@@ -584,10 +597,10 @@ def run_virtual(pg, args, pub, rp, status):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--thc", choices=sorted(THC_CARD), default="fwd",
-                    help="which THC the joystick is (default fwd)")
-    ap.add_argument("--rhc", choices=sorted(RHC_CHANNELS), default="lh",
-                    help="which RHC the joystick is (default lh, the CDR's)")
+    ap.add_argument("--thc", choices=sorted(THC_CARD), default=None,
+                    help="which THC: fwd (the CDR's) or aft; follows --rhc when omitted")
+    ap.add_argument("--rhc", choices=sorted(RHC_CHANNELS), default=None,
+                    help="which RHC: lh (CDR), rh (PLT) or aft; follows --thc when omitted")
     ap.add_argument("--quiet", action="store_true",
                     help="no running display of what the joystick commands")
     ap.add_argument("--test-rhc", metavar="'AXIS FRACTION SECONDS'",
@@ -608,6 +621,20 @@ def main(argv=None):
     ap.add_argument("--test", metavar="'DIR SECONDS'",
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
     args = ap.parse_args(argv)
+    # THE STATIONS, the only combinations there are (Ron, 2026-10-01): the
+    # forward THC is the CDR's alone, so --thc fwd --rhc lh; the aft station
+    # --thc aft --rhc aft; the PLT --rhc rh with no THC.  Either option
+    # implies the other; no option is the CDR's station.
+    if args.rhc is None:
+        args.rhc = "aft" if args.thc == "aft" else "lh"
+    if args.thc is None and "--thc" not in (argv if argv is not None else sys.argv[1:]):
+        args.thc = {"lh": "fwd", "aft": "aft", "rh": None}[args.rhc]
+    if (args.thc, args.rhc) not in (("fwd", "lh"), ("aft", "aft"), (None, "rh")):
+        ap.error("the stations are --thc fwd --rhc lh (CDR), --thc aft --rhc aft "
+                 "(aft), and --rhc rh (PLT, who has no THC); not --thc %s --rhc %s"
+                 % (args.thc, args.rhc))
+    if args.test and not args.thc:
+        ap.error("--test needs a THC, and the PLT (--rhc rh) has none")
     if args.port_base is not None:
         D.set_port_base(args.port_base)
     mapping = dict(DEFAULT_MAP)
@@ -616,9 +643,12 @@ def main(argv=None):
             mapping.update(json.load(f))
     pub = Publisher(args.thc)
     rp = RhcPublisher(args.rhc, pub.sock)
-    log("THC %s on FF1-3 card %d channel %d, ports %d-%d"
-        % (args.thc.upper(), pub.card, pub.ch, D.PORT_BASE + MDM_IO_OFFSET,
-           D.PORT_BASE + MDM_IO_OFFSET + 2))
+    if args.thc:
+        log("THC %s on FF1-3 card %d channel %d, ports %d-%d"
+            % (args.thc.upper(), pub.card, pub.ch, D.PORT_BASE + MDM_IO_OFFSET,
+               D.PORT_BASE + MDM_IO_OFFSET + 2))
+    else:
+        log("no THC: the PLT's station has none")
     log("RHC %s on AID card %s" % (args.rhc.upper(),
         "/".join(sorted(set("%d ch %d" % (c, h) for ax in RHC_CHANNELS[args.rhc].values()
                                                  for _, c, h in ax)))))

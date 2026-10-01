@@ -79,8 +79,9 @@ TITLE_ROLES = [
     (re.compile(r"^GPC discrete panel"), "discretepanel"),
     (re.compile(r"^Manager\b"), "manager"),
     # handcontrollers.py's window, by the controllers it stands in for.
-    (re.compile(r"^THC (FWD|AFT) / RHC (LH|RH|AFT)$"),
+    (re.compile(r"^THC (FWD|AFT) / RHC (LH|AFT)$"),
      lambda m: "hc_%s_%s" % (m.group(1).lower(), m.group(2).lower())),
+    (re.compile(r"^RHC RH$"), "hc_rh"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
     # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
     # command line is tried first and normally answers; this is the fallback
@@ -88,6 +89,16 @@ TITLE_ROLES = [
     (re.compile(r"^(CRT|CDR|PLT|MFD|AFD)(\d)$", re.I),
      lambda m: m.group(0).lower()),
 ]
+def _hc_role(thc, rhc):
+    """handcontrollers.py's layout role, from its --thc and --rhc."""
+    thc, rhc = (thc or "").lower(), (rhc or "").lower()
+    if rhc == "rh":
+        return "hc_rh"
+    if thc == "aft" or rhc == "aft":
+        return "hc_aft_aft"
+    return "hc_fwd_lh"
+
+
 ROLE_PATTERNS = [
     # (what to look for in the command line, the name to give it)
     (re.compile(r"stsKeyboard\.py.*--kybd\s+(\d)"), lambda m: "kybd%s" % m.group(1)),
@@ -102,9 +113,10 @@ ROLE_PATTERNS = [
     # window a layout could not put back.
     (re.compile(r"manager\.py"), lambda m: "manager"),
     # The virtual hand controllers' window (handcontrollers.py with no stick).
-    # Its --thc and --rhc, in either order, defaulting to fwd and lh.
+    # Its station, from --thc / --rhc in either order: hc_fwd_lh (CDR, also
+    # with neither), hc_aft_aft (aft), hc_rh (PLT, no THC).
     (re.compile(r"handcontrollers\.py(?=.*--thc[ =](\w+))?(?=.*--rhc[ =](\w+))?"),
-     lambda m: "hc_%s_%s" % ((m.group(1) or "fwd").lower(), (m.group(2) or "lh").lower())),
+     lambda m: _hc_role(m.group(1), m.group(2))),
 ]
 
 
