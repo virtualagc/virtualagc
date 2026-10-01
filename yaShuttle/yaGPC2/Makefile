@@ -153,7 +153,8 @@ test: all $(addprefix $(TEST_BIN_DIR)/,$(UNIT_TESTS)) $(TEST_BIN_DIR)/example_gp
 	    for f in $$failed; do echo "    $$f"; done; \
 	    exit 1; \
 	fi; \
-	echo "make test: every stage passed"
+	echo "make test: every stage passed"; \
+	python3 tools/gpc-upstream.py --offline 2>/dev/null || true
 
 $(TEST_BIN_DIR):
 	mkdir -p $(TEST_BIN_DIR)
