@@ -50,6 +50,12 @@ Default mapping (Logitech Extreme 3D Pro; every entry overridable with
 
 Buttons are numbered as printed on the stick, 1-12 (pygame counts from 0).
 
+The joystick may be connected or disconnected while this runs; while there
+is none both controllers are held in detent.  On macOS the terminal (or
+whatever app runs this) needs Input Monitoring permission (System Settings,
+Privacy & Security): without it the stick is listed but its input withheld,
+and the axes read a constant -1.
+
     python3 handcontrollers.py --thc fwd
     python3 handcontrollers.py --thc aft --port-base 7300
     python3 handcontrollers.py --thc fwd --test "+X 2"    (no joystick:
@@ -318,32 +324,56 @@ def main(argv=None):
     # SDL otherwise takes SIGINT and SIGTERM for itself and turns them into a
     # quit event, so neither Ctrl-C nor simulatePASS's shutdown stopped this.
     os.environ.setdefault("SDL_NO_SIGNAL_HANDLERS", "1")
+    # macOS: SDL 2.32's GameController (MFi) backend takes the joystick and
+    # then never reports it -- get_count() stays 0 (Mac-integrate, with an
+    # Extreme 3D Pro, 2026-10-01).  Overridable; Linux and Windows untouched.
+    if sys.platform == "darwin":
+        os.environ.setdefault("SDL_JOYSTICK_MFI", "0")
     import pygame
     pygame.init()
     pygame.joystick.init()
-    if pygame.joystick.get_count() <= args.joystick:
-        log("no joystick %d; holding the THC and RHC in detent" % args.joystick)
-        while True:
-            pub.send()
-            rp.send()
-            time.sleep(REPUBLISH_S)
-    js = pygame.joystick.Joystick(args.joystick)
-    js.init()
-    log("joystick %d: %s, %d axes, %d buttons, %d hat(s)"
-        % (args.joystick, js.get_name(), js.get_numaxes(), js.get_numbuttons(),
-           js.get_numhats()))
     status = Status(args.rhc, args.thc, not args.quiet)
+
+    def open_stick():
+        if pygame.joystick.get_count() <= args.joystick:
+            return None
+        js = pygame.joystick.Joystick(args.joystick)
+        js.init()
+        log("joystick %d: %s, %d axes, %d buttons, %d hat(s)"
+            % (args.joystick, js.get_name(), js.get_numaxes(), js.get_numbuttons(),
+               js.get_numhats()))
+        return js
+
+    # HOT-PLUG, BOTH WAYS.  A stick connected after start-up is opened when
+    # SDL says so, and one that goes away -- unplugged, or switched away by a
+    # KVM -- puts both controllers back in detent rather than leaving its
+    # last deflection latched, and is waited for again.
+    js = open_stick()
+    if js is None:
+        log("no joystick %d yet; holding the THC and RHC in detent" % args.joystick)
     while True:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 return 0
+            if e.type == pygame.JOYDEVICEADDED and js is None:
+                js = open_stick()
+            elif e.type == pygame.JOYDEVICEREMOVED and js is not None and \
+                    getattr(e, "instance_id", None) == js.get_instance_id():
+                log("joystick %d gone; THC and RHC back in detent" % args.joystick)
+                js = None
+        if js is None:
+            pub.bits = 0
+            rp.counts = dict((a, 0) for a in RHC_AXES)
+            pub.send()
+            rp.send()
+            time.sleep(0.1)
+            continue
         pub.bits = thc_bits(js, mapping)
         pub.send()
         rp.counts = rhc_counts(js, mapping)
         rp.send()
         status.show(rp.counts, pub.bits, js)
         time.sleep(0.02)
-
 
 if __name__ == "__main__":
     try:
