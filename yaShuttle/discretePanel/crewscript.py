@@ -106,6 +106,7 @@ PANEL_ARGS = {
     "adi": r"(l|r|a)\s+(att|attitude)\s+(inrtl|lvlh|ref)|(l|r|a)\s+(err|error|rate)\s+(high|med|low)",
     "sense": r"(-z|-x)",
     "attref": r"(l|r|a)",
+    "dap": r"(c3|fwd|a6u|aft)\s+(a|b|auto|inrtl|lvlh|free|pri|alt|vern|r_disc|r_pulse|p_disc|p_pulse|y_disc|y_pulse|x_norm|x_pulse|y_norm|y_pulse|low_z|z_norm|z_pulse|high_z)",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
 }
@@ -119,6 +120,7 @@ PANEL_USAGE = {
     "idpload": "idpload 1-4", "gpcid": "gpcid 1-5", "bit": "bit a|b N on|off",
     "adi": "adi l|r|a att inrtl|lvlh|ref, or adi l|r|a err|rate high|med|low",
     "sense": "sense -z|-x", "attref": "attref l|r|a",
+    "dap": "dap c3|a6u BUTTON (a b auto inrtl lvlh free pri alt vern r_disc ... high_z)",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -294,6 +296,15 @@ HELP = """\
                         ADI ERROR, ADI RATE
     attref S            ATT REF pushbutton, held 0.5 s
     sense -z|-x         A6U SENSE
+   C3 (forward) and A6U (aft), the ORBITAL DAP pushbuttons, each held 0.5 s:
+    dap c3|a6u a|b              SELECT A, B
+    dap c3|a6u auto|inrtl|lvlh|free
+                                CONTROL
+    dap c3|a6u pri|alt|vern     RCS jets
+    dap c3|a6u r_disc|r_pulse|p_disc|p_pulse|y_disc|y_pulse
+                                ROTATION roll/pitch/yaw DISC RATE, PULSE
+    dap c3|a6u x_norm|x_pulse|y_norm|y_pulse|z_norm|z_pulse|low_z|high_z
+                                TRANSLATION
    not a control:
     gpcid N             make GPC N the primary column
     bit a|b N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT

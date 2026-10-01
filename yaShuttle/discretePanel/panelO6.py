@@ -201,6 +201,57 @@ MDM_IO_OFFSET = 100            # _FF1_mdmIO's port offset; FF2-4 follow
 MDM_OP_SET, MDM_OP_RESET = 1, 2
 MDM_TYPE_DIH = 2
 ATT_REF_HOLD_MS = 500          # three GR2 passes at 6.25 Hz, and some
+
+# ---- the ORBITAL DAP pushbuttons (C3 forward, A6U aft) ----------------------
+#
+# Forward-MDM crew contacts like the ADI switches, published the same way.
+# The grid is SCOM printed page 2.13-22's panel C3 and 2.7-28's A6U, which
+# are laid out alike: SELECT A B and CONTROL AUTO INRTL LVLH FREE across the
+# top; MANUAL MODE below in three rows under TRANSLATION X Y Z and ROTATION
+# ROLL PITCH YAW.  Contacts are crew-switches-OPS2.md sections B and C, from
+# GPZORB.hal / GR2ORB.hal / CGBIH1.hal: the six top-row buttons have three
+# contacts (A and B on one bit of two MDMs, C on another bit of a third),
+# the eighteen others two (A and B, ANDed).  Forward A/B are FF1/FF2 and C is
+# FF3; aft A/B are FF3/FF4 and C is FF1.  DSCRTn -> (card, channel):
+# 6 -> (9, 0), 7 -> (9, 1), 8 -> (9, 2), 11 -> (12, 2).
+_DSCRT_CC = {6: (9, 0), 7: (9, 1), 8: (9, 2), 11: (12, 2)}
+# (legend, word, mask for contacts A/B, (word, mask) for contact C or None)
+DAP_PB = {
+    "A":      ("A", 6, 0x0800, (6, 0x0200)),
+    "B":      ("B", 6, 0x0400, (6, 0x0100)),
+    "AUTO":   ("AUTO", 6, 0x0080, (6, 0x0020)),
+    "INRTL":  ("INRTL", 6, 0x0040, (6, 0x0010)),
+    "LVLH":   ("LVLH", 7, 0x0004, (11, 0x0002)),
+    "FREE":   ("FREE", 7, 0x0002, (11, 0x0001)),
+    "PRI":    ("PRI", 7, 0x0800, None),
+    "ALT":    ("ALT", 7, 0x0100, None),
+    "VERN":   ("VERN", 7, 0x0020, None),
+    "R_DISC": ("DISC\nRATE", 7, 0x0400, None),
+    "R_PULSE": ("PULSE", 7, 0x0200, None),
+    "P_DISC": ("DISC\nRATE", 7, 0x0080, None),
+    "P_PULSE": ("PULSE", 7, 0x0040, None),
+    "Y_DISC": ("DISC\nRATE", 7, 0x0010, None),
+    "Y_PULSE": ("PULSE", 7, 0x0008, None),
+    "X_NORM": ("NORM", 7, 0x0001, None),
+    "X_PULSE": ("PULSE", 8, 0x8000, None),
+    "X_SPARE": ("", 8, 0x4000, None),
+    "Y_NORM": ("NORM", 8, 0x2000, None),
+    "Y_PULSE": ("PULSE", 8, 0x1000, None),
+    "LOW_Z":  ("LOW Z", 8, 0x0800, None),
+    "Z_NORM": ("NORM", 8, 0x0400, None),
+    "Z_PULSE": ("PULSE", 8, 0x0200, None),
+    "HIGH_Z": ("HIGH Z", 8, 0x0100, None),
+}
+# The grid, row by row, columns X Y Z ROLL PITCH YAW (top row: SELECT A B,
+# CONTROL AUTO INRTL LVLH FREE).
+DAP_GRID = (("A", "B", "AUTO", "INRTL", "LVLH", "FREE"),
+            ("X_SPARE", "LOW_Z", "HIGH_Z", "PRI", "ALT", "VERN"),
+            ("X_NORM", "Y_NORM", "Z_NORM", "R_DISC", "P_DISC", "Y_DISC"),
+            ("X_PULSE", "Y_PULSE", "Z_PULSE", "R_PULSE", "P_PULSE", "Y_PULSE"))
+DAP_STATIONS = ("FWD", "AFT")
+DAP_PANEL = {"FWD": "C3", "AFT": "A6U"}
+DAP_UNITS = {"FWD": (1, 2, 3), "AFT": (3, 4, 1)}   # contacts A, B, C
+DAP_HOLD_MS = 500             # a scripted press: three GR2 passes, and some
 MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
 LEFT_SEL_POS = ("1", "3")                       # left, right
 RIGHT_SEL_POS = ("3", "2")                      # left, right
@@ -337,6 +388,8 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
+C_PBI_DARK = "#8a8676"       # a DAP lamp unlit
+C_PBI_LIT = "#f4f0c8"        # a DAP lamp lit (to be tuned against photographs)
 # ACTIVITY lamps.  Unpowered is the pane grey, so a dark lamp is just its rim.
 C_LAMP = {"OFF": C_PANEL, "READY": "#1fbf2a", "BUSY": "#e02418"}# Tk reports no cap height, and its "ascent" is not one (on X11 with
 # Nimbus Sans it nearly equals the caps; with Arial it is 1/4 taller).
@@ -366,8 +419,9 @@ O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C
 ADI_COL_W = 340        # the ADI column, right of the IDP column: three full-size
                        # 3-position switches abreast, with their stacked legends
 PANEL_TAG_COLOR = "#d0661a"   # the panel numbers in the panes' corners
+DAP_COL_W = 470        # the ORBITAL DAP column: six pushbuttons abreast
 REF_W = (O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + PANE_GAP + ADI_COL_W
-         + MARGIN)     # 2040; 1684 before the ADI column
+         + PANE_GAP + DAP_COL_W + MARGIN)   # 2526; 1684 before ADI and DAP
 REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
@@ -512,6 +566,8 @@ class PanelO6:
         self.adi = dict(DEFAULT_ADI)         # "L_att": "LVLH", ...
         self.sense = DEFAULT_SENSE
         self.attref = [False] * len(ADI_STATIONS)   # held down
+        self.dap = {st: dict((k, False) for k in DAP_PB) for st in DAP_STATIONS}
+        self.dap_lamp = {st: dict((k, False) for k in DAP_PB) for st in DAP_STATIONS}
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
@@ -899,6 +955,18 @@ class PanelO6:
                         ATT_REF_BITS if self.attref[i] else 0))
         for u in (1, 2, 3):
             out.append((u, 9, 1, 0x6000, SENSE_BITS[self.sense]))
+        # The DAP pushbuttons, one record per contact.
+        for st in DAP_STATIONS:
+            ua, ub, uc = DAP_UNITS[st]
+            for k, (_leg, word, mask, cc) in DAP_PB.items():
+                down = self.dap[st][k]
+                card, ch = _DSCRT_CC[word]
+                for u in (ua, ub):
+                    out.append((u, card, ch, mask, mask if down else 0))
+                if cc is not None:
+                    cw, cm = cc
+                    card, ch = _DSCRT_CC[cw]
+                    out.append((uc, card, ch, cm, cm if down else 0))
         return out
 
     def _publish(self):
@@ -1429,6 +1497,14 @@ class PanelO6:
         # The ADI and SENSE switches: their own column, right of the IDP one.
         adi_x0 = idp_x1 + PANE_GAP
         adi_y1 = self._draw_crew(adi_x0, my0, adi_x0 + ADI_COL_W)
+        # The ORBITAL DAP pushbuttons: C3 over A6U, a column of their own.
+        dap_x0 = adi_x0 + ADI_COL_W + PANE_GAP
+        y = my0
+        for st in DAP_STATIONS:
+            y1 = self._draw_dap(dap_x0, y, dap_x0 + DAP_COL_W, st)
+            self._panel_tag(dap_x0, y, DAP_PANEL[st])
+            y = y1 + PANE_GAP
+        adi_y1 = max(adi_y1, y1)
         if adi_y1 + 12 > getattr(self, "_ref_h", REF_H) + 0.5:
             self._ref_h = adi_y1 + 12
             self.root.after_idle(self.redraw)
@@ -1816,6 +1892,86 @@ class PanelO6:
             self._panel_tag(x0, y, ADI_PANEL[st])
             y = y1 + PANE_GAP
         return y1
+
+    def _pbi(self, x1, y1, x2, y2, legend, down, lit):
+        """A lighted pushbutton indicator, the DAP's: the panel's pushbutton
+        with its legend in the upper part of the face and a lamp strip below,
+        which PASS lights."""
+        self._pushbutton(x1, y1, x2, y2, "", down=down)
+        dx = 2 if down else 0
+        cx = (x1 + x2) / 2.0 + dx
+        face = (x2 - x1) - 12
+        lines = [l for l in legend.split("\n") if l]
+        size = SETTING_SIZE
+        while size > 5 and lines and max(self._tw(l, size) for l in lines) > face - 4:
+            size -= 1
+        ls = self._tkfont(size).metrics("linespace") / max(self.s, 0.01)
+        top = y1 + 6 + dx + 3
+        for j, l in enumerate(lines):
+            self._text(cx, top + ls * (j + 0.5), l, size=size)
+        # The lamp: a strip across the lower face.
+        lx1, lx2 = x1 + 6 + dx + 5, x2 - 6 + dx - 5
+        ly2 = y2 - 6 + dx - 4
+        ly1 = ly2 - 7
+        self._rect(lx1, ly1, lx2, ly2, fill=C_PBI_LIT if lit else C_PBI_DARK,
+                   outline=C_PADDLE_LO, width=1)
+
+    def _draw_dap(self, x0, y0, x1, st):
+        """One station's ORBITAL DAP pushbuttons, as panel C3 (forward) or A6U
+        (aft) has them.  Returns the inset's bottom."""
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        b = PB_SIZE
+        g = 16                                   # between buttons
+        n = 6
+        grid_w = n * b + (n - 1) * g
+        gx0 = (x0 + x1) / 2.0 - grid_w / 2.0
+        colx = [gx0 + c * (b + g) for c in range(n)]
+        y_title = y0 + pad + th10
+        y_grp1 = y_title + th10 + pad + ths
+        row0 = y_grp1 + ths + pad / 2.0
+        y_mm = row0 + b + pad + th10 / 2.0 + ths
+        y_grp2 = y_mm + ths + pad / 2.0 + ths
+        y_sub = y_grp2 + ths + pad / 2.0 + ths
+        row1 = y_sub + ths + pad / 2.0
+        rows = [row0, row1, row1 + b + g, row1 + 2 * (b + g)]
+        y1 = rows[3] + b + pad
+        self._rect_panel(x0, y0, x1, y1)
+        self._text((x0 + x1) / 2.0, y_title,
+                   "ORBITAL DAP" if st == "FWD" else "ORBITER DAP", size=10)
+
+        def bracket(c0, c1, y, caption):
+            """A group caption over columns c0..c1, with its rule."""
+            xa, xb = colx[c0], colx[c1] + b
+            self._text((xa + xb) / 2.0, y, caption, size=SETTING_SIZE)
+            tw = self._tw(caption)
+            ry = y + ths * 0.15
+            mid = (xa + xb) / 2.0
+            for a, z in ((xa, mid - tw / 2.0 - 4), (mid + tw / 2.0 + 4, xb)):
+                if z > a:
+                    self._line(a, ry, z, ry, fill=C_INK, width=max(1, int(self.s)))
+
+        bracket(0, 1, y_grp1, "SELECT")
+        bracket(2, 5, y_grp1, "CONTROL")
+        bracket(0, 5, y_mm, "MANUAL MODE")
+        bracket(0, 2, y_grp2, "TRANSLATION")
+        bracket(3, 5, y_grp2, "ROTATION")
+        for c, cap in enumerate(("X", "Y", "Z", "ROLL", "PITCH", "YAW")):
+            self._text(colx[c] + b / 2.0, y_sub, cap, size=SETTING_SIZE)
+        for r, names in enumerate(DAP_GRID):
+            for c, k in enumerate(names):
+                bx, by = colx[c], rows[r]
+                self._pbi(bx, by, bx + b, by + b, DAP_PB[k][0],
+                          self.dap[st][k], self.dap_lamp[st][k])
+                self._hit("dap", (st, k), bx, by, bx + b, by + b)
+        return y1
+
+    def _set_dap(self, st, k, down):
+        old = "ON" if self.dap[st][k] else "OFF"
+        self.dap[st][k] = down
+        self._announce("%s DAP %s" % (DAP_PANEL[st], k), old, "ON" if down else "OFF")
+        self._changed()
 
     def _tw(self, text, size=SETTING_SIZE):
         """A caption's width in design units, as this host's font draws it."""
@@ -2234,6 +2390,9 @@ class PanelO6:
         elif kind == "attref":
             self._set_attref(index, True)
             self._held = (kind, index)
+        elif kind == "dap":
+            self._set_dap(index[0], index[1], True)
+            self._held = (kind, index)
 
 
     def _on_release(self, event):
@@ -2249,6 +2408,8 @@ class PanelO6:
             self._set_idp_load(index, False)
         elif kind == "attref":
             self._set_attref(index, False)
+        elif kind == "dap":
+            self._set_dap(index[0], index[1], False)
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -2597,6 +2758,12 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             panel._set_adi(st, f, val)
         elif verb == "sense":
             panel._set_sense(arg.upper())
+        elif verb == "dap":
+            st, k = arg.upper().split()
+            st = {"C3": "FWD", "FWD": "FWD", "A6U": "AFT", "AFT": "AFT"}[st]
+            k = {"FREE DRIFT": "FREE"}.get(k, k)
+            panel._set_dap(st, k, True)
+            root.after(DAP_HOLD_MS, lambda: panel._set_dap(st, k, False))
         elif verb == "attref":
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)
