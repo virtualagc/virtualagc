@@ -34,8 +34,9 @@ or by a layout being restored (windowLayout.py, the manager's Restore,
 simulatePASS.py --layout).  So choose a height for the longest caption the
 script has.
 
-TRYING SIZES: --edit.  The box takes the keyboard, so captions can be typed
-straight into it to find a geometry and font size that suit a recording:
+TRYING SIZES: --edit.  The box takes the keyboard (on Windows, once it is
+clicked), so captions can be typed straight into it to find a geometry and
+font size that suit a recording:
 
     typing          the caption (Enter: new line, Backspace, Escape: clear)
     Ctrl + / Ctrl - font size up or down by 2 points
@@ -84,6 +85,7 @@ BOTTOM_MARGIN = 80
 PAD_X, PAD_Y = 16, 8
 MIN_W, MIN_H = 200, 40
 EDIT_CURSOR = "▌"          # the block shown after typed text in --edit
+FOCUS_POLL_MS = 250        # Windows: how often a focused box checks it still is
 # --align: how the lines sit against each other (justify) and where the text
 # sits in the box (anchor).
 ANCHORS = {"left": "w", "center": "center", "right": "e"}
@@ -145,6 +147,27 @@ def virtual_screen():
         return None
 
 
+def _user32():
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.WinDLL("user32")
+    user32.GetForegroundWindow.restype = wintypes.HWND
+    user32.GetAncestor.restype = wintypes.HWND
+    user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+    user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+    return user32
+
+
+def foreground_window():
+    """Windows: the window that has the keyboard.  None anywhere else."""
+    if sys.platform != "win32":
+        return None
+    try:
+        return _user32().GetForegroundWindow()
+    except (OSError, AttributeError):
+        return None
+
+
 def look_file(pid):
     """Where a caption box on macOS or Windows keeps its look (see
     _publish_look)."""
@@ -153,8 +176,9 @@ def look_file(pid):
 
 
 class Subtitles(object):
-    def __init__(self, root, args, box):
-        """box: (width, height, x, y)."""
+    def __init__(self, root, args, box, before=None):
+        """box: (width, height, x, y).  before: Windows only, the window that
+        had the keyboard before this program made one (foreground_window())."""
         self.root = root
         self.args = args
         # The box is kept here rather than read back from the window, which
@@ -213,6 +237,7 @@ class Subtitles(object):
         # has the keyboard, so it is gone once focus moves to another window.
         self.cursor_wanted = True
         self.focused = False
+        self._focus_polling = False
         if args.edit:
             root.bind("<Key>", self._key)
             root.bind("<FocusIn>", lambda _e: self._focus(True))
@@ -233,7 +258,13 @@ class Subtitles(object):
                                                       and not self.text.strip())):
             root.deiconify()
         if args.edit:
-            root.after(200, root.focus_force)
+            if sys.platform == "win32":
+                # Windows gives a new window the keyboard as it appears, so
+                # the box would start with its cursor; as elsewhere, it starts
+                # without the keyboard, and a click on it gives it the keyboard.
+                root.after(200, lambda: self._give_keyboard_back(before))
+            else:
+                root.after(200, root.focus_force)
             log("--edit: type a caption; Ctrl +/- font, Ctrl L/E/R align, "
                 "Shift-drag size, Ctrl P options, Ctrl H cursor")
             self._report()
@@ -437,6 +468,8 @@ class Subtitles(object):
         self._moved = False
         if self.args.edit:
             self.root.focus_force()
+            if sys.platform == "win32":
+                self.root.after(100, self._recheck_focus)
 
     def _drag(self, e):
         self.x = e.x_root - self._grab[0]
@@ -519,6 +552,40 @@ class Subtitles(object):
         if focused != self.focused:
             self.focused = focused
             self.show(self.text)
+        if focused and sys.platform == "win32" and not self._focus_polling:
+            self._focus_polling = True
+            self.root.after(FOCUS_POLL_MS, self._poll_focus)
+
+    def _poll_focus(self):
+        self._focus_polling = False
+        self._recheck_focus()
+
+    def _recheck_focus(self):
+        """WINDOWS: THE KEYBOARD AS WINDOWS SEES IT.  Tk on Windows does not
+        always deliver the FocusOut when another window takes the keyboard
+        (seen with the box started from manager.py), and then the cursor
+        stays.  So while the box thinks it has the keyboard, ask Windows."""
+        self._focus(self._foreground())
+
+    def _ours(self, user32):
+        return user32.GetAncestor(self.root.winfo_id(), 2)        # GA_ROOT
+
+    def _foreground(self):
+        try:
+            user32 = _user32()
+            ours = self._ours(user32)
+            return ours is not None and user32.GetForegroundWindow() == ours
+        except (OSError, AttributeError, tk.TclError):
+            return self.focused
+
+    def _give_keyboard_back(self, before):
+        try:
+            user32 = _user32()
+            ours = self._ours(user32)
+            if before is not None and before != ours and user32.GetForegroundWindow() == ours:
+                user32.SetForegroundWindow(before)
+        except (OSError, AttributeError, tk.TclError):
+            pass
 
     def _key(self, e):
         ctrl = bool(e.state & 0x4)
@@ -647,6 +714,7 @@ def main(argv=None):
         D.set_port_base(args.port_base)
 
     import macdock; macdock.set_app_name("Captions")                  # its Dock name
+    before = foreground_window()     # Tk() takes the keyboard on Windows
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:
@@ -658,7 +726,7 @@ def main(argv=None):
         sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
         w = min(DEFAULT_W, sw)
         box = (w, DEFAULT_H, max(0, (sw - w) // 2), max(0, sh - DEFAULT_H - BOTTOM_MARGIN))
-    Subtitles(root, args, box)
+    Subtitles(root, args, box, before)
     root.mainloop()
 
 
