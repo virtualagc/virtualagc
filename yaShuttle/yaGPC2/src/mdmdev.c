@@ -300,8 +300,13 @@ static uint16_t fa_jets_b(int k) { return (uint16_t)(faOut[k][10][0] & fa_jet_ma
  * Opened only for a run wired to a panel (mdmdev_crew_open, from run.c with
  * --discretes), and independent of YAGPC_MDM_DEVICES: with the device model
  * off a forward-MDM read is all zeros, and the contacts are ORed into those
- * zeros once the panel has driven any; until then reads are untouched. */
-#define CREW_NUNIT 4
+ * zeros once the panel has driven any; until then reads are untouched.
+ *
+ * THE AFT MDMs TOO: FA1-4 are crew units 5-8, on `_FAk_mdmIO` (port base +
+ * 104 + k - 1, nsts-sim-gpc src/com/bus.civet), for the OMS ENG switches on
+ * panel C3 -- FA DSCRT2 bits 7-8, DIH card 3 ch 1 (CGBIH1.hal 2167-2174). */
+#define CREW_NFF 4
+#define CREW_NUNIT 8
 #define CREW_NCARD 16
 #define CREW_NCHAN 3
 #define CREW_PORT_OFFSET 100
@@ -315,9 +320,9 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * handcontrollers.py as op 4 VALUE records of type 6 (AID). */
 #define CREW_TYPE_AID 6
 #define CREW_AID_NCH 8
-static int16_t crewAid[CREW_NUNIT + 1][CREW_NCARD][CREW_AID_NCH];
+static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
-static int crewFd[CREW_NUNIT + 1] = { -1, -1, -1, -1, -1 };
+static int crewFd[CREW_NUNIT + 1] = { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 static bool crewOpen, crewHeard, crewTrace;
 static int crewPortBase;
 static long crewMsgs;
@@ -350,8 +355,9 @@ void mdmdev_crew_open(int portBase) {
         mreq.imr_interface.s_addr = iface.s_addr;
         if (bind(fd, (struct sockaddr *)&addr, sizeof addr) < 0 ||
             setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
-            fprintf(stderr, "mdmdev: FF%d crew contacts unavailable (port %d): %s\n",
-                    k, port, strerror(errno));
+            fprintf(stderr, "mdmdev: %s%d crew contacts unavailable (port %d): %s\n",
+                    k <= CREW_NFF ? "FF" : "FA", (k - 1) % CREW_NFF + 1, port,
+                    strerror(errno));
             close(fd);
             continue;
         }
@@ -371,7 +377,7 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
     unsigned card = buf[4], ch = buf[5];
     int cnt = ((int)buf[6] << 8) | buf[7];
     if (type == CREW_TYPE_AID) {
-        if (op != CREW_OP_VALUE) return;
+        if (op != CREW_OP_VALUE || k > CREW_NFF) return;
         if (cnt > (len - 8) / 2) cnt = (len - 8) / 2;
         for (int i = 0; i < cnt; i++) {
             unsigned c = ch + (unsigned)i;
@@ -403,8 +409,8 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
                      : (op == CREW_OP_RESET) ? (uint16_t)(was & ~w) : w;
         crewIn[k][card][c] = now;
         if (crewTrace && now != was)
-            fprintf(stderr, "mdmdev: FF%d card %u ch %u crew contacts %04x -> %04x\n",
-                    k, card, c, was, now);
+            fprintf(stderr, "mdmdev: %s%d card %u ch %u crew contacts %04x -> %04x\n",
+                    k <= CREW_NFF ? "FF" : "FA", (k - 1) % CREW_NFF + 1, card, c, was, now);
     }
     crewHeard = true;
     crewMsgs++;
@@ -467,13 +473,24 @@ static void crew_poll(void) {
 static void crew_dscrt(int k, uint16_t d[13]) {
     static const uint8_t CARD[13] = { 4, 4, 4, 6, 6, 9, 9, 9, 12, 12, 12, 15, 15 };
     static const uint8_t CHAN[13] = { 0, 1, 2, 0, 1, 0, 1, 2, 0, 1, 2, 0, 1 };
-    if (k < 1 || k > CREW_NUNIT) return;
+    if (k < 1 || k > CREW_NFF) return;
     for (int i = 0; i < 13; i++) d[i] |= crewIn[k][CARD[i]][CHAN[i]];
+}
+
+/* The aft contacts as the FA HFE read's discretes, words 18-25 (SEG5
+ * DSCRT1-8, CGBIH1.hal 549-560): DIH card 3 ch 0-2, DIL card 5 ch 0, DIH
+ * card 8 ch 0, DIH card 11 ch 0-2.  ORed, after the device model's words. */
+static void crew_fa_hfe(int k, uint16_t *b, int nb) {
+    static const uint8_t CARD[8] = { 3, 3, 3, 5, 8, 11, 11, 11 };
+    static const uint8_t CHAN[8] = { 0, 1, 2, 0, 0, 0, 1, 2 };
+    if (k < 1 || k > CREW_NFF) return;
+    for (int i = 0; i < 8 && 18 + i < nb; i++)
+        b[18 + i] |= crewIn[CREW_NFF + k][CARD[i]][CHAN[i]];
 }
 
 /* The RHC analogs into an HFE read's words 21-35. */
 static void crew_aid_hfe(int k, uint16_t *b, int nb) {
-    if (k < 1 || k > CREW_NUNIT || !crewAidHeard) return;
+    if (k < 1 || k > CREW_NFF || !crewAidHeard) return;
     for (int c = 0; c < 8 && 21 + c < nb; c++) b[21 + c] = (uint16_t)crewAid[k][1][c];
     for (int c = 0; c < 7 && 29 + c < nb; c++) b[29 + c] = (uint16_t)crewAid[k][14][c];
 }
@@ -565,6 +582,7 @@ static void fa_hfe(int k, uint16_t *w, int n) {
      * rotation detectors, which must read running (GQRORB.hal:139-270). */
     b[21] = (uint16_t)(fa_jets_b(k) | 0x00E0u);
     b[22] = fa_jets_b(k);
+    crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
 
@@ -653,9 +671,18 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
     if (!mdmdev_enabled()) {
         /* No device model: zeros, as ever, plus whatever crew contacts the
          * panel is driving -- and only once it has driven some. */
-        if (!crewHeard || CMD_IUA(cmd) != IUA_FF) return false;
-        int u = ff_unit(busID);
+        if (!crewHeard) return false;
         uint32_t f = cmd & 0x3ffffu;
+        if (CMD_IUA(cmd) == IUA_FA) {
+            int u = fa_unit(busID);
+            if (u < 1 || f != HFE_FA_READ) return false;
+            uint16_t b[54] = {0};
+            crew_fa_hfe(u, b, 54);
+            for (int i = 0; i < n; i++) out[i] = (i < 54) ? b[i] : 0;
+            return true;
+        }
+        if (CMD_IUA(cmd) != IUA_FF) return false;
+        int u = ff_unit(busID);
         int at = (f == HFE_FF_READ) ? 0 : (f == MFE_FF_READ) ? 8 : -1;
         if (u < 1 || at < 0) return false;
         uint16_t d[13] = {0};

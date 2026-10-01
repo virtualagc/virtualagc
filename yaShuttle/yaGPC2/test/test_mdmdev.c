@@ -298,6 +298,30 @@ int main(void) {
         }
         check(ok, "a THC contact on DSCRT4 survives the device model's words");
         crew_send(1, 2, 6, 0, 0x0100u);
+        /* THE AFT MDMs: crew units 5-8 are FA1-4.  OMS ENG L ARM (FA1 DSCRT2
+         * bit 8, DIH card 3 ch 1) reaches the FA HFE read's word 19; a
+         * contact on DSCRT3 (card 3 ch 2) is ORed with the device model's
+         * manifold-open bits in word 20, not over them. */
+        uint16_t a1[54];
+        crew_send(5, 1, 3, 1, 0x0100u);
+        crew_send(5, 1, 3, 2, 0x0001u);
+        ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(14, FA(0x0836Eu), 54, a1);
+            ok = a1[19] == 0x0100u && a1[20] == 0xA001u;
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        check(a1[19] == 0x0100u, "crew OMS ENG ARM reaches FA1 DSCRT2 (HFE word 19)");
+        check(a1[20] == 0xA001u, "an FA contact is ORed with the manifold bits");
+        crew_send(5, 2, 3, 1, 0x0100u);
+        crew_send(5, 2, 3, 2, 0x0001u);
+        ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(14, FA(0x0836Eu), 54, a1);
+            ok = a1[19] == 0 && a1[20] == 0xA000u;
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        check(ok, "and RESET clears the FA contacts");
     }
 
     mtumodel_free(m);
