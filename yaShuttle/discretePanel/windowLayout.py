@@ -1021,8 +1021,13 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
         elif ok is None:
             note = "  (the window went away)"
         else:
-            note = ("  (ended %+d,%+d from there -- a window that would straddle two "
-                    "monitors is pushed back onto one)" % (-ok[0], -ok[1]))
+            # SAY ONLY WHAT IS KNOWN: the window manager moved it.  A window
+            # straddling two monitors is one reason; a work area that has
+            # shrunk under it -- WSLg after a display change, down to one
+            # monitor -- is another, and blaming the first misled
+            # (WSL-integration, 2026-10-01).
+            note = ("  (ended %+d,%+d from there -- the window manager moved it: "
+                    "off its work area, or across two monitors?)" % (-ok[0], -ok[1]))
         log("   %-12s -> %d,%d%s%s" % (role, want["x"], want["y"],
                                        " %dx%d" % size if size[0] else "", note))
         done += 1

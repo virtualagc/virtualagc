@@ -1927,6 +1927,7 @@ def main():
             manager_argv = [py, "manager.py", "--port-base", str(args.port_base),
                             "--gpcs", ",".join(map(str, gpcs)),
                             "--crts", str(args.crts),
+                            "--hc-size", str(tk_px(size)),
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             if args.panel_script:

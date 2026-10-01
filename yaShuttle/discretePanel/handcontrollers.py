@@ -354,8 +354,14 @@ class VirtualControls:
         self.W, self.H = int((560 if thc_name else 300) * scale), int(380 * scale)
         self.screen = pg.display.set_mode((self.W, self.H), pg.RESIZABLE)
         pg.display.set_caption(window_title(thc_name, rhc_name))
-        self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(9, int(13 * scale)))
-        self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(8, int(11 * scale)))
+        # TEXT SCALES WITH THE WINDOW, as panelO6's does.  Floors of 9 and 8
+        # px held it full size while the drawing shrank -- 1.4x too big at
+        # --size 384, and 3x in simulatePASS's halved macOS window, where the
+        # no-focus line ran off the edge and the bottom line was cut off
+        # (Mac-integrate, 2026-10-01).  A floor of a few pixels only keeps
+        # it from vanishing.
+        self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(13 * scale)))
+        self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(11 * scale)))
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
         self.drag = None                     # gimbal: "pr" or "yaw" while held
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
@@ -557,8 +563,14 @@ class VirtualControls:
                  (20, 20, 20) if on else ink)
         if not self.focused:
             pg.draw.rect(s, (200, 40, 40), s.get_rect(), max(3, int(4 * k)))
-            msg = self.font.render("NO KEYBOARD FOCUS -- click here; keys inactive",
-                                   True, (255, 90, 90))
+            # The longest line that fits the window.
+            msg = None
+            for f, t in ((self.font, "NO KEYBOARD FOCUS -- click here; keys inactive"),
+                         (self.small, "NO KEYBOARD FOCUS -- click here"),
+                         (self.small, "NO FOCUS -- click")):
+                msg = f.render(t, True, (255, 90, 90))
+                if msg.get_width() <= self.W - int(12 * k):
+                    break
             s.blit(msg, ((self.W - msg.get_width()) // 2, int(6 * k) + self.font.get_height()))
         pg.display.flip()
 

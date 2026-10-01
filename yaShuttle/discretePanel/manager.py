@@ -23,6 +23,10 @@ WHAT IT DOES.
              size, colours -- is saved with it.
     Caption  Start the caption box (subtitles.py) with the look the layout
              file holds, or Stop the one this window started.
+    Hand     Start the hand controllers (handcontrollers.py) for one
+             station -- CDR, PLT or Aft -- or Stop them: the RHC and THC, from
+             a joystick or, without one, a window of virtual controllers.  So
+             a run started without simulatePASS's --rhc can still be flown.
 
 There is deliberately no pause: yaGPC2 has none of its own, and stopping its
 process leaves the displays timing out and the emulator racing to catch up
@@ -52,7 +56,7 @@ import windowLayout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROGRAMS = ("yaGPC2", "MEDS2.py", "panelO6.py", "stsKeyboard.py", "cam.py",
-            "subtitles.py", "discretePanel.py")
+            "subtitles.py", "discretePanel.py", "handcontrollers.py")
 POLL_MS = 3000
 C_BG = "#2b2b2b"
 C_FG = "#e8e8e8"
@@ -210,6 +214,7 @@ class Manager(object):
         self.script_heading = None
         self.root, self.args = root, args
         self.subtitles = None              # the caption box this window started
+        self.hands = None                  # the hand controllers it started
         # SHORT ENOUGH TO READ.  This window is narrow, and a title bar it
         # cannot fit says nothing at all: "Simulation manager" came back as
         # something unreadable, let alone with the run appended.  The run is
@@ -286,6 +291,15 @@ class Manager(object):
         row = self._row()
         self._button(row, "Start", self.start_subtitles, wide=True)
         self._button(row, "Stop", self.stop_subtitles)
+
+        # ONE STATION, as simulatePASS's --rhc: one person flies this.  Here so
+        # that forgetting --rhc at start-up does not cost the run (Ron).
+        self._section("HAND CONTROLLERS", bold)
+        row = self._row()
+        self._button(row, "CDR", lambda: self.start_hands("lh"))
+        self._button(row, "PLT", lambda: self.start_hands("rh"))
+        self._button(row, "Aft", lambda: self.start_hands("aft"))
+        self._button(row, "Stop", self.stop_hands)
 
         self._section("SIMULATION", bold)
         row = self._row()
@@ -1127,6 +1141,45 @@ class Manager(object):
         if os.path.isfile(path):
             self.root.after(2500, self.restore_layout)   # put it where the layout says
 
+    def start_hands(self, rhc):
+        if any(n == "handcontrollers.py" for n, _ in running(self.args.port_base)):
+            self.say("Hand controllers are already running on this port base; Stop them first")
+            return
+        argv = [sys.executable, os.path.join(HERE, "handcontrollers.py"),
+                "--rhc", rhc, "--port-base", str(self.args.port_base),
+                "--size", str(self.args.hc_size)]
+        try:
+            self.hands = subprocess.Popen(argv, cwd=HERE, stdout=subprocess.DEVNULL,
+                                          stderr=subprocess.STDOUT,
+                                          stdin=subprocess.DEVNULL)
+        except OSError as e:
+            self.say("Cannot start the hand controllers: %s" % e)
+            return
+        self.say("Hand controllers started: %s"
+                 % {"lh": "CDR (LH RHC, forward THC)", "rh": "PLT (RH RHC)",
+                    "aft": "Aft (aft RHC and THC)"}[rhc])
+        path = self.layout.get().strip()
+        if os.path.isfile(path):
+            self.root.after(2500, self.restore_layout)   # put it where the layout says
+
+    def stop_hands(self):
+        if self.hands is not None and self.hands.poll() is None:
+            self.hands.terminate()
+            self.hands = None
+            self.say("Hand controllers stopped")
+            return
+        pids = [pid for n, pid in running(self.args.port_base) if n == "handcontrollers.py"]
+        if not pids:
+            self.say("No hand controllers on this port base")
+            return
+        for pid in pids:
+            try:
+                os.kill(pid, 15)
+            except OSError as e:
+                self.say("Cannot stop %d: %s" % (pid, e))
+                return
+        self.say("Hand controllers stopped (pid %s)" % ", ".join(map(str, pids)))
+
     def stop_subtitles(self):
         if self.subtitles is not None and self.subtitles.poll() is None:
             self.subtitles.terminate()
@@ -1176,7 +1229,8 @@ class Manager(object):
             # Names a person uses, not the file names the scan found.
             pretty = {"yaGPC2": "GPC", "MEDS2.py": "MEDS", "panelO6.py": "Panel",
                       "discretePanel.py": "Panel", "cam.py": "CAM",
-                      "stsKeyboard.py": "Keyboard", "subtitles.py": "Captions"}
+                      "stsKeyboard.py": "Keyboard", "subtitles.py": "Captions",
+                      "handcontrollers.py": "Hand controllers"}
             shown = []
             for n, c in sorted(counts.items()):
                 shown.append("%s%s" % (pretty.get(n, n),
@@ -1214,6 +1268,9 @@ def main(argv=None):
     ap.add_argument("--gpcs", metavar="LIST", default="",
                     help="which GPCs this run has, for the status line")
     ap.add_argument("--crts", type=int, metavar="N", default=0)
+    ap.add_argument("--hc-size", type=int, metavar="N", default=384,
+                    help="--size for hand controllers started from here "
+                         "(simulatePASS passes the keyboards')")
     ap.add_argument("--tape", metavar="FILE", default="")
     ap.add_argument("--snapshot-dir", metavar="DIR", default="",
                     help="where Save writes and Restore reads")
