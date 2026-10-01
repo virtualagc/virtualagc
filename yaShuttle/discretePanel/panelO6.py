@@ -1582,8 +1582,20 @@ class PanelO6:
         act_y0 = act_y1 - (3 * pad + 4 * th10)
         rhc_y1 = act_y0 - PANE_GAP
         rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + self.pb)
-        self._draw_rhc(f6_x0, rhc_y0, f6_x1, rhc_y1)
-        self._draw_activity(f6_x0, act_y0, f6_x1, act_y1)
+        # RHC BFC ENGAGE IS AS WIDE AS ITS TITLE NEEDS, with room for the
+        # corner tag on either side so the centred title clears it, and
+        # ACTIVITY below it matches (owner, 2026-10-01): at C3's width the
+        # title overran the pane.  R11, beside them, moves right to suit.
+        tag_room = self._tw("RHC") + 14
+        bot_w = max(f6_x1 - f6_x0, self._tw("RHC BFC ENGAGE", 10) + 2 * tag_room)
+        bot_x1 = f6_x0 + bot_w
+        self._draw_rhc(f6_x0, rhc_y0, bot_x1, rhc_y1)
+        # Neither is from a crew panel: the ENGAGE buttons are on the RHC
+        # grips, and ACTIVITY is the simulator's own -- tagged so, in the
+        # panel numbers' place.
+        self._panel_tag(f6_x0, rhc_y0, "RHC")
+        self._draw_activity(f6_x0, act_y0, bot_x1, act_y1)
+        self._panel_tag(f6_x0, act_y0, "SIM")
         # The IDP column, right of C3/F6: C2 at the top, the O6 IDP LOAD
         # inset under it.
         idp_x0 = c3_x1 + PANE_GAP
@@ -1592,8 +1604,9 @@ class PanelO6:
         self._panel_tag(idp_x0, my0, "C2")
         load_y1 = self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
         self._panel_tag(idp_x0, c2_y1 + PANE_GAP, "O6")
-        self._draw_r11(idp_x0, load_y1 + PANE_GAP, idp_x1)
-        self._panel_tag(idp_x0, load_y1 + PANE_GAP, "R11")
+        r11_x0 = max(idp_x0, bot_x1 + PANE_GAP)
+        self._draw_r11(r11_x0, load_y1 + PANE_GAP, idp_x1)
+        self._panel_tag(r11_x0, load_y1 + PANE_GAP, "R11")
         # The ADI and SENSE switches: their own column, right of the IDP one.
         adi_x0 = idp_x1 + PANE_GAP
         adi_w = max(ADI_COL_W, self._adi_width())
