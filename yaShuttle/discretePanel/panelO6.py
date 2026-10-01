@@ -82,6 +82,7 @@ Usage:
 
 import argparse
 import json
+import math
 import os
 import sys
 import select
@@ -587,6 +588,9 @@ class PanelO6:
 
         mw, mh = scaled_wh(640, 700, size)
         root.minsize(mw, mh)
+        self._minsize = (mw, mh)
+        self.natural = None     # set by main() when it sizes the window itself
+        self._snugged = False
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
@@ -1622,8 +1626,38 @@ class PanelO6:
         # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
         # their measured text needs, which under macOS's wider fonts is more
         # than at Linux's (Mac-integrate, 2026-10-01).
+        self._fit_moved = False
         self._fit("_ref_w", REF_W, dap_x0 + dap_w + MARGIN)
         self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
+        if not self._fit_moved:
+            self._snug()
+
+    def _snug(self):
+        """ONCE, when the fit has settled: shrink a window still at its
+        natural size to the fitted content's shape.  The natural size comes
+        from REF_W x REF_H, but the content's shape is measured, so the
+        content was letterboxed -- about 95 px empty above and below at
+        --size 768 on Windows (Win11-native, 2026-10-01).  Only shrinks, and
+        never a window given --geometry or already resized by a layout or
+        the user."""
+        if self._snugged or self.natural is None:
+            return
+        root = self.root
+        size = (root.winfo_width(), root.winfo_height())
+        if size[0] <= 1:
+            return                        # not mapped yet
+        self._snugged = True
+        if size != self.natural:
+            return
+        cw, ch = self.cv.winfo_width(), self.cv.winfo_height()
+        dw = cw - int(math.ceil(getattr(self, "_ref_w", REF_W) * self.s)) - 2
+        dh = ch - int(math.ceil(getattr(self, "_ref_h", REF_H) * self.s)) - 2
+        if dw < 0.02 * cw and dh < 0.02 * ch:
+            return
+        w, h = size[0] - max(0, dw), size[1] - max(0, dh)
+        root.minsize(min(self._minsize[0], w), min(self._minsize[1], h))
+        log("snug: window %dx%d -> %dx%d to the fitted content" % (size + (w, h)))
+        root.geometry("%dx%d" % (w, h))
 
     FIT_PASSES = 16         # refits after one resize, growing or bisecting
     FIT_GROW_PASSES = 12    # extra growing refits: content is never clipped
@@ -1675,6 +1709,7 @@ class PanelO6:
         self._fit_passes = passes + 1
         log("fit: %s %.0f -> %.0f at scale %.4f" % (attr[5:], cur, new, self.s))
         setattr(self, attr, new)
+        self._fit_moved = True
         self.root.after_idle(self.redraw)
 
     def _gpc_numbers(self, y):
@@ -3237,6 +3272,7 @@ def main(argv=None):
     else:
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
+        panel.natural = (w, h)
     # BETWEEN CONSTRUCTION AND THE FIRST PUBLISH, which is the only window
     # where seeding the switches is silent -- see start_bus().
     if args.restore:
