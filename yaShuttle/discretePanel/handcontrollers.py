@@ -344,7 +344,11 @@ class VirtualControls:
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
         self.drag = None                     # gimbal: "pr" or "yaw" while held
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
-        self.focused = True
+        # The REAL keyboard focus, not an assumption: a window that never had
+        # it gets no WINDOWFOCUSLOST, so "focused until told otherwise" showed
+        # no red border at start-up from a terminal that kept the keyboard
+        # (Mac-integrate, 2026-10-01).  sync_focus() re-reads it every frame.
+        self.focused = bool(pg.key.get_focused())
         self._layout()
 
     def _layout(self):
@@ -402,6 +406,13 @@ class VirtualControls:
                     self.ptr["yaw"] = _clip(self.ptr["yaw"] + dx / full)
             elif self.style == "split" and "mouse" in self.fingers:
                 self._finger_move(None, e.pos)
+
+    def sync_focus(self):
+        """Keyboard focus as SDL has it now; losing it releases a drag."""
+        now = bool(self.pg.key.get_focused())
+        if self.focused and not now:
+            self._release_drag()
+        self.focused = now
 
     def _release_drag(self):
         if self.drag:
@@ -555,6 +566,7 @@ def run_virtual(pg, args, pub, rp, status):
             if e.type == pg.QUIT:
                 return 0
             vc.handle(e)
+        vc.sync_focus()
         defl = vc.deflection()
         rp.counts = dict((a, round(defl[a] * RHC_FULL)) for a in RHC_AXES)
         pub.bits = vc.thc_bits()
@@ -636,6 +648,10 @@ def main(argv=None):
         # can find and place it -- under WSLg too.
         if sys.platform.startswith("linux") and os.environ.get("DISPLAY"):
             os.environ.setdefault("SDL_VIDEODRIVER", "x11")
+        # macOS: SDL reports Ctrl-click as button 1, so the usual one-button
+        # right-click would have been pitch/roll, not yaw (Mac-integrate).
+        if sys.platform == "darwin":
+            os.environ.setdefault("SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK", "1")
         pygame.init()
         return run_virtual(pygame, args, pub, rp, status)
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
