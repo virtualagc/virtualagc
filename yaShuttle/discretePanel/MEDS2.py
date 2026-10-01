@@ -5271,7 +5271,7 @@ SHOW_IDP_BOX = str(env('NSTS_DPS_IDP_BOX', '1')) not in ('', '0')
 
 
 class Screen_DPS(MDUScreen):
-    POLL_FAIL_COLOR = 48
+    POLL_FAIL_COLOR = 62      # FAIL_COLOR, red; 48 is a flight code, cyan
     POLL_FAIL_X = [[0, 1, 52, 27], [52, 1, 0, 27]]
     POLL_FAIL_AT = [41, 26]
 
@@ -5634,9 +5634,17 @@ class Screen_DPS(MDUScreen):
                   % (kind, jsround(st['beamX']), jsround(st['beamY']),
                      st['tx'], st['ty'], penX(), penY(), extra))
 
+        # DOUBLE INTENSITY IS YELLOW, not brighter green, wherever the pen is
+        # the default green, implied or selected: STS-83-0020V1-34 sect.3.1
+        # maps the MCDS's "Overbright text (2X intensity) - BRIGHT GREEN" to
+        # MEDS "YELLOW".  A colour actually selected is drawn as selected.
         def penColor():
-            if st['colorCode'] is not None:
-                return self._deuColor(st['colorCode'])
+            bright = st['fcw1Bright'] or st['fcw3Bright']
+            code = st['colorCode']
+            if bright and (self.DEU_DEFAULT_GREEN if code is None else code) == self.DEU_DEFAULT_GREEN:
+                return self._deuColor(self.DEU_DEFAULT_YELLOW)
+            if code is not None:
+                return self._deuColor(code)
             return self.d.c2h['green']
 
         def penIntensity():
@@ -5962,9 +5970,46 @@ class Screen_DPS(MDUScreen):
         if showing[0] > 0:
             self.d.dirty = True
 
+    # THE FCW3 PALETTE INDEX -> AN RGB COLOUR.  The 64-entry table is in
+    # MG070100A1012E2, the MEDS IDP Software Requirements Specification,
+    # which we do not have.  Only three "MEDS enhanced" displays, all from
+    # OI33 (0540G, 0543G, 3041G), send colours, and STS-83-0020V1-34 names
+    # the colour of the codes they send in the prose for each display:
+    #
+    #   sect.3 field 47  "default green (color 40)", "default yellow (color 54)"
+    #   sect.4.2.1.1     alternate landing sites "in white" and "in cyan";
+    #                    sect.4.2.1.4 item N sends them as 29 and 47
+    #   sect.4.2.41 (5)  the target insertion line "in default yellow", 7 and 56
+    #   sect.4.2.41 (6)  the launch window lines "in default green", COLOR=DEU
+    #                    (select clear), which is 40
+    #   sect.4.2.42      selected runway line "in yellow", 21; delaz 7; roll
+    #                    reversal and range rings "in green", 4; alternate
+    #                    sites white 31 and cyan 48; IIP "white cross", 31;
+    #                    E/W scales "in green", 19
+    #
+    # 33 and 43 are the inset-window counterparts of 29 and 40 (sect.4.2.41
+    # E and K).  Reading every code as three 2-bit channels, as this did, drew
+    # default green olive and default yellow pink.  A code outside the table
+    # still falls back to that reading, fitted to nothing.  The table is Don
+    # Schmidt's (nsts-sim-gpc 966674f, mduScreen_DPS.coffee).
+    DEU_DEFAULT_GREEN = 40
+    DEU_DEFAULT_YELLOW = 54
+    # Not a flight code: no document names a colour for the IDP's own POLL
+    # FAIL and big X, which photographs show red; 62 is a code no display
+    # sends (upstream's FAIL_COLOR).
+    FAIL_COLOR = 62
+    DEU_NAMED_COLORS = {
+        4: 'green', 19: 'green', 40: 'green', 43: 'green',
+        7: 'yellow', 21: 'yellow', 54: 'yellow', 56: 'yellow',
+        29: 'white', 31: 'white', 33: 'white',
+        47: 'cyan', 48: 'cyan',
+        62: 'red',
+    }
+
     def _deuColor(self, code):
-        """The FCW3 palette index -> an RGB colour.  Every COLOR= value the
-        display decks use reads consistently as three 2-bit channels."""
+        name = self.DEU_NAMED_COLORS.get(code)
+        if name is not None:
+            return self.d.c2h[name]
         lvl = [0x00, 0x60, 0xb0, 0xff]
         r = lvl[(code >> 4) & 3]
         g = lvl[(code >> 2) & 3]
