@@ -1128,9 +1128,10 @@ class PanelO6:
     def _scale(self):
         cw = max(self.cv.winfo_width(), 40)
         ch = max(self.cv.winfo_height(), 40)
-        self.s = min(cw / float(REF_W), ch / float(REF_H))
+        ref_h = getattr(self, "_ref_h", REF_H)
+        self.s = min(cw / float(REF_W), ch / float(ref_h))
         self.ox = (cw - REF_W * self.s) / 2.0
-        self.oy = (ch - REF_H * self.s) / 2.0
+        self.oy = (ch - ref_h * self.s) / 2.0
 
     def X(self, x):
         return self.ox + x * self.s
@@ -1324,6 +1325,18 @@ class PanelO6:
         mx0, my0 = MARGIN, MARGIN
         mx1 = O6_MAIN_RIGHT
         my1 = L["mode_halt"] + 24
+        # THE DESIGN HEIGHT FITS WHAT WAS LAID OUT.  O6's vertical rhythm is
+        # built from measured text, so a larger font scale makes it taller:
+        # under macOS's NSTS_TK_FONT_SCALE=2 the panes ended at 1313 units
+        # (1319 with their shadow) against REF_H's 1300, and ACTIVITY was cut
+        # off at the bottom (Mac-integrate, 2026-10-01).  If they overrun,
+        # the design height grows to hold them and the picture is redrawn at
+        # the scale that fits.  It only grows, so it cannot oscillate; at
+        # Linux's sizes the panes end near 1100 and nothing changes.
+        need = my1 + 6 + 6
+        if need > getattr(self, "_ref_h", REF_H) + 0.5:
+            self._ref_h = need
+            self.root.after_idle(self.redraw)
         ex1 = 790
         ey0 = L["out_backup"] - 10
         ey1 = L["mode_line"] + 4
