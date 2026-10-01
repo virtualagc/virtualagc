@@ -123,68 +123,20 @@ static const int BCENET_BUS_PORT[BCENET_MAX_BUS_ID + 1] = {
  * NSTS_BUS_PORT_BASE) without fighting the first for sockets.  At the
  * default base of 6900 these are the 6901..6923 of nsts-sim-gpc's own
  * busConfig, unchanged. */
-/* bus.civet's own IP1..IP5 offsets, indexed by GPC number.  Note that it
- * gives IP2 and IP3 the SAME port (6925), so five GPCs share four ports.
- * That looks like an upstream typo, but it is reproduced verbatim rather
- * than silently corrected: a GPC 3 that "fixed" it would be talking on a
- * port the reference implementation is not listening to, which is a worse
- * failure than sharing one. */
-static const int BCENET_IP_PORT_BY_GPC[6] = { 0, 24, 25, 25, 26, 27 };
-
-/* WHAT WE DO ABOUT IT IN THE MEANTIME.  Reported upstream as
- * ColanderCombo/nsts-sim-gpc#34; until that is answered, the table above is
- * used VERBATIM -- except in the one configuration where it is not merely
- * odd but wrong: a vehicle carrying BOTH GPC 2 and GPC 3.  There the two
- * computers would transmit and listen on one intercomputer bus and each
- * would read the other's traffic as its own, which is not a bus fault the
- * flight software can diagnose -- it is the kind of artefact that presents
- * as a redundant set failing to form for no visible reason, and this project
- * has spent enough runs on those.
- *
- * GPC 3 moves, and only GPC 3: 1, 2, 4 and 5 keep their upstream ports, so a
- * run that does not contain the colliding pair is bit-for-bit what it always
- * was, and a run that does diverges from the reference by exactly one
- * computer.  That is the smallest divergence available, and it is NOT a
- * guess at what the upstream fix will be -- if Don shifts IP4 and IP5
- * instead, this follows him.  6928-6930 are unused in bus.civet.
- *
- * YAGPC_IP_PORTS_VERBATIM=1 keeps the collision, for anyone who needs to
- * reproduce the reference exactly, and still says what it is doing. */
-#define BCENET_IP_PORT_SPARE 28
-
-static int g_ipPortOverride[6];
-
-void bcenet_declare_gpc_set(unsigned mask) {
-    for (int g = 0; g < 6; g++) g_ipPortOverride[g] = 0;
-    if (!(mask & (1u << 2)) || !(mask & (1u << 3))) return;   /* no clash */
-    if (yagpc_getenv("YAGPC_IP_PORTS_VERBATIM") != NULL) {
-        fprintf(stderr,
-                "bcenet: GPC2 and GPC3 are BOTH running and the upstream port "
-                "table gives them the same intercomputer bus (%d); "
-                "YAGPC_IP_PORTS_VERBATIM is set, so they will share it -- "
-                "their ICC traffic will be each other's.  See "
-                "ColanderCombo/nsts-sim-gpc#34.\n",
-                yagpc_port_base() + BCENET_IP_PORT_BY_GPC[2]);
-        return;
-    }
-    g_ipPortOverride[3] = BCENET_IP_PORT_SPARE;
-    fprintf(stderr,
-            "bcenet: GPC2 and GPC3 are BOTH running and the upstream port "
-            "table gives them the same intercomputer bus (%d); GPC3 moved to "
-            "%d so they do not share one.  This DIVERGES from nsts-sim-gpc "
-            "for GPC3 only -- see ColanderCombo/nsts-sim-gpc#34, or set "
-            "YAGPC_IP_PORTS_VERBATIM=1 to keep the collision.\n",
-            yagpc_port_base() + BCENET_IP_PORT_BY_GPC[2],
-            yagpc_port_base() + BCENET_IP_PORT_SPARE);
-}
+/* bus.civet's IP1..IP5 offsets, indexed by GPC number: 24-28, one bus each.
+ * The table used to give IP2 and IP3 the same port (25), so a vehicle with
+ * both computers had them reading each other's intercomputer traffic, and
+ * this file moved GPC 3 to a spare port as a stopgap.  We reported it as
+ * ColanderCombo/nsts-sim-gpc#34, and upstream fixed it by renumbering IP3-IP5
+ * to 26-28 (its CMake reorganisation, 9528266).  The ports follow upstream
+ * now, so the stopgap and its YAGPC_IP_PORTS_VERBATIM switch are gone. */
+static const int BCENET_IP_PORT_BY_GPC[6] = { 0, 24, 25, 26, 27, 28 };
 
 static int bcenet_bus_port(int gpcId, int busID) {
     if (busID == 24) {
         int gpc = gpcId;
         if (gpc < 1 || gpc > 5) gpc = 1;
-        int off = g_ipPortOverride[gpc] ? g_ipPortOverride[gpc]
-                                        : BCENET_IP_PORT_BY_GPC[gpc];
-        return yagpc_port_base() + off;
+        return yagpc_port_base() + BCENET_IP_PORT_BY_GPC[gpc];
     }
     int off = (busID >= 0 && busID <= BCENET_MAX_BUS_ID)
                   ? BCENET_BUS_PORT[busID] : 0;

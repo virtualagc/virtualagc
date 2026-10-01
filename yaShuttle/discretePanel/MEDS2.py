@@ -237,9 +237,11 @@ busConfig = {
     'FC4': {'gpcBceNum': 23, 'port': 6923, 'nom': "Flight Critical 4"},
     'IP1': {'gpcBceNum': 24, 'port': 6924, 'nom': "IP1", 'gpc': 1},
     'IP2': {'gpcBceNum': 24, 'port': 6925, 'nom': "IP2", 'gpc': 2},
-    'IP3': {'gpcBceNum': 24, 'port': 6925, 'nom': "IP3", 'gpc': 3},
-    'IP4': {'gpcBceNum': 24, 'port': 6926, 'nom': "IP4", 'gpc': 4},
-    'IP5': {'gpcBceNum': 24, 'port': 6927, 'nom': "IP5", 'gpc': 5},
+    # IP1-IP5 at 24-28, one each, as upstream renumbered them (nsts-sim-gpc
+    # 9528266, our #34): IP2 and IP3 used to share 6925.
+    'IP3': {'gpcBceNum': 24, 'port': 6926, 'nom': "IP3", 'gpc': 3},
+    'IP4': {'gpcBceNum': 24, 'port': 6927, 'nom': "IP4", 'gpc': 4},
+    'IP5': {'gpcBceNum': 24, 'port': 6928, 'nom': "IP5", 'gpc': 5},
 
     '_KYBD1': {'port': 6931, 'nom': "DPS IDP Keyboard 1"},
     '_KYBD2': {'port': 6932, 'nom': "DPS IDP Keyboard 2"},
@@ -252,8 +254,9 @@ busConfig = {
 
     '_FF1_mdmIO': {'port': 6950, 'nom': "MDM FF1 I/O"},
 
-    '_NSP1_data': {'port': 6960, 'nom': "NSP1 to PCMMU"},
-    '_NSP2_data': {'port': 6960, 'nom': "NSP1 to PCMMU"},
+    # (The _NSP1_data/_NSP2_data pair, both on 6960, is gone: upstream
+    # replaced it with the PCMMU and S-band streams at 60-62, and nothing here
+    # opened either.)
 
     '_GSE_PCMMU_T0': {'port': 6970, 'nom': "PCCMU to GSE via T-0 umbilical"},
 
@@ -1432,6 +1435,11 @@ class DEU(object):
     BITE1 = NS(ALWAYS_ONE=0x8000, IPL_DONE=0x4000,
                IPL_ERROR=0x2000, IPL_CIRCUIT_ERROR=0x1000)
     BITE1_HEALTHY = 0x8000 | 0x4000
+    # Hardware status register 2 (the CPU and the two interfaces): bit 0 is
+    # always one, every error bit clear.  A running unit's status line reads
+    # "8200 8000 8000 0000" -- JSC-18820 Rev B, the OTP display's status line
+    # (fig.4-30), and STS-83-0020V2-34 sect.4.6.8's self test.  This sent 0.
+    BITE2_HEALTHY = 0x8000
 
     # The unit's software status register -- poll response word 15.
     SWSTATUS = NS(INITIALIZED=0x2000, INT_MASK=0x2010)
@@ -1565,7 +1573,7 @@ class DEU(object):
         for i in range(DEU.KEY_WORDS):
             words[2 + i] = packed[i]
         words[12] = (o['bite1'] if o.get('bite1') is not None else DEU.BITE1_HEALTHY) & 0xffff
-        words[13] = (o.get('bite2') or 0) & 0xffff
+        words[13] = (o['bite2'] if o.get('bite2') is not None else DEU.BITE2_HEALTHY) & 0xffff
         words[14] = (o['swStatus'] if o.get('swStatus') is not None else DEU.SWSTATUS_HEALTHY) & 0xffff
         words[15] = DEU.checksum(words[0:15])
         return words
@@ -1589,7 +1597,7 @@ class DEU(object):
         o = o or {}
         words = [(o.get('header') or 0) & 0xffff,
                  (o['bite1'] if o.get('bite1') is not None else DEU.BITE1_HEALTHY) & 0xffff,
-                 (o.get('bite2') or 0) & 0xffff,
+                 (o['bite2'] if o.get('bite2') is not None else DEU.BITE2_HEALTHY) & 0xffff,
                  (o['swStatus'] if o.get('swStatus') is not None else DEU.SWSTATUS_HEALTHY) & 0xffff,
                  0]
         words[4] = DEU.checksum(words[0:4])

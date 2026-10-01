@@ -37,6 +37,11 @@
 #define HDR_IPL_REQUIRED    0x0001
 #define BITE1_ALWAYS_ONE    0x8000
 #define BITE1_IPL_DONE      0x4000
+/* Hardware status register 2, the CPU and the two interfaces: bit 0 always
+ * one, every error bit clear.  A running unit's status line is "8200 8000
+ * 8000 0000" -- JSC-18820 Rev B fig.4-30, STS-83-0020V2-34 sect.4.6.8.  This
+ * sent 0 (ledger #269). */
+#define BITE2_HEALTHY       0x8000
 #define SWSTATUS_HEALTHY    0x2000
 
 /* A transfer is at most COUNT_MASK halfwords, the field's own limit. */
@@ -415,7 +420,7 @@ static void deu_poll_response(DeuModel *d) {
     w[1] = KEY_COUNT_HIGH;              /* no keys queued */
     w[0] |= deu_pending_keys(d, w);
     w[12] = deu_bite1(d);
-    w[13] = 0;
+    w[13] = BITE2_HEALTHY;
     w[14] = SWSTATUS_HEALTHY;
     w[15] = deu_checksum(w, 15);
     deu_queue_reply(d, w, POLL_WORDS);
@@ -424,7 +429,7 @@ static void deu_poll_response(DeuModel *d) {
 static void deu_bite_response(DeuModel *d) {
     uint16_t w[5];
     w[0] = deu_bite1(d);
-    w[1] = 0;
+    w[1] = BITE2_HEALTHY;
     w[2] = SWSTATUS_HEALTHY;
     w[3] = 0;
     w[4] = deu_checksum(w, 4);

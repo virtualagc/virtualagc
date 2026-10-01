@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 
     /* THE PORT BASE BEFORE ANYTHING PRINTS ONE.  batchrunner_init applies
      * --port-base, but that is per machine and runs later, so anything up
-     * here saw the default: the GPC2/GPC3 notice below reported 6925 and
+     * here saw the default: a GPC2/GPC3 port notice that once printed here reported 6925 and
      * 6928 on a run whose sockets were 7325 and 7328, which reads exactly
      * like a run squatting on another run's ports.  The sockets were always
      * right -- the message was not.  Setting it once, here, is what makes
@@ -109,13 +109,6 @@ int main(int argc, char **argv) {
         }
         yagpc_set_port_base((int)v);
     }
-
-    /* WHICH COMPUTERS, before any socket is opened.  The intercomputer bus is
-     * the one bus whose port depends on who owns it, and the upstream table
-     * gives GPC 2 and GPC 3 the same one -- see bcenet_transport.h. */
-    unsigned gpcMask = 0u;
-    for (int i = 0; i < nGpc; i++) gpcMask |= 1u << gpcs[i];
-    bcenet_declare_gpc_set(gpcMask);
 
     /* The peripherals belong to the vehicle, not to any one computer: two
      * mass memory units, one timing unit, the display units, one set of bus
