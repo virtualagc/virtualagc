@@ -582,6 +582,12 @@ def parse(text, path=None, _depth=0, _seen=None):
                         entry["audio"] = (snd if os.path.isfile(snd) and
                                           os.path.splitext(snd)[1].lower() in MAC_AUDIO_TYPES
                                           else "")
+                    elif sys.platform == "win32":
+                        # WINDOWS DOES THE SAME, with winsound, which plays
+                        # .wav only: a .wav that is there is kept, and anything
+                        # else becomes "", Windows' own notification sound.
+                        entry["audio"] = (snd if os.path.isfile(snd) and
+                                          snd.lower().endswith(".wav") else "")
                     elif not os.path.isfile(snd):
                         raise ScriptError("audio: no such file: %s" % arg)
                     else:
@@ -798,7 +804,22 @@ def play_audio(path, log=None):
 
     Whichever player is installed; the sounds a desktop already ships are
     .oga, which aplay cannot read and paplay can, so the order matters.
-    On macOS it is afplay, and "" means the fallback sound (see parse())."""
+    On macOS it is afplay, and "" means the fallback sound (see parse()).
+    On Windows it is Python's own winsound, which needs no player, and ""
+    means Windows' notification sound."""
+    if sys.platform == "win32":
+        try:
+            import winsound
+            if path:
+                winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC
+                                   | winsound.SND_NODEFAULT)
+            else:
+                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS | winsound.SND_ASYNC)
+            return True
+        except (ImportError, RuntimeError) as e:
+            if log:
+                log("audio: could not play %s: %s" % (path or "the system sound", e))
+            return False
     if sys.platform == "darwin":
         try:
             subprocess.Popen(["afplay", path or MAC_AUDIO_FALLBACK],
