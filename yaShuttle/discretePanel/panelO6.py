@@ -361,9 +361,10 @@ R11_W = 5 + 230 + 5 + 4  # the R11 inset: C2's margins round a 230-wide set
 # ~5 px under the IPL SOURCE tab at some --size values; at 40, 15 or more.
 RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
-ADI_COL_W = 260        # the ADI column, right of the IDP column
+ADI_COL_W = 300        # the ADI column, right of the IDP column (260 crowded under
+                       # macOS's wider fonts by about a character)
 REF_W = (O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + PANE_GAP + ADI_COL_W
-         + MARGIN)     # 1960; 1684 before the ADI column
+         + MARGIN)     # 2000; 1684 before the ADI column
 REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
@@ -1802,14 +1803,16 @@ class PanelO6:
         gw, gh = 40, 104
         sgw, sgh = 40, 64                        # SENSE, two positions
         well = gw * 1.08 / 2.0                   # the round well's radius
-        side = self._tw("M") + 4                 # a stacked LVLH / MED column
+        clear = 5                                # air between a ring and a legend
+        side = self._tw("M") + 2 * clear         # a stacked LVLH / MED column
         wA, wE, wR = (self._tw(c) for c in ("ATTITUDE", "ERROR", "RATE"))
         # ATTITUDE from the left edge, RATE from the right, each far enough in
         # for its caption and for the stacked labels beside its well; ERROR as
         # near RATE as its caption allows, which is where the panels put it.
         c0 = x0 + 8 + max(wA / 2.0, well + side)
         c2 = x1 - 8 - max(wR / 2.0, well + side)
-        c1 = min(c2 - (wE + wR) / 2.0 - gap, c2 - 2 * well - 8)
+        # ERROR is as near RATE as BOTH its caption and the two rings allow.
+        c1 = c2 - max((wE + wR) / 2.0 + gap, 2 * well + 8)
         c1 = max(c1, c0 + (wA + wE) / 2.0 + gap)
         cols = [c0, c1, c2]
         # A line of SETTING_SIZE text, baseline to baseline, in this font.
@@ -1842,6 +1845,8 @@ class PanelO6:
             self._hit("adi", (st, f), gx - gw / 2, top, gx + gw / 2, top + gh)
         self._vtext(cols[0] - well - side / 2.0, top + gh / 2.0, "LVLH")
         self._vtext(cols[2] + well + side / 2.0, top + gh / 2.0, "MED")
+        # (side / 2 from the ring is clear + half a letter: the legend's own
+        # width is measured, so it clears the ring by `clear` in any font.)
         self._text(cols[0], y_bot, "REF", size=SETTING_SIZE)
         self._text((cols[1] + cols[2]) / 2.0, y_bot, "LOW", size=SETTING_SIZE)
         # ATT REF under ATTITUDE, as on F6, F8 and A6U; its legend is two
