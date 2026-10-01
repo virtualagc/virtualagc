@@ -309,6 +309,7 @@ def run_test(pub, spec):
 # PASS's rates).  Detent and softstop are drawn at PASS's own thresholds.
 # Without keyboard focus the window says so and its keys count as released.
 
+FULL_SIZE = 768        # --size units: 768 is the design (full) window, as in panelO6.py
 VIRTUAL_KEY_DEFLECT = 1.0 / 3.0
 VIRTUAL_DRAG_FULL = 160.0          # pointer pixels (at scale 1) for full throw
 VIRTUAL_RING_FULL_DEG = 60.0       # ring rotation for full yaw
@@ -542,7 +543,11 @@ def run_virtual(pg, args, pub, rp, status):
             style = "split" if _touch.get_num_devices() > 0 else "gimbal"
         except Exception:
             style = "gimbal"
-    vc = VirtualControls(pg, style, args.scale, args.rhc, args.thc)
+    # --size as panelO6 and stsKeyboard mean it, so simulatePASS can hand
+    # every widget the same number (and halve it on macOS, where SDL, like
+    # Tk, measures windows in points).  This window's layout is drawn at
+    # --size 384, so that is scale 1.
+    vc = VirtualControls(pg, style, args.size / 384.0, args.rhc, args.thc)
     log("virtual hand controllers, style %s, window '%s'" % (style, WINDOW_TITLE))
     clock = pg.time.Clock()
     while True:
@@ -579,8 +584,10 @@ def main(argv=None):
     ap.add_argument("--style", choices=("split", "gimbal"), default=None,
                     help="virtual RHC: split (touch) or gimbal (mouse); default "
                          "split if a touchscreen is found, else gimbal")
-    ap.add_argument("--scale", type=float, default=1.0,
-                    help="virtual window scale (default 1.0)")
+    ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
+                    help="virtual window size, in the other widgets' --size units: "
+                         "%d is the design (full) size, simulatePASS's usual 384 "
+                         "half of it (default %d)" % (FULL_SIZE, FULL_SIZE))
     ap.add_argument("--test", metavar="'DIR SECONDS'",
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
     args = ap.parse_args(argv)
