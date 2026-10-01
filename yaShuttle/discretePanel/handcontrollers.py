@@ -71,6 +71,7 @@ it is set by flying it).
 """
 import argparse
 import json
+import math
 import os
 import socket
 import struct
@@ -286,6 +287,279 @@ def run_test(pub, spec):
         time.sleep(REPUBLISH_S)
 
 
+# ---- THE VIRTUAL HAND CONTROLLERS ------------------------------------------
+#
+# When there is no joystick (or --input virtual), one window stands in for
+# both controllers: the design WSL-integration drew up with Ron (2026-10-01).
+#
+#   RHC, --style split (touch): a knob for pitch/roll and a ring round it for
+#     yaw, worked by separate fingers -- SDL's per-finger events, so two
+#     fingers give all three axes at once.  Each springs back when lifted.
+#   RHC, --style gimbal (mouse): left-drag is pitch/roll, right-drag is yaw,
+#     by relative motion; the pointer is grabbed and hidden ONLY while a
+#     button is held, and the axes spring back on release.
+#   RHC from the keyboard, either style: arrows pitch/roll, Q / E yaw, a
+#     fixed third of full throw -- past detent, short of softstop, which on
+#     orbit is what the DAP's DISC RATE and PULSE modes respond to.
+#   THC from the keyboard: on/off contacts, as the real THC is -- W/S +X/-X,
+#     D/A +Y/-Y, Space -Z (up), C +Z (down).  Opposite keys cancel.
+#
+# Signs: stick right is +roll, stick forward (pushed) is -pitch (nose down),
+# twist right is +yaw, as the joystick path sends them (roll checked against
+# PASS's rates).  Detent and softstop are drawn at PASS's own thresholds.
+# Without keyboard focus the window says so and its keys count as released.
+
+VIRTUAL_KEY_DEFLECT = 1.0 / 3.0
+VIRTUAL_DRAG_FULL = 160.0          # pointer pixels (at scale 1) for full throw
+VIRTUAL_RING_FULL_DEG = 60.0       # ring rotation for full yaw
+# PASS's thresholds as fractions of full throw (RHC_FULL counts, about 5 V).
+_FULL_DEG = dict((a, RHC_FULL * RHC_DEG_PER_COUNT[a]) for a in RHC_AXES)
+DETENT_FRAC = {"roll": 1.725 / _FULL_DEG["roll"], "pitch": 1.725 / _FULL_DEG["pitch"],
+               "yaw": 0.975 / _FULL_DEG["yaw"]}
+SOFTSTOP_FRAC = {"roll": 21.17 / _FULL_DEG["roll"], "pitch": 21.17 / _FULL_DEG["pitch"],
+                 "yaw": 11.41 / _FULL_DEG["yaw"]}
+THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
+            ("space", "-Z"), ("c", "+Z"))
+WINDOW_TITLE = "Hand Controllers"
+
+
+def _clip(v, lo=-1.0, hi=1.0):
+    return lo if v < lo else hi if v > hi else v
+
+
+class VirtualControls:
+    """State and drawing of the virtual RHC and THC; pygame passed in."""
+
+    def __init__(self, pg, style, scale, rhc_name, thc_name):
+        self.pg = pg
+        self.style = style
+        self.k = scale
+        self.rhc_name, self.thc_name = rhc_name, thc_name
+        self.W, self.H = int(560 * scale), int(380 * scale)
+        self.screen = pg.display.set_mode((self.W, self.H), pg.RESIZABLE)
+        pg.display.set_caption(WINDOW_TITLE)
+        self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(9, int(13 * scale)))
+        self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(8, int(11 * scale)))
+        self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
+        self.drag = None                     # gimbal: "pr" or "yaw" while held
+        self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
+        self.focused = True
+        self._layout()
+
+    def _layout(self):
+        k = self.k
+        self.cx, self.cy = int(150 * k), int(170 * k)
+        self.R = int(110 * k)                # pitch/roll field radius = full throw
+        self.ring_in, self.ring_out = int(118 * k), int(140 * k)
+
+    # -- input --------------------------------------------------------------
+    def handle(self, e):
+        pg = self.pg
+        if e.type in (pg.WINDOWFOCUSLOST,) or (e.type == pg.ACTIVEEVENT and
+                                                getattr(e, "state", 0) & 2 and not e.gain):
+            self.focused = False
+            self._release_drag()
+        elif e.type in (pg.WINDOWFOCUSGAINED,) or (e.type == pg.ACTIVEEVENT and
+                                                   getattr(e, "state", 0) & 2 and e.gain):
+            self.focused = True
+        elif e.type == pg.VIDEORESIZE:
+            self.W, self.H = e.w, e.h
+        # Touch: per-finger, never the synthesised mouse.
+        elif e.type == pg.FINGERDOWN:
+            self._finger_down(e)
+        elif e.type == pg.FINGERMOTION:
+            self._finger_move(e)
+        elif e.type == pg.FINGERUP:
+            f = self.fingers.pop(e.finger_id, None)
+            if f:
+                self._spring(f[0])
+        elif e.type == pg.MOUSEBUTTONDOWN and not getattr(e, "touch", False):
+            if self.style == "gimbal":
+                if e.button in (1, 3):
+                    self.drag = "pr" if e.button == 1 else "yaw"
+                    pg.event.set_grab(True)
+                    pg.mouse.set_visible(False)
+                    if hasattr(pg.mouse, "get_rel"):
+                        pg.mouse.get_rel()
+            elif e.button == 1:
+                self._finger_down(None, e.pos)          # split, by mouse
+        elif e.type == pg.MOUSEBUTTONUP and not getattr(e, "touch", False):
+            if self.style == "gimbal":
+                self._release_drag()
+            else:
+                f = self.fingers.pop("mouse", None)
+                if f:
+                    self._spring(f[0])
+        elif e.type == pg.MOUSEMOTION and not getattr(e, "touch", False):
+            if self.style == "gimbal" and self.drag:
+                dx, dy = e.rel
+                full = VIRTUAL_DRAG_FULL * self.k
+                if self.drag == "pr":
+                    self.ptr["roll"] = _clip(self.ptr["roll"] + dx / full)
+                    self.ptr["pitch"] = _clip(self.ptr["pitch"] + dy / full)
+                else:
+                    self.ptr["yaw"] = _clip(self.ptr["yaw"] + dx / full)
+            elif self.style == "split" and "mouse" in self.fingers:
+                self._finger_move(None, e.pos)
+
+    def _release_drag(self):
+        if self.drag:
+            self._spring("knob" if self.drag == "pr" else "ring")
+            self.drag = None
+            self.pg.event.set_grab(False)
+            self.pg.mouse.set_visible(True)
+
+    def _spring(self, which):
+        if which == "knob":
+            self.ptr["roll"] = self.ptr["pitch"] = 0.0
+        else:
+            self.ptr["yaw"] = 0.0
+
+    def _pos(self, e, pos):
+        if pos is not None:
+            return pos
+        return (e.x * self.W, e.y * self.H)          # touch is normalised
+
+    def _finger_down(self, e, pos=None):
+        x, y = self._pos(e, pos)
+        r = math.hypot(x - self.cx, y - self.cy)
+        fid = "mouse" if e is None else e.finger_id
+        if r <= self.R:
+            self.fingers[fid] = ("knob", None)
+            self._finger_move(e, pos)
+        elif self.ring_in - 6 <= r <= self.ring_out + 6:
+            self.fingers[fid] = ("ring", math.atan2(y - self.cy, x - self.cx))
+
+    def _finger_move(self, e, pos=None):
+        fid = "mouse" if e is None else e.finger_id
+        f = self.fingers.get(fid)
+        if not f:
+            return
+        x, y = self._pos(e, pos)
+        if f[0] == "knob":
+            self.ptr["roll"] = _clip((x - self.cx) / self.R)
+            self.ptr["pitch"] = _clip((y - self.cy) / self.R)
+        else:
+            a = math.atan2(y - self.cy, x - self.cx)
+            d = math.degrees((a - f[1] + math.pi) % (2 * math.pi) - math.pi)
+            self.ptr["yaw"] = _clip(d / VIRTUAL_RING_FULL_DEG)
+
+    # -- what the controllers command ---------------------------------------
+    def deflection(self):
+        """Fractions of full throw per RHC axis, pointer/touch plus keys."""
+        keys = self.pg.key.get_pressed() if self.focused else None
+        out = dict(self.ptr)
+        if keys is not None:
+            K, kd = self.pg, VIRTUAL_KEY_DEFLECT
+            out["pitch"] += kd * (keys[K.K_DOWN] - keys[K.K_UP])
+            out["roll"] += kd * (keys[K.K_RIGHT] - keys[K.K_LEFT])
+            out["yaw"] += kd * (keys[K.K_e] - keys[K.K_q])
+        return dict((a, _clip(v)) for a, v in out.items())
+
+    def thc_bits(self):
+        if not self.focused:
+            return 0
+        keys = self.pg.key.get_pressed()
+        want = set(d for name, d in THC_KEYS if keys[self.pg.key.key_code(name)])
+        for axis in "XYZ":
+            if "+" + axis in want and "-" + axis in want:
+                want -= {"+" + axis, "-" + axis}
+        bits = 0
+        for d in want:
+            bits |= THC_BITS[d]
+        return bits
+
+    # -- drawing ------------------------------------------------------------
+    def draw(self, defl, bits):
+        pg, s, k = self.pg, self.screen, self.k
+        s.fill((40, 42, 44))
+        ink, dim = (220, 220, 210), (120, 120, 112)
+        # RHC field: softstop and detent circles, the stick's position.
+        pg.draw.circle(s, (70, 72, 74), (self.cx, self.cy), self.R)
+        for frac, col in ((SOFTSTOP_FRAC["roll"], (190, 140, 60)),
+                          (DETENT_FRAC["roll"], (90, 170, 90))):
+            pg.draw.circle(s, col, (self.cx, self.cy), max(2, int(self.R * frac)), 1)
+        pg.draw.line(s, dim, (self.cx - self.R, self.cy), (self.cx + self.R, self.cy))
+        pg.draw.line(s, dim, (self.cx, self.cy - self.R), (self.cx, self.cy + self.R))
+        kx = self.cx + int(defl["roll"] * self.R)
+        ky = self.cy + int(defl["pitch"] * self.R)
+        pg.draw.circle(s, (230, 230, 220), (kx, ky), int(14 * k))
+        # Yaw ring, with the deflection as an arc from the top.
+        pg.draw.circle(s, (70, 72, 74), (self.cx, self.cy), self.ring_out,
+                       self.ring_out - self.ring_in)
+        ang = defl["yaw"] * VIRTUAL_RING_FULL_DEG
+        if abs(ang) > 0.5:
+            rect = pg.Rect(0, 0, 2 * self.ring_out, 2 * self.ring_out)
+            rect.center = (self.cx, self.cy)
+            a0 = math.radians(90 - max(0, ang))
+            a1 = math.radians(90 - min(0, ang))
+            pg.draw.arc(s, (230, 230, 220), rect, a0, a1, self.ring_out - self.ring_in)
+        for frac in (DETENT_FRAC["yaw"], SOFTSTOP_FRAC["yaw"]):
+            for sg in (-1, 1):
+                a = math.radians(90 - sg * frac * VIRTUAL_RING_FULL_DEG)
+                x0 = self.cx + self.ring_in * math.cos(a)
+                y0 = self.cy - self.ring_in * math.sin(a)
+                x1 = self.cx + self.ring_out * math.cos(a)
+                y1 = self.cy - self.ring_out * math.sin(a)
+                pg.draw.line(s, (190, 140, 60) if frac > 0.5 else (90, 170, 90),
+                             (x0, y0), (x1, y1), 1)
+
+        def text(t, x, y, f=None, col=ink):
+            img = (f or self.small).render(t, True, col)
+            s.blit(img, (x, y))
+            return img.get_height()
+
+        text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
+        hint = ("drag knob: pitch/roll   drag ring: yaw" if self.style == "split" else
+                "left-drag: pitch/roll   right-drag: yaw")
+        text(hint + "   keys: arrows, Q/E", int(10 * k), self.H - int(36 * k))
+        degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
+        text(degs + " deg", int(10 * k), self.H - int(20 * k))
+        # THC: six contacts, lit when closed, with their keys.
+        x0, y0 = int(330 * k), int(40 * k)
+        text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
+        for i, (name, d) in enumerate(THC_KEYS):
+            on = bool(bits & THC_BITS[d])
+            r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
+            pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
+            label = "%s   %s" % (d, name.upper() if name != "space" else "SPACE")
+            text(label, r.x + int(10 * k), r.y + int(6 * k), self.font,
+                 (20, 20, 20) if on else ink)
+        if not self.focused:
+            pg.draw.rect(s, (200, 40, 40), s.get_rect(), max(3, int(4 * k)))
+            msg = self.font.render("NO KEYBOARD FOCUS -- click here; keys inactive",
+                                   True, (255, 90, 90))
+            s.blit(msg, ((self.W - msg.get_width()) // 2, int(6 * k) + self.font.get_height()))
+        pg.display.flip()
+
+
+def run_virtual(pg, args, pub, rp, status):
+    """The window loop: publish what the virtual controllers command."""
+    style = args.style
+    if style is None:
+        try:
+            from pygame._sdl2 import touch as _touch
+            style = "split" if _touch.get_num_devices() > 0 else "gimbal"
+        except Exception:
+            style = "gimbal"
+    vc = VirtualControls(pg, style, args.scale, args.rhc, args.thc)
+    log("virtual hand controllers, style %s, window '%s'" % (style, WINDOW_TITLE))
+    clock = pg.time.Clock()
+    while True:
+        for e in pg.event.get():
+            if e.type == pg.QUIT:
+                return 0
+            vc.handle(e)
+        defl = vc.deflection()
+        rp.counts = dict((a, round(defl[a] * RHC_FULL)) for a in RHC_AXES)
+        pub.bits = vc.thc_bits()
+        pub.send()
+        rp.send()
+        status.show(rp.counts, pub.bits)
+        vc.draw(defl, pub.bits)
+        clock.tick(50)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--thc", choices=sorted(THC_CARD), default="fwd",
@@ -299,6 +573,14 @@ def main(argv=None):
     ap.add_argument("--port-base", type=int, default=None)
     ap.add_argument("--joystick", type=int, default=0, help="SDL joystick index")
     ap.add_argument("--config", help="JSON mapping overriding the defaults")
+    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default="auto",
+                    help="auto (default): the joystick if there is one at start-up, "
+                         "else a window of virtual controllers")
+    ap.add_argument("--style", choices=("split", "gimbal"), default=None,
+                    help="virtual RHC: split (touch) or gimbal (mouse); default "
+                         "split if a touchscreen is found, else gimbal")
+    ap.add_argument("--scale", type=float, default=1.0,
+                    help="virtual window scale (default 1.0)")
     ap.add_argument("--test", metavar="'DIR SECONDS'",
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
     args = ap.parse_args(argv)
@@ -323,7 +605,6 @@ def main(argv=None):
             run_test(pub, args.test)
         return 0
 
-    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     # SDL otherwise takes SIGINT and SIGTERM for itself and turns them into a
     # quit event, so neither Ctrl-C nor simulatePASS's shutdown stopped this.
@@ -334,9 +615,24 @@ def main(argv=None):
     if sys.platform == "darwin":
         os.environ.setdefault("SDL_JOYSTICK_MFI", "0")
     import pygame
-    pygame.init()
-    pygame.joystick.init()
     status = Status(args.rhc, args.thc, not args.quiet)
+    # WHICH CONTROLS, decided once: the joystick subsystem alone answers
+    # whether a stick is there, before any video driver is chosen -- the
+    # joystick path stays windowless (the dummy driver), the virtual one
+    # needs a real window.
+    pygame.joystick.init()
+    mode = args.input
+    if mode == "auto":
+        mode = "joystick" if pygame.joystick.get_count() > args.joystick else "virtual"
+    if mode == "virtual":
+        # X11 on Linux, so --layout (windowLayout, which works through X)
+        # can find and place it -- under WSLg too.
+        if sys.platform.startswith("linux") and os.environ.get("DISPLAY"):
+            os.environ.setdefault("SDL_VIDEODRIVER", "x11")
+        pygame.init()
+        return run_virtual(pygame, args, pub, rp, status)
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    pygame.init()
 
     def open_stick():
         if pygame.joystick.get_count() <= args.joystick:
