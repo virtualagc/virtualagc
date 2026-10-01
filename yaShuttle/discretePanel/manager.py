@@ -1148,6 +1148,12 @@ class Manager(object):
         argv = [sys.executable, os.path.join(HERE, "handcontrollers.py"),
                 "--rhc", rhc, "--port-base", str(self.args.port_base),
                 "--size", str(self.args.hc_size)]
+        # simulatePASS's --joystick/--input/--style, as it would have passed
+        # them had it started this station itself.
+        for opt in ("joystick", "input", "style"):
+            v = getattr(self.args, "hc_" + opt)
+            if v is not None:
+                argv += ["--" + opt, str(v)]
         try:
             self.hands = subprocess.Popen(argv, cwd=HERE, stdout=subprocess.DEVNULL,
                                           stderr=subprocess.STDOUT,
@@ -1271,6 +1277,12 @@ def main(argv=None):
     ap.add_argument("--hc-size", type=int, metavar="N", default=384,
                     help="--size for hand controllers started from here "
                          "(simulatePASS passes the keyboards')")
+    ap.add_argument("--hc-joystick", type=int, metavar="N", default=None,
+                    help="--joystick for hand controllers started from here")
+    ap.add_argument("--hc-input", choices=("auto", "joystick", "virtual"), default=None,
+                    help="--input for hand controllers started from here")
+    ap.add_argument("--hc-style", choices=("split", "gimbal"), default=None,
+                    help="--style for hand controllers started from here")
     ap.add_argument("--tape", metavar="FILE", default="")
     ap.add_argument("--snapshot-dir", metavar="DIR", default="",
                     help="where Save writes and Restore reads")

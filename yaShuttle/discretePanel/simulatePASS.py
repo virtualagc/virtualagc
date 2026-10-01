@@ -1930,6 +1930,13 @@ def main():
                             "--hc-size", str(tk_px(size)),
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
+            # And the hand controllers' options, for its HAND CONTROLLERS row.
+            if args.joystick is not None:
+                manager_argv += ["--hc-joystick", str(args.joystick)]
+            if args.input:
+                manager_argv += ["--hc-input", args.input]
+            if args.style:
+                manager_argv += ["--hc-style", args.style]
             if args.panel_script:
                 manager_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.layout:
