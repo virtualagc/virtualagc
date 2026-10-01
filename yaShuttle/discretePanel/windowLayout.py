@@ -78,6 +78,7 @@ TITLE_ROLES = [
     (re.compile(r"^Panel$|^Panels O6\b"), "panel"),
     (re.compile(r"^GPC discrete panel"), "discretepanel"),
     (re.compile(r"^Manager\b"), "manager"),
+    (re.compile(r"^Hand Controllers$"), "handcontrollers"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
     # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
     # command line is tried first and normally answers; this is the fallback
@@ -98,6 +99,8 @@ ROLE_PATTERNS = [
     # keeps in a particular corner -- the one with the buttons -- was the one
     # window a layout could not put back.
     (re.compile(r"manager\.py"), lambda m: "manager"),
+    # The virtual hand controllers' window (handcontrollers.py with no stick).
+    (re.compile(r"handcontrollers\.py"), lambda m: "handcontrollers"),
 ]
 
 
@@ -760,7 +763,16 @@ def _listing_without_wmctrl():
     machine and title.  The position and size are placeholders -- windows()
     measures every window for itself -- and so is the desktop."""
     lines = []
-    for wid in run(["xdotool", "search", "--onlyvisible", "--name", "."]).split():
+    # BY NAME AND BY CLASS, merged.  SDL sets WM_NAME only as UTF8_STRING,
+    # which xdotool's --name search does not match, so the virtual hand
+    # controllers' window was missing from this list (WSL-integration,
+    # 2026-10-01); --class finds it, and every Tk window either way.
+    wids = []
+    for how in ("--name", "--class"):
+        for wid in run(["xdotool", "search", "--onlyvisible", how, "."]).split():
+            if wid not in wids:
+                wids.append(wid)
+    for wid in wids:
         pid = run(["xdotool", "getwindowpid", wid]).strip()
         title = run(["xdotool", "getwindowname", wid]).strip()
         lines.append("0x%08x 0 %s 0 0 0 0 N/A %s"
