@@ -1592,10 +1592,12 @@ def main():
         """Physical pixels as this platform's Tk takes them."""
         return int(round(v / float(tk_unit_scale))) if tk_unit_scale != 1 else v
     # ...and their text drawn the size Linux draws it.  NOT the display's
-    # scale: macOS Tk ignores `tk scaling` and fixes its own at 1.33 pixels
-    # per point, where the HiDPI Linux desktop these sizes were chosen on runs
-    # Tk at 2.67 -- so text there is twice what it is here, on any Mac display,
-    # Retina or not (see FONT_SCALE in panelO6.py).
+    # scale: the font sizes follow the Tk windows' drawing scale, which tk_px
+    # has just halved, so they are doubled back -- and Tk 9 then draws a point
+    # at `tk scaling` (4/3) points, 2.67 physical pixels on a Retina screen,
+    # which is the HiDPI Linux desktop's Xft.dpi 192 (see FONT_SCALE in
+    # panelO6.py).  Tk 8.6 on macOS ignored tk scaling; an earlier version of
+    # this note said so of Tk 9 too, wrongly.
     tk_font_scale = 2 if sys.platform == "darwin" else 1
     # On a scaled WSLg the fonts themselves are right -- Xft.dpi times WSLg's
     # scale is Linux's 2.67 px/pt -- but panelO6, stsKeyboard and cam size

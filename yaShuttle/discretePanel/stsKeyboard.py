@@ -72,9 +72,12 @@ REF_H = int(round(NROW * KEY_REF + (NROW + 1) * GAP_REF))
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
 # screen) where Linux Tk measures physical pixels.  The text must not shrink
-# with it: macOS Tk ignores `tk scaling`, so its text already comes out the
-# size a HiDPI Linux desktop's Tk scaling makes it.  simulatePASS.py passes
-# NSTS_TK_FONT_SCALE to put it back; unset, as on Linux, it is 1.
+# with it, and the font sizes follow the halved drawing scale, so
+# simulatePASS.py passes NSTS_TK_FONT_SCALE=2 to put them back; unset, as on
+# Linux, it is 1.  Tk 9 then draws an N-point font at N times `tk scaling`
+# (4/3) points, 2.67 physical pixels a point on a Retina screen -- the same
+# as the Linux desktop's Xft.dpi 192.  (Tk 8.6 on macOS ignored tk scaling,
+# which is what an earlier version of this note said.)
 try:
     FONT_SCALE = float(os.environ.get("NSTS_TK_FONT_SCALE") or 1)
 except ValueError:
