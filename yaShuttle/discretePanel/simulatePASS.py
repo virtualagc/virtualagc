@@ -1323,6 +1323,19 @@ def main():
                     help="display windows CRT1 up to CRT4: 1-4 (default 2 with more than "
                          "one GPC, else 1).  CRT4 is the aft display, on IDP 4 and the aft "
                          "keyboard")
+    ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default=None,
+                    help="start handcontrollers.py for this station: lh (CDR, with the "
+                         "forward THC), aft (aft RHC and THC) or rh (PLT, no THC).  One "
+                         "station, since one person flies the simulation; omitted, none "
+                         "is started")
+    ap.add_argument("--joystick", type=int, default=None, metavar="N",
+                    help="handcontrollers.py: the SDL joystick index (default 0)")
+    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default=None,
+                    help="handcontrollers.py: auto (default) uses a joystick if one is "
+                         "present at start-up, else a window of virtual controllers")
+    ap.add_argument("--style", choices=("split", "gimbal"), default=None,
+                    help="handcontrollers.py's virtual RHC: split (touch) or gimbal "
+                         "(mouse); default split if a touchscreen is found")
     ap.add_argument("--keyboards", type=int, choices=(0, 1, 2, 3), default=None,
                     help="stsKeyboard.py windows: 3 the left, right and aft keyboards; "
                          "2 the forward pair; 1 the left; 0 none.  Default: the ones the "
@@ -1753,6 +1766,21 @@ def main():
                 L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
                                 "--size", str(tk_px(cam_size)), "--geometry", cam_geom],
                         HERE, env)
+            # THE HAND CONTROLLERS, one station's: one person flies this.  The
+            # same --size as the keyboards (halved on macOS by tk_px, where
+            # SDL measures in points as Tk does); with a joystick it has no
+            # window, without one its window is placed by --layout like any
+            # other (role hc_fwd_lh / hc_aft_aft / hc_rh).
+            if args.rhc:
+                hc_argv = [py, "handcontrollers.py", "--rhc", args.rhc,
+                           "--port-base", str(args.port_base), "--size", str(tk_px(size))]
+                if args.joystick is not None:
+                    hc_argv += ["--joystick", str(args.joystick)]
+                if args.input:
+                    hc_argv += ["--input", args.input]
+                if args.style:
+                    hc_argv += ["--style", args.style]
+                L.start("handcontrollers", hc_argv, HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
             # instead of the tape: --resume makes each computer load its own
