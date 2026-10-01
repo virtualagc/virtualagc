@@ -17,6 +17,6 @@ f82bc9789 n/a GUI as debug-session client
 c92898bbe n/a run modes behind debugger sessions
 85f894e44 open GPC power-loss model (halt, MIAs off, outputs dropped, reset held) missing -- panelO6 POWER drives nothing; bad-SEV error termination not representable in busword.h (latent). Pacer 50 ms rebase deliberately NOT ported (rtpacer.c:77-96, measured 21% loss). Ring wiring and 20 ms peer hold already
 952826663 n/a CMake reorganisation
-c49530b15 open D/DR/M/MR/MH/MHI/MIH set the overflow indicator via bare psw_set_overflow but never take the fixed-point-overflow program interrupt (POO 4.10, 4.21-4.24); A/S/LCR do via cpu_add_fixed. Rest of the interrupt/IOP/real-time/FP rework already
+c49530b15 ported multiply/divide overflow now takes the program check (ledger #265); rest of the interrupt/IOP/real-time/FP rework already in yaGPC2
 818df8805 open undecodable halfword halts the run (cpu.c decodeFailed, run.c 'invalid instruction') where the machine takes an operation-exception program check, code 0000; MIA 33 us pacing exists but off by default (YAGPC_MIA_PACE). Addressing/SVC/BALR/SCAL/ISPB/MVH/@LH/@RAW/#LBR@/#BU@/timer borrow already
 0e275b1fc open apply_load_protection (ageharness.c) protects every section instead of the linker's .sym.json storeProtect map; affects --power-on without --ipl and YAGPC_IPL_PROTECT=sections only

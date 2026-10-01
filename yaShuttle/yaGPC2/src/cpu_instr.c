@@ -166,13 +166,19 @@ static void exec_CIST(CPU *t, DInstr *v) {
     cpu_compute_cc_arith(t, v1, v2);
 }
 
+/* Multiply and divide overflow go through cpu_signal_fixed_overflow(), as
+ * add and subtract do through cpu_add_fixed(): it sets the sticky
+ * indicator AND takes the fixed-point-overflow program check when the PSW
+ * mask allows -- POO 4.10 and 4.21-4.24 list "Fixed point overflow" under
+ * PROGRAM INTERRUPTS.  These set the indicator alone, so the check was never
+ * taken (ledger #265; upstream gpc fixed the same in c49530b). */
 static void exec_DR(CPU *t, DInstr *v) {
     uint32_t x = df_get(v, 'x');
     uint32_t hi = register_get32(R(t, v, 'x'));
     uint32_t lo = (x % 2) ? 0 : register_get32(cpu_r(t, (int)(x + 1)));
     Q31DivResult r = q31_div((int32_t)hi, (int32_t)lo, (int32_t)register_get32(R(t, v, 'y')));
     register_set32(R(t, v, 'x'), (uint32_t)r.quotient);
-    if (r.overflow) psw_set_overflow(&t->psw, 1);
+    if (r.overflow) cpu_signal_fixed_overflow(t);
 }
 
 static void exec_D(CPU *t, DInstr *v) {
@@ -181,7 +187,7 @@ static void exec_D(CPU *t, DInstr *v) {
     uint32_t lo = (x % 2) ? 0 : register_get32(cpu_r(t, (int)(x + 1)));
     Q31DivResult r = q31_div((int32_t)hi, (int32_t)lo, (int32_t)cpu_g_eaf(t, v, 0));
     register_set32(R(t, v, 'x'), (uint32_t)r.quotient);
-    if (r.overflow) psw_set_overflow(&t->psw, 1);
+    if (r.overflow) cpu_signal_fixed_overflow(t);
 }
 
 /* Exchange Upper and Lower Halfwords -- an EXCHANGE, with no XOR
@@ -292,7 +298,7 @@ static void exec_MR(CPU *t, DInstr *v) {
         Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)register_get32(R(t, v, 'y')));
         register_set32(R(t, v, 'x'), r.hi);
         register_set32(cpu_r(t, (int)(x + 1)), r.lo);
-        if (r.overflow) psw_set_overflow(&t->psw, 1);
+        if (r.overflow) cpu_signal_fixed_overflow(t);
     } else {
         /* R1 odd: still a FULL 32x32 multiply -- only the saving
          * differs.  POO 4.21: "Both multiplier and multiplicand are
@@ -306,7 +312,7 @@ static void exec_MR(CPU *t, DInstr *v) {
          * HALFWORD (4.22), a different instruction. */
         Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)register_get32(R(t, v, 'y')));
         register_set32(R(t, v, 'x'), r.hi);
-        if (r.overflow) psw_set_overflow(&t->psw, 1);
+        if (r.overflow) cpu_signal_fixed_overflow(t);
     }
 }
 
@@ -316,7 +322,7 @@ static void exec_M(CPU *t, DInstr *v) {
         Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)cpu_g_eaf(t, v, 0));
         register_set32(R(t, v, 'x'), r.hi);
         register_set32(cpu_r(t, (int)(x + 1)), r.lo);
-        if (r.overflow) psw_set_overflow(&t->psw, 1);
+        if (r.overflow) cpu_signal_fixed_overflow(t);
     } else {
         /* R1 odd: still a FULL 32x32 multiply -- only the saving
          * differs.  POO 4.21: "Both multiplier and multiplicand are
@@ -330,7 +336,7 @@ static void exec_M(CPU *t, DInstr *v) {
          * HALFWORD (4.22), a different instruction. */
         Q31MulResult r = q31_mul32((int32_t)register_get32(R(t, v, 'x')), (int32_t)cpu_g_eaf(t, v, 0));
         register_set32(R(t, v, 'x'), r.hi);
-        if (r.overflow) psw_set_overflow(&t->psw, 1);
+        if (r.overflow) cpu_signal_fixed_overflow(t);
     }
 }
 
@@ -340,7 +346,7 @@ static void exec_MH(CPU *t, DInstr *v) {
     int32_t v2 = (v2raw & 0x8000) ? (int32_t)v2raw - 0x10000 : (int32_t)v2raw;
     Q15MulResult r = q15_mul(v1, v2);
     register_set32(R(t, v, 'x'), (uint32_t)r.result);
-    if (r.overflow) psw_set_overflow(&t->psw, 1);
+    if (r.overflow) cpu_signal_fixed_overflow(t);
 }
 
 static void exec_MHI(CPU *t, DInstr *v) {
@@ -349,7 +355,7 @@ static void exec_MHI(CPU *t, DInstr *v) {
     int32_t v2 = (int32_t)register_get32(R(t, v, 'y')) >> 16;
     Q15MulResult r = q15_mul(v1, v2);
     register_set32(R(t, v, 'y'), (uint32_t)r.result);
-    if (r.overflow) psw_set_overflow(&t->psw, 1);
+    if (r.overflow) cpu_signal_fixed_overflow(t);
 }
 
 static void exec_MIH(CPU *t, DInstr *v) {
@@ -359,7 +365,7 @@ static void exec_MIH(CPU *t, DInstr *v) {
     int32_t product = v1 * v2;
     register_set32(R(t, v, 'x'), ((uint32_t)product & 0xffff) << 16);
     int32_t check = product >> 15;
-    if (check != 0 && check != -1) psw_set_overflow(&t->psw, 1);
+    if (check != 0 && check != -1) cpu_signal_fixed_overflow(t);
 }
 
 static void exec_ST(CPU *t, DInstr *v) {

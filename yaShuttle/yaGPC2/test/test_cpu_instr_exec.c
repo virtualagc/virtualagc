@@ -165,6 +165,32 @@ static int mvs_directed(void) {
     return f;
 }
 
+/* MR 4,6 with -1.0 x -1.0, the one product a Q31 multiply cannot hold.  The
+ * overflow INDICATOR is set either way; the fixed-point-overflow program
+ * check (code 0004) is taken only when the PSW's mask bit allows it -- POO
+ * 4.21 lists "Fixed point overflow" under PROGRAM INTERRUPTS.  Multiply and
+ * divide used to set the indicator alone, so the check was never taken
+ * (ledger #265; upstream gpc c49530b). */
+static int overflow_one(int mask) {
+    load_baseline();
+    register_set32(cpu_r(&cpu, 4), 0x80000000u);
+    register_set32(cpu_r(&cpu, 6), 0x80000000u);
+    psw_set_overflow(&cpu.psw, 0);
+    psw_set_fixed_pt_overflow(&cpu.psw, (uint32_t)mask);
+    cpu.intPending.programCheck = false;
+    cpu.intCode = 0;
+    DInstr v;
+    const InstrDesc *desc = instr_decode(0x44E6, 0x0000, &v);   /* MR 4,6 */
+    desc->e(&cpu, &v);
+    int ind = (int)psw_get_overflow(&cpu.psw), pc = cpu.intPending.programCheck;
+    if (ind != 1 || pc != mask || (mask && cpu.intCode != 0x0004)) {
+        printf("FAIL MR overflow, mask %d: indicator %d, program check %d, code %04x\n",
+               mask, ind, pc, cpu.intCode);
+        return 1;
+    }
+    return 0;
+}
+
 int main(void) {
     int failures = 0;
     long total = 0;
@@ -227,6 +253,9 @@ int main(void) {
     int mvsFail = mvs_directed();
     printf("%d/8 MVS directed cases passed\n", 8 - mvsFail);
     failures += mvsFail;
+    int ovfFail = overflow_one(0) + overflow_one(1);
+    printf("%d/2 multiply overflow interrupt cases passed\n", 2 - ovfFail);
+    failures += ovfFail;
 
     printf("%ld/%ld cpu instr exec fixtures passed\n", total - failures, total);
     return failures == 0 ? 0 : 1;
