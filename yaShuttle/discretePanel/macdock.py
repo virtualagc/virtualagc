@@ -39,6 +39,29 @@ def set_app_name(name):
             windowLayout.win_dpi_aware()
         except Exception:
             pass
+        # AND NOT A BACKGROUND PROCESS.  Windows throttles a program whose
+        # windows it thinks nobody can see -- all of them, when a KVM switch
+        # takes the monitors away -- moving it to slow cores and ignoring its
+        # timer requests.  A display that answers its GPC late holds the
+        # computer up; see yaGPC2/src/win32/posix_win32.c.
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            class _Throttle(ctypes.Structure):
+                _fields_ = [("Version", ctypes.c_ulong), ("ControlMask", ctypes.c_ulong),
+                            ("StateMask", ctypes.c_ulong)]
+            state = _Throttle(1, 0x1 | 0x4, 0)   # EXECUTION_SPEED | IGNORE_TIMER_RESOLUTION: off
+            k32 = ctypes.WinDLL("kernel32")
+            # Typed, or the process handle -- the pseudo-handle -1 -- is
+            # passed as a 32-bit int and arrives as something else.
+            k32.GetCurrentProcess.restype = wintypes.HANDLE
+            k32.SetProcessInformation.argtypes = [wintypes.HANDLE, ctypes.c_int,
+                                                  ctypes.c_void_p, wintypes.DWORD]
+            k32.SetProcessInformation(k32.GetCurrentProcess(), 4,   # ProcessPowerThrottling
+                                      ctypes.byref(state), ctypes.sizeof(state))
+        except Exception:
+            pass
         try:
             import ctypes
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(

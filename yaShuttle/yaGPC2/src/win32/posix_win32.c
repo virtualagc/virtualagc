@@ -30,6 +30,36 @@
 #undef close
 #undef pipe
 
+/* ---- not a background process ---------------------------------------- */
+
+/* WINDOWS SLOWS DOWN WHAT IT THINKS NOBODY IS WATCHING.  Windows 11 applies
+ * "power throttling" (EcoQoS) to a process it judges to be in the
+ * background -- and one with no window of its own, like this emulator, or
+ * one whose windows are all hidden, as they are when a KVM switch takes the
+ * monitors away, qualifies.  Throttled, its threads may be moved to a hybrid
+ * processor's efficiency cores and run at low clock, and its timer
+ * resolution request (timeBeginPeriod, below) is ignored, so every short wait
+ * rounds up to the 15.6 ms tick.  Measured on an i7-12700 with the monitors
+ * switched away: four GPCs in OPS 2 ran at 0.61 of real time.
+ *
+ * A real-time emulator is never background work, so it opts out of both,
+ * before main() runs, through the C runtime's initializer table.  Harmless
+ * where the call does not exist (before Windows 10 1709). */
+static void __cdecl not_background(void) {
+    typedef BOOL (WINAPI *SetInfo)(HANDLE, int, LPVOID, DWORD);
+    struct { ULONG Version, ControlMask, StateMask; } state;
+    SetInfo set = (SetInfo)(void *)GetProcAddress(GetModuleHandleW(L"kernel32.dll"),
+                                                  "SetProcessInformation");
+    if (set == NULL) return;
+    state.Version = 1;                          /* PROCESS_POWER_THROTTLING_CURRENT_VERSION */
+    state.ControlMask = 0x1 | 0x4;              /* EXECUTION_SPEED | IGNORE_TIMER_RESOLUTION */
+    state.StateMask = 0;                        /* ...both switched OFF */
+    set(GetCurrentProcess(), 4 /* ProcessPowerThrottling */, &state, sizeof state);
+}
+
+#pragma section(".CRT$XCU", read)
+__declspec(allocate(".CRT$XCU")) static void (__cdecl *yagpc_not_background)(void) = not_background;
+
 /* ---- time ------------------------------------------------------------ */
 
 static double qpc_seconds(void) {
