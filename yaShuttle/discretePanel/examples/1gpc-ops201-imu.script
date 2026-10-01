@@ -37,9 +37,21 @@
 +8     keys ITEM 1 9 + 1 EXEC
 +21    keys OPS 2 0 1 PRO
 
+# FREE DRIFT FIRST.  The orbit DAP comes up in AUTO, and an IMU coming into
+# operate under it is a jump in the attitude the DAP is flying on: it read
+# that as a rotation and fired against it -- a 2.5 s pitch burst to 3.2
+# deg/s at the first IMU, braked at the second, a roll correction at the
+# third (ledger #270).  The vehicle never does this in flight, where the
+# IMUs are up long before; here, with the DAP in FREE while they come up,
+# no jet fires at all.  (C3 FREE: panelO6's ORBITAL DAP pushbutton.)
++30    dap c3 free
+
 # IMUs 1-3 to OPER on SPEC 21, and leave it up while the software notes them.
-+40    keys SPEC 2 1 PRO
++10    keys SPEC 2 1 PRO
 +5     keys ITEM 4 EXEC
 +3     keys ITEM 5 EXEC
 +3     keys ITEM 6 EXEC
 +15    keys RESUME
+
+# Back to AUTO, now that the attitude is the IMUs'.
++5     dap c3 auto
