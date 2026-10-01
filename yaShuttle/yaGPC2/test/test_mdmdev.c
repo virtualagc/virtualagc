@@ -20,6 +20,8 @@
 
 #include "../src/mtumodel.h"
 #include "../src/busword.h"
+#include "../src/vehdyn.h"
+#include <math.h>
 
 static struct MtuModel *m;
 static int failures, checks;
@@ -70,6 +72,8 @@ static void write_words(int bus, uint32_t cmd, const uint16_t *w, int n) {
 
 int main(void) {
     setenv("YAGPC_MDM_DEVICES", "1", 1);
+    /* Before anything reads it: the switch is cached on first use. */
+    setenv("YAGPC_VEHDYN", "1", 1);
     m = mtumodel_create();
     uint16_t w[64];
 
@@ -138,6 +142,84 @@ int main(void) {
           "fa1 return word echoes 2AAA as AAA8");
     check(read_words(20, FF(0x31555u), 1, w) == 1 && w[0] == 0x5554u,
           "ff1 return word echoes 1555 as 5554");
+
+    /* THE IMU AS PASS READS IT, round trip: for random attitudes, decode the
+     * resolver words the way GMDRES does, rebuild C(body <- M50) with the
+     * flight software's own chain (GNWATT: TNBBODY . M1^T, TCM50 = I) and
+     * compare with the truth.  The 8X resolution is 0.0055 deg (9.6e-5 rad),
+     * so every matrix element must agree to 2e-4. */
+    {
+        vehdyn_reset(0.0);
+        const double D = 3.14159265358979323846 / 180.0;
+        const double NB[3][3] = { { 0.98293535, 0.0, -0.18395135 }, { 0, 1, 0 },
+                                  { 0.18395135, 0.0, 0.98293535 } };
+        double worst = 0.0;
+        unsigned seed = 12345;
+        for (int trial = 0; trial < 200; trial++) {
+            double q[4];
+            for (int i = 0; i < 4; i++) {
+                seed = seed * 1103515245u + 12345u;
+                q[i] = ((double)(seed >> 8) / 16777216.0) - 0.5;
+            }
+            vehdyn_set_attitude(q, NULL);
+            const PhysState *st = vehdyn_state();
+            if (read_words(21, FF(0x24C0Du), 14, w) != 14) { check(0, "imu read"); break; }
+            double ang[3];
+            for (int j = 0; j < 3; j++) {      /* OR, P, AZ */
+                unsigned c1 = w[3 + 2 * j] >> 3, c8 = w[4 + 2 * j] >> 3;
+                double x1 = c1 * 360.0 / 8192.0;
+                double a = ((c1 >> 10) * 8192.0 + c8) * 360.0 / 65536.0;
+                if (x1 - a > 22.5) a += 45.0; else if (a - x1 > 22.5) a -= 45.0;
+                ang[j] = a * D;
+            }
+            double cO = cos(ang[0]), sO = sin(ang[0]), cP = cos(ang[1]), sP = sin(ang[1]),
+                   cA = cos(ang[2]), sA = sin(ang[2]);
+            double Rx[3][3] = { { 1, 0, 0 }, { 0, cO, -sO }, { 0, sO, cO } };
+            double Ry[3][3] = { { cP, 0, sP }, { 0, 1, 0 }, { -sP, 0, cP } };
+            double Rz[3][3] = { { cA, -sA, 0 }, { sA, cA, 0 }, { 0, 0, 1 } };
+            double T[3][3], M1[3][3], C[3][3];
+            for (int i = 0; i < 3; i++) for (int k = 0; k < 3; k++)
+                T[i][k] = Ry[i][0] * Rx[0][k] + Ry[i][1] * Rx[1][k] + Ry[i][2] * Rx[2][k];
+            for (int i = 0; i < 3; i++) for (int k = 0; k < 3; k++)
+                M1[i][k] = Rz[i][0] * T[0][k] + Rz[i][1] * T[1][k] + Rz[i][2] * T[2][k];
+            for (int i = 0; i < 3; i++) for (int k = 0; k < 3; k++)
+                C[i][k] = NB[i][0] * M1[k][0] + NB[i][1] * M1[k][1] + NB[i][2] * M1[k][2];
+            /* truth: C(body <- M50) = R(q)^T */
+            double a0 = st->q[0], x = st->q[1], y = st->q[2], z = st->q[3];
+            double R[3][3] = {
+                { 1 - 2 * (y * y + z * z), 2 * (x * y - a0 * z), 2 * (x * z + a0 * y) },
+                { 2 * (x * y + a0 * z), 1 - 2 * (x * x + z * z), 2 * (y * z - a0 * x) },
+                { 2 * (x * z - a0 * y), 2 * (y * z + a0 * x), 1 - 2 * (x * x + y * y) } };
+            for (int i = 0; i < 3; i++) for (int k = 0; k < 3; k++) {
+                double e = fabs(C[i][k] - R[k][i]);
+                if (e > worst) worst = e;
+            }
+        }
+        if (worst >= 2e-4) printf("imu round trip worst element error %.3g\n", worst);
+        check(worst < 2e-4, "imu attitude round trip through PASS's decoding");
+
+        /* AND ITS ACCELEROMETERS: L1A + R1A (+X) for 4 s, attitude identity
+         * so body X is platform X.  The counts must be 2 F t / m in pulses of
+         * 0.0344488 ft/s along X only. */
+        double ident[4] = { 1, 0, 0, 0 };
+        vehdyn_reset(0.0);
+        vehdyn_set_attitude(ident, NULL);
+        read_words(21, FF(0x24C0Du), 14, w);
+        uint16_t x0 = w[9], y0 = w[10], z0 = w[11];
+        double m0 = vehdyn_state()->mass;
+        uint16_t ffw[5] = { 0 }, faw[5] = { 0 };
+        faw[1] = 0x8000 | 0x1000;
+        vehdyn_set_fire_words(ffw, faw, 0.0);
+        faw[1] = 0;
+        vehdyn_set_fire_words(ffw, faw, 4e6);
+        read_words(21, FF(0x24C0Du), 14, w);
+        double want = 2.0 * 3870.0 * 4.0 / m0 / 0.3048 / 0.0344488;
+        int dx = (int16_t)(uint16_t)(w[9] - x0), dy = (int16_t)(uint16_t)(w[10] - y0),
+            dz = (int16_t)(uint16_t)(w[11] - z0);
+        if (fabs(dx - want) > 0.01 * want) printf("imu counts %d want %.1f\n", dx, want);
+        check(fabs(dx - want) <= 0.01 * want, "imu X velocity counts from a +X burn");
+        check(dy == 0 && dz == 0, "imu Y and Z counts unchanged");
+    }
 
     mtumodel_free(m);
     printf("mdmdev: %d/%d checks passed\n", checks - failures, checks);

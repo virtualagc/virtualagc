@@ -1,5 +1,6 @@
 #include "mdmdev.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -90,11 +91,110 @@ static Imu imu[4];            /* [1..3] */
 #define IMU_BITE_D1D8   0x0010u
 #define IMU_CMD2_HIGAIN 0x8000u
 
+/* ---------------------------------------------------------------------
+ * THE IMU SEEING THE VEHICLE MOVE (YAGPC_VEHDYN).  The forward model the
+ * flight software inverts (GNWATT.hal:241-242, GMPTNB.hal:66-80):
+ *
+ *     C(body <- M50) = TNBBODY . TNBRL^T . M1^T . TCM50^T
+ *     M1 = Rz(AZ) . Rx(IR) . Ry(P) . Rx(OR)          gimbal angles
+ *
+ * TNBBODY is the IMU case's 10.6-degree pitch-down mounting (CGMCOM.hal:437),
+ * TNBRL the identity by default, and TCM50 -- the stable member's alignment
+ * to M50 -- the identity on a vehicle IPL'd straight to OPS 2 (CGMIPC.hal:
+ * 106, 202-203).  So M1 = R(q) . TNBBODY, where R(q) is the truth state's
+ * body-to-inertial rotation, and with inner roll held at null (outer roll
+ * servos it there):  P = asin(-M1[2][0]), OR = atan2(M1[2][1], M1[2][2]),
+ * AZ = atan2(M1[1][0], M1[0][0]).
+ *
+ * THE PLATFORM IS HELD FIXED.  In orbit PASS torques each platform at
+ * -GYREST to cancel that IMU's expected gyro drift (GMKGYO, GO2ORB.hal:629);
+ * a modelled drift of +GYREST would make the two cancel, and leaving out
+ * both is the same thing.  Alignment slews and torquing are not yet applied.
+ *
+ * The accelerometers count the non-gravitational delta-v in the platform
+ * frame (= M50 here) at 0.0344488 ft/s a pulse, low gain, Z negated
+ * (GMCACP.hal:62, 100); the remainder is carried between reads.  The
+ * compiled scale-factor and bias I-loads (SFLO, BILO) are NOT inverted --
+ * they look like placeholders; see vehdyn's notes.
+ * ------------------------------------------------------------------- */
+static const double TNBBODY[3][3] = {
+    { 0.98293535, 0.0, -0.18395135 },
+    { 0.0,        1.0,  0.0        },
+    { 0.18395135, 0.0,  0.98293535 },
+};
+#define IMU_FT_PER_PULSE 0.0344488
+#define FT_M 0.3048
+
+static void qmat(const double q[4], double R[3][3]) {
+    double w = q[0], x = q[1], y = q[2], z = q[3];
+    R[0][0] = 1 - 2 * (y * y + z * z); R[0][1] = 2 * (x * y - w * z); R[0][2] = 2 * (x * z + w * y);
+    R[1][0] = 2 * (x * y + w * z); R[1][1] = 1 - 2 * (x * x + z * z); R[1][2] = 2 * (y * z - w * x);
+    R[2][0] = 2 * (x * z - w * y); R[2][1] = 2 * (y * z + w * x); R[2][2] = 1 - 2 * (x * x + y * y);
+}
+
+static double wrap360(double deg) {
+    deg = fmod(deg, 360.0);
+    return (deg < 0.0) ? deg + 360.0 : deg;
+}
+
+/* A resolver angle as its 1X and 8X words: 13-bit counts in the top bits. */
+static void resolver_words(double deg, uint16_t *w1x, uint16_t *w8x) {
+    deg = wrap360(deg);
+    unsigned c1 = (unsigned)floor(deg * 8192.0 / 360.0) & 0x1FFFu;
+    unsigned c8 = (unsigned)floor(deg * 65536.0 / 360.0) & 0x1FFFu;
+    *w1x = (uint16_t)(c1 << 3);
+    *w8x = (uint16_t)(c8 << 3);
+}
+
+typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; } ImuAcc;
+static ImuAcc imuAcc[4];
+
+static void imu_dynamic(int n, uint16_t w[14]) {
+    const PhysState *s = vehdyn_state();
+    double R[3][3], M1[3][3];
+    qmat(s->q, R);
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            M1[i][j] = R[i][0] * TNBBODY[0][j] + R[i][1] * TNBBODY[1][j] + R[i][2] * TNBBODY[2][j];
+    double sp = -M1[2][0];
+    if (sp > 1.0) sp = 1.0;
+    if (sp < -1.0) sp = -1.0;
+    const double D = 180.0 / 3.14159265358979323846;
+    double P = asin(sp) * D;
+    double OR = atan2(M1[2][1], M1[2][2]) * D;
+    double AZ = atan2(M1[1][0], M1[0][0]) * D;
+    w[2] = 0;                                      /* inner roll 8X: null */
+    resolver_words(OR, &w[3], &w[4]);
+    resolver_words(P, &w[5], &w[6]);
+    resolver_words(AZ, &w[7], &w[8]);
+    /* the velocity counters */
+    ImuAcc *a = &imuAcc[n];
+    double dv[3];
+    vehdyn_sensed_dv(dv);
+    for (int i = 0; i < 3; i++) {
+        double ft = dv[i] / FT_M;
+        if (!a->started) { a->dvFt[i] = ft; continue; }
+        double pulses = (ft - a->dvFt[i]) / IMU_FT_PER_PULSE + a->carry[i];
+        double whole = floor(pulses);
+        a->carry[i] = pulses - whole;
+        a->dvFt[i] = ft;
+        int d = (int)whole;
+        if (i == 2) d = -d;                        /* Z counts the other way */
+        a->count[i] = (uint16_t)(a->count[i] + (unsigned)d);
+    }
+    a->started = true;
+    w[9] = a->count[0]; w[10] = a->count[1]; w[11] = a->count[2];
+}
+
 static void imu_read(int n, uint16_t *out, int words) {
     Imu *u = &imu[n];
     uint16_t w[14];
     memset(w, 0, sizeof w);
     w[0] = (uint16_t)(IMU_BITE_GOOD | ((u->cmd2 & IMU_CMD2_HIGAIN) ? IMU_BITE_D1D8 : 0));
+    if (vehdyn_enabled()) {
+        w[1] = 0x8000u;                            /* redundant rate: zero, positive */
+        imu_dynamic(n, w);
+    }
     /* w[1] redundant-axis rate: zero, not saturated -- a platform at rest.
      * w[2..8] the resolvers, inner roll 8X then outer roll, pitch and
      * azimuth 1X/8X: all gimbals at zero, where the coarse and fine readings

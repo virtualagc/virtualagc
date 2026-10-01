@@ -319,3 +319,9 @@ void vehdyn_report(void) {
             st.w[0] * 180 / VD_PI, st.w[1] * 180 / VD_PI, st.w[2] * 180 / VD_PI,
             st.q[0], st.q[1], st.q[2], st.q[3]);
 }
+
+void vehdyn_set_attitude(const double q[4], const double w[3]) {
+    double n = sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+    for (int i = 0; i < 4; i++) st.q[i] = (n > 0.0) ? q[i] / n : (i == 0);
+    for (int i = 0; i < 3; i++) st.w[i] = w ? w[i] : 0.0;
+}
