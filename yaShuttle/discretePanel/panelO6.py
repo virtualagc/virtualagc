@@ -226,12 +226,12 @@ DAP_PB = {
     "PRI":    ("PRI", 7, 0x0800, None),
     "ALT":    ("ALT", 7, 0x0100, None),
     "VERN":   ("VERN", 7, 0x0020, None),
-    "R_DISC": ("DISC\nRATE", 7, 0x0400, None),
-    "R_PULSE": ("PULSE", 7, 0x0200, None),
-    "P_DISC": ("DISC\nRATE", 7, 0x0080, None),
-    "P_PULSE": ("PULSE", 7, 0x0040, None),
-    "Y_DISC": ("DISC\nRATE", 7, 0x0010, None),
-    "Y_PULSE": ("PULSE", 7, 0x0008, None),
+    "ROLL_DISC": ("DISC\nRATE", 7, 0x0400, None),
+    "ROLL_PULSE": ("PULSE", 7, 0x0200, None),
+    "PITCH_DISC": ("DISC\nRATE", 7, 0x0080, None),
+    "PITCH_PULSE": ("PULSE", 7, 0x0040, None),
+    "YAW_DISC": ("DISC\nRATE", 7, 0x0010, None),
+    "YAW_PULSE": ("PULSE", 7, 0x0008, None),
     "X_NORM": ("NORM", 7, 0x0001, None),
     "X_PULSE": ("PULSE", 8, 0x8000, None),
     "X_SPARE": ("", 8, 0x4000, None),
@@ -246,12 +246,31 @@ DAP_PB = {
 # CONTROL AUTO INRTL LVLH FREE).
 DAP_GRID = (("A", "B", "AUTO", "INRTL", "LVLH", "FREE"),
             ("X_SPARE", "LOW_Z", "HIGH_Z", "PRI", "ALT", "VERN"),
-            ("X_NORM", "Y_NORM", "Z_NORM", "R_DISC", "P_DISC", "Y_DISC"),
-            ("X_PULSE", "Y_PULSE", "Z_PULSE", "R_PULSE", "P_PULSE", "Y_PULSE"))
+            ("X_NORM", "Y_NORM", "Z_NORM", "ROLL_DISC", "PITCH_DISC", "YAW_DISC"),
+            ("X_PULSE", "Y_PULSE", "Z_PULSE", "ROLL_PULSE", "PITCH_PULSE", "YAW_PULSE"))
 DAP_STATIONS = ("FWD", "AFT")
 DAP_PANEL = {"FWD": "C3", "AFT": "A6U"}
 DAP_UNITS = {"FWD": (1, 2, 3), "AFT": (3, 4, 1)}   # contacts A, B, C
 DAP_HOLD_MS = 500             # a scripted press: three GR2 passes, and some
+# THE LAMPS, as PASS drives them: forward-MDM discrete OUTPUTS, DOH cards 2
+# and 10, channels 1-2 -- C3's through FF1 only, A6U's through FF3 only --
+# written whole, RESET then SET, a lamp lit when its SET bit is 1 (GCQORB.hal
+# SET_LAMPS 2714-2818, bit map 730-765; aft rotation lamps GPZORB.hal 160,
+# 238-264, which also does the -Z sense swap; output buffer CGBOBF.hal 595-
+# 621; commands FIOHOS08/FIOHOS11, BCEEQU.asm 334-344).  yaGPC2 sends each
+# channel's word as a VALUE record on the MDM's hardware-side bus.
+DAP_LAMP_UNIT = {"FWD": 1, "AFT": 3}
+DAP_LAMP = {   # button: (card, channel, mask)
+    "PRI": (10, 1, 0x4000), "ROLL_DISC": (10, 1, 0x2000), "ROLL_PULSE": (10, 1, 0x1000),
+    "ALT": (10, 1, 0x0800), "PITCH_DISC": (10, 1, 0x0400), "PITCH_PULSE": (10, 1, 0x0200),
+    "VERN": (10, 1, 0x0100), "YAW_DISC": (10, 1, 0x0080), "YAW_PULSE": (10, 1, 0x0040),
+    "X_NORM": (10, 1, 0x0020), "X_PULSE": (10, 1, 0x0010), "X_SPARE": (10, 1, 0x0008),
+    "Y_NORM": (10, 1, 0x0004), "Y_PULSE": (10, 1, 0x0002), "LOW_Z": (10, 1, 0x0001),
+    "Z_NORM": (10, 2, 0x8000), "Z_PULSE": (10, 2, 0x4000), "HIGH_Z": (10, 2, 0x2000),
+    "AUTO": (2, 1, 0x0004), "A": (2, 1, 0x0002), "LVLH": (2, 1, 0x0001),
+    "INRTL": (2, 2, 0x1000), "B": (2, 2, 0x0800), "FREE": (2, 2, 0x0400),
+}
+MDM_OP_VALUE, MDM_TYPE_DOH = 4, 4
 MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
 LEFT_SEL_POS = ("1", "3")                       # left, right
 RIGHT_SEL_POS = ("3", "2")                      # left, right
@@ -285,6 +304,21 @@ def default_major_func():
 def idp_port(n):
     """IDP n's MDU <-> IDP bus, _IDPn."""
     return D.PORT_BASE + IDP_BUS_OFFSET + int(n)
+
+
+def mdm_receiver(k):
+    """A socket subscribed to FFk's hardware-side bus, for the lamps."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass
+    s.bind(("", D.PORT_BASE + MDM_IO_OFFSET + k - 1))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
 
 
 def idp_receiver(n):
@@ -679,6 +713,10 @@ class PanelO6:
             except OSError as e:
                 log("cannot listen on IDP%d's bus: %s" % (n, e))
         threading.Thread(target=self._listen_idp, daemon=True).start()
+        # The DAP lamps: what yaGPC2 says PASS wrote to FF1's and FF3's
+        # output cards, waiting in _mdm_out for the Tk side.
+        self._mdm_out = {}
+        threading.Thread(target=self._listen_mdm, daemon=True).start()
         # NOTHING IS PUBLISHED YET -- see start_bus(), which main() calls.
 
     # ---- the BFC modules --------------------------------------------------
@@ -1114,6 +1152,58 @@ class PanelO6:
         if changed:
             self.redraw()
 
+    def _listen_mdm(self):
+        """Thread: VALUE records of the forward MDMs' output cards."""
+        socks = {}
+        for k in sorted(set(DAP_LAMP_UNIT.values())):
+            try:
+                socks[mdm_receiver(k)] = k
+            except OSError as e:
+                log("cannot listen on FF%d's hardware side: %s" % (k, e))
+        if not socks:
+            return
+        while True:
+            try:
+                ready, _, _ = select.select(list(socks), [], [], 1.0)
+            except (OSError, ValueError):
+                return
+            for sk in ready:
+                try:
+                    data = sk.recv(512)
+                except OSError:
+                    continue
+                if len(data) < 8:
+                    continue
+                op, typ, addr, cnt = struct.unpack(">HHHH", data[:8])
+                if op != MDM_OP_VALUE or typ != MDM_TYPE_DOH:
+                    continue           # our own contacts, or not an output
+                card, ch = addr >> 8, addr & 0xff
+                n = min(cnt, (len(data) - 8) // 2)
+                words = struct.unpack(">%dH" % n, data[8:8 + 2 * n])
+                with self._rx_lock:
+                    for i, w in enumerate(words):
+                        self._mdm_out[(socks[sk], card, ch + i)] = w
+
+    def _lamps_follow(self):
+        """Light the DAP buttons from the output words heard."""
+        with self._rx_lock:
+            out = dict(self._mdm_out)
+        if not out:
+            return
+        changed = False
+        for st, k in DAP_LAMP_UNIT.items():
+            for name, (card, ch, mask) in DAP_LAMP.items():
+                w = out.get((k, card, ch))
+                lit = bool(w is not None and (w & mask))
+                if lit != self.dap_lamp[st][name]:
+                    self.dap_lamp[st][name] = lit
+                    changed = True
+        if changed:
+            log("DAP lamps  C3: %s  A6U: %s" % tuple(
+                " ".join(n for n in DAP_PB if self.dap_lamp[st][n]) or "-"
+                for st in DAP_STATIONS))
+            self.redraw()
+
     def _tick(self):
         """Every REPUBLISH_MS: re-assert our bits, refresh the lamps.
 
@@ -1136,6 +1226,7 @@ class PanelO6:
         self._tick_last = now
         self._talkbacks_follow()
         self._idp_adopt()
+        self._lamps_follow()
         with self._rx_lock:
             heard = list(self._mm_heard)
         for u, h in enumerate(heard):

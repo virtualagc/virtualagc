@@ -311,11 +311,13 @@ static uint16_t fa_jets_b(int k) { return (uint16_t)(faOut[k][10][0] & fa_jet_ma
 static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
 static int crewFd[CREW_NUNIT + 1] = { -1, -1, -1, -1, -1 };
 static bool crewOpen, crewHeard, crewTrace;
+static int crewPortBase;
 static long crewMsgs;
 
 void mdmdev_crew_open(int portBase) {
     if (crewOpen) return;              /* one vehicle, one set of sockets */
     crewOpen = true;
+    crewPortBase = portBase;
     crewTrace = yagpc_getenv("YAGPC_CREWTRACE") != NULL;
     const char *ifaceStr = yagpc_getenv("NSTS_BUS_IFACE");
     if (ifaceStr == NULL) ifaceStr = "127.0.0.1";
@@ -347,6 +349,9 @@ void mdmdev_crew_open(int portBase) {
         }
         int flags = fcntl(fd, F_GETFL, 0);
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+        setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, (const char *)&iface, sizeof iface);
+        int loop = 1;
+        setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&loop, sizeof loop);
         crewFd[k] = fd;
     }
 }
@@ -372,6 +377,45 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
     }
     crewHeard = true;
     crewMsgs++;
+}
+
+/* AND BACK: the forward MDMs' discrete OUTPUTS -- the lamps PASS lights on
+ * the crew's panels, the orbital DAP's among them -- go out on the same
+ * hardware-side buses as op 4 VALUE records, type 4 (DOH), one per channel,
+ * the reference's "MDM mirrors a GPC write to an output card".  Sent when a
+ * channel's word changes, and every CREW_REFRESH writes of that unit
+ * regardless, for a panel that starts late. */
+#define CREW_OP_VALUE_OUT 4
+#define CREW_TYPE_DOH 4
+#define CREW_REFRESH 64
+static uint16_t crewOutSent[CREW_NUNIT + 1][CREW_NCARD][NCHAN];
+static bool crewOutEver[CREW_NUNIT + 1][CREW_NCARD][NCHAN];
+static long crewOutWrites[CREW_NUNIT + 1];
+
+static void crew_send_out(int k, unsigned card, unsigned ch, uint16_t w) {
+    if (crewFd[k] < 0 || crewPortBase <= 0) return;
+    uint8_t b[10] = { 0, CREW_OP_VALUE_OUT, 0, CREW_TYPE_DOH, (uint8_t)card, (uint8_t)ch,
+                      0, 1, (uint8_t)(w >> 8), (uint8_t)w };
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + CREW_PORT_OFFSET + k - 1));
+    sendto(crewFd[k], (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
+}
+
+static void crew_publish_out(int k, uint32_t cmd, int n) {
+    if (!crewOpen || k < 1 || k > CREW_NUNIT) return;
+    unsigned card = CMD_CARD(cmd), ch0 = CMD_CHAN(cmd) & 0x0fu;
+    bool refresh = (++crewOutWrites[k] % CREW_REFRESH) == 0;
+    for (int i = 0; i < n && ch0 + (unsigned)i < NCHAN; i++) {
+        unsigned ch = ch0 + (unsigned)i;
+        uint16_t w = ffOut[k][card][ch];
+        if (refresh || !crewOutEver[k][card][ch] || crewOutSent[k][card][ch] != w) {
+            crew_send_out(k, card, ch, w);
+            crewOutSent[k][card][ch] = w;
+            crewOutEver[k][card][ch] = true;
+        }
+    }
 }
 
 static void crew_poll(void) {
@@ -520,9 +564,21 @@ static void push_fire(double sharedUs) {
     vehdyn_set_fire_words(ff, fa, sharedUs);
 }
 
+bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
+
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
-    if (!mdmdev_enabled() || n <= 0) return;
+    if (n <= 0) return;
+    if (!mdmdev_enabled()) {
+        /* No device model, but a panel: record the forward MDMs' discrete
+         * outputs and send them to it -- its lamps -- and nothing else. */
+        if (crewOpen && CMD_IUA(cmd) == IUA_FF && ff_unit(busID) > 0 &&
+            CMD_MODE(cmd) == 8u) {
+            discrete_write(ffOut, ffOutSeen, ff_unit(busID), cmd, words, n);
+            crew_publish_out(ff_unit(busID), cmd, n);
+        }
+        return;
+    }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
     if (iua == IUA_FF && ff_unit(busID) > 0) {
@@ -537,6 +593,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         }
         if (CMD_MODE(cmd) == 8u) {
             discrete_write(ffOut, ffOutSeen, u, cmd, words, n);
+            crew_publish_out(u, cmd, n);
             if (CMD_CARD(cmd) == 13u) push_fire(sharedUs);
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {

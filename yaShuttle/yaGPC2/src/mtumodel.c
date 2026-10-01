@@ -1694,7 +1694,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         /* A WRITE TO ONE OF THE TWO MDMs: its data words follow from the
          * computer that issued it, and go to mdmdev.c when all have come. */
         m->outWant[b] = 0;
-        if (mdmdev_enabled() && (CMD_IUA(cmd) == MTU_IUA || CMD_IUA(cmd) == 12u) &&
+        if (mdmdev_capturing() && (CMD_IUA(cmd) == MTU_IUA || CMD_IUA(cmd) == 12u) &&
             ((cmd >> 14) & 0xfu) == 8u) {
             m->outCmd[b] = cmd;
             m->outWant[b] = (int)((cmd & 0x1fu) + 1u);

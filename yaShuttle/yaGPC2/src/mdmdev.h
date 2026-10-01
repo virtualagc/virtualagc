@@ -46,6 +46,10 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
  * buses (portBase + 100..103), for a run wired to a panel.  Idempotent. */
 void mdmdev_crew_open(int portBase);
 
+/* Whether mtumodel.c should collect MDM writes for mdmdev_output(): with the
+ * device model on, or with a panel to send the lamps to. */
+bool mdmdev_capturing(void);
+
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 
