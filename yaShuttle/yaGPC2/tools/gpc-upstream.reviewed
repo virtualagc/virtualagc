@@ -1,2 +1,22 @@
 # Upstream gpc commits reviewed for yaGPC2: SHA VERDICT note.  Written by
 # tools/gpc-upstream.py mark; see its header for the verdicts.
+f4cf76de3 n/a #RDL operand field letter c->a, relocation only; yaGPC2 reads the 18-bit fullword count per BCE PoO (src/iop_bce_instr.c:480-510), ahead of upstream
+4d68a612f n/a timing from OBJECTGE.xpl (src/timing.c), not IBM tables; counters/PSW2 i-field already (src/cpu.c:1871-1944, src/regmem.c:109); own rtpacer.c
+af9c4b901 already HalUCP ON ERROR cells, READALL, SKIP(0), BIT input all in src/halucp.c
+a7c2b7ea4 open CVFX on convert overflow: upstream leaves R1 and CC unchanged (AP-101 C/M PoO IBM-6246156B 8-12 'The value of R1 is unchanged'); yaGPC2 stores the truncated result (src/cpu_instr.c:1141-1165, issues-db #9/#81). AP-101S manual silent. @LAR, BCT, #MOUT@/#MIN@ already
+f42f424f6 already LDM/STDM don't-care bits, from our PR #31; src/cpu_instr.c:2306-2318
+b6a74b054 already MVS = ledger #264 (d88d97631); bare program halt never needed IOINIT in src/halucp.c; flight images protected by --no-halucp-svc
+71f80716a already original MEDS port; MEDS2.py descends from it
+e49b0879e open DEU protocol already ported (deumodel.c, MEDS2.py); OPEN: major-function default should be GNC (JSC-18820 4.4), deumodel.c and MEDS2.py default PL unless told; simulatePASS passes GNC
+966674f22 open MEDS2.py: STS-83-0020V1-34 colour palette (40 green, 54 yellow, 29/31 white, 47/48 cyan; ours draws olive/pink), double intensity = default yellow, alt landing symbols 0x14/0x15, fault message line at 0x19BE never drawn, IP1-5/NSP2 port renumbering (bcenet_transport.c, MEDS2.py), BITE2 0x8000
+b83fc2f97 already keyboard routing by IDP/CRT SEL via panelO6 KYBD_SEL
+e12ac636e already MMU geometry/timing/READY in mmumodel.c
+7946bc15b already IPL discretes, REQUEST/VALUE, READY in discretes.c, iop.c
+d8f8803d0 n/a headless debugger socket
+f82bc9789 n/a GUI as debug-session client
+c92898bbe n/a run modes behind debugger sessions
+85f894e44 open GPC power-loss model (halt, MIAs off, outputs dropped, reset held) missing -- panelO6 POWER drives nothing; bad-SEV error termination not representable in busword.h (latent). Pacer 50 ms rebase deliberately NOT ported (rtpacer.c:77-96, measured 21% loss). Ring wiring and 20 ms peer hold already
+952826663 n/a CMake reorganisation
+c49530b15 open D/DR/M/MR/MH/MHI/MIH set the overflow indicator via bare psw_set_overflow but never take the fixed-point-overflow program interrupt (POO 4.10, 4.21-4.24); A/S/LCR do via cpu_add_fixed. Rest of the interrupt/IOP/real-time/FP rework already
+818df8805 open undecodable halfword halts the run (cpu.c decodeFailed, run.c 'invalid instruction') where the machine takes an operation-exception program check, code 0000; MIA 33 us pacing exists but off by default (YAGPC_MIA_PACE). Addressing/SVC/BALR/SCAL/ISPB/MVH/@LH/@RAW/#LBR@/#BU@/timer borrow already
+0e275b1fc open apply_load_protection (ageharness.c) protects every section instead of the linker's .sym.json storeProtect map; affects --power-on without --ipl and YAGPC_IPL_PROTECT=sections only
