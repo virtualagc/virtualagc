@@ -337,6 +337,13 @@ def window_title(thc, rhc):
     return "THC %s / RHC %s" % (thc.upper(), rhc.upper())
 
 
+# macOS ROUNDS A WINDOW'S BOTTOM CORNERS -- by about 11 points on macOS 27 --
+# and cuts off what is drawn under them; the status line ran into them (Ron,
+# via Mac-integrate, 2026-10-01).  This many points of the window's own colour
+# below the drawing, as in panelO6.
+BOTTOM_MARGIN = 12 if sys.platform == "darwin" else 0
+
+
 def _clip(v, lo=-1.0, hi=1.0):
     return lo if v < lo else hi if v > hi else v
 
@@ -351,7 +358,7 @@ class VirtualControls:
         self.rhc_name, self.thc_name = rhc_name, thc_name
         # The PLT's station has no THC, and its window no THC panel: only as
         # wide as the RHC (Ron, 2026-10-01).
-        size = (int((560 if thc_name else 300) * scale), int(380 * scale))
+        size = (int((560 if thc_name else 300) * scale), int(380 * scale) + BOTTOM_MARGIN)
         # RETINA.  A set_mode() window on macOS is drawn at one pixel a
         # point and doubled by the compositor: small, fuzzy text (Ron, via
         # Mac-integrate, 2026-10-01).  pygame-ce's Window API with
@@ -585,12 +592,15 @@ class VirtualControls:
             return img.get_height()
 
         text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
-        hint = ("drag knob: pitch/roll   drag ring: yaw" if self.style == "split" else
-                "left-drag: pitch/roll   right-drag: yaw")
-        text(hint, int(10 * k), self.H - int(52 * k))
-        text("keys: arrows, Q/E", int(10 * k), self.H - int(36 * k))
+        # UPPER CASE ONLY: lower case at these sizes was too small to read
+        # (Ron, via Mac-integrate, 2026-10-01).
+        hint = ("DRAG KNOB: PITCH/ROLL   DRAG RING: YAW" if self.style == "split" else
+                "LEFT-DRAG: PITCH/ROLL   RIGHT-DRAG: YAW")
+        bottom = self.H - int(BOTTOM_MARGIN * self.hd)
+        text(hint, int(10 * k), bottom - int(52 * k))
+        text("KEYS: ARROWS, Q/E", int(10 * k), bottom - int(36 * k))
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
-        text(degs + " deg", int(10 * k), self.H - int(20 * k))
+        text(degs + " DEG", int(10 * k), bottom - int(20 * k))
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
         # and the aft station; the PLT has none.
         x0, y0 = int(330 * k), int(40 * k)
@@ -607,9 +617,9 @@ class VirtualControls:
             pg.draw.rect(s, (200, 40, 40), s.get_rect(), max(3, int(4 * k)))
             # The longest line that fits the window.
             msg = None
-            for f, t in ((self.font, "NO KEYBOARD FOCUS -- click here; keys inactive"),
-                         (self.small, "NO KEYBOARD FOCUS -- click here"),
-                         (self.small, "NO FOCUS -- click")):
+            for f, t in ((self.font, "NO KEYBOARD FOCUS -- CLICK HERE; KEYS INACTIVE"),
+                         (self.small, "NO KEYBOARD FOCUS -- CLICK HERE"),
+                         (self.small, "NO FOCUS -- CLICK")):
                 msg = f.render(t, True, (255, 90, 90))
                 if msg.get_width() <= self.W - int(12 * k):
                     break
