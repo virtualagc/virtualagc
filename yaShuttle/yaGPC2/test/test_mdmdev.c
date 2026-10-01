@@ -14,13 +14,19 @@
 /* setenv, which -std=c11 alone does not declare. */
 #define _POSIX_C_SOURCE 200809L
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "../src/mtumodel.h"
 #include "../src/busword.h"
 #include "../src/vehdyn.h"
+#include "../src/mdmdev.h"
 #include <math.h>
 
 static struct MtuModel *m;
@@ -69,6 +75,26 @@ static void write_words(int bus, uint32_t cmd, const uint16_t *w, int n) {
 
 #define FA(c) ((12u << 19) | (c))
 #define FF(c) ((10u << 19) | (c))
+
+/* A crew contact, as panelO6 drives it: one datagram on FFk's hardware-side
+ * bus (CREW_BASE + 100 + k - 1), halfwords op, type, card<<8|channel, count,
+ * word -- big-endian. */
+#define CREW_BASE 39400
+static void crew_send(int k, int op, int card, int ch, uint16_t word) {
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    struct in_addr lo; lo.s_addr = inet_addr("127.0.0.1");
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, (const char *)&lo, sizeof lo);
+    int on = 1;
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&on, sizeof on);
+    uint8_t b[10] = { 0, (uint8_t)op, 0, 2, (uint8_t)card, (uint8_t)ch, 0, 1,
+                      (uint8_t)(word >> 8), (uint8_t)word };
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(CREW_BASE + 100 + k - 1));
+    sendto(fd, (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
+    close(fd);
+}
 
 int main(void) {
     setenv("YAGPC_MDM_DEVICES", "1", 1);
@@ -228,6 +254,36 @@ int main(void) {
                 printf("axis %d: compensated %.4f ft/s, truth %.4f\n", ax, comp, truth[ax]);
             check(fabs(comp - truth[ax]) <= 0.01, "PASS-compensated accelerometer delta-V equals the truth");
         }
+    }
+
+    /* CREW CONTACTS: the panel's ADI switches on FF1 DSCRT2 (DIH card 4
+     * ch 1) and the SENSE switch on FF2 DSCRT7 (DIH card 9 ch 1), sent as
+     * real datagrams, appear in the HFE read's words 1 and 6 and the MFE
+     * read's 9 and 14 -- ORed with what the device model puts there. */
+    {
+        mdmdev_crew_open(CREW_BASE);
+        crew_send(1, 4, 4, 1, 0x4900u);   /* VALUE: LVLH, rate MED, error MED */
+        crew_send(2, 1, 9, 1, 0x4000u);   /* SET: SENSE -Z */
+        uint16_t h1[36], h2[36], m2[21];
+        bool ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(20, FF(0x082E8u), 36, h1);
+            read_words(21, FF(0x082E8u), 36, h2);
+            ok = h1[1] == 0x4900u && (h2[6] & 0x4000u);
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        check(h1[1] == 0x4900u, "crew ADI switches reach FF1 DSCRT2 (HFE word 1)");
+        check((h2[6] & 0x4000u) != 0, "crew SENSE -Z reaches FF2 DSCRT7 (HFE word 6)");
+        check(read_words(21, FF(0x082C5u), 21, m2) == 21 && (m2[14] & 0x4000u),
+              "the same contact in the MFE read (word 14)");
+        crew_send(2, 2, 9, 1, 0x4000u);   /* RESET it */
+        ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(21, FF(0x082E8u), 36, h2);
+            ok = (h2[6] & 0x4000u) == 0;
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        check(ok, "a RESET clears the contact");
     }
 
     mtumodel_free(m);

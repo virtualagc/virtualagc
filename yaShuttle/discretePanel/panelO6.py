@@ -161,6 +161,45 @@ DEFAULT_GPC_ID = 1
 # what the IDPs were last told.
 IDP_POWER_POS = ("ON", "OFF")                   # up, down
 MAJ_FUNC_POS = ("GNC", "SM", "PL")              # up, mid, down
+
+# ---- the ADI switches and the SENSE switch (forward-MDM crew contacts) ----
+#
+# Unlike everything above, these are not GPC discretes: each is a contact on
+# a forward MDM's discrete input card, and PASS reads it as a bit of an FF
+# DSCRT word.  They are published on each MDM's HARDWARE SIDE bus, the
+# reference's `_FFk_mdmIO` (port base + 100 + k - 1), as datagrams of five
+# big-endian halfwords -- op (1 SET, 2 RESET), card type (2, DIH), card << 8
+# | channel, count (1), the bits -- which yaGPC2's mdmdev.c ORs into what the
+# MDM answers.  Field by field, break before make, as the GPC discretes.
+# Bits, cards and units are crew-switches-OPS2.md's, from the flight source:
+#   ADI ATTITUDE / RATE / ERROR   DSCRT2 (DIH card 4 ch 1) of FF1 (CDR, F6),
+#                                 FF2 (PLT, F8), FF3 (aft, A6U); GDPSWP.hal
+#   SENSE -Z / -X (A6U)           DSCRT7 (DIH card 9 ch 1) of FF1, FF2, FF3
+#                                 -- three contacts, voted; GR2ORB.hal
+#   ATT REF pushbutton            DSCRT11 (DIH card 12 ch 2) bits 7 and 8 of
+#                                 the station's MDM -- two contacts; GR2ORB
+# Appearance follows SCOM (USA007587 Rev A) printed page 2.7-5, "Commander's
+# / Pilot's / Aft ADI Switches and ATT REF Pushbutton on Panel F6 / F8 /
+# A6U", and 2.7-7, "SENSE Switch on Panel A6U".
+ADI_STATIONS = ("L", "R", "A")                  # CDR F6, PLT F8, aft A6U
+ADI_STATION_NAME = {"L": "F6  CDR", "R": "F8  PLT", "A": "A6U  AFT"}
+ADI_UNIT = {"L": 1, "R": 2, "A": 3}
+ADI_ATT_POS = ("INRTL", "LVLH", "REF")          # up, mid, down
+ADI_LEVEL_POS = ("HIGH", "MED", "LOW")          # up, mid, down (ERROR, RATE)
+ADI_FIELDS = ("att", "err", "rate")
+ADI_BITS = {"att":  {"INRTL": 0x8000, "LVLH": 0x4000, "REF": 0x2000},
+            "rate": {"HIGH": 0x1000, "MED": 0x0800, "LOW": 0x0400},
+            "err":  {"HIGH": 0x0200, "MED": 0x0100, "LOW": 0x0080}}
+SENSE_POS = ("-Z", "-X")                        # up, down
+SENSE_BITS = {"-Z": 0x4000, "-X": 0x2000}
+ATT_REF_BITS = 0x0300                           # contacts A and B
+DEFAULT_ADI = dict(("%s_%s" % (st, f), "LVLH" if f == "att" else "MED")
+                   for st in ADI_STATIONS for f in ADI_FIELDS)
+DEFAULT_SENSE = "-Z"
+MDM_IO_OFFSET = 100            # _FF1_mdmIO's port offset; FF2-4 follow
+MDM_OP_SET, MDM_OP_RESET = 1, 2
+MDM_TYPE_DIH = 2
+ATT_REF_HOLD_MS = 500          # three GR2 passes at 6.25 Hz, and some
 MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
 LEFT_SEL_POS = ("1", "3")                       # left, right
 RIGHT_SEL_POS = ("3", "2")                      # left, right
@@ -317,11 +356,14 @@ MARGIN = 28
 PANE_GAP = 16          # air between O6 and the C3/F6 stack
 C3_W = 236
 C2_W = 720             # the IDP column: panel C2 over the O6 IDP LOAD inset
+R11_W = 5 + 230 + 5 + 4  # the R11 inset: C2's margins round a 230-wide set
 # ENGAGE pushbuttons.  Smaller than IPL's 50: at 50 the pane leaves only
 # ~5 px under the IPL SOURCE tab at some --size values; at 40, 15 or more.
 RHC_BTN = 40
 O6_MAIN_RIGHT = 668    # right edge of the O6 main rectangle (IPL tab is below C3/F6)
-REF_W = O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + MARGIN   # 1684
+ADI_COL_W = 260        # the ADI column, right of the IDP column
+REF_W = (O6_MAIN_RIGHT + PANE_GAP + C3_W + PANE_GAP + C2_W + PANE_GAP + ADI_COL_W
+         + MARGIN)     # 1960; 1684 before the ADI column
 REF_H = 1300           # 1250 before the IPL-to-talkback gap was added
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
@@ -463,6 +505,9 @@ class PanelO6:
         self.bfc_disengage = DEFAULT_BFC_DISENGAGE
         self.activity = list(DEFAULT_ACTIVITY)
         self.rhc = [False] * len(RHCS)       # ENGAGE pushbuttons, held down
+        self.adi = dict(DEFAULT_ADI)         # "L_att": "LVLH", ...
+        self.sense = DEFAULT_SENSE
+        self.attref = [False] * len(ADI_STATIONS)   # held down
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
@@ -534,6 +579,8 @@ class PanelO6:
         # sending, which also keeps each RESET/SET pair in order.
         self._pub_lock = threading.Lock()
         self._pub_columns = None
+        self._pub_crew = None
+        self._crew_published = None
         self._pub_wake = threading.Event()
         self._tick_last = None
         threading.Thread(target=self._pub_loop, daemon=True).start()
@@ -747,7 +794,7 @@ class PanelO6:
     # these restores the thing that DRIVES the vehicle.
     SWITCHES = ("power", "output", "mode", "ipl_source", "bfc_display",
                 "bfc_select", "bfc_disengage", "idp_power", "idp_mf",
-                "kybd_sel")
+                "kybd_sel", "adi", "sense")
 
     # WHAT EACH SWITCH IS ALLOWED TO BE.  redraw() finds a control's position
     # with POS.index(value), so a value that is merely unexpected raises
@@ -759,7 +806,11 @@ class PanelO6:
                "ipl_source": IPL_SOURCE_POS, "bfc_display": BFC_DISPLAY_POS,
                "bfc_select": BFC_SELECT_POS, "bfc_disengage": BFC_DISENGAGE_POS,
                "idp_power": IDP_POWER_POS, "idp_mf": tuple(range(len(MF_NAMES))),
-               "kybd_sel": {"left": LEFT_SEL_POS, "right": RIGHT_SEL_POS}}
+               "kybd_sel": {"left": LEFT_SEL_POS, "right": RIGHT_SEL_POS},
+               "adi": dict(("%s_%s" % (st, f),
+                            ADI_ATT_POS if f == "att" else ADI_LEVEL_POS)
+                           for st in ADI_STATIONS for f in ADI_FIELDS),
+               "sense": SENSE_POS}
 
     @classmethod
     def _bad_value(cls, name, value, key=None):
@@ -827,11 +878,36 @@ class PanelO6:
         self._update_latches()
         self.redraw()
 
+    def crew_fields(self):
+        """The forward-MDM crew contacts, as (unit, card, channel, field mask,
+        bits) -- one per switch field, so that a field never disturbs the
+        other bits of the word it shares."""
+        out = []
+        for i, st in enumerate(ADI_STATIONS):
+            u = ADI_UNIT[st]
+            for f in ADI_FIELDS:
+                bits = ADI_BITS[f]
+                mask = 0
+                for b in bits.values():
+                    mask |= b
+                out.append((u, 4, 1, mask, bits[self.adi["%s_%s" % (st, f)]]))
+            out.append((u, 12, 2, ATT_REF_BITS,
+                        ATT_REF_BITS if self.attref[i] else 0))
+        for u in (1, 2, 3):
+            out.append((u, 9, 1, 0x6000, SENSE_BITS[self.sense]))
+        return out
+
     def _publish(self):
         """Hand every column's discretes to _pub_loop, and wake it."""
         columns = [self.discretes(w) for w in range(N_GPC)]
+        crew = self.crew_fields()
         with self._pub_lock:
             self._pub_columns = columns
+            self._pub_crew = crew
+        if crew != self._crew_published:
+            log("MDM crew contacts  " + "  ".join(
+                "FF%d %d/%d=%04x" % (u, c, ch, b) for u, c, ch, m, b in crew))
+            self._crew_published = crew
         self._pub_wake.set()
         if columns != self._published:
             for w, (a, b) in enumerate(columns):
@@ -854,8 +930,20 @@ class PanelO6:
             self._pub_wake.clear()
             with self._pub_lock:
                 columns = self._pub_columns
+                crew = self._pub_crew
             if columns is None:
                 continue
+            try:
+                for u, card, ch, mask, bits in crew or ():
+                    port = D.PORT_BASE + MDM_IO_OFFSET + u - 1
+                    for op, w in ((MDM_OP_RESET, mask & ~bits), (MDM_OP_SET, bits)):
+                        if w:
+                            self.sock.sendto(struct.pack(
+                                ">HHHHH", op, MDM_TYPE_DIH, (card << 8) | ch, 1, w),
+                                (D.GROUP, port))
+            except OSError as e:
+                if not self._send_failed:
+                    log("cannot publish the MDM crew contacts: %s" % e)
             try:
                 for w, (a, b) in enumerate(columns):
                     port = D.gpc_port(w + 1)
@@ -1308,6 +1396,9 @@ class PanelO6:
         c2_y1 = self._draw_c2(idp_x0, my0, idp_x1)
         load_y1 = self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
         self._draw_r11(idp_x0, load_y1 + PANE_GAP, idp_x1)
+        # The ADI and SENSE switches: their own column, right of the IDP one.
+        adi_x0 = idp_x1 + PANE_GAP
+        self._draw_crew(adi_x0, my0, adi_x0 + ADI_COL_W)
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -1645,7 +1736,7 @@ class PanelO6:
         rows = self._idp_rows(y0)
         y1 = rows[7] + (rows[6] - y0)
         left, right = 5, 5 + 4
-        width = left + 230 + right
+        width = R11_W
         self._rect_panel(x0, y0, x0 + width, y1)
         self._idp_set(x0 + left + 115, 4, rows)
         return y1
@@ -1681,6 +1772,70 @@ class PanelO6:
                                  pos, npos=2)
             self._hit("idp_load", k + 1, gx - gw / 2, sw_top, gx + gw / 2,
                       sw_top + gh)
+        return y1
+
+    def _draw_crew(self, x0, y0, x1):
+        """The three ADI switch groups -- F6 (CDR), F8 (PLT), A6U (aft) --
+        one above the other, each with its ATT REF pushbutton, and A6U's
+        SENSE switch."""
+        y = y0
+        for i, st in enumerate(ADI_STATIONS):
+            y = self._draw_adi(x0, y, x1, i, st) + PANE_GAP
+
+    def _draw_adi(self, x0, y0, x1, i, st):
+        """One station's ADI ATTITUDE / ERROR / RATE switches and ATT REF
+        pushbutton, laid out as SCOM printed page 2.7-5 draws them; on A6U,
+        SENSE beside ATT REF (page 2.7-7).  Returns the inset's bottom."""
+        pad = 10
+        th10 = self._th(10)
+        ths = self._th(SETTING_SIZE)
+        gw, gh = 40, 104
+        b = 40                                   # ATT REF, as RHC ENGAGE
+        sgw, sgh = 40, 64                        # SENSE, two positions
+        w = x1 - x0
+        # ATTITUDE is the long caption: its switch sits further from ERROR's
+        # than RATE's does, as on the panels.
+        cols = [x0 + w * k / 6.0 for k in (1.30, 3.45, 5.00)]
+        # The vertical rhythm first, so the body can be drawn behind it.
+        y_title = y0 + pad + th10
+        y_cap = y_title + th10 + pad + ths
+        y_top = y_cap + ths + pad / 2.0 + ths
+        top = y_top + ths + pad / 2.0
+        y_bot = top + gh + pad / 2.0 + ths
+        row = y_bot + ths + pad
+        y1 = row + (max(b, sgh) if st == "A" else b) + pad
+        self._rect_panel(x0, y0, x1, y1)
+        self._text((x0 + x1) / 2.0, y_title,
+                   "%s    ADI" % ADI_STATION_NAME[st], size=10)
+        for gx, cap in zip(cols, ("ATTITUDE", "ERROR", "RATE")):
+            self._text(gx, y_cap, cap, size=SETTING_SIZE)
+        self._text(cols[0], y_top, "INRTL", size=SETTING_SIZE)
+        self._text((cols[1] + cols[2]) / 2.0, y_top, "HIGH", size=SETTING_SIZE)
+        for gx, f in zip(cols, ADI_FIELDS):
+            positions = ADI_ATT_POS if f == "att" else ADI_LEVEL_POS
+            pos = positions.index(self.adi["%s_%s" % (st, f)])
+            self._guarded_toggle(gx - gw / 2, top, gx + gw / 2, top + gh, pos, npos=3)
+            self._hit("adi", (st, f), gx - gw / 2, top, gx + gw / 2, top + gh)
+        self._vtext(cols[0] - gw / 2 - 8, top + gh / 2.0, "LVLH")
+        self._vtext(cols[2] + gw / 2 + 8, top + gh / 2.0, "MED")
+        self._text(cols[0], y_bot, "REF", size=SETTING_SIZE)
+        self._text((cols[1] + cols[2]) / 2.0, y_bot, "LOW", size=SETTING_SIZE)
+        # ATT REF under ATTITUDE, as on F6, F8 and A6U.
+        bx = cols[0]
+        self._pushbutton(bx - b / 2, row, bx + b / 2, row + b, "", down=self.attref[i])
+        self._text(bx, row + b * 0.37, "ATT", size=SETTING_SIZE)
+        self._text(bx, row + b * 0.65, "REF", size=SETTING_SIZE)
+        self._hit("attref", i, bx - b / 2, row, bx + b / 2, row + b)
+        if st == "A":
+            # SENSE, captioned as on A6U: the name and -Z above, -X below.
+            sx = (cols[1] + cols[2]) / 2.0
+            lx = sx - sgw / 2 - 6
+            self._text(lx, row + ths * 0.6, "SENSE", size=SETTING_SIZE, anchor="e")
+            self._text(lx, row + ths * 1.9, "-Z", size=SETTING_SIZE, anchor="e")
+            self._text(lx, row + sgh - ths * 0.6, "-X", size=SETTING_SIZE, anchor="e")
+            pos = SENSE_POS.index(self.sense)
+            self._guarded_toggle(sx - sgw / 2, row, sx + sgw / 2, row + sgh, pos, npos=2)
+            self._hit("sense", None, sx - sgw / 2, row, sx + sgw / 2, row + sgh)
         return y1
 
     def _lamp(self, gx, y, caption, state, size=10):
@@ -1999,6 +2154,16 @@ class PanelO6:
         elif kind == "idp_load":
             self._set_idp_load(index, True)
             self._held = (kind, index)
+        elif kind == "adi":
+            st, f = index
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_adi(st, f, (ADI_ATT_POS if f == "att" else ADI_LEVEL_POS)[z])
+        elif kind == "sense":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_sense(SENSE_POS[z])
+        elif kind == "attref":
+            self._set_attref(index, True)
+            self._held = (kind, index)
 
 
     def _on_release(self, event):
@@ -2012,6 +2177,8 @@ class PanelO6:
             self._set_rhc(index, False)
         elif kind == "idp_load":
             self._set_idp_load(index, False)
+        elif kind == "attref":
+            self._set_attref(index, False)
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -2069,6 +2236,28 @@ class PanelO6:
         self.rhc[i] = down
         self._announce("%s RHC BFC ENGAGE" % RHCS[i], old,
                        "ON" if down else "OFF")
+        self._changed()
+
+    def _set_adi(self, st, f, value):
+        key = "%s_%s" % (st, f)
+        old = self.adi[key]
+        self.adi[key] = value
+        self._announce("%s ADI %s" % (ADI_STATION_NAME[st].split()[0],
+                                      {"att": "ATTITUDE", "err": "ERROR",
+                                       "rate": "RATE"}[f]), old, value)
+        self._changed()
+
+    def _set_sense(self, value):
+        old = self.sense
+        self.sense = value
+        self._announce("A6U SENSE", old, value)
+        self._changed()
+
+    def _set_attref(self, i, down):
+        old = "ON" if self.attref[i] else "OFF"
+        self.attref[i] = down
+        self._announce("%s ATT REF" % ADI_STATION_NAME[ADI_STATIONS[i]].split()[0],
+                       old, "ON" if down else "OFF")
         self._changed()
 
     # ---- the IDP controls -------------------------------------------------
@@ -2331,6 +2520,17 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             if val.upper() not in MAJ_FUNC_POS:
                 raise SystemExit("panelO6: MAJ FUNC is GNC, SM or PL, not %r" % val)
             panel._set_idp_mf(c2_idp(n), MF_NAMES.index(val.upper()))
+        elif verb == "adi":
+            st, f, val = arg.upper().split()
+            f = {"ATT": "att", "ATTITUDE": "att", "ERR": "err", "ERROR": "err",
+                 "RATE": "rate"}[f]
+            panel._set_adi(st, f, val)
+        elif verb == "sense":
+            panel._set_sense(arg.upper())
+        elif verb == "attref":
+            i = ADI_STATIONS.index(arg.upper())
+            panel._set_attref(i, True)
+            root.after(ATT_REF_HOLD_MS, lambda: panel._set_attref(i, False))
         elif verb == "kybdsel":
             side, val = arg.split()
             side = side.lower()

@@ -103,6 +103,9 @@ PANEL_ARGS = {
     "majfunc": r"[1-4]\s+(gnc|sm|pl)",
     "kybdsel": r"(left\s+[13]|right\s+[23])",
     "idpload": r"[1-4]",
+    "adi": r"(l|r|a)\s+(att|attitude)\s+(inrtl|lvlh|ref)|(l|r|a)\s+(err|error|rate)\s+(high|med|low)",
+    "sense": r"(-z|-x)",
+    "attref": r"(l|r|a)",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
 }
@@ -114,6 +117,8 @@ PANEL_USAGE = {
     "bfsengage": "bfsengage on|off", "idppower": "idppower 1-4 on|off",
     "majfunc": "majfunc 1-4 gnc|sm|pl", "kybdsel": "kybdsel left 1|3, or kybdsel right 2|3",
     "idpload": "idpload 1-4", "gpcid": "gpcid 1-5", "bit": "bit a|b N on|off",
+    "adi": "adi l|r|a att inrtl|lvlh|ref, or adi l|r|a err|rate high|med|low",
+    "sense": "sense -z|-x", "attref": "attref l|r|a",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -282,6 +287,13 @@ HELP = """\
     majfunc N gnc|sm|pl IDP/CRT MAJ FUNC
     kybdsel left 1|3    LEFT IDP/CRT SEL
     kybdsel right 2|3   RIGHT IDP/CRT SEL
+   F6, F8 and A6U, the ADI switches (l CDR F6, r PLT F8, a aft A6U):
+    adi S att inrtl|lvlh|ref
+                        ADI ATTITUDE
+    adi S err|rate high|med|low
+                        ADI ERROR, ADI RATE
+    attref S            ATT REF pushbutton, held 0.5 s
+    sense -z|-x         A6U SENSE
    not a control:
     gpcid N             make GPC N the primary column
     bit a|b N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT

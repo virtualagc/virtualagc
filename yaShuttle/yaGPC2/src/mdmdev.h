@@ -42,6 +42,10 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
  * false, leaving the caller's own answer (zeros) in place. */
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs);
 
+/* Listen for the panel's crew contacts on the forward MDMs' hardware-side
+ * buses (portBase + 100..103), for a run wired to a panel.  Idempotent. */
+void mdmdev_crew_open(int portBase);
+
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 

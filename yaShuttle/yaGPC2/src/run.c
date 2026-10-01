@@ -14,6 +14,7 @@
 #include "cpu_instr.h"
 #include "vehicle.h"
 #include "discretes.h"
+#include "mdmdev.h"
 #include "mtumodel.h"
 #include "iccmodel.h"
 #include "mmumodel.h"
@@ -1182,6 +1183,7 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
 
     if (opts->discretes) {
         r->discretes = discretes_create(r->gpcId);
+        mdmdev_crew_open(yagpc_port_base());   /* the crew switches behind the FF MDMs */
         iop_set_discretes(&r->age.gpc.iop, r->discretes);
         r->age.gpc.cpu.svcNoteCtx = r->discretes;
         r->age.gpc.cpu.svcNote = discretes_note_svc;

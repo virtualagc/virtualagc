@@ -1,10 +1,18 @@
+#define _DEFAULT_SOURCE /* struct ip_mreq under -std=c11's strict mode */
 #include "mdmdev.h"
 
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <math.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
+#include "compat.h"
 #include "envcache.h"
 #include "vehdyn.h"
 
@@ -276,10 +284,123 @@ static uint16_t fa_jets_b(int k) { return (uint16_t)(faOut[k][10][0] & fa_jet_ma
  * limit and no rate check.  2.5 V clears every one. */
 #define INJ_WARM 16000u
 
+/* ---------------------------------------------------------------------
+ * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
+ *
+ * A crew switch is a contact wired to a channel of a DIH or DIL card, and
+ * PASS reads it as a bit of an FF DSCRT word.  The panel (panelO6.py) drives
+ * them on each MDM's HARDWARE SIDE bus, nsts-sim-gpc's `_FFk_mdmIO` (port
+ * base + 100 + k - 1), in that bus's datagram shape (lru/mdm/mdmConf.coffee):
+ * halfwords op, card type, card << 8 | channel, count, then one halfword per
+ * channel -- op 1 SET ORs those bits in, 2 RESET clears them, 4 VALUE
+ * replaces the channel.  Halfwords are big-endian here, as on our discrete
+ * bus; the reference sends a native Uint16Array, but nothing of its runs on
+ * these ports in ours.
+ *
+ * Opened only for a run wired to a panel (mdmdev_crew_open, from run.c with
+ * --discretes), and independent of YAGPC_MDM_DEVICES: with the device model
+ * off a forward-MDM read is all zeros, and the contacts are ORed into those
+ * zeros once the panel has driven any; until then reads are untouched. */
+#define CREW_NUNIT 4
+#define CREW_NCARD 16
+#define CREW_NCHAN 3
+#define CREW_PORT_OFFSET 100
+#define CREW_OP_SET 1
+#define CREW_OP_RESET 2
+#define CREW_OP_VALUE 4
+static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
+static int crewFd[CREW_NUNIT + 1] = { -1, -1, -1, -1, -1 };
+static bool crewOpen, crewHeard, crewTrace;
+static long crewMsgs;
+
+void mdmdev_crew_open(int portBase) {
+    if (crewOpen) return;              /* one vehicle, one set of sockets */
+    crewOpen = true;
+    crewTrace = yagpc_getenv("YAGPC_CREWTRACE") != NULL;
+    const char *ifaceStr = yagpc_getenv("NSTS_BUS_IFACE");
+    if (ifaceStr == NULL) ifaceStr = "127.0.0.1";
+    struct in_addr iface;
+    iface.s_addr = inet_addr(ifaceStr);
+    if (iface.s_addr == INADDR_NONE) iface.s_addr = htonl(INADDR_ANY);
+    for (int k = 1; k <= CREW_NUNIT; k++) {
+        int port = portBase + CREW_PORT_OFFSET + k - 1;
+        int fd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (fd < 0) continue;
+        int reuse = 1;
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
+#if defined(SO_REUSEPORT) && !defined(__linux__)
+        setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof reuse);
+#endif
+        struct sockaddr_in addr = {0};
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        addr.sin_port = htons((uint16_t)port);
+        struct ip_mreq mreq = {0};
+        mreq.imr_multiaddr.s_addr = inet_addr("239.255.1.1");
+        mreq.imr_interface.s_addr = iface.s_addr;
+        if (bind(fd, (struct sockaddr *)&addr, sizeof addr) < 0 ||
+            setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
+            fprintf(stderr, "mdmdev: FF%d crew contacts unavailable (port %d): %s\n",
+                    k, port, strerror(errno));
+            close(fd);
+            continue;
+        }
+        int flags = fcntl(fd, F_GETFL, 0);
+        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+        crewFd[k] = fd;
+    }
+}
+
+static void crew_apply(int k, const uint8_t *buf, int len) {
+    if (len < 8) return;
+    unsigned op = ((unsigned)buf[0] << 8) | buf[1];
+    unsigned card = buf[4], ch = buf[5];
+    int cnt = ((int)buf[6] << 8) | buf[7];
+    if (op != CREW_OP_SET && op != CREW_OP_RESET && op != CREW_OP_VALUE) return;
+    if (cnt > (len - 8) / 2) cnt = (len - 8) / 2;
+    for (int i = 0; i < cnt; i++) {
+        unsigned c = ch + (unsigned)i;
+        if (card >= CREW_NCARD || c >= CREW_NCHAN) break;
+        uint16_t w = (uint16_t)(((unsigned)buf[8 + 2 * i] << 8) | buf[9 + 2 * i]);
+        uint16_t was = crewIn[k][card][c];
+        uint16_t now = (op == CREW_OP_SET) ? (uint16_t)(was | w)
+                     : (op == CREW_OP_RESET) ? (uint16_t)(was & ~w) : w;
+        crewIn[k][card][c] = now;
+        if (crewTrace && now != was)
+            fprintf(stderr, "mdmdev: FF%d card %u ch %u crew contacts %04x -> %04x\n",
+                    k, card, c, was, now);
+    }
+    crewHeard = true;
+    crewMsgs++;
+}
+
+static void crew_poll(void) {
+    if (!crewOpen) return;
+    uint8_t buf[256];
+    for (int k = 1; k <= CREW_NUNIT; k++) {
+        if (crewFd[k] < 0) continue;
+        for (;;) {
+            ssize_t r = recvfrom(crewFd[k], (char *)buf, sizeof buf, 0, NULL, NULL);
+            if (r <= 0) break;
+            crew_apply(k, buf, (int)r);
+        }
+    }
+}
+
+/* The crew contacts as DSCRT1-13 of FFk: DIH card 4 ch 0-2, DIL card 6 ch
+ * 0-1, DIH card 9 ch 0-2, DIH card 12 ch 0-2, DIL card 15 ch 0-1. */
+static void crew_dscrt(int k, uint16_t d[13]) {
+    static const uint8_t CARD[13] = { 4, 4, 4, 6, 6, 9, 9, 9, 12, 12, 12, 15, 15 };
+    static const uint8_t CHAN[13] = { 0, 1, 2, 0, 1, 0, 1, 2, 0, 1, 2, 0, 1 };
+    if (k < 1 || k > CREW_NUNIT) return;
+    for (int i = 0; i < 13; i++) d[i] |= crewIn[k][CARD[i]][CHAN[i]];
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
     memset(d, 0, 13 * sizeof d[0]);
+    crew_dscrt(k, d);
     /* Manifold isolation valves, all OPEN: bit 8 open, bit 9 closed, fuel in
      * DSCRT1 and oxidizer in DSCRT9 (GR8RCS.hal:180-184); manifold 5 in FF3's
      * bits 12-13 (:200-203).  Neither-open-nor-closed is a power failure and
@@ -428,7 +549,21 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 }
 
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
-    if (!mdmdev_enabled() || n <= 0) return false;
+    if (n <= 0) return false;
+    crew_poll();
+    if (!mdmdev_enabled()) {
+        /* No device model: zeros, as ever, plus whatever crew contacts the
+         * panel is driving -- and only once it has driven some. */
+        if (!crewHeard || CMD_IUA(cmd) != IUA_FF) return false;
+        int u = ff_unit(busID);
+        uint32_t f = cmd & 0x3ffffu;
+        int at = (f == HFE_FF_READ) ? 0 : (f == MFE_FF_READ) ? 8 : -1;
+        if (u < 1 || at < 0) return false;
+        uint16_t d[13] = {0};
+        crew_dscrt(u, d);
+        for (int i = 0; i < n; i++) out[i] = (i >= at && i < at + 13) ? d[i - at] : 0;
+        return true;
+    }
     if (vehdyn_enabled()) vehdyn_advance(sharedUs);   /* time passes for the vehicle */
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
