@@ -51,10 +51,12 @@ Default mapping (Logitech Extreme 3D Pro; every entry overridable with
 Buttons are numbered as printed on the stick, 1-12 (pygame counts from 0).
 
 The joystick may be connected or disconnected while this runs; while there
-is none both controllers are held in detent.  On macOS the terminal (or
-whatever app runs this) needs Input Monitoring permission (System Settings,
-Privacy & Security): without it the stick is listed but its input withheld,
-and the axes read a constant -1.
+is none both controllers are held in detent.  An axis or the hat that has
+not moved since the stick was opened is ALSO held in detent: SDL has no
+value for it until the stick sends one, and this stick sends only changes,
+so until then it reads -1 (seen on Linux and macOS alike).  On macOS the
+app running this may also need Input Monitoring permission (System
+Settings, Privacy & Security) for the stick's input to arrive.
 
     python3 handcontrollers.py --thc fwd
     python3 handcontrollers.py --thc aft --port-base 7300
@@ -219,13 +221,14 @@ class RhcPublisher:
         self.last_send = now
 
 
-def rhc_counts(js, mapping):
-    """The stick's deflection, as AID counts per RHC axis."""
+def rhc_counts(js, mapping, seen=None):
+    """The stick's deflection, as AID counts per RHC axis.  An axis not in
+    `seen` -- no motion reported since the stick was opened -- is in detent."""
     out = {}
     db = mapping["rhc_deadband"]
     for axis in RHC_AXES:
         i = mapping["rhc_axis"][axis]
-        v = js.get_axis(i) if i < js.get_numaxes() else 0.0
+        v = js.get_axis(i) if i < js.get_numaxes() and (seen is None or i in seen) else 0.0
         if abs(v) < db:
             v = 0.0
         else:            # rescale so the deadband's edge is 0, not a step
@@ -234,10 +237,11 @@ def rhc_counts(js, mapping):
     return out
 
 
-def thc_bits(js, mapping):
-    """The THC contacts the joystick is asking for, never + and - together."""
+def thc_bits(js, mapping, hat_seen=True):
+    """The THC contacts the joystick is asking for, never + and - together.
+    The hat counts only once it has reported a motion."""
     want = set()
-    if js.get_numhats() > 0:
+    if js.get_numhats() > 0 and hat_seen:
         hx, hy = js.get_hat(0)
         if hx:
             want.add(mapping["hat_x"][0 if hx < 0 else 1])
@@ -338,7 +342,8 @@ def main(argv=None):
         if pygame.joystick.get_count() <= args.joystick:
             return None
         js = pygame.joystick.Joystick(args.joystick)
-        js.init()
+        if not hasattr(pygame, "IS_CE"):     # pygame-ce opens it already, and
+            js.init()                        # deprecates init()
         log("joystick %d: %s, %d axes, %d buttons, %d hat(s)"
             % (args.joystick, js.get_name(), js.get_numaxes(), js.get_numbuttons(),
                js.get_numhats()))
@@ -349,6 +354,7 @@ def main(argv=None):
     # KVM -- puts both controllers back in detent rather than leaving its
     # last deflection latched, and is waited for again.
     js = open_stick()
+    seen_axes, hat_seen = set(), False      # what has reported since opening
     if js is None:
         log("no joystick %d yet; holding the THC and RHC in detent" % args.joystick)
     while True:
@@ -357,10 +363,16 @@ def main(argv=None):
                 return 0
             if e.type == pygame.JOYDEVICEADDED and js is None:
                 js = open_stick()
+                seen_axes, hat_seen = set(), False
             elif e.type == pygame.JOYDEVICEREMOVED and js is not None and \
                     getattr(e, "instance_id", None) == js.get_instance_id():
                 log("joystick %d gone; THC and RHC back in detent" % args.joystick)
                 js = None
+                seen_axes, hat_seen = set(), False
+            elif e.type == pygame.JOYAXISMOTION:
+                seen_axes.add(e.axis)
+            elif e.type == pygame.JOYHATMOTION:
+                hat_seen = True
         if js is None:
             pub.bits = 0
             rp.counts = dict((a, 0) for a in RHC_AXES)
@@ -368,9 +380,9 @@ def main(argv=None):
             rp.send()
             time.sleep(0.1)
             continue
-        pub.bits = thc_bits(js, mapping)
+        pub.bits = thc_bits(js, mapping, hat_seen)
         pub.send()
-        rp.counts = rhc_counts(js, mapping)
+        rp.counts = rhc_counts(js, mapping, seen_axes)
         rp.send()
         status.show(rp.counts, pub.bits, js)
         time.sleep(0.02)
