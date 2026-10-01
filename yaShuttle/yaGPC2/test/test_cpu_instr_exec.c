@@ -81,7 +81,12 @@
  *   snapshot before the EA here.  2 fixtures (BAL; no SCAL fixture drew
  *   the case, but the reference had the same defect and was patched too).
  *
- * All 111432 fixtures pass.
+ *   MVS: the result is the MIDVALUE of R1, R1+1 and storage; the
+ *   reference clamps R1 between the other two, which differs whenever
+ *   R1+1 < storage -- GMDRES's resolver fold, ledger #264.  109 fixtures.
+ *   mvs_directed() below adds the flight-code case and every ordering.
+ *
+ * All 111363 fixtures pass.
  */
 #include <stdio.h>
 #include <string.h>
@@ -120,6 +125,44 @@ static void load_baseline(void) {
     memset(cpu.mainStorage.data + (size_t)4096 * 2, 0, (size_t)cpu.mainStorage.wordCount * 4 - (size_t)4096 * 2);
     register_set32(&cpu.psw.psw1, EXEC_BASELINE.psw1);
     register_set32(&cpu.psw.psw2, EXEC_BASELINE.psw2);
+}
+
+
+/* MVS by hand: every ordering of three distinct values, and the exact
+ * operands GMDRES hands it (F0 = -pi, F1 = dtheta, storage = +pi), where the
+ * clamp the reference performs gave +pi and froze every IMU delta at -2pi. */
+static int mvs_one(uint32_t r1, uint32_t r1p1, uint32_t mem, uint32_t want, uint32_t wantCC) {
+    load_baseline();
+    register_set32(cpu_f(&cpu, 0), r1);
+    register_set32(cpu_f(&cpu, 1), r1p1);
+    mcm_set16(&cpu.mainStorage, 0x100, mem >> 16, false);
+    mcm_set16(&cpu.mainStorage, 0x101, mem & 0xffff, false);
+    DInstr v;
+    const InstrDesc *desc = instr_decode(0x60FB, 0x0100, &v);   /* MVS 0,X'0100' (B2 = 11: direct) */
+    desc->e(&cpu, &v);
+    uint32_t got = register_get32(cpu_f(&cpu, 0)), cc = psw_get_cc(&cpu.psw);
+    uint32_t keep = register_get32(cpu_f(&cpu, 1));
+    if (got != want || cc != wantCC || keep != r1p1) {
+        printf("FAIL MVS directed (%08x,%08x,%08x): F0=%08x cc=%u F1=%08x, expected %08x cc=%u\n",
+               r1, r1p1, mem, got, cc, keep, want, wantCC);
+        return 1;
+    }
+    return 0;
+}
+
+static int mvs_directed(void) {
+    const uint32_t NPI = 0xc13243f6, PPI = 0x413243f6, DTH = 0x3d648800;   /* -pi, +pi, 9.8e-5 */
+    const uint32_t A = 0xc1100000, B = 0x41100000, C = 0x41200000;         /* -1, 1, 2 */
+    int f = 0;
+    f += mvs_one(NPI, DTH, PPI, DTH, 1);    /* GMDRES */
+    f += mvs_one(B, C, A, B, 0);            /* limiter: within */
+    f += mvs_one(C, B, A, B, 1);            /* limiter: above upper */
+    f += mvs_one(A, C, B, B, 3);            /* limiter: below lower */
+    f += mvs_one(A, B, C, B, 1);            /* inverted limits: midvalue in R1+1 */
+    f += mvs_one(C, A, B, B, 3);            /* inverted limits: midvalue in storage */
+    f += mvs_one(B, A, C, B, 0);            /* inverted limits: midvalue in R1 */
+    f += mvs_one(B, B, A, B, 0);            /* tie goes to R1 */
+    return f;
 }
 
 int main(void) {
@@ -180,6 +223,10 @@ int main(void) {
             if (!ok) failures++;
         }
     }
+
+    int mvsFail = mvs_directed();
+    printf("%d/8 MVS directed cases passed\n", 8 - mvsFail);
+    failures += mvsFail;
 
     printf("%ld/%ld cpu instr exec fixtures passed\n", total - failures, total);
     return failures == 0 ? 0 : 1;

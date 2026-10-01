@@ -5,14 +5,15 @@
 #
 # The fixtures in test/cpu_instr_exec_fixtures.h are generated from Don
 # Schmidt's gpc -- the reference implementation this emulator was ported from
-# -- but not from it verbatim.  Five places have been found where the
+# -- but not from it verbatim.  Six places have been found where the
 # reference is wrong and yaGPC2 is right, each with its own measured evidence
 # in src/cpu_instr.c or src/cpu.c and each restated in the header comment of
 # test/test_cpu_instr_exec.c: SVC's 19-bit effective address, CVFX storing its
 # result before the interrupt, g_EA's B2 == 11 rule, g_EA's double-indirect
-# expansion, and BAL/SCAL snapshotting the link before the EA is formed.
+# expansion, BAL/SCAL snapshotting the link before the EA is formed, and MVS
+# selecting the true midvalue rather than clamping (ledger #264).
 #
-# Generating fixtures from an unpatched reference reintroduces all five as
+# Generating fixtures from an unpatched reference reintroduces all six as
 # test failures, and re-deriving them costs a day.  They were living only in a
 # scratch copy under /tmp, which is exactly the sort of step that gets
 # forgotten, so they are checked in as patches against upstream and applied by

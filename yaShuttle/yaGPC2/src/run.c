@@ -2141,6 +2141,27 @@ static void range_trace(BatchRunner *r, uint32_t nia, uint32_t hw1,
             (unsigned)after->r[2], (unsigned)after->r[3],
             (unsigned)after->r[4], (unsigned)after->r[5],
             (unsigned)after->r[6], (unsigned)after->r[7]);
+    /* YAGPC_RANGETRACE_FP=1: the floating-point registers too, F0-F7 as
+     * they stand after the instruction, on a continuation line.  Off by
+     * default so the line above keeps its format for the tools that parse
+     * it.  Added to follow GMDRES/GMBIMU's resolver arithmetic (#264). */
+    {
+        static int fpInit = 0, fp = 0;
+        if (!fpInit) {
+            fpInit = 1;
+            const char *e = yagpc_getenv("YAGPC_RANGETRACE_FP");
+            fp = e != NULL && *e != '\0' && strcmp(e, "0") != 0;
+        }
+        if (fp) {
+            CPU *c = &r->age.gpc.cpu;
+            fprintf(stderr, "RTF gpc=%d F0=%08x F1=%08x F2=%08x F3=%08x "
+                    "F4=%08x F5=%08x F6=%08x F7=%08x\n", r->gpcId,
+                    (unsigned)register_get32(cpu_f(c, 0)), (unsigned)register_get32(cpu_f(c, 1)),
+                    (unsigned)register_get32(cpu_f(c, 2)), (unsigned)register_get32(cpu_f(c, 3)),
+                    (unsigned)register_get32(cpu_f(c, 4)), (unsigned)register_get32(cpu_f(c, 5)),
+                    (unsigned)register_get32(cpu_f(c, 6)), (unsigned)register_get32(cpu_f(c, 7)));
+        }
+    }
 }
 
 /* The whole of main storage as raw big-endian halfwords, 524,288 of them.

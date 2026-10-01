@@ -1,5 +1,5 @@
 --- /home/rburkey/donschmidt/nsts-sim-gpc/gpc/cpu_instr.coffee	2026-08-31 20:02:37.690072476 -0500
-+++ /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad/refpatched/gpc/cpu_instr.coffee	2026-09-22 17:40:26.335932121 -0500
++++ /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad/refpatched/gpc/cpu_instr.coffee	2026-10-01 05:25:36.673472773 -0500
 @@ -1925,8 +1925,13 @@
                      xts:[3.75,7,10,6.75,10,8,9.5]
                      xtc:[1.6,1.8,2.6,1.7,1.8]
@@ -29,7 +29,36 @@
                          t.r(v.x).set32(result >>> 0)
                          # POO 8.13: a floating-point value of
                          # 41100000 is converted to 0x00010000 but gives
-@@ -5636,7 +5646,10 @@
+@@ -4584,14 +4594,23 @@
+                             return 0 if result.gFracBits().isZero()
+                             return -1 if result.gSign() < 0
+                             return  1
+-                        if cmpDiff(input, lower) < 0
+-                            t.f(v.x).set32(lower.to32())
+-                            t.psw.setCC(3)
+-                        else if cmpDiff(input, upper) > 0
++                        # PATCHED FOR FIXTURE GENERATION ONLY.  The result is the
++                        # MIDVALUE of all three operands, not R1 clamped between the
++                        # other two; they differ when upper < lower, where the PoO
++                        # (quoted above) says a mid-value select is performed.
++                        # GMDRES relies on it (yaGPC2 ledger #264).  CC names the
++                        # operand the result came from: 0 R1, 1 R1+1, 3 storage.
++                        il = cmpDiff(input, lower)
++                        iu = cmpDiff(input, upper)
++                        ul = cmpDiff(upper, lower)
++                        if (il >= 0 and iu <= 0) or (il <= 0 and iu >= 0)
++                            t.psw.setCC(0)
++                        else if (ul >= 0 and iu >= 0) or (ul <= 0 and iu <= 0)
+                             t.f(v.x).set32(upper.to32())
+                             t.psw.setCC(1)
+                         else
+-                            t.psw.setCC(0)
++                            t.f(v.x).set32(lower.to32())
++                            t.psw.setCC(3)
+                 }
+ 
+         # MULTIPLY (EXTENDED OPERANDS)
+@@ -5636,7 +5655,10 @@
                      t:OPTYPE_BRCH
                      xts:[18.125,21.5,24.5,21.25,24.5,22.5,24]
                      e:(t,v) ->
@@ -41,7 +70,7 @@
                          branchAddr = t.g_EA(v)
                          # Get SSD from R1: PTR (bits 0-15), INC (bits 16-31)
                          r1val = t.r(v.x).get32()
-@@ -5648,7 +5661,7 @@
+@@ -5648,7 +5670,7 @@
                          sa = (ptr + inc) & 0xffff
                          #console.log "SCAL SA=#{sa.asHex(8)}"
                          # Save PSW1 (first 2 halfwords) at SA
@@ -50,7 +79,7 @@
                          for i in [0..7]
                              return if not t.storeFW(sa + 2 + i * 2, t.r(i).get32())
                          # Update SSD: PTR = SA, INC = 18
-@@ -5823,7 +5836,17 @@
+@@ -5823,7 +5845,17 @@
                          # This swap is part of the instruction, not an end-of-instruction
                          # acceptance, so it does not pass the stop-before-swap hold in
                          # cpu.checkInterrupts

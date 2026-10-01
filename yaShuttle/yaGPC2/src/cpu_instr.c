@@ -1272,20 +1272,35 @@ static int mvs_cmp(const FloatIBM *a, const FloatIBM *b) {
     return fibm_gsign(&r.result) < 0 ? -1 : 1;
 }
 
+/* MIDVALUE SELECT: R1 gets the MIDVALUE of all three operands -- F(R1),
+ * F((R1+1) mod 8) and the storage operand -- not the result of clamping R1
+ * between the other two.  The two differ only when (R1+1) < storage, which
+ * the PoO calls a limiter set up wrongly but which is still "predictable in
+ * that the instruction will perform a mid-value select" (POO 8.23; the
+ * reference quotes the same sentence and then clamps anyway).  Flight code
+ * relies on it: GMDRES folds each IMU resolver delta into [-pi, pi] with
+ * LE 0,-pi / LE 1,dtheta / MVS 0,+pi, so (R1+1) = dtheta < storage = +pi.
+ * Clamping returned +pi for every small dtheta, GMDRES then stored
+ * dtheta - 2pi, and the frozen -2pi deltas tripped the resolver-limit BITE
+ * (ledger #264).  The CC names the operand the result came from -- 00 R1,
+ * 01 (R1+1), 11 storage -- which is exactly the limiter table whenever
+ * lower < upper, and "meaningless" (the PoO's word) otherwise.  Ties go to
+ * R1 first, matching the limiter's inclusive "within limits". */
 static void exec_MVS(CPU *t, DInstr *v) {
     uint32_t x = df_get(v, 'x');
     FloatIBM input = fibm_from32(register_get32(cpu_f(t, (int)x)));
     FloatIBM upper = fibm_from32(register_get32(cpu_f(t, (int)(x + 1))));
     FloatIBM lower = fibm_from32(cpu_g_eaf(t, v, 0));
+    int il = mvs_cmp(&input, &lower), iu = mvs_cmp(&input, &upper), ul = mvs_cmp(&upper, &lower);
 
-    if (mvs_cmp(&input, &lower) < 0) {
-        register_set32(cpu_f(t, (int)x), fibm_to32(&lower));
-        psw_set_cc(&t->psw, 3);
-    } else if (mvs_cmp(&input, &upper) > 0) {
+    if ((il >= 0 && iu <= 0) || (il <= 0 && iu >= 0)) {
+        psw_set_cc(&t->psw, 0);
+    } else if ((ul >= 0 && iu >= 0) || (ul <= 0 && iu <= 0)) {
         register_set32(cpu_f(t, (int)x), fibm_to32(&upper));
         psw_set_cc(&t->psw, 1);
     } else {
-        psw_set_cc(&t->psw, 0);
+        register_set32(cpu_f(t, (int)x), fibm_to32(&lower));
+        psw_set_cc(&t->psw, 3);
     }
 }
 
