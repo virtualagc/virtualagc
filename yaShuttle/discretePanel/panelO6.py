@@ -1426,6 +1426,8 @@ class PanelO6:
         if pending:
             for attr, v in pending[1].items():
                 setattr(self, attr, v)
+            if sys.platform == "darwin":
+                self._nudge_height()
         if FIT_TRACE:
             r = self.root
             log("fittrace: Configure canvas %dx%d (winfo %dx%d, predicted %s), "
@@ -1437,6 +1439,26 @@ class PanelO6:
         self._fit_grow = 0
         self._fit_bracket = {}
         self.redraw()
+
+    def _nudge_height(self):
+        """macOS: after a programmatic height shrink, Tk's content view keeps
+        its old origin -- Cocoa's y runs upward -- so the whole drawing sat
+        shifted UP by the shrink, the pane tops cut off and a band below,
+        though every size Tk reported was right.  Moving the window does not
+        cure it; a height change of one point and back does (Mac-integrate,
+        2026-10-01)."""
+        r = self.root
+        w, h = r.winfo_width(), r.winfo_height()
+
+        def back():
+            r.geometry("%dx%d" % (w, h))
+
+        def up():
+            r.geometry("%dx%d" % (w, h + 1))
+            r.update_idletasks()
+            r.after(50, back)
+
+        r.after(50, up)
 
     def _scale(self):
         # The size the last Configure reported, which is the canvas's as
