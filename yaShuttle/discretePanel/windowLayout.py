@@ -78,7 +78,9 @@ TITLE_ROLES = [
     (re.compile(r"^Panel$|^Panels O6\b"), "panel"),
     (re.compile(r"^GPC discrete panel"), "discretepanel"),
     (re.compile(r"^Manager\b"), "manager"),
-    (re.compile(r"^Hand Controllers$"), "handcontrollers"),
+    # handcontrollers.py's window, by the controllers it stands in for.
+    (re.compile(r"^THC (FWD|AFT) / RHC (LH|RH|AFT)$"),
+     lambda m: "hc_%s_%s" % (m.group(1).lower(), m.group(2).lower())),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
     # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
     # command line is tried first and normally answers; this is the fallback
@@ -100,7 +102,9 @@ ROLE_PATTERNS = [
     # window a layout could not put back.
     (re.compile(r"manager\.py"), lambda m: "manager"),
     # The virtual hand controllers' window (handcontrollers.py with no stick).
-    (re.compile(r"handcontrollers\.py"), lambda m: "handcontrollers"),
+    # Its --thc and --rhc, in either order, defaulting to fwd and lh.
+    (re.compile(r"handcontrollers\.py(?=.*--thc[ =](\w+))?(?=.*--rhc[ =](\w+))?"),
+     lambda m: "hc_%s_%s" % ((m.group(1) or "fwd").lower(), (m.group(2) or "lh").lower())),
 ]
 
 

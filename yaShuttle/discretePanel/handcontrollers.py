@@ -321,7 +321,11 @@ SOFTSTOP_FRAC = {"roll": 21.17 / _FULL_DEG["roll"], "pitch": 21.17 / _FULL_DEG["
                  "yaw": 11.41 / _FULL_DEG["yaw"]}
 THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
             ("space", "-Z"), ("c", "+Z"))
-WINDOW_TITLE = "Hand Controllers"
+# The window's title names the controllers it stands in for -- "THC FWD /
+# RHC LH" -- so two instances (the CDR's and the aft station's) can be told
+# apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
+def window_title(thc, rhc):
+    return "THC %s / RHC %s" % (thc.upper(), rhc.upper())
 
 
 def _clip(v, lo=-1.0, hi=1.0):
@@ -338,7 +342,7 @@ class VirtualControls:
         self.rhc_name, self.thc_name = rhc_name, thc_name
         self.W, self.H = int(560 * scale), int(380 * scale)
         self.screen = pg.display.set_mode((self.W, self.H), pg.RESIZABLE)
-        pg.display.set_caption(WINDOW_TITLE)
+        pg.display.set_caption(window_title(thc_name, rhc_name))
         self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(9, int(13 * scale)))
         self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(8, int(11 * scale)))
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
@@ -559,7 +563,8 @@ def run_virtual(pg, args, pub, rp, status):
     # Tk, measures windows in points).  This window's layout is drawn at
     # --size 384, so that is scale 1.
     vc = VirtualControls(pg, style, args.size / 384.0, args.rhc, args.thc)
-    log("virtual hand controllers, style %s, window '%s'" % (style, WINDOW_TITLE))
+    log("virtual hand controllers, style %s, window '%s'"
+        % (style, window_title(args.thc, args.rhc)))
     clock = pg.time.Clock()
     while True:
         for e in pg.event.get():
