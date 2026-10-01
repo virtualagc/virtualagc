@@ -654,6 +654,7 @@ class PanelO6:
         self._fit_passes = 0
         self._fit_grow = 0
         self._fit_bracket = {}
+        self._fit_need = {}
         self._cursor_hits = False
 
         self.cv.bind("<ButtonPress-1>", self._on_press)
@@ -1293,6 +1294,10 @@ class PanelO6:
         if event.width < 40 or event.height < 40:
             return
         self._wh = (event.width, event.height)
+        pending, self._snug_pending = getattr(self, "_snug_pending", None), None
+        if pending and pending[0] == self._wh:
+            for attr, v in pending[1].items():
+                setattr(self, attr, v)
         self._fit_passes = 0
         self._fit_grow = 0
         self._fit_bracket = {}
@@ -1649,12 +1654,30 @@ class PanelO6:
         self._snugged = True
         if size != self.natural:
             return
+        # TO WHAT THE CONTENT MEASURED, not to the fitted design size: that
+        # keeps the slack of whole-point font steps -- ~100 px empty at the
+        # right at --size 384 under Xft.dpi 192 (WSL-integration,
+        # 2026-10-01).  The design size becomes the need and the window
+        # shrinks by the same factor, so the scale, and with it every font
+        # size, is unchanged and the content still fits.
         cw, ch = self.cv.winfo_width(), self.cv.winfo_height()
-        dw = cw - int(math.ceil(getattr(self, "_ref_w", REF_W) * self.s)) - 2
-        dh = ch - int(math.ceil(getattr(self, "_ref_h", REF_H) * self.s)) - 2
-        if dw < 0.02 * cw and dh < 0.02 * ch:
+        sizes = {}
+        for attr, default, c in (("_ref_w", REF_W, cw), ("_ref_h", REF_H, ch)):
+            ref = getattr(self, attr, default)
+            want = min(ref, self._fit_need.get(attr, ref) * 1.003)
+            # Rounded DOWN, so the scale can only fall a hair, never round
+            # a font up.
+            d = c - int(math.floor(want * self.s))
+            sizes[attr] = (want, d if d >= 0.02 * c else 0)
+        dw, dh = sizes["_ref_w"][1], sizes["_ref_h"][1]
+        if not dw and not dh:
             return
-        w, h = size[0] - max(0, dw), size[1] - max(0, dh)
+        # The new design size waits for the Configure that reports the new
+        # canvas: a redraw before it, with the new design size against the
+        # old canvas, raised the scale and set the fit off again.
+        self._snug_pending = ((cw - dw, ch - dh),
+                              dict((a, v[0]) for a, v in sizes.items() if v[1]))
+        w, h = size[0] - dw, size[1] - dh
         root.minsize(min(self._minsize[0], w), min(self._minsize[1], h))
         log("snug: window %dx%d -> %dx%d to the fitted content" % (size + (w, h)))
         root.geometry("%dx%d" % (w, h))
@@ -1678,6 +1701,7 @@ class PanelO6:
         (hi), and always finishes on one that fits.  Before a bracket
         exists it grows 2% past the need, or trims to the need."""
         cur = getattr(self, attr, default)
+        self._fit_need[attr] = need
         br = self._fit_bracket.setdefault(attr, [None, None])   # [lo, hi]
         if need > cur * 1.005:
             br[0] = cur if br[0] is None else max(br[0], cur)
