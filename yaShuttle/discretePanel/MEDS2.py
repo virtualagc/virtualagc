@@ -933,7 +933,8 @@ def bytesFromWords(words):
 
 
 # The MEDS alternate character set, keyed by symbol number.  No alternate
-# glyphs are loaded, so these draw their DEUCharset counterparts.
+# glyphs are loaded: 0x14 and 0x15 are drawn as shapes (Screen_DPS.drawFCWS),
+# the rest as their DEUCharset counterparts.
 ALTCHARSET = {
     0x14: 'filled/shaded circle',
     0x15: 'filled/shaded diamond',
@@ -5708,6 +5709,30 @@ class Screen_DPS(MDUScreen):
                 # The empty half of a single-glyph word draws nothing AND does
                 # not advance.
                 pass
+            elif st['altchar'] and g in (0x14, 0x15):
+                # THE TWO ALTERNATE LANDING-SITE SYMBOLS, solid, in the pen's
+                # colour (FCW3 sends 29 white and 47 cyan for them):
+                # STS-83-0020V1-34 sect.4.2.1.1, "A shaded circle symbol in
+                # white ... A shaded diamond symbol in cyan".  The font has no
+                # alternate glyphs.  Centred where a glyph's centre falls --
+                # the DEU font's strokes sit about (1.5, 0.5) and are placed
+                # at x - 1 -- half a column across; a column is 19 beam units
+                # and a row 27, hence the shorter vertical radius.  Shapes and
+                # size from upstream (nsts-sim-gpc 966674f, drawAltSymbol).
+                cx = penX() + 0.5
+                cy = penY() + 0.5
+                rx = 0.5
+                ry = 0.5 * COL_PITCH / ROW_PITCH
+                if g == 0x14:
+                    pts = [[cx + rx * math.cos(2 * math.pi * i / 24),
+                            cy + ry * math.sin(2 * math.pi * i / 24)]
+                           for i in range(24)]
+                else:
+                    pts = [[cx, cy - ry], [cx + rx, cy], [cx, cy + ry], [cx - rx, cy]]
+                add(self.d.polyFill(pts, penColor(), None))
+                if traceOn:
+                    trace('ALTSYM', 'symbol %x' % g)
+                advance()
             else:
                 ch = self.fcw.DEUCharset.get(g)
                 if ch is not None and ch != ' ':
