@@ -5,6 +5,7 @@
 #include <strings.h>
 
 #include "envcache.h"
+#include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
  *     mode (4) | card (4) | channel (5) | word count - 1 (5)
@@ -258,9 +259,16 @@ static void fa_mfe(int k, uint16_t *w, int n) {
  * ------------------------------------------------------------------- */
 static long ffReads, faReads, ffWrites, faWrites;
 
+/* THE FIRE COMMANDS TO THE VEHICLE'S DYNAMICS, whenever a B word changes. */
+static void push_fire(double sharedUs) {
+    if (!vehdyn_enabled()) return;
+    uint16_t ff[5] = { 0 }, fa[5] = { 0 };
+    for (int k = 1; k <= 4; k++) { ff[k] = ff_jets_b(k); fa[k] = fa_jets_b(k); }
+    vehdyn_set_fire_words(ff, fa, sharedUs);
+}
+
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
-    (void)sharedUs;
     if (!mdmdev_enabled() || n <= 0) return;
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
@@ -274,18 +282,22 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             imu[u].writes++;
             return;
         }
-        if (CMD_MODE(cmd) == 8u)
+        if (CMD_MODE(cmd) == 8u) {
             discrete_write(ffOut, ffOutSeen, u, cmd, words, n);
+            if (CMD_CARD(cmd) == 13u) push_fire(sharedUs);
+        }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
         faWrites++;
-        if (CMD_MODE(cmd) == 8u)
+        if (CMD_MODE(cmd) == 8u) {
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
+            if (CMD_CARD(cmd) == 10u) push_fire(sharedUs);
+        }
     }
 }
 
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
-    (void)sharedUs;
     if (!mdmdev_enabled() || n <= 0) return false;
+    if (vehdyn_enabled()) vehdyn_advance(sharedUs);   /* time passes for the vehicle */
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
     if (iua == IUA_FF) {
@@ -312,6 +324,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
 
 void mdmdev_report(void) {
     if (!mdmdev_enabled()) return;
+    vehdyn_report();
     fprintf(stderr, "mdmdev: healthy vehicle at rest -- %ld forward and %ld aft MDM "
                     "read(s) answered, %ld and %ld write(s) taken; IMU reads %ld/%ld/%ld, "
                     "commands %ld/%ld/%ld\n",
