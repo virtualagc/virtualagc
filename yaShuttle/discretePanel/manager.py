@@ -647,7 +647,7 @@ class Manager(object):
                 self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
         self._window_work(work, done)
 
-    def restore_layout(self):
+    def restore_layout(self, only_roles=None):
         path = self.layout.get().strip()
         if not os.path.isfile(path):
             self.say("No such layout file: %s" % path)
@@ -658,7 +658,8 @@ class Manager(object):
                 # This simulation's windows only: the manager is simulatePASS's
                 # child, so its parent's process tree is the simulation.
                 # (parent_pid, not os.getppid: see procinfo.py for Windows.)
-                only_pids=windowLayout.descendants(procinfo.parent_pid()))
+                only_pids=windowLayout.descendants(procinfo.parent_pid()),
+                only_roles=only_roles)
 
         def done(result):
             placed, missing, inexact = result
@@ -1138,8 +1139,11 @@ class Manager(object):
             self.say("Cannot start the caption box: %s" % e)
             return
         self.say("Caption box started (%s)" % " ".join(look))
+        # PLACE IT, AND ONLY IT: restoring the whole layout here moved every
+        # other window back too, undoing an arrangement made by hand (owner,
+        # 2026-10-01, of the hand controllers' button, which did the same).
         if os.path.isfile(path):
-            self.root.after(2500, self.restore_layout)   # put it where the layout says
+            self.root.after(2500, lambda: self.restore_layout(only_roles={"subtitles"}))
 
     def start_hands(self, rhc):
         if any(n == "handcontrollers.py" for n, _ in running(self.args.port_base)):
@@ -1164,9 +1168,13 @@ class Manager(object):
         self.say("Hand controllers started: %s"
                  % {"lh": "CDR (LH RHC, forward THC)", "rh": "PLT (RH RHC)",
                     "aft": "Aft (aft RHC and THC)"}[rhc])
+        # PLACE IT, AND ONLY IT, where the layout says.  Restoring the whole
+        # layout here moved every other window back as well, undoing what
+        # the owner had just arranged by hand (2026-10-01).
         path = self.layout.get().strip()
         if os.path.isfile(path):
-            self.root.after(2500, self.restore_layout)   # put it where the layout says
+            self.root.after(2500, lambda: self.restore_layout(
+                only_roles={windowLayout._hc_role(rhc)}))
 
     def stop_hands(self):
         if self.hands is not None and self.hands.poll() is None:

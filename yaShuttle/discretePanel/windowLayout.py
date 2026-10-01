@@ -976,11 +976,14 @@ def look_in(path, role="subtitles"):
 
 
 def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=None,
-                   only_pids=None):
+                   only_pids=None, only_roles=None):
     """Put the windows where the file says.  only_ids, if given, is the set of
     window ids that may be moved; only_pids the set of processes whose windows
     may be -- see descendants(), which is how one simulation is kept from
-    dragging another's windows about.  Returns (placed, missing, inexact)."""
+    dragging another's windows about; only_roles the roles that may be, the
+    rest of the file being left alone -- a window started late is placed
+    without moving the ones already arranged.  Returns (placed, missing,
+    inexact)."""
     with open(path) as fh:
         layout = json.load(fh)
     here = {}
@@ -998,6 +1001,8 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
     done = missing = failed = 0
     for want in layout["windows"]:
         role = want["role"]
+        if only_roles is not None and role not in only_roles:
+            continue
         got = here.get(role)
         if not got:
             log("   %-12s not on screen" % role)
