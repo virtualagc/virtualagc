@@ -358,7 +358,8 @@ class VirtualControls:
         self.rhc_name, self.thc_name = rhc_name, thc_name
         # The PLT's station has no THC, and its window no THC panel: only as
         # wide as the RHC (Ron, 2026-10-01).
-        size = (int((560 if thc_name else 300) * scale), int(380 * scale) + BOTTOM_MARGIN)
+        self.BW, self.BH = (560 if thc_name else 300), 380   # design units
+        size = (int(self.BW * scale), int(self.BH * scale) + BOTTOM_MARGIN)
         # RETINA.  A set_mode() window on macOS is drawn at one pixel a
         # point and doubled by the compositor: small, fuzzy text (Ron, via
         # Mac-integrate, 2026-10-01).  pygame-ce's Window API with
@@ -375,14 +376,10 @@ class VirtualControls:
         else:
             self.screen = pg.display.set_mode(size, pg.RESIZABLE)
             pg.display.set_caption(window_title(thc_name, rhc_name))
-        self.hd = None
+        self.hd = self.k = None
+        self._fonts = {}
+        self._font_size = {}
         self._sync_surface()
-        # TEXT SCALES WITH THE WINDOW, as panelO6's does.  Floors of 9 and 8
-        # px held it full size while the drawing shrank -- 1.4x too big at
-        # --size 384, and 3x in simulatePASS's halved macOS window, where the
-        # no-focus line ran off the edge and the bottom line was cut off
-        # (Mac-integrate, 2026-10-01).  A floor of a few pixels only keeps
-        # it from vanishing.
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
         self.drag = None                     # gimbal: "pr" or "yaw" while held
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
@@ -393,26 +390,59 @@ class VirtualControls:
         self.focused = bool(pg.key.get_focused())
 
     def _sync_surface(self):
-        """Drawing surface, its size, and pixels per point -- which change
-        when the window is resized or moves between a Retina and a 1x
-        display; a change of hd re-scales the layout and the fonts."""
+        """The drawing surface, re-read every frame, and the scale and
+        offset that fit the design into it.
+
+        THE DRAWING FOLLOWS THE WINDOW.  It was laid out once at --size, so
+        a resized window snapped back to it, leaving gaps or cropping (Ron,
+        via Mac-integrate, 2026-10-01).  Now k fits the design (BW x BH
+        units) into whatever the window is, centred as panelO6 centres its
+        panel, and hd -- pixels per point, 2 on Retina -- is re-read too, so
+        a move between displays also re-scales.  The macOS bottom margin is
+        kept clear below it."""
         if self.win is not None:
             self.screen = self.win.get_surface()
             hd = self.screen.get_width() / float(max(1, self.win.size[0]))
         else:
+            self.screen = self.pg.display.get_surface()
             hd = 1.0
+        self.hd = hd
         self.W, self.H = self.screen.get_size()
-        if hd != self.hd:
-            self.hd = hd
-            self.k = self.scale * hd
-            pg = self.pg
-            self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(13 * self.k)))
-            self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(11 * self.k)))
+        self.margin = int(BOTTOM_MARGIN * hd)
+        avail_h = max(1, self.H - self.margin)
+        k = min(self.W / float(self.BW), avail_h / float(self.BH))
+        self.ox = int((self.W - self.BW * k) / 2)
+        self.oy = int((avail_h - self.BH * k) / 2)
+        if k != self.k:
+            self.k = k
             self._layout()
 
+    def _font_px(self, px):
+        px = max(5, int(round(px)))
+        f = self._fonts.get(px)
+        if f is None:
+            f = self.pg.font.SysFont("dejavusans,helvetica,arial", px)
+            self._fonts[px] = f
+            self._font_size[id(f)] = px
+        return f
+
+    # TEXT SCALES WITH THE WINDOW, as panelO6's does -- and at about 1.3x
+    # what it was, there being room (Ron, via Mac-integrate, 2026-10-01).
+    @property
+    def font(self):
+        return self._font_px(17 * self.k)
+
+    @property
+    def small(self):
+        return self._font_px(14 * self.k)
+
     def _px(self, p):
-        """A mouse position or delta, in points, as drawing pixels."""
-        return (p[0] * self.hd, p[1] * self.hd)
+        """A mouse position, in points, as design-drawing pixels."""
+        return (p[0] * self.hd - self.ox, p[1] * self.hd - self.oy)
+
+    def _dpx(self, d):
+        """A mouse movement, in points, as pixels."""
+        return (d[0] * self.hd, d[1] * self.hd)
 
     def _grab(self, on):
         if self.win is not None and hasattr(self.win, "grab_mouse"):
@@ -436,8 +466,6 @@ class VirtualControls:
         elif e.type in (pg.WINDOWFOCUSGAINED,) or (e.type == pg.ACTIVEEVENT and
                                                    getattr(e, "state", 0) & 2 and e.gain):
             self.focused = True
-        elif e.type == pg.VIDEORESIZE and self.win is None:
-            self.W, self.H = e.w, e.h
         # Touch: per-finger, never the synthesised mouse.
         elif e.type == pg.FINGERDOWN:
             self._finger_down(e)
@@ -466,7 +494,7 @@ class VirtualControls:
                     self._spring(f[0])
         elif e.type == pg.MOUSEMOTION and not getattr(e, "touch", False):
             if self.style == "gimbal" and self.drag:
-                dx, dy = self._px(e.rel)
+                dx, dy = self._dpx(e.rel)
                 full = VIRTUAL_DRAG_FULL * self.k
                 if self.drag == "pr":
                     self.ptr["roll"] = _clip(self.ptr["roll"] + dx / full)
@@ -499,7 +527,7 @@ class VirtualControls:
     def _pos(self, e, pos):
         if pos is not None:
             return pos
-        return (e.x * self.W, e.y * self.H)          # touch is normalised
+        return (e.x * self.W - self.ox, e.y * self.H - self.oy)   # touch is normalised
 
     def _finger_down(self, e, pos=None):
         x, y = self._pos(e, pos)
@@ -553,8 +581,12 @@ class VirtualControls:
     # -- drawing ------------------------------------------------------------
     def draw(self, defl, bits):
         self._sync_surface()
-        pg, s, k = self.pg, self.screen, self.k
-        s.fill((40, 42, 44))
+        pg, k = self.pg, self.k
+        full = self.screen
+        full.fill((40, 42, 44))
+        # The design, centred: everything below draws in its coordinates.
+        cw, ch = int(self.BW * k), int(self.BH * k)
+        s = full.subsurface(pg.Rect(self.ox, self.oy, cw, ch).clip(full.get_rect()))
         ink, dim = (220, 220, 210), (120, 120, 112)
         # RHC field: softstop and detent circles, the stick's position.
         pg.draw.circle(s, (70, 72, 74), (self.cx, self.cy), self.R)
@@ -586,8 +618,15 @@ class VirtualControls:
                 pg.draw.line(s, (190, 140, 60) if frac > 0.5 else (90, 170, 90),
                              (x0, y0), (x1, y1), 1)
 
-        def text(t, x, y, f=None, col=ink):
-            img = (f or self.small).render(t, True, col)
+        def text(t, x, y, f=None, col=ink, right=None):
+            # The design's size, or smaller if it would run past `right`.
+            f = f or self.small
+            img = f.render(t, True, col)
+            limit = (cw if right is None else right) - x - int(4 * k)
+            px = self._font_size.get(id(f), 12)
+            while img.get_width() > limit and px > 6:
+                px -= 1
+                img = self._font_px(px).render(t, True, col)
             s.blit(img, (x, y))
             return img.get_height()
 
@@ -596,11 +635,12 @@ class VirtualControls:
         # (Ron, via Mac-integrate, 2026-10-01).
         hint = ("DRAG KNOB: PITCH/ROLL   DRAG RING: YAW" if self.style == "split" else
                 "LEFT-DRAG: PITCH/ROLL   RIGHT-DRAG: YAW")
-        bottom = self.H - int(BOTTOM_MARGIN * self.hd)
-        text(hint, int(10 * k), bottom - int(52 * k))
-        text("KEYS: ARROWS, Q/E", int(10 * k), bottom - int(36 * k))
+        bottom = ch
+        rx = int(320 * k) if self.thc_name else None   # the THC panel's left
+        text(hint, int(10 * k), bottom - int(62 * k), right=rx)
+        text("KEYS: ARROWS, Q/E", int(10 * k), bottom - int(43 * k), right=rx)
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
-        text(degs + " DEG", int(10 * k), bottom - int(20 * k))
+        text(degs + " DEG", int(10 * k), bottom - int(24 * k), right=rx)
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
         # and the aft station; the PLT has none.
         x0, y0 = int(330 * k), int(40 * k)
@@ -611,10 +651,13 @@ class VirtualControls:
             r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
             pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
             label = "%s   %s" % (d, name.upper() if name != "space" else "SPACE")
-            text(label, r.x + int(10 * k), r.y + int(6 * k), self.font,
-                 (20, 20, 20) if on else ink)
+            text(label, r.x + int(10 * k), r.y + (r.h - self.font.get_height()) // 2,
+                 self.font, (20, 20, 20) if on else ink)
         if not self.focused:
-            pg.draw.rect(s, (200, 40, 40), s.get_rect(), max(3, int(4 * k)))
+            # Inside the area above the macOS bottom margin, so the rounded
+            # corners do not cut the frame (Ron, via Mac-integrate).
+            pg.draw.rect(full, (200, 40, 40),
+                         pg.Rect(0, 0, self.W, self.H - self.margin), max(3, int(4 * k)))
             # The longest line that fits the window.
             msg = None
             for f, t in ((self.font, "NO KEYBOARD FOCUS -- CLICK HERE; KEYS INACTIVE"),
@@ -623,7 +666,8 @@ class VirtualControls:
                 msg = f.render(t, True, (255, 90, 90))
                 if msg.get_width() <= self.W - int(12 * k):
                     break
-            s.blit(msg, ((self.W - msg.get_width()) // 2, int(6 * k) + self.font.get_height()))
+            full.blit(msg, ((self.W - msg.get_width()) // 2,
+                            self.oy + int(6 * k) + self.font.get_height()))
         if self.win is not None:
             self.win.flip()
         else:
