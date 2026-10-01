@@ -1343,6 +1343,12 @@ class PanelO6:
         """The crew panel a pane comes from -- O6, C3, F6 ... -- in its upper
         left corner: small and orange, so it is never read as one of the
         panel's own captions (owner, 2026-10-01)."""
+        # On a patch of the pane's own colour: in C2 and R11 the inner box
+        # of an IDP/CRT set has its corner just there, and its lines ran
+        # through the label (Mac-integrate, 2026-10-01).
+        w = self._tw(text) + 4
+        h = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        self._rect(x0 + 3, y0 + 2, x0 + 3 + w, y0 + 3 + h, fill=C_PANEL, outline="")
         self._text(x0 + 5, y0 + 3, text, size=SETTING_SIZE, fill=PANEL_TAG_COLOR,
                    anchor="nw")
 
