@@ -21,6 +21,7 @@ import shutil
 import subprocess
 import socket
 import struct
+import sys
 import threading
 import time
 
@@ -568,9 +569,23 @@ def parse(text, path=None, _depth=0, _seen=None):
                     snd = arg
                     if not os.path.isabs(snd):
                         snd = os.path.join(os.path.dirname(os.path.abspath(path or ".")), snd)
-                    if not os.path.isfile(snd):
+                    if sys.platform == "darwin":
+                        # macOS PLAYS WHAT IT CAN, AND A SOUND OF ITS OWN FOR
+                        # THE REST.  The example scripts name Linux's desktop
+                        # sounds (.oga, under /usr/share/sounds), which macOS
+                        # neither has nor can play, and refusing the whole
+                        # script for them would leave every demonstration
+                        # unrunnable without --no-audio.  So a file afplay
+                        # can play is kept; anything else becomes "", which
+                        # play_audio() answers with MAC_AUDIO_FALLBACK -- the
+                        # cue still sounds, just not the sound named.
+                        entry["audio"] = (snd if os.path.isfile(snd) and
+                                          os.path.splitext(snd)[1].lower() in MAC_AUDIO_TYPES
+                                          else "")
+                    elif not os.path.isfile(snd):
                         raise ScriptError("audio: no such file: %s" % arg)
-                    entry["audio"] = snd
+                    else:
+                        entry["audio"] = snd
 
             elif verb == "snapshot":
                 # WHERE, CHECKED NOW.  A capture is the one step in a script
@@ -766,6 +781,13 @@ AUDIO_PLAYERS = (
 )
 
 
+# macOS: afplay, which every macOS has, and what it can play.  Not .oga or
+# .ogg -- the format of Linux's desktop sounds -- which is why parse() turns
+# those into the fallback, one of macOS's own alert sounds.
+MAC_AUDIO_TYPES = (".wav", ".aif", ".aiff", ".aifc", ".mp3", ".m4a", ".caf")
+MAC_AUDIO_FALLBACK = "/System/Library/Sounds/Glass.aiff"
+
+
 def play_audio(path, log=None):
     """Start FILE playing and return at once.
 
@@ -775,7 +797,18 @@ def play_audio(path, log=None):
     where the recording should not.
 
     Whichever player is installed; the sounds a desktop already ships are
-    .oga, which aplay cannot read and paplay can, so the order matters."""
+    .oga, which aplay cannot read and paplay can, so the order matters.
+    On macOS it is afplay, and "" means the fallback sound (see parse())."""
+    if sys.platform == "darwin":
+        try:
+            subprocess.Popen(["afplay", path or MAC_AUDIO_FALLBACK],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             stdin=subprocess.DEVNULL)
+            return True
+        except OSError as e:
+            if log:
+                log("audio: afplay would not start: %s" % e)
+            return False
     for prog, flags in AUDIO_PLAYERS:
         if shutil.which(prog) is None:
             continue
