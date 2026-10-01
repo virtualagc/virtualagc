@@ -1379,6 +1379,7 @@ class DEU(object):
         VAR_DATA_NOHDR=0x0a06,    # variable data, no header
         CF_CHECKSUM=0x0f48,
         CONTROL_PROGRAM=0x0f49,   # where the DEU's own IPL load starts
+        MESSAGE_LINE=0x19be,      # the fault message line PASS fills, line 25
         DISPLAY_HEADER=0x19ee,    # the display header -- where a refresh starts
         UPLINK_IND=0x1a06,
         DYNAMIC=0x1a0e,           # the dynamic portion of the display
@@ -5474,6 +5475,23 @@ class Screen_DPS(MDUScreen):
             # -- PASS's GPC MEMORY page stayed on screen under GPCIPL's menu
             # after a re-IPL, the two lists superimposed.
             self.geo_dps_bg = self.drawFCWS([], self.geo_dps_bg)
+        # THE FAULT MESSAGE LINE.  PASS writes it as a 35-halfword fill at
+        # MESSAGE_LINE -- text on line 25, e.g. "I/O ERROR  CRT2  1  00:00:03",
+        # then a branch to BACKGROUND_TOP -- and the unit's refresh enters
+        # there and runs on through the background into the header.  This
+        # walk started at the header, so no fault message was ever drawn.
+        # Here it is its own pass, ended at that branch because the other two
+        # passes draw what it leads to.  Orange: STS-83-0020V1-34 sect.3.1,
+        # "Fault Message Line 25 - ORANGE" under MEDS.  Memory still zero
+        # there means nothing has been written since the unit was loaded.
+        if self.bgFCWS[DEU.ADDR.MESSAGE_LINE]:
+            self.geo_dps_msg = self.drawFCWS(
+                self.bgFCWS, self.geo_dps_msg,
+                {'memory': self.bgFCWS, 'start': DEU.ADDR.MESSAGE_LINE,
+                 'branchEnds': True, 'colorCode': self.FAULT_COLOR,
+                 'rowScale': adj('rowGap')})
+        else:
+            self.geo_dps_msg = self.drawFCWS([], self.geo_dps_msg)
         self.geo_dps_fcws = self.drawFCWS(
             self.bgFCWS, self.geo_dps_fcws,
             {'memory': self.bgFCWS, 'start': DEU.ADDR.DISPLAY_HEADER,
@@ -5595,7 +5613,7 @@ class Screen_DPS(MDUScreen):
               'fcw1Bright': False, 'fcw3Bright': False,
               'large': False, 'angle': 0.0, 'angleStep': 0.0,
               'incrOn': False, 'vecRotate': False, 'altchar': False,
-              'colorCode': None, 'slope': None, 'lsiteHi': None,
+              'colorCode': opts.get('colorCode'), 'slope': None, 'lsiteHi': None,
               'repeatCount': 0}
         sector = opts.get('sector', 1)                # branch page
         cellTraceFile = cellTracePath()
@@ -5810,6 +5828,8 @@ class Screen_DPS(MDUScreen):
                 if splice is not None:
                     pass                    # a branch inside a spliced run is
                                             # data, not a jump
+                elif opts.get('branchEnds'):
+                    done = True             # a pass that ends where it hands on
                 elif opts.get('memory') is not None and not visited.get(tgt):
                     visited[tgt] = True
                     pc = tgt
@@ -5998,12 +6018,15 @@ class Screen_DPS(MDUScreen):
     # FAIL and big X, which photographs show red; 62 is a code no display
     # sends (upstream's FAIL_COLOR).
     FAIL_COLOR = 62
+    # The fault message line, orange per sect.3.1; also not a flight code.
+    FAULT_COLOR = 63
     DEU_NAMED_COLORS = {
         4: 'green', 19: 'green', 40: 'green', 43: 'green',
         7: 'yellow', 21: 'yellow', 54: 'yellow', 56: 'yellow',
         29: 'white', 31: 'white', 33: 'white',
         47: 'cyan', 48: 'cyan',
         62: 'red',
+        63: 'orange',
     }
 
     def _deuColor(self, code):
@@ -6067,6 +6090,8 @@ class Screen_DPS(MDUScreen):
         self.geo_dps_meds = Object3D()    # the background MEDS draws itself
         self.group.add(self.geo_dps_meds)
         self.geo_dps_bg = Object3D()      # the resident background
+        self.geo_dps_msg = Object3D()     # the fault message line
+        self.group.add(self.geo_dps_msg)
         self.group.add(self.geo_dps_bg)
         self._vdisp = None                # the MEDS background now showing
         self._vdispNext = None            # ...and the one this frame named
