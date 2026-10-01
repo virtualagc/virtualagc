@@ -89,14 +89,9 @@ TITLE_ROLES = [
     (re.compile(r"^(CRT|CDR|PLT|MFD|AFD)(\d)$", re.I),
      lambda m: m.group(0).lower()),
 ]
-def _hc_role(thc, rhc):
-    """handcontrollers.py's layout role, from its --thc and --rhc."""
-    thc, rhc = (thc or "").lower(), (rhc or "").lower()
-    if rhc == "rh":
-        return "hc_rh"
-    if thc == "aft" or rhc == "aft":
-        return "hc_aft_aft"
-    return "hc_fwd_lh"
+def _hc_role(rhc):
+    """handcontrollers.py's layout role, from its --rhc (the station)."""
+    return {"rh": "hc_rh", "aft": "hc_aft_aft"}.get((rhc or "").lower(), "hc_fwd_lh")
 
 
 ROLE_PATTERNS = [
@@ -113,10 +108,10 @@ ROLE_PATTERNS = [
     # window a layout could not put back.
     (re.compile(r"manager\.py"), lambda m: "manager"),
     # The virtual hand controllers' window (handcontrollers.py with no stick).
-    # Its station, from --thc / --rhc in either order: hc_fwd_lh (CDR, also
-    # with neither), hc_aft_aft (aft), hc_rh (PLT, no THC).
-    (re.compile(r"handcontrollers\.py(?=.*--thc[ =](\w+))?(?=.*--rhc[ =](\w+))?"),
-     lambda m: _hc_role(m.group(1), m.group(2))),
+    # Its station, from --rhc alone: hc_fwd_lh (CDR, also the default),
+    # hc_aft_aft (aft), hc_rh (PLT, no THC).
+    (re.compile(r"handcontrollers\.py(?=.*--rhc[ =](\w+))?"),
+     lambda m: _hc_role(m.group(1))),
 ]
 
 

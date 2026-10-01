@@ -58,9 +58,10 @@ so until then it reads -1 (seen on Linux and macOS alike).  On macOS the
 app running this may also need Input Monitoring permission (System
 Settings, Privacy & Security) for the stick's input to arrive.
 
-    python3 handcontrollers.py --thc fwd
-    python3 handcontrollers.py --thc aft --port-base 7300
-    python3 handcontrollers.py --thc fwd --test "+X 2"    (no joystick:
+    python3 handcontrollers.py                  (the CDR: LH RHC, forward THC)
+    python3 handcontrollers.py --rhc aft --port-base 7300   (aft RHC and THC)
+    python3 handcontrollers.py --rhc rh         (the PLT: RH RHC, no THC)
+    python3 handcontrollers.py --test "+X 2"    (no joystick:
                                      hold +X for 2 s, release, and exit)
     python3 handcontrollers.py --rhc lh --test-rhc "roll 0.5 3"
                                     (no joystick: half right roll for 3 s)
@@ -597,10 +598,9 @@ def run_virtual(pg, args, pub, rp, status):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--thc", choices=sorted(THC_CARD), default=None,
-                    help="which THC: fwd (the CDR's) or aft; follows --rhc when omitted")
-    ap.add_argument("--rhc", choices=sorted(RHC_CHANNELS), default=None,
-                    help="which RHC: lh (CDR), rh (PLT) or aft; follows --thc when omitted")
+    ap.add_argument("--rhc", choices=sorted(RHC_CHANNELS), default="lh",
+                    help="the station, by its RHC: lh (CDR, with the forward THC; the "
+                         "default), aft (with the aft THC), or rh (PLT, no THC)")
     ap.add_argument("--quiet", action="store_true",
                     help="no running display of what the joystick commands")
     ap.add_argument("--test-rhc", metavar="'AXIS FRACTION SECONDS'",
@@ -621,18 +621,10 @@ def main(argv=None):
     ap.add_argument("--test", metavar="'DIR SECONDS'",
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
     args = ap.parse_args(argv)
-    # THE STATIONS, the only combinations there are (Ron, 2026-10-01): the
-    # forward THC is the CDR's alone, so --thc fwd --rhc lh; the aft station
-    # --thc aft --rhc aft; the PLT --rhc rh with no THC.  Either option
-    # implies the other; no option is the CDR's station.
-    if args.rhc is None:
-        args.rhc = "aft" if args.thc == "aft" else "lh"
-    if args.thc is None and "--thc" not in (argv if argv is not None else sys.argv[1:]):
-        args.thc = {"lh": "fwd", "aft": "aft", "rh": None}[args.rhc]
-    if (args.thc, args.rhc) not in (("fwd", "lh"), ("aft", "aft"), (None, "rh")):
-        ap.error("the stations are --thc fwd --rhc lh (CDR), --thc aft --rhc aft "
-                 "(aft), and --rhc rh (PLT, who has no THC); not --thc %s --rhc %s"
-                 % (args.thc, args.rhc))
+    # THE STATION IS ITS RHC (Ron, 2026-10-01): the forward THC is the CDR's
+    # alone, so lh brings the forward THC, aft the aft one, and rh -- the PLT
+    # -- none.  There is no --thc.
+    args.thc = {"lh": "fwd", "aft": "aft", "rh": None}[args.rhc]
     if args.test and not args.thc:
         ap.error("--test needs a THC, and the PLT (--rhc rh) has none")
     if args.port_base is not None:
