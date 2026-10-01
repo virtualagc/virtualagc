@@ -1,0 +1,45 @@
+# ONE GPC to OPS 201 with its IMUs in operate -- the bench for the vehicle
+# dynamics (yaGPC2's YAGPC_MDM_DEVICES=1 YAGPC_VEHDYN=1).
+#
+# WHY THE SPEC 21 STEP.  In OPS 2 the flight software uses an IMU's resolver
+# data (and so knows the vehicle's attitude at all) only for an IMU it has
+# recorded as IN OPERATE (CGMB_IMU_INOP_IPG).  A real orbiter brought that
+# state up from OPS 9, where the IMUs were put in operate on the pad, through
+# OPS 1.  This vehicle goes straight from OPS 0 to OPS 2, and in OPS 2 the
+# only thing that sets the flag is the SPEC 21 IMU ALIGN display supervisor
+# (GX4DIS): for each IMU commanded to OPER whose in-operate discrete is on.
+# It runs only while SPEC 21 is displayed, so the display is left up for a
+# few seconds after the three OPER items.  (Ledger #263.)
+#
+# Run, for example, with the vehicle started turning, to watch the AUTO DAP
+# fire the jets and bring it back:
+#   YAGPC_MDM_DEVICES=1 YAGPC_VEHDYN=1 YAGPC_VEHDYN_RATE=0,0,0.5 \
+#     python3 simulatePASS.py --gpcs 1 --crts 1 --tape <tape> \
+#     --script examples/1gpc-ops201-imu.script
+# (one line when typed).  The attitude and rates on UNIV PTG then follow the
+# vehicle, and yaGPC2's "vehdyn:" line at shutdown reports the jet-seconds
+# and the propellant used.
+
++0     gpc 1
++0     mode HALT
++0.02  idppower 1 on
++0.01  script ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
+
++11    keys ITEM 1 + 2 EXEC
++8     keys ITEM 2 + 1 EXEC
++8     keys ITEM 7 + 1 EXEC
++8     keys ITEM 8 + 1 EXEC
++8     keys ITEM 9 + 1 EXEC
++8     keys ITEM 1 0 + 1 EXEC
++8     keys ITEM 1 1 + 1 EXEC
++8     keys ITEM 1 2 + 1 EXEC
++8     keys ITEM 1 8 + 1 EXEC
++8     keys ITEM 1 9 + 1 EXEC
++21    keys OPS 2 0 1 PRO
+
+# IMUs 1-3 to OPER on SPEC 21, and leave it up while the software notes them.
++40    keys SPEC 2 1 PRO
++5     keys ITEM 4 EXEC
++3     keys ITEM 5 EXEC
++3     keys ITEM 6 EXEC
++15    keys RESUME
