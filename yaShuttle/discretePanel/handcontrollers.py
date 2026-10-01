@@ -347,21 +347,35 @@ class VirtualControls:
     def __init__(self, pg, style, scale, rhc_name, thc_name):
         self.pg = pg
         self.style = style
-        self.k = scale
+        self.scale = scale
         self.rhc_name, self.thc_name = rhc_name, thc_name
         # The PLT's station has no THC, and its window no THC panel: only as
         # wide as the RHC (Ron, 2026-10-01).
-        self.W, self.H = int((560 if thc_name else 300) * scale), int(380 * scale)
-        self.screen = pg.display.set_mode((self.W, self.H), pg.RESIZABLE)
-        pg.display.set_caption(window_title(thc_name, rhc_name))
+        size = (int((560 if thc_name else 300) * scale), int(380 * scale))
+        # RETINA.  A set_mode() window on macOS is drawn at one pixel a
+        # point and doubled by the compositor: small, fuzzy text (Ron, via
+        # Mac-integrate, 2026-10-01).  pygame-ce's Window API with
+        # allow_high_dpi gives a surface of physical pixels -- 560x380 for a
+        # 280x190-point window -- so there everything is drawn at
+        # k = scale * hd, hd being pixels per point, and mouse positions and
+        # drag deltas, which stay in points, are multiplied by hd.  Plain
+        # pygame (Linux here) has no Window API and needs none.
+        self.win = None
+        if sys.platform == "darwin" and hasattr(pg, "Window"):
+            self.win = pg.Window(window_title(thc_name, rhc_name), size,
+                                 allow_high_dpi=True, resizable=True)
+            self.screen = self.win.get_surface()
+        else:
+            self.screen = pg.display.set_mode(size, pg.RESIZABLE)
+            pg.display.set_caption(window_title(thc_name, rhc_name))
+        self.hd = None
+        self._sync_surface()
         # TEXT SCALES WITH THE WINDOW, as panelO6's does.  Floors of 9 and 8
         # px held it full size while the drawing shrank -- 1.4x too big at
         # --size 384, and 3x in simulatePASS's halved macOS window, where the
         # no-focus line ran off the edge and the bottom line was cut off
         # (Mac-integrate, 2026-10-01).  A floor of a few pixels only keeps
         # it from vanishing.
-        self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(13 * scale)))
-        self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(11 * scale)))
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
         self.drag = None                     # gimbal: "pr" or "yaw" while held
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
@@ -370,7 +384,34 @@ class VirtualControls:
         # no red border at start-up from a terminal that kept the keyboard
         # (Mac-integrate, 2026-10-01).  sync_focus() re-reads it every frame.
         self.focused = bool(pg.key.get_focused())
-        self._layout()
+
+    def _sync_surface(self):
+        """Drawing surface, its size, and pixels per point -- which change
+        when the window is resized or moves between a Retina and a 1x
+        display; a change of hd re-scales the layout and the fonts."""
+        if self.win is not None:
+            self.screen = self.win.get_surface()
+            hd = self.screen.get_width() / float(max(1, self.win.size[0]))
+        else:
+            hd = 1.0
+        self.W, self.H = self.screen.get_size()
+        if hd != self.hd:
+            self.hd = hd
+            self.k = self.scale * hd
+            pg = self.pg
+            self.font = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(13 * self.k)))
+            self.small = pg.font.SysFont("dejavusans,helvetica,arial", max(5, round(11 * self.k)))
+            self._layout()
+
+    def _px(self, p):
+        """A mouse position or delta, in points, as drawing pixels."""
+        return (p[0] * self.hd, p[1] * self.hd)
+
+    def _grab(self, on):
+        if self.win is not None and hasattr(self.win, "grab_mouse"):
+            self.win.grab_mouse = on
+        else:
+            self.pg.event.set_grab(on)
 
     def _layout(self):
         k = self.k
@@ -388,7 +429,7 @@ class VirtualControls:
         elif e.type in (pg.WINDOWFOCUSGAINED,) or (e.type == pg.ACTIVEEVENT and
                                                    getattr(e, "state", 0) & 2 and e.gain):
             self.focused = True
-        elif e.type == pg.VIDEORESIZE:
+        elif e.type == pg.VIDEORESIZE and self.win is None:
             self.W, self.H = e.w, e.h
         # Touch: per-finger, never the synthesised mouse.
         elif e.type == pg.FINGERDOWN:
@@ -403,12 +444,12 @@ class VirtualControls:
             if self.style == "gimbal":
                 if e.button in (1, 3):
                     self.drag = "pr" if e.button == 1 else "yaw"
-                    pg.event.set_grab(True)
+                    self._grab(True)
                     pg.mouse.set_visible(False)
                     if hasattr(pg.mouse, "get_rel"):
                         pg.mouse.get_rel()
             elif e.button == 1:
-                self._finger_down(None, e.pos)          # split, by mouse
+                self._finger_down(None, self._px(e.pos))  # split, by mouse
         elif e.type == pg.MOUSEBUTTONUP and not getattr(e, "touch", False):
             if self.style == "gimbal":
                 self._release_drag()
@@ -418,7 +459,7 @@ class VirtualControls:
                     self._spring(f[0])
         elif e.type == pg.MOUSEMOTION and not getattr(e, "touch", False):
             if self.style == "gimbal" and self.drag:
-                dx, dy = e.rel
+                dx, dy = self._px(e.rel)
                 full = VIRTUAL_DRAG_FULL * self.k
                 if self.drag == "pr":
                     self.ptr["roll"] = _clip(self.ptr["roll"] + dx / full)
@@ -426,7 +467,7 @@ class VirtualControls:
                 else:
                     self.ptr["yaw"] = _clip(self.ptr["yaw"] + dx / full)
             elif self.style == "split" and "mouse" in self.fingers:
-                self._finger_move(None, e.pos)
+                self._finger_move(None, self._px(e.pos))
 
     def sync_focus(self):
         """Keyboard focus as SDL has it now; losing it releases a drag."""
@@ -439,7 +480,7 @@ class VirtualControls:
         if self.drag:
             self._spring("knob" if self.drag == "pr" else "ring")
             self.drag = None
-            self.pg.event.set_grab(False)
+            self._grab(False)
             self.pg.mouse.set_visible(True)
 
     def _spring(self, which):
@@ -504,6 +545,7 @@ class VirtualControls:
 
     # -- drawing ------------------------------------------------------------
     def draw(self, defl, bits):
+        self._sync_surface()
         pg, s, k = self.pg, self.screen, self.k
         s.fill((40, 42, 44))
         ink, dim = (220, 220, 210), (120, 120, 112)
@@ -572,7 +614,10 @@ class VirtualControls:
                 if msg.get_width() <= self.W - int(12 * k):
                     break
             s.blit(msg, ((self.W - msg.get_width()) // 2, int(6 * k) + self.font.get_height()))
-        pg.display.flip()
+        if self.win is not None:
+            self.win.flip()
+        else:
+            pg.display.flip()
 
 
 def run_virtual(pg, args, pub, rp, status):
