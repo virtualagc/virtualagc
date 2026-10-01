@@ -272,6 +272,70 @@ DAP_LAMP = {   # button: (card, channel, mask)
     "INRTL": (2, 2, 0x1000), "B": (2, 2, 0x0800), "FREE": (2, 2, 0x0400),
 }
 MDM_OP_VALUE, MDM_TYPE_DOH = 4, 4
+
+# ---- section D: the other switches GR2 reads in OPS 2 and 8 -----------------
+#
+# crew-switches-OPS2.md section D, checked against the flight source: the
+# slow triple-switch words GR2ORB.hal 185-215, CGBIH1.hal 2167-2174, 2489,
+# 2752-2819, GSAXFD.hal 134-148.  Contacts are (unit, DSCRT, mask); units 1-4
+# are FF1-4 and 5-8 FA1-4, each on its MDM's hardware-side bus.  Appearance
+# follows SCOM (USA007587 Rev A): C3 FCS CHANNEL (printed 2.13-44) and OMS
+# ENG (2.18-8), O7 MASTER RCS CROSSFEED (2.18-18), F2/F4 BODY FLAP and SPD
+# BK/THROT (2.13-39), F3 TRIM RHC/PNL (2.13-41).  On those drawings a legend
+# printed above a three-position switch is its up position, one printed down
+# its side the middle, and one below it down -- as on BFC CRT SELECT.
+_DSCRT_ALL = {1: (4, 0), 2: (4, 1), 3: (4, 2), 4: (6, 0), 5: (6, 1),
+              6: (9, 0), 7: (9, 1), 8: (9, 2), 9: (12, 0), 10: (12, 1),
+              11: (12, 2), 12: (15, 0), 13: (15, 1)}
+_FA_DSCRT = {1: (3, 0), 2: (3, 1), 3: (3, 2)}    # FA DSCRT1-3: DIH card 3
+FA_UNIT0 = 4                    # FA k is crew unit 4 + k (yaGPC2 mdmdev.c)
+# FCS CHANNEL 1-4 (C3): OVERRIDE / AUTO / OFF, lever-locked; only OVERRIDE
+# has contacts -- three per channel, voted (slow triple bits 13-16).
+FCS_CH_POS = ("OVERRIDE", "AUTO", "OFF")
+FCS_CH_CONTACTS = (((2, 9, 0x8000), (1, 9, 0x8000), (3, 1, 0x4000)),
+                   ((2, 1, 0x8000), (3, 1, 0x8000), (4, 1, 0x4000)),
+                   ((4, 1, 0x8000), (1, 1, 0x8000), (2, 1, 0x4000)),
+                   ((4, 9, 0x8000), (3, 9, 0x8000), (1, 1, 0x4000)))
+DEFAULT_FCS_CH = "AUTO"
+# OMS ENG LEFT / RIGHT (C3): ARM / ARM/PRESS / OFF, lever-locked.  Two
+# contacts each, on the AFT MDMs' DSCRT2: L on FA3/FA1, R on FA4/FA2; bit 7
+# ARM/PRESS, bit 8 ARM; OFF is neither.
+OMS_SIDES = ("L", "R")
+OMS_ENG_POS = ("ARM", "ARM/PRESS", "OFF")
+OMS_ENG_UNITS = {"L": (FA_UNIT0 + 3, FA_UNIT0 + 1), "R": (FA_UNIT0 + 4, FA_UNIT0 + 2)}
+OMS_ENG_BITS = {"ARM/PRESS": 0x0200, "ARM": 0x0100, "OFF": 0}
+DEFAULT_OMS_ENG = "OFF"
+# MASTER RCS CROSSFEED (O7): FEED FROM LEFT / OFF / FEED FROM RIGHT, thrown
+# sideways, lever-locked.  FF1/2/3 DSCRT11 bit 2 from left, bit 3 from right
+# (slow triple bits 19-20; both on holds the last valid value).
+XFEED_POS = ("FROM LEFT", "OFF", "FROM RIGHT")    # left, middle, right
+XFEED_BITS = {"FROM LEFT": 0x4000, "OFF": 0, "FROM RIGHT": 0x2000}
+DEFAULT_XFEED = "OFF"
+# TRIM RHC/PNL (F3, one at each end): ENABLE / INHIBIT.  The INHIBIT
+# contact, two each: L on FF1/FF2, R on FF3/FF4, DSCRT10 bit 9.
+TRIM_SIDES = ("L", "R")
+TRIM_POS = ("ENABLE", "INHIBIT")
+TRIM_UNITS = {"L": (1, 2), "R": (3, 4)}
+TRIM_MASK = 0x0080
+DEFAULT_TRIM = "ENABLE"
+# BODY FLAP and SPD BK/THROT AUTO/MAN pushbuttons (F2 CDR, F4 PLT): split-
+# legend PBIs, momentary, three contacts each.  In OPS 2 docking reuses them
+# as post-contact-thrusting arm and activate (GC1ORB.hal 140-262).  Their
+# lamps are FF DOH card 10 channel 0, SET bits: bit 5 BODY FLAP, bit 6 SPD
+# BK; AUTO on FF1 (CDR) / FF3 (PLT), MAN on FF2 / FF4 (GC1ORB.hal 117-122,
+# GPHSBT.hal 183-259, CGBOBF.hal 562-565).
+AM_SIDES = ("L", "R")                        # F2 CDR, F4 PLT
+AM_PANEL = {"L": "F2", "R": "F4"}
+AM_PBS = ("BF", "SB")
+AM_ORDER = {"L": ("BF", "SB"), "R": ("SB", "BF")}   # left to right, as printed
+AM_CAPTION = {"BF": "BODY FLAP", "SB": "SPD BK/\nTHROT"}
+AM_CONTACTS = {("L", "BF"): ((1, 2, 0x0001), (2, 2, 0x0001), (3, 2, 0x0001)),
+               ("L", "SB"): ((1, 3, 0x8000), (2, 3, 0x8000), (3, 3, 0x8000)),
+               ("R", "BF"): ((2, 10, 0x0001), (3, 10, 0x0001), (4, 10, 0x0001)),
+               ("R", "SB"): ((2, 11, 0x8000), (3, 11, 0x8000), (4, 11, 0x8000))}
+AM_LAMP = {"BF": 0x0800, "SB": 0x0400}       # card 10 channel 0
+AM_LAMP_UNITS = {"L": (1, 2), "R": (3, 4)}   # (AUTO, MAN)
+AM_HOLD_MS = 500
 MF_NAMES = ("PL", "GNC", "SM", "ILLEGAL")       # MEDS2's major function values
 LEFT_SEL_POS = ("1", "3")                       # left, right
 RIGHT_SEL_POS = ("3", "2")                      # left, right
@@ -290,6 +354,11 @@ DEFAULT_IDP_POWER = "OFF"
 DEFAULT_LEFT_SEL = "1"
 DEFAULT_RIGHT_SEL = "2"
 MF_RING = "#c0201a"     # an ILLEGAL major function, as MEDS2's pane marks it
+
+
+def mdm_name(u):
+    """A crew unit's MDM: 1-4 are FF1-4, 5-8 FA1-4."""
+    return "FA%d" % (u - FA_UNIT0) if u > FA_UNIT0 else "FF%d" % u
 
 
 def default_major_func():
@@ -607,6 +676,12 @@ class PanelO6:
         self.attref = [False] * len(ADI_STATIONS)   # held down
         self.dap = {st: dict((k, False) for k in DAP_PB) for st in DAP_STATIONS}
         self.dap_lamp = {st: dict((k, False) for k in DAP_PB) for st in DAP_STATIONS}
+        self.fcs_ch = [DEFAULT_FCS_CH] * len(FCS_CH_CONTACTS)
+        self.oms_eng = dict((sd, DEFAULT_OMS_ENG) for sd in OMS_SIDES)
+        self.xfeed = DEFAULT_XFEED
+        self.trim_rhc = dict((sd, DEFAULT_TRIM) for sd in TRIM_SIDES)
+        self.am = dict(((sd, k), False) for sd in AM_SIDES for k in AM_PBS)  # held
+        self.am_lamp = dict(((sd, k), (False, False)) for sd in AM_SIDES for k in AM_PBS)
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
@@ -901,7 +976,8 @@ class PanelO6:
     # these restores the thing that DRIVES the vehicle.
     SWITCHES = ("power", "output", "mode", "ipl_source", "bfc_display",
                 "bfc_select", "bfc_disengage", "idp_power", "idp_mf",
-                "kybd_sel", "adi", "sense")
+                "kybd_sel", "adi", "sense", "fcs_ch", "oms_eng", "xfeed",
+                "trim_rhc")
 
     # WHAT EACH SWITCH IS ALLOWED TO BE.  redraw() finds a control's position
     # with POS.index(value), so a value that is merely unexpected raises
@@ -917,7 +993,10 @@ class PanelO6:
                "adi": dict(("%s_%s" % (st, f),
                             ADI_ATT_POS if f == "att" else ADI_LEVEL_POS)
                            for st in ADI_STATIONS for f in ADI_FIELDS),
-               "sense": SENSE_POS}
+               "sense": SENSE_POS, "fcs_ch": FCS_CH_POS,
+               "oms_eng": dict((sd, OMS_ENG_POS) for sd in OMS_SIDES),
+               "xfeed": XFEED_POS,
+               "trim_rhc": dict((sd, TRIM_POS) for sd in TRIM_SIDES)}
 
     @classmethod
     def _bad_value(cls, name, value, key=None):
@@ -1014,6 +1093,28 @@ class PanelO6:
                     cw, cm = cc
                     card, ch = _DSCRT_CC[cw]
                     out.append((uc, card, ch, cm, cm if down else 0))
+        # Section D.
+        def contact(u, dscrt, mask, on):
+            card, ch = (_FA_DSCRT if u > FA_UNIT0 else _DSCRT_ALL)[dscrt]
+            out.append((u, card, ch, mask, mask if on else 0))
+        for i, contacts in enumerate(FCS_CH_CONTACTS):
+            for u, d, m in contacts:
+                contact(u, d, m, self.fcs_ch[i] == "OVERRIDE")
+        mask = OMS_ENG_BITS["ARM/PRESS"] | OMS_ENG_BITS["ARM"]
+        for sd in OMS_SIDES:
+            for u in OMS_ENG_UNITS[sd]:
+                card, ch = _FA_DSCRT[2]
+                out.append((u, card, ch, mask, OMS_ENG_BITS[self.oms_eng[sd]]))
+        mask = XFEED_BITS["FROM LEFT"] | XFEED_BITS["FROM RIGHT"]
+        for u in (1, 2, 3):
+            card, ch = _DSCRT_ALL[11]
+            out.append((u, card, ch, mask, XFEED_BITS[self.xfeed]))
+        for sd in TRIM_SIDES:
+            for u in TRIM_UNITS[sd]:
+                contact(u, 10, TRIM_MASK, self.trim_rhc[sd] == "INHIBIT")
+        for key, contacts in AM_CONTACTS.items():
+            for u, d, m in contacts:
+                contact(u, d, m, self.am[key])
         return out
 
     def _publish(self):
@@ -1025,7 +1126,7 @@ class PanelO6:
             self._pub_crew = crew
         if crew != self._crew_published:
             log("MDM crew contacts  " + "  ".join(
-                "FF%d %d/%d=%04x" % (u, c, ch, b) for u, c, ch, m, b in crew))
+                "%s %d/%d=%04x" % (mdm_name(u), c, ch, b) for u, c, ch, m, b in crew))
             self._crew_published = crew
         self._pub_wake.set()
         if columns != self._published:
@@ -1164,7 +1265,10 @@ class PanelO6:
     def _listen_mdm(self):
         """Thread: VALUE records of the forward MDMs' output cards."""
         socks = {}
-        for k in sorted(set(DAP_LAMP_UNIT.values())):
+        units = set(DAP_LAMP_UNIT.values())
+        for pair in AM_LAMP_UNITS.values():
+            units.update(pair)
+        for k in sorted(units):
             try:
                 socks[mdm_receiver(k)] = k
             except OSError as e:
@@ -1211,6 +1315,21 @@ class PanelO6:
             log("DAP lamps  C3: %s  A6U: %s" % tuple(
                 " ".join(n for n in DAP_PB if self.dap_lamp[st][n]) or "-"
                 for st in DAP_STATIONS))
+        am_changed = False
+        for (sd, k) in self.am_lamp:
+            lit = []
+            for u in AM_LAMP_UNITS[sd]:
+                w = out.get((u, 10, 0))
+                lit.append(bool(w is not None and (w & AM_LAMP[k])))
+            if tuple(lit) != self.am_lamp[(sd, k)]:
+                self.am_lamp[(sd, k)] = tuple(lit)
+                am_changed = True
+        if am_changed:
+            log("AUTO/MAN lamps  " + "  ".join(
+                "%s %s %s" % (AM_PANEL[sd], k, "/".join(
+                    n for n, on in zip(("AUTO", "MAN"), self.am_lamp[(sd, k)]) if on) or "-")
+                for sd in AM_SIDES for k in AM_PBS))
+        if changed or am_changed:
             self.redraw()
 
     def _tick(self):
@@ -1628,11 +1747,15 @@ class PanelO6:
             self._panel_tag(dap_x0, y, DAP_PANEL[st])
             y = y1 + PANE_GAP
         adi_y1 = max(adi_y1, y1)
+        # Section D's switches: a column of their own, right of the DAP's --
+        # the panel grows wider rather than taller (owner, 2026-09-30).
+        secd_x1, secd_y1 = self._draw_secd(dap_x0 + dap_w + PANE_GAP, my0)
+        adi_y1 = max(adi_y1, secd_y1)
         # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
         # their measured text needs, which under macOS's wider fonts is more
         # than at Linux's (Mac-integrate, 2026-10-01).
         self._fit_moved = False
-        self._fit("_ref_w", REF_W, dap_x0 + dap_w + MARGIN)
+        self._fit("_ref_w", REF_W, secd_x1 + MARGIN)
         self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
         if not self._fit_moved:
             self._snug()
@@ -2118,7 +2241,7 @@ class PanelO6:
         lines = set()
         for leg, _w, _m, _c in DAP_PB.values():
             lines.update(l for l in leg.split("\n") if l)
-        lines.update(("ATT", "REF"))
+        lines.update(("ATT", "REF", "AUTO", "MAN"))
         widest = max(self._tw(l) for l in lines)
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
         face_w = widest + 8
@@ -2237,6 +2360,231 @@ class PanelO6:
                           self.dap[st][k], self.dap_lamp[st][k])
                 self._hit("dap", (st, k), bx, by, bx + b, by + b)
         return y1
+
+    # ---- section D: FCS CHANNEL, OMS ENG, TRIM, AUTO/MAN, CROSSFEED --------
+    #
+    # Each pane is drawn by a function that, given measure=True, only returns
+    # the width and height it needs; redraw() packs them into a column right
+    # of the DAP one and stretches each row's panes to the column's width.
+
+    def _rule_caption(self, xa, xb, y, caption, size=SETTING_SIZE):
+        """A caption centred over xa..xb with a rule out to each end, as the
+        SCOM drawings print OVERRIDE and OFF across a row of switches."""
+        self._text((xa + xb) / 2.0, y, caption, size=size)
+        tw = self._tw(caption, size)
+        ry = y + self._th(size) * 0.15
+        mid = (xa + xb) / 2.0
+        for a, z in ((xa, mid - tw / 2.0 - 4), (mid + tw / 2.0 + 4, xb)):
+            if z > a:
+                self._line(a, ry, z, ry, fill=C_INK, width=max(1, int(self.s)))
+
+    def _toggle_row(self, x0, y0, x1, title, caps, top, side, bottom, values,
+                    positions, kind, measure=False, h=None):
+        """A titled row of three-position switches with one legend above the
+        row (up), one down each outer side (middle), one below (down) -- FCS
+        CHANNEL and OMS ENG as SCOM draws them.  Returns (width, height)."""
+        pad, gap = 10, 18
+        th10, ths = self._th(10), self._th(SETTING_SIZE)
+        gw, gh = 58, 136
+        well = gw * 1.08 / 2.0
+        n = len(caps)
+        step = max(2 * well + gap, max(self._tw(c) for c in caps) + gap)
+        side_w = gw / 2.0 + 14 + self._tw("M")
+        inner = (n - 1) * step + 2 * side_w
+        width = max(inner, self._tw(title, 10) + 24,
+                    self._tw(top) + 2 * gw, self._tw(bottom) + 2 * gw) + 2 * 16
+        y_title = y0 + pad + th10
+        y_cap = y_title + th10 + pad + ths
+        y_top = y_cap + ths + pad / 2.0 + ths
+        sw_top = y_top + ths + pad
+        y_bot = sw_top + gh + pad + ths
+        height = y_bot + ths + pad - y0
+        if measure:
+            return width, height
+        self._rect_panel(x0, y0, x1, y0 + max(height, h or 0))
+        cx = (x0 + x1) / 2.0
+        c0 = cx - (n - 1) * step / 2.0
+        cols = [c0 + i * step for i in range(n)]
+        self._rule_caption(cols[0] - side_w + 6, cols[-1] + side_w - 6, y_title, title, 10)
+        for gx, c in zip(cols, caps):
+            self._text(gx, y_cap, c, size=SETTING_SIZE)
+        span = (cols[0] - gw / 2.0, cols[-1] + gw / 2.0)
+        self._rule_caption(span[0], span[1], y_top, top)
+        for i, gx in enumerate(cols):
+            pos = positions.index(values[i])
+            self._guarded_toggle(gx - gw / 2, sw_top, gx + gw / 2, sw_top + gh, pos, npos=3)
+            self._hit(kind, i, gx - gw / 2, sw_top, gx + gw / 2, sw_top + gh)
+        lx = gw / 2.0 + 14 + self._tw("M") / 2.0
+        self._vtext(cols[0] - lx, sw_top + gh / 2.0, side)
+        self._vtext(cols[-1] + lx, sw_top + gh / 2.0, side)
+        self._rule_caption(span[0], span[1], y_bot, bottom)
+        return width, height
+
+    def _draw_fcs(self, x0, y0, x1, measure=False, h=None):
+        return self._toggle_row(x0, y0, x1, "FCS CHANNEL", ("1", "2", "3", "4"),
+                                "OVERRIDE", "AUTO", "OFF", self.fcs_ch, FCS_CH_POS,
+                                "fcs", measure, h)
+
+    def _draw_oms(self, x0, y0, x1, measure=False, h=None):
+        return self._toggle_row(x0, y0, x1, "OMS ENG", ("LEFT", "RIGHT"),
+                                "ARM", "ARM/PRESS", "OFF",
+                                [self.oms_eng[sd] for sd in OMS_SIDES], OMS_ENG_POS,
+                                "oms", measure, h)
+
+    def _draw_trim(self, x0, y0, x1, measure=False, h=None):
+        """TRIM RHC/PNL, the CDR's (left end of F3) and the PLT's (right
+        end): ENABLE above, INHIBIT below.  Returns (width, height)."""
+        pad, gap = 10, 18
+        th10, ths = self._th(10), self._th(SETTING_SIZE)
+        gw, gh = 58, 124
+        step = max(gw * 1.08 + gap, self._tw("INHIBIT") + gap, self._tw("ENABLE") + gap)
+        width = max(step + gw * 1.08, self._tw("TRIM RHC/PNL", 10)) + 2 * 24
+        y_title = y0 + pad + th10
+        y_cap = y_title + th10 + pad + ths
+        y_top = y_cap + ths + pad / 2.0 + ths
+        sw_top = y_top + ths + pad
+        y_bot = sw_top + gh + pad + ths
+        height = y_bot + ths + pad - y0
+        if measure:
+            return width, height
+        self._rect_panel(x0, y0, x1, y0 + max(height, h or 0))
+        cx = (x0 + x1) / 2.0
+        self._text(cx, y_title, "TRIM RHC/PNL", size=10)
+        for i, sd in enumerate(TRIM_SIDES):
+            gx = cx + (i - 0.5) * step
+            self._text(gx, y_cap, ("LEFT", "RIGHT")[i], size=SETTING_SIZE)
+            self._text(gx, y_top, "ENABLE", size=SETTING_SIZE)
+            pos = TRIM_POS.index(self.trim_rhc[sd])
+            self._guarded_toggle(gx - gw / 2, sw_top, gx + gw / 2, sw_top + gh, pos, npos=2)
+            self._hit("trim", sd, gx - gw / 2, sw_top, gx + gw / 2, sw_top + gh)
+            self._text(gx, y_bot, "INHIBIT", size=SETTING_SIZE)
+        return width, height
+
+    def _pbi_split(self, x1, y1, x2, y2, down, auto_lit, man_lit):
+        """A split-legend PBI: AUTO over MAN, each half lighting on its own,
+        in the DAP lamps' colours."""
+        self._pushbutton(x1, y1, x2, y2, "", down=down)
+        dx = 2 if down else 0
+        fy1, fy2 = y1 + 6 + dx + 3, y2 - 6 + dx - 3
+        hx1, hx2 = x1 + 6 + dx + 3, x2 - 6 + dx - 3
+        mid = (fy1 + fy2) / 2.0
+        for (ya, yb), legend, lit in (((fy1, mid - 1), "AUTO", auto_lit),
+                                      ((mid + 1, fy2), "MAN", man_lit)):
+            self._rect(hx1, ya, hx2, yb, fill=C_PBI_LIT if lit else C_PBI_DARK,
+                       outline=C_PADDLE_LO, width=1)
+            self._text((hx1 + hx2) / 2.0, (ya + yb) / 2.0, legend, size=SETTING_SIZE)
+
+    def _draw_am(self, x0, y0, x1, sd, measure=False, h=None):
+        """F2's (CDR) or F4's (PLT) BODY FLAP and SPD BK/THROT pushbuttons,
+        captioned below as printed.  Returns (width, height)."""
+        pad, gap = 10, 18
+        th10 = self._th(10)
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        b = self.pb
+        colw = max([b] + [self._tw(l) for k in AM_PBS for l in AM_CAPTION[k].split("\n")])
+        width = 2 * colw + gap + 2 * 24
+        top = y0 + pad + 2 * th10 + pad
+        y_cap = top + b + pad / 2.0
+        height = y_cap + 2 * ls + pad - y0
+        if measure:
+            return width, height
+        self._rect_panel(x0, y0, x1, y0 + max(height, h or 0))
+        cx = (x0 + x1) / 2.0
+        for i, k in enumerate(AM_ORDER[sd]):
+            bx = cx + (i - 0.5) * (colw + gap)
+            auto_lit, man_lit = self.am_lamp[(sd, k)]
+            self._pbi_split(bx - b / 2.0, top, bx + b / 2.0, top + b,
+                            self.am[(sd, k)], auto_lit, man_lit)
+            self._hit("am", (sd, k), bx - b / 2.0, top, bx + b / 2.0, top + b)
+            for j, l in enumerate(AM_CAPTION[k].split("\n")):
+                self._text(bx, y_cap + ls * (j + 0.5), l, size=SETTING_SIZE)
+        return width, height
+
+    def _draw_xfeed(self, x0, y0, x1, measure=False, h=None):
+        """O7's MASTER RCS CROSSFEED: thrown sideways, FEED FROM LEFT and
+        FEED FROM RIGHT beside it and OFF above.  Returns (width, height)."""
+        pad = 10
+        th10, ths = self._th(10), self._th(SETTING_SIZE)
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        gw, gh = 136, 58
+        side_w = max(self._tw(w) for w in ("FEED", "FROM", "RIGHT"))
+        width = max(gw + 2 * (side_w + 14), self._tw("RCS CROSSFEED", 10)) + 2 * 24
+        y_t1 = y0 + pad + th10
+        y_t2 = y_t1 + 2 * th10
+        y_off = y_t2 + th10 + pad + ths
+        sw_top = y_off + ths + pad / 2.0
+        height = max(sw_top + gh, sw_top + gh / 2.0 + 1.5 * ls) + pad - y0
+        if measure:
+            return width, height
+        self._rect_panel(x0, y0, x1, y0 + max(height, h or 0))
+        cx = (x0 + x1) / 2.0
+        self._text(cx, y_t1, "MASTER", size=10)
+        self._text(cx, y_t2, "RCS CROSSFEED", size=10)
+        self._text(cx, y_off, "OFF", size=SETTING_SIZE)
+        sx1, sx2 = cx - gw / 2.0, cx + gw / 2.0
+        pos = XFEED_POS.index(self.xfeed)
+        self._guarded_toggle_h(sx1, sw_top, sx2, sw_top + gh, pos, npos=3)
+        self._hit("xfeed", None, sx1, sw_top, sx2, sw_top + gh)
+        cy = sw_top + gh / 2.0
+        for x, words in ((sx1 - 14 - side_w / 2.0, ("FEED", "FROM", "LEFT")),
+                         (sx2 + 14 + side_w / 2.0, ("FEED", "FROM", "RIGHT"))):
+            for j, w in enumerate(words):
+                self._text(x, cy + (j - 1) * ls, w, size=SETTING_SIZE)
+        return width, height
+
+    def _draw_secd(self, x0, y0):
+        """Section D's column: FCS CHANNEL; OMS ENG beside TRIM RHC/PNL; the
+        F2 and F4 AUTO/MAN pushbuttons; MASTER RCS CROSSFEED.  Each row's
+        panes share its width.  Returns (right edge, bottom)."""
+        rows = (((self._draw_fcs, (), "C3"),),
+                ((self._draw_oms, (), "C3"), (self._draw_trim, (), "F3")),
+                ((self._draw_am, ("L",), "F2"), (self._draw_am, ("R",), "F4")),
+                ((self._draw_xfeed, (), "O7"),))
+        sizes = [[f(0, 0, 0, *a, measure=True) for f, a, _t in row] for row in rows]
+        col_w = max(sum(w for w, _h in sz) + PANE_GAP * (len(sz) - 1) for sz in sizes)
+        y = y0
+        for row, sz in zip(rows, sizes):
+            extra = (col_w - sum(w for w, _h in sz) - PANE_GAP * (len(sz) - 1)) / len(sz)
+            h = max(hh for _w, hh in sz)
+            x = x0
+            for (f, a, tag), (w, _h) in zip(row, sz):
+                f(x, y, x + w + extra, *a, h=h)
+                self._panel_tag(x, y, tag)
+                x += w + extra + PANE_GAP
+            y += h + PANE_GAP
+        return x0 + col_w, y - PANE_GAP
+
+    def _set_fcs(self, i, value):
+        old = self.fcs_ch[i]
+        self.fcs_ch[i] = value
+        self._announce("C3 FCS CHANNEL %d" % (i + 1), old, value)
+        self._changed()
+
+    def _set_oms(self, sd, value):
+        old = self.oms_eng[sd]
+        self.oms_eng[sd] = value
+        self._announce("C3 OMS ENG %s" % ("LEFT" if sd == "L" else "RIGHT"), old, value)
+        self._changed()
+
+    def _set_trim(self, sd, value):
+        old = self.trim_rhc[sd]
+        self.trim_rhc[sd] = value
+        self._announce("F3 TRIM RHC/PNL %s" % ("LEFT" if sd == "L" else "RIGHT"), old, value)
+        self._changed()
+
+    def _set_xfeed(self, value):
+        old = self.xfeed
+        self.xfeed = value
+        self._announce("O7 MASTER RCS CROSSFEED", old, value)
+        self._changed()
+
+    def _set_am(self, key, down):
+        sd, k = key
+        old = "ON" if self.am[key] else "OFF"
+        self.am[key] = down
+        self._announce("%s %s AUTO/MAN" % (AM_PANEL[sd], "BODY FLAP" if k == "BF"
+                                           else "SPD BK/THROT"), old, "ON" if down else "OFF")
+        self._changed()
 
     def _set_dap(self, st, k, down):
         old = "ON" if self.dap[st][k] else "OFF"
@@ -2661,6 +3009,21 @@ class PanelO6:
         elif kind == "dap":
             self._set_dap(index[0], index[1], True)
             self._held = (kind, index)
+        elif kind == "fcs":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_fcs(index, FCS_CH_POS[z])
+        elif kind == "oms":
+            z = self._zone(event.y, y1, y2, 3)
+            self._set_oms(OMS_SIDES[index], OMS_ENG_POS[z])
+        elif kind == "trim":
+            z = self._zone(event.y, y1, y2, 2)
+            self._set_trim(index, TRIM_POS[z])
+        elif kind == "xfeed":
+            z = self._zone(event.x, x1, x2, 3)
+            self._set_xfeed(XFEED_POS[z])
+        elif kind == "am":
+            self._set_am(index, True)
+            self._held = (kind, index)
 
 
     def _on_release(self, event):
@@ -2678,6 +3041,8 @@ class PanelO6:
             self._set_attref(index, False)
         elif kind == "dap":
             self._set_dap(index[0], index[1], False)
+        elif kind == "am":
+            self._set_am(index, False)
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -3032,6 +3397,23 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             k = {"FREE DRIFT": "FREE"}.get(k, k)
             panel._set_dap(st, k, True)
             root.after(DAP_HOLD_MS, lambda: panel._set_dap(st, k, False))
+        elif verb == "fcs":
+            n, val = arg.split()
+            panel._set_fcs(int(n) - 1, position("FCS CHANNEL", val, FCS_CH_POS))
+        elif verb == "omseng":
+            sd, val = arg.split()
+            panel._set_oms(sd[0].upper(), position("OMS ENG", val, OMS_ENG_POS))
+        elif verb == "xfeed":
+            panel._set_xfeed({"LEFT": "FROM LEFT", "RIGHT": "FROM RIGHT",
+                              "OFF": "OFF"}[arg.strip().upper()])
+        elif verb == "trim":
+            sd, val = arg.split()
+            panel._set_trim(sd[0].upper(), position("TRIM RHC/PNL", val, TRIM_POS))
+        elif verb in ("bodyflap", "spdbk"):
+            key = ({"CDR": "L", "PLT": "R"}[arg.strip().upper()],
+                   "BF" if verb == "bodyflap" else "SB")
+            panel._set_am(key, True)
+            root.after(AM_HOLD_MS, lambda: panel._set_am(key, False))
         elif verb == "attref":
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)

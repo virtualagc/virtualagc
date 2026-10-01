@@ -107,6 +107,12 @@ PANEL_ARGS = {
     "sense": r"(-z|-x)",
     "attref": r"(l|r|a)",
     "dap": r"(c3|fwd|a6u|aft)\s+(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch_disc|pitch_pulse|yaw_disc|yaw_pulse|x_norm|x_pulse|y_norm|y_pulse|low_z|z_norm|z_pulse|high_z)",
+    "fcs": r"[1-4]\s+(override|auto|off)",
+    "omseng": r"(left|right)\s+(arm|arm/press|off)",
+    "xfeed": r"(left|off|right)",
+    "trim": r"(left|right)\s+(enable|inhibit)",
+    "bodyflap": r"(cdr|plt)",
+    "spdbk": r"(cdr|plt)",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
 }
@@ -121,6 +127,9 @@ PANEL_USAGE = {
     "adi": "adi l|r|a att inrtl|lvlh|ref, or adi l|r|a err|rate high|med|low",
     "sense": "sense -z|-x", "attref": "attref l|r|a",
     "dap": "dap c3|a6u BUTTON (a b auto inrtl lvlh free pri alt vern roll_disc ... high_z)",
+    "fcs": "fcs 1-4 override|auto|off", "omseng": "omseng left|right arm|arm/press|off",
+    "xfeed": "xfeed left|off|right", "trim": "trim left|right enable|inhibit",
+    "bodyflap": "bodyflap cdr|plt", "spdbk": "spdbk cdr|plt",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -305,6 +314,15 @@ HELP = """\
                                 ROTATION roll/pitch/yaw DISC RATE, PULSE
     dap c3|a6u x_norm|x_pulse|y_norm|y_pulse|z_norm|z_pulse|low_z|high_z
                                 TRANSLATION
+   C3, O7, F3, F2 and F4, the other switches PASS reads in OPS 2:
+    fcs N override|auto|off     C3 FCS CHANNEL N (1-4)
+    omseng left|right arm|arm/press|off
+                                C3 OMS ENG
+    xfeed left|off|right        O7 MASTER RCS CROSSFEED (FEED FROM LEFT/RIGHT)
+    trim left|right enable|inhibit
+                                F3 TRIM RHC/PNL (left end CDR, right end PLT)
+    bodyflap cdr|plt            F2/F4 BODY FLAP AUTO/MAN pushbutton, held 0.5 s
+    spdbk cdr|plt               F2/F4 SPD BK/THROT AUTO/MAN pushbutton, held 0.5 s
    not a control:
     gpcid N             make GPC N the primary column
     bit a|b N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
