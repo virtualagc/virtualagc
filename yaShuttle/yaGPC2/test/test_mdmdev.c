@@ -132,6 +132,13 @@ int main(void) {
               "imu2 discretes good");
     }
 
+    /* THE RETURN-WORD PATTERN CHECK (ledger #262): the pattern in the
+     * command's low fourteen bits comes back shifted left two. */
+    check(read_words(14, FA(0x32AAAu), 1, w) == 1 && w[0] == 0xAAA8u,
+          "fa1 return word echoes 2AAA as AAA8");
+    check(read_words(20, FF(0x31555u), 1, w) == 1 && w[0] == 0x5554u,
+          "ff1 return word echoes 1555 as 5554");
+
     mtumodel_free(m);
     printf("mdmdev: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;

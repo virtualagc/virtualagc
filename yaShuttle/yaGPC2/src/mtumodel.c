@@ -793,6 +793,7 @@ struct MtuModel {
     int commander[MTU_NBUS];
     int lastBus;                 /* the bus last filled, for the report */
     long commands, reads, wordsOut, listenerWords, nspReads, biteReads;
+    long rtwdReads;              /* return-word pattern checks answered */
     /* ONE MODEL, FIVE THREADS, AND NO LOCK OF ITS OWN.  run.c sets sharedUs
      * and armedWords -- two scalars shared by every computer and every bus --
      * and then calls mtumodel_service_as, holding only busLock[busID].  A
@@ -1090,6 +1091,27 @@ static int mtu_wirelog(void) {
  * reader still holding its command sync never started, and keeping its words
  * would deliver data with no sync in front of it. */
 static uint16_t mdm_word(const struct MtuModel *m, int b, int r);
+
+/* THE FC MDM RETURN-WORD PATTERN CHECK (ledger #262).  Every cycle FCOS reads
+ * a forward and an aft MDM's return word with a command whose low fourteen
+ * bits are a test pattern -- 2AAA or 1555, alternated by FIOFCHNG (FIOUTPAT,
+ * FIOCBLKS.asm) -- and FIOCHECK (FIOPDHF.asm, "CHECK BIT PATTERN RETURNED TO
+ * FC MDM AGAINST THE PATTERN THAT WAS TRANSMITTED") compares the word that
+ * comes back with AAA8 or 5554 (FIOCKPAT): the pattern, shifted left two.
+ * Two mismatches in a row annunciate MDM OUTPUT for that MDM, and the output
+ * element is bypassed.  This model answered zero, so every forward and aft
+ * MDM failed it at the OPS 2 transition, together with the SENSE SW and
+ * DISPLAY SW messages that follow.  Only the pattern commands -- mode 12,
+ * field 32AAA or 31555, at IUA 10 or 12 -- are answered this way.
+ * YAGPC_MDM_RTWD=0 restores the zero answer. */
+static bool mdm_rtwd_pattern(uint32_t cmd) {
+    static int inited = 0, on = 0;
+    if (!inited) { inited = 1; on = env_default_on("YAGPC_MDM_RTWD"); }
+    if (!on) return false;
+    unsigned iua = CMD_IUA(cmd);
+    uint32_t f = cmd & 0x3ffffu;
+    return (iua == MTU_IUA || iua == 12u) && (f == 0x32AAAu || f == 0x31555u);
+}
 
 static void mtu_carry_take(struct MtuModel *m, int b, int r) {
     /* LISTENERS ONLY.  A commander that has just issued a command has
@@ -1628,6 +1650,12 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             uint16_t devWords[FF_REPLY_MAX];
             bool dev = nsp > 0 && !bite && nsp <= FF_REPLY_MAX &&
                        mdmdev_reply(in->busID, cmd, nsp, devWords, m->sharedUs);
+            if (!dev && nsp > 0 && !bite && mdm_rtwd_pattern(cmd)) {
+                memset(devWords, 0, sizeof devWords);
+                devWords[0] = (uint16_t)((cmd & 0x3fffu) << 2);
+                dev = true;
+                m->rtwdReads++;
+            }
             for (int r = 0; r < MTU_READERS; r++) mtu_carry_take(m, b, r);
             m->mdmHasData[b] = dev;
             m->mdmTotal[b] = dev ? nsp : 0;
@@ -1961,6 +1989,9 @@ void mtumodel_report(struct MtuModel *m) {
     if (m->nspReads > 0)
         fprintf(stderr, "mtu: %ld NSP read(s) answered by the forward MDM "
                         "(the NSP is not powered in this vehicle)\n", m->nspReads);
+    if (m->rtwdReads > 0)
+        fprintf(stderr, "mtu: %ld MDM return-word pattern read(s) answered with the "
+                        "pattern shifted left two (AAA8/5554)\n", m->rtwdReads);
     if (m->biteReads > 0)
         fprintf(stderr, "mtu: %ld MDM A/D BITE 4 read(s) answered with the "
                         "reference voltages (+2.00 V 3200, -2.00 V ce00)\n",
