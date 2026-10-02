@@ -636,6 +636,21 @@ def snapshot_tape_problem(snapdir, tape):
     return None
 
 
+# How far the vehicle's GMT is from the wall clock: zero unless
+# --date-time-epoch moved it, and then what a capture must add to the wall
+# time it records so that a restore resumes at the vehicle's GMT.
+EPOCH_SHIFT = 0.0
+
+
+def parse_epoch(text):
+    """--date-time-epoch: Unix seconds, or a UTC date and time."""
+    try:
+        return float(text)
+    except ValueError:
+        import calendar
+        return float(calendar.timegm(time.strptime(text, "%Y-%m-%dT%H:%M:%S")))
+
+
 def saved_epoch(snapdir):
     """The wall-clock epoch a snapshot was taken at, or None.
 
@@ -729,7 +744,7 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
             log("snapshot: %s" % why)
             return False, why
 
-    epoch = time.time()
+    epoch = time.time() + EPOCH_SHIFT
     try:
         signal_gpc(gpc, "SIGUSR1")
     except OSError as e:
@@ -1410,6 +1425,13 @@ def main():
                          "players).  Passed on to the panel and manager")
     ap.add_argument("--duration", type=float, metavar="SECONDS",
                     help="shut down after this long instead of waiting for Enter")
+    ap.add_argument("--date-time-epoch", metavar="WHEN",
+                    help="the GMT the vehicle's clock starts at, for a fresh "
+                         "(not restored) run: Unix seconds, or UTC as "
+                         "YYYY-MM-DDTHH:MM:SS.  Default: now.  For a script "
+                         "that must type absolute times -- an OMS burn's "
+                         "TIG -- which a clock that starts at 'now' makes "
+                         "impossible to know in advance")
     args = ap.parse_args()
     gpcs = args.gpcs
     multi = len(gpcs) > 1
@@ -1796,6 +1818,11 @@ def main():
                 epoch = saved_epoch(resume)
                 if epoch is not None:
                     gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
+            elif args.date_time_epoch:
+                global EPOCH_SHIFT
+                start = parse_epoch(args.date_time_epoch)
+                EPOCH_SHIFT = start - time.time()
+                gpc_argv += ["--date-time-epoch", "%.3f" % start]
             # THE MASS MEMORY, RESTORED OR NOT.  A restore used to be given the
             # snapshot INSTEAD of the tape, leaving a vehicle with no mass
             # memory at all: no re-IPL, no OPS transition.  See
