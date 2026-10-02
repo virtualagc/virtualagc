@@ -2254,12 +2254,13 @@ class PanelO6:
 
     def _draw_win_c2(self):
         x0 = y0 = MARGIN
-        return x0 + C2_W, self._draw_c2(x0, y0, x0 + C2_W)
+        w = max(C2_W, 3 * (2 * self._idp_hw() + 10))     # three sets, as wide as they need
+        return x0 + w, self._draw_c2(x0, y0, x0 + w)
 
     def _draw_win_r11(self):
         x0 = y0 = MARGIN
         y1 = self._draw_r11(x0, y0, x0 + R11_W)
-        return x0 + 5 + 2 * 115 + 5 + 4, y1
+        return x0 + 5 + 2 * self._idp_hw() + 5 + 4, y1
 
     def _draw_win_none(self):
         """A panel window holding only table-driven panes."""
@@ -2271,6 +2272,21 @@ class PanelO6:
     ROT_D = 64                                # a rotary's knob
     CTL_GAP = 28           # between controls in a row: legends of neighbours
                            # nearly met at 18 (Mac-integrate, 2026-10-02)
+
+    def _vtext_h(self, text, size=SETTING_SIZE):
+        """A stacked legend's height in design units (see _vtext)."""
+        fh = int(helvetica.ascent(self._tkfont(size))) + 2
+        return sum(0.6 if ch.isspace() else 1.0 for ch in text.strip()) * fh / max(self.s, 0.01)
+
+    def _t3_excess(self, key):
+        """How much a three-position switch's stacked middle legend overruns
+        its body: the top and bottom legends move apart by this much, half
+        each way (L2's LO GAIN met NO Y JET, Mac-integrate 2026-10-02)."""
+        c = PC.CONTROLS[key]
+        if c["kind"] != "t3":
+            return 0.0
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        return max(0.0, self._vtext_h(c["positions"][1]) + ls * 0.6 - self.TGL3_H)
 
     def _ctl_lines(self, text):
         return [l for l in (text or "").split("\n") if l]
@@ -2293,7 +2309,8 @@ class PanelO6:
             side = self._tw("M") + 14 if k == "t3" else 0
             w = max(self.TGL_W * 1.08 + 2 * side, cap_w,
                     self._tw(pos[0]), self._tw(pos[-1]))
-            return w, above + ls, body, ls
+            ex = self._t3_excess(key) / 2.0
+            return w, above + ls + ex, body, ls + ex
         if k == "h3":
             pos = c["positions"]
             lw = max(self._tw(pos[0]), self._tw(pos[-1]))
@@ -2330,13 +2347,14 @@ class PanelO6:
         if k in ("t2", "t3"):
             pos = c["positions"]
             gw = self.TGL_W
-            self._text(cx, y - ls * 0.5, pos[0], size=SETTING_SIZE)
+            ex = self._t3_excess(key) / 2.0
+            self._text(cx, y - ls * 0.5 - ex, pos[0], size=SETTING_SIZE)
             p = pos.index(self.ctl[key])
             self._guarded_toggle(cx - gw / 2, y, cx + gw / 2, y + body, p, npos=len(pos))
             self._hit("ctl", key, cx - gw / 2, y, cx + gw / 2, y + body)
             if k == "t3":
                 self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, pos[1])
-            self._text(cx, y + body + ls * 0.5, pos[-1], size=SETTING_SIZE)
+            self._text(cx, y + body + ls * 0.5 + ex, pos[-1], size=SETTING_SIZE)
         elif k == "h3":
             pos = c["positions"]
             gw, gh = self.TGL3_H, self.TGL_W
@@ -2406,8 +2424,8 @@ class PanelO6:
             for i, p in enumerate(pos):
                 a = 90 + span / 2.0 - i * span / max(1, n - 1)
                 t = math.radians(a)
-                out.append((p, (r + 10 + self._tw(p) / 2.0) * math.cos(t),
-                            -(r + 4 + ls * 0.8) * math.sin(t), a))
+                out.append((p, (r + 15 + self._tw(p) / 2.0) * math.cos(t),
+                            -(r + 6 + ls * 0.8) * math.sin(t), a))
             # Round the top only if the legends clear each other and the
             # knob; long ones (KU-BAND's GPC DESIG, AUTO TRACK) overprinted
             # (WSL-integration, Mac-integrate, 2026-10-02), and go to columns.
@@ -2477,7 +2495,7 @@ class PanelO6:
             if not self._rot_columns.get(key):
                 # A short tick at each detent (owner, 2026-10-02).
                 self._line(cx + r * math.cos(t), cy - r * math.sin(t),
-                           cx + (r + 7) * math.cos(t), cy - (r + 7) * math.sin(t),
+                           cx + (r + 5) * math.cos(t), cy - (r + 5) * math.sin(t),
                            fill=C_INK_DIM, width=max(1, int(self.s)))
             if self._rot_columns.get(key):
                 inner = dx + (self._tw(p) / 2.0 + 3) * (1 if dx < 0 else -1)
@@ -3026,13 +3044,22 @@ class PanelO6:
         box_y1 = y_down + ths + pad / 2.0
         return (y_idp, y_crt, y_names, y_up, sw_top, y_down, box_y0, box_y1)
 
+    def _idp_hw(self):
+        """Half the width of an IDP/CRT set's frame: 115, or what this host's
+        captions need -- with macOS's fonts MAJ FUNC reached the frame
+        (Mac-integrate, 2026-10-02)."""
+        return max(115.0, 55 + self._tw("POWER") / 2.0 + 8,
+                   55 + self._tw("MAJ FUNC") / 2.0 + 8,
+                   55 + 29 + 14 + self._tw("M") + 8)
+
     def _idp_set(self, scx, n, rows):
         """One IDP/CRT set, POWER and MAJ FUNC, centred on scx."""
         y_idp, y_crt, y_names, y_up, sw_top, y_down, box_y0, box_y1 = rows
         pw, ph = 58, 124        # POWER: O6 POWER's guard
         mw, mh = 58, 136        # MAJ FUNC: O6 OUTPUT's 3-position guard
         ow = max(1, int(self.s))
-        self._rect(scx - 115, box_y0, scx + 115, box_y1,
+        hw = self._idp_hw()
+        self._rect(scx - hw, box_y0, scx + hw, box_y1,
                    fill="", outline=C_GUARD_LO, width=ow)
         self._text(scx, y_idp, "IDP/", size=10)
         self._text(scx, y_crt, "CRT %d" % n, size=10)
@@ -3081,9 +3108,9 @@ class PanelO6:
         left, right = 5, 5 + 4
         # As wide as the set and those margins: R11_W left a strip on the
         # right (owner, 2026-10-02).
-        width = left + 2 * 115 + right
+        width = left + 2 * self._idp_hw() + right
         self._rect_panel(x0, y0, x0 + width, y1)
-        self._idp_set(x0 + left + 115, 4, rows)
+        self._idp_set(x0 + left + self._idp_hw(), 4, rows)
         return y1
 
     def _draw_idp_load(self, x0, y0, x1):
