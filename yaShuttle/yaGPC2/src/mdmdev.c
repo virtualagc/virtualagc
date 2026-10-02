@@ -917,6 +917,48 @@ static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, dou
     fcSent++;
 }
 
+/* ---------------------------------------------------------------------
+ * THE TRUTH, for a debugging instrument (discretePanel/truthball.py): the
+ * vehicle dynamics' own state -- not anything the flight software sees --
+ * so that what PASS shows on its ADI can be set beside what the vehicle is
+ * really doing.  One datagram per TRUTH_PERIOD_S of vehicle time on port
+ * base + TRUTH_OFFSET: "TRU1", then big-endian IEEE doubles -- vehicle time
+ * (s), PASS GMT (s), the attitude quaternion body -> M50 (w x y z), body
+ * rates (rad/s), M50 position (m) and velocity (m/s).  Only with the
+ * dynamics on and a panel wired. */
+#define TRUTH_OFFSET 98
+#define TRUTH_PERIOD_S 0.05
+
+static void put_be_double(uint8_t *b, double v) {
+    uint64_t u;
+    memcpy(&u, &v, sizeof u);
+    for (int i = 0; i < 8; i++) b[i] = (uint8_t)(u >> (56 - 8 * i));
+}
+
+static void truth_publish(void) {
+    static double next = -1.0;
+    if (!crewOpen || crewFd[1] < 0 || !vehdyn_enabled()) return;
+    const PhysState *st = vehdyn_state();
+    if (st->t < next && st->t > next - 10.0) return;
+    next = st->t + TRUTH_PERIOD_S;
+    double v[2 + 4 + 3 + 3 + 3];
+    int n = 0;
+    v[n++] = st->t;
+    v[n++] = vehdyn_gmt(st->t);
+    for (int i = 0; i < 4; i++) v[n++] = st->q[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->w[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->r[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->v[i];
+    uint8_t b[4 + 8 * 15];
+    memcpy(b, "TRU1", 4);
+    for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + TRUTH_OFFSET));
+    sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
+}
+
 bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
 
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
@@ -1006,7 +1048,10 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         }
         return true;
     }
-    if (vehdyn_enabled()) vehdyn_advance(sharedUs);   /* time passes for the vehicle */
+    if (vehdyn_enabled()) {
+        vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
+        truth_publish();
+    }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
     if (iua == IUA_FF) {
