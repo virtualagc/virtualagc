@@ -81,6 +81,7 @@ Usage:
 """
 
 import argparse
+import collections
 from collections import OrderedDict
 import json
 import math
@@ -722,8 +723,8 @@ OPS_PANELS = {
     ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2"),
     ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7", "L2"),
     ("GNC", 9): ("C3", "L2"),
-    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A2", "A8U", "A8L"),
-    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A2"),
+    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L"),
+    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
 SCREEN_OPS = re.compile(r"^\s*(\d)\d{3}/")
@@ -828,6 +829,11 @@ class PanelO6:
                         if PC.is_switch(k))
         self.ctl_held = dict((k, False) for k in PC.CONTROLS if PC.is_button(k))
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
+        unconnected = collections.Counter(c["via"] for c in PC.CONTROLS.values()
+                                          if c.get("via"))
+        for via, n in sorted(unconnected.items()):
+            log("%d panel controls are shown but not connected to PASS yet: via %s"
+                % (n, via))
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
@@ -2245,10 +2251,12 @@ class PanelO6:
             return (max(cap_w, self.pb, max([self._tw(l) for l in lines] or [0]) + 12),
                     above, self.pb * 0.6, 0)
         if k == "rot":
-            pos = c["positions"]
-            lw = max(self._tw(p) for p in pos)
-            w = max(cap_w, self.ROT_D + 2 * lw + 28)
-            return w, above + ls * 2.2, self.ROT_D, ls * 0.3
+            x0, y0, x1, y1 = self._rot_bbox(key)
+            w = max(cap_w, 2 * max(-x0, x1) + 8)
+            # The body is the knob; the legends above and below it count as
+            # space above and below.
+            r = self.ROT_D / 2.0
+            return w, above + max(0.0, -y0 - r) + 4, self.ROT_D, max(0.0, y1 - r) + 4
         # pb / pbi
         return max(cap_w, self.pb), above, self.pb, 0
 
@@ -2309,23 +2317,66 @@ class PanelO6:
                 self._legend_pb(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held)
             self._hit("ctl", key, cx - b / 2, y, cx + b / 2, y + b)
 
+    def _rot_legends(self, key):
+        """[(legend, dx, dy, angle)] of a rotary's positions about its centre:
+        over the top half for a few, round to 300 degrees for many, so that
+        neighbouring legends clear each other."""
+        pos = PC.CONTROLS[key]["positions"]
+        n = len(pos)
+        r = self.ROT_D / 2.0
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        out = []
+        if n <= 5:
+            span = min(170.0, 50.0 * (n - 1))
+            for i, p in enumerate(pos):
+                a = 90 + span / 2.0 - i * span / max(1, n - 1)
+                t = math.radians(a)
+                out.append((p, (r + 10 + self._tw(p) / 2.0) * math.cos(t),
+                            -(r + 4 + ls * 0.8) * math.sin(t), a))
+            return out
+        # MANY POSITIONS (the RMS's 8 and 12): round an arc they cannot all
+        # be read, so they stand in two columns beside the knob -- the first
+        # half on the left, rising, the rest on the right, falling -- each
+        # joined to its tick by a leader (drawn in _rotary).
+        span = 300.0
+        half = (n + 1) // 2
+        for i, p in enumerate(pos):
+            a = 90 + span / 2.0 - i * span / (n - 1)
+            if i < half:
+                y = ((half - 1) / 2.0 - i) * ls * 1.1
+                x = -(r + 22 + self._tw(p) / 2.0)
+            else:
+                j = i - half
+                y = (j - (n - half - 1) / 2.0) * ls * 1.1
+                x = r + 22 + self._tw(p) / 2.0
+            out.append((p, x, y, a))
+        return out
+
+    def _rot_bbox(self, key):
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        r = self.ROT_D / 2.0
+        xs, ys = [-r, r], [-r, r]
+        for p, dx, dy, _a in self._rot_legends(key):
+            xs += [dx - self._tw(p) / 2.0, dx + self._tw(p) / 2.0]
+            ys += [dy - ls / 2.0, dy + ls / 2.0]
+        return min(xs), min(ys), max(xs), max(ys)
+
     def _rotary(self, key, cx, cy):
-        """A rotary switch: a knob with a pointer, its positions on an arc
-        above it, left to right; clicked left or right of centre it turns."""
+        """A rotary switch: a knob with a pointer, its positions round it,
+        first to last clockwise; clicked left or right of centre it turns."""
         c = PC.CONTROLS[key]
         pos = c["positions"]
         n = len(pos)
         r = self.ROT_D / 2.0
-        # Spread over the top half, wider the more positions there are, so
-        # neighbouring legends clear each other.
-        span = min(170.0, 50.0 * (n - 1))
-        angs = [90 + span / 2.0 - i * span / max(1, n - 1) for i in range(n)]
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
-        for p, a in zip(pos, angs):
-            t = math.radians(a)
-            lx = cx + (r + 10 + self._tw(p) / 2.0) * math.cos(t)
-            ly = cy - (r + 4 + ls) * math.sin(t)
-            self._text(lx, ly, p, size=SETTING_SIZE)
+        legends = self._rot_legends(key)          # see there for the spread
+        angs = [a for _p, _x, _y, a in legends]
+        for p, dx, dy, a in legends:
+            self._text(cx + dx, cy + dy, p, size=SETTING_SIZE)
+            if n > 5:
+                t = math.radians(a)
+                inner = dx + (self._tw(p) / 2.0 + 3) * (1 if dx < 0 else -1)
+                self._line(cx + r * math.cos(t), cy - r * math.sin(t), cx + inner, cy + dy,
+                           fill=C_INK_DIM, width=1)
         self._oval(cx - r, cy - r, cx + r, cy + r, fill=C_BEZEL, outline=C_INK,
                    width=max(1, int(self.s)))
         k = r * 0.72

@@ -290,3 +290,92 @@ PANES.update({
     "R2": [("MPS PROPELLANT DUMP", [["mps_dump_seq", "mps_dump_lh2"]])],
 })
 check()
+
+
+# ---------------------------------------------------------------------------
+# SYSTEMS MANAGEMENT, OPS 2 (and 4): the switches the SM software reads, from
+# the 2026-10-02 S2 survey.  SHOWN BUT NOT YET CONNECTED: SM reads these
+# through the PCMMU (orbiter instrumentation MDMs OF1-4/OA1-3, payload MDMs
+# PF1/PF2) and the RMS through its MCIU, none of which yaGPC2 emulates yet --
+# so they have no contacts here ('via' says where they will come from).  The
+# owner's call (2026-10-02): an OPS's panels appear even before every
+# control on them works.
+
+def _sm(key, panel, kind, caption, positions, default, via, **kw):
+    CONTROLS[key] = dict(panel=panel, kind=kind, caption=caption, positions=positions,
+                         default=default, contacts={}, via=via, **kw)
+
+
+_PCM = "PCMMU (OF/OA MDM) -- not yet emulated"
+_MCIU = "RMS MCIU -- not yet emulated"
+
+_sm("plbd", "R13L", "t3", "PAYLOAD BAY\nDOOR", ("OPEN", "STOP", "CLOSE"), "STOP", _PCM,
+    sources="four contacts per position, voted 2-of-4 (SSBPLBAY 224-237)")
+_sm("fc_purge_seq", "R11U", "t2", "FUEL CELL\nGPC PURGE SEQ", ("START", "OFF"), "OFF", _PCM,
+    spring=("START",), sources="V72K6050Y; SSCFUELC 118-123")
+_sm("fc_purge_htr", "R11U", "t3", "PURGE\nHEATER", ("GPC", "OFF", "ON"), "GPC", _PCM)
+for n in (1, 2, 3):
+    _sm("fc_purge_vlv%d" % n, "R11U", "t3", "PURGE\nVALVE %d" % n,
+        ("OPEN", "GPC", "CLOSE"), "GPC", _PCM)
+for n in (1, 2, 3):
+    _sm("hyd_circ_pump%d" % n, "R2", "t3", "HYD CIRC\nPUMP %d" % n, ("ON", "GPC", "OFF"),
+        "GPC", _PCM, sources="SSTHYDFL 281,423")
+    _sm("boiler_cntlr%d" % n, "R2", "t3", "BOILER\nCNTLR/HTR %d" % n, ("A", "OFF", "B"),
+        "OFF", _PCM, sources="SSHHYD 108-121")
+_sm("freon_isol", "L1", "t2", "FREON ISOLATION\nMODE", ("AUTO", "MAN"), "AUTO", _PCM,
+    sources="V63S1200E; panel L1 per the source, L2 per SCOM text")
+_sm("sband_pm_ant", "C3", "rot", "S-BAND PM\nANTENNA",
+    ("GPC", "LL F", "LL A", "UL F", "UL A", "UR F", "UR A", "LR F", "LR A"), "GPC", _PCM,
+    sources="SCOM 2.4-5; only GPC is read (SSMANTMG 982); order of the eight unverified")
+_sm("sband_fm_ant", "A1R", "t3", "S-BAND FM\nANTENNA", ("UPPER", "GPC", "LOWER"), "GPC", _PCM,
+    sources="SSMANTMG 984-986")
+_sm("ku_steering", "A1U", "rot", "KU-BAND\nSTEERING MODE",
+    ("GPC", "GPC DESIG", "AUTO TRACK", "MAN SLEW"), "GPC", _PCM,
+    sources="SCOM 2.4-19 (panel A1U); only GPC ACQ is read (SSMANTMG 927)")
+_sm("rms_mode", "A8U", "rot", "MODE",
+    ("TEST", "AUTO 1", "AUTO 2", "AUTO 3", "AUTO 4", "OPR CMD", "ORB UNL", "END EFF",
+     "ORB LD", "PL", "SINGLE", "DIRECT"), "SINGLE", _MCIU, sources="V72K2970-2981J")
+CONTROLS["rms_mode_enter"] = dict(panel="A8U", kind="pb", caption="MODE", legend="ENTER",
+                                  contacts=[], via=_MCIU)
+_sm("rms_parameter", "A8U", "rot", "PARAMETER",
+    ("TEST", "POSITION", "ATTITUDE", "JOINT ANGLE", "VELOCITY", "RATE",
+     "PORT TEMP", "STBD TEMP"), "POSITION", _MCIU)
+_sm("rms_joint", "A8U", "rot", "JOINT",
+    ("SHOULDER YAW", "SHOULDER PITCH", "ELBOW PITCH", "WRIST PITCH", "WRIST YAW",
+     "WRIST ROLL", "EE TEMP", "CRIT TEMP"), "SHOULDER YAW", _MCIU)
+_sm("rms_brakes", "A8U", "t2", "BRAKES", ("ON", "OFF"), "ON", _MCIU)
+_sm("rms_drive", "A8U", "t3", "SINGLE/DIRECT\nDRIVE", ("+", "OFF", "-"), "OFF", _MCIU,
+    spring=("+", "-"))
+_sm("rms_auto_seq", "A8U", "t3", "AUTO SEQ", ("PROCEED", "OFF", "STOP"), "OFF", _MCIU,
+    spring=("PROCEED", "STOP"))
+_sm("rms_rate", "A8U", "t2", "RATE", ("VERNIER", "COARSE"), "COARSE", _MCIU)
+_sm("rms_rate_hold", "A8U", "t2", "RATE HOLD", ("ON", "OFF"), "OFF", _MCIU)
+_sm("rms_ee_mode", "A8U", "t3", "END EFF\nMODE", ("AUTO", "OFF", "MAN"), "OFF", _MCIU)
+_sm("rms_ee_man", "A8U", "t3", "END EFF\nMAN CONTR", ("RIGID", "OFF", "DERIGID"), "OFF", _MCIU,
+    spring=("RIGID", "DERIGID"))
+_sm("rms_safing", "A8U", "t3", "SAFING", ("SAFE", "AUTO", "CANCEL"), "AUTO", _MCIU,
+    sources="read but used by no S2 code")
+_sm("rms_shoulder_brace", "A8U", "t3", "SHOULDER BRACE\nRELEASE", ("PORT", "OFF", "STBD"),
+    "OFF", _MCIU, sources="read but used by no S2 code")
+CONTROLS["rms_master_alarm"] = dict(panel="A8U", kind="pb", caption="MASTER", legend="ALARM",
+                                    contacts=[], via=_MCIU)
+_sm("rms_select", "A8L", "t3", "RMS SELECT", ("PORT", "OFF", "STBD"), "OFF", _MCIU,
+    sources="V54X2025J/2026J")
+_sm("rms_power", "A8L", "t3", "RMS POWER", ("PRIMARY", "OFF", "BACKUP"), "OFF", _MCIU,
+    sources="display only (SPEC 94)")
+
+PANES["R13L"] = [("PAYLOAD BAY", [["plbd"]])]
+PANES["R11U"] = [("FUEL CELL PURGE", [["fc_purge_seq", "fc_purge_htr"],
+                                      ["fc_purge_vlv1", "fc_purge_vlv2", "fc_purge_vlv3"]])]
+PANES["R2"].append(("HYDRAULICS", [["hyd_circ_pump1", "hyd_circ_pump2", "hyd_circ_pump3"],
+                                   ["boiler_cntlr1", "boiler_cntlr2", "boiler_cntlr3"]]))
+PANES["L1"] = [("FREON", [["freon_isol"]])]
+PANES["C3"].append(("S-BAND PM", [["sband_pm_ant"]]))
+PANES["A1R"] = [("S-BAND FM", [["sband_fm_ant"]])]
+PANES["A1U"] = [("KU-BAND", [["ku_steering"]])]
+PANES["A8U"] = [("RMS", [["rms_mode", "rms_mode_enter", "rms_parameter", "rms_joint"],
+                         ["rms_brakes", "rms_drive", "rms_auto_seq", "rms_rate", "rms_rate_hold"],
+                         ["rms_ee_mode", "rms_ee_man", "rms_safing", "rms_shoulder_brace",
+                          "rms_master_alarm"]])]
+PANES["A8L"] = [("RMS", [["rms_select", "rms_power"]])]
+check()
