@@ -69,10 +69,11 @@ void phys_set_gravity(int degree, int order);
 void phys_set_drag(double cd, double areaX, double areaY, double areaZ);
 
 /* The Earth's orientation: inertial -> Earth-fixed is Rz(theta) P, with P
- * constant and theta = theta0 + omega (t - t0).  Default: P identity,
- * theta 0 at t = 0. */
-void phys_set_earth(const double P[3][3], double theta0, double t0);
+ * constant and theta = theta0 + rate (t - t0).  Default: P identity,
+ * theta 0 at t = 0, the sidereal rate (rate <= 0 also means that). */
+void phys_set_earth(const double P[3][3], double theta0, double t0, double rate);
 double phys_earth_angle(double t);
+double phys_earth_rate(void);
 void phys_inertial_to_earth(double t, double M[3][3]);
 
 /* The field and the air, for tests and sensors: gravitational acceleration

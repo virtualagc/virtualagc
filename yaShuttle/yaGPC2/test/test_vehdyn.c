@@ -101,6 +101,36 @@ int main(void) {
     s = vehdyn_state();
     check(s->w[1] < wantQ * 1.3, "a couple pitches harder than F1U alone", s->w[1], wantQ);
 
+    /* THE EARTH AS PASS SEES IT.  With the clock's zero at 2000-03-15
+     * 00:00 UTC -- the tape's own RNP epoch, day 75 of 2000 -- the Earth
+     * angle at t = 0 is zero and inertial -> Earth-fixed is GLWRNP's matrix
+     * itself: a rotation, its pole within half a degree of M50's (fifty
+     * years of precession is about 0.28 deg), and Greenwich at the sidereal
+     * time of that midnight, about 11h 32m (173 deg), plus the 0.7 deg the
+     * equinox moved from 1950. */
+    {
+        vehdyn_set_gmt_zero(953078400.0);
+        check(fabs(vehdyn_gmt(0.0) - 75 * 86400.0) < 1e-6, "PASS GMT seconds at day 75",
+              vehdyn_gmt(0.0), 75 * 86400.0);
+        double M[3][3], worst = 0.0;
+        phys_inertial_to_earth(0.0, M);
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++) {
+                double d = M[i][0] * M[j][0] + M[i][1] * M[j][1] + M[i][2] * M[j][2] - (i == j);
+                if (fabs(d) > worst) worst = fabs(d);
+            }
+        check(worst < 1e-12, "GLWRNP matrix is a rotation", worst, 0.0);
+        double pole = acos(M[2][2]) * 180 / 3.14159265358979323846;
+        check(pole > 0.2 && pole < 0.5, "pole of date vs M50 (deg)", pole, 0.28);
+        double gst = atan2(M[0][1], M[0][0]) * 180 / 3.14159265358979323846;
+        if (gst < 0) gst += 360;
+        check(fabs(gst - 173.6) < 1.5, "Greenwich from M50 X at the epoch (deg)", gst, 173.6);
+        /* and it turns at PASS's earth rate */
+        double a1 = phys_earth_angle(3600.0) - phys_earth_angle(0.0);
+        check(fabs(a1 - 0.729211514646E-4 * 3600.0) < 1e-12, "turns at CGNS_EARTH_RATE", a1,
+              0.729211514646E-4 * 3600.0);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

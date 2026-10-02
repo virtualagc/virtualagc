@@ -1,4 +1,5 @@
 #include "mtumodel.h"
+#include "vehdyn.h"
 #include "json.h"
 
 #include <math.h>
@@ -1221,6 +1222,11 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         us = m->clockUs ? *m->clockUs : 0.0;
         epochUs = us + ((m->offsetUs != NULL) ? *m->offsetUs : 0.0);
     }
+    /* The vehicle's dynamics run on the same clock without the epoch:
+     * tell them what Unix time their zero is, so GPS time and the Earth's
+     * rotation agree with the GMT reported here. */
+    if (m->epochSec != NULL && *m->epochSec > 0.0 && mdm_time_us(m) >= 0.0)
+        vehdyn_set_gmt_zero(*m->epochSec + (epochUs - mdm_time_us(m)) / 1e6);
     double skewUs = mtu_skew_us(m);  /* diagnostic; see mtu_skew_us */
     us += skewUs;
     epochUs += skewUs;

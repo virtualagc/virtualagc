@@ -57,7 +57,8 @@ void phys_body_to_inertial(const PhysState *s, const double b[3], double out[3])
  * session) and theta = theta0 + omega (t - t0) is the Earth rotation angle.
  * The defaults -- P the identity, theta0 zero at t = 0 -- put the pole on M50
  * Z and Greenwich on M50 X at the start of time, which is self-consistent
- * but not the real sky; phys_set_earth() replaces them.
+ * but not the real sky; phys_set_earth() replaces them, and vehdyn.c sets
+ * them to the flight software's own (vehdyn_set_gmt_zero).
  *
  * Gravity.  A spherical-harmonic field to degree and order PHYS_GRAV_NMAX,
  * EGM96 to 4x4: the same size of field as the onboard navigation's coasting
@@ -106,10 +107,10 @@ static struct {
     int n, m;                     /* degree and order in use */
     int ready;
     double P[3][3];               /* M50 -> equator of date */
-    double theta0, t0;            /* Earth rotation angle theta0 at t0 */
+    double theta0, t0, rate;      /* Earth rotation angle theta0 at t0, rad/s */
     double cd, area[3];           /* drag coefficient, body-axis areas m^2 */
 } E = { .n = PHYS_GRAV_NMAX, .m = PHYS_GRAV_NMAX,
-        .P = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } },
+        .P = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } }, .rate = PHYS_OMEGA_EARTH,
         /* The Orbiter, roughly: seen nose-on (fuselage, wings edge-on, fin),
          * from the side (fuselage and fin), from above (wings and body). */
         .cd = 2.2, .area = { 40.0, 220.0, 360.0 } };
@@ -139,14 +140,17 @@ void phys_set_drag(double cd, double ax, double ay, double az) {
     E.cd = cd; E.area[0] = ax; E.area[1] = ay; E.area[2] = az;
 }
 
-void phys_set_earth(const double P[3][3], double theta0, double t0) {
+void phys_set_earth(const double P[3][3], double theta0, double t0, double rate) {
     memcpy(E.P, P, sizeof E.P);
     E.theta0 = theta0; E.t0 = t0;
+    E.rate = (rate > 0.0) ? rate : PHYS_OMEGA_EARTH;
 }
 
 double phys_earth_angle(double t) {
-    return E.theta0 + PHYS_OMEGA_EARTH * (t - E.t0);
+    return E.theta0 + E.rate * (t - E.t0);
 }
+
+double phys_earth_rate(void) { return E.rate; }
 
 void phys_inertial_to_earth(double t, double M[3][3]) {
     double th = phys_earth_angle(t), c = cos(th), s = sin(th);
@@ -284,7 +288,7 @@ static void drag(const PhysState *s, double t, const double r[3], const double v
     /* the air turns with the Earth, about the pole of date */
     double pole[3] = { E.P[2][0], E.P[2][1], E.P[2][2] }, wxr[3], vr[3];
     cross(pole, r, wxr);
-    for (int i = 0; i < 3; i++) vr[i] = v[i] - PHYS_OMEGA_EARTH * wxr[i];
+    for (int i = 0; i < 3; i++) vr[i] = v[i] - E.rate * wxr[i];
     double sp = sqrt(dot(vr, vr));
     if (sp <= 0.0) return;
     double qc[4] = { q[0], -q[1], -q[2], -q[3] }, vb[3];

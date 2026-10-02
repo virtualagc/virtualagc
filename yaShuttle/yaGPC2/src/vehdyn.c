@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #include "envcache.h"
 
@@ -341,6 +342,72 @@ void vehdyn_set_fire_words(const uint16_t ff[5], const uint16_t fa[5], double sh
         }
     }
 }
+
+/* ---------------------------------------------------------------------
+ * THE VEHICLE'S CLOCK AND THE EARTH UNDER IT.
+ *
+ * The state's time t is the shared clock in seconds; the timing unit reports
+ * GMT from the same clock, offset by the epoch the run stands for
+ * (mtumodel.c, mtu_fill_time), and tells this module that offset as the Unix
+ * time of t = 0.  The flight software counts GMT in seconds as
+ * day-of-year x 86400 + seconds of the day, with day 1 Jan 1 -- FPMMTURM
+ * defaults an unset clock to X'30' half-hours, "GMT TO 1 DAY" -- and so does
+ * vehdyn_gmt().  A run that crosses New Year's Eve sees the count wrap, as
+ * the unit's own day field does.
+ *
+ * The Earth turns as the flight software believes it does, exactly: M50 to
+ * Earth-fixed at its epoch is GLW_RNP_MAT_COMP (GLWRNP.hal) evaluated with
+ * the tape's I-loads -- LAUNCH_YEAR 2000, RNP_DAY 75 (CGGCOM.hal:576-583;
+ * YAGPC_RNP=year,day for a tape built otherwise) -- the epoch is
+ * RNP_DAY x 86400 (GO2ORB.hal, step 127.7D), and the angle since is
+ * CGNS_EARTH_RATE (CGNCOM.hal:123) times the time since (GNFEAR.hal).  A GPS
+ * position is then the truth state's own Earth-fixed position as PASS will
+ * convert it back, with no difference of frame for navigation to absorb; the
+ * gravity field turns with the same Earth.  That this is PASS's model of the
+ * sky rather than the real one -- its fit is good near 2022 and the I-loads
+ * say 2000 -- does not matter: no part of this simulation looks at stars. */
+#define PASS_EARTH_RATE 0.729211514646E-4
+
+static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
+
+static void pass_rnp(int year, int day, double A[3][3]) {
+    const double PI = 3.14159265358979323846;
+    double jday = day + trunc(365.25 * (year + 4799)) - 31790.5;
+    double ut1 = jday - 2459579.5;
+    double et = ut1 + 63.18 / 86400.0;
+    double at = et * PI * 1e-4, sa = sin(at), ca = cos(at), ss = sa * sa, cc = 1.0 - ss;
+    double s2 = 2 * ca * sa, c2 = cc - ss, s3 = sa * (3 * cc - ss), c3 = ca * (cc - 3 * ss);
+    double X = 4.086914938E-5 + 3.30570821156E-9 * et + 5.3101057542E-13 * et * et
+             + 1.91701187619E-5 * ca + 6.84908162624E-6 * sa - 6.07687147621E-6 * c2
+             - 5.08608200417E-6 * s2 - 2.0912057236E-5 * c3 - 3.61848835411E-5 * s3;
+    double Y = 7.00499683245E-3 + 2.67922724381E-7 * et - 3.72836339327E-13 * et * et
+             - 1.08609567896E-5 * ca - 1.23753947146E-5 * sa - 8.83842901467E-7 * c2
+             + 6.05983470459E-6 * s2 - 2.73258319638E-5 * c3 + 1.48249685562E-5 * s3;
+    double Z = fmod(1.72302078155 + 6.30038748669 * ut1 - 2.30211679566E-15 * ut1 * ut1, 2 * PI);
+    double cx = cos(X), sx = sin(X), cy = cos(Y), sy = sin(Y), cz = cos(Z), sz = sin(Z);
+    A[0][0] = cy * cz;  A[0][1] = cx * sz + sx * sy * cz;  A[0][2] = sx * sz - cx * sy * cz;
+    A[1][0] = -cy * sz; A[1][1] = cx * cz - sx * sy * sz; A[1][2] = sx * cz + cx * sy * sz;
+    A[2][0] = sy;       A[2][1] = -sx * cy;               A[2][2] = cx * cy;
+}
+
+void vehdyn_set_gmt_zero(double unixAtZero) {
+    time_t whole = (time_t)floor(unixAtZero);
+    struct tm g;
+    gmtime_r(&whole, &g);
+    double z = (g.tm_yday + 1) * 86400.0 + g.tm_hour * 3600.0 + g.tm_min * 60.0 + g.tm_sec
+             + (unixAtZero - (double)whole);
+    if (fabs(z - gmtZero) < 1e-3) return;          /* already so */
+    gmtZero = z;
+    int year = 2000, day = 75;
+    const char *e = yagpc_getenv("YAGPC_RNP");
+    if (e != NULL) sscanf(e, "%d,%d", &year, &day);
+    double A[3][3];
+    pass_rnp(year, day, A);
+    /* angle = rate (GMT - RNP_DAY 86400), GMT = gmtZero + t */
+    phys_set_earth(A, 0.0, day * 86400.0 - gmtZero, PASS_EARTH_RATE);
+}
+
+double vehdyn_gmt(double t) { return (gmtZero >= 0.0) ? gmtZero + t : -1.0; }
 
 const PhysState *vehdyn_state(void) { return &st; }
 double vehdyn_propellant(int module) { return (module >= 0 && module < 3) ? prop[module] : 0.0; }

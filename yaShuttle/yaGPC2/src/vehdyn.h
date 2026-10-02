@@ -54,6 +54,14 @@ int vehdyn_jet_index(const char *name);
 
 void vehdyn_report(void);
 
+/* THE CLOCK: the Unix time that the state's t = 0 stands for, as the timing
+ * unit reports it (mtumodel.c).  Sets the Earth's orientation to the flight
+ * software's own (GLWRNP, GNFEAR) at that clock.  vehdyn_gmt(t) is the
+ * flight software's GMT in seconds -- day of year x 86400 + seconds of day
+ * -- at state time t, or -1 before the clock is known. */
+void vehdyn_set_gmt_zero(double unixAtZero);
+double vehdyn_gmt(double t);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);
