@@ -257,6 +257,87 @@ int main(void) {
         }
     }
 
+    /* GPS, FF1 CARD 11 CHANNEL 2.  Silent until commanded; then, in NAV,
+     * a message PASS decodes -- by GPBGPS.hal's arithmetic and GLJRCV.hal's
+     * frame change, done here independently -- back to the truth state at
+     * the solution's time, to the receiver's own resolution (1/16 ft,
+     * 1/512 ft/s); and that time is GPS_LAG_S before the read, in PASS GMT. */
+    {
+        vehdyn_set_gmt_zero(1790000000.0);     /* 2026-09-21; turns the field */
+        vehdyn_reset(0.0);
+        vehdyn_advance(99.95e6);
+        double rTrue[3], vTrue[3];
+        memcpy(rTrue, vehdyn_state()->r, sizeof rTrue);
+        memcpy(vTrue, vehdyn_state()->v, sizeof vTrue);
+        vehdyn_reset(0.0);
+        vehdyn_advance(100e6);
+        double ri[3], vi[3];
+        check(vehdyn_state_at(99.95, ri, vi), "state history covers the solution time");
+        double dr = 0, dv = 0;
+        for (int i = 0; i < 3; i++) { dr += (ri[i] - rTrue[i]) * (ri[i] - rTrue[i]); dv += (vi[i] - vTrue[i]) * (vi[i] - vTrue[i]); }
+        if (sqrt(dr) > 1e-3 || sqrt(dv) > 1e-5) printf("history: %.3g m, %.3g m/s off\n", sqrt(dr), sqrt(dv));
+        check(sqrt(dr) < 1e-3 && sqrt(dv) < 1e-5, "interpolated history is the propagated state");
+
+        check(read_words(20, FF(0x26C5Fu), 32, w) == 32 && w[0] == 0, "gps1 silent before a command");
+        uint16_t msg1[32] = { 0xAAAAu, 0x8000u, 0x0651u }, msg3[32] = { 0xBBBBu };
+        write_words(20, FF(0x22C5Fu), msg1, 32);
+        write_words(20, FF(0x22C5Fu), msg3, 32);
+        check(read_words(20, FF(0x26C5Fu), 32, w) == 32, "gps1 length");
+        check(w[0] == 0xFFFFu, "gps1 NAV header");
+        check((w[1] & 0xE000u) == 0xC000u && (w[2] & 3u) == 1u, "gps1 valid, NAV, complement 01");
+        check(((w[19] >> 1) & 0xFu) == 1u, "gps1 FOM 1");
+        int tracking = 0;
+        const int CHW[5] = { 21, 23, 25, 27, 28 };
+        for (int c = 0; c < 5; c++) {
+            unsigned b57 = (w[CHW[c]] >> 9) & 7u;
+            if (b57 == 5u || b57 == 3u) tracking++;
+        }
+        check(tracking == 5, "gps1 five channels tracking");
+        /* GPBGPS.hal:926-932 */
+        double sec = ((double)w[4] * 4294967296.0 + (double)w[5] * 65536.0 + (double)w[6]) * 1e-8;
+        double gmt = sec + w[3] * 604800.0 - 11.0 - 504403200.0;
+        double tv = gmt - vehdyn_gmt(0.0);
+        if (fabs(tv - 99.95) > 1e-6) printf("gps time of validity %.9f\n", tv);
+        check(fabs(tv - 99.95) < 1e-6, "gps time is PASS GMT, GPS_LAG_S before the read");
+        double re[3], ve[3];
+        for (int i = 0; i < 3; i++) {
+            int32_t pr = (int32_t)(((uint32_t)w[7 + 2 * i] << 16) | w[8 + 2 * i]);
+            int32_t vr = (int32_t)(((uint32_t)w[13 + 2 * i] << 16) | w[14 + 2 * i]);
+            re[i] = pr * 0.0625 * 0.3048;
+            ve[i] = vr * 0.001953125 * 0.3048;
+        }
+        /* GLJRCV.hal:520-531: R = M re, V = M ve + omega x R, M = EF -> M50 */
+        double M[3][3], R[3], V[3], rate = 0.729211514646E-4;
+        phys_inertial_to_earth(tv, M);
+        for (int i = 0; i < 3; i++) {
+            R[i] = M[0][i] * re[0] + M[1][i] * re[1] + M[2][i] * re[2];
+            V[i] = M[0][i] * ve[0] + M[1][i] * ve[1] + M[2][i] * ve[2];
+        }
+        double om[3] = { rate * M[2][0], rate * M[2][1], rate * M[2][2] };
+        V[0] += om[1] * R[2] - om[2] * R[1];
+        V[1] += om[2] * R[0] - om[0] * R[2];
+        V[2] += om[0] * R[1] - om[1] * R[0];
+        dr = dv = 0;
+        for (int i = 0; i < 3; i++) { dr += (R[i] - rTrue[i]) * (R[i] - rTrue[i]); dv += (V[i] - vTrue[i]) * (V[i] - vTrue[i]); }
+        if (sqrt(dr) > 0.02 || sqrt(dv) > 0.001) printf("gps decoded: %.4g m, %.4g m/s off\n", sqrt(dr), sqrt(dv));
+        check(sqrt(dr) < 0.02, "gps position decodes to the truth (1/16 ft)");
+        check(sqrt(dv) < 0.001, "gps velocity decodes to the truth (1/512 ft/s)");
+        /* a second read later carries a newer time: not static data */
+        vehdyn_advance(100.96e6);
+        uint16_t w2[32];
+        read_words(20, FF(0x26C5Fu), 32, w2);
+        check(w2[6] != w[6] || w2[5] != w[5], "gps time advances between reads");
+        /* INIT and TEST answer in their own formats */
+        msg1[1] = 0x4000u;
+        write_words(20, FF(0x22C5Fu), msg1, 32);
+        read_words(20, FF(0x26C5Fu), 32, w2);
+        check(w2[0] == 0xEEEEu && (w2[1] & 0xE000u) == 0x2000u && (w2[2] & 3u) == 2u, "gps1 INIT");
+        msg1[1] = 0x0000u;
+        write_words(20, FF(0x22C5Fu), msg1, 32);
+        read_words(20, FF(0x26C5Fu), 32, w2);
+        check(w2[0] == 0xDDDDu && (w2[1] & 0xE000u) == 0 && (w2[2] & 3u) == 3u, "gps1 TEST");
+    }
+
     /* CREW CONTACTS: the panel's ADI switches on FF1 DSCRT2 (DIH card 4
      * ch 1) and the SENSE switch on FF2 DSCRT7 (DIH card 9 ch 1), sent as
      * real datagrams, appear in the HFE read's words 1 and 6 and the MFE

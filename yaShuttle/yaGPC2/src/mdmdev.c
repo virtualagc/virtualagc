@@ -612,6 +612,128 @@ static void fa_mfe(int k, uint16_t *w, int n) {
 }
 
 /* ---------------------------------------------------------------------
+ * THE GPS RECEIVERS, one behind each of FF1-3 on card 11 channel 2: a
+ * 32-word read every 0.96 s (FIOGPSRD, X'26C5F') and two 32-word writes every
+ * 0.16 s (FIOGPSWT, X'22C5F') -- BCEEQU.asm:618-620, FIOGPSPG.asm.  The
+ * formats are the GPS SOP's (GPBGPS.hal) and the Nav Aids SOP FSSR's
+ * (STS83-0014, 4.17.1.1.2 and 4.17.6.1); HAL bit 1 is the most significant.
+ *
+ * WHAT THE COMPUTERS SEND.  Message 1 (header AAAA) always, then Message 3
+ * (BBBB, attitude and air data) in NAV or Message 2 (CCCC, lever arms) in
+ * INIT.  Its word 2 commands the mode in bits 1-2 -- NAV 10, INIT 01, TEST 00
+ * -- and asks, in bits 3, 9 and 16, for an announced reset, an init-state
+ * set and a filter restart; the receiver answers each in its own status.
+ * Nothing here waits: the receiver is in the commanded mode at once, its
+ * almanac downloaded and its satellites already tracked -- a receiver that
+ * has been on for a while, not one acquiring from cold.
+ *
+ * WHAT IT ANSWERS (VEHDYN only: it reports the truth state, so without one
+ * there is nothing to say, and the read stays zeros -- mode blank on SPEC 55,
+ * which nothing treats as a failure):
+ *   w1     header: DDDD TEST, EEEE INIT, FFFF NAV (GPBGPS.hal:515)
+ *   w2-3   NAV_MODE_WORD: valid, mode, almanac, UTC valid; the completions;
+ *          the mode's complement in w3 bits 15-16, which must match
+ *   w4     GPS week, full count
+ *   w5-7   seconds of week, 48 bits, 1e-8 s
+ *   w8-13  WGS-84 Earth-fixed position, 32-bit, 1/16 ft
+ *   w14-19 Earth-relative velocity in that frame, 32-bit, 1/512 ft/s
+ *   w20    FOM 1 (0-25 m) in bits 12-15, GDOP 2 in bits 8-11
+ *   w22,24,26,28,29  five channels tracking (bits 5-7 101), PRN in 11-16
+ *   w31    TFOM 1
+ *
+ * TIME.  PASS turns week and seconds into its GMT as
+ * week x 604800 + sow - 11 (leap seconds, GPBS_LEAP_SEC_CORR) - 504403200
+ * (CGNS_T_GPS_OFFSET_SECS, 1995-12-31 0h in GPS seconds) - the uplinkable
+ * adjustments (zero) -- GPBGPS.hal:926-932 -- so this is the inverse, from
+ * vehdyn_gmt(): the same arithmetic, not the real GPS-UTC relation, so that
+ * the time PASS recovers is its own GMT exactly.  The solution is valid
+ * GPS_LAG_S before the read: PASS takes a state only within 0.48 s of its MFE
+ * time tag (:950-957) and only once an IMU sample is newer (GPJGPS.hal), so
+ * it must be recent but in the past -- and every read's time is new, or PASS
+ * sees the data as static (:935).
+ *
+ * FRAME.  PASS converts back with M50 = (Rz(lambda) A)^T ECEF and
+ * V = M v_ecef + omega x R (GLJRCV.hal:520-531, GVMVRE.hal), with A and
+ * lambda the GLWRNP/GNFEAR Earth that vehdyn.c gives the physics -- so the
+ * position is phys_inertial_to_earth() applied to the truth, and the
+ * velocity has the Earth's turning taken out, exactly. */
+#define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
+#define GPS_WRITE 0x22C5Fu    /* FIOGPSWT: mode 8, card 11 ch 2, 32 words */
+#define GPS_LAG_S 0.05
+#define GPS_OFFSET_S (504403200.0 + 11.0)
+
+typedef struct {
+    bool haveCmd;
+    unsigned mode;            /* 2 NAV, 1 INIT, 0 TEST: word 2 bits 1-2 */
+    uint16_t done;            /* w3 completions owed: 8000 reset, 4000 init, 1000 restart */
+    long reads, writes;
+} Gps;
+static Gps gps[4];            /* [1..3] */
+
+static void gps_write(int u, const uint16_t *w, int n) {
+    Gps *g = &gps[u];
+    g->writes++;
+    if (n < 2 || w[0] != 0xAAAAu) return;   /* Message 2 or 3: nothing to act on */
+    g->haveCmd = true;
+    g->mode = (w[1] >> 14) & 3u;
+    g->done = 0;
+    if (w[1] & 0x2000u) g->done |= 0x8000u;  /* announced reset -> reset complete */
+    if (w[1] & 0x0080u) g->done |= 0x4000u;  /* init state set -> init states complete */
+    if (w[1] & 0x0001u) g->done |= 0x1000u;  /* filter restart -> restart complete */
+}
+
+static void put32(uint16_t *w, double x) {
+    double c = floor(x + 0.5);
+    if (c > 2147483647.0) c = 2147483647.0;
+    if (c < -2147483648.0) c = -2147483648.0;
+    uint32_t u = (uint32_t)(int32_t)c;
+    w[0] = (uint16_t)(u >> 16); w[1] = (uint16_t)u;
+}
+
+/* The words of a read; false when there is nothing to report. */
+static bool gps_words(int u, uint16_t w[32]) {
+    Gps *g = &gps[u];
+    memset(w, 0, 32 * sizeof *w);
+    if (!vehdyn_enabled() || !g->haveCmd) return false;
+    const PhysState *s = vehdyn_state();
+    double tv = s->t - GPS_LAG_S, gmt = vehdyn_gmt(tv);
+    double r[3], v[3];
+    if (gmt < 0.0 || !vehdyn_state_at(tv, r, v)) return false;
+    static const uint16_t HDR[4] = { 0xDDDDu, 0xEEEEu, 0xFFFFu, 0xDDDDu };
+    static const uint16_t COMPL[4] = { 0x0003u, 0x0002u, 0x0001u, 0x0003u };
+    unsigned mode = (g->mode == 3u) ? 0u : g->mode;
+    w[0] = HDR[mode];
+    w[1] = (uint16_t)((mode << 13) | 0x0200u | 0x0080u);   /* mode, almanac, UTC valid */
+    if (mode == 2u) w[1] |= 0x8000u;                        /* nav data valid */
+    w[2] = (uint16_t)(g->done | COMPL[mode]);
+    double total = gmt + GPS_OFFSET_S;
+    double week = floor(total / 604800.0), sow = total - week * 604800.0;
+    w[3] = (uint16_t)week;
+    uint64_t ticks = (uint64_t)llround(sow * 1e8);
+    w[4] = (uint16_t)(ticks >> 32); w[5] = (uint16_t)(ticks >> 16); w[6] = (uint16_t)ticks;
+    if (mode == 1u) { w[7] = 0; w[8] = (uint16_t)week; return true; }   /* INIT */
+    if (mode != 2u) return true;                                        /* TEST: no faults */
+    double M[3][3], re[3], ve[3], rate = phys_earth_rate();
+    phys_inertial_to_earth(tv, M);
+    for (int i = 0; i < 3; i++) {
+        re[i] = M[i][0] * r[0] + M[i][1] * r[1] + M[i][2] * r[2];
+        ve[i] = M[i][0] * v[0] + M[i][1] * v[1] + M[i][2] * v[2];
+    }
+    ve[0] += rate * re[1];                   /* less the Earth's turning: omega z x r */
+    ve[1] -= rate * re[0];
+    for (int i = 0; i < 3; i++) {
+        put32(&w[7 + 2 * i], re[i] / FT_M * 16.0);
+        put32(&w[13 + 2 * i], ve[i] / FT_M * 512.0);
+    }
+    w[19] = (uint16_t)((2u << 5) | (1u << 1));             /* GDOP 2, FOM 1 */
+    static const uint8_t PRN[5] = { 3, 7, 11, 19, 24 };
+    static const int CHW[5] = { 21, 23, 25, 27, 28 };
+    for (int c = 0; c < 5; c++) w[CHW[c]] = (uint16_t)(0x0A00u | PRN[c]);
+    w[30] = 0x0001u;                                        /* TFOM 1 */
+    return true;
+}
+
+/* ---------------------------------------------------------------------
  * The reads this module answers.
  * ------------------------------------------------------------------- */
 static long ffReads, faReads, ffWrites, faWrites;
@@ -644,6 +766,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
     if (iua == IUA_FF && ff_unit(busID) > 0) {
         int u = ff_unit(busID);
         ffWrites++;
+        if (f == GPS_WRITE && u <= 3) { gps_write(u, words, n); return; }
         if (f == IMU_WRITE && u <= 3) {
             imu[u].cmd1 = words[0];
             imu[u].cmd2 = (n > 1) ? words[1] : imu[u].cmd2;
@@ -705,6 +828,14 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
+        if (u >= 1 && u <= 3 && f == GPS_READ) {
+            uint16_t w[32];
+            gps[u].reads++;
+            if (!gps_words(u, w)) return false;
+            for (int i = 0; i < n; i++) out[i] = (i < 32) ? w[i] : 0;
+            ffReads++;
+            return true;
+        }
         if (u >= 1 && u <= 3 && f == IMU_DSCRT) {
             for (int i = 0; i < n; i++) out[i] = (i == 0) ? IMU_DSCRT_ALL_GOOD : 0;
             ffReads++;
@@ -725,8 +856,9 @@ void mdmdev_report(void) {
     vehdyn_report();
     fprintf(stderr, "mdmdev: healthy vehicle at rest -- %ld forward and %ld aft MDM "
                     "read(s) answered, %ld and %ld write(s) taken; IMU reads %ld/%ld/%ld, "
-                    "commands %ld/%ld/%ld\n",
+                    "commands %ld/%ld/%ld; GPS reads %ld/%ld/%ld, writes %ld/%ld/%ld\n",
             ffReads, faReads, ffWrites, faWrites,
             imu[1].reads, imu[2].reads, imu[3].reads,
-            imu[1].writes, imu[2].writes, imu[3].writes);
+            imu[1].writes, imu[2].writes, imu[3].writes,
+            gps[1].reads, gps[2].reads, gps[3].reads, gps[1].writes, gps[2].writes, gps[3].writes);
 }

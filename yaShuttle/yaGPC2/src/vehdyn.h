@@ -60,6 +60,11 @@ void vehdyn_report(void);
  * flight software's GMT in seconds -- day of year x 86400 + seconds of day
  * -- at state time t, or -1 before the clock is known. */
 void vehdyn_set_gmt_zero(double unixAtZero);
+
+/* The truth position and velocity (inertial, m and m/s) at a recent time t
+ * no later than now -- interpolated from the steps taken; false if t is
+ * outside what is kept (a few hundred steps). */
+bool vehdyn_state_at(double t, double r[3], double v[3]);
 double vehdyn_gmt(double t);
 
 /* For tests: start over at time t with full tanks, a 400 km circular orbit

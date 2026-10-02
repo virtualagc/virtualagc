@@ -136,6 +136,22 @@ static const double TANK_XYZ[3][3] = {     /* inches, Orbiter structural */
 };
 
 static PhysState st;
+
+/* THE RECENT PAST: (t, r, v) after every step, so a sensor can report the
+ * state at a moment just gone -- a GPS solution's time of validity -- by
+ * cubic Hermite interpolation, which at the steps used here (<= 1 s coasting,
+ * 5 ms under thrust) is exact to well under a millimetre. */
+#define HIST_N 256
+static struct { double t, r[3], v[3]; } hist[HIST_N];
+static int histHead, histCount;
+
+static void hist_push(void) {
+    histHead = (histHead + 1) % HIST_N;
+    hist[histHead].t = st.t;
+    memcpy(hist[histHead].r, st.r, sizeof st.r);
+    memcpy(hist[histHead].v, st.v, sizeof st.v);
+    if (histCount < HIST_N) histCount++;
+}
 static double prop[3];                 /* kg left, per module */
 static double cgB[3];                  /* current CG, as an offset from the dry CG, body m */
 static bool on[VEHDYN_NJETS];
@@ -271,6 +287,8 @@ void vehdyn_reset(double t) {
     }
     haveTime = true;
     fireChanges = 0;
+    histCount = 0;
+    hist_push();
 }
 
 /* Advance in steps no longer than STEP_S, re-deriving the loads and the mass
@@ -298,6 +316,7 @@ void vehdyn_advance(double sharedUs) {
         phys_drag_accel(&st, ad0);
         phys_step(&st, dt, firing ? f : NULL, firing ? tau : NULL);
         phys_drag_accel(&st, ad1);
+        hist_push();
         for (int i = 0; i < 3; i++) sensedDv[i] += 0.5 * (ad0[i] + ad1[i]) * dt;
         if (firing) {
             double fi[3];
@@ -405,6 +424,33 @@ void vehdyn_set_gmt_zero(double unixAtZero) {
     pass_rnp(year, day, A);
     /* angle = rate (GMT - RNP_DAY 86400), GMT = gmtZero + t */
     phys_set_earth(A, 0.0, day * 86400.0 - gmtZero, PASS_EARTH_RATE);
+}
+
+bool vehdyn_state_at(double t, double r[3], double v[3]) {
+    if (histCount == 0) return false;
+    int k = histHead, newer = -1;
+    for (int n = 0; n < histCount; n++) {
+        if (hist[k].t <= t) break;
+        newer = k;
+        k = (k - 1 + HIST_N) % HIST_N;
+        if (n == histCount - 1) return false;          /* older than we keep */
+    }
+    if (newer < 0) {                                     /* at or after the newest */
+        if (t - hist[k].t > 1e-9) return false;
+        memcpy(r, hist[k].r, 3 * sizeof *r); memcpy(v, hist[k].v, 3 * sizeof *v);
+        return true;
+    }
+    double t0 = hist[k].t, h = hist[newer].t - t0, s = (t - t0) / h;
+    double s2 = s * s, s3 = s2 * s;
+    double h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2;
+    double d00 = (6 * s2 - 6 * s) / h, d10 = 3 * s2 - 4 * s + 1, d01 = (-6 * s2 + 6 * s) / h,
+           d11 = 3 * s2 - 2 * s;
+    for (int i = 0; i < 3; i++) {
+        double r0 = hist[k].r[i], v0 = hist[k].v[i], r1 = hist[newer].r[i], v1 = hist[newer].v[i];
+        r[i] = h00 * r0 + h10 * h * v0 + h01 * r1 + h11 * h * v1;
+        v[i] = d00 * r0 + d10 * v0 + d01 * r1 + d11 * v1;
+    }
+    return true;
 }
 
 double vehdyn_gmt(double t) { return (gmtZero >= 0.0) ? gmtZero + t : -1.0; }
