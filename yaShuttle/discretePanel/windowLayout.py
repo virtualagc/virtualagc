@@ -952,8 +952,38 @@ def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None
     return len(keep)
 
 
+PORT_BASE_ARG = re.compile(r"--port-base[ =](\d+)")
+
+
+def port_base_of(cmd):
+    """The --port-base on a command line, or None."""
+    m = PORT_BASE_ARG.search(cmd or "")
+    return int(m.group(1)) if m else None
+
+
+def _scope(args, refuse):
+    """THE WINDOWS OF ONE SIMULATION.  The manager's own Save and Restore are
+    limited to its run's processes, but this command line was not: a save
+    and restore on one port base swept up a live run on another and moved
+    its windows (Win11-native, 2026-10-02).  --port-base limits it to the
+    processes started with that port base; without it, more than one
+    simulation on screen is reported -- and a restore refused."""
+    ws = windows()
+    if args.port_base is not None:
+        return {w["pid"] for w in ws if port_base_of(w.get("cmd")) == args.port_base}
+    bases = sorted({b for b in (port_base_of(w.get("cmd")) for w in ws) if b is not None})
+    if len(bases) > 1:
+        msg = ("windows of %d simulations are on screen (port bases %s); "
+               "give --port-base to say which" % (len(bases), ", ".join(map(str, bases))))
+        if refuse:
+            raise SystemExit("windowLayout: " + msg + " -- nothing moved")
+        print("windowLayout: warning: " + msg)
+    return None
+
+
 def cmd_save(args):
-    save_layout(args.file, everything=args.all, merge=args.merge)
+    save_layout(args.file, everything=args.all, merge=args.merge,
+                only_pids=_scope(args, refuse=False))
     with open(args.file) as fh:
         layout = json.load(fh)
     for w in layout["windows"]:
@@ -1062,7 +1092,8 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
 
 
 def cmd_restore(args):
-    restore_layout(args.file, not args.no_sizes, args.verbose)
+    restore_layout(args.file, not args.no_sizes, args.verbose,
+                   only_pids=_scope(args, refuse=True))
     return 0
 
 
@@ -1091,6 +1122,8 @@ def main(argv=None):
     s.add_argument("--merge", action="store_true",
                    help="add to the file: the windows on screen replace their own "
                         "entries, its others are kept")
+    s.add_argument("--port-base", type=int, default=None,
+                   help="only that simulation's windows")
     s.set_defaults(func=cmd_save)
     r = sub.add_parser("restore", help="put the windows back where a file says")
     r.add_argument("file")
@@ -1099,6 +1132,8 @@ def main(argv=None):
     r.add_argument("--no-sizes", action="store_true",
                    help="move the windows without resizing them")
     r.add_argument("--verbose", action="store_true", help="show each move and what came of it")
+    r.add_argument("--port-base", type=int, default=None,
+                   help="only that simulation's windows (required when more than one is up)")
     r.set_defaults(func=cmd_restore)
     h = sub.add_parser("show", help="what is on screen now, or what a file holds")
     h.add_argument("file", nargs="?")
