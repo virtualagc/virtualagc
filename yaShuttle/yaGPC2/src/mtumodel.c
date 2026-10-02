@@ -1718,6 +1718,19 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             m->outHave[b] = 0;
             m->outIssuer[b] = g;
         }
+        /* OR THE FLIGHT INSTRUMENTS' DATA: the HFE's DDU writes (ADI, HSI,
+         * AVVI, AMI) and MEDS transfers on FC1-4, IUA 6, 9 or 15 with the
+         * DDU write bit, X'40000' -- and here the low five bits ARE the
+         * word count, not one less (nsts-sim-gpc lru/ddu/dduConf.coffee).
+         * mdmdev.c passes them to the displays. */
+        else if (mdmdev_capturing() && (cmd & 0x40000u) &&
+                 (CMD_IUA(cmd) == 6u || CMD_IUA(cmd) == 9u || CMD_IUA(cmd) == 15u) &&
+                 (cmd & 0x1fu) != 0u) {
+            m->outCmd[b] = cmd;
+            m->outWant[b] = (int)(cmd & 0x1fu);
+            m->outHave[b] = 0;
+            m->outIssuer[b] = g;
+        }
         /* BUT THE COMMAND ITSELF IS ON THE WIRE, whoever it is for.  A
          * listener's Listen-Mode receive waits, with no time-out, for a
          * command at its own IUA (iop.c); echoing only the timing unit's read

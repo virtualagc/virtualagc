@@ -854,11 +854,78 @@ static void push_fire(double sharedUs) {
     vehdyn_set_fire_words(ff, fa, sharedUs);
 }
 
+/* ---------------------------------------------------------------------
+ * THE FLIGHT INSTRUMENTS' DATA, to the displays.  Every 40 ms the HFE writes
+ * each of FC1-4 (buses 20-23) the MEDS transfer (four messages to IUA 15)
+ * and the DDU messages -- ADI to DDUs 1-3 (IUAs 6, 9, 15), HSI, AVVI and AMI
+ * to DDUs 1 and 2 (nsts-sim-gpc lru/ddu/dduConf.coffee, from the OI30
+ * listing's FIOHFEPG).  An IDP hears all four buses; its MDU's DATA BUS
+ * edgekey picks the one the PFD follows.  These buses are modelled here,
+ * not on the network, so each message goes to MEDS2 as one datagram on
+ * port base + FC_INSTR_OFFSET, halfwords big-endian:
+ *     FC_INSTR_MAGIC, FC bus 1-4, command high 8 bits, command low 16 bits,
+ *     word count, the words
+ * Sent when its words change, and at least every FC_INSTR_REFRESH_US so a
+ * display can tell a quiet bus (its instruments go invalid) from a steady
+ * one.  Only for a run wired to a panel -- the one that has displays.
+ * ------------------------------------------------------------------- */
+#define FC_INSTR_OFFSET 97
+#define FC_INSTR_MAGIC 0xFC01u
+#define FC_INSTR_REFRESH_US 500000.0
+#define FC_INSTR_SLOTS 16
+
+typedef struct {
+    uint32_t cmd;
+    int n;
+    uint16_t w[32];
+    double sentUs;
+    long sentCalls;
+} FcSlot;
+static FcSlot fcLast[5][FC_INSTR_SLOTS];
+static long fcCalls, fcSent;
+
+static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, double sharedUs) {
+    int fc = busID - 19;
+    if (fc < 1 || fc > 4 || n <= 0 || n > 32 || !crewOpen || crewFd[1] < 0) return;
+    fcCalls++;
+    /* a slot per message: IUA and select bits */
+    int slot = -1;
+    for (int i = 0; i < FC_INSTR_SLOTS; i++) {
+        if (fcLast[fc][i].cmd == cmd) { slot = i; break; }
+        if (fcLast[fc][i].cmd == 0u && slot < 0) slot = i;
+    }
+    if (slot < 0) return;
+    FcSlot *e = &fcLast[fc][slot];
+    bool same = e->cmd == cmd && e->n == n && memcmp(e->w, words, (size_t)n * sizeof *words) == 0;
+    bool due = (sharedUs >= 0.0) ? (sharedUs - e->sentUs >= FC_INSTR_REFRESH_US)
+                                 : (fcCalls - e->sentCalls >= 50);
+    if (same && !due && e->cmd != 0u) return;
+    e->cmd = cmd; e->n = n;
+    memcpy(e->w, words, (size_t)n * sizeof *words);
+    e->sentUs = sharedUs; e->sentCalls = fcCalls;
+    uint8_t b[2 * (5 + 32)];
+    uint16_t h[5] = { FC_INSTR_MAGIC, (uint16_t)fc, (uint16_t)((cmd >> 16) & 0xffu),
+                      (uint16_t)(cmd & 0xffffu), (uint16_t)n };
+    int k = 0;
+    for (int i = 0; i < 5; i++) { b[k++] = (uint8_t)(h[i] >> 8); b[k++] = (uint8_t)h[i]; }
+    for (int i = 0; i < n; i++) { b[k++] = (uint8_t)(words[i] >> 8); b[k++] = (uint8_t)words[i]; }
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + FC_INSTR_OFFSET));
+    sendto(crewFd[1], (const char *)b, (size_t)k, 0, (struct sockaddr *)&to, sizeof to);
+    fcSent++;
+}
+
 bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
 
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
+    if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
+        fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
+        return;
+    }
     if (!mdmdev_enabled()) {
         /* No device model, but a panel: record the forward MDMs' discrete
          * outputs and send them to it -- its lamps -- and nothing else. */
@@ -1106,6 +1173,9 @@ bool mdmdev_load(const char *dir) {
 }
 
 void mdmdev_report(void) {
+    if (fcCalls > 0)
+        fprintf(stderr, "mdmdev: %ld flight-instrument message(s) heard on FC1-4, %ld sent "
+                        "to the displays\n", fcCalls, fcSent);
     if (!mdmdev_enabled()) return;
     vehdyn_report();
     fprintf(stderr, "mdmdev: healthy vehicle at rest -- %ld forward and %ld aft MDM "
