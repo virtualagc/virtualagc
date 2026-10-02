@@ -522,6 +522,9 @@ C_PANEL_HI = "#dddaca"
 C_PANEL_LO = "#8e8b7e"
 C_INK = "#1b1b1b"
 C_INK_DIM = "#3a3a3a"
+# The legends of a control not yet connected to PASS (panelcontrols 'via'),
+# greyed so that one knows not to heed it (owner, 2026-10-02).
+C_INK_UNWIRED = "#8b8879"
 C_GUARD = "#d9d6c9"
 C_GUARD_LO = "#6a675c"
 C_SLOT = "#242422"
@@ -866,6 +869,7 @@ class PanelO6:
 
         self._font_cache = {}
         self._rot_columns = {}         # rotary key -> legends in columns
+        self._dim = False              # drawing a control not yet connected
         # ONE WINDOW PER NUMBERED PANEL (owner, 2026-10-02): titled with the
         # panel's number alone -- O6, C3, F6 ... -- so no corner tag is
         # needed, each placed and sized by a layout under its own role, and
@@ -1681,12 +1685,16 @@ class PanelO6:
                             **kw)
 
     def _text(self, x, y, text, size=11, fill=C_INK, bold=True, anchor="c"):
+        if fill == C_INK and self._dim:
+            fill = C_INK_UNWIRED
         # helvetica.lift: nothing on Linux or macOS; see helvetica.py.
         lift = helvetica.lift(self._tkfont(size, bold), anchor)
         self.cv.create_text(self.X(x), self.Y(y) - lift, text=text, fill=fill,
                             font=self._font(size, bold), anchor=anchor)
 
     def _vtext(self, x, y, text, size=SETTING_SIZE, fill=C_INK):
+        if fill == C_INK and self._dim:
+            fill = C_INK_UNWIRED
         """Stacked caption.  Ascent plus a 2 px gutter — about 20% of the
         previous extra leading, so the letters stay separate without a
         large hole between them."""
@@ -2354,7 +2362,15 @@ class PanelO6:
         return max(cap_w, self.pb), above, self.pb, 0
 
     def _draw_ctl_item(self, key, cx, top):
-        """Draw one control centred on cx, its caption starting at top."""
+        """Draw one control centred on cx, its caption starting at top --
+        its legends greyed if it is not connected to PASS yet."""
+        self._dim = bool(PC.CONTROLS[key].get("via"))
+        try:
+            self._draw_ctl_item_(key, cx, top)
+        finally:
+            self._dim = False
+
+    def _draw_ctl_item_(self, key, cx, top):
         c = PC.CONTROLS[key]
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
         w, above, body, below = self._ctl_size(key)
@@ -2625,7 +2641,10 @@ class PanelO6:
             return width, height
         self._rect_panel(x0, y0, x0 + width, y0 + max(height, h or 0))
         if title:
+            keys = [k for row in rows for k in row if PC.CONTROLS[k]["kind"] != "blank"]
+            self._dim = bool(keys) and all(PC.CONTROLS[k].get("via") for k in keys)
             self._text(x0 + width / 2.0, y0 + pad + th10, title, size=10)
+            self._dim = False
         y = y0 + title_h + pad
         for row, sz, rw, rh in zip(rows, sizes, widths, heights):
             x = x0 + (width - rw) / 2.0
