@@ -7215,6 +7215,458 @@ class Screen_IDP_CST(MDUScreen):
 
 
 # ===========================================================================
+# lru/ddu/dduConf.coffee + dduFields.coffee -- the flight instruments' data
+#
+# Every 40 ms PASS's HFE writes each of FC1-4 the MEDS transfer (four
+# messages to IUA 15) and the DDU messages: ADI to DDUs 1-3 (IUAs 6, 9, 15),
+# HSI, AVVI and AMI to DDUs 1 and 2 (OI30 listing, FIOHFEPG).  An IDP hears
+# all four buses and its MDU's DATA BUS edgekey picks the one the PFD
+# follows; DDU 1 is the commander's station, 2 the pilot's, 3 the aft.
+# Word formats are STS-83-0020V3-34 Appendix F, as nsts-sim-gpc decodes them
+# (lru/ddu/dduConf.coffee, dduFields.coffee); this is a port of that.
+#
+# yaGPC2 models FC1-4 itself rather than putting them on the network, so it
+# sends each message here as one datagram on port base + FC_INSTR_OFFSET
+# (yaGPC2 src/mdmdev.c, fc_output): halfwords FC_INSTR_MAGIC, FC bus 1-4,
+# command high 8 bits, command low 16 bits, word count, the words.  It sends
+# when the words change and at least every half second, so a bus quiet for
+# FC_STALE_S is a dead one and its instruments show their invalid markers.
+# ===========================================================================
+FC_INSTR_OFFSET = 97
+FC_INSTR_MAGIC = 0xFC01
+FC_REFRESH_MS = 100
+FC_STALE_S = 1.0
+
+FC_MSG_OF_SELECT = {0x020: 'ADI', 0x040: 'HSI', 0x080: 'AVVI', 0x100: 'AMI',
+                    0x800: 'MEDS1', 0x1000: 'MEDS2', 0x2000: 'MEDS3', 0x4000: 'MEDS4'}
+DDU_OF_IUA = {6: 1, 9: 2, 15: 3}
+STATION_DDU = {'L': 1, 'R': 2, 'A': 3}
+# medsConf.coffee's stations: which crew station's DDU each MDU shows.
+MDU_STATION = {'CRT1': 'L', 'CRT2': 'R', 'CRT3': 'L', 'CRT4': 'A',
+               'CDR1': 'L', 'CDR2': 'L', 'PLT1': 'R', 'PLT2': 'R',
+               'MFD1': 'L', 'MFD2': 'R', 'AFD1': 'A'}
+POINTER_FULL_SCALE = 5      # rate and error pointers read -5..+5 at full scale
+
+
+def _s16(w):
+    w &= 0xffff
+    return w - 0x10000 if w & 0x8000 else w
+
+
+def _fcBit(n):
+    return 0x8000 >> (n - 1)
+
+
+def _fcField(w, a, b):
+    """Bits a-b of a halfword, a counted from the most significant."""
+    return (w >> (16 - b)) & ((1 << (b - a + 1)) - 1)
+
+
+def _fcSfield(w, a, b):
+    n = b - a + 1
+    v = _fcField(w, a, b)
+    return v - (1 << n) if v & (1 << (n - 1)) else v
+
+
+def fcWordValid(control, n):
+    """Word n (0-based) of a DDU message is valid by its control-word bit."""
+    return n == 0 or (control & _fcBit(n)) != 0
+
+
+def wordToFrac(w):
+    return (_s16(w) >> 3) / 4095.0
+
+
+def wordToAngle(w):
+    return ((w >> 4) & 0x7ff) * 180.0 / 1024
+
+
+def wordToBcd(w):
+    return (((w >> 13) & 0x3) * 1000 + ((w >> 9) & 0xf) * 100 +
+            ((w >> 5) & 0xf) * 10 + ((w >> 1) & 0xf))
+
+
+def wordToDev(w):
+    return _s16(w) >> 6
+
+
+def devToDots(count):
+    return count / 512.0 * 3
+
+
+def wordToMach(w):
+    return ((w >> 3) & 0xfff) * 0.0075
+
+
+def wordToAlpha(w):
+    return (_s16(w) >> 1) * 0.015
+
+
+def wordToEas(w):
+    return ((w >> 3) & 0xfff) * 0.125
+
+
+def wordToAccel(w):
+    c = _s16(w) >> 3
+    return c * (0.00125 if c < 0 else 0.0025)
+
+
+def wordToAlt(w):
+    c = (w >> 3) & 0xfff
+    if c < 200:
+        return (c - 220) / 0.2
+    if c < 280:
+        return (c - 280) / 0.8
+    if c <= 480:
+        a, b = 0.4686e-3, 0.6343
+        return (b - math.sqrt(max(0.0, b * b - 4 * a * (c - 280)))) / (2 * a)
+    if c < 2470:
+        return (c - 470) / 0.02
+    return 1e5 + (c - 2470) * 625
+
+
+def wordToHdot(w):
+    c = _s16(w) >> 3
+    s = -1 if c < 0 else 1
+    a = abs(c)
+    if a <= 500:
+        k, q = 7.92875, 0.0292875
+        v = (k - math.sqrt(max(0.0, k * k - 4 * q * a))) / (2 * q)
+    elif a <= 2500:
+        v = (a - 187.5) / 3.125
+    else:
+        v = (a - 2204) / 0.4
+    return s * v
+
+
+def wordToRadarAlt(w):
+    c = (w >> 4) & 0x7ff
+    if c < 1000:
+        k, q = 3.1715, 2.343e-3
+        return (k - math.sqrt(max(0.0, k * k - 4 * q * c))) / (2 * q)
+    return 500 + (c - 1000) * 10
+
+
+def wordToVertAccel(w):
+    return (_s16(w) >> 7) * 0.05
+
+
+def _wrap360(d):
+    return d % 360.0
+
+
+ADI_INVALID = {'adiValid': False, 'adiRolRate': None, 'adiPchRate': None,
+               'adiYawRate': None, 'adiRolErr': None, 'adiPchErr': None,
+               'adiYawErr': None}
+
+
+def adiFields(w, fresh):
+    c = w[0]
+    ok = lambda n: fresh and fcWordValid(c, n)
+    att = all(ok(n) for n in range(2, 8))
+    f = {'adiValid': att}
+    if att:
+        f['adiRol'] = _wrap360(math.degrees(math.atan2(wordToFrac(w[2]), wordToFrac(w[3]))))
+        f['adiPch'] = _wrap360(math.degrees(math.atan2(wordToFrac(w[4]), wordToFrac(w[5]))))
+        f['adiYaw'] = _wrap360(math.degrees(math.atan2(wordToFrac(w[6]), wordToFrac(w[7]))))
+    for n, k in ((8, 'adiRolRate'), (9, 'adiPchRate'), (10, 'adiYawRate'),
+                 (11, 'adiRolErr'), (12, 'adiPchErr'), (13, 'adiYawErr')):
+        f[k] = POINTER_FULL_SCALE * wordToFrac(w[n]) if ok(n) else None
+    return f
+
+
+HSI_INVALID = {'hsiCourseValid': False, 'hsiHeadingValid': False,
+               'hsiPriBearingValid': False, 'hsiSecBearingValid': False,
+               'hsiPriRangeValid': False, 'hsiSecRangeValid': False,
+               'hsiCdiValid': False, 'hsiGsiValid': False}
+
+
+def hsiFields(w, fresh):
+    c = w[0]
+    ok = lambda n: fresh and fcWordValid(c, n)
+    return {'hsiCourse': wordToAngle(w[2]), 'hsiCourseValid': ok(2),
+            'hsiHeading': wordToAngle(w[3]), 'hsiHeadingValid': ok(3),
+            'hsiPriBearing': wordToAngle(w[4]), 'hsiPriBearingValid': ok(4),
+            'hsiSecBearing': wordToAngle(w[5]), 'hsiSecBearingValid': ok(5),
+            'hsiPriRange': wordToBcd(w[6]), 'hsiPriRangeValid': ok(6),
+            'hsiSecRange': wordToBcd(w[7]), 'hsiSecRangeValid': ok(7),
+            'hsiCdi': devToDots(wordToDev(w[8])), 'hsiCdiValid': ok(8),
+            'hsiGsi': devToDots(wordToDev(w[9])), 'hsiGsiValid': ok(9)}
+
+
+AMI_INVALID = {'machValid': False, 'alphaValid': False, 'keasValid': False,
+               'accValid': False, 'mach': None, 'vel': None, 'alpha': None,
+               'keas': None, 'vehicleAcceleration': None}
+
+
+def amiFields(w, fresh):
+    c = w[0]
+    ok = lambda n: fresh and fcWordValid(c, n)
+    f = dict(AMI_INVALID)
+    f['machValid'], f['alphaValid'], f['keasValid'], f['accValid'] = ok(2), ok(3), ok(4), ok(5)
+    if ok(2):
+        m = wordToMach(w[2])
+        f['mach'] = min(m, 4)
+        f['vel'] = m * 1000
+    if ok(3):
+        f['alpha'] = wordToAlpha(w[3])
+    if ok(4):
+        f['keas'] = wordToEas(w[4])
+    if ok(5):
+        f['vehicleAcceleration'] = wordToAccel(w[5])
+    return f
+
+
+AVVI_INVALID = {'altValid': False, 'hdotValid': False, 'radarValid': False,
+                'vertAccelValid': False, 'altitude': None, 'hdot': None,
+                'radarAlt': None, 'vertAccel': None}
+
+
+def avviFields(w, fresh):
+    c = w[0]
+    ok = lambda n: fresh and fcWordValid(c, n)
+    f = dict(AVVI_INVALID)
+    f['altValid'], f['hdotValid'], f['radarValid'], f['vertAccelValid'] = ok(2), ok(3), ok(4), ok(5)
+    if ok(2):
+        f['altitude'] = wordToAlt(w[2])
+    if ok(3):
+        f['hdot'] = wordToHdot(w[3])
+    if ok(4):
+        f['radarAlt'] = wordToRadarAlt(w[4])
+    if ok(5):
+        f['vertAccel'] = wordToVertAccel(w[5])
+    return f
+
+
+# The MEDS transfer, table F.4.128.1-2: message 1's words 1 and 2 say which
+# of words 7-30 (and message 2's 1-3) are valid.
+FC_ABORT_FLAGS = {'CA': 12, 'RTLS': 13, 'AOA': 14, 'ATO': 15, 'TAL': 16}
+
+
+def medsValid(w1, n, m2=False):
+    if m2:
+        return (w1[1] & _fcBit(8 + n)) != 0
+    if n < 7:
+        return True
+    if n <= 22:
+        return (w1[0] & _fcBit(n - 6)) != 0
+    return (w1[1] & _fcBit(n - 22)) != 0
+
+
+def decodeMEDS1(w):
+    g = lambda n: w[n - 1] & 0xffff
+    abort = None
+    for k, b in FC_ABORT_FLAGS.items():
+        if g(9) & _fcBit(b):
+            abort = k
+    valid = {n: medsValid(w, n) for n in range(7, 31)}
+    for n in (1, 2, 3):
+        valid['M2.%d' % n] = medsValid(w, n, True)
+    site = ''.join(chr(c) for c in (g(25) & 0xff, (g(25) >> 8) & 0xff, g(26) & 0xff,
+                                    (g(26) >> 8) & 0xff, g(27) & 0xff)).replace('\0', ' ')
+    return {
+        'valid': valid,
+        'isPfs': (g(7) & _fcBit(16)) != 0,
+        'majorMode': _fcField(g(8), 7, 16),
+        'eoYawSteering': (g(9) & _fcBit(9)) != 0,
+        'rollSw': (g(9) & _fcBit(10)) != 0,
+        'ppa': (g(9) & _fcBit(11)) != 0,
+        'abortMode': abort,
+        'iphase': _fcField(g(10), 14, 16),
+        'islect': _fcField(g(11), 13, 16),
+        'tgEnd': (g(12) & _fcBit(15)) != 0,
+        'wowlon': (g(12) & _fcBit(16)) != 0,
+        'hsiModeL': _fcField(g(13), 13, 14),
+        'hsiModeR': _fcField(g(13), 15, 16),
+        'thetaMaxDelta': wordToFrac(g(14)),
+        'thetaMinDelta': wordToFrac(g(15)),
+        'scale': {
+            'rollRateTgoL': (g(16) & _fcBit(1)) != 0,
+            'rollRate0OnRight': (g(16) & _fcBit(2)) != 0,
+            'pitchRateL': _fcField(g(16), 4, 16),
+            'rollRateTgoR': (g(17) & _fcBit(1)) != 0,
+            'pitchRateR': _fcField(g(17), 4, 16),
+            'yawRateL': _fcField(g(18), 4, 16),
+            'yawRateR': _fcField(g(19), 4, 16),
+            'rollRateL': _fcField(g(20), 9, 12),
+            'rollRateR': _fcField(g(20), 13, 16),
+            'pitchErrL': _fcField(g(21), 1, 8) * 0.25,
+            'pitchErrR': _fcField(g(21), 9, 16) * 0.25,
+        },
+        'attSelL': _fcField(g(20), 1, 2),
+        'attSelR': _fcField(g(20), 3, 4),
+        'sbAuto': (g(20) & _fcBit(5)) != 0,
+        'throtBlank': (g(20) & _fcBit(6)) != 0,
+        'throtAuto': (g(20) & _fcBit(7)) != 0,
+        'dapAuto': (g(20) & _fcBit(8)) != 0,
+        'cdiScale': _fcField(g(22), 8, 16),
+        'dAzWarn': (g(23) & _fcBit(7)) != 0,
+        'dAz': _fcSfield(g(23), 8, 16),
+        'hVr': wordToAngle(g(24)),
+        'siteId': site,
+        'targetNz': wordToAccel(g(28)),
+        'beta': _fcSfield(g(29), 6, 16) / 10.0,
+        'dIncl': (_s16(g(30)) >> 1) / 100.0,
+    }
+
+
+def decodeMEDS2(w):
+    return {'xtrk': _s16(w[0]) / 10.0,
+            'xtrkDev': _fcSfield(w[1] & 0xffff, 5, 16),
+            'tgtIncl': _fcField(w[2] & 0xffff, 7, 16) / 10.0}
+
+
+MEDS_INVALID = dict.fromkeys((
+    'gpcIsPfs', 'majorMode', 'abortMode', 'ppa', 'rollSw', 'eoYawSteering',
+    'iphase', 'islect', 'tgEnd', 'wowlon', 'hsiMode', 'thetaMaxDelta',
+    'thetaMinDelta', 'adiRateScale', 'adiPchErrScale', 'attSel',
+    'fcsConfSBAuto', 'fcsConfThrotBlank', 'fcsConfThrotAuto', 'fcsConfRYAuto',
+    'fcsConfDAPAuto', 'fcsConfPitchAuto', 'cdiScale', 'dAz', 'dAzWarn', 'hVr',
+    'siteId', 'targetNZ', 'beta', 'dIncl', 'xtrk', 'xtrkDev', 'tgtIncl'))
+
+
+def medsFields(m1, m2, fresh, side):
+    """dduFields.medsFields: a word the GPC stopped marking valid takes its
+    field to None ("should not be used by the MEDS software", F.4.128.1.2)."""
+    f = dict(MEDS_INVALID)
+    f['medsValid'] = fresh
+    if not fresh or m1 is None:
+        return f
+    d = decodeMEDS1(m1)
+    v = d['valid']
+    r = side == 'R'
+    f['gpcIsPfs'] = d['isPfs']
+    if v[8]:
+        f['majorMode'] = d['majorMode']
+    if v[9]:
+        f['abortMode'] = d['abortMode']
+        f['ppa'] = d['ppa']
+        f['rollSw'] = d['rollSw']
+        f['eoYawSteering'] = d['eoYawSteering']
+    if v[10]:
+        f['iphase'] = d['iphase']
+    if v[11]:
+        f['islect'] = d['islect']
+    if v[12]:
+        f['tgEnd'], f['wowlon'] = d['tgEnd'], d['wowlon']
+    if v[13]:
+        f['hsiMode'] = d['hsiModeR'] if r else d['hsiModeL']
+    if v[14]:
+        f['thetaMaxDelta'] = d['thetaMaxDelta']
+    if v[15]:
+        f['thetaMinDelta'] = d['thetaMinDelta']
+    if all(v[n] for n in range(16, 22)):
+        s = d['scale']
+        f['adiRateScale'] = {
+            'roll': s['rollRateR'] if r else s['rollRateL'],
+            'pitch': s['pitchRateR'] if r else s['pitchRateL'],
+            'yaw': s['yawRateR'] if r else s['yawRateL'],
+            'rollTgo': s['rollRateTgoR'] if r else s['rollRateTgoL'],
+            'rollZeroOnRight': s['rollRate0OnRight']}
+        f['adiPchErrScale'] = s['pitchErrR'] if r else s['pitchErrL']
+        f['attSel'] = d['attSelR'] if r else d['attSelL']
+        # "DAP & Pitch" and "THROT & R/Y" are one field each; the PFD labels
+        # them DAP and Throt in powered flight, Pitch and R/Y gliding
+        f['fcsConfSBAuto'] = d['sbAuto']
+        f['fcsConfThrotBlank'] = d['throtBlank']
+        f['fcsConfThrotAuto'] = f['fcsConfRYAuto'] = d['throtAuto']
+        f['fcsConfDAPAuto'] = f['fcsConfPitchAuto'] = d['dapAuto']
+    if v[22]:
+        f['cdiScale'] = d['cdiScale']
+    if v[23]:
+        f['dAz'], f['dAzWarn'] = d['dAz'], d['dAzWarn']
+    if v[24]:
+        f['hVr'] = d['hVr']
+    if v[25] and v[26] and v[27]:
+        f['siteId'] = d['siteId']
+    if v[28]:
+        f['targetNZ'] = d['targetNz']
+    if v[29]:
+        f['beta'] = d['beta']
+    if v[30]:
+        f['dIncl'] = d['dIncl']
+    if m2 is not None:
+        e = decodeMEDS2(m2)
+        if v['M2.1']:
+            f['xtrk'] = e['xtrk']
+        if v['M2.2']:
+            f['xtrkDev'] = e['xtrkDev']
+        if v['M2.3']:
+            f['tgtIncl'] = e['tgtIncl']
+    return f
+
+
+def fieldsOfFeed(station, feed, fresh=True):
+    """The PFD fields of one bus's messages, for one crew station."""
+    side = 'R' if station == 'R' else 'L'
+    f = {}
+    f.update(adiFields(feed['ADI'], fresh) if 'ADI' in feed else ADI_INVALID)
+    f.update(hsiFields(feed['HSI'], fresh) if 'HSI' in feed else HSI_INVALID)
+    f.update(amiFields(feed['AMI'], fresh) if 'AMI' in feed else AMI_INVALID)
+    f.update(avviFields(feed['AVVI'], fresh) if 'AVVI' in feed else AVVI_INVALID)
+    f.update(medsFields(feed.get('MEDS1'), feed.get('MEDS2'), fresh, side))
+    return f
+
+
+class FCInstrumentFeed(object):
+    """The one socket a process has for the flight instruments' datagrams,
+    and the MDUs it hands each message to: {bus, iua, msg, words}."""
+    _the = None
+
+    @classmethod
+    def get(cls):
+        if cls._the is None:
+            cls._the = cls()
+        return cls._the
+
+    def __init__(self):
+        self.listeners = []
+        self.sock = None
+        self._notifier = None
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except (AttributeError, OSError):
+                pass
+            s.bind(('', PORT_BASE + FC_INSTR_OFFSET))
+            iface = os.environ.get('NSTS_BUS_IFACE', '127.0.0.1')
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                         socket.inet_aton(MCAST_GROUP) + socket.inet_aton(iface))
+            s.setblocking(False)
+            self.sock = s
+            self._notifier = QSocketNotifier(s.fileno(), QSocketNotifier.Type.Read)
+            self._notifier.activated.connect(self._readable)
+        except OSError as e:
+            print("flight instruments: no feed on port %d: %s"
+                  % (PORT_BASE + FC_INSTR_OFFSET, e))
+
+    def listen(self, fn):
+        self.listeners.append(fn)
+
+    def _readable(self, *_):
+        while True:
+            try:
+                d = self.sock.recv(256)
+            except (BlockingIOError, OSError):
+                return
+            if len(d) < 10 or len(d) % 2:
+                continue
+            h = struct.unpack('>%dH' % (len(d) // 2), d)
+            if h[0] != FC_INSTR_MAGIC:
+                continue
+            bus, n = h[1], h[4]
+            cmd = (h[2] << 16) | h[3]
+            msg = FC_MSG_OF_SELECT.get(cmd & 0x7fe0)
+            if msg is None or len(h) < 5 + n:
+                continue
+            m = {'bus': bus, 'iua': (cmd >> 19) & 0x1f, 'msg': msg, 'words': list(h[5:5 + n])}
+            for fn in self.listeners:
+                fn(m)
+
+
+# ===========================================================================
 # meds/mduScreen_AE_PFD.coffee -- the Ascent/Entry Primary Flight Display
 # ===========================================================================
 
@@ -8267,7 +8719,17 @@ class Screen_AE_PFD(MDUScreen):
         vw = 4.75
         vcx = vx0 + vw / 2
         vOpts = {'center': True, 'lblScale': 1.2, 'rdScale': 1.2, 'clipOff': AMI_OFF}
-        if swap:
+        # AN INVALID TAPE IS THE SOLID RED RECTANGLE, as the AVVI's -- the
+        # validity the GPC sends with each AMI word (upstream
+        # mduScreen_AE_PFD.coffee; FCInstrumentFeed).  Absent, as in the
+        # page's own test data, a tape is valid.
+        machOK = self.data().get('machValid', True) is not False and self.data().get('mach') is not None
+        keasOK = self.data().get('keasValid', True) is not False and self.data().get('keas') is not None
+        alphaOK = self.data().get('alphaValid', True) is not False and self.data().get('alpha') is not None
+        if (swap and not keasOK) or (not swap and not machOK):
+            self.ami.add(self.d.str(2.25, 3.24, ("KEAS" if swap else velLbl), C['darkGray'], 1, .9))
+            self.ami.add(self._redTape(vx0, 4.4, vw, 15.57))
+        elif swap:
             self.ami.add(self.d.str(2.25, 3.24, "KEAS", C['darkGray'], 1, .9))
             o = dict(vOpts)
             o.update({'id': 'ami-keas', 'tickW': 0.27 * TAPE_IN_COLS, 'range': [0, 500]})
@@ -8302,7 +8764,10 @@ class Screen_AE_PFD(MDUScreen):
         # coords, so the child group backs the AMI nudge out.
         blo = Object3D()
         blo.position.set(-AMI_OFF[0], -AMI_OFF[1], 0)
-        bloVal = ("%.2f" % mach) if swap else ("%d" % jsround(keas))
+        if swap:
+            bloVal = ("%.2f" % mach) if machOK else ""
+        else:
+            bloVal = ("%d" % jsround(keas)) if keasOK else ""
         blo.add(self.d.box(1.925, 20.911, 6.625, 22.661, C['darkGray']))
         blo.add(self.d.str(2.69, 23.011, (velLbl if swap else "KEAS"),
                            C['darkGray'], 0.9, 0.9))
@@ -8333,8 +8798,11 @@ class Screen_AE_PFD(MDUScreen):
         if mach < 3.0:
             aOpts['diamond'] = self._lerpTable(self.ALPHA_MAXLD, mach, 1)
         aOpts['id'] = 'alpha'
-        self.ami.add(self.scrollTape(7.4, 4.4, 4.75, 15.57, self.data()['alpha'],
-                                     5, 0.685, aOpts))
+        if alphaOK:
+            self.ami.add(self.scrollTape(7.4, 4.4, 4.75, 15.57, self.data()['alpha'],
+                                         5, 0.685, aOpts))
+        else:
+            self.ami.add(self._redTape(7.4, 4.4, 4.75, 15.57))
         self.ami.position.set(AMI_OFF[0], AMI_OFF[1], 0)
         return self.ami
 
@@ -10213,6 +10681,18 @@ class MDU(LRU):
 
         self._edgeKeys = None
 
+        # THE FLIGHT INSTRUMENT DATA heard on each FC bus: by bus number, the
+        # words of each message as last heard, for this crew station's DDU
+        # and the MEDS transfer (FCInstrumentFeed); the PFD screens follow
+        # the bus the DATA BUS edgekey selects.
+        self.station = MDU_STATION.get(str(CONFIG['config']['lru']).upper(), 'L')
+        self.fcFeed = {}
+        self.fcHeard = {}
+        self.fcFields = None
+        self._fcFieldsJson = None
+        self._fcDirty = False
+        self._fcTimer = None
+
     # -- startup ------------------------------------------------------------
     def start(self):
         self._edgeKeys = MDUEdgeKeys(self.win)
@@ -10237,6 +10717,11 @@ class MDU(LRU):
         self.redraw()
 
         self.kybd = KYBD(self.kybdBus(), self)
+
+        FCInstrumentFeed.get().listen(self._fcMessage)
+        self._fcTimer = QTimer()
+        self._fcTimer.timeout.connect(self._fcTick)
+        self._fcTimer.start(FC_REFRESH_MS)
 
         # Debug: double-click outside the display canvas toggles a live
         # feed-parameter editor
@@ -10518,11 +11003,71 @@ class MDU(LRU):
             cd.draw()
             if self.curDisplay == 'DPS':
                 cd.setPollFail(self.dps_poll_fail)
+            if self.curDisplay in self.PFD_SCREENS:
+                self._fcApply(self.curDisplay)
             if cd.group is not None:
                 self.disp.scene.add(cd.group)
                 self.redraw()
 
+    # -- the flight instruments (FCInstrumentFeed) ---------------------------
+    PFD_SCREENS = ('AE_PFD', 'ORBIT_PFD')
+    ADI_KEYS = frozenset(('adiValid', 'adiRol', 'adiPch', 'adiYaw', 'adiRolRate',
+                          'adiPchRate', 'adiYawRate', 'adiRolErr', 'adiPchErr',
+                          'adiYawErr'))
+
+    def _fcMessage(self, m):
+        if m['msg'].startswith('MEDS'):
+            if m['iua'] != 15:
+                return
+        elif DDU_OF_IUA.get(m['iua']) != STATION_DDU[self.station]:
+            return
+        self.fcFeed.setdefault(m['bus'], {})[m['msg']] = m['words']
+        self.fcHeard[m['bus']] = time.monotonic()
+        if m['bus'] == self.flightCritBus:
+            self._fcDirty = True
+
+    def _fcFresh(self, bus):
+        return time.monotonic() - self.fcHeard.get(bus, -1e9) < FC_STALE_S
+
+    def _fcTick(self):
+        """Ten times a second: the selected bus's words as the PFD's fields,
+        applied if they changed -- including a bus going quiet."""
+        bus = self.flightCritBus
+        fresh = self._fcFresh(bus)
+        if not self._fcDirty and fresh == getattr(self, '_fcWasFresh', None):
+            return
+        self._fcDirty = False
+        self._fcWasFresh = fresh
+        if not self.fcFeed and not fresh:
+            return                         # nothing heard yet: leave the page as drawn
+        fields = fieldsOfFeed(self.station, self.fcFeed.get(bus, {}), fresh)
+        js = json.dumps(fields, sort_keys=True, default=str)
+        if js == self._fcFieldsJson:
+            return
+        self._fcFieldsJson = js
+        self.fcFields = fields
+        if self.curDisplay in self.PFD_SCREENS:
+            self._fcApply(self.curDisplay)
+
+    def _fcApply(self, scrName):
+        scr = self.screens.get(scrName)
+        f = self.fcFields
+        if scr is None or f is None or getattr(scr, 'curData', None) is None:
+            return
+        changed = [k for k, v in f.items() if scr.curData.get(k) != v]
+        if not changed:
+            return
+        scr.curData.update(f)
+        if getattr(scr, 'group', None) is None:
+            return
+        if all(k in self.ADI_KEYS for k in changed):
+            scr.updateADI()
+        else:
+            scr.refreshFeed()
+        self.redraw()
+
     def setFCBus(self, bus):
+        self._fcDirty = True
         self.flightCritBus = bus
         self.mdu_menuArea.setFCBus(self.flightCritBus)
         # keep the DATA BUS SELECT highlight in sync however the bus was set
