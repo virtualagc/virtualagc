@@ -261,6 +261,7 @@ class Manager(object):
         row = self._row()
         self._button(row, "Browse", self.browse_layout)
         self._button(row, "Save", self.save_layout, wide=True)
+        self._button(row, "Add", self.add_to_layout)
         self._button(row, "Restore", self.restore_layout)
 
         # SNAPSHOT.  Save & Continue is the one that has to be reachable at an
@@ -645,6 +646,28 @@ class Manager(object):
                 self.say("Cannot save: %s" % n)
             else:
                 self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
+        self._window_work(work, done)
+
+    def add_to_layout(self):
+        """ADD the windows on screen to the layout file: theirs replaced, the
+        file's others kept.  Nothing is lost, so nothing is asked."""
+        path = self.layout.get().strip()
+        if not path:
+            self.say("No layout file chosen")
+            return
+        def work():
+            try:
+                return windowLayout.save_layout(
+                    path, log=lambda _t: None, merge=True,
+                    only_pids=windowLayout.descendants(procinfo.parent_pid()))
+            except (OSError, ValueError) as e:
+                return e
+
+        def done(n):
+            if isinstance(n, Exception):
+                self.say("Cannot add to the layout: %s" % n)
+            else:
+                self.say("Added %d windows to %s" % (n, os.path.basename(path)))
         self._window_work(work, done)
 
     def restore_layout(self, only_roles=None):

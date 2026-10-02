@@ -81,6 +81,7 @@ Usage:
 """
 
 import argparse
+from collections import OrderedDict
 import json
 import math
 import re
@@ -689,19 +690,88 @@ def scaled_wh(w, h, size):
     return max(1, int(round(w * f))), max(1, int(round(h * f)))
 
 
+# THE PANEL WINDOWS: (title, draw method, rough design size).  The design
+# size is only where the fit starts; each window is fitted to what it draws.
+PANEL_WINDOWS = (
+    ("O6", "_draw_win_o6", (1300, 1180)),
+    ("C2", "_draw_win_c2", (780, 500)),
+    ("R11", "_draw_win_r11", (330, 360)),
+    ("C3", "_draw_win_c3", (1050, 620)),
+    ("F2", "_draw_win_f2", (260, 190)),
+    ("F3", "_draw_win_f3", (250, 300)),
+    ("F4", "_draw_win_f4", (260, 190)),
+    ("F6", "_draw_win_f6", (660, 400)),
+    ("F8", "_draw_win_f8", (400, 390)),
+    ("A6U", "_draw_win_a6u", (900, 520)),
+    ("O7", "_draw_win_o7", (480, 200)),
+)
+IDP_LOAD_W = 420       # O6's IDP LOAD inset: four switches
+R11_W = 300            # R11: IDP/CRT 4's POWER and MAJ FUNC
+
+
+class PanelWin:
+    """One numbered panel's window: its canvas, and the fit and size state
+    that used to be the whole panel's.  PanelO6 draws into whichever is
+    current (PanelO6.w) through the properties at the end of this file."""
+
+    def __init__(self, app, name, top, draw, ref0, size):
+        self.app, self.name, self.top, self.draw, self.ref0 = app, name, top, draw, ref0
+        top.title(name)
+        top.configure(bg=C_WINDOW)
+        if top is not app.root:
+            top.protocol("WM_DELETE_WINDOW", top.withdraw)
+            import windowLayout
+            windowLayout.claim(top)
+        w, h = scaled_wh(ref0[0], ref0[1], size)
+        self.cv = tk.Canvas(top, bg=C_WINDOW, highlightthickness=0, width=w, height=h)
+        if sys.platform == "darwin":
+            # AN EDGE DOWN EACH SIDE, in the title bar's colour (the system's,
+            # so it follows dark mode): a macOS window has no border of its
+            # own, and this one is dark to its edges.  Not along the bottom,
+            # where macOS clips its rounded corners through any line.
+            for side in ("left", "right"):
+                tk.Frame(top, width=1, bg="systemWindowBackgroundColor"
+                         ).pack(side=side, fill="y")
+        if BOTTOM_MARGIN:
+            # In the panes' colour, so the rounded corners cut into what reads
+            # as the bottom of the panel, set off by the panes' dark gap.
+            tk.Frame(top, height=BOTTOM_MARGIN, bg=C_PANEL).pack(side="bottom", fill="x")
+            gap = max(1, int(round(PANE_GAP * size / float(FULL_SIZE))))
+            tk.Frame(top, height=gap, bg=C_WINDOW).pack(side="bottom", fill="x")
+        self.cv.pack(fill="both", expand=True)
+        # A natural size, which the snug then fits to the content at the
+        # scale --size gives; main() may replace O6's with --geometry.
+        top.geometry("%dx%d" % (w, h))
+        self.natural = (w, h)
+        self._minsize = (max(80, w // 3), max(60, h // 3))
+        top.minsize(*self._minsize)
+        self.s, self.ox, self.oy = 1.0, 0.0, 0.0
+        self._hits = []
+        self._bp_cache = {}
+        self._wh = (0, 0)
+        self._fit_passes = 0
+        self._fit_grow = 0
+        self._fit_bracket = {}
+        self._fit_need = {}
+        self._fit_moved = False
+        self._snugged = 0
+        self._measured = False
+        self._snug_set = None
+        self._snug_pending = None
+        self._cursor_hits = False
+        self._ref_w, self._ref_h = ref0
+        for ev, fn in (("<ButtonPress-1>", app._on_press),
+                       ("<ButtonRelease-1>", app._on_release),
+                       ("<Motion>", app._on_motion),
+                       ("<Configure>", app._on_configure),
+                       ("<Leave>", app._on_leave)):
+            self.cv.bind(ev, lambda e, fn=fn: app._in(self, fn, e))
+
+
 class PanelO6:
     def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
         self._size = size
-        root.title(TITLE_BASE)
-        root.configure(bg=C_WINDOW)
-
-        mw, mh = scaled_wh(640, 700, size)
-        root.minsize(mw, mh)
-        self._minsize = (mw, mh)
-        self.natural = None     # set by main() when it sizes the window itself
-        self._snugged = 0       # passes made: at most two
-        self._snug_set = None
         self.circle = None      # (feature, colour, diameter): a script's 'circle'
         self._circle_missed = None
 
@@ -743,44 +813,20 @@ class PanelO6:
         self._tb_shown = ["BP"] * N_GPC
         self._out_tb_shown = ["BP"] * N_GPC
 
-        cw, ch = scaled_wh(REF_W, REF_H, size)
-        self.cv = tk.Canvas(root, bg=C_WINDOW, highlightthickness=0,
-                            width=cw, height=ch)
-        if sys.platform == "darwin":
-            # AN EDGE DOWN EACH SIDE, in the title bar's colour (the system's,
-            # so it follows dark mode): a macOS window has no border of its
-            # own, and this one is dark to its edges, so on a black desktop it
-            # had none at all.  Not along the bottom, where macOS clips its
-            # rounded corners through any line; these just end where the
-            # corners begin, and the title bar marks the top.
-            for side in ("left", "right"):
-                tk.Frame(root, width=1, bg="systemWindowBackgroundColor"
-                         ).pack(side=side, fill="y")
-        if BOTTOM_MARGIN:
-            # In the panes' colour, not the window's dark one, so the rounded
-            # corners cut into what reads as the bottom of the panel -- and
-            # set off from the lowest pane (which runs to the drawing's very
-            # bottom) by the same dark gap that separates the panes.
-            tk.Frame(root, height=BOTTOM_MARGIN, bg=C_PANEL).pack(side="bottom", fill="x")
-            gap = max(1, int(round(PANE_GAP * size / float(FULL_SIZE))))
-            tk.Frame(root, height=gap, bg=C_WINDOW).pack(side="bottom", fill="x")
-        self.cv.pack(fill="both", expand=True)
-
-        self._hits = []          # (kind, index, x1, y1, x2, y2)
-        self._bp_cache = {}
         self._font_cache = {}
-        self._wh = (0, 0)
-        self._fit_passes = 0
-        self._fit_grow = 0
-        self._fit_bracket = {}
-        self._fit_need = {}
-        self._cursor_hits = False
-
-        self.cv.bind("<ButtonPress-1>", self._on_press)
-        self.cv.bind("<ButtonRelease-1>", self._on_release)
-        self.cv.bind("<Motion>", self._on_motion)
-        self.cv.bind("<Configure>", self._on_configure)
-        self.cv.bind("<Leave>", self._on_leave)
+        # ONE WINDOW PER NUMBERED PANEL (owner, 2026-10-02): titled with the
+        # panel's number alone -- O6, C3, F6 ... -- so no corner tag is
+        # needed, each placed and sized by a layout under its own role, and
+        # each an abstract of its real panel holding only what PASS reads.
+        # One process, one switch state, one bus; every window drawn with
+        # the same primitives, colours, fonts and control sizes.  O6 is the
+        # Tk root: closing it ends the program; closing another hides it.
+        self.wins = OrderedDict()
+        for name, draw, ref0 in PANEL_WINDOWS:
+            top = root if name == "O6" else tk.Toplevel(root)
+            self.wins[name] = PanelWin(self, name, top, getattr(self, draw), ref0, size)
+        self.w = self.wins["O6"]
+        self._placed = False
 
         # The startup report is printed by start_bus(), not here: --restore
         # runs between the two, and a report of the DEFAULTS followed by a
@@ -1470,7 +1516,7 @@ class PanelO6:
             if sys.platform == "darwin":
                 self._nudge_height()
         if FIT_TRACE:
-            r = self.root
+            r = self.w.top
             log("fittrace: Configure canvas %dx%d (winfo %dx%d, predicted %s), "
                 "root %dx%d%s" % (event.width, event.height, self.cv.winfo_width(),
                                   self.cv.winfo_height(), pending[0] if pending else "-",
@@ -1479,7 +1525,7 @@ class PanelO6:
         self._fit_passes = 0
         self._fit_grow = 0
         self._fit_bracket = {}
-        self.redraw()
+        self._redraw_win(self.w)
 
     def _nudge_height(self):
         """macOS: after a programmatic height shrink, Tk's content view keeps
@@ -1488,7 +1534,7 @@ class PanelO6:
         though every size Tk reported was right.  Moving the window does not
         cure it; a height change of one point and back does (Mac-integrate,
         2026-10-01)."""
-        r = self.root
+        r = self.w.top
         w, h = r.winfo_width(), r.winfo_height()
 
         def back():
@@ -1500,6 +1546,15 @@ class PanelO6:
             r.after(50, back)
 
         r.after(50, up)
+
+    def _in(self, win, fn, event):
+        """An event in one window's canvas, handled with that window current."""
+        prev = self.w
+        self.w = win
+        try:
+            return fn(event)
+        finally:
+            self.w = prev
 
     def _scale(self):
         # The size the last Configure reported, which is the canvas's as
@@ -1709,12 +1764,125 @@ class PanelO6:
         L["mode_halt"] = y
         return L
 
+    # WHAT EACH WINDOW DRAWS FROM.  A whole redraw of every window took
+    # 460 ms at 192 dpi, and every switch move asked for one; so redraw()
+    # repaints only the windows whose state has changed.  (A resize or a fit
+    # pass repaints its own window directly.)
+    WIN_STATE = {
+        "O6": ("power", "output", "ipl", "mode", "ipl_source", "gpc_out", "_tb_shown",
+               "_out_tb_shown", "latch", "term_a", "idp_load", "rhc", "activity", "wired",
+               "bfc_display", "bfc_select", "bfc_disengage"),
+        "C2": ("idp_power", "idp_mf", "kybd_sel"),
+        "R11": ("idp_power", "idp_mf"),
+        "C3": ("bfc_display", "bfc_select", "dap", "dap_lamp", "fcs_ch", "oms_eng"),
+        "F6": ("bfc_disengage", "adi", "attref"),
+        "F8": ("adi", "attref"),
+        "A6U": ("adi", "attref", "sense", "dap", "dap_lamp"),
+        "F2": ("am", "am_lamp"), "F4": ("am", "am_lamp"),
+        "F3": ("trim_rhc",), "O7": ("xfeed",),
+    }
+
+    def _win_sig(self, win):
+        return repr([getattr(self, a, None) for a in self.WIN_STATE.get(win.name, ())]
+                    + [self.circle])
+
     def redraw(self):
-        self._scale()
-        self.cv.delete("all")
-        self._hits = []
-        self._bp_cache = {}
-        self.pb = self._pb_size()
+        """The panel windows whose state has changed, each drawn by its own
+        function in its own canvas, at its own scale."""
+        for win in self.wins.values():
+            if self._win_sig(win) != getattr(win, "_sig", None):
+                self._redraw_win(win)
+
+    def _redraw_win(self, win):
+        prev = self.__dict__.get("w")
+        self.w = win
+        win._sig = self._win_sig(win)
+        # MEASURED ONCE AT THE SCALE --size GIVES.  A window still at its
+        # natural size is drawn at exactly size/FULL_SIZE and then made the
+        # size of what it drew -- no fit loop: inferring the scale from the
+        # window, with whole-point fonts, bounced the small panels 20-30
+        # times each and held Tk 11 s at startup.
+        measuring = win.natural is not None and not win._measured
+        try:
+            if measuring:
+                self.s = self._size / float(FULL_SIZE)
+                self.ox = self.oy = 0.0
+            else:
+                self._scale()
+            self.cv.delete("all")
+            self._hits = []
+            self._bp_cache = {}
+            self.pb = self._pb_size()
+            right, bottom = win.draw()
+            self._draw_circle()
+            if measuring:
+                self._size_to_content(win, right + MARGIN, bottom + MARGIN)
+                if not self._placed and all(x._measured or x.natural is None
+                                            for x in self.wins.values()):
+                    self._placed = True
+                    self.root.after(600, self._auto_place)
+                return
+            # A WINDOW SOMEONE HAS SIZED is fitted to: the design size
+            # follows what was laid out, in this host's fonts.
+            self._fit_moved = False
+            self._fit("_ref_w", win.ref0[0], right + MARGIN)
+            self._fit("_ref_h", win.ref0[1], bottom + MARGIN)
+        finally:
+            if prev is not None:
+                self.w = prev
+
+    # WHERE THE WINDOWS GO WITHOUT A LAYOUT: O6 where it was put, the rest in
+    # this order flowing to its right and wrapping at the screen's edge.  A
+    # first guess, done once; a layout restored afterwards moves them all.
+    PLACE_ORDER = ("C3", "F6", "F8", "A6U", "F2", "F3", "F4", "O7", "C2", "R11")
+    PLACE_GAP = 8          # between windows, real pixels
+    PLACE_TITLE = 32       # allowance for a title bar
+
+    def _auto_place(self):
+        root = self.root
+        root.update_idletasks()
+        x0 = root.winfo_x() + root.winfo_width() + self.PLACE_GAP
+        y0 = max(0, root.winfo_y())
+        sw = root.winfo_screenwidth()
+        x, y, row_h = x0, y0, 0
+        for name in self.PLACE_ORDER:
+            win = self.wins.get(name)
+            if win is None:
+                continue
+            w, h = win.top.winfo_width(), win.top.winfo_height()
+            if x + w > sw and x > x0:
+                x, y, row_h = x0, y + row_h + self.PLACE_TITLE + self.PLACE_GAP, 0
+            win.top.geometry("+%d+%d" % (x, y))
+            x += w + self.PLACE_GAP
+            row_h = max(row_h, h)
+        log("placed the panel windows to the right of O6 (no layout yet)")
+
+    def _size_to_content(self, win, need_w, need_h):
+        """The window the size of its content at size/FULL_SIZE, capped by
+        the screen (which is logged); the design size is the need."""
+        st = self._size / float(FULL_SIZE)
+        win._ref_w, win._ref_h = need_w * 1.003, need_h * 1.003
+        top = win.top
+        cap = min(1.0, (top.winfo_screenwidth() - 24) / (win._ref_w * st),
+                  (top.winfo_screenheight() - 120) / (win._ref_h * st))
+        # Rounded down, so the scale can only fall a hair, never round a
+        # font up.
+        w = int(math.floor(win._ref_w * st * cap))
+        h = int(math.floor(win._ref_h * st * cap))
+        win._measured = True
+        win.natural = None
+        win._wh = (w, h)
+        self.cv.configure(width=w, height=h)
+        top.geometry("")                  # the window follows its canvas
+        top.minsize(min(w, win._minsize[0]), min(h, win._minsize[1]))
+        log("size: %s %dx%d, the content at scale %.3f%s"
+            % (win.name, w, h, st * cap,
+               "" if cap >= 1.0 else " -- the screen holds only %.0f%%" % (100 * cap)))
+
+    def _draw_win_o6(self):
+        """O6: the GPC panel, its IDP LOAD inset, and two things that are not
+        O6's but have nowhere better -- RHC BFC ENGAGE (on the hand
+        controllers' grips) and the simulator's ACTIVITY lamps."""
         L = self._layout()
         self.L = L
 
@@ -1764,7 +1932,6 @@ class PanelO6:
         self.side_l_out = self.col[0] - 29 - 14
         self.side_r_out = self.col[-1] + 29 + 14
 
-        self._panel_tag(mx0, my0, "O6")
         self._draw_title()
         self._draw_power()
         self._draw_output_talkbacks()
@@ -1774,78 +1941,97 @@ class PanelO6:
         self._draw_mode_switches()
         self._draw_ipl_source(mx1, ex1, ey0, ey1)
 
-        # C3 / F6 sit in the O6 concave cutout, above the IPL SOURCE tab.
+        # The right-hand column, beside the IPL SOURCE tab: IDP LOAD at the
+        # top; RHC BFC ENGAGE and ACTIVITY at the bottom, ACTIVITY's bottom
+        # on O6's.
         pad = 10
         th10 = self._th(10)
-        ths = self._th(SETTING_SIZE)
-        c3_sw_h = 136          # same 3-pos guard as O6 OUTPUT
-        sw_h = 58              # F6 is POWER's 58x124 guard, rotated
-        c3_x0 = mx1 + PANE_GAP
-        c3_x1 = c3_x0 + C3_W
-        c3_y0 = my0
-        # Heights follow _draw_c3 / _draw_f6: centre-anchored titles
-        # consume a full linespace on each side of the glyph.
-        c3_y1 = c3_y0 + 5 * pad + 2 * th10 + 6 * ths + c3_sw_h
-        f6_x0, f6_x1 = c3_x0, c3_x1
-        f6_y0 = c3_y1 + PANE_GAP
-        f6_y1 = f6_y0 + 4 * pad + 4 * th10 + sw_h
-        self._draw_c3(c3_x0, c3_y0, c3_x1, c3_y1)
-        self._panel_tag(c3_x0, c3_y0, "C3")
-        self._draw_f6(f6_x0, f6_y0, f6_x1, f6_y1)
-        self._panel_tag(f6_x0, f6_y0, "F6")
-        # Below the IPL SOURCE tab, in the same column: ACTIVITY with its
-        # bottom on O6's bottom edge, and RHC BFC ENGAGE directly above it.
-        # Heights follow _draw_activity / _draw_rhc.
+        x0 = ex1 + PANE_GAP
+        col_w = max(IDP_LOAD_W, self._tw("RHC BFC ENGAGE", 10) + 2 * 16,
+                    self._tw("INTEGRATED DISPLAY PROCESSOR", 10) + 2 * 24)
+        self._draw_idp_load(x0, my0, x0 + col_w)
         act_y1 = my1
         act_y0 = act_y1 - (3 * pad + 4 * th10)
         rhc_y1 = act_y0 - PANE_GAP
         rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + self.pb)
-        # RHC BFC ENGAGE IS AS WIDE AS ITS TITLE NEEDS, and ACTIVITY below
-        # it matches (owner, 2026-10-01): at C3's width the title overran
-        # the pane.  R11, beside them, moves right to suit.  Neither carries
-        # a panel number: the ENGAGE buttons are on the CDR's and PLT's
-        # hand controllers, and ACTIVITY is the simulator's own.
-        bot_w = max(f6_x1 - f6_x0, self._tw("RHC BFC ENGAGE", 10) + 2 * 16)
-        bot_x1 = f6_x0 + bot_w
-        self._draw_rhc(f6_x0, rhc_y0, bot_x1, rhc_y1)
-        self._draw_activity(f6_x0, act_y0, bot_x1, act_y1)
-        # The IDP column, right of C3/F6: C2 at the top, the O6 IDP LOAD
-        # inset under it.
-        idp_x0 = c3_x1 + PANE_GAP
-        idp_x1 = idp_x0 + C2_W
-        c2_y1 = self._draw_c2(idp_x0, my0, idp_x1)
-        self._panel_tag(idp_x0, my0, "C2")
-        load_y1 = self._draw_idp_load(idp_x0, c2_y1 + PANE_GAP, idp_x1)
-        self._panel_tag(idp_x0, c2_y1 + PANE_GAP, "O6")
-        r11_x0 = max(idp_x0, bot_x1 + PANE_GAP)
-        self._draw_r11(r11_x0, load_y1 + PANE_GAP, idp_x1)
-        self._panel_tag(r11_x0, load_y1 + PANE_GAP, "R11")
-        # The ADI and SENSE switches: their own column, right of the IDP one.
-        adi_x0 = idp_x1 + PANE_GAP
-        adi_w = max(ADI_COL_W, self._adi_width())
-        adi_y1 = self._draw_crew(adi_x0, my0, adi_x0 + adi_w)
-        # The ORBITAL DAP pushbuttons: C3 over A6U, a column of their own.
-        dap_x0 = adi_x0 + adi_w + PANE_GAP
-        dap_w = max(DAP_COL_W, self._dap_width())
-        y = my0
-        for st in DAP_STATIONS:
-            y1 = self._draw_dap(dap_x0, y, dap_x0 + dap_w, st)
-            self._panel_tag(dap_x0, y, DAP_PANEL[st])
-            y = y1 + PANE_GAP
-        adi_y1 = max(adi_y1, y1)
-        # Section D's switches: a column of their own, right of the DAP's --
-        # the panel grows wider rather than taller (owner, 2026-09-30).
-        secd_x1, secd_y1 = self._draw_secd(dap_x0 + dap_w + PANE_GAP, my0)
-        adi_y1 = max(adi_y1, secd_y1)
-        self._draw_circle()
-        # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
-        # their measured text needs, which under macOS's wider fonts is more
-        # than at Linux's (Mac-integrate, 2026-10-01).
-        self._fit_moved = False
-        self._fit("_ref_w", REF_W, secd_x1 + MARGIN)
-        self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
-        if not self._fit_moved:
-            self._snug()
+        self._draw_rhc(x0, rhc_y0, x0 + col_w, rhc_y1)
+        self._draw_activity(x0, act_y0, x0 + col_w, act_y1)
+        return x0 + col_w, my1 + 6
+
+    def _c3_bfc_h(self):
+        pad, th10, ths = 10, self._th(10), self._th(SETTING_SIZE)
+        return 5 * pad + 2 * th10 + 6 * ths + 136     # follows _draw_c3
+
+    def _draw_win_c3(self):
+        """C3: OMS ENG beside BFC CRT, as on the real panel, FCS CHANNEL
+        below them, and the ORBITAL DAP block to the right."""
+        x0 = y0 = MARGIN
+        ow, oh = self._draw_oms(0, 0, 0, measure=True)
+        row_h = max(oh, self._c3_bfc_h())
+        self._draw_oms(x0, y0, x0 + ow, h=row_h)
+        bx0 = x0 + ow + PANE_GAP
+        self._draw_c3(bx0, y0, bx0 + C3_W, y0 + row_h)
+        row_w = ow + PANE_GAP + C3_W
+        fw, fh = self._draw_fcs(0, 0, 0, measure=True)
+        left_w = max(row_w, fw)
+        fy0 = y0 + row_h + PANE_GAP
+        self._draw_fcs(x0, fy0, x0 + left_w)
+        left_bottom = fy0 + fh
+        dx0 = x0 + left_w + PANE_GAP
+        dw = max(DAP_COL_W, self._dap_width())
+        dy1 = self._draw_dap(dx0, y0, dx0 + dw, "FWD")
+        return dx0 + dw, max(left_bottom, dy1)
+
+    def _draw_win_f6(self):
+        """F6: BFC DISENGAGE and the CDR's ADI switches."""
+        x0 = y0 = MARGIN
+        pad, th10 = 10, self._th(10)
+        self._draw_f6(x0, y0, x0 + C3_W, y0 + 4 * pad + 4 * th10 + 58)
+        ax0 = x0 + C3_W + PANE_GAP
+        aw = max(ADI_COL_W, self._adi_width())
+        y1 = self._draw_adi(ax0, y0, ax0 + aw, 0, "L")
+        return ax0 + aw, y1
+
+    def _draw_win_f8(self):
+        x0 = y0 = MARGIN
+        aw = max(ADI_COL_W, self._adi_width())
+        return x0 + aw, self._draw_adi(x0, y0, x0 + aw, 1, "R")
+
+    def _draw_win_a6u(self):
+        """A6U: the aft ADI switches with SENSE, and the aft DAP block."""
+        x0 = y0 = MARGIN
+        aw = max(ADI_COL_W, self._adi_width())
+        y1 = self._draw_adi(x0, y0, x0 + aw, 2, "A")
+        dx0 = x0 + aw + PANE_GAP
+        dw = max(DAP_COL_W, self._dap_width())
+        y2 = self._draw_dap(dx0, y0, dx0 + dw, "AFT")
+        return dx0 + dw, max(y1, y2)
+
+    def _draw_win_c2(self):
+        x0 = y0 = MARGIN
+        return x0 + C2_W, self._draw_c2(x0, y0, x0 + C2_W)
+
+    def _draw_win_r11(self):
+        x0 = y0 = MARGIN
+        return x0 + R11_W, self._draw_r11(x0, y0, x0 + R11_W)
+
+    def _draw_one(self, fn, *a):
+        x0 = y0 = MARGIN
+        w, h = fn(0, 0, 0, *a, measure=True)
+        fn(x0, y0, x0 + w, *a)
+        return x0 + w, y0 + h
+
+    def _draw_win_f2(self):
+        return self._draw_one(self._draw_am, "L")
+
+    def _draw_win_f4(self):
+        return self._draw_one(self._draw_am, "R")
+
+    def _draw_win_f3(self):
+        return self._draw_one(self._draw_trim)
+
+    def _draw_win_o7(self):
+        return self._draw_one(self._draw_xfeed)
 
     CIRCLE_PX = 2          # its stroke: real pixels, whatever --size
 
@@ -1863,15 +2049,16 @@ class PanelO6:
                 self.cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline=colour,
                                     width=self.CIRCLE_PX, tags=("circle",))
                 return
-        if self._circle_missed != name:
-            self._circle_missed = name
-            log("circle: no feature %r on the panel" % name)
 
     def set_circle(self, name, colour="yellow", diameter=2.0):
         self.circle = None if name is None else (name, colour, float(diameter))
         log("circle: %s" % ("none" if name is None else
                             "%s, %s, %g pushbuttons" % (name, colour, diameter)))
         self.redraw()
+        if name is not None and not any(
+                feature_name(k, i) == name for win in self.wins.values()
+                for k, i, *_ in win._hits):
+            log("circle: no feature %r in any panel window" % name)
 
     def _snug(self):
         """ONCE, when the fit has settled: give a window still at its natural
@@ -1890,7 +2077,7 @@ class PanelO6:
             return
         if getattr(self, "_snug_pending", None):
             return                        # its Configure has yet to come
-        root = self.root
+        root = self.w.top
         size = (root.winfo_width(), root.winfo_height())
         if size[0] <= 1:
             return                        # not mapped yet
@@ -1937,8 +2124,8 @@ class PanelO6:
         x, y = root.winfo_x(), root.winfo_y()
         nx = max(0, min(x, root.winfo_screenwidth() - w - frame_w - 8))
         ny = max(0, min(y, root.winfo_screenheight() - h - frame_h - 48))
-        log("snug: window %dx%d -> %dx%d, the content at scale %.3f%s"
-            % (size + (w, h, st * cap)
+        log("snug: %s window %dx%d -> %dx%d, the content at scale %.3f%s"
+            % ((self.w.name,) + size + (w, h, st * cap)
                + ((", moved to %d,%d to stay on the screen" % (nx, ny))
                   if (nx, ny) != (x, y) else "",)))
         if (nx, ny) != (x, y):
@@ -1995,10 +2182,11 @@ class PanelO6:
         else:
             return
         self._fit_passes = passes + 1
-        log("fit: %s %.0f -> %.0f at scale %.4f" % (attr[5:], cur, new, self.s))
+        log("fit: %s %s %.0f -> %.0f at scale %.4f" % (self.w.name, attr[5:], cur, new, self.s))
         setattr(self, attr, new)
         self._fit_moved = True
-        self.root.after_idle(self.redraw)
+        win = self.w
+        self.root.after_idle(lambda: self._redraw_win(win))
 
     def _gpc_numbers(self, y):
         for i, cx in enumerate(self.col):
@@ -2423,7 +2611,6 @@ class PanelO6:
         y = y0
         for i, st in enumerate(ADI_STATIONS):
             y1 = self._draw_adi(x0, y, x1, i, st)
-            self._panel_tag(x0, y, ADI_PANEL[st])
             y = y1 + PANE_GAP
         return y1
 
@@ -2675,28 +2862,6 @@ class PanelO6:
             for j, w in enumerate(words):
                 self._text(x, cy + (j - 1) * ls, w, size=SETTING_SIZE)
         return width, height
-
-    def _draw_secd(self, x0, y0):
-        """Section D's column: FCS CHANNEL; OMS ENG beside TRIM RHC/PNL; the
-        F2 and F4 AUTO/MAN pushbuttons; MASTER RCS CROSSFEED.  Each row's
-        panes share its width.  Returns (right edge, bottom)."""
-        rows = (((self._draw_fcs, (), "C3"),),
-                ((self._draw_oms, (), "C3"), (self._draw_trim, (), "F3")),
-                ((self._draw_am, ("L",), "F2"), (self._draw_am, ("R",), "F4")),
-                ((self._draw_xfeed, (), "O7"),))
-        sizes = [[f(0, 0, 0, *a, measure=True) for f, a, _t in row] for row in rows]
-        col_w = max(sum(w for w, _h in sz) + PANE_GAP * (len(sz) - 1) for sz in sizes)
-        y = y0
-        for row, sz in zip(rows, sizes):
-            extra = (col_w - sum(w for w, _h in sz) - PANE_GAP * (len(sz) - 1)) / len(sz)
-            h = max(hh for _w, hh in sz)
-            x = x0
-            for (f, a, tag), (w, _h) in zip(row, sz):
-                f(x, y, x + w + extra, *a, h=h)
-                self._panel_tag(x, y, tag)
-                x += w + extra + PANE_GAP
-            y += h + PANE_GAP
-        return x0 + col_w, y - PANE_GAP
 
     def _set_fcs(self, i, value):
         old = self.fcs_ch[i]
@@ -3058,8 +3223,9 @@ class PanelO6:
 
     def wait_for_click(self, done):
         self._user_wait = done
-        self._cursor_hits = None
-        self.cv.configure(cursor=self.WAIT_CURSOR)
+        for win in self.wins.values():
+            win._cursor_hits = None
+            win.cv.configure(cursor=self.WAIT_CURSOR)
         # NSTS_PANEL_AUTOCLICK=<seconds>: A TEST OF 'wait user'.  The click
         # arrives through the canvas's own binding, as a real one would.
         auto = os.environ.get("NSTS_PANEL_AUTOCLICK", "")
@@ -3069,7 +3235,7 @@ class PanelO6:
             ms = None
         if ms is not None:
             log("NSTS_PANEL_AUTOCLICK: clicking in %.1f s" % (ms / 1000.0))
-            self.root.after(ms, lambda: self.cv.event_generate(
+            self.root.after(ms, lambda: self.wins["O6"].cv.event_generate(
                 "<ButtonPress-1>", x=5, y=5, when="tail"))
 
     def _on_leave(self, _event):
@@ -3092,8 +3258,9 @@ class PanelO6:
     def _on_press(self, event):
         if self._user_wait is not None:
             done, self._user_wait = self._user_wait, None
-            self._cursor_hits = False
-            self.cv.configure(cursor="")
+            for win in self.wins.values():
+                win._cursor_hits = False
+                win.cv.configure(cursor="")
             done()
             return
         hit = self._find(event.x, event.y)
@@ -3699,7 +3866,7 @@ def _listen_control(panel):
             # what they want -- so it can be asked for without restarting.
             # It is withdrawn, not destroyed, so this is all it takes.
             log("script command: show the panel")
-            panel.root.after(0, panel.root.deiconify)
+            panel.root.after(0, lambda: [w.top.deiconify() for w in panel.wins.values()])
         elif word == "save" and rest:
             # ON THE TK THREAD.  The switches are read by the same thread
             # that writes them, so a save can never catch a control
@@ -3757,6 +3924,18 @@ def _stop_script(panel):
     if getattr(panel, "player", None) is not None and not panel.player.stopped:
         panel.player.stopped = True
         log("script stopped")
+
+
+def _per_window(name):
+    return property(lambda self: getattr(self.w, name),
+                    lambda self, v: setattr(self.w, name, v))
+
+
+for _n in ("cv", "s", "ox", "oy", "_hits", "_bp_cache", "_wh", "_fit_passes",
+           "_fit_grow", "_fit_bracket", "_fit_need", "_fit_moved", "_snugged",
+           "_snug_set", "_snug_pending", "_cursor_hits", "_ref_w", "_ref_h",
+           "natural", "_minsize"):
+    setattr(PanelO6, _n, _per_window(_n))
 
 
 def main(argv=None):
@@ -3834,12 +4013,11 @@ def main(argv=None):
             root.geometry(geom)
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
-    # A --geometry that only places the window (simulatePASS's "+X+Y")
-    # leaves its size natural, and the snug free to fit it to the content.
-    if not geom or not re.match(r"^\s*\d+x\d+", geom):
-        w, h = scaled_wh(REF_W, REF_H, args.size)
-        root.geometry("%dx%d" % (w, h))
-        panel.natural = (w, h)
+    # A --geometry that only places O6 (simulatePASS's "+X+Y") leaves its
+    # size natural, and the snug free to fit it to the content; one with a
+    # size is the user's, and stays.
+    if geom and re.match(r"^\s*\d+x\d+", geom):
+        panel.wins["O6"].natural = None
     # BETWEEN CONSTRUCTION AND THE FIRST PUBLISH, which is the only window
     # where seeding the switches is silent -- see start_bus().
     if args.restore:
@@ -3872,9 +4050,10 @@ def main(argv=None):
     # An unattended scripted run has nobody watching it, so it gets no
     # window -- unless asked for one (--show, for a demonstration), or the
     # script waits for someone to click in it.
-    _dont_steal_focus(root, mapWindow=(not args.script or args.show or args.wait_user
-                                       or (crewscript.has_wait_user(text)
-                                           and not args.no_wait_user)))
+    show = (not args.script or args.show or args.wait_user
+            or (crewscript.has_wait_user(text) and not args.no_wait_user))
+    for win in panel.wins.values():
+        _dont_steal_focus(win.top, mapWindow=show)
     # The screen announcements and the script commands are wanted whether or
     # not a script was named: manager.py can start one at any moment.
     panel.screens = crewscript.ScreenWatch()

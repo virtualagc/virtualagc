@@ -415,8 +415,17 @@ def claim(root, delay_ms=300):
     root.after(delay_ms, stamp)
 
 
+# panelO6.py's windows, one per numbered panel, titled with the number alone
+# -- O6, C3, F6, A6U, R11 ... -- and so told apart by title, though they
+# share one process (owner, 2026-10-02).
+PANEL_TITLE = re.compile(r"^([ACFLOR]\d{1,2}[ULR]?)$")
+
+
 def role_of(pid, title):
     cmd = cmdline(pid) if pid else ""
+    m = PANEL_TITLE.match(title.strip())
+    if m and (not cmd or "panelO6.py" in cmd):
+        return "panel_" + m.group(1).lower(), cmd
     for pattern, name in ROLE_PATTERNS:
         m = pattern.search(cmd)
         if m:
@@ -908,39 +917,47 @@ def place(wid, x, y, w=None, h=None, verbose=False):
     return (dx, dy)                    # how far out it finished
 
 
-def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None):
+def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None,
+                merge=False):
     """Write where the windows are now.  everything keeps unrecognised ones;
     only_ids limits it to those windows, only_pids to those processes' (see
-    descendants()).  Returns how many were saved."""
+    descendants()).  Returns how many were saved.
+
+    merge: ADD TO THE FILE rather than replace it -- windows on screen now
+    replace their own entries, the file's other entries are kept.  The
+    panels' windows appear only with the OPS that needs them, so no one
+    moment has all of them up to save (owner, 2026-10-02)."""
     keep = [w for w in windows()
             if (everything or not w["role"].startswith("other:"))
             and (only_ids is None or w["id"] in only_ids)
             and (only_pids is None or w["pid"] in only_pids)]
+    entries = [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look") if k in w}
+               for w in keep]
+    kept = 0
+    if merge and os.path.isfile(path):
+        with open(path) as fh:
+            old = json.load(fh).get("windows", [])
+        now = {e["role"] for e in entries}
+        rest = [e for e in old if e.get("role") not in now]
+        kept = len(rest)
+        entries += rest
     layout = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
-              "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look")
-                           if k in w}
-                          for w in sorted(keep, key=lambda w: w["role"])]}
+              "windows": sorted(entries, key=lambda e: e["role"])}
     with open(path, "w") as fh:
         json.dump(layout, fh, indent=2)
         fh.write("\n")
-    log("saved %d windows to %s" % (len(keep), path))
+    log("saved %d windows to %s%s" % (len(keep), path,
+                                      " (and kept %d not on screen)" % kept if merge else ""))
     return len(keep)
 
 
 def cmd_save(args):
-    ws = windows()
-    keep = [w for w in ws if not w["role"].startswith("other:") or args.all]
-    layout = {"saved": time.strftime("%Y-%m-%d %H:%M:%S"),
-              "windows": [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look")
-                           if k in w}
-                          for w in sorted(keep, key=lambda w: w["role"])]}
-    with open(args.file, "w") as fh:
-        json.dump(layout, fh, indent=2)
-        fh.write("\n")
-    print("saved %d windows to %s" % (len(keep), args.file))
+    save_layout(args.file, everything=args.all, merge=args.merge)
+    with open(args.file) as fh:
+        layout = json.load(fh)
     for w in layout["windows"]:
         print("   %-12s %5d,%-5d %4dx%-4d  %s" % (w["role"], w["x"], w["y"],
-                                                  w["w"], w["h"], w["title"][:40]))
+                                                  w["w"], w["h"], w.get("title", "")[:40]))
         if w.get("look"):
             print("   %-12s %s" % ("", w["look"]))
     return 0
@@ -1070,6 +1087,9 @@ def main(argv=None):
     s = sub.add_parser("save", help="write the current placement to a file")
     s.add_argument("file")
     s.add_argument("--all", action="store_true", help="unrecognised windows too")
+    s.add_argument("--merge", action="store_true",
+                   help="add to the file: the windows on screen replace their own "
+                        "entries, its others are kept")
     s.set_defaults(func=cmd_save)
     r = sub.add_parser("restore", help="put the windows back where a file says")
     r.add_argument("file")
