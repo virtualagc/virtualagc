@@ -457,7 +457,11 @@ int main(void) {
      * and the vehicle then moves on from there exactly as the original
      * would have. */
     {
-        char dir[] = "/tmp/test_mdmdev_capXXXXXX";
+        char dir[512];
+        const char *tmp = getenv("TMPDIR");
+        if (tmp == NULL) tmp = getenv("TEMP");
+        if (tmp == NULL) tmp = "/tmp";
+        snprintf(dir, sizeof dir, "%s/test_mdmdev_capXXXXXX", tmp);
         check(mkdtemp(dir) != NULL, "capture: temporary directory");
         vehdyn_reset(0.0);
         vehdyn_set_oms(1, false, true, 1.5, -2.0, 0.0);
@@ -483,9 +487,9 @@ int main(void) {
         for (int i = 0; i < 3; i++) d += (vehdyn_state()->r[i] - rFut[i]) * (vehdyn_state()->r[i] - rFut[i]);
         if (sqrt(d) > 0.01) printf("restored vehicle %.4g m from the original\n", sqrt(d));
         check(sqrt(d) < 0.01, "capture: the restored vehicle flies on as the original did");
-        char cmd[200];
-        snprintf(cmd, sizeof cmd, "rm -rf %s", dir);
-        if (system(cmd) != 0) printf("could not remove %s\n", dir);
+        char file[600];
+        snprintf(file, sizeof file, "%s/vehdyn.json", dir);
+        if (remove(file) != 0 || rmdir(dir) != 0) printf("could not remove %s\n", dir);
     }
 
     mtumodel_free(m);

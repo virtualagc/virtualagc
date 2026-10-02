@@ -26,4 +26,13 @@ int yagpc_pipe(int fds[2]);
 
 int usleep(unsigned int microseconds);
 
+/* mkdtemp: the template's XXXXXX made unique, then the directory made.
+ * rmdir comes with <direct.h>. */
+#include <direct.h>
+#include <string.h>
+static __inline char *mkdtemp(char *tmpl) {
+    if (_mktemp_s(tmpl, strlen(tmpl) + 1) != 0) return NULL;
+    return _mkdir(tmpl) == 0 ? tmpl : NULL;
+}
+
 #endif
