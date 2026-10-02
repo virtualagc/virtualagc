@@ -180,6 +180,9 @@ static struct {
 
 static PhysState st;
 static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
+/* After a restore, the GMT the restored state belongs to, until the timing
+ * unit says what GMT the restored clock's zero is (vehdyn_set_gmt_zero). */
+static double restoredGmt = -1.0;
 
 /* THE RECENT PAST: (t, r, v) after every step, so a sensor can report the
  * state at a moment just gone -- a GPS solution's time of validity -- by
@@ -513,6 +516,31 @@ void vehdyn_set_gmt_zero(double unixAtZero) {
              + (unixAtZero - (double)whole);
     if (fabs(z - gmtZero) < 1e-3) return;          /* already so */
     gmtZero = z;
+    /* A RESTORED VEHICLE FLIES ON THROUGH THE GAP.  The timing unit's GMT
+     * includes the time the restored computers sat in HALT before RUN (its
+     * latched halt offset), which the flight software's clock counts and the
+     * restored state did not: coast the truth through it, as the real
+     * vehicle would have while its computers were stopped, so that state and
+     * GMT agree again.  Without this the flight software's navigation,
+     * propagated to the new GMT, was seconds -- tens of kilometres -- ahead
+     * of the truth. */
+    if (restoredGmt > 0.0) {
+        double gap = z - restoredGmt;
+        restoredGmt = -1.0;
+        if (gap > 1e-6 && gap < 3600.0) {
+            double r[3], v[3];
+            memcpy(r, st.r, sizeof r);
+            memcpy(v, st.v, sizeof v);
+            PhysState c = st;
+            c.t = 0.0;
+            phys_advance_to(&c, gap, 1.0, NULL, NULL);
+            memcpy(st.r, c.r, sizeof st.r); memcpy(st.v, c.v, sizeof st.v);
+            memcpy(st.q, c.q, sizeof st.q); memcpy(st.w, c.w, sizeof st.w);
+            histCount = 0;
+            hist_push();
+            fprintf(stderr, "vehdyn: restored state coasted %.3f s, to the timing unit's GMT\n", gap);
+        }
+    }
     int year = 2000, day = 75;
     const char *e = yagpc_getenv("YAGPC_RNP");
     if (e != NULL) sscanf(e, "%d,%d", &year, &day);
@@ -636,6 +664,7 @@ int vehdyn_save(double *b, int max) {
         PUT(oms[e].cmd[0]); PUT(oms[e].cmd[1]); PUT(oms[e].pos[0]); PUT(oms[e].pos[1]);
         PUT(oms[e].onSec);
     }
+    PUT(gmtZero >= 0.0 ? gmtZero + st.t : -1.0);      /* the state's GMT */
 #undef PUT
     return n;
 }
@@ -660,14 +689,17 @@ double vehdyn_load(const double *b, int n) {
         oms[e].pos[0] = GET(); oms[e].pos[1] = GET();
         oms[e].onSec = GET();
     }
+    double gmtCap = (i < n) ? b[i] : -1.0;
+    i++;
 #undef GET
-    if (i > n) return -1.0;
+    if (i > n + 1) return -1.0;               /* the GMT may be missing: older */
     haveTime = had;
     st.t = 0.0;                    /* the restored clock's zero */
     mass_properties();
     histCount = 0;
     hist_push();
     if (gmtZero >= 0.0) gmtZero += t;
+    restoredGmt = gmtCap;
     return t;
 }
 

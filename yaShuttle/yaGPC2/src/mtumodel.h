@@ -53,6 +53,12 @@ void mtumodel_set_clock(struct MtuModel *m, const double *clockUs);
  * day 0, as before. */
 void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec);
 
+/* The time of day the unit is reporting now, as Unix seconds (GMT), or a
+ * negative number without an epoch.  What a session capture must record for
+ * a restore to resume at: the vehicle's own GMT, which runs behind the wall
+ * clock by however much simulated time has lagged. */
+double mtumodel_unix_now(const struct MtuModel *m);
+
 /* Simulated microseconds of the time of day that the calling computer's own
  * clock does not contain: whatever its real-time pacer wrote off while the
  * computer was held in HALT, or stopped by a debugger.  The timing unit is a

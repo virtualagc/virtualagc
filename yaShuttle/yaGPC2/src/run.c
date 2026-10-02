@@ -753,8 +753,17 @@ static void batchrunner_write_capture(BatchRunner *r) {
                     if (*c == '"' || *c == '\\') fputc('\\', cf);
                     fputc((unsigned char)*c < 0x20 ? ' ' : *c, cf);
                 }
-                fprintf(cf, "\",\n  \"capturedAtUs\": %.0f\n}\n",
+                fprintf(cf, "\",\n  \"capturedAtUs\": %.0f",
                         r->age.gpc.cpu.elapsedTimeUs);
+                /* THE VEHICLE'S GMT, for the restore to resume at: the time
+                 * of day the timing unit was reporting, not the wall clock
+                 * the capture was asked for at -- equal only while simulated
+                 * time keeps exact pace with real time, and a restore that
+                 * resumed at a later GMT would move it forward under a
+                 * flight software and a truth vehicle that had not moved. */
+                double gmtUnix = mtumodel_unix_now(r->mtuModel);
+                if (gmtUnix > 0.0) fprintf(cf, ",\n  \"gmtUnix\": %.6f", gmtUnix);
+                fprintf(cf, "\n}\n");
                 fclose(cf);
             }
         }

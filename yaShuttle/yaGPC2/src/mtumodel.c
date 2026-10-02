@@ -1195,6 +1195,17 @@ static uint16_t mdm_word(const struct MtuModel *m, int b, int r) {
     return (i >= 0 && i < FF_REPLY_MAX) ? m->mdmData[b][i] : 0;
 }
 
+double mtumodel_unix_now(const struct MtuModel *m) {
+    if (m == NULL || m->epochSec == NULL || *m->epochSec <= 0.0) return -1.0;
+    double epochUs;
+    if (!ff_mdm_off() && m->sharedUs >= 0.0)
+        epochUs = m->sharedUs + (m->haveBase ? m->baseUs
+                                 : (m->offsetUs != NULL ? *m->offsetUs : 0.0));
+    else
+        epochUs = (m->clockUs ? *m->clockUs : 0.0) + (m->offsetUs != NULL ? *m->offsetUs : 0.0);
+    return *m->epochSec + epochUs / 1e6;
+}
+
 static void mtu_fill_time(struct MtuModel *m, int b) {
     /* THE UNIT'S OWN TIME, from the vehicle's shared clock where there is one
      * -- see mtumodel_set_shared_us.  Falling back to the caller's clock is
