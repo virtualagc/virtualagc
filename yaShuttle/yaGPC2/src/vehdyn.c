@@ -291,7 +291,13 @@ void vehdyn_advance(double sharedUs) {
         double maxDt = firing ? STEP_S : 1.0;
         if (dt > maxDt) dt = maxDt;
         if (dt < 1e-9) { st.t = t; break; }
+        /* What the accelerometers feel: everything but gravity -- the jets
+         * and the air, the drag taken at the middle of the step. */
+        double ad0[3], ad1[3];
+        phys_drag_accel(&st, ad0);
         phys_step(&st, dt, firing ? f : NULL, firing ? tau : NULL);
+        phys_drag_accel(&st, ad1);
+        for (int i = 0; i < 3; i++) sensedDv[i] += 0.5 * (ad0[i] + ad1[i]) * dt;
         if (firing) {
             double fi[3];
             phys_body_to_inertial(&st, f, fi);
