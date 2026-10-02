@@ -664,7 +664,8 @@ class PanelO6:
         root.minsize(mw, mh)
         self._minsize = (mw, mh)
         self.natural = None     # set by main() when it sizes the window itself
-        self._snugged = False
+        self._snugged = 0       # passes made: at most two
+        self._snug_set = None
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
@@ -1820,14 +1821,23 @@ class PanelO6:
         --size gives them however many there are.  Only the screen limits
         it, and a cap is logged.  Never a window given a --geometry size or
         already resized by a layout or the user."""
-        if self._snugged or self.natural is None:
+        if self.natural is None or self._snugged >= 2:
             return
+        if getattr(self, "_snug_pending", None):
+            return                        # its Configure has yet to come
         root = self.root
         size = (root.winfo_width(), root.winfo_height())
         if size[0] <= 1:
             return                        # not mapped yet
-        self._snugged = True
-        if size != self.natural:
+        # A SECOND PASS, once, from the size the first one set: the need
+        # measured at the new scale can differ -- whole-point fonts, Menlo on
+        # macOS -- and the fit then drew 3-6% under size/FULL_SIZE with dead
+        # band beside (Mac-integrate, 2026-10-01).  Measured at that scale,
+        # the second lands on it.
+        expect = self.natural if self._snugged == 0 else self._snug_set
+        self._snugged += 1
+        if size != expect:
+            self._snugged = 2             # a layout or the user has it now
             return
         # TO WHAT THE CONTENT MEASURED, not to the fitted design size, which
         # keeps the slack of whole-point font steps (WSL-integration,
@@ -1855,9 +1865,21 @@ class PanelO6:
         self._snug_pending = ((tw, th), want)
         w, h = size[0] + tw - cw, size[1] + th - ch
         root.minsize(min(self._minsize[0], w), min(self._minsize[1], h))
-        log("snug: window %dx%d -> %dx%d, the content at scale %.3f"
-            % (size + (w, h, st * cap)))
-        root.geometry("%dx%d" % (w, h))
+        self._snug_set = (w, h)
+        # ON THE SCREEN: the cap limits the size, but a window placed toward
+        # the right went off the edge (Mac-integrate: x 87 + 1904 on a 1920
+        # screen).  Moved back on if it would be.
+        x, y = root.winfo_x(), root.winfo_y()
+        nx = max(0, min(x, root.winfo_screenwidth() - w - frame_w - 8))
+        ny = max(0, min(y, root.winfo_screenheight() - h - frame_h - 48))
+        log("snug: window %dx%d -> %dx%d, the content at scale %.3f%s"
+            % (size + (w, h, st * cap)
+               + ((", moved to %d,%d to stay on the screen" % (nx, ny))
+                  if (nx, ny) != (x, y) else "",)))
+        if (nx, ny) != (x, y):
+            root.geometry("%dx%d+%d+%d" % (w, h, nx, ny))
+        else:
+            root.geometry("%dx%d" % (w, h))
 
     FIT_PASSES = 16         # refits after one resize, growing or bisecting
     FIT_GROW_PASSES = 12    # extra growing refits: content is never clipped
