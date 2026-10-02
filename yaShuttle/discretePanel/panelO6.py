@@ -83,6 +83,7 @@ Usage:
 import argparse
 import json
 import math
+import re
 import os
 import sys
 import select
@@ -655,6 +656,7 @@ def scaled_wh(w, h, size):
 class PanelO6:
     def __init__(self, root, size=FULL_SIZE, gpc_id=DEFAULT_GPC_ID):
         self.root = root
+        self._size = size
         root.title(TITLE_BASE)
         root.configure(bg=C_WINDOW)
 
@@ -1806,13 +1808,18 @@ class PanelO6:
             self._snug()
 
     def _snug(self):
-        """ONCE, when the fit has settled: shrink a window still at its
-        natural size to the fitted content's shape.  The natural size comes
-        from REF_W x REF_H, but the content's shape is measured, so the
-        content was letterboxed -- about 95 px empty above and below at
-        --size 768 on Windows (Win11-native, 2026-10-01).  Only shrinks, and
-        never a window given --geometry or already resized by a layout or
-        the user."""
+        """ONCE, when the fit has settled: give a window still at its natural
+        size the fitted content's shape AT THE SCALE --size ASKS FOR.
+
+        THE CONTROLS KEEP A USABLE SIZE (owner, 2026-10-01).  The natural
+        size came from REF_W x REF_H, so each column added to the panel was
+        drawn smaller in the same window -- at --size 384 everything was
+        0.42 of full, and "when they shrink they become unusable".  Now the
+        window takes the content's measured size times size/FULL_SIZE,
+        growing or shrinking to suit, so text and controls stay the size
+        --size gives them however many there are.  Only the screen limits
+        it, and a cap is logged.  Never a window given a --geometry size or
+        already resized by a layout or the user."""
         if self._snugged or self.natural is None:
             return
         root = self.root
@@ -1822,32 +1829,34 @@ class PanelO6:
         self._snugged = True
         if size != self.natural:
             return
-        # TO WHAT THE CONTENT MEASURED, not to the fitted design size: that
-        # keeps the slack of whole-point font steps -- ~100 px empty at the
-        # right at --size 384 under Xft.dpi 192 (WSL-integration,
-        # 2026-10-01).  The design size becomes the need and the window
-        # shrinks by the same factor, so the scale, and with it every font
-        # size, is unchanged and the content still fits.
+        # TO WHAT THE CONTENT MEASURED, not to the fitted design size, which
+        # keeps the slack of whole-point font steps (WSL-integration,
+        # 2026-10-01): the design size becomes the need.
         cw, ch = self.cv.winfo_width(), self.cv.winfo_height()
-        sizes = {}
-        for attr, default, c in (("_ref_w", REF_W, cw), ("_ref_h", REF_H, ch)):
-            ref = getattr(self, attr, default)
-            want = min(ref, self._fit_need.get(attr, ref) * 1.003)
-            # Rounded DOWN, so the scale can only fall a hair, never round
-            # a font up.
-            d = c - int(math.floor(want * self.s))
-            sizes[attr] = (want, d if d >= 0.02 * c else 0)
-        dw, dh = sizes["_ref_w"][1], sizes["_ref_h"][1]
-        if not dw and not dh:
+        want = dict((a, self._fit_need.get(a, getattr(self, a, d)) * 1.003)
+                    for a, d in (("_ref_w", REF_W), ("_ref_h", REF_H)))
+        st = self._size / float(FULL_SIZE)
+        tw, th = want["_ref_w"] * st, want["_ref_h"] * st
+        # The screen is the one limit: the window's frame and the desktop's
+        # bars are allowed for roughly.
+        frame_w, frame_h = size[0] - cw, size[1] - ch
+        max_w = root.winfo_screenwidth() - frame_w - 16
+        max_h = root.winfo_screenheight() - frame_h - 96
+        cap = min(1.0, max_w / tw, max_h / th)
+        if cap < 1.0:
+            log("snug: the screen holds only %.0f%% of the size --size %d asks for"
+                % (100 * cap, self._size))
+        # Rounded DOWN, so the scale can only fall a hair, never round a
+        # font up.
+        tw, th = int(math.floor(tw * cap)), int(math.floor(th * cap))
+        if abs(tw - cw) < 0.01 * cw and abs(th - ch) < 0.01 * ch:
             return
-        # The new design size waits for the Configure that reports the new
-        # canvas: a redraw before it, with the new design size against the
-        # old canvas, raised the scale and set the fit off again.
-        self._snug_pending = ((cw - dw, ch - dh),
-                              dict((a, v[0]) for a, v in sizes.items() if v[1]))
-        w, h = size[0] - dw, size[1] - dh
+        # The new design size is applied on the Configure that follows.
+        self._snug_pending = ((tw, th), want)
+        w, h = size[0] + tw - cw, size[1] + th - ch
         root.minsize(min(self._minsize[0], w), min(self._minsize[1], h))
-        log("snug: window %dx%d -> %dx%d to the fitted content" % (size + (w, h)))
+        log("snug: window %dx%d -> %dx%d, the content at scale %.3f"
+            % (size + (w, h, st * cap)))
         root.geometry("%dx%d" % (w, h))
 
     FIT_PASSES = 16         # refits after one resize, growing or bisecting
@@ -3720,7 +3729,9 @@ def main(argv=None):
             root.geometry(geom)
         except tk.TclError as e:
             raise SystemExit("panelO6: bad --geometry %r: %s" % (geom, e))
-    else:
+    # A --geometry that only places the window (simulatePASS's "+X+Y")
+    # leaves its size natural, and the snug free to fit it to the content.
+    if not geom or not re.match(r"^\s*\d+x\d+", geom):
         w, h = scaled_wh(REF_W, REF_H, args.size)
         root.geometry("%dx%d" % (w, h))
         panel.natural = (w, h)
