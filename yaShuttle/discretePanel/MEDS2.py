@@ -2252,8 +2252,14 @@ class DEUUnit(object):
             return
         if self.spl.press(code) != 'complete':
             return
+        # The whole entry, up to the 30 keys a poll reply can carry, as
+        # upstream (deuUnit.coffee:289).  This once cut it to MAX_KEYS_IPL,
+        # 6: every entry longer than that reached the GPC without its
+        # closing EXEC, and DMM_KYBD_PROC (DMMMCD.hal:453-455) answered each
+        # with ILLEGAL ENTRY -- which no display needing data showed until
+        # ORBIT MNVR EXEC, where WT, TIG and the delta-Vs all run longer.
         if not self.spl.err:
-            self.keyQueue.append(self.spl.keys[0:DEU.MAX_KEYS_IPL])
+            self.keyQueue.append(self.spl.keys[0:DEU.MAX_KEYS])
 
 
 # ===========================================================================
