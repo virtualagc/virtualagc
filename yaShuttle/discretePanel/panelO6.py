@@ -357,6 +357,42 @@ DEFAULT_RIGHT_SEL = "2"
 MF_RING = "#c0201a"     # an ILLEGAL major function, as MEDS2's pane marks it
 
 
+def feature_name(kind, index):
+    """A control's name for the script's 'circle', from its hit (kind,
+    index); crewscript.PANEL_FEATURE accepts exactly these."""
+    side = {"L": "left", "R": "right"}
+    seat = {"L": "cdr", "R": "plt"}
+    if kind in ("power", "output", "mode", "ipl"):
+        return "%s%d" % (kind, index + 1)
+    if kind in ("fcs",):
+        return "fcs%d" % (index + 1)
+    simple = {"ipl_source": "iplsource", "bfc_display": "bfcdisplay",
+              "bfc_select": "bfcselect", "bfc_disengage": "disengage",
+              "xfeed": "xfeed", "sense": "sense"}
+    if kind in simple:
+        return simple[kind]
+    if kind == "rhc":
+        return "rhcengage-" + RHCS[index].lower()
+    if kind == "kybd_sel":
+        return "kybdsel-" + index
+    if kind in ("idp_power", "idp_mf", "idp_load"):
+        return {"idp_power": "idppower", "idp_mf": "majfunc",
+                "idp_load": "idpload"}[kind] + str(index)
+    if kind == "adi":
+        return "adi-%s-%s" % (index[0].lower(), index[1])
+    if kind == "attref":
+        return "attref-" + ADI_STATIONS[index].lower()
+    if kind == "dap":
+        return "dap-%s-%s" % (DAP_PANEL[index[0]].lower(), index[1].lower())
+    if kind == "oms":
+        return "omseng-" + ("left", "right")[index]
+    if kind == "trim":
+        return "trim-" + side[index]
+    if kind == "am":
+        return "%s-%s" % ("bodyflap" if index[1] == "BF" else "spdbk", seat[index[0]])
+    return None
+
+
 def mdm_name(u):
     """A crew unit's MDM: 1-4 are FF1-4, 5-8 FA1-4."""
     return "FA%d" % (u - FA_UNIT0) if u > FA_UNIT0 else "FF%d" % u
@@ -666,6 +702,8 @@ class PanelO6:
         self.natural = None     # set by main() when it sizes the window itself
         self._snugged = 0       # passes made: at most two
         self._snug_set = None
+        self.circle = None      # (feature, colour, diameter): a script's 'circle'
+        self._circle_missed = None
 
         self.power = list(DEFAULT_POWER)
         self.output = list(DEFAULT_OUTPUT)
@@ -1799,6 +1837,7 @@ class PanelO6:
         # the panel grows wider rather than taller (owner, 2026-09-30).
         secd_x1, secd_y1 = self._draw_secd(dap_x0 + dap_w + PANE_GAP, my0)
         adi_y1 = max(adi_y1, secd_y1)
+        self._draw_circle()
         # THE DESIGN WIDTH FITS TOO: the ADI and DAP columns are as wide as
         # their measured text needs, which under macOS's wider fonts is more
         # than at Linux's (Mac-integrate, 2026-10-01).
@@ -1807,6 +1846,32 @@ class PanelO6:
         self._fit("_ref_h", REF_H, max(my1 + 6 + 6, adi_y1 + 12))
         if not self._fit_moved:
             self._snug()
+
+    CIRCLE_PX = 2          # its stroke: real pixels, whatever --size
+
+    def _draw_circle(self):
+        """A script's 'circle': on top of everything, centred on the named
+        control, DIAMETER pushbuttons across, clipped by the window as the
+        canvas clips anything."""
+        if self.circle is None:
+            return
+        name, colour, diam = self.circle
+        for kind, index, x1, y1, x2, y2 in self._hits:
+            if feature_name(kind, index) == name:
+                cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+                r = diam * self.pb * self.s / 2.0
+                self.cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline=colour,
+                                    width=self.CIRCLE_PX, tags=("circle",))
+                return
+        if self._circle_missed != name:
+            self._circle_missed = name
+            log("circle: no feature %r on the panel" % name)
+
+    def set_circle(self, name, colour="yellow", diameter=2.0):
+        self.circle = None if name is None else (name, colour, float(diameter))
+        log("circle: %s" % ("none" if name is None else
+                            "%s, %s, %g pushbuttons" % (name, colour, diameter)))
+        self.redraw()
 
     def _snug(self):
         """ONCE, when the fit has settled: give a window still at its natural
@@ -3493,6 +3558,21 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                    "BF" if verb == "bodyflap" else "SB")
             panel._set_am(key, True)
             root.after(AM_HOLD_MS, lambda: panel._set_am(key, False))
+        elif verb == "circle":
+            words = arg.split()
+            name, colour, diam = words[0].lower(), "yellow", 2.0
+            for w in words[1:]:
+                try:
+                    diam = float(w)
+                except ValueError:
+                    colour = w
+            try:
+                root.winfo_rgb(colour)
+            except tk.TclError:
+                raise SystemExit("panelO6: circle: %r is not a colour" % colour)
+            panel.set_circle(name, colour, diam)
+        elif verb == "nocircle":
+            panel.set_circle(None)
         elif verb == "attref":
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)

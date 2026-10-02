@@ -86,6 +86,18 @@ IDP_MSG = {"DEU_LOAD": (0x0002,), "IDP_POWER_ON": (0x0003, 1), "IDP_POWER_OFF": 
 # Panel commands and the arguments each takes, checked when a script is read
 # (panelO6.py carries them out).  Case does not matter.
 _ON_OFF = r"(on|off)"
+# THE PANEL'S FEATURES BY NAME, for 'circle': every control panelO6 draws,
+# named from what it is (panelO6.feature_name builds the same names from
+# its controls).
+_DAP_KEYS = (r"(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch_disc"
+             r"|pitch_pulse|yaw_disc|yaw_pulse|x_norm|x_pulse|x_spare|y_norm|y_pulse"
+             r"|low_z|z_norm|z_pulse|high_z)")
+PANEL_FEATURE = (r"(power|output|mode|ipl)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
+                 r"|rhcengage-(cdr|plt)|kybdsel-(left|right)|(idppower|majfunc|idpload)[1-4]"
+                 r"|adi-(l|r|a)-(att|err|rate)|attref-(l|r|a)|sense"
+                 r"|dap-(c3|a6u)-" + _DAP_KEYS +
+                 r"|fcs[1-4]|omseng-(left|right)|trim-(left|right)|xfeed"
+                 r"|(bodyflap|spdbk)-(cdr|plt)")
 PANEL_ARGS = {
     "gpc": r"[1-5]",
     "power": _ON_OFF,
@@ -113,6 +125,8 @@ PANEL_ARGS = {
     "trim": r"(left|right)\s+(enable|inhibit)",
     "bodyflap": r"(cdr|plt)",
     "spdbk": r"(cdr|plt)",
+    "circle": r"(" + PANEL_FEATURE + r")(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
+    "nocircle": r"",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
 }
@@ -130,6 +144,8 @@ PANEL_USAGE = {
     "fcs": "fcs 1-4 override|auto|off", "omseng": "omseng left|right arm|arm/press|off",
     "xfeed": "xfeed left|off|right", "trim": "trim left|right enable|inhibit",
     "bodyflap": "bodyflap cdr|plt", "spdbk": "spdbk cdr|plt",
+    "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
+    "nocircle": "nocircle (no argument)",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -143,6 +159,15 @@ _KEY_NAMES = " ".join(["ITEM", "EXEC", "OPS", "PRO", "SPEC", "RESUME", "CLEAR",
                                          for k in IDP_MSG])
 
 
+# '#' STARTS A COMMENT -- except as a #RRGGBB colour, which 'circle' takes:
+# '#' then six hex digits then a word's end.
+_COMMENT = re.compile(r"#(?![0-9a-fA-F]{6}\b).*$")
+
+
+def strip_comment(raw):
+    return _COMMENT.sub("", raw)
+
+
 def _wrap(text, indent):
     import textwrap
     return textwrap.fill(text, 76, initial_indent=indent, subsequent_indent=indent)
@@ -151,7 +176,7 @@ def _wrap(text, indent):
 # For --help screens: RawDescriptionHelpFormatter keeps the layout.
 HELP = """\
   One command per line; '#' starts a comment (so a subtitle cannot contain
-  one); blank lines are ignored.  Every line is checked when the file is
+  one), except '#' and six hex digits, a colour; blank lines are ignored.  Every line is checked when the file is
   read, so a mistake is reported before anything happens.
 
   <seconds> <command>   a timed step.  SECONDS (decimals allowed) from the
@@ -323,6 +348,19 @@ HELP = """\
                                 F3 TRIM RHC/PNL (left end CDR, right end PLT)
     bodyflap cdr|plt            F2/F4 BODY FLAP AUTO/MAN pushbutton, held 0.5 s
     spdbk cdr|plt               F2/F4 SPD BK/THROT AUTO/MAN pushbutton, held 0.5 s
+   drawing attention, for demonstrations:
+    circle FEATURE [COLOR] [DIAMETER]
+                        a circle round that control, on top of the Panel,
+                        until the next circle or nocircle; COLOR a colour name
+                        or #RRGGBB (yellow), DIAMETER in pushbutton sizes (2)
+    nocircle            take it away
+                        FEATURE names: power1-5 output1-5 mode1-5 ipl1-5
+                        iplsource bfcdisplay bfcselect disengage
+                        rhcengage-cdr|plt idppower1-4 majfunc1-4 idpload1-4
+                        kybdsel-left|right adi-l|r|a-att|err|rate
+                        attref-l|r|a sense dap-c3|a6u-BUTTON (as for dap,
+                        and x_spare) fcs1-4 omseng-left|right
+                        trim-left|right xfeed bodyflap-cdr|plt spdbk-cdr|plt
    not a control:
     gpcid N             make GPC N the primary column
     bit a|b N on|off    one discrete bit: A12 I/O TERM A, A13 OUTPUT
@@ -516,7 +554,7 @@ def parse(text, path=None, _depth=0, _seen=None):
                               % (os.path.basename(path) if path else "this script",
                                  ", ".join("$" + n for n in names)))
     for n, raw in enumerate(text.splitlines(), 1):
-        line = raw.split("#", 1)[0].strip()
+        line = strip_comment(raw).strip()
         if not line:
             continue
         try:
@@ -718,7 +756,7 @@ def has_wait_user(text):
     Text only, so a 'script FILE' line's contents are not seen -- use
     needs_user(parse(text, path)) when the file is to hand."""
     for raw in text.splitlines():
-        w = raw.split("#", 1)[0].split()
+        w = strip_comment(raw).split()
         if len(w) == 2 and w[0].lower() == "wait" and w[1].lower() == "user":
             return True
     return False
