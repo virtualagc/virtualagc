@@ -25,6 +25,9 @@ A CONTROL is CONTROLS[key] = dict:
                              position and as the second otherwise
                "cb"          a circuit breaker, IN or OUT
                "blank"       an empty place in a grid of controls
+               "ann"         an annunciator: a flat light with its legend,
+                             lit in its 'color' (red or amber) when any of
+                             its 'lamps' is set
     caption    printed above it ("\\n" for two lines)
     positions  for t2/t3/rot: the legends, as printed
     default    for t2/t3/rot: where it starts
@@ -36,9 +39,10 @@ A CONTROL is CONTROLS[key] = dict:
                dscrt is the FF DSCRT word 1-13 (FA: 1-3), mask its bit(s).
     lamps      for pbi / lamp: [(unit, card, channel, mask), ...] -- lit when
                any of those DOH output bits is set
-    halves     for a split-legend lamp instead of lamps: [(legend, lamps),
-               (legend, lamps)], each half lit on its own; split "h" puts
-               them side by side, "v" one over the other
+    halves     for a split-legend lamp instead of lamps: [(legend, lamps
+               [, colour]), ...], each half lit on its own (in its colour,
+               else white); split "h" puts them side by side, "v" one over
+               the other
     hold_ms    for pb/pbi: how long a scripted 'press' holds it (500)
     spring     for switches: positions that spring back to the default when
                let go -- held only while the mouse is down, and for hold_ms
@@ -56,7 +60,7 @@ window after its older, hand-drawn panes.
 CONTROLS = {}
 PANES = {}
 
-KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank")
+KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank", "ann")
 FF_UNITS = (1, 2, 3, 4)
 FA_UNITS = (5, 6, 7, 8)
 
@@ -71,6 +75,9 @@ def check():
             raise ValueError("%s: no panel" % where)
         if c["kind"] in ("tb", "blank"):
             continue
+        if c["kind"] == "ann":
+            if c.get("color") not in ("red", "amber", "white", "green", "blue"):
+                raise ValueError("%s: color %r" % (where, c.get("color")))
         if c["kind"] in ("t2", "t3", "h3", "rot", "cb"):
             pos = c.get("positions") or ()
             need = {"t2": 2, "t3": 3, "h3": 3, "cb": 2}.get(c["kind"])
@@ -85,8 +92,8 @@ def check():
         else:
             _check_contacts(where, c.get("contacts") or [])
             lamps = list(c.get("lamps") or ())
-            for _leg, ls in c.get("halves") or ():
-                lamps += ls
+            for h in c.get("halves") or ():
+                lamps += h[1]
             for lamp in lamps:
                 if len(lamp) != 4 or lamp[0] not in FF_UNITS:
                     raise ValueError("%s: lamp %r" % (where, lamp))
@@ -515,3 +522,73 @@ def _ssp_place(panel, place, spec, default):
 
 
 load_ssp()
+
+
+
+# ---------------------------------------------------------------------------
+# F7, CAUTION AND WARNING (owner, 2026-10-02).  The annunciator matrix, 8 rows
+# of 5 left of CRT 3, from SCOM 2.2-20..22 and Appendix A-5; colours as the
+# text gives them where the drawings disagree (FREON LOOP red; RIGHT/AFT RHC
+# red, FCS SATURATION amber).  PASS LIGHTS SIXTEEN of them: the fourteen
+# GNC class-2 lights, as FF DOL card 5 channel 1 set/reset words -- all on
+# FF3 but LEFT RCS on FF1 (DGNLIGHT 55-77, 139-171; on a class-2 message
+# until MSG RESET, in configurations 1, 2, 3 and 8) -- and BACKUP C/W ALARM,
+# FF3/FF4 DOH card 10 ch 2 bit 4 (DLALIGHT).  The other 24 are the C&W
+# unit's own sensor channels, which nothing here models: greyed.
+
+_CW = "C&W unit sensor channel -- not simulated"
+_F7 = (
+    (("O2 PRESS", "amber"), ("H2 PRESS", "amber"), ("FUEL CELL\nREAC", "red"),
+     ("FUEL CELL\nSTACK TEMP", "amber"), ("FUEL CELL\nPUMP", "amber")),
+    (("CABIN ATM", "red"), ("O2 HEATER\nTEMP", "amber"), ("MAIN BUS\nUNDERVOLT", "red"),
+     ("AC\nVOLTAGE", "amber"), ("AC\nOVERLOAD", "amber")),
+    (("FREON\nLOOP", "red"), ("AV BAY/\nCABIN AIR", "amber"), ("IMU", "amber", 3, 0x0200),
+     ("FWD RCS", "red", 3, 0x0008), ("RCS JET", "amber", 3, 0x8000)),
+    (("H2O LOOP", "amber"), ("RGA/ACCEL", "amber", 3, 0x0020), ("AIR DATA", "red", 3, 0x0040),
+     ("LEFT RCS", "red", 1, 0x0010), ("RIGHT RCS", "red", 3, 0x0010)),
+    (("", "amber"), ("LEFT RHC", "red", 3, 0x0080), ("RIGHT/AFT\nRHC", "red", 3, 0x0100),
+     ("LEFT OMS", "red", 3, 0x2000), ("RIGHT OMS", "red", 3, 0x1000)),
+    (("PAYLOAD\nWARNING", "red"), ("GPC", "amber"), ("FCS\nSATURATION", "amber", 3, 0x0400),
+     ("OMS KIT", "amber"), ("OMS TVC", "red", 3, 0x4000)),
+    (("PAYLOAD\nCAUTION", "amber"), ("PRIMARY C/W", "amber"), ("FCS\nCHANNEL", "amber", 3, 0x0800),
+     ("MPS", "red"), ("", "amber")),
+    (("BACKUP C/W\nALARM", "red", None, None), ("APU TEMP", "amber"), ("APU\nOVERSPEED", "amber"),
+     ("APU\nUNDERSPEED", "amber"), ("HYD PRESS", "amber")),
+)
+_rows = []
+for r, row in enumerate(_F7):
+    keys = []
+    for col, cell in enumerate(row):
+        legend, colour = cell[0], cell[1]
+        key = "cw_r%dc%d" % (r + 1, col + 1)
+        c = dict(panel="F7", kind="ann", caption="", legend=legend, color=colour, contacts=[])
+        if legend.startswith("BACKUP"):
+            c["lamps"] = [(3, 10, 2, 0x1000), (4, 10, 2, 0x1000)]
+            c["sources"] = "DLALIGHT 89-90, 142-167 (signal A, FF3/FF4)"
+        elif len(cell) > 2:
+            c["lamps"] = [(cell[2], 5, 1, cell[3])]
+            c["sources"] = "DGNLIGHT; class-2 GNC caution"
+        else:
+            c["via"] = _CW
+        CONTROLS[key] = c
+        keys.append(key)
+    _rows.append(keys)
+
+# MAIN ENGINE STATUS: CTR raised between LEFT and RIGHT; each a split light,
+# red over amber, on FF (engine number): red DOH card 10 ch 1 bit 1, amber
+# card 2 ch 1 bit 1 (GSPMPS 42-67, 145-154; OPS 1/6).  Engines 1-3 = CTR,
+# LEFT, RIGHT by the standard numbering.  And SM ALERT, blue: DOH card 10
+# ch 2 bit 6 on FF1-4 (DLALIGHT) -- in SM configurations it goes by the PF
+# MDMs instead, which are not captured.
+for key, cap, ff in (("mes_left", "LEFT", 2), ("mes_ctr", "CTR", 1), ("mes_right", "RIGHT", 3)):
+    CONTROLS[key] = dict(panel="F7", kind="lamp", caption=cap, split="v",
+                         halves=[("", [(ff, 10, 1, 0x8000)], "red"),
+                                 ("", [(ff, 2, 1, 0x8000)], "amber")],
+                         sources="GSPMPS 42-67, 145-154")
+CONTROLS["sm_alert"] = dict(panel="F7", kind="ann", caption="", legend="SM\nALERT",
+                            color="blue", contacts=[],
+                            lamps=[(u, 10, 2, 0x0400) for u in (1, 2, 3, 4)],
+                            sources="DLALIGHT; PF MDMs in SM configurations (not captured)")
+PANES["F7"] = [("CAUTION / WARNING", _rows, {"grid": True}),
+               ("MAIN ENGINE STATUS", [["mes_left", "mes_ctr", "mes_right"], ["sm_alert"]])]
+check()

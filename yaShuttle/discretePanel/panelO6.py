@@ -525,6 +525,9 @@ C_INK_DIM = "#3a3a3a"
 # The legends of a control not yet connected to PASS (panelcontrols 'via'),
 # greyed so that one knows not to heed it (owner, 2026-10-02).
 C_INK_UNWIRED = "#8b8879"
+# Annunciators lit (the C&W matrix's red and amber; white for the rest).
+C_ANN = {"red": "#e8452f", "amber": "#f2a51f", "white": "#f4f0c8", "green": "#5ec85a",
+         "blue": "#4f8fe8"}
 C_GUARD = "#d9d6c9"
 C_GUARD_LO = "#6a675c"
 C_SLOT = "#242422"
@@ -720,15 +723,16 @@ PANEL_WINDOWS = (
 # only adding its window.
 BASE_PANELS = ("O6", "C2", "R11")
 OPS_PANELS = {
-    ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2", "R2"),
-    ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2", "R2"),
-    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7"),
-    ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2"),
-    ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7", "L2"),
-    ("GNC", 9): ("C3", "L2"),
-    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L",
+    ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
+    ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
+    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7"),
+    ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2"),
+    ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7", "L2"),
+    ("GNC", 9): ("C3", "F7", "L2"),
+    ("SM", 2): ("C3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L",
                 "L12U", "L12L", "L11U"),
-    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "L12U", "L12L", "L11U"),
+    ("SM", 4): ("C3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "L12U", "L12L",
+                "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
 SCREEN_OPS = re.compile(r"^\s*(\d)\d{3}/")
@@ -870,6 +874,8 @@ class PanelO6:
         self._font_cache = {}
         self._rot_columns = {}         # rotary key -> legends in columns
         self._dim = False              # drawing a control not yet connected
+        self._ann_size = {}            # (panel, scale) -> an annunciator's size
+        self._measure = {}             # (font, text) -> pixel width; (font, None) -> linespace
         # ONE WINDOW PER NUMBERED PANEL (owner, 2026-10-02): titled with the
         # panel's number alone -- O6, C3, F6 ... -- so no corner tag is
         # needed, each placed and sized by a layout under its own role, and
@@ -1440,8 +1446,8 @@ class PanelO6:
             units.update(pair)
         for c in PC.CONTROLS.values():
             units.update(l[0] for l in c.get("lamps") or ())
-            for _leg, ls in c.get("halves") or ():
-                units.update(l[0] for l in ls)
+            for h in c.get("halves") or ():
+                units.update(l[0] for l in h[1])
         for k in sorted(units):
             try:
                 socks[mdm_receiver(k)] = k
@@ -1506,8 +1512,8 @@ class PanelO6:
         for key in self.ctl_lamp:
             c = PC.CONTROLS[key]
             if c.get("halves"):
-                lit = tuple(any(out.get((u, card, ch), 0) & m for u, card, ch, m in ls)
-                            for _leg, ls in c["halves"])
+                lit = tuple(any(out.get((u, card, ch), 0) & m for u, card, ch, m in h[1])
+                            for h in c["halves"])
             else:
                 lit = any(out.get((u, card, ch), 0) & m for u, card, ch, m in c["lamps"])
             if lit != self.ctl_lamp[key]:
@@ -1725,7 +1731,7 @@ class PanelO6:
         # of an IDP/CRT set has its corner just there, and its lines ran
         # through the label (Mac-integrate, 2026-10-01).
         w = self._tw(text) + 4
-        h = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        h = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         self._rect(x0 + 3, y0 + 2, x0 + 3 + w, y0 + 3 + h, fill=C_PANEL, outline="")
         self._text(x0 + 5, y0 + 3, text, size=SETTING_SIZE, fill=PANEL_TAG_COLOR,
                    anchor="nw")
@@ -2290,6 +2296,7 @@ class PanelO6:
     TGL_W, TGL3_H, TGL2_H = 58, 136, 124      # the panel's paddle guards
     TB_W, TB_H = 50, 34                       # O6's talkback window
     CB_D = 34                                 # a circuit breaker's knob
+    ANN_W, ANN_H = 84, 40                     # an annunciator of the C&W matrix
     ROT_D = 64                                # a rotary's knob
     CTL_GAP = 28           # between controls in a row: legends of neighbours
                            # nearly met at 18 (Mac-integrate, 2026-10-02)
@@ -2306,7 +2313,7 @@ class PanelO6:
         c = PC.CONTROLS[key]
         if c["kind"] != "t3":
             return 0.0
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         return max(0.0, self._vtext_h(c["positions"][1]) + ls * 0.6 - self.TGL3_H)
 
     def _ctl_lines(self, text):
@@ -2315,7 +2322,7 @@ class PanelO6:
     def _ctl_size(self, key):
         """(width, height above the body's top, body height, height below)."""
         c = PC.CONTROLS[key]
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         cap = self._ctl_lines(c.get("caption"))
         cap_w = max([self._tw(l) for l in cap] or [0])
         # A gap under the caption, so it does not read as one block with the
@@ -2339,6 +2346,22 @@ class PanelO6:
             return w, above + ls, self.TGL_W, 0
         if k == "tb":
             return max(cap_w, self.TB_W + 8), above, self.TB_H, 0
+        if k == "ann":
+            # One size for every annunciator on the panel, the matrix being
+            # a grid of equal lights: as wide and tall as its widest and
+            # tallest legend needs.
+            # (Measured once per panel and scale: done per light it took
+            # nine seconds to draw F7.)
+            ck = (c["panel"], round(self.s, 5))
+            wh = self._ann_size.get(ck)
+            if wh is None:
+                ls_ = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
+                peers = [self._ctl_lines(o.get("legend")) for o in PC.CONTROLS.values()
+                         if o["kind"] == "ann" and o["panel"] == c["panel"]]
+                wh = (max([self.ANN_W] + [self._tw(l) + 12 for ls in peers for l in ls]),
+                      max([self.ANN_H] + [len(ls) * ls_ + 8 for ls in peers]))
+                self._ann_size[ck] = wh
+            return max(cap_w, wh[0]), above, wh[1], 0
         if k == "cb":
             return max(cap_w, self.CB_D + 8), above, self.CB_D, 0
         if k == "blank":
@@ -2372,7 +2395,7 @@ class PanelO6:
 
     def _draw_ctl_item_(self, key, cx, top):
         c = PC.CONTROLS[key]
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         w, above, body, below = self._ctl_size(key)
         cap = self._ctl_lines(c.get("caption"))
         for j, l in enumerate(cap):
@@ -2404,6 +2427,16 @@ class PanelO6:
                        size=SETTING_SIZE)
         elif k == "blank":
             pass
+        elif k == "ann":
+            w, _a, body, _b = self._ctl_size(key)
+            lit = self.ctl_lamp.get(key, False)
+            self._rect(cx - w / 2.0, y, cx + w / 2.0, y + body,
+                       fill=C_ANN[c["color"]] if lit else C_BTN, outline=C_BEZEL,
+                       width=max(1, int(self.s)))
+            lines = self._ctl_lines(c.get("legend"))
+            for j, l in enumerate(lines):
+                self._text(cx, y + body / 2.0 + ls * (j - (len(lines) - 1) / 2.0), l,
+                           size=SETTING_SIZE)
         elif k == "tb":
             pos = c["positions"]
             state = pos[0] if self.tb_on.get(key) else pos[-1]
@@ -2439,8 +2472,10 @@ class PanelO6:
             else:
                 mid = (fx1 + fx2) / 2.0
                 parts = ((fx1, fy1, mid, fy2), (mid, fy1, fx2, fy2))
-            for (a1, b1, a2, b2), (leg, _ls), on in zip(parts, c["halves"], lit):
-                self._rect(a1, b1, a2, b2, fill=C_PBI_LIT if on else C_BTN,
+            for (a1, b1, a2, b2), half, on in zip(parts, c["halves"], lit):
+                leg = half[0]
+                lit_fill = C_ANN[half[2]] if len(half) > 2 else C_PBI_LIT
+                self._rect(a1, b1, a2, b2, fill=lit_fill if on else C_BTN,
                            outline=C_PADDLE_LO, width=1)
                 self._text((a1 + a2) / 2.0, (b1 + b2) / 2.0, leg, size=SETTING_SIZE)
         elif k == "lamp":
@@ -2476,7 +2511,7 @@ class PanelO6:
         pos = PC.CONTROLS[key]["positions"]
         n = len(pos)
         r = self.ROT_D / 2.0
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         out = []
         if n <= 5:
             span = min(170.0, 50.0 * (n - 1))
@@ -2546,7 +2581,7 @@ class PanelO6:
         return min(legends, key=lambda l: abs((ang - l[2] + 180) % 360 - 180))[0]
 
     def _rot_bbox(self, key):
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         r = self.ROT_D / 2.0
         xs, ys = [-r, r], [-r, r]
         for p, dx, dy, _a in self._rot_legends(key):
@@ -2563,7 +2598,7 @@ class PanelO6:
         r = self.ROT_D / 2.0
         legends = self._rot_legends(key)          # see there for the spread
         angs = [a for _p, _x, _y, a in legends]
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         # Where it is on the canvas, for _rot_pick: the knob's centre and
         # each legend's box, in this window's canvas pixels.
         self.w.rot_geom[key] = (self.X(cx), self.Y(cy), [
@@ -2610,7 +2645,7 @@ class PanelO6:
         self._pushbutton(x1, y1, x2, y2, "", down=down)
         dx = 2 if down else 0
         lines = self._ctl_lines(legend)
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         mid = (y1 + y2) / 2.0 + dx
         for j, l in enumerate(lines):
             self._text((x1 + x2) / 2.0 + dx, mid + ls * (j - (len(lines) - 1) / 2.0),
@@ -3279,7 +3314,7 @@ class PanelO6:
             lines.update(l for l in leg.split("\n") if l)
         lines.update(("ATT", "REF", "AUTO", "MAN"))
         widest = max(self._tw(l) for l in lines)
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         face_w = widest + 8
         face_h = 2 * ls + 4 + PBI_LAMP_H + 4
         return max(PB_SIZE, face_w + 12, face_h + 12)
@@ -3339,7 +3374,7 @@ class PanelO6:
         lines = [l for l in legend.split("\n") if l]
         if not lines:
             return
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         mid = (fy1 + 2 + ly1 - 2) / 2.0
         top = mid - ls * len(lines) / 2.0
         for j, l in enumerate(lines):
@@ -3517,7 +3552,7 @@ class PanelO6:
         captioned below as printed.  Returns (width, height)."""
         pad, gap = 10, 18
         th10 = self._th(10)
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         b = self.pb
         colw = max([b] + [self._tw(l) for k in AM_PBS for l in AM_CAPTION[k].split("\n")])
         width = 2 * colw + gap + 2 * 24
@@ -3543,7 +3578,7 @@ class PanelO6:
         FEED FROM RIGHT beside it and OFF above.  Returns (width, height)."""
         pad = 10
         th10, ths = self._th(10), self._th(SETTING_SIZE)
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         gw, gh = 136, 58
         side_w = max(self._tw(w) for w in ("FEED", "FROM", "RIGHT"))
         width = max(gw + 2 * (side_w + 14), self._tw("RCS CROSSFEED", 10)) + 2 * 24
@@ -3609,8 +3644,24 @@ class PanelO6:
         self._changed()
 
     def _tw(self, text, size=SETTING_SIZE):
-        """A caption's width in design units, as this host's font draws it."""
-        return self._tkfont(size).measure(text) / max(self.s, 0.01)
+        """A caption's width in design units, as this host's font draws it.
+        Pixel widths are cached by font: measuring every caption afresh on
+        every redraw took seconds once the panel windows had a few hundred
+        controls between them."""
+        f = self._tkfont(size)
+        key = (str(f), text)
+        px = self._measure.get(key)
+        if px is None:
+            px = self._measure[key] = f.measure(text)
+        return px / max(self.s, 0.01)
+
+    def _linespace(self, size):
+        f = self._tkfont(size)
+        key = (str(f), None)
+        px = self._measure.get(key)
+        if px is None:
+            px = self._measure[key] = f.metrics("linespace")
+        return px
 
     def _draw_adi(self, x0, y0, x1, i, st):
         """One station's ADI ATTITUDE / ERROR / RATE switches and ATT REF
@@ -3628,7 +3679,7 @@ class PanelO6:
         gap = 18                                 # least air between captions and rings
         th10 = self._th(10)
         ths = self._th(SETTING_SIZE)
-        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         gw, gh = 58, 136                         # O6 OUTPUT's 3-position guard
         sgw, sgh = 58, 124                       # O6 POWER's 2-position guard
         b = self.pb
@@ -3676,11 +3727,11 @@ class PanelO6:
         face = b - 12 - 4
         lsize = 10
         while lsize > 6:
-            lls = self._tkfont(lsize).metrics("linespace") / max(self.s, 0.01)
+            lls = self._linespace(lsize) / max(self.s, 0.01)
             if 2 * lls <= face and self._tw("ATT", lsize) <= face:
                 break
             lsize -= 1
-        lls = self._tkfont(lsize).metrics("linespace") / max(self.s, 0.01)
+        lls = self._linespace(lsize) / max(self.s, 0.01)
         dx = 2 if self.attref[i] else 0
         mid = row + b / 2.0 + dx
         self._text(bx + dx, mid - lls * 0.5, "ATT", size=lsize)
