@@ -825,7 +825,7 @@ class PanelO6:
         # by key -> position, saved and restored; buttons held by key; lamps.
         PC.check()
         self.ctl = dict((k, c["default"]) for k, c in PC.CONTROLS.items()
-                        if not PC.is_button(k))
+                        if PC.is_switch(k))
         self.ctl_held = dict((k, False) for k in PC.CONTROLS if PC.is_button(k))
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
@@ -1130,7 +1130,7 @@ class PanelO6:
                "xfeed": XFEED_POS,
                "trim_rhc": dict((sd, TRIM_POS) for sd in TRIM_SIDES),
                "ctl": dict((k, PC.positions_of(k)) for k in PC.CONTROLS
-                           if not PC.is_button(k))}
+                           if PC.is_switch(k))}
 
     @classmethod
     def _bad_value(cls, name, value, key=None):
@@ -1255,10 +1255,12 @@ class PanelO6:
             if PC.is_button(key):
                 for u, d, m in c.get("contacts") or ():
                     contact(u, d, m, self.ctl_held[key])
-            else:
+            elif PC.is_switch(key):
+                gate = c.get("while_held")
+                live = gate is None or self.ctl_held.get(gate, False)
                 for pos, cs in (c.get("contacts") or {}).items():
                     for u, d, m in cs:
-                        contact(u, d, m, self.ctl[key] == pos)
+                        contact(u, d, m, live and self.ctl[key] == pos)
         return out
 
     def _publish(self):
@@ -2220,8 +2222,12 @@ class PanelO6:
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
         cap = self._ctl_lines(c.get("caption"))
         cap_w = max([self._tw(l) for l in cap] or [0])
-        above = len(cap) * ls
+        # A gap under the caption, so it does not read as one block with the
+        # top legend below it; and room for a pushbutton's guard.
+        above = len(cap) * ls + (ls * 0.4 if cap else 0)
         k = c["kind"]
+        if k == "pb" and c.get("guarded"):
+            above += 8
         if k in ("t2", "t3"):
             pos = c["positions"]
             body = self.TGL3_H if k == "t3" else self.TGL2_H
@@ -2229,6 +2235,15 @@ class PanelO6:
             w = max(self.TGL_W * 1.08 + 2 * side, cap_w,
                     self._tw(pos[0]), self._tw(pos[-1]))
             return w, above + ls, body, ls
+        if k == "h3":
+            pos = c["positions"]
+            lw = max(self._tw(pos[0]), self._tw(pos[-1]))
+            w = max(cap_w, self.TGL3_H + 2 * (lw + 12))
+            return w, above + ls, self.TGL_W, 0
+        if k == "lamp":
+            lines = self._ctl_lines(c.get("legend"))
+            return (max(cap_w, self.pb, max([self._tw(l) for l in lines] or [0]) + 12),
+                    above, self.pb * 0.6, 0)
         if k == "rot":
             pos = c["positions"]
             lw = max(self._tw(p) for p in pos)
@@ -2257,6 +2272,27 @@ class PanelO6:
             if k == "t3":
                 self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, pos[1])
             self._text(cx, y + body + ls * 0.5, pos[-1], size=SETTING_SIZE)
+        elif k == "h3":
+            pos = c["positions"]
+            gw, gh = self.TGL3_H, self.TGL_W
+            p = pos.index(self.ctl[key])
+            self._guarded_toggle_h(cx - gw / 2, y, cx + gw / 2, y + gh, p, npos=3)
+            self._hit("ctl", key, cx - gw / 2, y, cx + gw / 2, y + gh)
+            self._text(cx, y - ls * 0.5, pos[1], size=SETTING_SIZE)
+            self._text(cx - gw / 2 - 6 - self._tw(pos[0]) / 2.0, y + gh / 2.0, pos[0],
+                       size=SETTING_SIZE)
+            self._text(cx + gw / 2 + 6 + self._tw(pos[-1]) / 2.0, y + gh / 2.0, pos[-1],
+                       size=SETTING_SIZE)
+        elif k == "lamp":
+            lw = max(self.pb, max([self._tw(l) for l in self._ctl_lines(c.get("legend"))]
+                                  or [0]) + 12)
+            lit = self.ctl_lamp.get(key, False)
+            self._rect(cx - lw / 2, y, cx + lw / 2, y + body, fill=C_PBI_LIT if lit else C_PBI_DARK,
+                       outline=C_BEZEL, width=max(1, int(self.s)))
+            lines = self._ctl_lines(c.get("legend"))
+            for j, l in enumerate(lines):
+                self._text(cx, y + body / 2.0 + ls * (j - (len(lines) - 1) / 2.0), l,
+                           size=SETTING_SIZE)
         elif k == "rot":
             self._rotary(key, cx, y + body / 2.0)
         else:
@@ -2266,6 +2302,10 @@ class PanelO6:
                 self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
                           self.ctl_lamp.get(key, False))
             else:
+                if c.get("guarded"):
+                    g = 5
+                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                               outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
                 self._legend_pb(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held)
             self._hit("ctl", key, cx - b / 2, y, cx + b / 2, y + b)
 
@@ -3692,9 +3732,13 @@ class PanelO6:
                 i = pos.index(self.ctl[index])
                 i = max(0, i - 1) if event.x < (x1 + x2) / 2.0 else min(len(pos) - 1, i + 1)
                 self._set_ctl(index, pos[i])
-            else:
+            elif c["kind"] != "lamp":
                 pos = c["positions"]
-                self._set_ctl(index, pos[self._zone(event.y, y1, y2, len(pos))])
+                z = (self._zone(event.x, x1, x2, len(pos)) if c["kind"] == "h3"
+                     else self._zone(event.y, y1, y2, len(pos)))
+                self._set_ctl(index, pos[z])
+                if pos[z] in (c.get("spring") or ()):
+                    self._held = ("ctl_spring", index)      # back when let go
 
 
     def _on_release(self, event):
@@ -3716,6 +3760,8 @@ class PanelO6:
             self._set_am(index, False)
         elif kind == "ctl":
             self._set_ctl(index, False)
+        elif kind == "ctl_spring":
+            self._set_ctl(index, PC.CONTROLS[index]["default"])
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -4090,7 +4136,12 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         elif verb == "switch":
             key, _, val = arg.strip().partition(" ")
             key, val = key.lower(), val.strip().upper()
-            panel._set_ctl(key, next(p for p in PC.positions_of(key) if p.upper() == val))
+            pos = next(p for p in PC.positions_of(key) if p.upper() == val)
+            panel._set_ctl(key, pos)
+            c = PC.CONTROLS[key]
+            if pos in (c.get("spring") or ()):
+                root.after(c.get("hold_ms", 500),
+                           lambda k=key, d=c["default"]: panel._set_ctl(k, d))
         elif verb == "press":
             key = arg.strip().lower()
             panel._set_ctl(key, True)
