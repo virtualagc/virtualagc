@@ -46,6 +46,12 @@ typedef struct {
 void phys_init_circular(PhysState *s, double re, double alt, double incl,
                         double raan, double arglat, double t);
 
+/* An orbit from its elements: apogee and perigee altitudes above a sphere
+ * of radius re (m), inclination, node, argument of perigee and true anomaly
+ * (rad), at time t.  Attitude identity, rates zero. */
+void phys_init_elements(PhysState *s, double re, double ha, double hp, double incl,
+                        double raan, double argp, double nu, double t);
+
 /* Advance by dt seconds under gravity plus the applied body-frame force
  * (N) and torque (N m), both held constant over the step; NULL for none. */
 void phys_step(PhysState *s, double dt, const double fBody[3], const double tBody[3]);

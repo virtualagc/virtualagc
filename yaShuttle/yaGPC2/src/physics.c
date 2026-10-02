@@ -387,6 +387,30 @@ void phys_init_circular(PhysState *s, double re, double alt, double incl,
     s->t = t;
 }
 
+void phys_init_elements(PhysState *s, double re, double ha, double hp, double incl,
+                        double raan, double argp, double nu, double t) {
+    double ra = re + ha, rp = re + hp;
+    if (ra < rp) { double x = ra; ra = rp; rp = x; }
+    double a = 0.5 * (ra + rp), e = (ra - rp) / (ra + rp);
+    double p = a * (1.0 - e * e), mu = PHYS_MU_EARTH;
+    double r = p / (1.0 + e * cos(nu));
+    /* perifocal position and velocity, then into the inertial frame by the
+     * argument of perigee, inclination and node */
+    double xp = r * cos(nu), yp = r * sin(nu);
+    double vxp = -sqrt(mu / p) * sin(nu), vyp = sqrt(mu / p) * (e + cos(nu));
+    double cO = cos(raan), sO = sin(raan), ci = cos(incl), si = sin(incl),
+           cw = cos(argp), sw = sin(argp);
+    double P[3] = { cO * cw - sO * sw * ci, sO * cw + cO * sw * ci, sw * si };
+    double Q[3] = { -cO * sw - sO * cw * ci, -sO * sw + cO * cw * ci, cw * si };
+    for (int i = 0; i < 3; i++) {
+        s->r[i] = xp * P[i] + yp * Q[i];
+        s->v[i] = vxp * P[i] + vyp * Q[i];
+    }
+    s->q[0] = 1.0; s->q[1] = s->q[2] = s->q[3] = 0.0;
+    s->w[0] = s->w[1] = s->w[2] = 0.0;
+    s->t = t;
+}
+
 double phys_orbit_energy(const PhysState *s) {
     return 0.5 * dot(s->v, s->v) - PHYS_MU_EARTH / sqrt(dot(s->r, s->r));
 }

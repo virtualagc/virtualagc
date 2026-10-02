@@ -381,6 +381,26 @@ void vehdyn_reset(double t) {
     memset(sensedDv, 0, sizeof sensedDv);
     mass_properties();
     phys_init_circular(&st, 6378137.0, 400e3, 51.6 * VD_PI / 180.0, 0.0, 0.0, t);
+    /* YAGPC_VEHDYN_ORBIT: the starting orbit, instead of 400 km circular at
+     * 51.6 deg from the ascending node.  Four numbers, a circular orbit:
+     * altitude (km), inclination, node and argument of latitude (deg); six,
+     * any orbit: apogee and perigee altitudes (km), inclination, node,
+     * argument of perigee and true anomaly (deg).  Altitudes above the
+     * equatorial radius; the node in M50. */
+    {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_ORBIT");
+        double x[6];
+        int n = (e != NULL) ? sscanf(e, "%lf,%lf,%lf,%lf,%lf,%lf",
+                                     &x[0], &x[1], &x[2], &x[3], &x[4], &x[5]) : 0;
+        const double D = VD_PI / 180.0;
+        if (n == 4)
+            phys_init_circular(&st, 6378137.0, x[0] * 1e3, x[1] * D, x[2] * D, x[3] * D, t);
+        else if (n == 6)
+            phys_init_elements(&st, 6378137.0, x[0] * 1e3, x[1] * 1e3, x[2] * D,
+                               x[3] * D, x[4] * D, x[5] * D, t);
+        else if (e != NULL)
+            fprintf(stderr, "vehdyn: YAGPC_VEHDYN_ORBIT wants 4 or 6 numbers, got \"%s\"\n", e);
+    }
     /* YAGPC_VEHDYN_ATT=roll,pitch,yaw (degrees): the starting attitude, as a
      * yaw-pitch-roll sequence from M50; and YAGPC_VEHDYN_RATE=p,q,r (deg/s)
      * the starting body rates.  For tests: see that the IMU and the flight

@@ -125,6 +125,24 @@ int main(void) {
               "along the body X axis", norm(dv), want);
     }
 
+    /* AN ORBIT FROM ITS ELEMENTS: 300 x 200 km at 28.5 deg, at perigee --
+     * the radius is the perigee's, the energy gives the semi-major axis, the
+     * angular momentum the inclination, and half a period later the vehicle
+     * is at apogee. */
+    {
+        orbiter(&s);
+        phys_init_elements(&s, RE, 300e3, 200e3, 28.5 * PI / 180, 1.0, 0.5, 0.0, 0.0);
+        double ra = RE + 300e3, rp = RE + 200e3, a = 0.5 * (ra + rp), h[3];
+        check(fabs(norm(s.r) - rp) < 1e-6, "elements: perigee radius (m)", norm(s.r), rp);
+        double aE = -PHYS_MU_EARTH / (2 * phys_orbit_energy(&s));
+        check(fabs(aE - a) < 1e-3, "elements: semi-major axis (m)", aE, a);
+        phys_orbit_h(&s, h);
+        double inc = acos(h[2] / norm(h)) * 180 / PI;
+        check(fabs(inc - 28.5) < 1e-9, "elements: inclination (deg)", inc, 28.5);
+        phys_advance_to(&s, PI * sqrt(a * a * a / PHYS_MU_EARTH), 0.5, NULL, NULL);
+        check(fabs(norm(s.r) - ra) < 0.05, "elements: apogee half a period later (m)", norm(s.r), ra);
+    }
+
     /* THE FIELD'S ZONAL COEFFICIENTS are the textbook J2, J3, J4. */
     check(fabs(phys_jn(2) / 1.08262668e-3 - 1.0) < 1e-6, "J2", phys_jn(2), 1.08262668e-3);
     check(fabs(phys_jn(3) / -2.53265649e-6 - 1.0) < 1e-5, "J3", phys_jn(3), -2.53265649e-6);
