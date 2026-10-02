@@ -526,7 +526,8 @@ static void crew_aid_hfe(int k, uint16_t *b, int nb) {
  *            which the fail logic compares with 16,000 counts
  *            (CGRS_PC_THRESH), and the 1-word HFE read FIOHI1C5.  20,000
  *            while burning -- 100%, if 0-5 V spans the meter's 0-160%, which
- *            is inferred, not documented -- and 0 otherwise.
+ *            is inferred, not documented -- falling with the thrust through
+ *            the tail-off, and 0 otherwise.
  * ------------------------------------------------------------------- */
 static int16_t faAod[5][NCARD][NCHAN];
 #define PC_FA_READ 0x25A40u     /* FIOHI1C5: card 6 ch 18, 1 word */
@@ -692,7 +693,7 @@ static void fa_mfe(int k, uint16_t *w, int n) {
         SEG2(3) = RCS_PRP_T;
         SEG2(1) = RCS_HE_T;
         SEG2(10) = 16000u;                       /* OMS */
-        if (vehdyn_oms_burning(k == 3 ? 0 : 1)) SEG2(11) = OMS_PC_BURNING;
+        SEG2(11) = (uint16_t)(OMS_PC_BURNING * vehdyn_oms_thrust(k == 3 ? 0 : 1));
     }
 #undef SEG2
     for (int i = 0; i < n; i++) w[i] = (i < 34) ? b[i] : 0;
@@ -942,7 +943,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         if (u >= 1 && f == HFE_FA_READ) { fa_hfe(u, out, n); faReads++; return true; }
         if (u >= 1 && f == MFE_FA_READ) { fa_mfe(u, out, n); faReads++; return true; }
         if (u >= 3 && f == PC_FA_READ) {
-            out[0] = vehdyn_oms_burning(u == 3 ? 0 : 1) ? OMS_PC_BURNING : 0;
+            out[0] = (uint16_t)(OMS_PC_BURNING * vehdyn_oms_thrust(u == 3 ? 0 : 1));
             for (int i = 1; i < n; i++) out[i] = 0;
             faReads++;
             return true;

@@ -1109,6 +1109,9 @@ which are reachable in about fifteen minutes with two computers
 - **#266** *(emulator)* An undecodable halfword halts the run ('invalid instruction', cpu.c decodeFailed / run.c) where the AP-101S takes an operation-exception program check (code 0000) to FCOS's handler. Upstream gpc did this in 818df88. Bears on ledger #1 (0xc6c6 stop at 0x648da) and #56.
   - evidence: tools/gpc-upstream.py review 2026-10-01; src/cpu.c:1600-1607, src/run.c:2865-2879.
   - instrs `operation exception` &middot; files `src/cpu.c,src/run.c` &middot; symptom `invalid instruction, run stops`
+- **#272** *(emulator)* PASS failed RCS jet L2D OFF (CGRB_FOFF(2) HAL bit 19 = FA3 jet 3; message 'L RCS DJET') during an MM202 auto attitude maneuver with YAGPC_MDM_DEVICES=1 YAGPC_VEHDYN=1: GRORCS fail-off logic saw the jet commanded (CGRB_JET_FIRE) with no pressure discrete (FA HFE word 21, CGBB_HFA_SEG5_DSCRT4) for CGRS_FAIL_OFF_DELAY consecutive passes. mdmdev derives word 21 from the B word PASS last WROTE (faOut[k][10][0]), so the internal fire flag and the written word disagreed for 3+ HFE cycles -- or the read and the write are ordered so Pc lags. Not yet traced.
+  - evidence: burn2 run (restore of mm202cap, 2026-10-02): message at MET 00:19:52 before EXEC; postburn capture: CGRB_FOFF(2)=00002000 CGRB_FAILURE(2) same, JET_AVAILABLE(2)=ffffdfff, FON and FLK clear. Jets L2D/R2D fired often in the maneuver (vehdyn trace). Next: trace per-HFE-cycle FA3 B word vs word 21 vs CGRB_JET_FIRE around the failure.
+  - csects `GRORCS,GRRRCS` &middot; config `G2` &middot; env `YAGPC_MDM_DEVICES,YAGPC_VEHDYN` &middot; files `src/mdmdev.c` &middot; symptom `L RCS DJET, jet fail off, FOFF, L2D deselected, RCS jet failed` &middot; run `burn2`
 
 ## Confirmed
 

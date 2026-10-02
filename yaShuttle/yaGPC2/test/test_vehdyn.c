@@ -163,6 +163,24 @@ int main(void) {
               miss[0] - miss[1], 0.069);
     }
 
+    /* THE OMS TAIL-OFF: after the valves close, the engine delivers the
+     * impulse of CGGV_TCO_BIAS = 0.398 s at full thrust -- what PASS's early
+     * cutoff allows for -- and its chamber pressure falls with it. */
+    {
+        vehdyn_reset(0.0);
+        vehdyn_set_oms(0, true, true, 0.0, 0.0, 0.0);
+        vehdyn_set_oms(0, false, true, 0.0, 0.0, 1e6);
+        double m1 = vehdyn_state()->mass;
+        vehdyn_advance(1.398e6);
+        check(fabs(vehdyn_oms_thrust(0) - 0.5) < 0.01, "half thrust halfway through the tail-off",
+              vehdyn_oms_thrust(0), 0.5);
+        vehdyn_advance(3e6);
+        double used = m1 - vehdyn_state()->mass;
+        double want = 6087.0 * 4.4482216152605 / (10136.8 * 0.3048) * 0.398;
+        check(fabs(used / want - 1.0) < 0.01, "tail-off burns 0.398 s of propellant (kg)", used, want);
+        check(vehdyn_oms_thrust(0) == 0.0, "and then nothing", vehdyn_oms_thrust(0), 0.0);
+    }
+
     /* THE EARTH AS PASS SEES IT.  With the clock's zero at 2000-03-15
      * 00:00 UTC -- the tape's own RNP epoch, day 75 of 2000 -- the Earth
      * angle at t = 0 is zero and inertial -> Earth-fixed is GLWRNP's matrix

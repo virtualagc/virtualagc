@@ -163,12 +163,20 @@ static const double TANK_XYZ[NMOD][3] = {  /* inches, Orbiter structural */
  * +/-7 plus about a degree of snubbing).  Unpowered, they stay where they
  * are.  The engine fires while its valves are commanded open (mdmdev.c
  * decides that from the coils and the ARM switches) and its pod has
- * propellant; it starts and stops at once. */
+ * propellant.  It starts at once, but it does not stop at once: the
+ * propellant between the valves and the injector still burns, and the flight
+ * software allows for exactly that -- it commands cutoff CGGV_TCO_BIAS =
+ * 0.398 s early (GHOORB.hal:238-246, DASS G2) so the tail-off impulse
+ * finishes the burn.  The thrust here falls linearly to zero over twice that,
+ * an impulse of 0.398 s at full thrust; an engine that stopped dead
+ * underburned every maneuver by that much.  The shape is not documented
+ * here, only the impulse PASS expects. */
 #define OMS_THRUST_N     (6087.0 * LBF_N)
 #define OMS_ISP_S        (10136.8 * 0.3048 / G0)
 #define OMS_SLEW_DEG_S   5.0
 #define OMS_CANT_P       0.276053
 #define OMS_CANT_Y       0.113446
+#define OMS_TAILOFF_S    (2.0 * 0.398)
 
 static const double OMS_XYZ[2][3] = { { 1518.0, -88.0, 492.0 }, { 1518.0, 88.0, 492.0 } };
 static struct {
@@ -176,7 +184,9 @@ static struct {
     double cmd[2];       /* deg, pitch and yaw, as commanded */
     double pos[2];       /* deg, where the actuators are */
     double onSec;
+    double tail;         /* s of tail-off still to come, after the valves close */
 } oms[2];
+
 
 static PhysState st;
 static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
@@ -299,6 +309,14 @@ static void mass_properties(void) {
     memcpy(cgB, c, sizeof c);
 }
 
+/* An engine's thrust as a fraction of full: 1 burning, falling through the
+ * tail-off, 0 with its pod dry. */
+static double oms_fraction(int e) {
+    if (prop[3 + e] <= 0.0) return 0.0;
+    if (oms[e].fire) return 1.0;
+    return (oms[e].tail > 0.0) ? oms[e].tail / OMS_TAILOFF_S : 0.0;
+}
+
 /* The force and the torque about the current CG of the jets that are on. */
 static void jet_loads(double f[3], double tau[3], double *mdot) {
     f[0] = f[1] = f[2] = tau[0] = tau[1] = tau[2] = 0.0;
@@ -319,22 +337,27 @@ static void jet_loads(double f[3], double tau[3], double *mdot) {
         mdot[mod] += jet_mdot(j);
     }
     for (int e = 0; e < 2; e++) {
-        if (!oms[e].fire || prop[3 + e] <= 0.0) continue;
+        double frac = oms_fraction(e);
+        if (frac <= 0.0) continue;
         double P = OMS_CANT_P - oms[e].pos[0] * VD_PI / 180.0;
         double Y = oms[e].pos[1] * VD_PI / 180.0 + (e == 0 ? OMS_CANT_Y : -OMS_CANT_Y);
         double u[3] = { cos(P) * cos(Y), sin(Y), sin(P) * cos(Y) }, p[3], r[3], fk[3];
         to_body(OMS_XYZ[e][0], OMS_XYZ[e][1], OMS_XYZ[e][2], p);
-        for (int i = 0; i < 3; i++) { r[i] = p[i] - cgB[i]; fk[i] = OMS_THRUST_N * u[i]; }
+        for (int i = 0; i < 3; i++) { r[i] = p[i] - cgB[i]; fk[i] = frac * OMS_THRUST_N * u[i]; }
         tau[0] += r[1] * fk[2] - r[2] * fk[1];
         tau[1] += r[2] * fk[0] - r[0] * fk[2];
         tau[2] += r[0] * fk[1] - r[1] * fk[0];
         for (int i = 0; i < 3; i++) f[i] += fk[i];
-        mdot[3 + e] += OMS_THRUST_N / (OMS_ISP_S * G0);
+        mdot[3 + e] += frac * OMS_THRUST_N / (OMS_ISP_S * G0);
     }
 }
 
-/* The actuators, dt seconds on. */
+/* The actuators, and the tail-off, dt seconds on. */
 static void oms_slew(double dt) {
+    for (int e = 0; e < 2; e++) {
+        oms[e].tail -= dt;
+        if (oms[e].tail < 0.0) oms[e].tail = 0.0;
+    }
     static const double LIM[2] = { 7.0, 8.0 };
     for (int e = 0; e < 2; e++) {
         if (!oms[e].powered) continue;
@@ -600,6 +623,8 @@ void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawD
             fprintf(stderr, "vehdyn: t=%.3f s %s OMS %s, gimbal %+.2f %+.2f deg\n", st.t,
                     e ? "right" : "left", fire ? "ON" : "off", oms[e].pos[0], oms[e].pos[1]);
     }
+    if (oms[e].fire && !fire) oms[e].tail = OMS_TAILOFF_S;
+    if (fire) oms[e].tail = 0.0;
     oms[e].fire = fire;
     oms[e].powered = powered;
     if (powered) { oms[e].cmd[0] = pitchDeg; oms[e].cmd[1] = yawDeg; }
@@ -608,6 +633,8 @@ void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawD
 bool vehdyn_oms_burning(int e) {
     return e >= 0 && e <= 1 && oms[e].fire && prop[3 + e] > 0.0;
 }
+
+double vehdyn_oms_thrust(int e) { return (e >= 0 && e <= 1) ? oms_fraction(e) : 0.0; }
 
 double vehdyn_oms_gimbal(int e, int axis) {
     return (e >= 0 && e <= 1 && axis >= 0 && axis <= 1) ? oms[e].pos[axis] : 0.0;
@@ -665,6 +692,7 @@ int vehdyn_save(double *b, int max) {
         PUT(oms[e].onSec);
     }
     PUT(gmtZero >= 0.0 ? gmtZero + st.t : -1.0);      /* the state's GMT */
+    PUT(oms[0].tail); PUT(oms[1].tail);
 #undef PUT
     return n;
 }
@@ -691,8 +719,9 @@ double vehdyn_load(const double *b, int n) {
     }
     double gmtCap = (i < n) ? b[i] : -1.0;
     i++;
+    for (int e = 0; e < 2; e++, i++) oms[e].tail = (i < n) ? b[i] : 0.0;
 #undef GET
-    if (i > n + 1) return -1.0;               /* the GMT may be missing: older */
+    if (i > n + 3) return -1.0;     /* the GMT and the tail-offs may be missing: older */
     haveTime = had;
     st.t = 0.0;                    /* the restored clock's zero */
     mass_properties();

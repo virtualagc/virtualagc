@@ -53,6 +53,7 @@ void vehdyn_set_propellant(int module, double kg);
 void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawDeg,
                     double sharedUs);
 bool vehdyn_oms_burning(int e);
+double vehdyn_oms_thrust(int e);      /* fraction of full, tail-off included */
 double vehdyn_oms_gimbal(int e, int axis);
 double vehdyn_oms_on_seconds(int e);
 
