@@ -1338,6 +1338,12 @@ def main():
                     help="display windows CRT1 up to CRT4: 1-4 (default 2 with more than "
                          "one GPC, else 1).  CRT4 is the aft display, on IDP 4 and the aft "
                          "keyboard")
+    ap.add_argument("--orbit", metavar="ELEMENTS",
+                    help="the vehicle dynamics' starting orbit (with YAGPC_MDM_DEVICES=1 "
+                         "YAGPC_VEHDYN=1): ALT,INCL,NODE,ARGLAT for a circular orbit, or "
+                         "HA,HP,INCL,NODE,ARGP,TRUEANOM for any -- km and degrees, altitudes "
+                         "above the equatorial radius, node in M50.  Default 400,51.6,0,0.  "
+                         "groundstation.py sv then gives PASS the same state")
     ap.add_argument("--truth-ball", action="store_true",
                     help="start truthball.py, a debugging attitude indicator driven "
                          "by the vehicle dynamics' truth state (needs YAGPC_MDM_DEVICES=1 "
@@ -1711,6 +1717,8 @@ def main():
         kb_geom, o6_geom, cam_geom = to_x(kb_geom), to_x(o6_geom), to_x(cam_geom)
 
     env = dict(os.environ)
+    if args.orbit:
+        env["YAGPC_VEHDYN_ORBIT"] = args.orbit
     if tk_font_scale != 1:
         env.setdefault("NSTS_TK_FONT_SCALE", str(tk_font_scale))
     env["NSTS_MAJOR_FUNC"] = str(MAJOR_FUNC[args.major_func])
