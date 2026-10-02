@@ -1328,6 +1328,9 @@ def main():
                          "forward THC), aft (aft RHC and THC) or rh (PLT, no THC).  One "
                          "station, since one person flies the simulation; omitted, none "
                          "is started")
+    ap.add_argument("--ssp", metavar="FILE", default=None,
+                    help="names file for the payload standard switch panels (L12U, "
+                         "L12L, L11U), passed to panelO6.py; e.g. examples/sts109-ssp.txt")
     ap.add_argument("--joystick", type=int, default=None, metavar="N",
                     help="handcontrollers.py: the SDL joystick index (default 0)")
     ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default=None,
@@ -1857,6 +1860,8 @@ def main():
                           "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size)), "--geometry", o6_geom]
             if panel_restore and os.path.isfile(panel_restore):
                 panel_argv += ["--restore", panel_restore]
+            if args.ssp:
+                panel_argv += ["--ssp", os.path.abspath(args.ssp)]
             # The run's layout, so panel windows that appear later with their
             # OPS are placed where it says (a resume's own layout included).
             if args.layout:

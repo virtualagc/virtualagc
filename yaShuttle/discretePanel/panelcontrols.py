@@ -19,6 +19,12 @@ A CONTROL is CONTROLS[key] = dict:
                "pb"          a momentary pushbutton
                "pbi"         a momentary pushbutton indicator (lighted)
                "lamp"        an indicator only: lamps, no contacts
+               "tb"          a talkback: positions are its two states (a
+                             word, GRAY or BP), shown as the first while
+                             the switch named by 'follows' is in its first
+                             position and as the second otherwise
+               "cb"          a circuit breaker, IN or OUT
+               "blank"       an empty place in a grid of controls
     caption    printed above it ("\\n" for two lines)
     positions  for t2/t3/rot: the legends, as printed
     default    for t2/t3/rot: where it starts
@@ -50,7 +56,7 @@ window after its older, hand-drawn panes.
 CONTROLS = {}
 PANES = {}
 
-KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp")
+KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank")
 FF_UNITS = (1, 2, 3, 4)
 FA_UNITS = (5, 6, 7, 8)
 
@@ -63,9 +69,11 @@ def check():
             raise ValueError("%s: kind %r" % (where, c.get("kind")))
         if not c.get("panel"):
             raise ValueError("%s: no panel" % where)
-        if c["kind"] in ("t2", "t3", "h3", "rot"):
+        if c["kind"] in ("tb", "blank"):
+            continue
+        if c["kind"] in ("t2", "t3", "h3", "rot", "cb"):
             pos = c.get("positions") or ()
-            need = {"t2": 2, "t3": 3, "h3": 3}.get(c["kind"])
+            need = {"t2": 2, "t3": 3, "h3": 3, "cb": 2}.get(c["kind"])
             if (need and len(pos) != need) or len(pos) < 2:
                 raise ValueError("%s: positions %r" % (where, pos))
             if c.get("default") not in pos:
@@ -83,7 +91,7 @@ def check():
                 if len(lamp) != 4 or lamp[0] not in FF_UNITS:
                     raise ValueError("%s: lamp %r" % (where, lamp))
     for panel, panes in PANES.items():
-        for title, rows in panes:
+        for title, rows, *_opts in panes:
             for row in rows:
                 for key in row:
                     if key not in CONTROLS:
@@ -107,7 +115,7 @@ def _check_contacts(where, cs):
 
 
 def is_switch(key):
-    return CONTROLS[key]["kind"] in ("t2", "t3", "h3", "rot")
+    return CONTROLS[key]["kind"] in ("t2", "t3", "h3", "rot", "cb")
 
 
 def positions_of(key):
@@ -388,3 +396,113 @@ PANES["A8U"] = [("RMS", [["rms_mode", "rms_mode_enter", "rms_parameter", "rms_jo
                           "rms_master_alarm"]])]
 PANES["A8L"] = [("RMS", [["rms_select", "rms_power"]])]
 check()
+
+
+
+# ---------------------------------------------------------------------------
+# THE PAYLOAD STANDARD SWITCH PANELS, SSP 1-3 on L12U, L12L and L11U (owner,
+# 2026-10-02).  One grid on every flight -- switch places S1-S24, talkback
+# places DS1-DS24 above them, circuit breakers CB1-CB4 -- and what is fitted
+# where, and called what, is the flight's (STS-109 Payload Systems Data and
+# Malfunction Procedures, section 10, shows three).  Without a names file each
+# is the bare grid: a two-position toggle at every switch place, numbered,
+# and the four breakers.  With one (panelO6.py --ssp FILE) each place is what
+# the file says.  They are wired to the payload, not to PASS: nothing here
+# reaches a GPC, and a talkback can only follow a switch ('follows'), as the
+# payload would answer it.
+#
+# The names file, one place per line ('#' to the end of a line is ignored):
+#     PANEL  PLACE  KIND  | CAPTION | POSITIONS | FOLLOWS
+# PANEL is L12U, L12L or L11U; PLACE is S1-S24, DS1-DS24, CB1-CB4 or Q1-Q4
+# (the quadrants: Q1 upper left, Q2 upper right, Q3 lower left, Q4 lower
+# right, whose CAPTION is their title).  KIND is t2 or t3 (a toggle), t3m (a
+# three-position toggle whose ends spring back to the middle), tb (a
+# talkback), cb (a breaker), none (an empty place) or title (for Q1-Q4).
+# CAPTION may use \n for a new line; POSITIONS are separated by / (top
+# first; for tb the two states, e.g. UP/BP or GRAY/BP); FOLLOWS is the
+# switch place a talkback follows.
+
+SSP_PANELS = ("L12U", "L12L", "L11U")
+SSP_VIA = "payload (flight-specific) -- not wired to PASS"
+_SSP_QUADS = (("Q1", [1, 2, 3, 4, 5, 6, 7], ()),
+              ("Q2", [13, 14, 15, 16, 17, 18, 19], ()),
+              ("Q3", [8, 9, 10, 11, 12], (2, 1)),
+              ("Q4", [20, 21, 22, 23, 24], (4, 3)))
+
+
+def _ssp_key(panel, place):
+    return "%s_%s" % (panel.lower(), place.lower())
+
+
+def load_ssp(path=None):
+    """The three SSPs, bare or from a names file; replaces any loaded before.
+    Returns the number of places the file set."""
+    for k in [k for k, c in CONTROLS.items() if c.get("ssp")]:
+        del CONTROLS[k]
+    spec = {}
+    titles = {}
+    n = 0
+    if path:
+        with open(path) as fh:
+            for lineno, raw in enumerate(fh, 1):
+                line = raw.split("#", 1)[0].strip()
+                if not line:
+                    continue
+                head, *fields = [f.strip() for f in line.split("|")]
+                words = head.split()
+                if len(words) != 3:
+                    raise ValueError("%s:%d: expected 'PANEL PLACE KIND | ...'"
+                                     % (path, lineno))
+                panel, place, kind = words[0].upper(), words[1].upper(), words[2].lower()
+                if panel not in SSP_PANELS:
+                    raise ValueError("%s:%d: panel %r is not one of %s"
+                                     % (path, lineno, panel, ", ".join(SSP_PANELS)))
+                fields += [""] * (3 - len(fields))
+                if kind == "title":
+                    titles[(panel, place)] = fields[0]
+                else:
+                    spec[(panel, place)] = (kind, fields[0].replace("\\n", "\n"),
+                                            [p.strip() for p in fields[1].split("/") if p.strip()],
+                                            fields[2].upper())
+                n += 1
+    for panel in SSP_PANELS:
+        panes = []
+        for q, places, cbs in _SSP_QUADS:
+            tb_row, sw_row = [], []
+            for cb_top, cb_bot in ([cbs] if cbs else []):
+                tb_row.append(_ssp_place(panel, "CB%d" % cb_top, spec, "cb"))
+                sw_row.append(_ssp_place(panel, "CB%d" % cb_bot, spec, "cb"))
+            for i in places:
+                tb_row.append(_ssp_place(panel, "DS%d" % i, spec, "none"))
+                sw_row.append(_ssp_place(panel, "S%d" % i, spec, "t2"))
+            panes.append((titles.get((panel, q), ""), [tb_row, sw_row], {"grid": True}))
+        PANES[panel] = panes
+    check()
+    return n
+
+
+def _ssp_place(panel, place, spec, default):
+    key = _ssp_key(panel, place)
+    kind, caption, positions, follows = spec.get((panel, place), (default, "", [], ""))
+    c = dict(panel=panel, ssp=True, via=SSP_VIA, caption=caption, contacts={})
+    if kind == "none":
+        c.update(kind="blank")
+    elif kind in ("t2", "t3", "t3m"):
+        pos = tuple(positions) or (("ON", "OFF") if kind == "t2" else ("ON", "-", "OFF"))
+        c.update(kind="t3" if kind == "t3m" else kind, positions=pos,
+                 default=pos[1] if len(pos) == 3 else pos[-1],
+                 caption=caption or place)
+        if kind == "t3m":
+            c["spring"] = (pos[0], pos[-1])
+    elif kind == "tb":
+        c.update(kind="tb", positions=tuple(positions) or ("GRAY", "BP"),
+                 follows=_ssp_key(panel, follows) if follows else None)
+    elif kind == "cb":
+        c.update(kind="cb", positions=("IN", "OUT"), default="IN", caption=caption or place)
+    else:
+        raise ValueError("SSP %s %s: kind %r" % (panel, place, kind))
+    CONTROLS[key] = c
+    return key
+
+
+load_ssp()

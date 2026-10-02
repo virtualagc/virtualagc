@@ -723,8 +723,9 @@ OPS_PANELS = {
     ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2"),
     ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7", "L2"),
     ("GNC", 9): ("C3", "L2"),
-    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L"),
-    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U"),
+    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L",
+                "L12U", "L12L", "L11U"),
+    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "L12U", "L12L", "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
 SCREEN_OPS = re.compile(r"^\s*(\d)\d{3}/")
@@ -829,6 +830,15 @@ class PanelO6:
         self.ctl = dict((k, c["default"]) for k, c in PC.CONTROLS.items()
                         if PC.is_switch(k))
         self.ctl_held = dict((k, False) for k in PC.CONTROLS if PC.is_button(k))
+        # A talkback following a switch LATCHES, as the payload would: set
+        # by the switch's first position, cleared by its last, left alone
+        # by a middle one -- so a momentary ON/-/OFF switch's flag stays up
+        # after the switch springs back.
+        self.tb_on = {}
+        for k, c in PC.CONTROLS.items():
+            f = c.get("follows") if c["kind"] == "tb" else None
+            if f in PC.CONTROLS:
+                self.tb_on[k] = PC.CONTROLS[f].get("default") == PC.positions_of(f)[0]
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.ctl_lamp.update((k, (False,) * len(c["halves"]))
                              for k, c in PC.CONTROLS.items() if c.get("halves"))
@@ -1872,8 +1882,8 @@ class PanelO6:
         own = [k for k, c in PC.CONTROLS.items() if c["panel"] == win.name]
         return repr([getattr(self, a, None) for a in self.WIN_STATE.get(win.name, ())]
                     + [self.circle]
-                    + [(self.ctl.get(k), self.ctl_held.get(k), self.ctl_lamp.get(k))
-                       for k in own])
+                    + [(self.ctl.get(k), self.ctl_held.get(k), self.ctl_lamp.get(k),
+                        self.tb_on.get(k)) for k in own])
 
     def redraw(self):
         """The panel windows whose state has changed, each drawn by its own
@@ -2270,6 +2280,8 @@ class PanelO6:
     # ---- the table-driven controls (panelcontrols.py) -----------------------
 
     TGL_W, TGL3_H, TGL2_H = 58, 136, 124      # the panel's paddle guards
+    TB_W, TB_H = 50, 34                       # O6's talkback window
+    CB_D = 34                                 # a circuit breaker's knob
     ROT_D = 64                                # a rotary's knob
     CTL_GAP = 28           # between controls in a row: legends of neighbours
                            # nearly met at 18 (Mac-integrate, 2026-10-02)
@@ -2317,6 +2329,12 @@ class PanelO6:
             lw = max(self._tw(pos[0]), self._tw(pos[-1]))
             w = max(cap_w, self.TGL3_H + 2 * (lw + 12))
             return w, above + ls, self.TGL_W, 0
+        if k == "tb":
+            return max(cap_w, self.TB_W + 8), above, self.TB_H, 0
+        if k == "cb":
+            return max(cap_w, self.CB_D + 8), above, self.CB_D, 0
+        if k == "blank":
+            return self.TGL_W, 0, 0, 0
         if k == "lamp" and c.get("halves"):
             # A split-legend light: the panel's pushbutton size, halved
             # side by side or one over the other.
@@ -2353,7 +2371,7 @@ class PanelO6:
             p = pos.index(self.ctl[key])
             self._guarded_toggle(cx - gw / 2, y, cx + gw / 2, y + body, p, npos=len(pos))
             self._hit("ctl", key, cx - gw / 2, y, cx + gw / 2, y + body)
-            if k == "t3":
+            if k == "t3" and pos[1].strip("- "):
                 self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, pos[1])
             self._text(cx, y + body + ls * 0.5 + ex, pos[-1], size=SETTING_SIZE)
         elif k == "h3":
@@ -2367,6 +2385,29 @@ class PanelO6:
                        size=SETTING_SIZE)
             self._text(cx + gw / 2 + 6 + self._tw(pos[-1]) / 2.0, y + gh / 2.0, pos[-1],
                        size=SETTING_SIZE)
+        elif k == "blank":
+            pass
+        elif k == "tb":
+            pos = c["positions"]
+            state = pos[0] if self.tb_on.get(key) else pos[-1]
+            self._talkback(cx - self.TB_W / 2.0, y, cx + self.TB_W / 2.0, y + self.TB_H,
+                           state.upper() if state.upper() in ("GRAY", "BP") else state)
+        elif k == "cb":
+            d = self.CB_D
+            out = self.ctl[key] == "OUT"
+            ow = max(1, int(self.s))
+            if out:
+                # Pulled: the white band on its shank shows.
+                self._oval(cx - d / 2, y, cx + d / 2, y + d, fill=C_PADDLE, outline=C_INK, width=ow)
+                k2 = d * 0.36
+                self._oval(cx - k2, y + d / 2 - k2, cx + k2, y + d / 2 + k2, fill=C_BEZEL,
+                           outline=C_INK, width=ow)
+            else:
+                self._oval(cx - d / 2, y, cx + d / 2, y + d, fill=C_BEZEL, outline=C_INK, width=ow)
+                k2 = d * 0.30
+                self._oval(cx - k2, y + d / 2 - k2, cx + k2, y + d / 2 + k2, fill="#5a584f",
+                           outline=C_INK_DIM, width=ow)
+            self._hit("ctl", key, cx - d / 2 - 4, y - 4, cx + d / 2 + 4, y + d + 4)
         elif k == "lamp" and c.get("halves"):
             b = self.pb
             x1, x2 = cx - b / 2.0, cx + b / 2.0
@@ -2558,14 +2599,22 @@ class PanelO6:
             self._text((x1 + x2) / 2.0 + dx, mid + ls * (j - (len(lines) - 1) / 2.0),
                        l, size=SETTING_SIZE)
 
-    def _draw_ctl_pane(self, x0, y0, title, rows, measure=False, h=None):
-        """A titled pane of table-driven controls in rows.  Returns (w, h)."""
+    def _draw_ctl_pane(self, x0, y0, title, rows, measure=False, h=None, opts=None, w=None):
+        """A titled pane of table-driven controls in rows.  Returns (w, h).
+        opts {"grid": True}: columns line up from row to row (a talkback
+        over its switch)."""
+        opts = opts or {}
         pad, gap = 10, self.CTL_GAP
         th10 = self._th(10)
         title_h = (pad + 2 * th10) if title else pad
         sizes = [[self._ctl_size(k) for k in row] for row in rows]
+        if opts.get("grid"):
+            ncol = max(len(r) for r in sizes)
+            colw = [max(r[j][0] for r in sizes if j < len(r)) for j in range(ncol)]
+            sizes = [[(colw[j],) + sz[1:] for j, sz in enumerate(r)] for r in sizes]
         widths = [sum(s[0] for s in row) + gap * (len(row) - 1) for row in sizes]
         width = max(widths + [self._tw(title, 10) + 24 if title else 0]) + 2 * 24
+        width = max(width, w or 0)
         # Aligned on their bodies, so a row is as tall as its tallest
         # caption-and-legend above plus its tallest body-and-legend below
         # (the ABORT button, with no caption, hung out of its pane).
@@ -2589,7 +2638,7 @@ class PanelO6:
     def _pane(self, panel, title, x0, y0, measure=False, h=None):
         """One of the table's panes placed by a window's own layout (so the
         column of the rest leaves it out).  Returns (w, h)."""
-        rows = dict(PC.PANES[panel])[title]
+        rows = dict((t, r) for t, r, *_o in PC.PANES[panel])[title]
         if not measure:
             self._placed_panes.add(title)
         return self._draw_ctl_pane(x0, y0, title, rows, measure=measure, h=h)
@@ -2597,16 +2646,26 @@ class PanelO6:
     def _draw_ctl_panes(self, panel, right, bottom):
         """The table's panes for this window, in a column to the right of
         what it drew already.  Returns the new (right, bottom)."""
-        panes = [(t, r) for t, r in PC.PANES.get(panel, ())
-                 if t not in self._placed_panes]
+        panes = [(t, r, (o[0] if o else {})) for t, r, *o in PC.PANES.get(panel, ())
+                 if not (t and t in self._placed_panes)]
         if not panes:
             return right, bottom
         x0 = right + PANE_GAP
-        sizes = [self._draw_ctl_pane(0, 0, t, r, measure=True) for t, r in panes]
+        sizes = [self._draw_ctl_pane(0, 0, t, r, measure=True, opts=o) for t, r, o in panes]
+        if any(o.get("grid") for _t, _r, o in panes) and len(panes) == 4:
+            # THE SSP's FOUR QUADRANTS, two over two, as the panel has them.
+            cw = [max(sizes[0][0], sizes[2][0]), max(sizes[1][0], sizes[3][0])]
+            rh = [max(sizes[0][1], sizes[1][1]), max(sizes[2][1], sizes[3][1])]
+            for i, (title, rows, o) in enumerate(panes):
+                col, row = i % 2, i // 2
+                self._draw_ctl_pane(x0 + (cw[0] + PANE_GAP if col else 0),
+                                    MARGIN + (rh[0] + PANE_GAP if row else 0),
+                                    title, rows, opts=o, h=rh[row], w=cw[col])
+            return x0 + cw[0] + PANE_GAP + cw[1], max(bottom, MARGIN + rh[0] + PANE_GAP + rh[1])
         col_w = max(w for w, _h in sizes)
         y = MARGIN
-        for (title, rows), (w, hh) in zip(panes, sizes):
-            self._draw_ctl_pane(x0 + (col_w - w) / 2.0, y, title, rows)
+        for (title, rows, o), (w, hh) in zip(panes, sizes):
+            self._draw_ctl_pane(x0 + (col_w - w) / 2.0, y, title, rows, opts=o)
             y += hh + PANE_GAP
         return x0 + col_w, max(bottom, y - PANE_GAP)
 
@@ -2619,6 +2678,13 @@ class PanelO6:
         else:
             self.ctl[key] = value
             new = value
+            pos = PC.positions_of(key)
+            for tb, c in PC.CONTROLS.items():
+                if c["kind"] == "tb" and c.get("follows") == key:
+                    if value == pos[0]:
+                        self.tb_on[tb] = True
+                    elif value == pos[-1]:
+                        self.tb_on[tb] = False
         self._announce("%s %s" % (PC.CONTROLS[key]["panel"],
                                   " ".join(self._ctl_lines(PC.CONTROLS[key].get("caption")
                                                            or PC.CONTROLS[key].get("legend")
@@ -3968,6 +4034,8 @@ class PanelO6:
             if PC.is_button(index):
                 self._set_ctl(index, True)
                 self._held = (kind, index)
+            elif c["kind"] == "cb":
+                self._set_ctl(index, "IN" if self.ctl[index] == "OUT" else "OUT")
             elif c["kind"] == "rot":
                 # TO WHERE IT IS CLICKED, in one turn, and dragged on from
                 # there: stepping one detent per click, and the long way
@@ -4661,6 +4729,10 @@ def main(argv=None):
                          "discrete bus is base+80 (default 6900).  The same "
                          "option as on yaGPC2 and MEDS2.py. "
                          "NSTS_BUS_PORT_BASE sets it too.")
+    ap.add_argument("--ssp", metavar="FILE", default=None,
+                    help="the payload standard switch panels' names file (L12U, "
+                         "L12L, L11U); see panelcontrols.py.  Without it they "
+                         "are the bare, numbered grid")
     ap.add_argument("--all-panels", action="store_true",
                     help="show every panel window, not only those the OPS on the "
                          "displays need (to save a layout, or to look)")
@@ -4687,6 +4759,12 @@ def main(argv=None):
                          "published, so restoring a running simulation does "
                          "not halt it")
     args = ap.parse_args(argv)
+    if args.ssp:
+        try:
+            n = PC.load_ssp(args.ssp)
+        except (OSError, ValueError) as e:
+            raise SystemExit("panelO6: --ssp: %s" % e)
+        log("payload standard switch panels from %s: %d places" % (args.ssp, n))
     if args.font:
         global FONT_FAMILY
         FONT_FAMILY = args.font
