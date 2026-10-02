@@ -495,6 +495,83 @@ static void crew_aid_hfe(int k, uint16_t *b, int nb) {
     for (int c = 0; c < 7 && 29 + c < nb; c++) b[29 + c] = (uint16_t)crewAid[k][14][c];
 }
 
+/* ---------------------------------------------------------------------
+ * THE OMS ENGINES (vehdyn.c flies them).  What the computers command and
+ * what the engines answer -- GSDFIR.hal, GPKOMS.hal, GR5OMS.hal, GRNOMS.hal
+ * and the I/O tables CGBOBF/CGBIH1/CGBIM1:
+ *
+ *   VALVES   the GN2 control-valve coils, a DOH bit 2 (0x4000) on all four
+ *            FAs: card 15 ch 1 left, card 7 ch 1 right.  The engine fires
+ *            while ANY of its four is set -- either coil opens a valve --
+ *            AND its OMS ENG switch on panel C3 is at ARM or ARM/PRESS,
+ *            which is hardware: the coils have no power otherwise (SCOM
+ *            2.18-8).  The switch is FA DIH card 3 ch 1 bits 7-8 (0x0300),
+ *            left on FA1/FA3 and right on FA2/FA4, from the panel; or
+ *            YAGPC_OMS_ARMED=1 for a run without one.
+ *   GIMBALS  analog outputs, FA AOD card 4 ch 7 (pitch) and 8 (yaw) --
+ *            VALUES, not set and reset masks -- in 6400 counts a volt:
+ *            counts = deg x C + K, pitch C 3902.08 K -286.72, yaw C
+ *            +/-3912.96 (left/right) K -1660.80 (GPKOMS.hal:145-152).  FA1
+ *            drives the left primary controller, FA2 left secondary, FA4
+ *            right primary, FA3 right secondary; the actuator follows the
+ *            controller whose power PASS has selected, FF DOH card 2 ch 2
+ *            bits 2-3 on FF1/FF2 (left primary/secondary) and FF4/FF3
+ *            (right).
+ *   FEEDBACK the actuator positions in every FA's HFE read words 0-1, the
+ *            inverse scaling (GPLOMS.hal:63-70): deg = counts x C + K, pitch
+ *            C 0.00025625 K 0.0735, yaw C +/-0.00025562 K +/-0.4244.
+ *   Pc       chamber pressure on FA3 (left) and FA4 (right): MFE SEG2(11),
+ *            which the fail logic compares with 16,000 counts
+ *            (CGRS_PC_THRESH), and the 1-word HFE read FIOHI1C5.  20,000
+ *            while burning -- 100%, if 0-5 V spans the meter's 0-160%, which
+ *            is inferred, not documented -- and 0 otherwise.
+ * ------------------------------------------------------------------- */
+static int16_t faAod[5][NCARD][NCHAN];
+#define PC_FA_READ 0x25A40u     /* FIOHI1C5: card 6 ch 18, 1 word */
+#define OMS_PC_BURNING 20000u
+
+static bool oms_armed(int e) {
+    static int force = -1;
+    if (force < 0) {
+        const char *v = yagpc_getenv("YAGPC_OMS_ARMED");
+        force = v != NULL && *v != '\0' && strcmp(v, "0") != 0;
+    }
+    if (force) return true;
+    int a = (e == 0) ? 1 : 2, b = (e == 0) ? 3 : 4;
+    return ((crewIn[CREW_NFF + a][3][1] | crewIn[CREW_NFF + b][3][1]) & 0x0300u) != 0;
+}
+
+static void push_oms(double sharedUs) {
+    if (!vehdyn_enabled()) return;
+    for (int e = 0; e < 2; e++) {
+        int card = (e == 0) ? 15 : 7;
+        bool coils = false;
+        for (int k = 1; k <= 4; k++) coils = coils || (faOut[k][card][1] & 0x4000u);
+        /* the powered controller, primary first, and the FA that drives it */
+        int pri = (e == 0) ? 1 : 4, sec = (e == 0) ? 2 : 3, fa = 0;
+        if (ffOut[pri][2][2] & 0x6000u) fa = pri;
+        else if (ffOut[sec][2][2] & 0x6000u) fa = sec;
+        double p = 0.0, y = 0.0;
+        if (fa) {
+            p = (faAod[fa][4][7] + 286.72) / 3902.08;
+            y = (faAod[fa][4][8] + 1660.80) / ((e == 0) ? 3912.96 : -3912.96);
+        }
+        vehdyn_set_oms(e, coils && oms_armed(e), fa != 0, p, y, sharedUs);
+    }
+}
+
+/* An actuator's position as its feedback counts. */
+static uint16_t oms_feedback(int e, int axis) {
+    double d = vehdyn_oms_gimbal(e, axis), c;
+    if (axis == 0) c = (d - 0.0735) / 0.00025625;
+    else if (e == 0) c = (d - 0.4244) / 0.00025562;
+    else c = (d + 0.4244) / -0.00025562;
+    c = floor(c + 0.5);
+    if (c > 32767.0) c = 32767.0;
+    if (c < -32768.0) c = -32768.0;
+    return (uint16_t)(int16_t)c;
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
@@ -582,6 +659,13 @@ static void fa_hfe(int k, uint16_t *w, int n) {
      * rotation detectors, which must read running (GQRORB.hal:139-270). */
     b[21] = (uint16_t)(fa_jets_b(k) | 0x00E0u);
     b[22] = fa_jets_b(k);
+    /* the OMS gimbal positions, words 0-1: FA1/FA2 the left engine's
+     * controllers, FA3/FA4 the right's */
+    if (vehdyn_enabled()) {
+        int e = (k <= 2) ? 0 : 1;
+        b[0] = oms_feedback(e, 0);
+        b[1] = oms_feedback(e, 1);
+    }
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -605,7 +689,8 @@ static void fa_mfe(int k, uint16_t *w, int n) {
         SEG2(2) = RCS_HE_P;   SEG2(5) = RCS_HE_P;
         SEG2(3) = RCS_PRP_T;
         SEG2(1) = RCS_HE_T;
-        SEG2(10) = 16000u;                       /* OMS; SEG2(11), Pc, stays 0 */
+        SEG2(10) = 16000u;                       /* OMS */
+        if (vehdyn_oms_burning(k == 3 ? 0 : 1)) SEG2(11) = OMS_PC_BURNING;
     }
 #undef SEG2
     for (int i = 0; i < n; i++) w[i] = (i < 34) ? b[i] : 0;
@@ -778,12 +863,19 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             discrete_write(ffOut, ffOutSeen, u, cmd, words, n);
             crew_publish_out(u, cmd, n);
             if (CMD_CARD(cmd) == 13u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 2u) push_oms(sharedUs);
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
         faWrites++;
-        if (CMD_MODE(cmd) == 8u) {
+        if (CMD_MODE(cmd) == 8u && CMD_CARD(cmd) == 4u) {      /* AOD: values */
+            unsigned ch = CMD_CHAN(cmd) & 0x0fu;
+            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++)
+                faAod[fa_unit(busID)][4][ch + (unsigned)i] = (int16_t)words[i];
+            push_oms(sharedUs);
+        } else if (CMD_MODE(cmd) == 8u) {
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
             if (CMD_CARD(cmd) == 10u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
         }
     }
 }
@@ -847,6 +939,12 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         int u = fa_unit(busID);
         if (u >= 1 && f == HFE_FA_READ) { fa_hfe(u, out, n); faReads++; return true; }
         if (u >= 1 && f == MFE_FA_READ) { fa_mfe(u, out, n); faReads++; return true; }
+        if (u >= 3 && f == PC_FA_READ) {
+            out[0] = vehdyn_oms_burning(u == 3 ? 0 : 1) ? OMS_PC_BURNING : 0;
+            for (int i = 1; i < n; i++) out[i] = 0;
+            faReads++;
+            return true;
+        }
     }
     return false;
 }

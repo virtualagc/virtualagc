@@ -39,8 +39,22 @@ void vehdyn_advance(double sharedUs);
 /* The current truth state, for the sensors. */
 const PhysState *vehdyn_state(void);
 
-/* Propellant left in a module: 0 forward, 1 left pod, 2 right pod (kg). */
+/* Propellant left in a module (kg): RCS 0 forward, 1 left pod, 2 right pod;
+ * OMS 3 left, 4 right.  Set it -- for tests that want a vehicle without,
+ * say, the OMS load -- and the mass properties follow. */
 double vehdyn_propellant(int module);
+void vehdyn_set_propellant(int module, double kg);
+
+/* THE OMS ENGINES, 0 left and 1 right: whether the engine's valves are open
+ * (fire), whether an actuator controller is powered, and the gimbal command
+ * it is giving (deg, pitch and yaw as PASS scales them), from sharedUs on.
+ * And what they are doing: burning, and where each gimbal is (axis 0 pitch,
+ * 1 yaw, deg). */
+void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawDeg,
+                    double sharedUs);
+bool vehdyn_oms_burning(int e);
+double vehdyn_oms_gimbal(int e, int axis);
+double vehdyn_oms_on_seconds(int e);
 
 /* Non-gravitational velocity change sensed since the start, in the inertial
  * frame (m/s) -- what ideal accelerometers on an inertial platform count. */

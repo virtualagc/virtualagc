@@ -129,11 +129,53 @@ static const Jet JETS[VEHDYN_NJETS] = {
 #define DRY_IZZ          1.01e7
 #define RCS_LOAD_KG      1460.0
 
-static const double TANK_XYZ[3][3] = {     /* inches, Orbiter structural */
+/* THE OMS PROPELLANT, modules 3 (left pod) and 4 (right): "1% OMS = 130
+ * lb/side" (SCOM 2.18), so 13,000 lb = 5,897 kg a pod at 100%, as a point
+ * mass at the pod's tanks -- the position ESTIMATED, forward of and level
+ * with the engines. */
+#define OMS_LOAD_KG      5897.0
+#define NMOD             5
+
+static const double TANK_XYZ[NMOD][3] = {  /* inches, Orbiter structural */
     {  375.0,    0.0, 400.0 },
     { 1510.0, -105.0, 465.0 },
     { 1510.0,  105.0, 465.0 },
+    { 1400.0,  -88.0, 480.0 },
+    { 1400.0,   88.0, 480.0 },
 };
+
+/* =====================================================================
+ * THE OMS ENGINES.  6,087 lbf (27.08 kN) each, CGGS_OMS_THRUST_NOM; exhaust
+ * velocity CGGS_VEX_ORB 10,136.8 ft/s, an Isp of 315.1 s -- both the flight
+ * software's own I-loads (DASS G2/G3).  Thrust direction in body axes is
+ * (cos P cos Y, sin Y, sin P cos Y) with P = 15.82 deg - pitch gimbal and
+ * Y = yaw gimbal + 6.50 deg left, - 6.50 deg right (GHBCMD.hal:253-302): each
+ * nozzle canted down and inboard so the thrust passes near the centre of
+ * gravity.  The mounts, Xo 1518, Yo -/+88, Zo 492, are NOT from a document
+ * found here; they are consistent with those cants, whose lines cross the
+ * dry CG's Zo 375 and the centreline near its Xo 1100.
+ *
+ * The gimbals follow the command of whichever actuator controller is
+ * powered, at OMS_SLEW_DEG_S -- a rate not found in any document, chosen to
+ * keep up with PASS's 2-degree, 24-pass servo check -- and stop at the
+ * mechanical limits, +/-7 deg pitch and +/-8 deg yaw (SCOM 2.18-21: +/-6 and
+ * +/-7 plus about a degree of snubbing).  Unpowered, they stay where they
+ * are.  The engine fires while its valves are commanded open (mdmdev.c
+ * decides that from the coils and the ARM switches) and its pod has
+ * propellant; it starts and stops at once. */
+#define OMS_THRUST_N     (6087.0 * LBF_N)
+#define OMS_ISP_S        (10136.8 * 0.3048 / G0)
+#define OMS_SLEW_DEG_S   5.0
+#define OMS_CANT_P       0.276053
+#define OMS_CANT_Y       0.113446
+
+static const double OMS_XYZ[2][3] = { { 1518.0, -88.0, 492.0 }, { 1518.0, 88.0, 492.0 } };
+static struct {
+    bool fire, powered;
+    double cmd[2];       /* deg, pitch and yaw, as commanded */
+    double pos[2];       /* deg, where the actuators are */
+    double onSec;
+} oms[2];
 
 static PhysState st;
 
@@ -152,7 +194,7 @@ static void hist_push(void) {
     memcpy(hist[histHead].v, st.v, sizeof st.v);
     if (histCount < HIST_N) histCount++;
 }
-static double prop[3];                 /* kg left, per module */
+static double prop[5];                 /* kg left: RCS F, L, R; OMS L, R */
 static double cgB[3];                  /* current CG, as an offset from the dry CG, body m */
 static bool on[VEHDYN_NJETS];
 static double onSec[VEHDYN_NJETS];
@@ -207,8 +249,8 @@ static double jet_mdot(const Jet *j) {
  * shifts of the dry body and of each module's propellant as a point mass. */
 static void mass_properties(void) {
     double m = DRY_MASS_KG, c[3] = { 0, 0, 0 };
-    double tank[3][3];
-    for (int k = 0; k < 3; k++) {
+    double tank[NMOD][3];
+    for (int k = 0; k < NMOD; k++) {
         to_body(TANK_XYZ[k][0], TANK_XYZ[k][1], TANK_XYZ[k][2], tank[k]);
         m += prop[k];
         for (int i = 0; i < 3; i++) c[i] += prop[k] * tank[k][i];
@@ -221,7 +263,7 @@ static void mass_properties(void) {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             I[i][j] += DRY_MASS_KG * ((i == j ? dd : 0.0) - d[i] * d[j]);
-    for (int k = 0; k < 3; k++) {
+    for (int k = 0; k < NMOD; k++) {
         double p[3] = { tank[k][0] - c[0], tank[k][1] - c[1], tank[k][2] - c[2] };
         double pp = p[0] * p[0] + p[1] * p[1] + p[2] * p[2];
         for (int i = 0; i < 3; i++)
@@ -236,7 +278,7 @@ static void mass_properties(void) {
 /* The force and the torque about the current CG of the jets that are on. */
 static void jet_loads(double f[3], double tau[3], double *mdot) {
     f[0] = f[1] = f[2] = tau[0] = tau[1] = tau[2] = 0.0;
-    for (int m = 0; m < 3; m++) mdot[m] = 0.0;
+    for (int m = 0; m < NMOD; m++) mdot[m] = 0.0;
     for (int k = 0; k < VEHDYN_NJETS; k++) {
         if (!on[k]) continue;
         const Jet *j = &JETS[k];
@@ -252,11 +294,41 @@ static void jet_loads(double f[3], double tau[3], double *mdot) {
         for (int i = 0; i < 3; i++) { f[i] += fk[i]; tau[i] += t[i]; }
         mdot[mod] += jet_mdot(j);
     }
+    for (int e = 0; e < 2; e++) {
+        if (!oms[e].fire || prop[3 + e] <= 0.0) continue;
+        double P = OMS_CANT_P - oms[e].pos[0] * VD_PI / 180.0;
+        double Y = oms[e].pos[1] * VD_PI / 180.0 + (e == 0 ? OMS_CANT_Y : -OMS_CANT_Y);
+        double u[3] = { cos(P) * cos(Y), sin(Y), sin(P) * cos(Y) }, p[3], r[3], fk[3];
+        to_body(OMS_XYZ[e][0], OMS_XYZ[e][1], OMS_XYZ[e][2], p);
+        for (int i = 0; i < 3; i++) { r[i] = p[i] - cgB[i]; fk[i] = OMS_THRUST_N * u[i]; }
+        tau[0] += r[1] * fk[2] - r[2] * fk[1];
+        tau[1] += r[2] * fk[0] - r[0] * fk[2];
+        tau[2] += r[0] * fk[1] - r[1] * fk[0];
+        for (int i = 0; i < 3; i++) f[i] += fk[i];
+        mdot[3 + e] += OMS_THRUST_N / (OMS_ISP_S * G0);
+    }
+}
+
+/* The actuators, dt seconds on. */
+static void oms_slew(double dt) {
+    static const double LIM[2] = { 7.0, 8.0 };
+    for (int e = 0; e < 2; e++) {
+        if (!oms[e].powered) continue;
+        for (int a = 0; a < 2; a++) {
+            double want = oms[e].cmd[a];
+            if (want > LIM[a]) want = LIM[a];
+            if (want < -LIM[a]) want = -LIM[a];
+            double d = want - oms[e].pos[a], mx = OMS_SLEW_DEG_S * dt;
+            oms[e].pos[a] += (d > mx) ? mx : (d < -mx) ? -mx : d;
+        }
+    }
 }
 
 void vehdyn_reset(double t) {
     memset(&st, 0, sizeof st);
     for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG;
+    prop[3] = prop[4] = OMS_LOAD_KG;
+    memset(oms, 0, sizeof oms);
     memset(on, 0, sizeof on);
     memset(onSec, 0, sizeof onSec);
     memset(sensedDv, 0, sizeof sensedDv);
@@ -303,13 +375,14 @@ void vehdyn_advance(double sharedUs) {
     /* A long gap -- the computers in HALT, say -- is coasted in larger
      * steps when nothing is firing; with jets on, every step is short. */
     while (st.t < t) {
-        double f[3], tau[3], mdot[3];
+        double f[3], tau[3], mdot[NMOD];
         jet_loads(f, tau, mdot);
-        bool firing = (mdot[0] + mdot[1] + mdot[2]) > 0.0;
+        bool firing = (mdot[0] + mdot[1] + mdot[2] + mdot[3] + mdot[4]) > 0.0;
         double dt = t - st.t;
         double maxDt = firing ? STEP_S : 1.0;
         if (dt > maxDt) dt = maxDt;
         if (dt < 1e-9) { st.t = t; break; }
+        oms_slew(dt);
         /* What the accelerometers feel: everything but gravity -- the jets
          * and the air, the drag taken at the middle of the step. */
         double ad0[3], ad1[3];
@@ -324,7 +397,9 @@ void vehdyn_advance(double sharedUs) {
             for (int i = 0; i < 3; i++) sensedDv[i] += fi[i] / st.mass * dt;
             for (int k = 0; k < VEHDYN_NJETS; k++)
                 if (on[k] && prop[jet_module(&JETS[k])] > 0.0) onSec[k] += dt;
-            for (int m = 0; m < 3; m++) {
+            for (int e = 0; e < 2; e++)
+                if (oms[e].fire && prop[3 + e] > 0.0) oms[e].onSec += dt;
+            for (int m = 0; m < NMOD; m++) {
                 prop[m] -= mdot[m] * dt;
                 if (prop[m] < 0.0) prop[m] = 0.0;
             }
@@ -456,7 +531,40 @@ bool vehdyn_state_at(double t, double r[3], double v[3]) {
 double vehdyn_gmt(double t) { return (gmtZero >= 0.0) ? gmtZero + t : -1.0; }
 
 const PhysState *vehdyn_state(void) { return &st; }
-double vehdyn_propellant(int module) { return (module >= 0 && module < 3) ? prop[module] : 0.0; }
+double vehdyn_propellant(int module) { return (module >= 0 && module < NMOD) ? prop[module] : 0.0; }
+
+void vehdyn_set_propellant(int module, double kg) {
+    if (module < 0 || module >= NMOD) return;
+    prop[module] = (kg > 0.0) ? kg : 0.0;
+    mass_properties();
+}
+
+void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawDeg,
+                    double sharedUs) {
+    if (!vehdyn_enabled() || e < 0 || e > 1) return;
+    vehdyn_advance(sharedUs);
+    if (fire != oms[e].fire) {
+        fireChanges++;
+        static int trace = -1;
+        if (trace < 0) trace = yagpc_getenv("YAGPC_VEHDYN_TRACE") != NULL;
+        if (trace)
+            fprintf(stderr, "vehdyn: t=%.3f s %s OMS %s, gimbal %+.2f %+.2f deg\n", st.t,
+                    e ? "right" : "left", fire ? "ON" : "off", oms[e].pos[0], oms[e].pos[1]);
+    }
+    oms[e].fire = fire;
+    oms[e].powered = powered;
+    if (powered) { oms[e].cmd[0] = pitchDeg; oms[e].cmd[1] = yawDeg; }
+}
+
+bool vehdyn_oms_burning(int e) {
+    return e >= 0 && e <= 1 && oms[e].fire && prop[3 + e] > 0.0;
+}
+
+double vehdyn_oms_gimbal(int e, int axis) {
+    return (e >= 0 && e <= 1 && axis >= 0 && axis <= 1) ? oms[e].pos[axis] : 0.0;
+}
+
+double vehdyn_oms_on_seconds(int e) { return (e >= 0 && e <= 1) ? oms[e].onSec : 0.0; }
 void vehdyn_sensed_dv(double out[3]) { memcpy(out, sensedDv, sizeof sensedDv); }
 double vehdyn_jet_on_seconds(int k) { return (k >= 0 && k < VEHDYN_NJETS) ? onSec[k] : 0.0; }
 const char *vehdyn_jet_name(int k) { return (k >= 0 && k < VEHDYN_NJETS) ? JETS[k].name : "?"; }
@@ -470,9 +578,11 @@ void vehdyn_report(void) {
     double fired = 0.0;
     for (int k = 0; k < VEHDYN_NJETS; k++) fired += onSec[k];
     fprintf(stderr, "vehdyn: t=%.1f s; %ld fire-command change(s), %.2f jet-seconds; "
-                    "RCS propellant F/L/R %.1f/%.1f/%.1f kg; rates %.4f/%.4f/%.4f deg/s; "
+                    "RCS propellant F/L/R %.1f/%.1f/%.1f kg; OMS L/R %.1f/%.1f kg, "
+                    "%.1f/%.1f s burning; rates %.4f/%.4f/%.4f deg/s; "
                     "q %.6f %.6f %.6f %.6f\n",
-            st.t, fireChanges, fired, prop[0], prop[1], prop[2],
+            st.t, fireChanges, fired, prop[0], prop[1], prop[2], prop[3], prop[4],
+            oms[0].onSec, oms[1].onSec,
             st.w[0] * 180 / VD_PI, st.w[1] * 180 / VD_PI, st.w[2] * 180 / VD_PI,
             st.q[0], st.q[1], st.q[2], st.q[3]);
 }

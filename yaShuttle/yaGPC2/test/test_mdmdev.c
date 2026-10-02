@@ -403,6 +403,52 @@ int main(void) {
             if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
         }
         check(ok, "and RESET clears the FA contacts");
+
+        /* THE LEFT OMS ENGINE, through the bus as PASS drives it: power to
+         * the left primary actuator controller (FF1 DOH card 2 ch 2), the
+         * gimbal command on FA1's AOD card 4 ch 7-8 (FIOHO106, X'210E1') at
+         * the two-engine trim, and the control-valve coil on FA1 card 15
+         * ch 1 (FIOHOS05, X'23E02').  Disarmed, nothing burns however the
+         * coils are set; the actuators still follow, and every FA's feedback
+         * reads them back as the command, in PASS's feedback scaling.
+         * Armed from the panel (FA1 DSCRT2 ARM), the engine burns and FA3
+         * reports chamber pressure, in both the MFE word and the one-word
+         * HFE read; the right engine stays cold. */
+        vehdyn_reset(0.0);
+        uint16_t pwr = 0x6000u;
+        write_words(20, FF(0x20A40u), &pwr, 1);
+        int16_t pc = (int16_t)floor(0.4 * 3902.08 - 286.72), yc = (int16_t)floor(-5.75 * 3912.96 - 1660.80);
+        uint16_t aod[2] = { (uint16_t)pc, (uint16_t)yc };
+        write_words(14, FA(0x210E1u), aod, 2);
+        uint16_t coil[3] = { 0, 0x4000u, 0 };
+        write_words(14, FA(0x23E02u), coil, 3);
+        vehdyn_advance(3e6);
+        check(!vehdyn_oms_burning(0), "OMS: disarmed, the coils alone fire nothing");
+        read_words(14, FA(0x0836Eu), 54, a1);
+        /* GPLOMS.hal:63-70's scaling: within 0.01 deg of what was commanded */
+        double fbP = (int16_t)a1[0] * 0.00025625 + 0.0735, fbY = (int16_t)a1[1] * 0.00025562 + 0.4244;
+        if (fabs(fbP - 0.4) > 0.01 || fabs(fbY + 5.75) > 0.01) printf("feedback %.4f %.4f deg\n", fbP, fbY);
+        check(fabs(fbP - 0.4) < 0.01 && fabs(fbY + 5.75) < 0.01,
+              "OMS: gimbal feedback, as PASS scales it, is the commanded trim");
+        crew_send(5, 1, 3, 1, 0x0100u);           /* L ARM */
+        ok = false;
+        for (int tries = 0; tries < 200 && !ok; tries++) {
+            read_words(14, FA(0x0836Eu), 54, a1);
+            ok = a1[19] == 0x0100u;
+            if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
+        }
+        write_words(14, FA(0x23E02u), coil, 3);
+        check(vehdyn_oms_burning(0) && !vehdyn_oms_burning(1), "OMS: armed, the left engine burns");
+        uint16_t mf[34], one[1];
+        read_words(16, FA(0x082A5u), 34, mf);
+        check(mf[15] == 20000u, "OMS: FA3 MFE SEG2(11) chamber pressure while burning");
+        read_words(17, FA(0x082A5u), 34, mf);
+        check(mf[15] == 0u, "OMS: FA4 (right) chamber pressure zero");
+        check(read_words(16, FA(0x25A40u), 1, one) == 1 && one[0] == 20000u, "OMS: FA3 one-word Pc read");
+        uint16_t nocoil[3] = { 0xFFFFu, 0xFFFFu, 0xFFFFu };
+        write_words(14, FA(0x23C02u), nocoil, 3);   /* the RESET word, card 15 ch 0-2 */
+        check(!vehdyn_oms_burning(0), "OMS: coils reset, the engine stops");
+        crew_send(5, 2, 3, 1, 0x0100u);
     }
 
     mtumodel_free(m);
