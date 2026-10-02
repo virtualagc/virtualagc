@@ -1857,6 +1857,10 @@ def main():
                           "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size)), "--geometry", o6_geom]
             if panel_restore and os.path.isfile(panel_restore):
                 panel_argv += ["--restore", panel_restore]
+            # The run's layout, so panel windows that appear later with their
+            # OPS are placed where it says (a resume's own layout included).
+            if args.layout:
+                panel_argv += ["--layout", os.path.abspath(args.layout)]
             if args.wait_user and not args.panel_script:
                 log("note: --wait-user holds a --script, and there is none; ignored")
             # NOT ON A RESUME, AND THIS IS THE WHOLE POINT OF ONE.
@@ -1983,6 +1987,11 @@ def main():
             # among the NEW windows -- and waiting for it would spend the
             # whole twelve-second deadline on every restore before placing
             # anything.
+            # NOT THE PANEL WINDOWS THAT COME WITH AN OPS: only O6, C2 and R11
+            # are up from the start; the rest appear with the OPS that needs
+            # them, and panelO6 places those itself (its --layout).
+            roles_wanted = {r for r in roles_wanted
+                            if not r.startswith("panel_") or r in windowLayout.PANEL_BASE_ROLES}
             survivors = windowLayout.window_ids() & windows_before
             if survivors:
                 roles_wanted -= {w["role"] for w in windowLayout.windows()

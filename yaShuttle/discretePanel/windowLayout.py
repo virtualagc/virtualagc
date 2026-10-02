@@ -419,6 +419,7 @@ def claim(root, delay_ms=300):
 # -- O6, C3, F6, A6U, R11 ... -- and so told apart by title, though they
 # share one process (owner, 2026-10-02).
 PANEL_TITLE = re.compile(r"^([ACFLOR]\d{1,2}[ULR]?)$")
+PANEL_BASE_ROLES = {"panel_o6", "panel_c2", "panel_r11"}   # up from the start
 
 
 def role_of(pid, title):

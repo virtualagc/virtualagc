@@ -1070,6 +1070,11 @@ class ScreenWatch(object):
     def settled(self):
         return time.monotonic() - self._started >= SCREEN_SETTLE_S
 
+    def all(self):
+        """{MDU name: (title text, key)} for every MDU heard."""
+        with self._lock:
+            return dict(self._screens)
+
 
 class Player(object):
     """Runs parsed entries on the host's event loop.

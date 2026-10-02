@@ -705,6 +705,26 @@ PANEL_WINDOWS = (
     ("A6U", "_draw_win_a6u", (900, 520)),
     ("O7", "_draw_win_o7", (480, 200)),
 )
+# WHICH PANELS EACH OPS NEEDS (owner, 2026-10-02): a panel window is shown
+# while some display is in an OPS that reads a control on it -- from the
+# 2026-10-02 survey of every crew control PASS reads, by load (G16 = OPS 1
+# and 6, G2, G3, G8, G9, S2).  O6, C2 and R11 -- FCMBOOT, GPCIPL and OPS 0's
+# -- are always up.  Panels not yet built are listed so that adding one is
+# only adding its window.
+BASE_PANELS = ("O6", "C2", "R11")
+OPS_PANELS = {
+    ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2", "R2"),
+    ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2", "R2"),
+    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7"),
+    ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F8", "O7", "L2"),
+    ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F8", "A6U", "O7", "L2"),
+    ("GNC", 9): ("C3", "L2"),
+    ("SM", 2): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A2", "A8U", "A8L"),
+    ("SM", 4): ("C3", "L1", "R2", "R11U", "R13L", "A1R", "A2"),
+}
+OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
+SCREEN_OPS = re.compile(r"^\s*(\d)\d{3}/")
+
 IDP_LOAD_W = 420       # O6's IDP LOAD inset: four switches
 R11_W = 300            # R11: IDP/CRT 4's POWER and MAJ FUNC
 
@@ -756,6 +776,8 @@ class PanelWin:
         self._fit_moved = False
         self._snugged = 0
         self._measured = False
+        self.shown = True
+        self.layout_placed = False
         self._snug_set = None
         self._snug_pending = None
         self._cursor_hits = False
@@ -827,6 +849,14 @@ class PanelO6:
             self.wins[name] = PanelWin(self, name, top, getattr(self, draw), ref0, size)
         self.w = self.wins["O6"]
         self._placed = False
+        # Which windows are up: "ops" follows the OPS on the displays, "all"
+        # shows every one (for saving a layout, or looking).  may_map is
+        # False for an unattended scripted run, which maps nothing.
+        self.panel_mode = "ops"
+        self.may_map = True
+        self.layout_path = None
+        self._ops_seen = {}            # (major function, OPS) -> last seen
+        self._ops_shown = None
 
         # The startup report is printed by start_bus(), not here: --restore
         # runs between the two, and a report of the DEFAULTS followed by a
@@ -1442,6 +1472,7 @@ class PanelO6:
             self._stall = None
             now = time.monotonic()
         self._tick_last = now
+        self._panels_follow()
         self._talkbacks_follow()
         self._idp_adopt()
         self._lamps_follow()
@@ -1843,19 +1874,49 @@ class PanelO6:
         root.update_idletasks()
         x0 = root.winfo_x() + root.winfo_width() + self.PLACE_GAP
         y0 = max(0, root.winfo_y())
-        sw = root.winfo_screenwidth()
+        sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
         x, y, row_h = x0, y0, 0
+        # Not a window the run's layout places: that goes where it says.
+        laid = set()
+        if self.layout_path:
+            try:
+                import windowLayout
+                laid = set(windowLayout.roles_in(self.layout_path))
+            except (OSError, ValueError, KeyError):
+                pass
         for name in self.PLACE_ORDER:
             win = self.wins.get(name)
-            if win is None:
+            if win is None or "panel_" + name.lower() in laid:
                 continue
-            w, h = win.top.winfo_width(), win.top.winfo_height()
+            # Requested, not current: a window not yet up has never been
+            # mapped, and measures 1x1.
+            w = max(win.top.winfo_width(), win.top.winfo_reqwidth())
+            h = max(win.top.winfo_height(), win.top.winfo_reqheight())
             if x + w > sw and x > x0:
                 x, y, row_h = x0, y + row_h + self.PLACE_TITLE + self.PLACE_GAP, 0
-            win.top.geometry("+%d+%d" % (x, y))
+            # ON THE SCREEN: a third row ran off a 1080-point screen's bottom
+            # (Mac-integrate, 2026-10-02).  Overlapping is better than lost.
+            yy = max(0, min(y, sh - h - self.PLACE_TITLE - 48))
+            win.top.geometry("+%d+%d" % (x, yy))
             x += w + self.PLACE_GAP
             row_h = max(row_h, h)
         log("placed the panel windows to the right of O6 (no layout yet)")
+
+    def _darwin_nudge(self, win):
+        """macOS: after a programmatic resize Tk's content view keeps its old
+        origin (Cocoa's y runs upward), so the drawing sat shifted -- O6
+        cropped with a blank band above it at startup (Mac-integrate,
+        2026-10-02).  One point of height and back cures it; see
+        _nudge_height.  Only for a window that is up."""
+        top = win.top
+        if not top.winfo_ismapped():
+            return
+        w, h = top.winfo_width(), top.winfo_height()
+        if w <= 1 or h <= 1:
+            return
+        top.geometry("%dx%d" % (w, h + 1))
+        top.update_idletasks()
+        top.after(50, lambda: top.geometry("%dx%d" % (w, h)))
 
     def _size_to_content(self, win, need_w, need_h):
         """The window the size of its content at size/FULL_SIZE, capped by
@@ -1875,9 +1936,95 @@ class PanelO6:
         self.cv.configure(width=w, height=h)
         top.geometry("")                  # the window follows its canvas
         top.minsize(min(w, win._minsize[0]), min(h, win._minsize[1]))
+        if sys.platform == "darwin":
+            self.root.after(400, lambda: self._darwin_nudge(win))
         log("size: %s %dx%d, the content at scale %.3f%s"
             % (win.name, w, h, st * cap,
                "" if cap >= 1.0 else " -- the screen holds only %.0f%%" % (100 * cap)))
+
+    def _ops_on_screens(self):
+        """{(major function, OPS)} on the displays now, from the title lines
+        MEDS2 announces; an MDU named crtN is IDP N, whose MAJ FUNC switch
+        says GNC, SM or PL.  The IPL program's own display is OPS 0."""
+        screens = getattr(self, "screens", None)
+        found = set()
+        if screens is None:
+            return found
+        for name, (text, _key) in screens.all().items():
+            m = SCREEN_OPS.match(text)
+            if not m:
+                continue
+            mf = "GNC"
+            n = re.match(r"crt(\d)$", name)
+            if n and 1 <= int(n.group(1)) <= N_IDP_SW:
+                mf = MF_NAMES[self.idp_mf[int(n.group(1)) - 1] & 3]
+            found.add((mf, int(m.group(1))))
+        return found
+
+    def _panels_follow(self):
+        """Show the panel windows the OPS on the displays need, hide the rest
+        -- held OPS_HOLD_S after an OPS leaves, so a transition does not
+        flicker -- or show all of them in "all" mode."""
+        now = time.monotonic()
+        for key in self._ops_on_screens():
+            self._ops_seen[key] = now
+        ops = sorted(k for k, t in self._ops_seen.items() if now - t <= OPS_HOLD_S)
+        want = set(BASE_PANELS)
+        for k in ops:
+            want.update(OPS_PANELS.get(k, ()))
+        if self.panel_mode == "all":
+            want = set(self.wins)
+        shown = tuple(n for n in self.wins if n in want)
+        if (shown, tuple(ops)) != self._ops_shown:
+            log("panels: %s -- showing %s"
+                % (", ".join("%s OPS %d" % k for k in ops) or "no OPS on the displays",
+                   " ".join(shown)) + (" (all)" if self.panel_mode == "all" else ""))
+            self._ops_shown = (shown, tuple(ops))
+        if not self.may_map:
+            return
+        for name, win in self.wins.items():
+            up = name in want
+            if up and not win.shown:
+                win.top.deiconify()
+                win.shown = True
+                if sys.platform == "darwin":
+                    self.root.after(300, lambda w=win: self._darwin_nudge(w))
+                if not win.layout_placed:
+                    win.layout_placed = True
+                    self._place_from_layout(win)
+            elif not up and win.shown:
+                win.top.withdraw()
+                win.shown = False
+
+    def _place_from_layout(self, win):
+        """A panel window appearing for the first time goes where the run's
+        layout says, if it names it -- so it is placed even though it was
+        not up when the layout was restored."""
+        path = self.layout_path
+        if not path:
+            return
+        role = "panel_" + win.name.lower()
+        try:
+            import windowLayout
+            if role not in windowLayout.roles_in(path):
+                return
+        except (OSError, ValueError, KeyError):
+            return
+
+        def work():
+            try:
+                windowLayout.restore_layout(path, log=lambda _t: None,
+                                            only_roles={role}, only_pids={os.getpid()})
+            except Exception as e:
+                log("cannot place %s from %s: %s" % (win.name, path, e))
+        # Off this thread: on macOS the placing goes through Accessibility,
+        # which asks this very application (see manager.py _window_work).
+        self.root.after(500, lambda: threading.Thread(target=work, daemon=True).start())
+
+    def set_panel_mode(self, mode):
+        self.panel_mode = mode
+        log("panels: %s" % ("every window" if mode == "all" else "following the OPS"))
+        self._panels_follow()
 
     def _draw_win_o6(self):
         """O6: the GPC panel, its IDP LOAD inset, and two things that are not
@@ -3866,7 +4013,17 @@ def _listen_control(panel):
             # what they want -- so it can be asked for without restarting.
             # It is withdrawn, not destroyed, so this is all it takes.
             log("script command: show the panel")
-            panel.root.after(0, lambda: [w.top.deiconify() for w in panel.wins.values()])
+            def show_all():
+                panel.may_map = True
+                for w in panel.wins.values():
+                    w.shown = False         # _panels_follow maps the ones wanted
+                panel._panels_follow()
+            panel.root.after(0, show_all)
+        elif word == "panels" and rest in ("all", "ops"):
+            # The manager's ALL PANELS: every window, to save a layout with all
+            # of them in it; 'ops' goes back to following the displays.
+            log("script command: panels %s" % rest)
+            panel.root.after(0, lambda m=rest: panel.set_panel_mode(m))
         elif word == "save" and rest:
             # ON THE TK THREAD.  The switches are read by the same thread
             # that writes them, so a save can never catch a control
@@ -3966,6 +4123,12 @@ def main(argv=None):
                          "discrete bus is base+80 (default 6900).  The same "
                          "option as on yaGPC2 and MEDS2.py. "
                          "NSTS_BUS_PORT_BASE sets it too.")
+    ap.add_argument("--all-panels", action="store_true",
+                    help="show every panel window, not only those the OPS on the "
+                         "displays need (to save a layout, or to look)")
+    ap.add_argument("--layout", metavar="FILE", default=None,
+                    help="the run's window layout: a panel window that appears "
+                         "later, with its OPS, is placed where this says")
     ap.add_argument("--script", metavar="FILE", help=SCRIPT_HELP)
     ap.add_argument("--no-audio", action="store_true",
                     help="ignore 'audio' lines in scripts: no file check, no sound")
@@ -4052,8 +4215,16 @@ def main(argv=None):
     # script waits for someone to click in it.
     show = (not args.script or args.show or args.wait_user
             or (crewscript.has_wait_user(text) and not args.no_wait_user))
-    for win in panel.wins.values():
-        _dont_steal_focus(win.top, mapWindow=show)
+    # Only the always-present panels are mapped now; the rest follow the OPS
+    # on the displays (_panels_follow), or all of them with --all-panels.
+    panel.may_map = show
+    panel.layout_path = os.path.abspath(args.layout) if args.layout else None
+    if args.all_panels:
+        panel.panel_mode = "all"
+    for name, win in panel.wins.items():
+        first = show and (args.all_panels or name in BASE_PANELS)
+        _dont_steal_focus(win.top, mapWindow=first)
+        win.shown = first
     # The screen announcements and the script commands are wanted whether or
     # not a script was named: manager.py can start one at any moment.
     panel.screens = crewscript.ScreenWatch()

@@ -263,6 +263,7 @@ class Manager(object):
         self._button(row, "Save", self.save_layout, wide=True)
         self._button(row, "Add", self.add_to_layout)
         self._button(row, "Restore", self.restore_layout)
+        self._button(row, "All panels", self.toggle_all_panels)
 
         # SNAPSHOT.  Save & Continue is the one that has to be reachable at an
         # unplanned moment -- the whole reason this window exists -- so it is
@@ -647,6 +648,15 @@ class Manager(object):
             else:
                 self.say("Saved %d windows to %s" % (n, os.path.basename(path)))
         self._window_work(work, done)
+
+    def toggle_all_panels(self):
+        """Every panel window up, so all of them can be placed and saved --
+        or back to only those the OPS on the displays need."""
+        self.all_panels = not getattr(self, "all_panels", False)
+        crewscript.send_control("panels %s" % ("all" if self.all_panels else "ops"),
+                                self.args.port_base)
+        self.say("Panels: %s" % ("every window up -- place them, then Add"
+                                 if self.all_panels else "only those the OPS need"))
 
     def add_to_layout(self):
         """ADD the windows on screen to the layout file: theirs replaced, the
