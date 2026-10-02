@@ -92,12 +92,15 @@ _ON_OFF = r"(on|off)"
 _DAP_KEYS = (r"(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch_disc"
              r"|pitch_pulse|yaw_disc|yaw_pulse|x_norm|x_pulse|x_spare|y_norm|y_pulse"
              r"|low_z|z_norm|z_pulse|high_z)")
+import panelcontrols as PC
+
 PANEL_FEATURE = (r"(power|output|mode|ipl)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
                  r"|rhcengage-(cdr|plt)|kybdsel-(left|right)|(idppower|majfunc|idpload)[1-4]"
                  r"|adi-(l|r|a)-(att|err|rate)|attref-(l|r|a)|sense"
                  r"|dap-(c3|a6u)-" + _DAP_KEYS +
                  r"|fcs[1-4]|omseng-(left|right)|trim-(left|right)|xfeed"
-                 r"|(bodyflap|spdbk)-(cdr|plt)")
+                 r"|(bodyflap|spdbk)-(cdr|plt)"
+                 + "".join("|" + re.escape(k) for k in sorted(PC.CONTROLS)))
 PANEL_ARGS = {
     "gpc": r"[1-5]",
     "power": _ON_OFF,
@@ -125,6 +128,8 @@ PANEL_ARGS = {
     "trim": r"(left|right)\s+(enable|inhibit)",
     "bodyflap": r"(cdr|plt)",
     "spdbk": r"(cdr|plt)",
+    "switch": r"\S+\s+\S.*",
+    "press": r"\S+",
     "circle": r"(" + PANEL_FEATURE + r")(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
     "nocircle": r"",
     "gpcid": r"[1-5]",
@@ -144,6 +149,8 @@ PANEL_USAGE = {
     "fcs": "fcs 1-4 override|auto|off", "omseng": "omseng left|right arm|arm/press|off",
     "xfeed": "xfeed left|off|right", "trim": "trim left|right enable|inhibit",
     "bodyflap": "bodyflap cdr|plt", "spdbk": "spdbk cdr|plt",
+    "switch": "switch NAME POSITION -- a control from panelcontrols.py, as printed",
+    "press": "press NAME -- a pushbutton from panelcontrols.py, held 0.5 s",
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
 }
@@ -162,6 +169,23 @@ _KEY_NAMES = " ".join(["ITEM", "EXEC", "OPS", "PRO", "SPEC", "RESUME", "CLEAR",
 # '#' STARTS A COMMENT -- except as a #RRGGBB colour, which 'circle' takes:
 # '#' then six hex digits then a word's end.
 _COMMENT = re.compile(r"#(?![0-9a-fA-F]{6}\b).*$")
+
+
+def check_table_control(verb, arg):
+    """'switch NAME POSITION' / 'press NAME' against panelcontrols.py."""
+    key, _, val = arg.strip().partition(" ")
+    key = key.lower()
+    if key not in PC.CONTROLS:
+        raise ScriptError("%s: no control %r (panelcontrols.py)" % (verb, key))
+    if verb == "press":
+        if not PC.is_button(key):
+            raise ScriptError("press %s: not a pushbutton; use 'switch %s POSITION'" % (key, key))
+        return
+    if PC.is_button(key):
+        raise ScriptError("switch %s: a pushbutton; use 'press %s'" % (key, key))
+    pos = PC.positions_of(key)
+    if val.strip().upper() not in [p.upper() for p in pos]:
+        raise ScriptError("switch %s: %r is not one of %s" % (key, val.strip(), " | ".join(pos)))
 
 
 def strip_comment(raw):
@@ -348,6 +372,9 @@ HELP = """\
                                 F3 TRIM RHC/PNL (left end CDR, right end PLT)
     bodyflap cdr|plt            F2/F4 BODY FLAP AUTO/MAN pushbutton, held 0.5 s
     spdbk cdr|plt               F2/F4 SPD BK/THROT AUTO/MAN pushbutton, held 0.5 s
+   the rest of the panels' controls, by name (panelcontrols.py lists them):
+    switch NAME POSITION        a switch or rotary, by its printed position
+    press NAME                  a pushbutton, held 0.5 s
    drawing attention, for demonstrations:
     circle FEATURE [COLOR] [DIAMETER]
                         a circle round that control, on top of the Panel,
@@ -745,6 +772,8 @@ def parse(text, path=None, _depth=0, _seen=None):
                 raise ScriptError("unknown command %r" % verb)
             elif not re.fullmatch(PANEL_ARGS[verb], arg, re.IGNORECASE):
                 raise ScriptError("%r: expected '%s'" % (rest, PANEL_USAGE[verb]))
+            elif verb in ("switch", "press"):
+                check_table_control(verb, arg)
             entries.append(entry)
         except ScriptError as e:
             raise ScriptError("script line %d: %s" % (n, e))

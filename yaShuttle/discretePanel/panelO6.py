@@ -97,6 +97,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 
 import crewscript
+import panelcontrols as PC
 import helvetica
 
 # JUST "Panel".  The desktop's task bar labels its button with the window
@@ -391,6 +392,8 @@ def feature_name(kind, index):
         return "trim-" + side[index]
     if kind == "am":
         return "%s-%s" % ("bodyflap" if index[1] == "BF" else "spdbk", seat[index[0]])
+    if kind == "ctl":
+        return index
     return None
 
 
@@ -818,6 +821,13 @@ class PanelO6:
         self.trim_rhc = dict((sd, DEFAULT_TRIM) for sd in TRIM_SIDES)
         self.am = dict(((sd, k), False) for sd in AM_SIDES for k in AM_PBS)  # held
         self.am_lamp = dict(((sd, k), (False, False)) for sd in AM_SIDES for k in AM_PBS)
+        # THE TABLE-DRIVEN CONTROLS (panelcontrols.py): switches and rotaries
+        # by key -> position, saved and restored; buttons held by key; lamps.
+        PC.check()
+        self.ctl = dict((k, c["default"]) for k, c in PC.CONTROLS.items()
+                        if not PC.is_button(k))
+        self.ctl_held = dict((k, False) for k in PC.CONTROLS if PC.is_button(k))
+        self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.latch = [False] * N_GPC         # each GPC's BFC engage latches
         self.term_a = False                  # hardware 0; --script only
         self.wired = gpc_id - 1              # the column that is published
@@ -844,7 +854,9 @@ class PanelO6:
         # the same primitives, colours, fonts and control sizes.  O6 is the
         # Tk root: closing it ends the program; closing another hides it.
         self.wins = OrderedDict()
-        for name, draw, ref0 in PANEL_WINDOWS:
+        listed = set(n for n, _d, _r in PANEL_WINDOWS)
+        extra = tuple((n, "_draw_win_none", (400, 300)) for n in PC.PANES if n not in listed)
+        for name, draw, ref0 in PANEL_WINDOWS + extra:
             top = root if name == "O6" else tk.Toplevel(root)
             self.wins[name] = PanelWin(self, name, top, getattr(self, draw), ref0, size)
         self.w = self.wins["O6"]
@@ -1097,7 +1109,7 @@ class PanelO6:
     SWITCHES = ("power", "output", "mode", "ipl_source", "bfc_display",
                 "bfc_select", "bfc_disengage", "idp_power", "idp_mf",
                 "kybd_sel", "adi", "sense", "fcs_ch", "oms_eng", "xfeed",
-                "trim_rhc")
+                "trim_rhc", "ctl")
 
     # WHAT EACH SWITCH IS ALLOWED TO BE.  redraw() finds a control's position
     # with POS.index(value), so a value that is merely unexpected raises
@@ -1116,7 +1128,9 @@ class PanelO6:
                "sense": SENSE_POS, "fcs_ch": FCS_CH_POS,
                "oms_eng": dict((sd, OMS_ENG_POS) for sd in OMS_SIDES),
                "xfeed": XFEED_POS,
-               "trim_rhc": dict((sd, TRIM_POS) for sd in TRIM_SIDES)}
+               "trim_rhc": dict((sd, TRIM_POS) for sd in TRIM_SIDES),
+               "ctl": dict((k, PC.positions_of(k)) for k in PC.CONTROLS
+                           if not PC.is_button(k))}
 
     @classmethod
     def _bad_value(cls, name, value, key=None):
@@ -1235,6 +1249,16 @@ class PanelO6:
         for key, contacts in AM_CONTACTS.items():
             for u, d, m in contacts:
                 contact(u, d, m, self.am[key])
+        # The table-driven controls: each contact closed in its position(s),
+        # or while its button is held.  One record per (word, bit) owned.
+        for key, c in PC.CONTROLS.items():
+            if PC.is_button(key):
+                for u, d, m in c.get("contacts") or ():
+                    contact(u, d, m, self.ctl_held[key])
+            else:
+                for pos, cs in (c.get("contacts") or {}).items():
+                    for u, d, m in cs:
+                        contact(u, d, m, self.ctl[key] == pos)
         return out
 
     def _publish(self):
@@ -1388,6 +1412,8 @@ class PanelO6:
         units = set(DAP_LAMP_UNIT.values())
         for pair in AM_LAMP_UNITS.values():
             units.update(pair)
+        for c in PC.CONTROLS.values():
+            units.update(l[0] for l in c.get("lamps") or ())
         for k in sorted(units):
             try:
                 socks[mdm_receiver(k)] = k
@@ -1449,6 +1475,13 @@ class PanelO6:
                 "%s %s %s" % (AM_PANEL[sd], k, "/".join(
                     n for n, on in zip(("AUTO", "MAN"), self.am_lamp[(sd, k)]) if on) or "-")
                 for sd in AM_SIDES for k in AM_PBS))
+        for key in self.ctl_lamp:
+            lit = any(out.get((u, card, ch), 0) & m
+                      for u, card, ch, m in PC.CONTROLS[key]["lamps"])
+            if lit != self.ctl_lamp[key]:
+                self.ctl_lamp[key] = lit
+                am_changed = True
+                log("lamp %s %s" % (key, "lit" if lit else "out"))
         if changed or am_changed:
             self.redraw()
 
@@ -1814,8 +1847,11 @@ class PanelO6:
     }
 
     def _win_sig(self, win):
+        own = [k for k, c in PC.CONTROLS.items() if c["panel"] == win.name]
         return repr([getattr(self, a, None) for a in self.WIN_STATE.get(win.name, ())]
-                    + [self.circle])
+                    + [self.circle]
+                    + [(self.ctl.get(k), self.ctl_held.get(k), self.ctl_lamp.get(k))
+                       for k in own])
 
     def redraw(self):
         """The panel windows whose state has changed, each drawn by its own
@@ -1845,6 +1881,7 @@ class PanelO6:
             self._bp_cache = {}
             self.pb = self._pb_size()
             right, bottom = win.draw()
+            right, bottom = self._draw_ctl_panes(win.name, right, bottom)
             self._draw_circle()
             if measuring:
                 self._size_to_content(win, right + MARGIN, bottom + MARGIN)
@@ -1884,7 +1921,9 @@ class PanelO6:
                 laid = set(windowLayout.roles_in(self.layout_path))
             except (OSError, ValueError, KeyError):
                 pass
-        for name in self.PLACE_ORDER:
+        order = list(self.PLACE_ORDER) + [n for n in self.wins
+                                           if n not in self.PLACE_ORDER and n != "O6"]
+        for name in order:
             win = self.wins.get(name)
             if win is None or "panel_" + name.lower() in laid:
                 continue
@@ -2161,6 +2200,167 @@ class PanelO6:
     def _draw_win_r11(self):
         x0 = y0 = MARGIN
         return x0 + R11_W, self._draw_r11(x0, y0, x0 + R11_W)
+
+    def _draw_win_none(self):
+        """A panel window holding only table-driven panes."""
+        return MARGIN - PANE_GAP, MARGIN
+
+    # ---- the table-driven controls (panelcontrols.py) -----------------------
+
+    TGL_W, TGL3_H, TGL2_H = 58, 136, 124      # the panel's paddle guards
+    ROT_D = 64                                # a rotary's knob
+    CTL_GAP = 18
+
+    def _ctl_lines(self, text):
+        return [l for l in (text or "").split("\n") if l]
+
+    def _ctl_size(self, key):
+        """(width, height above the body's top, body height, height below)."""
+        c = PC.CONTROLS[key]
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        cap = self._ctl_lines(c.get("caption"))
+        cap_w = max([self._tw(l) for l in cap] or [0])
+        above = len(cap) * ls
+        k = c["kind"]
+        if k in ("t2", "t3"):
+            pos = c["positions"]
+            body = self.TGL3_H if k == "t3" else self.TGL2_H
+            side = self._tw("M") + 14 if k == "t3" else 0
+            w = max(self.TGL_W * 1.08 + 2 * side, cap_w,
+                    self._tw(pos[0]), self._tw(pos[-1]))
+            return w, above + ls, body, ls
+        if k == "rot":
+            pos = c["positions"]
+            lw = max(self._tw(p) for p in pos)
+            w = max(cap_w, self.ROT_D + 2 * lw + 28)
+            return w, above + ls * 2.2, self.ROT_D, ls * 0.3
+        # pb / pbi
+        return max(cap_w, self.pb), above, self.pb, 0
+
+    def _draw_ctl_item(self, key, cx, top):
+        """Draw one control centred on cx, its caption starting at top."""
+        c = PC.CONTROLS[key]
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        w, above, body, below = self._ctl_size(key)
+        cap = self._ctl_lines(c.get("caption"))
+        for j, l in enumerate(cap):
+            self._text(cx, top + ls * (j + 0.5), l, size=SETTING_SIZE)
+        y = top + above                      # the body's top
+        k = c["kind"]
+        if k in ("t2", "t3"):
+            pos = c["positions"]
+            gw = self.TGL_W
+            self._text(cx, y - ls * 0.5, pos[0], size=SETTING_SIZE)
+            p = pos.index(self.ctl[key])
+            self._guarded_toggle(cx - gw / 2, y, cx + gw / 2, y + body, p, npos=len(pos))
+            self._hit("ctl", key, cx - gw / 2, y, cx + gw / 2, y + body)
+            if k == "t3":
+                self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, pos[1])
+            self._text(cx, y + body + ls * 0.5, pos[-1], size=SETTING_SIZE)
+        elif k == "rot":
+            self._rotary(key, cx, y + body / 2.0)
+        else:
+            b = self.pb
+            held = self.ctl_held[key]
+            if k == "pbi":
+                self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
+                          self.ctl_lamp.get(key, False))
+            else:
+                self._legend_pb(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held)
+            self._hit("ctl", key, cx - b / 2, y, cx + b / 2, y + b)
+
+    def _rotary(self, key, cx, cy):
+        """A rotary switch: a knob with a pointer, its positions on an arc
+        above it, left to right; clicked left or right of centre it turns."""
+        c = PC.CONTROLS[key]
+        pos = c["positions"]
+        n = len(pos)
+        r = self.ROT_D / 2.0
+        # Spread over the top half, wider the more positions there are, so
+        # neighbouring legends clear each other.
+        span = min(170.0, 50.0 * (n - 1))
+        angs = [90 + span / 2.0 - i * span / max(1, n - 1) for i in range(n)]
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        for p, a in zip(pos, angs):
+            t = math.radians(a)
+            lx = cx + (r + 10 + self._tw(p) / 2.0) * math.cos(t)
+            ly = cy - (r + 4 + ls) * math.sin(t)
+            self._text(lx, ly, p, size=SETTING_SIZE)
+        self._oval(cx - r, cy - r, cx + r, cy + r, fill=C_BEZEL, outline=C_INK,
+                   width=max(1, int(self.s)))
+        k = r * 0.72
+        self._oval(cx - k, cy - k, cx + k, cy + k, fill=C_PADDLE, outline=C_PADDLE_LO,
+                   width=max(1, int(self.s)))
+        t = math.radians(angs[pos.index(self.ctl[key])])
+        self._line(cx, cy, cx + k * math.cos(t), cy - k * math.sin(t),
+                   fill=C_INK, width=max(2, int(3 * self.s)))
+        self._hit("ctl", key, cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4)
+
+    def _legend_pb(self, x1, y1, x2, y2, legend, down):
+        """A momentary pushbutton with its legend on the face."""
+        self._pushbutton(x1, y1, x2, y2, "", down=down)
+        dx = 2 if down else 0
+        lines = self._ctl_lines(legend)
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        mid = (y1 + y2) / 2.0 + dx
+        for j, l in enumerate(lines):
+            self._text((x1 + x2) / 2.0 + dx, mid + ls * (j - (len(lines) - 1) / 2.0),
+                       l, size=SETTING_SIZE)
+
+    def _draw_ctl_pane(self, x0, y0, title, rows, measure=False, h=None):
+        """A titled pane of table-driven controls in rows.  Returns (w, h)."""
+        pad, gap = 10, self.CTL_GAP
+        th10 = self._th(10)
+        title_h = (pad + 2 * th10) if title else pad
+        sizes = [[self._ctl_size(k) for k in row] for row in rows]
+        widths = [sum(s[0] for s in row) + gap * (len(row) - 1) for row in sizes]
+        width = max(widths + [self._tw(title, 10) + 24 if title else 0]) + 2 * 24
+        heights = [max(s[1] + s[2] + s[3] for s in row) for row in sizes]
+        height = title_h + sum(heights) + pad * (len(rows) + 1)
+        if measure:
+            return width, height
+        self._rect_panel(x0, y0, x0 + width, y0 + max(height, h or 0))
+        if title:
+            self._text(x0 + width / 2.0, y0 + pad + th10, title, size=10)
+        y = y0 + title_h + pad
+        for row, sz, rw, rh in zip(rows, sizes, widths, heights):
+            x = x0 + (width - rw) / 2.0
+            tops = max(s[1] for s in sz)        # align the bodies along the row
+            for k, (w, above, body, below) in zip(row, sz):
+                self._draw_ctl_item(k, x + w / 2.0, y + tops - above)
+                x += w + gap
+            y += rh + pad
+        return width, height
+
+    def _draw_ctl_panes(self, panel, right, bottom):
+        """The table's panes for this window, in a column to the right of
+        what it drew already.  Returns the new (right, bottom)."""
+        panes = PC.PANES.get(panel)
+        if not panes:
+            return right, bottom
+        x0 = right + PANE_GAP
+        sizes = [self._draw_ctl_pane(0, 0, t, r, measure=True) for t, r in panes]
+        col_w = max(w for w, _h in sizes)
+        y = MARGIN
+        for (title, rows), (w, hh) in zip(panes, sizes):
+            self._draw_ctl_pane(x0 + (col_w - w) / 2.0, y, title, rows)
+            y += hh + PANE_GAP
+        return x0 + col_w, max(bottom, y - PANE_GAP)
+
+    def _set_ctl(self, key, value):
+        old = self.ctl_held[key] if PC.is_button(key) else self.ctl[key]
+        if PC.is_button(key):
+            self.ctl_held[key] = bool(value)
+            new = "ON" if value else "OFF"
+            old = "ON" if old else "OFF"
+        else:
+            self.ctl[key] = value
+            new = value
+        self._announce("%s %s" % (PC.CONTROLS[key]["panel"],
+                                  " ".join(self._ctl_lines(PC.CONTROLS[key].get("caption")
+                                                           or PC.CONTROLS[key].get("legend")
+                                                           or key))), old, new)
+        self._changed()
 
     def _draw_one(self, fn, *a):
         x0 = y0 = MARGIN
@@ -3482,6 +3682,19 @@ class PanelO6:
         elif kind == "am":
             self._set_am(index, True)
             self._held = (kind, index)
+        elif kind == "ctl":
+            c = PC.CONTROLS[index]
+            if PC.is_button(index):
+                self._set_ctl(index, True)
+                self._held = (kind, index)
+            elif c["kind"] == "rot":
+                pos = c["positions"]
+                i = pos.index(self.ctl[index])
+                i = max(0, i - 1) if event.x < (x1 + x2) / 2.0 else min(len(pos) - 1, i + 1)
+                self._set_ctl(index, pos[i])
+            else:
+                pos = c["positions"]
+                self._set_ctl(index, pos[self._zone(event.y, y1, y2, len(pos))])
 
 
     def _on_release(self, event):
@@ -3501,6 +3714,8 @@ class PanelO6:
             self._set_dap(index[0], index[1], False)
         elif kind == "am":
             self._set_am(index, False)
+        elif kind == "ctl":
+            self._set_ctl(index, False)
 
     def _set_power(self, i, value):
         old = self.power[i]
@@ -3872,6 +4087,15 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                    "BF" if verb == "bodyflap" else "SB")
             panel._set_am(key, True)
             root.after(AM_HOLD_MS, lambda: panel._set_am(key, False))
+        elif verb == "switch":
+            key, _, val = arg.strip().partition(" ")
+            key, val = key.lower(), val.strip().upper()
+            panel._set_ctl(key, next(p for p in PC.positions_of(key) if p.upper() == val))
+        elif verb == "press":
+            key = arg.strip().lower()
+            panel._set_ctl(key, True)
+            root.after(PC.CONTROLS[key].get("hold_ms", 500),
+                       lambda k=key: panel._set_ctl(k, False))
         elif verb == "circle":
             words = arg.split()
             name, colour, diam = words[0].lower(), "yellow", 2.0
