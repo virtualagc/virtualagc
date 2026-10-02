@@ -608,6 +608,69 @@ void vehdyn_report(void) {
             st.q[0], st.q[1], st.q[2], st.q[3]);
 }
 
+/* ---------------------------------------------------------------------
+ * IN A SESSION CAPTURE (mdmdev.c writes it into vehdyn.json).  Everything
+ * that is state rather than configuration, as numbers in a fixed order after
+ * a version.  A restore starts the vehicle's clock at zero, so the state's
+ * time is rebased: t becomes 0 and the history starts over at that instant;
+ * GMT stays continuous because the timing unit's epoch moves with it
+ * (vehdyn_set_gmt_zero is called again from the restored clock). */
+#define SAVE_VERSION 1.0
+
+int vehdyn_save(double *b, int max) {
+    int n = 0;
+#define PUT(x) do { if (n < max) b[n] = (double)(x); n++; } while (0)
+    PUT(SAVE_VERSION);
+    PUT(haveTime ? 1 : 0);
+    PUT(st.t);
+    for (int i = 0; i < 3; i++) PUT(st.r[i]);
+    for (int i = 0; i < 3; i++) PUT(st.v[i]);
+    for (int i = 0; i < 4; i++) PUT(st.q[i]);
+    for (int i = 0; i < 3; i++) PUT(st.w[i]);
+    for (int k = 0; k < NMOD; k++) PUT(prop[k]);
+    for (int i = 0; i < 3; i++) PUT(sensedDv[i]);
+    for (int k = 0; k < VEHDYN_NJETS; k++) PUT(on[k] ? 1 : 0);
+    for (int k = 0; k < VEHDYN_NJETS; k++) PUT(onSec[k]);
+    for (int e = 0; e < 2; e++) {
+        PUT(oms[e].fire ? 1 : 0); PUT(oms[e].powered ? 1 : 0);
+        PUT(oms[e].cmd[0]); PUT(oms[e].cmd[1]); PUT(oms[e].pos[0]); PUT(oms[e].pos[1]);
+        PUT(oms[e].onSec);
+    }
+#undef PUT
+    return n;
+}
+
+double vehdyn_load(const double *b, int n) {
+    int i = 0;
+#define GET() ((i < n) ? b[i++] : (i++, 0.0))
+    if (n < 1 || GET() != SAVE_VERSION) return -1.0;
+    bool had = GET() != 0.0;
+    double t = GET();
+    for (int k = 0; k < 3; k++) st.r[k] = GET();
+    for (int k = 0; k < 3; k++) st.v[k] = GET();
+    for (int k = 0; k < 4; k++) st.q[k] = GET();
+    for (int k = 0; k < 3; k++) st.w[k] = GET();
+    for (int k = 0; k < NMOD; k++) prop[k] = GET();
+    for (int k = 0; k < 3; k++) sensedDv[k] = GET();
+    for (int k = 0; k < VEHDYN_NJETS; k++) on[k] = GET() != 0.0;
+    for (int k = 0; k < VEHDYN_NJETS; k++) onSec[k] = GET();
+    for (int e = 0; e < 2; e++) {
+        oms[e].fire = GET() != 0.0; oms[e].powered = GET() != 0.0;
+        oms[e].cmd[0] = GET(); oms[e].cmd[1] = GET();
+        oms[e].pos[0] = GET(); oms[e].pos[1] = GET();
+        oms[e].onSec = GET();
+    }
+#undef GET
+    if (i > n) return -1.0;
+    haveTime = had;
+    st.t = 0.0;                    /* the restored clock's zero */
+    mass_properties();
+    histCount = 0;
+    hist_push();
+    if (gmtZero >= 0.0) gmtZero += t;
+    return t;
+}
+
 void vehdyn_set_attitude(const double q[4], const double w[3]) {
     double n = sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
     for (int i = 0; i < 4; i++) st.q[i] = (n > 0.0) ? q[i] / n : (i == 0);

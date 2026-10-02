@@ -81,6 +81,13 @@ void vehdyn_set_gmt_zero(double unixAtZero);
 bool vehdyn_state_at(double t, double r[3], double v[3]);
 double vehdyn_gmt(double t);
 
+/* A session capture: the state as numbers, into b[0..max-1], returning how
+ * many it takes (call with max 0 to ask); and back, rebased so that the
+ * restored clock's zero is the captured instant.  vehdyn_load returns the
+ * captured time (s), or a negative number for a record it cannot read. */
+int vehdyn_save(double *b, int max);
+double vehdyn_load(const double *b, int n);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);

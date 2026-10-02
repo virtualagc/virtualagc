@@ -50,6 +50,12 @@ void mdmdev_crew_open(int portBase);
  * device model on, or with a panel to send the lamps to. */
 bool mdmdev_capturing(void);
 
+/* A session capture's vehdyn.json in dir: the vehicle dynamics' truth state
+ * and the devices' memory.  Only with the device model on; a capture
+ * without the file restores to the default vehicle, and says so. */
+bool mdmdev_dump(const char *dir);
+bool mdmdev_load(const char *dir);
+
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 

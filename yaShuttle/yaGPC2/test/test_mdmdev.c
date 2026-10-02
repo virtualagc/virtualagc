@@ -451,6 +451,43 @@ int main(void) {
         crew_send(5, 2, 3, 1, 0x0100u);
     }
 
+    /* A SESSION CAPTURE: vehdyn.json round trip.  The truth state, OMS
+     * propellant and actuator, and an IMU's running counts survive, with the
+     * time rebased so the restored clock's zero is the captured instant --
+     * and the vehicle then moves on from there exactly as the original
+     * would have. */
+    {
+        char dir[] = "/tmp/test_mdmdev_capXXXXXX";
+        check(mkdtemp(dir) != NULL, "capture: temporary directory");
+        vehdyn_reset(0.0);
+        vehdyn_set_oms(1, false, true, 1.5, -2.0, 0.0);
+        vehdyn_advance(120e6);
+        read_words(21, FF(0x24C0Du), 14, w);               /* IMU 2 counting */
+        vehdyn_set_propellant(4, 4000.0);
+        double r0[3], v0[3], rFut[3];
+        memcpy(r0, vehdyn_state()->r, sizeof r0);
+        memcpy(v0, vehdyn_state()->v, sizeof v0);
+        double gim = vehdyn_oms_gimbal(1, 0);
+        check(mdmdev_dump(dir), "capture: vehdyn.json written");
+        vehdyn_advance(150e6);
+        memcpy(rFut, vehdyn_state()->r, sizeof rFut);       /* where it goes next */
+        vehdyn_reset(0.0);                                  /* a fresh process */
+        check(mdmdev_load(dir), "capture: vehdyn.json read");
+        const PhysState *st = vehdyn_state();
+        double dr = 0, dv = 0;
+        for (int i = 0; i < 3; i++) { dr += fabs(st->r[i] - r0[i]); dv += fabs(st->v[i] - v0[i]); }
+        check(dr == 0.0 && dv == 0.0 && st->t == 0.0, "capture: state restored, time rebased to 0");
+        check(vehdyn_propellant(4) == 4000.0 && vehdyn_oms_gimbal(1, 0) == gim, "capture: OMS restored");
+        vehdyn_advance(30e6);                               /* 30 s on the restored clock */
+        double d = 0;
+        for (int i = 0; i < 3; i++) d += (vehdyn_state()->r[i] - rFut[i]) * (vehdyn_state()->r[i] - rFut[i]);
+        if (sqrt(d) > 0.01) printf("restored vehicle %.4g m from the original\n", sqrt(d));
+        check(sqrt(d) < 0.01, "capture: the restored vehicle flies on as the original did");
+        char cmd[200];
+        snprintf(cmd, sizeof cmd, "rm -rf %s", dir);
+        if (system(cmd) != 0) printf("could not remove %s\n", dir);
+    }
+
     mtumodel_free(m);
     printf("mdmdev: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;

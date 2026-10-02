@@ -7,6 +7,7 @@
 #include <math.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
@@ -14,6 +15,7 @@
 
 #include "compat.h"
 #include "envcache.h"
+#include "json.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -947,6 +949,133 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         }
     }
     return false;
+}
+
+/* ---------------------------------------------------------------------
+ * IN A SESSION CAPTURE: vehdyn.json beside the computers' own files -- the
+ * truth state (vehdyn_save) and what the devices remember between reads:
+ * each IMU's command words and its accelerometers' running counts, each GPS
+ * receiver's mode, and every discrete and analog output the computers have
+ * written.  Without it a restored run started the truth vehicle over in its
+ * default orbit while the flight software carried on in the captured one,
+ * and the IMU velocity counters restarted at zero under a flight software
+ * that differences them.
+ * ------------------------------------------------------------------- */
+static void put_list(FILE *f, const char *key, const double *b, int n, bool more) {
+    fprintf(f, "  \"%s\": [", key);
+    for (int i = 0; i < n; i++) fprintf(f, "%s%.17g", i ? "," : "", b[i]);
+    fprintf(f, "]%s\n", more ? "," : "");
+}
+
+bool mdmdev_dump(const char *dir) {
+    if (!mdmdev_enabled() || dir == NULL) return false;
+    char path[600];
+    snprintf(path, sizeof path, "%s/vehdyn.json", dir);
+    FILE *f = fopen(path, "w");
+    if (f == NULL) { fprintf(stderr, "mdmdev: cannot write %s\n", path); return false; }
+    fprintf(f, "{\n");
+    double vb[256];
+    int nv = vehdyn_save(vb, 256);
+    put_list(f, "vehdyn", vb, nv, true);
+    double ib[4 * 13];
+    int ni = 0;
+    for (int k = 1; k <= 3; k++) {
+        ib[ni++] = imu[k].cmd1; ib[ni++] = imu[k].cmd2; ib[ni++] = imu[k].haveCmd;
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].dvFt[i];
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].carry[i];
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].count[i];
+        ib[ni++] = imuAcc[k].started;
+    }
+    put_list(f, "imu", ib, ni, true);
+    double tb[3];
+    for (int k = 1; k <= 3; k++) tb[k - 1] = imuAcc[k].t;
+    put_list(f, "imuTime", tb, 3, true);
+    double gb[9];
+    for (int k = 1; k <= 3; k++) {
+        gb[3 * (k - 1)] = gps[k].haveCmd; gb[3 * (k - 1) + 1] = gps[k].mode;
+        gb[3 * (k - 1) + 2] = gps[k].done;
+    }
+    put_list(f, "gps", gb, 9, true);
+    static double ob[3 * 5 * NCARD * NCHAN];
+    int no = 0;
+    for (int u = 0; u < 5; u++)
+        for (int c = 0; c < NCARD; c++)
+            for (int h = 0; h < NCHAN; h++) {
+                ob[no++] = ffOut[u][c][h]; ob[no++] = faOut[u][c][h]; ob[no++] = faAod[u][c][h];
+            }
+    put_list(f, "outputs", ob, no, false);
+    fprintf(f, "}\n");
+    bool ok = fclose(f) == 0;
+    if (ok) fprintf(stderr, "mdmdev: vehicle dynamics and device state captured\n");
+    return ok;
+}
+
+static int get_list(const JsonValue *root, const char *key, double *b, int max) {
+    const JsonValue *a = json_obj_get(root, key);
+    int n = json_arr_count(a);
+    for (int i = 0; i < n && i < max; i++) b[i] = json_as_number(json_arr_get(a, i), 0.0);
+    return n < max ? n : max;
+}
+
+bool mdmdev_load(const char *dir) {
+    if (!mdmdev_enabled() || dir == NULL) return false;
+    char path[600];
+    snprintf(path, sizeof path, "%s/vehdyn.json", dir);
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "mdmdev: no vehdyn.json in this capture -- the vehicle "
+                        "starts over in its default orbit\n");
+        return false;
+    }
+    fseek(f, 0, SEEK_END);
+    long len = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *text = (char *)malloc((size_t)len + 1);
+    if (text == NULL || fread(text, 1, (size_t)len, f) != (size_t)len) {
+        free(text); fclose(f); return false;
+    }
+    text[len] = '\0';
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) { fprintf(stderr, "mdmdev: %s is not JSON\n", path); return false; }
+    double vb[256];
+    int nv = get_list(root, "vehdyn", vb, 256);
+    double tCap = vehdyn_load(vb, nv);
+    if (tCap < 0.0) {
+        fprintf(stderr, "mdmdev: vehdyn.json's vehicle record is unreadable -- default orbit\n");
+        json_free(root);
+        return false;
+    }
+    double ib[4 * 13], tb[3], gb[9];
+    static double ob[3 * 5 * NCARD * NCHAN];
+    int ni = get_list(root, "imu", ib, 39), nt = get_list(root, "imuTime", tb, 3);
+    int ng = get_list(root, "gps", gb, 9), no = get_list(root, "outputs", ob, 3 * 5 * NCARD * NCHAN);
+    if (ni == 39 && nt == 3)
+        for (int k = 1, i = 0; k <= 3; k++) {
+            imu[k].cmd1 = (uint16_t)ib[i++]; imu[k].cmd2 = (uint16_t)ib[i++];
+            imu[k].haveCmd = ib[i++] != 0.0;
+            for (int j = 0; j < 3; j++) imuAcc[k].dvFt[j] = ib[i++];
+            for (int j = 0; j < 3; j++) imuAcc[k].carry[j] = ib[i++];
+            for (int j = 0; j < 3; j++) imuAcc[k].count[j] = (uint16_t)ib[i++];
+            imuAcc[k].started = ib[i++] != 0.0;
+            imuAcc[k].t = tb[k - 1] - tCap;              /* rebased with the vehicle */
+        }
+    if (ng == 9)
+        for (int k = 1; k <= 3; k++) {
+            gps[k].haveCmd = gb[3 * (k - 1)] != 0.0; gps[k].mode = (unsigned)gb[3 * (k - 1) + 1];
+            gps[k].done = (uint16_t)gb[3 * (k - 1) + 2];
+        }
+    if (no == 3 * 5 * NCARD * NCHAN)
+        for (int u = 0, i = 0; u < 5; u++)
+            for (int c = 0; c < NCARD; c++)
+                for (int h = 0; h < NCHAN; h++) {
+                    ffOut[u][c][h] = (uint16_t)ob[i++]; faOut[u][c][h] = (uint16_t)ob[i++];
+                    faAod[u][c][h] = (int16_t)ob[i++];
+                }
+    json_free(root);
+    fprintf(stderr, "mdmdev: vehicle dynamics and device state restored (captured at t=%.3f s)\n", tCap);
+    return true;
 }
 
 void mdmdev_report(void) {

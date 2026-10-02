@@ -1,5 +1,6 @@
 /* See vehicle.h. */
 #include "vehicle.h"
+#include "mdmdev.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1178,6 +1179,9 @@ void vehicle_dump_devices(const Vehicle *v, const char *dir) {
         snprintf(path, sizeof path, "%s/mtu.json", dir);
         mtumodel_dump(v->mtu, path);
     }
+    /* AND THE VEHICLE ITSELF: the truth state and what the devices behind
+     * the MDMs remember (mdmdev.c). */
+    mdmdev_dump(dir);
     /* AND HOW FAR APART THE MACHINES WERE.  The barrier keeps them within
      * barDeltaUs of each other in SIMULATED time, and that spread is what
      * FCOS's 3.85 ms sync timeouts measure.  A restore starts every clock
@@ -1308,4 +1312,5 @@ void vehicle_load_mmu(Vehicle *v, const char *dir) {
         snprintf(path, sizeof path, "%s/mtu.json", dir);
         mtumodel_load(v->mtu, path);
     }
+    mdmdev_load(dir);
 }
