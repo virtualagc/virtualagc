@@ -22,6 +22,16 @@
                              buffer, simulated time, frame number, format ID,
                              the words in hex), and with --show N the words of
                              every Nth frame
+    downlink --decode [--match REGEX] [--changes] [--csv FILE] [--table T]
+                             ... and decode them into named measurements
+                             (downlist.py, with the table dltable.py made from
+                             the flight source, downlist-OI340700.json): a
+                             listing of the latest values refreshed once a
+                             second, or with --changes a line per value as it
+                             changes; --match keeps the MSIDs and names that
+                             match; --csv logs every decoded value (simulated
+                             time, GPC, format, frame, word, MSID, name, value,
+                             units, discrete label)
 
 THE DOWNLINK.  yaGPC2 watches each GPC's IP bus (BCE 24) and sends every
 downlist frame PASS writes to the PCM master unit, at its end of message, on
@@ -29,8 +39,8 @@ port base + 88 ("DNL1", GPC, toggle buffer, word count, simulated time in
 us, the words).  A frame describes itself (CDWDOWNL.hal, DCDDOW.hal): word 1
 the sync EB90; word 2 a 2-bit counter, the 6-bit frame number 0-49 and the
 8-bit format ID; in frames 0 and 25, word 3 the vehicle, GPC and mission IDs
-and words 4-6 the GPC's time.  Decoding the rest into named measurements is
-the next step (the downlist tables are in the flight source).
+and words 4-6 the GPC's time (TFCMLTQM half-hours, TFCMLTQH microseconds).
+--decode names the rest: see downlist.py and dltable.py.
 
 HOW IT GETS THERE.  yaGPC2 models NSP1 behind FF MDM 1 (src/mdmdev.c,
 nsp_reply); this program sends it each poll's buffer -- up to ten 48-bit
@@ -283,18 +293,22 @@ def frame_header(words):
         h['frame'] = (words[1] >> 8) & 0x3f
         h['format'] = words[1] & 0xff
     if len(words) >= 6 and h.get('frame') in (0, 25):
-        h['vehicle'] = words[2] >> 13
-        h['gpc'] = (words[2] >> 10) & 7
+        # INTEGER(CDUV_NSP_VEHICLE_ILOAD BIT(3) || SUBBIT$(3 AT 14)(TFCMID)
+        # || MISSION_ID BIT(8)): 14 bits, right-justified (DCDDOW 012600)
+        h['vehicle'] = (words[2] >> 11) & 7
+        h['gpc'] = (words[2] >> 8) & 7
         h['mission'] = words[2] & 0xff
         h['time_words'] = words[3:6]
     return h
 
 
-def downlink(base, log=None, show=0, seconds=0):
+def downlink(base, log=None, show=0, seconds=0, decode=None, match=None,
+             changes=False, csv_path=None):
     import json
     s = mcast_listen(base + DOWNLINK_OFFSET)
     s.settimeout(1.0)
     out = open(log, "a") if log else None
+    view = DecodedView(decode, match, changes, csv_path) if decode is not None else None
     t0 = time.time()
     last = {}
     count = {}
@@ -304,6 +318,8 @@ def downlink(base, log=None, show=0, seconds=0):
             try:
                 d = s.recv(512)
             except socket.timeout:
+                if view:
+                    view.tick()
                 continue
             f = parse_downlist(d)
             if f is None:
@@ -316,6 +332,9 @@ def downlink(base, log=None, show=0, seconds=0):
                 out.write(json.dumps({'gpc': g, 'tb': f['tb'], 't_us': f['t_us'],
                                       'frame': h.get('frame'), 'format': h.get('format'),
                                       'words': ["%04X" % w for w in f['words']]}) + "\n")
+            if view:
+                view.frame(f, h)
+                continue
             if show and nframes % show == 0:
                 print("GPC%d TB%d t=%.3f frame %s format %s:" % (
                     g, f['tb'], f['t_us'] / 1e6, h.get('frame'), h.get('format')))
@@ -335,6 +354,94 @@ def downlink(base, log=None, show=0, seconds=0):
     finally:
         if out:
             out.close()
+        if view:
+            view.close()
+
+
+class DecodedView:
+    """Decoded downlist values: the latest of each, shown as a listing
+    refreshed once a second (or a line per change), and every value to CSV."""
+
+    def __init__(self, table_path, match=None, changes=False, csv_path=None):
+        import re
+        import downlist
+        self.dl = downlist
+        self.table = downlist.load_table(table_path or None)
+        self.match = re.compile(match, re.I) if match else None
+        self.changes = changes
+        self.latest = {}              # (gpc, msid, name) -> (t, value text, units, fmt, frame, word)
+        self.status = {}
+        self.unknown = set()
+        self.next_draw = 0.0
+        self.csv = None
+        if csv_path:
+            import csv
+            new = not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0
+            self._csvf = open(csv_path, "a", newline="")
+            self.csv = csv.writer(self._csvf)
+            if new:
+                self.csv.writerow(["time_s", "gpc", "format", "frame", "word", "msid",
+                                   "name", "value", "units", "text"])
+        print("groundstation: decoding with %s (%s), %d formats"
+              % (table_path or downlist.DEFAULT_TABLE, self.table.release,
+                 len(self.table.formats)), flush=True)
+
+    def frame(self, f, h):
+        fmt, fr, g, t = h.get('format'), h.get('frame'), f['gpc'], f['t_us'] / 1e6
+        self.status[g] = (t, fmt, fr, h)
+        if fmt not in self.table.formats:
+            if fmt not in self.unknown:
+                self.unknown.add(fmt)
+                print("groundstation: format %s is not in the decode table" % fmt, flush=True)
+            return
+        for d in self.dl.decode_full(f['words'], fmt, fr, self.table):
+            if self.match and not (self.match.search(d["name"]) or self.match.search(d["msid"])):
+                continue
+            txt = self.dl.fmt_value(d)
+            key = (g, d["msid"], d["name"])
+            old = self.latest.get(key)
+            self.latest[key] = (t, txt, d["units"], fmt, fr, d["word"])
+            if self.csv:
+                v = d["value"]
+                self.csv.writerow(["%.6f" % t, g, fmt, fr, d["word"], d["msid"], d["name"],
+                                   repr(v) if isinstance(v, float) else v, d["units"],
+                                   d["text"] or ""])
+            if self.changes and (old is None or old[1] != txt):
+                print("%10.3f GPC%d %-10s %-44s %s %s" % (t, g, d["msid"], d["name"], txt,
+                                                         d["units"]), flush=True)
+        self.tick()
+
+    def tick(self):
+        if self.changes:
+            return
+        now = time.time()
+        if now < self.next_draw:
+            return
+        self.next_draw = now + 1.0
+        import shutil
+        cols, rows = shutil.get_terminal_size((120, 40))
+        lines = []
+        for g, (t, fmt, fr, h) in sorted(self.status.items()):
+            lines.append("GPC%d  t=%.3f s  format %s  frame %s%s" % (
+                g, t, fmt, fr, "  GPC time %.3f s" % (h['time_words'][0] * 1800.0 + (
+                    (h['time_words'][1] << 16) | h['time_words'][2]) * 1e-6)
+                if 'time_words' in h else ""))
+        lines.append("%-4s %-10s %-44s %-24s %-8s %9s" % ("GPC", "MSID", "NAME", "VALUE",
+                                                       "UNITS", "AGE s"))
+        tnow = {g: st[0] for g, st in self.status.items()}
+        items = sorted(self.latest.items(), key=lambda kv: (kv[0][0], kv[0][2], kv[0][1]))
+        room = max(rows - len(lines) - 2, 5)
+        for (g, msid, name), (t, txt, u, fmt, fr, w) in items[:room]:
+            lines.append(("%-4d %-10s %-44s %-24s %-8s %9.1f" % (
+                g, msid, name[:44], txt, u, tnow.get(g, t) - t))[:cols - 1])
+        if len(items) > room:
+            lines.append("... %d more (narrow with --match)" % (len(items) - room))
+        sys.stdout.write("\x1b[H\x1b[2J" + "\n".join(lines) + "\n")
+        sys.stdout.flush()
+
+    def close(self):
+        if self.csv:
+            self._csvf.close()
 
 
 def main():
@@ -355,11 +462,24 @@ def main():
     dn.add_argument("--log", metavar="FILE", help="append every frame, JSON lines")
     dn.add_argument("--show", type=int, default=0, metavar="N", help="print every Nth frame's words")
     dn.add_argument("--seconds", type=float, default=0, help="stop after this long")
+    dn.add_argument("--decode", action="store_true",
+                    help="decode the frames into named measurements (downlist.py)")
+    dn.add_argument("--table", metavar="JSON", default=None,
+                    help="decode table (default downlist-OI340700.json beside this program)")
+    dn.add_argument("--match", metavar="REGEX",
+                    help="with --decode: only MSIDs/names matching (case-insensitive)")
+    dn.add_argument("--changes", action="store_true",
+                    help="with --decode: a line per value as it changes, not a refreshing listing")
+    dn.add_argument("--csv", metavar="FILE", help="with --decode: append every decoded value")
     raw = sub.add_parser("raw", help="command words as hex halfword triples")
     raw.add_argument("halfwords", nargs="+")
     args = ap.parse_args()
     if args.cmd == "downlink":
-        downlink(args.port_base, args.log, args.show, args.seconds)
+        if (args.match or args.changes or args.csv or args.table) and not args.decode:
+            args.decode = True
+        downlink(args.port_base, args.log, args.show, args.seconds,
+                 (args.table or "") if args.decode else None, args.match,
+                 args.changes, args.csv)
         return
     link = Link(args.port_base)
 
