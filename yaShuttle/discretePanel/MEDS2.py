@@ -2696,6 +2696,11 @@ _IDENT4 = np.eye(4, dtype=np.float64)
 
 class Object3D(object):
     isMesh = False
+    # three.js's matrixAutoUpdate: false, and `matrix` (a 4x4 numpy array) is
+    # the local transform as it stands, in place of position/rotation/scale.
+    # The HSI's compass card turns by a shear set this way.
+    matrixAutoUpdate = True
+    matrix = None
 
     def __init__(self):
         self.id = _nextId()
@@ -2744,6 +2749,8 @@ class Object3D(object):
         return None
 
     def localMatrix(self):
+        if not self.matrixAutoUpdate and self.matrix is not None:
+            return self.matrix
         p = self.position
         r = self.rotation
         s = self.scale
@@ -3239,6 +3246,47 @@ def makeSDFLinesGeometry(polylines, z=100.0):
     geom.setAttribute('endB', BufferAttribute(endB.reshape(-1), 3))
     geom.setAttribute('corner', BufferAttribute(corner.reshape(-1), 2))
     geom.setAttribute('segDist', BufferAttribute(segDist.reshape(-1), 2))
+    geom.index = idx
+    return geom
+
+
+def mergeSDFGeometries(parts):
+    """Several SDF line geometries as one: `parts` is [(geom, xf)], xf a 4x4
+    transform baked into the vertices or None.  The quads keep their order,
+    so the merged mesh draws its members' strokes as they drew."""
+    pos = []
+    endA = []
+    endB = []
+    corner = []
+    segDist = []
+
+    def xfm(a, m):
+        v = a.array.reshape(-1, 3).astype(np.float64)
+        return (v @ m[0:3, 0:3].T + m[0:3, 3]).astype(np.float32)
+    for g, m in parts:
+        a = g.attributes
+        corner.append(a['corner'].array.reshape(-1, 2))
+        segDist.append(a['segDist'].array.reshape(-1, 2))
+        if m is not None:
+            pos.append(xfm(a['position'], m))
+            endA.append(xfm(a['endA'], m))
+            endB.append(xfm(a['endB'], m))
+        else:
+            pos.append(a['position'].array.reshape(-1, 3))
+            endA.append(a['endA'].array.reshape(-1, 3))
+            endB.append(a['endB'].array.reshape(-1, 3))
+    total = sum(len(p) for p in pos)
+    nSeg = total >> 2
+    base = np.arange(nSeg, dtype=np.int64) * 4
+    quad = np.array([0, 2, 1, 2, 3, 1], dtype=np.int64)
+    idx = (base[:, None] + quad[None, :]).reshape(-1).astype(
+        np.uint32 if total > 65535 else np.uint16)
+    geom = BufferGeometry()
+    geom.setAttribute('position', BufferAttribute(np.concatenate(pos).reshape(-1), 3))
+    geom.setAttribute('endA', BufferAttribute(np.concatenate(endA).reshape(-1), 3))
+    geom.setAttribute('endB', BufferAttribute(np.concatenate(endB).reshape(-1), 3))
+    geom.setAttribute('corner', BufferAttribute(np.concatenate(corner).reshape(-1), 2))
+    geom.setAttribute('segDist', BufferAttribute(np.concatenate(segDist).reshape(-1), 2))
     geom.index = idx
     return geom
 
@@ -3910,13 +3958,18 @@ class CharGen(object):
                 strokes.append(coords)
         self.chars[chrv] = strokes
 
-    def drawGlyph(self, mdu, dl, glyphChar, x, y, c, scaleFactor=1.0, scalex=1.0,
-                  rot=0, centered=False, clip=None):
+    def glyphStrokes(self, mdu, glyphChar, x, y, scaleFactor=1.0, scalex=1.0,
+                     rot=0, centered=False):
+        """The glyph's strokes at (x,y) in display coordinates, and the
+        multiple of the text stroke width they are drawn at.  The cell offset
+        and the scale ride in the coordinates, so a string's glyphs share one
+        geometry.  `centered` puts the glyph's bounding-box centre on (x,y);
+        the cell corner goes there otherwise."""
         if glyphChar not in self.chars:
-            return []
+            return [], 1.0
         strokes = self.chars[glyphChar]
         if not strokes:
-            return []
+            return [], 1.0
 
         gcx = 0.0
         gcy = 0.0
@@ -3945,6 +3998,7 @@ class CharGen(object):
 
         # SIGN-FIELD KNOBS (see ADJ 'brkStroke'), for the DEU font only: a
         # thinner line and an inward shift for the brackets, a narrower sign.
+        # (A local addition: upstream's glyphStrokes has none of them.)
         width = mdu.TEXT_STROKE
         dx = 0.0
         if self.suffix == 'deu' and not centered and not rot:
@@ -3960,16 +4014,16 @@ class CharGen(object):
                 strokes = [[[mx + (p[0] - mx) * k, my + (p[1] - my) * k]
                             for p in stroke] for stroke in strokes]
 
-        # One batched mesh for the whole glyph: every stroke shares the
-        # material and the transform, so this is the same picture in one draw.
-        buffer = mdu.lines(strokes, c, 1.0, clip, width)
+        sx = scaleFactor * scalex
+        sy = scaleFactor
         if centered:
-            buffer.position.set(x - scaleFactor * scalex * gcx,
-                                y - scaleFactor * gcy, 0)
+            ox = x - sx * gcx
+            oy = y - sy * gcy
         else:
-            buffer.position.set(x - 1 + dx, y, 0)
-        buffer.scale.set(scaleFactor * scalex, scaleFactor, 1)
-        return [buffer]
+            ox = x - 1 + dx
+            oy = y
+        return [[[ox + sx * p[0], oy + sy * p[1]] for p in stroke]
+                for stroke in strokes], width
 
 
 def _iter_descendants(e):
@@ -4201,22 +4255,27 @@ class VectorDisplay(object):
     # -- text ---------------------------------------------------------------
     def str(self, x, y, s, color=None, scale=1.0, advance=1.0, scalex=1.0,
             charGen=None, rot=0, centered=False, clip=None):
+        """A string of glyphs in one colour: every stroke of every character
+        goes into a single geometry -- one per stroke width, where the DEU
+        font's sign-field knobs draw a bracket thinner."""
         if color is None:
             color = self.c2h['cyan']
         if charGen is None:
             charGen = self.deuFont
         xx = x
-        group = Object3D()
-        group.name = s
+        strokes = {}                    # stroke-width multiple -> polylines
         for c in s:
             if c == '\n':
                 y += 1 * scale
                 xx = x - 1
-            geoms = charGen.drawGlyph(self, None, c, xx, y, color, scale, scalex,
-                                      rot, centered, clip)
-            for geom in geoms:
-                group.add(geom)
+            pl, ws = charGen.glyphStrokes(self, c, xx, y, scale, scalex, rot, centered)
+            if pl:
+                strokes.setdefault(ws, []).extend(pl)
             xx = xx + advance
+        group = Object3D()
+        group.name = s
+        for ws, pl in strokes.items():
+            group.add(self.lines(pl, color, 1.0, clip, ws))
         return group
 
     def strMEDS(self, x, y, s, color=None, scale=1.0, advance=0.62, scalex=1.0,
@@ -4263,15 +4322,23 @@ class VectorDisplay(object):
         ]
 
     def _clipMat(self, material, clip):
-        """Clip to a window (tape) by cloning a shared material."""
+        """Clip to a window (tape) by cloning a shared material.  The clones
+        are cached per material and clip rect: callers rebuild their geometry
+        at feed rate, and materials are never disposed."""
         if clip is None or clip is self.NO_CLIP:
             return material
-        material = material.clone()
-        material.clippingPlanes = self.clipPlanes(clip)
+        key = (material.id, clip.x, clip.y, clip.z, clip.w)
+        cache = self.__dict__.setdefault('_clipMats', {})
+        m = cache.get(key)
+        if m is not None:
+            return m
+        m = material.clone()
+        m.clippingPlanes = self.clipPlanes(clip)
         # clone() deep-copies uniforms; re-share the screen-size refs
-        material.uniforms['resolution'] = self.resolutionU
-        material.uniforms['pxRatio'] = self.pxRatioU
-        return material
+        m.uniforms['resolution'] = self.resolutionU
+        m.uniforms['pxRatio'] = self.pxRatioU
+        cache[key] = m
+        return m
 
     # -- strokes ------------------------------------------------------------
     def _scaledMat(self, key, widthScale, opt):
@@ -4347,6 +4414,116 @@ class VectorDisplay(object):
 
     def line(self, coords, color=None, intensity=1.0, clip=None):
         return self.lines([coords], color, intensity, clip)
+
+    def flatten(self, root):
+        """Merge the strokes of a freshly built subtree into fewer meshes.
+
+        The transparent pass draws in render order, then far origin to near,
+        then in the order the meshes were made (GLRenderer.render, as
+        three.js).  Every transparent mesh of the subtree is remade along that
+        same sequence, and a run of neighbours sharing a material, a host node
+        and an origin depth becomes one mesh with its members' transforms
+        baked into the vertices.  The merged mesh keeps that origin depth, so
+        what overlaps what comes out as it went in.
+
+        A node the caller moves or hides after the build holds the strokes
+        under it: a run stops at its edge and merged geometry stays inside
+        it.  Such a node carries userData flattenApart; the tape layers'
+        keepAlive says the same thing.  A host already merged is left alone
+        -- it is the one a rebuild keeps, and its strokes hold the place in
+        the sequence they were made in.  Opaque geometry draws in the opaque
+        pass and stays where it is.
+
+        Unlike three.js, a disposed geometry here is gone for good (the
+        renderer skips it), so a merged member's geometry is disposed only
+        when no mesh left in the subtree still draws it."""
+        if root is None:
+            return root
+        hosts = []
+        items = []
+
+        def walk(node, host, m):
+            for child in node.children:
+                ud = child.userData
+                if (ud.get('flattenApart') or ud.get('keepAlive')) and not child.isMesh:
+                    if ud.get('flattened'):
+                        continue
+                    hosts.append(child)
+                    walk(child, child, _IDENT4)
+                    continue
+                cm = m @ child.localMatrix()
+                if child.isMesh:
+                    mat = child.material
+                    if mat is not None and mat.transparent and child.geometry is not None:
+                        # the depth the renderer sorts on is the mesh origin's,
+                        # which the merged mesh takes as its position, so the
+                        # bake leaves it out
+                        oz = float(cm[2, 3])
+                        bake = None
+                        if not np.array_equal(cm, _IDENT4):
+                            bake = cm.copy()
+                            bake[2, 3] -= oz
+                        items.append({'mesh': child, 'host': host,
+                                      'ro': child.renderOrder, 'oz': oz,
+                                      'sdf': 'endA' in child.geometry.attributes,
+                                      'xf': bake})
+                elif child.children:
+                    walk(child, host, cm)
+        walk(root, root, _IDENT4)
+        if len(items) < 2:
+            return root
+        items.sort(key=lambda e: (e['ro'], e['mesh'].id))
+        runs = []
+        for e in items:
+            last = runs[-1] if runs else None
+            if last is not None and last['sdf'] and e['sdf'] and last['ro'] == e['ro'] \
+                    and last['host'] is e['host'] and last['oz'] == e['oz'] \
+                    and last['parts'][0]['mesh'].material is e['mesh'].material:
+                last['parts'].append(e)
+            else:
+                runs.append({'ro': e['ro'], 'host': e['host'], 'sdf': e['sdf'],
+                             'oz': e['oz'], 'parts': [e]})
+        for h in hosts:
+            h.userData['flattened'] = True
+        root.userData['flattened'] = True
+        if len(runs) == len(items):
+            return root
+        spent = []
+        for r in runs:
+            if len(r['parts']) == 1:
+                old = r['parts'][0]['mesh']
+                mesh = Mesh(old.geometry, old.material)
+                mesh.position = old.position.copy()
+                mesh.rotation = Euler(old.rotation.x, old.rotation.y,
+                                      old.rotation.z, old.rotation.order)
+                mesh.scale = old.scale.copy()
+                mesh.matrixAutoUpdate = old.matrixAutoUpdate
+                mesh.matrix = old.matrix
+                mesh.frustumCulled = old.frustumCulled
+                mesh.renderOrder = old.renderOrder
+                parent = old.parent
+                parent.remove(old)
+                parent.add(mesh)
+            else:
+                geom = mergeSDFGeometries([(e['mesh'].geometry, e['xf'])
+                                           for e in r['parts']])
+                for e in r['parts']:
+                    e['mesh'].parent.remove(e['mesh'])
+                    spent.append(e['mesh'].geometry)
+                mesh = Mesh(geom, r['parts'][0]['mesh'].material)
+                mesh.frustumCulled = False
+                mesh.renderOrder = r['ro']
+                mesh.position.z = r['oz']
+                r['host'].add(mesh)
+        if spent:
+            used = set()
+            root.traverse(lambda o: used.add(id(o.geometry))
+                          if getattr(o, 'geometry', None) is not None else None)
+            for g in spent:
+                if id(g) not in used:
+                    used.add(id(g))
+                    g.dispose()
+        return root
 
     def dashedLine(self, coords, color=None):
         """Dashed variant of line() for DEU FEAT lineDash."""
@@ -5150,10 +5327,11 @@ class MDUScreen(object):
     def build(self):
         pass
 
-    def refreshFeed(self):
+    def refreshFeed(self, changed=None):
         """Debug parameter editor hook: repaint after live curData pokes.  The
         default rebuilds the screen wholesale and swaps the fresh group into
-        the scene."""
+        the scene.  `changed` names the feed fields that moved, for a screen
+        that can rebuild only what reads them (the PFDs); this one cannot."""
         old = self.group
         self.build()
         self.draw()
@@ -7681,6 +7859,8 @@ def spad(s):
 # inches of physical tape -> display units.  The tape geometry in the spec is
 # given in inches of tape face; the MDU active display area is 6.7 in square
 # and the screen coordinate grid is 52.2425 cols x 38.32 rows.
+TAPE_BAND = 12                  # rows of tape kept past each end of a window,
+                                # which is how far it scrolls between rebuilds
 TAPE_IN_ROWS = 38.32 / 6.7      # rows per inch (vertical, along the tape)
 TAPE_IN_COLS = 52.2425 / 6.7    # cols per inch (tick widths)
 NM_FT = 6076.115                # feet per nautical mile
@@ -7760,6 +7940,7 @@ ZERO_LIFT = 3
 # green pointer arrows: rim thickness (rows, ~2px) and overall scale
 GA_RIM = 2 * 38.32 / 1024
 GA_SCL = 1.25
+GA_ASP = 38.32 / 52.2425       # rim aspect for arrows drawn in col/row space
 
 AT_TICK = 50          # ms, the ADI test cadence
 AT_RATE = 12          # deg/s sweep rate
@@ -7784,9 +7965,238 @@ def ballPt(p, w, r):
     return [r * sw, -r * cw * sp, r * cw * cp]
 
 
+def sameField(a, b):
+    """mduScreen.coffee's sameField: a feed field that has not moved.  JS
+    compares with ===, under which true is not 1; objects compare by value."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b
+    return a == b
+
+
+# A builder that enumerates the feed reads all of it (upstream's Symbol).
+ALL_FIELDS = object()
+
+
+class _FieldRecorder(object):
+    """curData behind a recorder -- upstream's Proxy in _recorded: every field
+    a builder reads is noted in `keys`, and a write goes through to the data
+    underneath.  Recorders nest, a read through the inner noting it in both."""
+    __slots__ = ('_t', '_keys')
+
+    def __init__(self, target, keys):
+        self._t = target
+        self._keys = keys
+
+    def __getitem__(self, k):
+        self._keys.add(k)
+        return self._t[k]
+
+    def get(self, k, dflt=None):
+        self._keys.add(k)
+        return self._t.get(k, dflt)
+
+    def __contains__(self, k):
+        self._keys.add(k)
+        return k in self._t
+
+    def __setitem__(self, k, v):
+        self._t[k] = v
+
+    def update(self, *a, **kw):
+        self._t.update(*a, **kw)
+
+    def _all(self):
+        self._keys.add(ALL_FIELDS)
+        return self._t
+
+    def keys(self):
+        return self._all().keys()
+
+    def items(self):
+        return self._all().items()
+
+    def values(self):
+        return self._all().values()
+
+    def __iter__(self):
+        return iter(self._all())
+
+    def __len__(self):
+        return len(self._all())
+
+
+# R for RTLS, T for TAL, AOA for AOA, ATO for ATO, CA for contingency
+# (JSC-48017/6-14 item 11), keyed by the abort flags of message 1 word 9.
+ABORT_LTR = {'RTLS': "R", 'TAL': "T", 'AOA': "AOA", 'ATO': "ATO", 'CA': "CA"}
+
+# The ADI ATTITUDE switch position the transfer carries (word 20 bits 1-4,
+# MEDS_L/R_ATT_SEL_SW): the FSSR maps the switch discrete -1, 0, +1 to 1, 2,
+# 3 (F.4.128.1.3.2.7) and names the positions "INRTL (inertial), LVLH (local
+# vertical/local horizontal), and REF (reference)" in panel order (USA-007587
+# sect.2.7).  0 is no position.
+ATT_SEL = {1: "INRTL", 2: "LVLH", 3: "REF"}
+
+# The beta digital box sits under the alpha tape and spans it.
+BETA_X = [7.4, 12.15]
+
+ADI_LBL_ADV = 0.62            # per-character step of the ADI scale labels
+THETA_HALF = 1.15             # theta limit bracket half length, rows
+THETA_TICK = 0.42             # its turned end
+
+# Glide slope indicator: the box, and one dot of deviation in rows.
+GSI_BOX = [45.43, 20.55, 46.95, 31.31]
+GSI_DOT = 2.275
+
+# Altitude acceleration scale.
+HDD_X = [48.80, 50.30]        # scale face
+HDD_ZERO = 26.62              # the zero row
+HDD_S = 0.507                 # rows per fps2
+HDD_MAX = 10
+HDD_PAD = 0.35                # face run past the end marks
+HDD_LBL = 50.86               # left ink edge of the scale legends
+GAUGE_DIG = 0.856             # meds digits at the 0.70-row cap these fields use
+
+# The four ascent digitals.
+XTRK_LBL = 42.60              # left edge of the labels
+XTRK_VAL = 50.40              # right edge of the values
+XTRK_LADV = 0.62
+XTRK_VADV = 0.80
+XTRK_ROWS = [24.5, 26.0, 27.5, 29.0]
+
+# Delta azimuth.
+DAZ_BOX = [33.80, 22.30, 38.00, 23.53]
+DAZ_LBL = 33.50               # right edge of the label
+
+# Range to the landing site.
+RNG_X = [38.45, 42.09]
+
+# HSI geometry, in rows about the compass-card centre; x is stretched by
+# HSI_ASP (d.arc's row->col ratio) so a radius means the same in both axes.
+# Radii and type sizes are measured off the reference photo.
+HSI_ASP = 1.47222
+HSI_C = [24.85, 31.12]        # compass-card centre
+HSI_CASE = 7.56               # case circle
+HSI_CARD = 6.97               # compass card outer edge
+HSI_FACE = 4.56               # compass card inner edge
+HSI_MARK = 7.98               # outer end of the lubber lines and fixed indices
+HSI_LBL = 5.28                # compass label ring
+HSI_TICK = [0.80, 0.50]       # 10-degree and 5-degree mark lengths
+HSI_LTR = 1.03                # cardinal cap height, rows
+HSI_DIG = 0.70                # ten-degree label cap height
+HSI_GLYPH = 0.818             # meds glyph cap height at scale 1
+# The instrument face -- orbiter symbol, course pointer, deviation bar and
+# its dots -- is centred 0.29 rows above the compass card.
+HSI_FC = [24.78, 30.83]
+HSI_DOT = 1.52                # one dot of course deviation, rows
+HSI_DEV = [2.98, 0.195]       # deviation bar half length and half width
+# Bearing pointer: the head is a kite astride the card's outer edge, the
+# tail a pentagon inside the card.  Each entry is [halfWidth, radius].
+HSI_BHEAD = [[0, 6.37], [0.53, 7.15], [0, 7.59]]
+HSI_BTAIL = [[0, 5.18], [0.355, 5.32], [0.355, 6.22], [0.18, 6.34]]
+HSI_BLTR = [7.05, 5.78]       # radius of the head's letter and the tail's
+# Course pointer: an arrow with swept barbs, tip outward, and opposite it the
+# tail -- the same shaft with a blunt end (fig.3.12.2-2 items 19, 9).
+HSI_ARROW = [[0, 5.65], [0.24, 5.10], [0.31, 4.30], [0.87, 3.90], [0.87, 3.66],
+             [0.31, 3.53], [0.22, 3.36]]
+HSI_CTAIL = [[0.16, 5.65], [0.24, 5.45], [0.24, 3.53], [0.22, 3.36]]
+# Orbiter symbol, [halfWidth, rows below the face centre].
+HSI_ORB = [[0, -1.36], [0.10, -0.90], [0.17, -0.50], [0.24, -0.10],
+           [0.53, 0.24], [0.20, 0.56], [0, 0.72]]
+# The instrument runs under the menu area; everything on it is clipped to
+# the display above it.  (This replaces the opaque menu-area mask the HSI
+# carried before: the clip needs no depth trick.)
+HSI_CLIP = Vector4(-1, 53, -2, 32.374)
+# Stacking on the face and the card.  An SDF stroke's geometry carries
+# z = 100, in front of every fill, so the fills join the same transparent
+# pass and the order is renderOrder throughout: dots under the deviation bar,
+# both under the course pointer and the bearing tags, the tags' letters over
+# their fill, the orbiter symbol over all of it.
+HSI_ORD = {'dot': 2, 'bar': 3, 'ptr': 4, 'ltr': 5, 'orb': 6}
+
+# HSI mode indicator (message 1 word 13, MEDS_HSI_MODE_LEFT/RIGHT) and what
+# each mode makes of the instrument, from the HSI Function Matrix (USA-007587
+# sect.2.7) and JSC-48017/6-14 item 13:
+#
+#   Entry     [H] spherical bearing to the NEP HAC intercept; the CDI is
+#             pegged at zero and its scale unlabelled; the GSI is blanked
+#   TAEM      [H] the same, [C] bearing to the HAC centre and the HAC-C
+#             range box; CDI full scale 10 deg, GSI 5000 ft
+#   Approach  [R] bearing to the runway touchdown point; CDI 2.5 deg,
+#             GSI 1000 ft
+#
+# The secondary pointer's letter outside TAEM is fitted: the JSC-48017
+# availability matrix carries the runway pointer on the secondary bearing
+# through MM 304, 305, 601, 602 and 603, and the function matrix names one
+# pointer for Entry and for Approach.
+HSI_MODE_ENTRY = 1
+HSI_MODE_TAEM = 2
+HSI_MODE_APPROACH = 3
+HSI_MODE_LTR = {1: {'pri': "H", 'sec': "R"},
+                2: {'pri': "H", 'sec': "C"},
+                3: {'pri': "R", 'sec': "R"}}
+# CDI full scale in degrees for TAEM and Approach (item 14, "the scale and
+# digital set to 10 (deg) ... at HSI approach and land, the scale and digital
+# changes to 2.5 (deg)"); the GSI's in feet (item 19).
+HSI_CDI_DEG = {2: "10", 3: "2.5"}
+HSI_GSI_LBL = {2: "5K", 3: "1K"}
+HSI_CDI_LBL = 3.5             # rows along the dot row from the face centre
+HSI_CDI_ADV = 0.72
+
+
+def _rateLbl(v):
+    """An ADI rate scale's label: an integer of its units, 'K' for
+    thousands (a lateral deviation scale in feet)."""
+    if v is None or isinstance(v, bool) or not v > 0:
+        return ""
+    if v < 1000:
+        return _numstr(v)
+    k = v / 1000.0
+    return (_numstr(int(k)) if k == jsround(k) else "%.1f" % k) + "K"
+
+
+def _errLbl(v):
+    """1.25 g prints as "1.2 G ... due to space limitations and truncation"
+    (JSC-48017/6-13)."""
+    if v is None or isinstance(v, bool) or not v > 0:
+        return ""
+    if v == jsround(v):
+        return _numstr(int(v))
+    return "%.1f" % (math.floor(v * 10) / 10)
+
+
 class Screen_AE_PFD(MDUScreen):
-    # G-meter placement, shared by build/refreshFeed/the G-meter test
+    # G-meter and ADI placement, shared by the part table and the tests
     ACC_ARGS = [7.6, 28.25, 2.55, -1, 4]
+    ADI_C = [24.90, 12.0]
+
+    # The instruments a PFD is assembled from.  Each is a group built from
+    # curData, held on the named field, and rebuilt when the feed changes;
+    # `u` names a cheaper update where a wholesale rebuild is not wanted.  A
+    # screen carries the ones its parts() names.
+    PARTS = {
+        'fcsConfig': {'f': 'fcsConfig', 'b': lambda t: t.drawFCSConfig()},
+        'majorMode': {'f': 'majorMode', 'b': lambda t: t.drawMajorMode()},
+        'ami': {'f': 'ami', 'b': lambda t: t.drawAMI()},
+        'avvi': {'f': 'avviGrp', 'b': lambda t: t.drawAVVI()},
+        'accMeter': {'f': 'accMeter', 'b': lambda t: t.drawAccMeter(*t.ACC_ARGS)},
+        # the ball geometry is static and expensive to build; updateADI()
+        # redraws the attitude-driven overlays alone
+        'adi': {'f': 'adi', 'b': lambda t: t.drawADI(*t.ADI_C),
+                'u': lambda t: t.updateADI()},
+        'hsi': {'f': 'hsi', 'b': lambda t: t.drawHSI()},
+        'gsi': {'f': 'gsi', 'b': lambda t: t.drawGSI()},
+        'attAcc': {'f': 'attAcc', 'b': lambda t: t.drawAttAcc()},
+        'xtrk': {'f': 'xtrk', 'b': lambda t: t.drawXtrk()},
+        'range': {'f': 'range', 'b': lambda t: t.drawRange()},
+        'dAz': {'f': 'dAz', 'b': lambda t: t.drawDAz()},
+    }
+
+    # A/E PFD: every instrument.  Screen_ORBIT_PFD names a subset.
+    screenName = 'AE_PFD'
+
+    def parts(self):
+        return ['fcsConfig', 'majorMode', 'ami', 'avvi', 'accMeter', 'adi',
+                'hsi', 'gsi', 'attAcc', 'range', 'dAz', 'xtrk']
 
     # "A Max L/D diamond indicates the optimum alpha value for maximum lift
     # over drag flying techniques, and is displayed when M < 3.0."
@@ -7824,7 +8234,6 @@ class Screen_AE_PFD(MDUScreen):
         self._tapeCache = None
         self._accCache = None
         self._adiBugG = None
-        self._adiRateScales = None
         self._adiDynC = None
         self._adiDynS = None
         self._tickBlkMat = None
@@ -7842,45 +8251,111 @@ class Screen_AE_PFD(MDUScreen):
         self.majorMode = None
         self.ami = None
         self.accMeter = None
+        self.hsi = None
+        self.gsi = None
+        self.attAcc = None
+        self.xtrk = None
+        self.range = None
+        self.dAz = None
+        self._partKeys = None
+        self._keptEls = None
+        self._marksCache = None
         MDUScreen.__init__(self, d)
+
+    def dev(self):
+        """meds --dev: a screen with no feed starts on sample values; started
+        normally it shows every instrument's invalid indication until data
+        arrives (mduScreen.coffee)."""
+        return bool((getattr(self.d, 'CONFIG', None) or {}).get('dev'))
 
     def setData(self, curData=None):
         self.curData = curData
         if self.curData is None:
-            self.curData = {
-                'majorMode': 305,
-                'abortMode': "TAL",
-                'fcsConfDAPAuto': True,
-                'fcsConfThrotAuto': True,
-                'adiRolRate': -1.05,   # -5 -> +5
-                'adiYawRate': 0,
-                'adiPchRate': -0.1,
-                # errors default centred; roll sits a touch left so the top
-                # needle overlaps the left half of the belly band
-                'adiRolErr': -0.25,
-                'adiYawErr': 0,
-                'adiPchErr': 0,
-                # False = ADI OFF: ball locks, needles/pointers stow, digitals
-                # blank, red OFF flag shows
-                'adiValid': True,
-                'adiRol': 315,
-                'adiPch': 315,
-                'adiYaw': 316,
-                'vehicleAcceleration': 1.0,
-                'targetNZ': 1.8,      # MM 602 magenta target NZ line
-                'keas': 304,          # velocity (KEAS) tape value
-                'alpha': 6.0,         # angle-of-attack tape value
-                'mach': 0.48,         # velocity tape + limit bar + L/D diamond
-                'vel': 480,           # VR/VI, fps
-                'ppa': False,         # RTLS powered pitch-around done
-                'altitude': 2105,     # altitude (H) tape value, ft
-                'altValid': True,
-                'hdot': -164,         # altitude rate (H-dot) tape value, fps
-                'hdotValid': True,
-                'radarAlt': 1950,     # radar altitude, ft
-                'radarValid': False,  # radar altimeter lock
-            }
+            self.curData = self.sampleData() if self.dev() else self.noData()
         self.draw()
+
+    def noData(self):
+        """No data from the GPC: the ADI's OFF flag, every needle and pointer
+        stowed, every tape a red box, the meter without its needle, the mode
+        and DAP fields blank (STS-83-0020V1-34 sect.3.12: "a stow (out-of-
+        view) position which is used to indicate invalid conditions", "An OFF
+        flag is provided to indicate when the attitude ball display may be
+        invalid", "invalid indicator - solid red rectangle")."""
+        return {
+            'adiValid': False,
+            'adiRolRate': None, 'adiPchRate': None, 'adiYawRate': None,
+            'adiRolErr': None, 'adiPchErr': None, 'adiYawErr': None,
+            'machValid': False, 'alphaValid': False, 'keasValid': False,
+            'accValid': False,
+            'altValid': False, 'hdotValid': False, 'radarValid': False,
+            'vertAccelValid': False,
+            'hsiHeadingValid': False, 'hsiCourseValid': False, 'hsiCdiValid': False,
+            'hsiPriBearingValid': False, 'hsiSecBearingValid': False,
+            'hsiGsiValid': False, 'hsiPriRangeValid': False, 'hsiSecRangeValid': False,
+        }
+
+    def sampleData(self):
+        """The sample of an entry, for --dev."""
+        return {
+            'majorMode': 305,
+            'abortMode': "TAL",
+            'fcsConfDAPAuto': True,
+            'fcsConfThrotAuto': True,
+            'fcsConfPitchAuto': True,
+            'fcsConfRYAuto': True,
+            'fcsConfSBAuto': True,
+            'attSel': 2,          # ADI ATTITUDE: 1 INRTL, 2 LVLH, 3 REF
+            'hsiMode': 2,         # HSI MODE: 1 Entry, 2 TAEM, 3 Approach
+            # TAEM, ADI RATE high: 5 deg/s each axis, pitch error 1.25 g
+            'adiRateScale': {'roll': 5, 'pitch': 5, 'yaw': 5,
+                             'rollTgo': False, 'rollZeroOnRight': False},
+            'adiPchErrScale': 1.25,
+            # sin(THETA_MAX - THETA) and sin(THETA - THETA_MIN)
+            'thetaMaxDelta': 0.20,
+            'thetaMinDelta': 0.14,
+            'dAz': 1, 'dAzWarn': False,
+            'iphase': 1,          # TAEM guidance phase
+            'adiRolRate': -1.05,   # -5 -> +5
+            'adiYawRate': 0,
+            'adiPchRate': -0.1,
+            # errors default centred; roll sits a touch left so the top
+            # needle overlaps the left half of the belly band
+            'adiRolErr': -0.25,
+            'adiYawErr': 0,
+            'adiPchErr': 0,
+            # False = ADI OFF: ball locks, needles/pointers stow, digitals
+            # blank, red OFF flag shows
+            'adiValid': True,
+            'adiRol': 315,
+            'adiPch': 315,
+            'adiYaw': 316,
+            'vehicleAcceleration': 1.0,
+            'targetNZ': 1.8,      # MM 602 magenta target NZ line
+            'keas': 304,          # velocity (KEAS) tape value
+            'alpha': 6.0,         # angle-of-attack tape value
+            'mach': 0.48,         # velocity tape + limit bar + L/D diamond
+            'vel': 480,           # VR/VI, fps
+            'ppa': False,         # RTLS powered pitch-around done
+            'altitude': 2105,     # altitude (H) tape value, ft
+            'altValid': True,
+            'hdot': -164,         # altitude rate (H-dot) tape value, fps
+            'hdotValid': True,
+            'radarAlt': 1950,     # radar altitude, ft
+            'radarValid': False,  # radar altimeter lock
+            'vertAccel': -10,     # altitude acceleration, fps2
+            'vertAccelValid': True,
+            # HSI: heading turns the compass card; course, the deviation
+            # and the bearings are angles on the case (the DDU words
+            # carry heading already subtracted)
+            'hsiHeading': 90, 'hsiHeadingValid': True,
+            'hsiCourse': 19, 'hsiCourseValid': True,
+            'hsiCdi': -2, 'hsiCdiValid': True,        # dots, + flies right
+            'hsiPriBearing': 122, 'hsiPriBearingValid': True,
+            'hsiSecBearing': 59, 'hsiSecBearingValid': True,
+            'hsiGsi': -2, 'hsiGsiValid': True,        # dots, + flies down
+            'hsiPriRange': 0, 'hsiPriRangeValid': True,
+            'hsiSecRange': 0, 'hsiSecRangeValid': True,
+        }
 
     def data(self):
         return self.curData
@@ -7917,17 +8392,103 @@ class Screen_AE_PFD(MDUScreen):
             self._disposeGroup(grp)
         ng = builder()
         if ng is not None:
+            self.d.flatten(ng)
             self.group.add(ng)
         self.d.dirty = True
         return ng
 
     def _redrawAVVI(self):
-        if self.avviGrp is not None:
-            self.group.remove(self.avviGrp)
-            self._disposeGroup(self.avviGrp)
-        self.avviGrp = self.drawAVVI()
-        self.group.add(self.avviGrp)
-        self.d.dirty = True
+        self._part('avvi')
+
+    def _part(self, name):
+        """Rebuild one part in place; a screen that does not carry it has
+        nothing to redraw."""
+        if name not in self.parts():
+            return
+        p = self.PARTS[name]
+        setattr(self, p['f'], self._redo(
+            getattr(self, p['f']),
+            lambda: self._reading(name, lambda: p['b'](self))))
+
+    # The feed fields an instrument reads.
+    #
+    # A builder runs with curData behind a recorder (_FieldRecorder), and the
+    # fields it read are what a later feed has to name for it to be built
+    # again.  A builder that enumerates the feed reads all of it, ALL_FIELDS.
+    def _recorded(self, build):
+        keys = set()
+        outer = self.curData
+        self.curData = _FieldRecorder(outer, keys)
+        try:
+            g = build()
+        finally:
+            self.curData = outer
+        return g, keys
+
+    def _reading(self, name, build, add=False):
+        """`add` keeps what the part read before: an update path (`u`) reads
+        what it draws now, and an instrument built with no data to draw has
+        not yet read the fields it will."""
+        g, keys = self._recorded(build)
+        if self._partKeys is None:
+            self._partKeys = {}
+        prev = self._partKeys.get(name)
+        if add and prev is not None:
+            keys |= prev
+        self._partKeys[name] = keys
+        return g
+
+    def _reads(self, name, changed):
+        keys = (self._partKeys or {}).get(name)
+        if keys is None or ALL_FIELDS in keys:
+            return True
+        for k in changed:
+            if k in keys:
+                return True
+        return False
+
+    def _kept(self, name, build):
+        """An element of a part that is built once and kept until a field it
+        reads moves.  The builder runs behind the recorder, so what it read
+        and what those fields held is what the next call compares, and the
+        part rebuilds around the group it already has.  _disposeGroup spares
+        a kept subtree and flatten merges it once, leaving it under the
+        strokes built after it: a kept element stays where its builder put
+        it."""
+        if self._keptEls is None:
+            self._keptEls = {}
+        c = self._keptEls.get(name)
+        if c is not None:
+            moved = False
+            for k, v in c['vals'].items():
+                if not sameField(self.curData.get(k), v):
+                    moved = True
+            if not moved:
+                return c['g']
+            # Unlike three.js, a geometry here is not collected: the one being
+            # replaced (detached by the rebuild that spared it) is disposed.
+            if c['g'].parent is not None:
+                c['g'].parent.remove(c['g'])
+            dispose3D(c['g'])
+        g, keys = self._recorded(build)
+        g.userData['keepAlive'] = True
+        vals = {}
+        for k in keys:
+            if isinstance(k, str):
+                vals[k] = self.curData.get(k)
+        self._keptEls[name] = {'g': g, 'vals': vals}
+        return g
+
+    def _marksOf(self, opts):
+        """A tape's whole mark grid, which is the tape and not the value on
+        it: the id names the variant, so the provider runs once for each."""
+        if opts.get('id') is None:
+            return opts['marks']()
+        if self._marksCache is None:
+            self._marksCache = {}
+        if opts['id'] not in self._marksCache:
+            self._marksCache[opts['id']] = opts['marks']()
+        return self._marksCache[opts['id']]
 
     def _tapeLayer(self, tid, fp, value, mapFn, scale, builder):
         """Cache/reuse one tape's expensive content (label glyphs + ticks)
@@ -7953,16 +8514,18 @@ class Screen_AE_PFD(MDUScreen):
             c['layer'].position.y = (value - c['anchor']) * scale
         return c['layer']
 
-    def refreshFeed(self):
-        """Rebuild every data-driven element from curData: used by the debug
-        parameter editor after live pokes."""
-        self.fcsConfig = self._redo(self.fcsConfig, lambda: self.drawFCSConfig())
-        self.majorMode = self._redo(self.majorMode, lambda: self.drawMajorMode())
-        self.ami = self._redo(self.ami, lambda: self.drawAMI())
-        self.accMeter = self._redo(self.accMeter,
-                                   lambda: self.drawAccMeter(*self.ACC_ARGS))
-        self._redrawAVVI()
-        self.updateADI()
+    def refreshFeed(self, changed=None):
+        """Rebuild the data-driven elements `changed` reaches, naming the feed
+        fields that moved.  Without it every element is rebuilt: the debug
+        parameter editor pokes curData directly."""
+        for name in self.parts():
+            if changed is not None and not self._reads(name, changed):
+                continue
+            u = self.PARTS[name].get('u')
+            if u is not None:
+                self._reading(name, lambda: u(self), True)
+            else:
+                self._part(name)
 
     # -- live-feed tests ----------------------------------------------------
     def toggleTapeTest(self):
@@ -7980,7 +8543,7 @@ class Screen_AE_PFD(MDUScreen):
     def enterTapeTest(self):
         if self._ttTimer is not None:
             return
-        self._ttHdot0 = self.curData['hdot']    # restore the static on exit
+        self._ttHdot0 = self.curData.get('hdot')    # restore the static on exit
         self._ttT0 = time.time() * 1000.0
         self.tickTapeTest()
         self._ttTimer = self._mkTimer(TT_TICK, self.tickTapeTest)
@@ -8008,8 +8571,8 @@ class Screen_AE_PFD(MDUScreen):
     def enterAltTest(self):
         if self._altTimer is not None:
             return
-        self._alt0 = [self.curData['altitude'], self.curData['radarAlt'],
-                      self.curData['radarValid']]
+        self._alt0 = [self.curData.get('altitude'), self.curData.get('radarAlt'),
+                      self.curData.get('radarValid')]
         self._altT0 = time.time() * 1000.0
         self._altTimer = self._mkTimer(TT_TICK, self.tickAltTest)
         self.tickAltTest()
@@ -8061,9 +8624,9 @@ class Screen_AE_PFD(MDUScreen):
         else:
             # save the static defaults once, when the test first engages
             if self._at0 is None:
-                self._at0 = [d['adiRol'], d['adiPch'], d['adiYaw'], d['adiRolErr'],
-                             d['adiPchErr'], d['adiYawErr'], d['adiRolRate'],
-                             d['adiPchRate'], d['adiYawRate']]
+                self._at0 = [d.get(k) for k in ('adiRol', 'adiPch', 'adiYaw',
+                                                'adiRolErr', 'adiPchErr', 'adiYawErr',
+                                                'adiRolRate', 'adiPchRate', 'adiYawRate')]
             self._atMode = i
             if i == 4:                              # freeze: hold data as-is
                 if self._atTimer is not None:
@@ -8123,7 +8686,8 @@ class Screen_AE_PFD(MDUScreen):
             self._redrawGMeter()
         else:
             if self._gt0 is None:
-                self._gt0 = [d['majorMode'], d['vehicleAcceleration'], d['targetNZ']]
+                self._gt0 = [d.get('majorMode'), d.get('vehicleAcceleration'),
+                             d.get('targetNZ')]
             self._gtMode = i
             d['majorMode'] = GT_MODES[i][1]
             self._gtT0 = time.time() * 1000.0
@@ -8147,14 +8711,14 @@ class Screen_AE_PFD(MDUScreen):
         self._redrawGMeter()
 
     def _redrawGMeter(self):
-        self.accMeter = self._redo(self.accMeter,
-                                   lambda: self.drawAccMeter(*self.ACC_ARGS))
-        self.majorMode = self._redo(self.majorMode, lambda: self.drawMajorMode())
+        """The meter and the MM digits (the test changes majorMode) only."""
+        self._part('accMeter')
+        self._part('majorMode')
 
     def enterAlphaTest(self):
         if self._apTimer is not None:
             return
-        self._ap0 = [self.curData['alpha'], self.curData['mach']]
+        self._ap0 = [self.curData.get('alpha'), self.curData.get('mach')]
         self._apT0 = time.time() * 1000.0
         self._apTimer = self._mkTimer(ATP_TICK, self.tickAlphaTest)
         self.tickAlphaTest()
@@ -8168,7 +8732,7 @@ class Screen_AE_PFD(MDUScreen):
         if self._ap0 is not None:
             self.curData['alpha'], self.curData['mach'] = self._ap0
         self._ap0 = None
-        self.ami = self._redo(self.ami, lambda: self.drawAMI())
+        self._part('ami')
         print("PFD alpha tape test OFF")
 
     def tickAlphaTest(self):
@@ -8179,12 +8743,13 @@ class Screen_AE_PFD(MDUScreen):
             return 2 * ph if ph < 0.5 else 2 - 2 * ph
         self.curData['alpha'] = jsround((-8 + tri(11) * 32) * 10) / 10
         self.curData['mach'] = jsround((0.3 + tri(17) * 2.9) * 100) / 100
-        self.ami = self._redo(self.ami, lambda: self.drawAMI())
+        self._part('ami')
 
     def enterVelTest(self):
         if self._vtTimer is not None:
             return
-        self._vt0 = [self.curData['mach'], self.curData['vel'], self.curData['keas']]
+        self._vt0 = [self.curData.get('mach'), self.curData.get('vel'),
+                     self.curData.get('keas')]
         self._vtT0 = time.time() * 1000.0
         self._vtTimer = self._mkTimer(VT_TICK, self.tickVelTest)
         self.tickVelTest()
@@ -8198,7 +8763,7 @@ class Screen_AE_PFD(MDUScreen):
         if self._vt0 is not None:
             self.curData['mach'], self.curData['vel'], self.curData['keas'] = self._vt0
         self._vt0 = None
-        self.ami = self._redo(self.ami, lambda: self.drawAMI())
+        self._part('ami')
         print("PFD velocity tape test OFF")
 
     def tickVelTest(self):
@@ -8225,7 +8790,7 @@ class Screen_AE_PFD(MDUScreen):
         self.curData['mach'] = jsround(min(u, 4) * 100) / 100
         self.curData['vel'] = jsround(u * 1000)
         self.curData['keas'] = jsround(tri(23) * 500)
-        self.ami = self._redo(self.ami, lambda: self.drawAMI())
+        self._part('ami')
 
     def testControls(self):
         """Descriptors for the parameter editor's test-control section:
@@ -8257,77 +8822,97 @@ class Screen_AE_PFD(MDUScreen):
         self.T_RPY_TOP = [0, 89, 271]
         self.T_RPY_1 = [331, 348, 0]
         self.T_RPY_2 = [0, 348, 0]
-        self.T_setRPY([0.5, 348.5, 0.25])
+        if self.dev():
+            self.T_setRPY([0.5, 348.5, 0.25])
         self.group = Object3D()
-        self.group.name = "AE_PFD"
-
-        self.group.add(self.drawFCSConfig())
-        self.group.add(self.drawMajorMode())
-        self.group.add(self.drawAMI())
-
-        self.avviGrp = self.drawAVVI()
-        self.group.add(self.avviGrp)
+        self.group.name = self.screenName
+        for name in self.parts():
+            p = self.PARTS[name]
+            g = self._reading(name, lambda: p['b'](self))
+            setattr(self, p['f'], g)
+            if g is not None:
+                self.d.flatten(g)
+                self.group.add(g)
         self.d.dirty = True
 
-        MRN_X = 37.62
-        MRN_Y = 26.88
-        self.group.add(self.d.box(MRN_X, MRN_Y + 0.95, MRN_X + 4.0, MRN_Y + 2,
-                                  self.d.c2h['darkGray']))
-        self.group.add(self.d.str(MRN_X + 0.15, MRN_Y, "MRN20",
-                                  self.d.c2h['darkGray'], 0.85, 0.90, 1.10))
-        self.group.add(self.d.strMEDS(MRN_X + 1.99, MRN_Y + 1.16, "2.4",
-                                      self.d.c2h['white'], 0.85, 0.70))
-
-        self.group.add(self.drawAccMeter(*self.ACC_ARGS))
-        self.group.add(self.drawADI(24.90, 12.0))
-        self.group.add(self.drawHSI(25, 30))
-
-        self.drawAttAcc()
-        self.drawGSI()
-        self.drawRange()
-
     def drawFCSConfig(self):
-        """FCS Configuration -- DAP and throttle mode.  [JSC-48017/p.279]"""
+        """FCS Configuration -- DAP and throttle mode.  During powered flight
+        (MM 101-103 & MM 601), the fields show DAP mode (AUTO or CSS) and
+        Throttle mode (AUTO or MAN).  If CSS or MAN are selected, a yellow box
+        is drawn around the fields.  Post-MECO (MM 104-106), the DAP mode will
+        indicate AUTO or INRTL, while the throttle field is blanked in MM 103
+        at MECO confirmed and throughout MM 104-106.  In MM 301-303, the upper
+        field will show DAP: AUTO or INRTL as in post-MECO OPS 1, while the
+        lower field remains blank.  During Entry (MM 304, 305, 602, & 603),
+        the fields display the Pitch and Roll/Yaw DAP mode (AUTO or CSS) in
+        the upper and lower fields, respectively.  Additionally, a yellow box
+        is drawn around the field if CSS is selected prior to M =1.
+
+        [JSC-48017/6-8 item 1]"""
         self.fcsConfig = Object3D()
         C = self.d.c2h
-        mm = self.data()['majorMode']
+        d = self.data()
+        mm = d.get('majorMode')
         F = self.fcsConfig
+
+        def lbl(x, y, t):
+            F.add(self.d.str(x, y, t, C['darkGray'], 1, .9))
+
+        # an indicator whose word the GPC is not marking valid has no field
+        def val(x, y, auto, a, b):
+            if auto is not None:
+                F.add(self.d.str(x, y, a if auto else b, C['white'], 1, .9))
+        css = False                 # a CSS or MAN field is showing
         if mm in (101, 102, 103, 601):
-            F.add(self.d.str(2, 0.75, "  DAP:", C['darkGray'], 1, .9))
-            F.add(self.d.str(2, 1.75, "Throt:", C['darkGray'], 1, .9))
-            F.add(self.d.str(8, 0.75, "Auto" if self.data().get('fcsConfDAPAuto') else " CSS",
-                             C['white'], 1, .9))
-            F.add(self.d.str(8, 1.75, "Auto" if self.data().get('fcsConfThrotAuto') else "MAN",
-                             C['white'], 1, .9))
-        elif mm in (104, 105, 106):
-            F.add(self.d.str(2, 0.75, "  DAP:", C['darkGray'], 1, .9))
-            F.add(self.d.str(8, 0.75, "Auto" if self.data().get('fcsConfDAPAuto') else "INRTL",
-                             C['white'], 1, .9))
-        elif mm in (301, 302, 303):
-            F.add(self.d.str(2, 0.75, "  DAP:", C['darkGray'], 1, .9))
-            F.add(self.d.str(8, 0.75, "Auto" if self.data().get('fcsConfDAPAuto') else "INRTL",
-                             C['white'], 1, .9))
+            lbl(2, 0.75, "  DAP:")
+            val(8, 0.75, d.get('fcsConfDAPAuto'), "Auto", " CSS")
+            css = d.get('fcsConfDAPAuto') is False
+            # word 20 bit 6, MEDS_THROT_RY_AUTO_BLANK: MECO confirmed
+            if not d.get('fcsConfThrotBlank'):
+                lbl(2, 1.75, "Throt:")
+                val(8, 1.75, d.get('fcsConfThrotAuto'), "Auto", "MAN")
+                css = css or d.get('fcsConfThrotAuto') is False
+        elif mm in (104, 105, 106, 301, 302, 303):
+            lbl(2, 0.75, "  DAP:")
+            val(8, 0.75, d.get('fcsConfDAPAuto'), "Auto", "INRTL")
         elif mm in (304, 305, 602, 603):
-            F.add(self.d.str(3, 0.9, "Pitch:", C['darkGray'], 1, .9))
-            F.add(self.d.str(3, 1.9, "  R/Y:", C['darkGray'], 1, .9))
-            F.add(self.d.str(8.5, 0.90, "Auto" if self.data().get('fcsConfPitchAuto') else " CSS",
-                             C['white'], 1, .9))
-            F.add(self.d.str(8.5, 1.90, "Auto" if self.data().get('fcsConfRYAuto') else " CSS",
-                             C['white'], 1, .9))
-        if self.data().get('fcsConfDAPSel'):
+            lbl(3, 0.9, "Pitch:")
+            lbl(3, 1.9, "  R/Y:")
+            val(8.5, 0.90, d.get('fcsConfPitchAuto'), "Auto", " CSS")
+            val(8.5, 1.90, d.get('fcsConfRYAuto'), "Auto", " CSS")
+            # "prior to M = 1": entry decelerates through it, so above mach 1
+            mach = d.get('mach')
+            css = (d.get('fcsConfPitchAuto') is False or d.get('fcsConfRYAuto') is False) \
+                and (mach if mach is not None else 0) > 1
+        if css:
             F.add(self.d.box(2, 0.75, 12.75, 1.75, C['yellow']))
-        F.add(self.d.str(42, 2, " SB:", C['darkGray'], 1, .9))
-        F.add(self.d.str(45.78, 2, " Auto", C['white'], 1, .9))
+
+        # FCS Configuration/ADI Attitude -- the field below the major mode
+        # shows the applicable CDR or PLT ADI attitude selected, i.e. INRTL,
+        # LVLH, or REF (MM 101-106 and 601, and 301-303), or SB mode, i.e.
+        # AUTO or MAN (MM 304 and 305, and 602 and 603).  A yellow box is
+        # drawn around the indicator if MAN SB is selected.
+        # [JSC-48017/6-14 item 10]
+        if mm in (101, 102, 103, 104, 105, 106, 301, 302, 303, 601):
+            lbl(42, 2, " ATT:")
+            att = ATT_SEL.get(d.get('attSel'))
+            if att is not None:
+                F.add(self.d.str(45.78, 2, " %s" % att, C['white'], 1, .9))
+        elif mm in (304, 305, 602, 603):
+            lbl(42, 2, " SB:")
+            val(45.78, 2, d.get('fcsConfSBAuto'), " Auto", " MAN")
+            if d.get('fcsConfSBAuto') is False:
+                F.add(self.d.box(45.9, 1.55, 50.4, 2.55, C['yellow']))
         return F
 
     def drawMajorMode(self):
         """The current major mode, upper right; with an abort declared, an
-        indicator verifies the abort mode selected."""
+        indicator verifies the abort mode selected (R for RTLS, T for TAL, AOA
+        for AOA, ATO for ATO, and CA for contingency aborts)."""
         self.majorMode = Object3D()
-        am = self.data().get('abortMode')
-        abt = {"RTLS": "R", "TAL": "T", "AOA": "AOA", "ATO": "ATO",
-               "Contingency": "CA"}.get(am, "")
-        mmStr = " %s%s" % (self.data()['majorMode'], abt)
+        mm = self.data().get('majorMode')
+        abt = ABORT_LTR.get(self.data().get('abortMode'), "")
+        mmStr = (" %s%s" % (mm, abt)) if mm is not None else ""
         self.majorMode.add(self.d.str(42, .95, " MM:", self.d.c2h['darkGray'], 1, .9))
         self.majorMode.add(self.d.str(45.78, .95, mmStr, self.d.c2h['white'], 1, .9))
         return self.majorMode
@@ -8361,19 +8946,53 @@ class Screen_AE_PFD(MDUScreen):
                                  self.d.c2h['black'], self.d.NO_CLIP))
         return group
 
-    def _thinTick(self, pts, clip):
-        """Thin (1.5px) background-colour tick stroke, clipped: the clip planes
-        ride on cloned materials, so the clones are cached per clip rect."""
+    def _clipBoth(self, lg, clipTop, clipBot):
+        """A tape's marks, trimmed to the tape above the readout box and again
+        to the tape below it: one geometry under two clip rects.  A mark
+        carries no side of the box, so the layer stands while the tape scrolls
+        under the window.
+
+        The box is 1.70 rows and the tallest mark 1.33 (a 1.22-scale meds
+        digit, 0.409 rows of ink either side of its line, plus the stroke and
+        its feather), so no mark reaches from one window into the other and
+        each comes out as it would trimmed to the side it lies on.
+
+        The second set is built after the first, in the same order, so the
+        two merge as two runs."""
+        marks = []
+        lg.traverse(lambda o: marks.append(o) if o.isMesh else None)
+        mirror = Object3D()
+        for m in marks:
+            base = m.material
+            m.material = self.d._clipMat(base, clipTop)
+            c = Mesh(m.geometry, self.d._clipMat(base, clipBot))
+            c.frustumCulled = m.frustumCulled
+            c.renderOrder = m.renderOrder
+            c.position = m.position.copy()
+            c.rotation = Euler(m.rotation.x, m.rotation.y, m.rotation.z, m.rotation.order)
+            c.scale = m.scale.copy()
+            mirror.add(c)
+        lg.add(mirror)
+        return lg
+
+    def _thinTick(self, pts, clip=None):
+        """Thin (1.5px) background-colour tick stroke.  A clip rect rides on
+        a cloned material, so the clones are cached per rect; a tick with no
+        rect takes the shared material and _clipBoth gives it the two it
+        needs."""
         if self._tickBlkMat is None:
             self._tickBlkMat = makeSDFLineMaterial(
                 self.d.sdfOpt({'color': self.d.c2h['black'], 'widthPx': 1.5}))
         if self._tickClipMats is None:
             self._tickClipMats = {}
-        key = "%s,%s,%s,%s" % (clip.x, clip.y, clip.z, clip.w)
-        m = self._tickClipMats.get(key)
-        if m is None:
-            m = self.d._clipMat(self._tickBlkMat, clip)
-            self._tickClipMats[key] = m
+        if clip is None:
+            m = self._tickBlkMat
+        else:
+            key = "%s,%s,%s,%s" % (clip.x, clip.y, clip.z, clip.w)
+            m = self._tickClipMats.get(key)
+            if m is None:
+                m = self.d._clipMat(self._tickBlkMat, clip)
+                self._tickClipMats[key] = m
         t = Mesh(makeSDFLineGeometry(pts), m)
         t.frustumCulled = False
         t.renderOrder = -1        # tuck tick ends under the frame stroke
@@ -8435,6 +9054,17 @@ class Screen_AE_PFD(MDUScreen):
         def dpos(v):
             return (mapFn(v) - map0) if mapFn is not None else (v - value) * scale
 
+        # A tape is a strip longer than its window, and scrolling it is a
+        # translation of the strip.  The marks that go on it are those in a
+        # band around a tape position quantised to TAPE_BAND rows: the strip
+        # then stands until the tape has travelled a band, and the band covers
+        # the window wherever the value sits inside it.  `dq` is a mark's row
+        # measured from that quantised position.
+        posQ = TAPE_BAND * jsround((map0 if mapFn is not None else value * scale) / TAPE_BAND)
+
+        def dq(v):
+            return (mapFn(v) if mapFn is not None else v * scale) - posQ
+
         vMin = vMax = None
         # opts.range [vMin, vMax]: bounded unsigned tape.  The white face spans
         # just the value range -- padded ~a label half-height past each end --
@@ -8495,9 +9125,10 @@ class Screen_AE_PFD(MDUScreen):
             return x0 + opts.get('lblPad', 0.41) + 1 - GXL * lblScale
 
         if opts.get('marks') is not None:
-            # opts.marks(value) -> {faces, labels, ticks}: explicit mark lists
-            # for piecewise tapes (AVVI altitude / altitude-rate).
-            mk = opts['marks'](value)
+            # opts.marks() -> {faces, labels, ticks}: the whole tape's marks,
+            # for piecewise tapes (AVVI altitude / altitude-rate).  scrollTape
+            # takes the band it needs.
+            mk = self._marksOf(opts)
             fPad = 0.55 * lblScale
             # faces are a few clamped quads -- cheap, rebuilt every call
             for f in (mk.get('faces') or []):
@@ -8508,16 +9139,14 @@ class Screen_AE_PFD(MDUScreen):
             # labels + ticks: the expensive glyph/stroke content rides a cached
             # layer -- kept with a margin past the window so a rebuild happens
             # before anything scrolls on.
-            MMARG = 3
+            MMARG = TAPE_BAND + 1.5
             visLabels = [L for L in (mk.get('labels') or [])
-                         if y0 - 1.5 - MMARG <= cy - dpos(L['v']) <= y0 + h + 1.5 + MMARG]
+                         if y0 - MMARG <= cy - dq(L['v']) <= y0 + h + MMARG]
             visTicks = [T for T in (mk.get('ticks') or [])
-                        if y0 - 0.5 - MMARG <= cy - dpos(T['v']) <= y0 + h + 0.5 + MMARG]
-            fp = (','.join("%s~%s~%d" % (L['v'], L['txt'], 1 if (cy - dpos(L['v']) < cy) else 0)
-                           for L in visLabels) + '|'
-                  + ','.join("%s~%s~%s~%d~%d" % (T['v'], T['x0'], T['x1'],
-                                                 1 if T.get('thin') else 0,
-                                                 1 if (cy - dpos(T['v']) < cy) else 0)
+                        if y0 - MMARG <= cy - dq(T['v']) <= y0 + h + MMARG]
+            fp = (','.join("%s~%s" % (L['v'], L['txt']) for L in visLabels) + '|'
+                  + ','.join("%s~%s~%s~%d" % (T['v'], T['x0'], T['x1'],
+                                              1 if T.get('thin') else 0)
                              for T in visTicks))
 
             def buildMarks():
@@ -8525,34 +9154,29 @@ class Screen_AE_PFD(MDUScreen):
                 for L in visLabels:
                     yV = cy - dpos(L['v'])
                     # y = yV - GYC*lblScale puts the measured ink centre on the
-                    # value line; clips end at the readout box edges so labels
-                    # slide behind it
+                    # value line; the clips end at the readout box edges so
+                    # labels slide behind it
                     lg.add(self.d.strMEDS(lblAt(L['txt']), yV - GYC * lblScale,
-                                          L['txt'], L['c'], lblScale, adv, 1.0,
-                                          (clipTop if yV < cy else clipBot)))
+                                          L['txt'], L['c'], lblScale, adv, 1.0))
                 for T in visTicks:
                     yVt = cy - dpos(T['v'])
-                    tclip = clipTop if yVt < cy else clipBot
                     if T.get('thin'):
-                        lg.add(self._thinTick([[T['x0'], yVt], [T['x1'], yVt]], tclip))
+                        lg.add(self._thinTick([[T['x0'], yVt], [T['x1'], yVt]]))
                     else:
-                        lg.add(self.d.line([[T['x0'], yVt], [T['x1'], yVt]],
-                                           T['c'], 1.0, tclip))
-                return lg
+                        lg.add(self.d.line([[T['x0'], yVt], [T['x1'], yVt]], T['c']))
+                return self._clipBoth(lg, clipTop, clipBot)
             grp.add(self._tapeLayer(opts.get('id'), fp, value, mapFn, scale, buildMarks))
         else:
-            nEach = int(math.ceil((h / 2) / (scale * step))) + 1
-            vC = jsround(value / step) * step
+            nBand = max(1, jsround(TAPE_BAND / (scale * step)))
+            nEach = int(math.ceil((h / 2) / (scale * step))) + nBand + 1
+            vC = nBand * step * jsround(value / (nBand * step))
             eps = step / 1000            # float-noise guard at the range ends
 
             def inRng(v):
                 return opts.get('range') is None or (vMin - eps <= v <= vMax + eps)
-            # cached layer: the mark window is anchored on vC, so the
-            # fingerprint is vC plus each mark's side of the tape centre
-            fp = "%s|" % vC + ''.join(
-                "%d%d" % (1 if dpos(vC + k * step) > 0 else 0,
-                          1 if dpos(vC + (k + 0.5) * step) > 0 else 0)
-                for k in range(-nEach, nEach + 1))
+            # cached layer: the mark window is anchored on vC, so vC is the
+            # fingerprint
+            fp = "%r" % vC
 
             def buildTicks():
                 lg = Object3D()
@@ -8562,9 +9186,12 @@ class Screen_AE_PFD(MDUScreen):
                     if inRng(V):
                         # opts.lblFn formats the legend
                         txt = opts['lblFn'](V) if opts.get('lblFn') else _numstr(V)
+                        # the clipTop/clipBot windows end at the readout box
+                        # edges, so a label scrolling toward the box is
+                        # occluded progressively, like a label printed on a
+                        # physical tape sliding behind the readout
                         lg.add(self.d.strMEDS(lblAt(txt), yV - GYC * lblScale, txt,
-                                              lblClr(V), lblScale, adv, 1.0,
-                                              (clipTop if yV < cy else clipBot)))
+                                              lblClr(V), lblScale, adv, 1.0))
                     if tickW > 0:                    # minor tick at the half-step
                         Vt = V + step / 2
                         yVt = cy - dpos(Vt)
@@ -8574,15 +9201,14 @@ class Screen_AE_PFD(MDUScreen):
                             ext = opts['tickFn'](Vt) if opts.get('tickFn') \
                                 else [cx - tickW / 2, cx + tickW / 2]
                             if ext is not None:
-                                tclip = clipTop if yVt < cy else clipBot
                                 if opts.get('range') is not None:
-                                    lg.add(self._thinTick([[ext[0], yVt], [ext[1], yVt]],
-                                                          tclip))
+                                    # black face ticks run thin, like the alpha
+                                    # tape's right lane
+                                    lg.add(self._thinTick([[ext[0], yVt], [ext[1], yVt]]))
                                 else:
                                     lg.add(self.d.line([[ext[0], yVt], [ext[1], yVt]],
-                                                       (lblClr(Vt) if signed else tickColor),
-                                                       1.0, tclip))
-                return lg
+                                                       (lblClr(Vt) if signed else tickColor)))
+                return self._clipBoth(lg, clipTop, clipBot)
             grp.add(self._tapeLayer(opts.get('id'), fp, value, mapFn, scale, buildTicks))
 
         # right-lane unit ticks: black on the white (positive) face, white with
@@ -8709,7 +9335,7 @@ class Screen_AE_PFD(MDUScreen):
         self.ami = Object3D()
         C = self.d.c2h
         AMI_OFF = [0.075, 0.187]     # group nudge (right ~2px, down ~5px)
-        mm = self.data()['majorMode']
+        mm = self.data().get('majorMode')
         mach = self.data().get('mach') or 0
         keas = self.data().get('keas') or 0
         swap = mm in (305, 603) and mach < 0.9
@@ -8774,6 +9400,25 @@ class Screen_AE_PFD(MDUScreen):
         # value anchor tuned on the 4-char "0.48"; shorter strings centre on it
         blo.add(self.d.strMEDS(2.41 + (4 - len(bloVal)) * 0.94 / 2, 21.43, bloVal,
                                C['white'], 1.25, 0.94))
+        # Beta digital, under the alpha tape: "In MM 102/103 and 601, a beta
+        # value (in degrees) is provided below the alpha tape. 'L' and 'R'
+        # indicate the yaw steering required to null the beta value, and used
+        # in conjunction with the 'E' bearing pointer. ... Both the 'E' pointer
+        # and Beta digital blank at altitude > 200K or MET > 2:30, whichever
+        # occurs first. Resolution of the digital is one decimal place."
+        # (JSC-48017/6-9 item 2; the blanking is the validity of message 1
+        # word 29, MEDS_BETAHVR_VALID.)  Figure 6-8 shows the field as L00.1.
+        # Which sign takes L is fitted: positive sideslip is nulled with right
+        # yaw.
+        beta = self.data().get('beta')
+        if beta is not None:
+            b = max(-99.9, min(99.9, beta))
+            bt = ("L" if b < 0 else "R") + ("0" + "%.1f" % abs(b))[-4:]
+            blo.add(self.d.box(BETA_X[0], 20.911, BETA_X[1], 22.661, C['darkGray']))
+            bcx = (BETA_X[0] + BETA_X[1]) / 2
+            blo.add(self.d.strMEDS(bcx - (len(bt) - 1) * 0.94 / 2 - 0.455, 21.43, bt,
+                                   C['white'], 1.25, 0.94))
+            blo.add(self.d.str(bcx - 1.585, 23.011, "Beta", C['darkGray'], 0.9, 0.9))
         self.ami.add(blo)
 
         # alpha tape -- just left of tape centre, baseline to the KEAS label
@@ -8799,7 +9444,7 @@ class Screen_AE_PFD(MDUScreen):
             aOpts['diamond'] = self._lerpTable(self.ALPHA_MAXLD, mach, 1)
         aOpts['id'] = 'alpha'
         if alphaOK:
-            self.ami.add(self.scrollTape(7.4, 4.4, 4.75, 15.57, self.data()['alpha'],
+            self.ami.add(self.scrollTape(7.4, 4.4, 4.75, 15.57, self.data().get('alpha'),
                                          5, 0.685, aOpts))
         else:
             self.ami.add(self._redTape(7.4, 4.4, 4.75, 15.57))
@@ -8883,7 +9528,7 @@ class Screen_AE_PFD(MDUScreen):
             return "%d" % jsround(v)
         grayLbl = {'c': C['white'], 'border': C['black']}
 
-        def marks(value):
+        def marks():
             labels = {}
             for si, s in enumerate(ALT_SEGS):
                 st = s[3]
@@ -8938,7 +9583,7 @@ class Screen_AE_PFD(MDUScreen):
         def lclr(v):
             return C['black'] if v > 0 else {'c': C['white'], 'border': C['black']}
 
-        def marks(value):
+        def marks():
             labels = []
             ticks = []
             for v in crange(-980, 980, 20):
@@ -8972,7 +9617,7 @@ class Screen_AE_PFD(MDUScreen):
         hw = 4.75
         hh = 15.57
         alt = self.data().get('altitude') or 0
-        entry = self.data()['majorMode'] in (304, 305, 602, 603)
+        entry = self.data().get('majorMode') in (304, 305, 602, 603)
         altValid = self.data().get('altValid')
         if altValid is None:
             altValid = True
@@ -8982,7 +9627,7 @@ class Screen_AE_PFD(MDUScreen):
             radarOK = bool(entry and self.data().get('radarValid') and 0 <= ra < 5000)
             # digital: same abbreviation + precision as the tape labels
             if radarOK:
-                rdStr = "%d" % jsround(self.data()['radarAlt'])
+                rdStr = "%d" % jsround(ra)
             elif alt >= 400000:
                 rdStr = "%dM" % jsround(alt / NM_FT)
             elif alt >= 5000:
@@ -9008,7 +9653,7 @@ class Screen_AE_PFD(MDUScreen):
                 avvi.add(rg)
                 # radar-altitude pointer, rides the tape's RIGHT edge pushed
                 # outward, pointing left at the radar altitude on the NAV tape
-                yR = hy0 + hh / 2 - (altMapRows(self.data()['radarAlt']) - altMapRows(alt))
+                yR = hy0 + hh / 2 - (altMapRows(ra) - altMapRows(alt))
                 if hy0 + 0.2 < yR < hy0 + hh - 0.2:
                     xe = hx0 + hw
                     avvi.add(self._greenArrow(
@@ -9031,7 +9676,7 @@ class Screen_AE_PFD(MDUScreen):
             hdValid = True
         if hdValid:
             hd = self._hdotTape(hdX, hdW)
-            avvi.add(self.scrollTape(hdX, 4.4, hdW, HD_H, self.data()['hdot'], 20,
+            avvi.add(self.scrollTape(hdX, 4.4, hdW, HD_H, self.data().get('hdot') or 0, 20,
                                      HD_S,
                                      {'id': 'avvi-hdot', 'signed': True,
                                       'border': True, 'lblScale': HD_F,
@@ -9052,7 +9697,7 @@ class Screen_AE_PFD(MDUScreen):
         self.accMeter = Object3D()
         self.accMeter.name = "accMeter"
         C = self.d.c2h
-        mm = self.data()['majorMode']
+        mm = self.data().get('majorMode')
         if mm not in (102, 103, 304, 305, 601, 602, 603):
             return None
 
@@ -9106,9 +9751,9 @@ class Screen_AE_PFD(MDUScreen):
         self.accMeter.add(self._accCache[key])
 
         # MM 602 only: magenta target NZ line, from the hub out past the arc
-        if mm == 602 and self.data().get('targetNZ') is not None:
-            self.accMeter.add(self.d.line([pt(self.data()['targetNZ'], 0),
-                                           pt(self.data()['targetNZ'], rad + 0.5)],
+        tnz = self.data().get('targetNZ')
+        if mm == 602 and tnz is not None:
+            self.accMeter.add(self.d.line([pt(tnz, 0), pt(tnz, rad + 0.5)],
                                           C['magenta']))
         val = self.data().get('vehicleAcceleration')
         if val is not None:
@@ -9162,11 +9807,10 @@ class Screen_AE_PFD(MDUScreen):
         self.adi.add(self.adiC)
 
         # text in local coords with unstretched glyph shapes: undo AX on the
-        # glyph geometry and on drawGlyph's baked-in x-1 origin offset
+        # glyph geometry and on glyphStrokes' baked-in x-1 origin offset
         def ltxt(lx, ly, s, color, scale=1.0, advance=0.62, scalex=1.0):
-            return self.d.strMEDS(lx + 1 - 1 / AX, ly, s, color, scale,
-                                  advance / AX, scalex / AX)
-        self.adiLtxt = ltxt
+            return self._adiLocalText(AX, lx, ly, s, color, scale, advance, scalex)
+        self.adiLtxt = ltxt     # the dynamic overlay redraw reuses this helper
 
         # Vehicle reference symbol -- fixed to the centre of the ADI window.
         VC = 2.85
@@ -9286,24 +9930,11 @@ class Screen_AE_PFD(MDUScreen):
                     [[ERR_R * ca, ERR_R * sa],
                      [ERR_R * ca + 0.28 * tkx, ERR_R * sa + 0.28 * tky]], mScl)))
         self.adiC.add(errScl)
-        # TAEM (MM 305/603): the pitch error scale reads in g's
-        if self.data()['majorMode'] in (305, 603):
-            sy = ERR_R * math.sin(deg2rad(25))
-            self.adiC.add(ltxt(7.05, -sy - 0.74 * 0.8 - 0.05, "1.2g", C['magenta'],
-                               0.8, 0.7, 1.0))
-            self.adiC.add(ltxt(7.05, sy - 0.08 * 0.8 + 0.05, "1.2g", C['magenta'],
-                               0.8, 0.7, 1.0))
+        # (the pitch error scale's labels are feed-driven; _drawADIDyn draws
+        # them)
 
-        # ADI rate-needle '0' and '5' scale labels
-        self.adiC.add(ltxt(-0.11, -9.88, "0", C['darkGray'], 0.85))
-        self.adiC.add(ltxt(-0.11, 9.37, "0", C['darkGray'], 0.85))
-        self.adiC.add(ltxt(9.55, -0.28, "0", C['darkGray'], 0.85))
-        self.adiC.add(ltxt(-6.42, -9.10, "5", C['white'], 0.85, 0.62, 1.18))
-        self.adiC.add(ltxt(-6.51, 8.48, "5", C['white'], 0.85, 0.62, 1.18))
-        self.adiC.add(ltxt(8.27, -6.83, "5", C['white'], 0.85, 0.62, 1.18))
-        self.adiC.add(ltxt(6.03, -9.10, "5", C['white'], 0.85, 0.62, 1.18))
-        self.adiC.add(ltxt(6.06, 8.48, "5", C['white'], 0.85, 0.62, 1.18))
-        self.adiC.add(ltxt(8.27, 6.30, "5", C['white'], 0.85, 0.62, 1.18))
+        # (the '0' centre marks and the end labels of the three rate scales
+        # are feed-driven; _drawADIDyn draws them)
 
         # the ball itself: static geometry, rotated per attitude by updateADI()
         self.adiC.add(self.adiBall())
@@ -9316,6 +9947,7 @@ class Screen_AE_PFD(MDUScreen):
         g.name = "adiBall"
         # rotor: everything painted on the ball; updateADI() sets its rotation
         self.adiBallRot = Object3D()
+        self.adiBallRot.userData['flattenApart'] = True   # updateADI turns it
         self.adiBallRot.add(self._ballFills())
         self.adiBallRot.add(self._ballMarkMeshes(self._ballMarks()))
         g.add(self.adiBallRot)
@@ -9585,10 +10217,19 @@ class Screen_AE_PFD(MDUScreen):
         if self._adiDynS is not None:
             self.adi.remove(self._adiDynS)
             self._disposeGroup(self._adiDynS)
+        # The two overlays this method replaces hold the strokes under them
+        # across a part flatten.  They merge here when they are going onto a
+        # standing display; during the part's build the flatten at the end of
+        # it covers them, in the order the whole part was drawn.
         self._adiDynC = self._drawADIDyn(r, p, y, valid)
         self.adiC.add(self._adiDynC)
         self._adiDynS = self.drawADIDigitals(r, p, y, valid)
         self.adi.add(self._adiDynS)
+        self._adiDynC.userData['flattenApart'] = True
+        self._adiDynS.userData['flattenApart'] = True
+        if self.adi.parent is not None:
+            self.d.flatten(self._adiDynC)
+            self.d.flatten(self._adiDynS)
         self.d.dirty = True
 
     def _adiProtect(self, r, p, y):
@@ -9606,6 +10247,134 @@ class Screen_AE_PFD(MDUScreen):
         else:
             self._adiFrz = [r, p]
         return [r, p, y]
+
+    # Rate Scale Labels and the Pitch Error Scale Label
+    #
+    # "Rate scales are labeled for all axes and are in deg/sec unless
+    # indicated by a suffix. For example, '5K' indicates the rate scale now
+    # serves purpose of being a lateral deviation indicator with max scale
+    # deflection of 5000 feet. Only the pitch error scale is labeled and is
+    # assumed to denote degrees of error except when a suffix is indicated;
+    # i.e., 1.2 G." (JSC-48017/6-13 item 8)
+    #
+    # The six rate labels and the pitch error label come from MEDS transfer
+    # message 1 words 16 to 21; the rate labels are integers of the scale's
+    # units (equation set F.4.103.0-2) and the error label carries the 0.25
+    # LSB of word 21.  A scale term of 0 stows that needle, and its scale goes
+    # unlabelled.
+    #
+    # Word 16 bit 1 says the roll scale reads time to go to the turn on the
+    # HAC, and bit 2 which end of it is zero: "The MEDS must know when this
+    # occurs in order to display the scale label correctly and must also know
+    # which side of the scale represents zero" (STS-83-0020V3-34
+    # F.4.128.1.3.1.7).  A rate scale reads full scale at both ends about a 0
+    # centre; the tgo scale reads 0 at one end and full scale at the other.
+    def _adiLocalText(self, ax, lx, ly, s, color, scale=1.0, advance=0.62, scalex=1.0):
+        return self.d.strMEDS(lx + 1 - 1 / ax, ly, s, color, scale, advance / ax,
+                              scalex / ax)
+
+    def _adiScaleLabels(self):
+        """The legends beside the rate scales, which follow the scale words
+        the transfer carries and not the attitude."""
+        def build():
+            d = self.data()
+            C = self.d.c2h
+            g = Object3D()
+            sc = d.get('adiRateScale') or {}
+            ltxt = self.adiLtxt
+
+            # left-anchored, and right-anchored so a wider label grows away
+            # from the scale
+            def lt(x, y, t, color=C['white']):
+                if t:
+                    g.add(ltxt(x, y, t, color, 0.85, ADI_LBL_ADV, 1.18))
+
+            def rt(x, y, t, color=C['white']):
+                lt(x - (len(t) - 1) * ADI_LBL_ADV, y, t, color)
+
+            def zero(x, y):
+                g.add(ltxt(x, y, "0", C['darkGray'], 0.85))
+            # roll, across the top: tgo puts 0 at one end and the scale at the
+            # other
+            roll = _rateLbl(sc.get('roll'))
+            if sc.get('rollTgo'):
+                if sc.get('rollZeroOnRight'):
+                    rt(-6.42, -9.10, roll)
+                    zero(6.03, -9.10)
+                else:
+                    rt(-6.42, -9.10, "0")
+                    lt(6.03, -9.10, roll)
+            else:
+                rt(-6.42, -9.10, roll)
+                zero(-0.11, -9.88)
+                lt(6.03, -9.10, roll)
+            # yaw, across the bottom
+            yaw = _rateLbl(sc.get('yaw'))
+            rt(-6.51, 8.48, yaw)
+            zero(-0.11, 9.37)
+            lt(6.06, 8.48, yaw)
+            # pitch, up the right side
+            pch = _rateLbl(sc.get('pitch'))
+            lt(8.27, -6.83, pch)
+            zero(9.55, -0.28)
+            lt(8.27, 6.30, pch)
+            # Pitch Scale Labels -- Reflects the setting of the ADI ERROR
+            # switch and displayed in degrees. During TAEM (MM 305 and 603) and
+            # Nz hold (MM 602), the Pitch Attitude Error scale is in g's, and
+            # indicated by a "g" next to the scale value. (JSC-48017/6-12 item
+            # 7.  Nz hold is where the target Nz word is valid, MM 602 with
+            # IPHASE at least 5.)
+            err = _errLbl(d.get('adiPchErrScale'))
+            if err:
+                mm = d.get('majorMode')
+                if mm in (305, 603) or (mm == 602 and d.get('targetNZ') is not None):
+                    err += "g"
+                # baseline of the upper label flush with the top tick and
+                # topline of the lower flush with the bottom tick (meds glyph
+                # ink at scale s spans y-0.08s .. y+0.74s)
+                sy = ERR_R * math.sin(deg2rad(25))
+                g.add(ltxt(7.05, -sy - 0.74 * 0.8 - 0.05, err, C['magenta'], 0.8, 0.7, 1.0))
+                g.add(ltxt(7.05, sy - 0.08 * 0.8 + 0.05, err, C['magenta'], 0.8, 0.7, 1.0))
+            return g
+        return self._kept('adiScaleLabels', build)
+
+    # ADI Theta Limit Bracket -- A green limit bracket available while M < 2
+    # if either 1) air data is inhibited to G&C, 2) no ADTA/probes are
+    # available, or 3) an air data dilemma exists (AD DG flag set to 0). The
+    # upper and lower bracket represent the theta high and low limits,
+    # respectively, as determined by guidance. The bracket is dynamic and
+    # varies with bank angle. The limits are the same as the theta limit
+    # indicators available on the VERT SIT display.
+    #
+    #       [JSC-48017/6-10 item 4]
+    #
+    # Message 1 words 14 and 15 carry sin(THETA_MAX - THETA) and sin(THETA -
+    # THETA_MIN), and the GPC sets their validity for exactly the conditions
+    # above.  A point that many degrees off the ball centre projects to
+    # BALL_R times that sine, so the words place the brackets directly; they
+    # ride the ball, so the group turns with roll.  The bracket's shape -- a
+    # bar with ends turned toward the centre -- is fitted.
+    def _adiThetaBracket(self, roll):
+        d = self.data()
+        g = Object3D()
+        # an A/E PFD element; the ORB PFD's five items carry no bracket
+        if self.screenName != 'AE_PFD':
+            return g
+        tmax = d.get('thetaMaxDelta')
+        tmin = d.get('thetaMinDelta')
+        if tmax is None or tmin is None:
+            return g
+
+        def bar(yv, sgn):
+            if abs(yv) > WIN_R:
+                return
+            g.add(self.d.line([[-THETA_HALF, yv + sgn * THETA_TICK], [-THETA_HALF, yv],
+                               [THETA_HALF, yv], [THETA_HALF, yv + sgn * THETA_TICK]],
+                              self.d.c2h['green']))
+        bar(-BALL_R * tmax, 1)
+        bar(BALL_R * tmin, -1)
+        g.rotation.z = deg2rad(-roll)
+        return g
 
     def _drawADIDyn(self, r, p, y, valid=True):
         """Dynamic overlay in ADI circular space: roll bug, attitude error
@@ -9665,28 +10434,33 @@ class Screen_AE_PFD(MDUScreen):
             nin = self.adiNIN if self.adiNIN is not None else 2.16
             ninV = self.adiNINv if self.adiNINv is not None else 2.0
             ninT = self.adiNINtop if self.adiNINtop is not None else 2.15
-            xr = defl(d.get('adiRolErr'))            # top:    + error -> right
-            g.add(nd([xr, -math.sqrt(ERR_R ** 2 - xr * xr) + EOUT], [xr, -ninT]))
-            yp = -defl(d.get('adiPchErr'))           # right:  + error -> up
-            g.add(nd([math.sqrt(ERR_R ** 2 - yp * yp) - EOUT, yp], [nin, yp]))
-            xy = defl(d.get('adiYawErr'))            # bottom: + error -> right
-            g.add(nd([xy, math.sqrt(ERR_R ** 2 - xy * xy) - EOUT], [xy, ninV]))
+            # a needle whose error word is invalid (None) stows
+            if d.get('adiRolErr') is not None:
+                xr = defl(d.get('adiRolErr'))        # top:    + error -> right
+                g.add(nd([xr, -math.sqrt(ERR_R ** 2 - xr * xr) + EOUT], [xr, -ninT]))
+            if d.get('adiPchErr') is not None:
+                yp = -defl(d.get('adiPchErr'))       # right:  + error -> up
+                g.add(nd([math.sqrt(ERR_R ** 2 - yp * yp) - EOUT, yp], [nin, yp]))
+            if d.get('adiYawErr') is not None:
+                xy = defl(d.get('adiYawErr'))        # bottom: + error -> right
+                g.add(nd([xy, math.sqrt(ERR_R ** 2 - xy * xy) - EOUT], [xy, ninV]))
+        g.add(self._adiScaleLabels())
+        g.add(self._adiThetaBracket(r))
         # rate pointers, -5..+5 onto the fixed scales; they stow when invalid
         rolV = (d['adiRolRate'] + 5) if (valid and d.get('adiRolRate') is not None) else None
         yawV = (d['adiYawRate'] + 5) if (valid and d.get('adiYawRate') is not None) else None
         pchV = (10 - (d['adiPchRate'] + 5)) if (valid and d.get('adiPchRate') is not None) else None
-        # scales built once, kept alive; only the pointer arrows rebuild
-        if self._adiRateScales is None:
+        # the scales stand; only the pointer arrows on them move
+        def rateScales():
             s = Object3D()
-            s.userData['keepAlive'] = True
             s.add(self.drawHorizGauge(None, "5", "0", "5", -5.81, 5.88, -9.1,
                                       .55, .55, 10, False))
             s.add(self.drawHorizGauge(None, "5", "0", "5", -5.81, 5.88, 9.15,
                                       .55, .55, 10))
             s.add(self.drawVertGauge(None, "5", "0", "5", -5.95, 5.95, 9.13,
                                      .41, .41, 10))
-            self._adiRateScales = s
-        g.add(self._adiRateScales)
+            return s
+        g.add(self._kept('adiRateScales', rateScales))
         g.add(self.drawHorizGauge(rolV, "5", "0", "5", -5.81, 5.88, -9.1,
                                   .55, .55, 10, False, True))
         g.add(self.drawHorizGauge(yawV, "5", "0", "5", -5.81, 5.88, 9.15,
@@ -9715,55 +10489,16 @@ class Screen_AE_PFD(MDUScreen):
                 g.add(t)
         return g
 
-    def drawHSI(self, xc, yc):
-        """Horizontal Situation Indicator -- the compass card ring."""
-        C = self.d.c2h
-        hsiGroup = Object3D()
-        hsiGroup.name = "HSI"
-        ringGroup = Object3D()
-        ringGroup.name = "HSI_ring"
-        c = [25, 30.75]
-        ringGroup.add(self.d.arc(c[0], c[1], 7.3, 0, 360))
-        ringGroup.add(self.d.arc(c[0], c[1], 6.6, 0, 360, C['white']))
-        ringGroup.add(self.d.arc(c[0], c[1], 4.4, 0, 360, C['white']))
-        ringGroup.add(self.d.arcTicks(c[0], c[1], 6.6, 0, 360, 5, -.4, C['white']))
-        ringGroup.add(self.d.arcTicks(c[0], c[1], 6.6, 0, 360, 10, -.6, C['white']))
-        ringGroup.position.z = -2
-        hsiGroup.add(ringGroup)
-
-        ring = RingGeometry(4.4, 6.6, 100)
-        ringMat = MeshBasicMaterial({'side': DoubleSide, 'color': C['darkGray']})
-        mRing = Mesh(ring, ringMat)
-        mRing.scale.x = 1.47222
-        mRing.position.x = c[0]
-        mRing.position.y = c[1]
-        mRing.position.z = 0
-        hsiGroup.add(mRing)
-
-        # Menu area mask: must sit strictly between the HSI lines (~97.999)
-        # and the menu content (~100).  SDF lines are transparent (drawn after
-        # opaque), so only the depth test can mask them.
-        menuMask = PlaneGeometry(52, 5)
-        matMenuMask = MeshBasicMaterial({'side': DoubleSide, 'color': C['black']})
-        mMenuMask = Mesh(menuMask, matMenuMask)
-        mMenuMask.position.x = 25.5
-        mMenuMask.position.y = 34.5
-        mMenuMask.position.z = 99
-        hsiGroup.add(mMenuMask)
-        hsiGroup.position.z = -.001
-        hsiGroup.position.y = 0.374   # shift HSI down ~10px
-        return hsiGroup
-
     def drawADIDigitals(self, r=None, p=None, y=None, valid=True):
         """Digital attitude readout, R/P/Y order (FDF convention, not the PYR
         Euler sequence)."""
         C = self.d.c2h
         if r is None:
-            r = self.data()['adiRol']
+            r = self.data().get('adiRol')
         if p is None:
-            p = self.data()['adiPch']
+            p = self.data().get('adiPch')
         if y is None:
-            y = self.data()['adiYaw']
+            y = self.data().get('adiYaw')
 
         def wrap(v):
             return (jsround(v or 0) % 360 + 360) % 360
@@ -9777,18 +10512,600 @@ class Screen_AE_PFD(MDUScreen):
             group.add(self.d.strMEDS(37.80, 3.7, zpad(wrap(y)), C['white'], 0.85, .71))
         return group
 
-    def drawAttAcc(self, x0=None, y0=None):
-        pass
+    # -----------------------------------------------------------------------
+    # Glide Slope Indicator (GSI) -- Distance of the vehicle above or below
+    # the desired glide slope and is indicated by the deflection of the
+    # pointer.  The pointer is a fly-to indicator, so an increase in glide
+    # slope deviation above (below) the desired slope results in deflection
+    # of the pointer downward (upward).  The GSI computation is available
+    # above 1500 ft in TAEM MM 305 and 603.  The pointer is blanked prior to
+    # MM 305 or 603, and the GS flag is displayed below 1500 ft.
+    #
+    # Range:
+    #       TAEM -- -5000 to 5000 ft, 1 dot = 2500 ft
+    #       Approach/Land -- -1000 to 1000 ft, 1 dot = 500 ft
+    #
+    #       [JSC-48017/6-16 item 19]
+    # -----------------------------------------------------------------------
+    def drawGSI(self):
+        C = self.d.c2h
+        g = Object3D()
+        g.name = "GSI"
+        mm = self.data().get('majorMode')
+        # available in MM 305 and 603; with no major mode the outline stands,
+        # as it does on the prelaunch A/E PFD ("The OPS 9 A/E PFD contains no
+        # active elements, however outlines for all major display elements
+        # are provided", JSC-48017/6-22).  The region is shared with the four
+        # ascent digitals of items 20 to 23.
+        if not (mm in (305, 603) or mm is None):
+            return g
+        x0, y0, x1, y1 = GSI_BOX
+        cy = (y0 + y1) / 2
 
-    def drawGSI(self, x0=None, y0=None):
-        self.d.add(self.d.box(45, 20.874, 46.75, 31.374, self.d.c2h['darkGray']))
+        def frame():
+            fg = Object3D()
+            fg.add(self.d.box(x0, y0, x1, y1, C['white']))
+            fg.add(self.d.line([[x0, cy], [x1, cy]], C['darkGray']))
+            for k in (-2, -1, 1, 2):
+                fg.add(self.d.filledArc((x0 + x1) / 2, cy + k * GSI_DOT, 0.29, 0, 360,
+                                        C['white']))
+            return fg
+        g.add(self._kept('gsiFrame', frame))
+        # full scale centred above and below the box: 5K in TAEM, 1K in
+        # approach and land (the inset beside item 19)
+        lbl = HSI_GSI_LBL.get(self.data().get('hsiMode'))
+        if lbl is not None:
+            # meds glyph ink at scale s runs y-0.08s to y+0.74s, so the upper
+            # label's ink bottom and the lower's ink top clear the box
+            cx = (x0 + x1) / 2 - (len(lbl) - 1) * 0.45 - 0.36
+            g.add(self.d.strMEDS(cx, y0 - 1.00, lbl, C['white'], 0.9, 0.9))
+            g.add(self.d.strMEDS(cx, y1 + 0.30, lbl, C['white'], 0.9, 0.9))
+        if self.data().get('hsiGsiValid'):
+            gsi = self.data().get('hsiGsi')
+            v = max(-2.4, min(2.4, gsi if gsi is not None else 0))
+            yv = cy + v * GSI_DOT
+            g.add(self._greenArrow([[x1 + 0.66, yv - 0.452], [x1 - 0.74, yv],
+                                    [x1 + 0.66, yv + 0.452]], GA_ASP))
+        elif mm in (305, 603):
+            g.add(self._hsiFlag((x0 + x1) / 2, cy, "GS"))
+        return g
 
+    # Altitude Acceleration -- Available in PASS MM 304 and 602.  A pointer
+    # slides vertically on a scale in fps2.  Maximum range of the scale is
+    # +/-10 fps2.  A green pointer indicates the current NAV-derived altitude
+    # acceleration value.
+    #
+    # Range:
+    #       Altitude Acceleration -- -10 to 10 fps2
+    #
+    #       [JSC-48017/6-16 item 18]
+    def drawAttAcc(self):
+        C = self.d.c2h
+        g = Object3D()
+        g.name = "attAcc"
+        mm = self.data().get('majorMode')
+        # available in MM 304 and 602, plus the prelaunch outline
+        if not (mm in (304, 602) or mm is None):
+            return g
+        x0, x1 = HDD_X
+        yTop = HDD_ZERO - HDD_MAX * HDD_S - HDD_PAD
+        yBot = HDD_ZERO + HDD_MAX * HDD_S + HDD_PAD
+        # title: 'H' overstruck with the DEU upper-double-dot glyph (cell
+        # c135) for the second derivative; the deu glyph cell spans
+        # x-0.05..x+0.85
+        for hc in ("H", u"¨"):
+            g.add(self.d.str((x0 + x1) / 2 - 0.4, 20.05, hc, C['darkGray'], 1, .9))
+        # positive above the zero row on the white face, negative on the grey
+        g.add(self.d.box(x0, yTop, x1, HDD_ZERO, None, C['white']))
+        g.add(self.d.box(x0, HDD_ZERO, x1, yBot, None, C['darkGray']))
+        g.add(self.d.box(x0, yTop, x1, yBot, C['white']))
+        for v in crange(-HDD_MAX, HDD_MAX, 2):
+            y = HDD_ZERO - v * HDD_S
+            long_ = v == 0 or abs(v) == HDD_MAX
+            g.add(self.d.line([[x1, y], [x1 + (0.44 if long_ else 0.25), y]], C['white']))
+            if not long_:
+                continue
+            s = GAUGE_DIG
+            # left-aligned on the digits, the minus sign outdented one advance
+            g.add(self.d.strMEDS(HDD_LBL + 1 - 1.009 * s - (0.9 if v < 0 else 0),
+                                 y - 0.330 * s, "%d" % v, C['white'], s, 0.9))
+        if self.data().get('vertAccelValid'):
+            va = self.data().get('vertAccel')
+            v = max(-HDD_MAX, min(HDD_MAX, va if va is not None else 0))
+            yv = HDD_ZERO - v * HDD_S
+            g.add(self._greenArrow([[x0 - 0.61, yv - 0.42], [x0 + 0.71, yv],
+                                    [x0 - 0.61, yv + 0.42]], GA_ASP))
+        return g
+
+    # Delta Cross Track digital -- Delta X-Trk is X-Trk minus the radius of
+    # the targeted TAL cross-range circle in nautical miles, showing the
+    # lateral distance the vehicle must steer to meet TAL cross-range
+    # targeting.  It is only available for TAL abort ...
+    #
+    # Cross Track digital -- X-Trk is the lateral off-set distance from
+    # targeted plane in nautical miles ... The value is positive for
+    # positions north of the target insertion plane, and negative for
+    # positions south of the target plane.  X-Trk is available for nominal
+    # uphill, TAL, and ATO powered flight (MM 102 and 103).
+    #
+    # Delta Inclination digital -- Delta Inc is the difference between the
+    # current & targeted inclination, in degrees ...
+    #
+    # Target Inclination digital -- Tgt Inc indicates the value of the
+    # targeted inclination in degrees.  It is only available for ATO (MM 103)
+    # ...
+    #
+    #       [JSC-48017/6-17 items 20 to 23]
+    #
+    # Each row draws while its word is valid, which carries the availability
+    # above.  Resolutions are the transfer's: cross track a tenth of a mile,
+    # cross track deviation whole miles (F.4.128.1.3.1.16, LSB = 1 NM, where
+    # the p.6-17 inset draws a tenth), delta inclination a hundredth of a
+    # degree, target inclination a tenth.  They share the lower right region
+    # with the GSI and the altitude acceleration face; the major modes do not
+    # overlap.
+    def drawXtrk(self):
+        d = self.data()
+        C = self.d.c2h
+        g = Object3D()
+        g.name = "xtrk"
+
+        def fmt(v, dp):
+            return ("-" if v < 0 else "") + "%.*f" % (dp, abs(v))
+
+        def fld(k, dp):
+            v = d.get(k)
+            return fmt(v, dp) if v is not None else None
+        rows = [[u"∆ X-Trk", fld('xtrkDev', 0)],
+                ["X-Trk", fld('xtrk', 1)],
+                [u"∆ Inc", fld('dIncl', 2)],
+                ["Tgt Inc", fld('tgtIncl', 1)]]
+        for i, (lbl, v) in enumerate(rows):
+            if v is None:
+                continue
+            y = XTRK_ROWS[i]
+            g.add(self.d.strMEDS(XTRK_LBL, y, lbl, C['darkGray'], 0.72, XTRK_LADV))
+            g.add(self.d.strMEDS(XTRK_VAL - (len(v) - 1) * XTRK_VADV - 0.66, y, v,
+                                 C['white'], 0.78, XTRK_VADV))
+        return g
+
+    # Delta AZ or HAC Turn Angle - As Delta AZ this field displays the angle
+    # between the vehicle flight path and the HAC tangent in degrees.  The
+    # outline box will flash red when roll reversal limits are met or
+    # exceeded (10.5 or 17 deg).  During TAEM post-HAC intercept, the field
+    # changes to HAC Turn Angle (HTA).
+    #
+    # Ranges:
+    #       Delta AZ - 0 - 180 degrees
+    #       HTA - 0 -360 degrees
+    #
+    #       [JSC-48017/6-15 item 17]
+    #
+    # "Delta Azimuth - White label, yellow digits" and the label reads AZ
+    # (STS-83-0020V1-34 fig.3.12.2-2 item 23); the box is figure 6-8's.  The
+    # value is message 1 word 23, one degree a count, with the warning flag
+    # beside it; the box is drawn red for the warning where the display
+    # flashes it.  The GPC marks the word valid in MM 305 and 603 only while
+    # IPHASE is below 2, so the HTA relabel has no data to carry.
+    def drawDAz(self):
+        C = self.d.c2h
+        g = Object3D()
+        g.name = "dAz"
+        dAz = self.data().get('dAz')
+        if dAz is None:
+            return g
+        x0, y0, x1, y1 = DAZ_BOX
+        s = GAUGE_DIG
+        g.add(self.d.strMEDS(DAZ_LBL - 2 * 0.9, (y0 + y1) / 2 - 0.330 * s, "AZ",
+                             C['white'], s, 0.9))
+        g.add(self.d.box(x0, y0, x1, y1,
+                         C['red'] if self.data().get('dAzWarn') else C['darkGray']))
+        txt = u"%d°" % jsround(dAz)
+        g.add(self.d.strMEDS(x1 - 0.726 * s - (len(txt) - 1) * 0.9,
+                             (y0 + y1) / 2 - 0.330 * s, txt, C['yellow'], s, 0.9))
+        return g
+
+    # Range to Landing Site - The range to the SPEC 50 primary runway is
+    # displayed in nautical miles.  The range label (above the range value)
+    # reflects the SPEC 50 primary runway.  Range to the landing site is
+    # displayed in powered flight at TAL MM 103, RTLS MM 601, and after
+    # ECAL/BDA abort selection.  In glided flight, the range to the runway is
+    # displayed at MM 304 and 602, and both range to the runway and HAC
+    # center are displayed at MM 305 and 603.
+    #
+    # Range:
+    #       0 - 999.9 nautical miles
+    #
+    #       [JSC-48017/6-15 items 15 and 16]
+    #
+    # "Primary Range - White digits in a white rectangle (invalid indicator -
+    # solid red rectangle)" (STS-83-0020V1-34 fig.3.12.2-2).
     def drawRange(self):
         C = self.d.c2h
-        self.d.add(self.d.strMEDS(39, 26.634, "PRI", C['darkGray'], 1.0, .95))
-        self.d.add(self.d.box(38.5, 27.674, 41.75, 28.674, C['darkGray']))
-        self.d.add(self.d.strMEDS(39, 29.374, "SEC", C['darkGray'], 1.0, .95))
-        self.d.add(self.d.box(38.5, 30.374, 41.75, 31.424, C['darkGray']))
+        d = self.data()
+        g = Object3D()
+        g.name = "range"
+        x0, x1 = RNG_X
+        # the primary label is the selected landing site (message 1 words 25
+        # to 27), the secondary HAC-C in the TAEM mode: "In the TAEM mode, a
+        # range box for HAC center (HAC-C) will also appear, showing the
+        # straight-line range from the vehcile to the center of the HAC in
+        # nautical miles" (USA-007587 sect.2.7)
+        secLbl = "HAC-C" if d.get('hsiMode') == HSI_MODE_TAEM else "SEC"
+        site = d.get('siteId')
+        for lbl, ly, y0, y1, v, ok in (
+                ((site if site is not None else "PRI"), 26.469, 27.22, 28.45,
+                 d.get('hsiPriRange'), d.get('hsiPriRangeValid')),
+                (secLbl, 29.269, 30.06, 31.30,
+                 d.get('hsiSecRange'), d.get('hsiSecRangeValid'))):
+            g.add(self.d.strMEDS(39.30, ly, lbl, C['darkGray'], 0.868, .95))
+            if ok:
+                g.add(self.d.box(x0, y0, x1, y1, C['darkGray']))
+                s = GAUGE_DIG
+                txt = "%d" % jsround(v if v is not None else 0)
+                g.add(self.d.strMEDS(41.66 + 1 - 1.726 * s - (len(txt) - 1) * 0.9,
+                                     (y0 + y1) / 2 - 0.330 * s, txt, C['white'], s, 0.9))
+            else:
+                g.add(self.d.box(x0, y0, x1, y1, C['red'], C['red']))
+        return g
+
+    # -----------------------------------------------------------------------
+    # Horizontal Situation Indicator (HSI)
+    # -----------------------------------------------------------------------
+    def _hsiRV(self, c, r, v, a):
+        """r rows out along screen angle `a` (degrees, 0 = +x, y down) and v
+        rows across it, about centre c."""
+        t = deg2rad(a)
+        cs = math.cos(t)
+        sn = math.sin(t)
+        return [c[0] + (r * cs - v * sn) * HSI_ASP, c[1] + r * sn + v * cs]
+
+    def _hsiShape(self, c, shape, a, sgn, color):
+        """A [halfWidth, radius] outline mirrored about the pointer axis and
+        filled as a strip, so the swept shapes fill correctly; `sgn` -1 turns
+        it through the centre for a pointer's tail."""
+        aa = a + 180 if sgn < 0 else a
+        verts = []
+        idx = []
+        for i, (v, r) in enumerate(shape):
+            p = self._hsiRV(c, r, v, aa)
+            q = self._hsiRV(c, r, -v, aa)
+            verts += [p[0], p[1], 0, q[0], q[1], 0]
+            if i > 0:
+                idx += [2 * i - 2, 2 * i - 1, 2 * i, 2 * i - 1, 2 * i + 1, 2 * i]
+        geom = BufferGeometry()
+        geom.setAttribute('position', Float32BufferAttribute(verts, 3))
+        geom.setIndex(idx)
+        mat = MeshBasicMaterial({'color': color, 'side': DoubleSide})
+        mat.clippingPlanes = self.d.clipPlanes(HSI_CLIP)
+        mat.transparent = True          # joins the pass the strokes are in
+        return Mesh(geom, mat)
+
+    def _hsiText(self, c, s, r, a, h, color, up=1):
+        """One card string, glyphs centred on radius r at screen angle a and
+        turned so the type reads outward; `up` -1 turns it to read inward."""
+        g = Object3D()
+        rot = deg2rad(a + 90 * up)
+        AR = 18.789 / 13.783                # pxRow/pxCol, glyphStrokes' rotation aspect
+        adv = 0.654 * h                     # glyph pitch along the card, rows
+        cx, cy = self._hsiRV(c, r, 0, a)
+        for i, ch in enumerate(s):
+            t = up * (i - (len(s) - 1) / 2) * adv
+            g.add(self.d.str(cx + t * math.cos(rot) * AR, cy + t * math.sin(rot), ch,
+                             color, h / HSI_GLYPH, 1.0, 1.0, self.d.medsFont, rot, True,
+                             HSI_CLIP))
+        return g
+
+    def _hsiFlag(self, cx, cy, txt):
+        """Black legend on a solid red rectangle (STS-83-0020V1-34
+        fig.3.12.2-2: "Bearing Flag - Black 'BRG' on a solid red
+        rectangle")."""
+        g = Object3D()
+        adv = 0.95
+        w = adv * len(txt) + 0.3
+        fill = self.d.box(cx - w / 2, cy - 0.62, cx + w / 2, cy + 0.62, None,
+                          self.d.c2h['red'], HSI_CLIP)
+
+        def _fillSet(o):
+            if getattr(o, 'material', None) is not None:
+                o.material.transparent = True
+                o.renderOrder = HSI_ORD['ptr']
+        fill.traverse(_fillSet)
+        g.add(fill)
+        lbl = self.d.str(cx - (len(txt) - 1) * adv / 2, cy, txt, self.d.c2h['black'],
+                         0.9, adv, 1.0, self.d.medsFont, 0, True, HSI_CLIP)
+        lbl.traverse(lambda o: setattr(o, 'renderOrder', HSI_ORD['ltr']))
+        g.add(lbl)
+        return g
+
+    def _hsiCase(self):
+        """The case ring and its fixed indices, all of it outside the compass
+        card: outer circle, the fixed lubber line at the top, its reciprocal
+        at the bottom, and the six fixed indices between them."""
+        def build():
+            C = self.d.c2h
+            g = Object3D()
+            g.add(self._hsiArc(HSI_CASE, C['darkGray']))
+            for a in (-90, 90):
+                g.add(self.d.line([self._hsiRV(HSI_C, HSI_CARD, 0, a),
+                                   self._hsiRV(HSI_C, HSI_MARK, 0, a)],
+                                  C['lightGray'], 1.0, HSI_CLIP))
+            for a in (0, 45, 135, 180, 225, 315):
+                g.add(self.d.line([self._hsiRV(HSI_C, HSI_CASE, 0, a),
+                                   self._hsiRV(HSI_C, HSI_MARK, 0, a)],
+                                  C['lightGray'], 1.0, HSI_CLIP))
+            return g
+        return self._kept('hsiCase', build)
+
+    def _hsiArc(self, r, color):
+        """A full circle about the card centre, clipped like the rest."""
+        pts = [self._hsiRV(HSI_C, r, 0, a) for a in range(0, 361)]
+        return self.d.line(pts, color, 1.0, HSI_CLIP)
+
+    def _hsiMarks(self, hdg, rev):
+        """The 72 marks of the card, every five degrees, the ten-degree ones
+        long.  The ring is built at heading 0 and turned: mark k sits at
+        5k - hdg on a card, so the turn is -hdg, and reverse drawing puts mark
+        k where mark -k is, the same length either way (72 marks,
+        alternating).
+
+        A turn of the card is a rotation in its circular frame, which the
+        display's anisotropic x makes a shear on screen: about the card
+        centre C, with S = diag(HSI_ASP, 1), the map is S R(phi) S^-1."""
+        def build():
+            ring = Object3D()
+            ring.matrixAutoUpdate = False
+            ring.matrix = _IDENT4
+            for k in range(72):
+                a = 5 * k - 90
+                ln = HSI_TICK[k % 2]
+                ring.add(self.d.line([self._hsiRV(HSI_C, HSI_CARD, 0, a),
+                                      self._hsiRV(HSI_C, HSI_CARD - ln, 0, a)],
+                                     self.d.c2h['white'], 1.0, HSI_CLIP))
+            return ring
+        g = self._kept('hsiMarks', build)
+        phi = deg2rad(hdg if rev else -hdg)
+        cs = math.cos(phi)
+        sn = math.sin(phi)
+        a11, a12 = cs, -HSI_ASP * sn
+        a21, a22 = sn / HSI_ASP, cs
+        cx, cy = HSI_C
+        g.matrix = np.array([[a11, a12, 0, cx - (a11 * cx + a12 * cy)],
+                             [a21, a22, 0, cy - (a21 * cx + a22 * cy)],
+                             [0, 0, 1, 0],
+                             [0, 0, 0, 1]], dtype=np.float64)
+        return g
+
+    def _hsiFace(self):
+        """The card's annulus and the two edges of it, which the heading does
+        not move."""
+        def build():
+            C = self.d.c2h
+            g = Object3D()
+            fill = Mesh(RingGeometry(HSI_FACE, HSI_CARD, 120),
+                        MeshBasicMaterial({'side': DoubleSide, 'color': C['darkGray']}))
+            fill.scale.x = HSI_ASP
+            fill.position.set(HSI_C[0], HSI_C[1], 0)
+            fill.material.clippingPlanes = self.d.clipPlanes(HSI_CLIP)
+            g.add(fill)
+            g.add(self._hsiArc(HSI_CARD, C['white']))
+            g.add(self._hsiArc(HSI_FACE, C['white']))
+            return g
+        return self._kept('hsiFace', build)
+
+    def _hsiCard(self, hdg, rev=False):
+        """Compass card at `hdg`: the annulus, marks every 5 degrees (every
+        10 run long) and a label every 30."""
+        g = Object3D()
+        g.add(self._hsiFace())
+        # reverse drawing mirrors each card value about the lubber line, so a
+        # value still reads under it when the vehicle is inverted
+        sgn = -1 if rev else 1
+        g.add(self._hsiMarks(hdg, rev))
+        if self.data().get('majorMode') in (102, 103):
+            cards = ['0', '9', '18', '27']
+        else:
+            cards = ['N', 'E', 'S', 'W']
+        for k in range(12):
+            txt = cards[k // 3] if k % 3 == 0 else "%d" % (3 * k)
+            h = HSI_LTR if k % 3 == 0 else HSI_DIG
+            g.add(self._hsiText(HSI_C, txt, HSI_LBL, sgn * (30 * k - hdg) - 90, h,
+                                self.d.c2h['white']))
+        return g
+
+    def _hsiLetters(self):
+        """The letters the two bearing pointers carry.  In powered flight the
+        HSI mode word is not yet valid (it turns on at the first area
+        navigation pass): the primary is the runway pointer and the secondary
+        the inertial velocity pointer, and the primary becomes the HAC pointer
+        after the RTLS powered pitch-around.  With neither a mode nor a major
+        mode the letters are the P and S of figure 3.12.2-2's legend."""
+        d = self.data()
+        ltr = HSI_MODE_LTR.get(d.get('hsiMode'))
+        if ltr is not None:
+            return ltr
+        mm = d.get('majorMode')
+        if mm in (101, 102, 103, 104):
+            return {'pri': "R", 'sec': "I"}
+        if mm == 601:
+            return {'pri': ("H" if d.get('ppa') else "R"), 'sec': "I"}
+        return {'pri': "P", 'sec': "S"}
+
+    def _hsiCourse(self, crs, cdi, cdiValid):
+        """Course pointer, its tail, the four deviation dots across them and
+        the deviation bar, all on the face centre."""
+        C = self.d.c2h
+        g = Object3D()
+        ca = crs - 90
+        for shape, sg in ((HSI_ARROW, 1), (HSI_CTAIL, -1)):
+            arw = self._hsiShape(HSI_FC, shape, ca, sg, C['magenta'])
+            arw.renderOrder = HSI_ORD['ptr']
+            g.add(arw)
+        for k in (-2, -1, 1, 2):
+            dx, dy = self._hsiRV(HSI_FC, 0, k * HSI_DOT, ca)
+            dot = self.d.filledArc(dx, dy, 0.30, 0, 360, C['white'])
+            dot.material.clippingPlanes = self.d.clipPlanes(HSI_CLIP)
+            dot.material.transparent = True
+            dot.renderOrder = HSI_ORD['dot']
+            g.add(dot)
+        lbl = self._hsiCdiScale(ca)
+        if lbl is not None:
+            lbl.traverse(lambda o: setattr(o, 'renderOrder', HSI_ORD['ltr']))
+            g.add(lbl)
+        if cdiValid:
+            v = max(-3, min(3, cdi)) * HSI_DOT
+            hl, hw = HSI_DEV
+            bar = self._hsiShape(HSI_FC, [[hw, -hl], [hw, hl]], ca, 1, C['magenta'])
+            bar.position.set(-math.sin(deg2rad(ca)) * v * HSI_ASP,
+                             math.cos(deg2rad(ca)) * v, 0)
+            bar.renderOrder = HSI_ORD['bar']
+            g.add(bar)
+        return g
+
+    # Course Deviation Indicator (CDI) - Shows the lateral off-set from the
+    # targeted plane or course in nautical miles.  It is auto re-scaled at
+    # 50, 10, & 1 nm and labeled accordingly, with one mile scaling only
+    # occurring after 6+30 MET. ... During entry (MM 304 and 602), the CDI
+    # dots are displayed but without scaling (indicated by the absence of
+    # labels).  During TAEM (MM 305 and 603), the CDI represents the angular
+    # displacement from the runway centerline, and the scale and digital set
+    # to 10 (deg).  At HSI approach and land, the scale and digital changes
+    # to 2.5 (deg).
+    #
+    #       [JSC-48017/6-15 item 14]
+    #
+    # Powered flight takes the label from message 1 word 22, which the GPC
+    # marks valid in MM 101 to 104; glided flight from the HSI mode.  It sits
+    # beyond the outer dot on the fly-left side of the dot row (figure 6-8).
+    def _hsiCdiScale(self, ca):
+        d = self.data()
+        if d.get('majorMode') in (101, 102, 103, 104):
+            txt = _numstr(d['cdiScale']) if d.get('cdiScale') is not None else None
+        else:
+            txt = HSI_CDI_DEG.get(d.get('hsiMode'))
+        if not txt:
+            return None
+        cx, cy = self._hsiRV(HSI_FC, 0, -HSI_CDI_LBL, ca)
+        return self.d.strMEDS(cx - (len(txt) - 1) * HSI_CDI_ADV / 2 - 0.36, cy + 0.33, txt,
+                              self.d.c2h['white'], 0.85, HSI_CDI_ADV, 1.0, HSI_CLIP)
+
+    def drawHSI(self, xc=None, yc=None):
+        """Horizontal Situation Indicator (HSI)
+
+        The compass card replaces N, E, S, and W with 0, 9, 18, and 27 in MM
+        102/103, and references the target insertion plane course as the
+        baseline for 0 on the display.  For MM 304/305 and MM 601-603, the
+        card reflects magnetic heading indicated by N, E, S, and W being
+        present on the compass card.  In powered flight, the compass card is
+        reverse drawn while inverted, thus will always reflect the correct
+        heading information, regardless of whether the vehicle is heads-up or
+        heads-down.
+
+        For ascent, heading references the target insertion plane, with 0
+        representing the pre-flight planned target insertion plane course.
+        The course arrow is pinned at 0 unless TAL or ATO is selected with
+        variable IY active.  If TAL, the arrow is redefined to point at a
+        tangent to a cross-range circle around the TAL site, and reflects the
+        nominal or minimum crossrange, as appropriate.  If ATO and variable IY
+        is active, the course arrow indicates the new target inclination
+        course (if redefined), with 0 still representing the pre-launch target
+        insertion plane course.  If variable IY steering is not active, the
+        course arrow remains pegged at 0.
+
+        The VREL Bearing Pointer, labeled "E", indicates the direction of the
+        Earth-relative velocity vector relative to the vehicle nose (lubber
+        line) & course (compass card/course arrow).  It works in concert with
+        the beta digital readout, and both the "E" bearing pointer and the
+        beta digital blank on ascent at altitude > 200K or MET > 2:30.
+
+        In MM 102-104 and 601, the Inertial Bearing Pointer, labeled "I",
+        indicates the direction of the inertial velocity vector relative to
+        nose & course.  It is not displayed in glided or orbital flight.
+
+        The Runway/HAC Bearing Pointer (labeled "*" in the figure) indicates
+        "R" for bearing to runway in powered flight and "H" for bearing to HAC
+        in gliding flight.  It appears at RTLS/TAL abort select & entry (MM
+        304/305 and 602/603).
+
+        The HAC Center Bearing Pointer, labeled "C", indicates bearing to the
+        HAC center during TAEM (MM 305 and 603).
+
+        The bearing flag (BRG) is displayed when valid TACAN, GPS, or MLS data
+        is not available due to commfault, lack of comm-lock, or invalid
+        station.
+
+        Ranges:
+                  Compass Card - 0- 360 degrees
+
+              [JSC-48017/6-14 item 13]
+
+        The course and bearing words carry the vehicle heading already
+        subtracted, so they are angles on the case: "the software must
+        subtract (modulo 360) the vehicle's heading from the course. It is
+        this difference that is represented by the digital input to the HSI
+        from the DDU" (STS-83-0020V1-34 sect.3.12.2 (3))."""
+        C = self.d.c2h
+        d = self.data()
+        hsi = Object3D()
+        hsi.name = "HSI"
+        mm = d.get('majorMode')
+        # word 9 bit 10 is the HSI heads-down flag (table F.4.128.1-2)
+        rev = bool(d.get('rollSw')) and mm in (101, 102, 103, 104, 601)
+        hdg = d.get('hsiHeading') if d.get('hsiHeadingValid') else 0
+        hsi.add(self._hsiCard(hdg if hdg is not None else 0, rev))
+        hsi.add(self._hsiCase())
+
+        if d.get('hsiCourseValid'):
+            crs = d.get('hsiCourse')
+            cdi = d.get('hsiCdi')
+            hsi.add(self._hsiCourse(crs if crs is not None else 0,
+                                    cdi if cdi is not None else 0, d.get('hsiCdiValid')))
+        if not d.get('hsiCdiValid'):
+            hsi.add(self._hsiFlag(HSI_FC[0], HSI_C[1] - 3.78, "CDI"))
+
+        # primary and secondary bearing pointers, each a head on the card's
+        # outer edge and a tail opposite it, both carrying the letter.  The
+        # primary and secondary bearings come from the DDU words; the relative
+        # velocity pointer is message 1 word 24, which the GPC drives in MM
+        # 102, 103 and 601 and stops at 200K feet or MET 2:30 (F.4.104,
+        # MEDS_BETAHVR_VALID).  Its shape here is the bearing pointer's and
+        # its colour is fitted: figure 6-8 draws it as a larger solid triangle
+        # and no legend gives the colour.
+        ltrs = self._hsiLetters()
+        for brg, ok, clr, ltr in (
+                (d.get('hsiPriBearing'), d.get('hsiPriBearingValid'), C['green'], ltrs['pri']),
+                (d.get('hsiSecBearing'), d.get('hsiSecBearingValid'), C['white'], ltrs['sec']),
+                (d.get('hVr'), d.get('hVr') is not None, C['lightGray'], "E")):
+            if not ok:
+                continue
+            ba = (brg if brg is not None else 0) - 90
+            g = Object3D()
+            for shape, sg in ((HSI_BHEAD, 1), (HSI_BTAIL, -1)):
+                tag = self._hsiShape(HSI_C, shape, ba, sg, clr)
+                tag.renderOrder = HSI_ORD['ptr']
+                g.add(tag)
+            for lr, la, lu in ((HSI_BLTR[0], ba, 1), (HSI_BLTR[1], ba + 180, -1)):
+                t = self._hsiText(HSI_C, ltr, lr, la, 0.62, C['black'], lu)
+                t.traverse(lambda o: setattr(o, 'renderOrder', HSI_ORD['ltr']))
+                g.add(t)
+            hsi.add(g)
+        # The bearing flag: no valid heading or either bearing
+        # (STS-83-0020V1-34 sect.3.12.2 (8)).  The figure puts the flag off the
+        # case, under the menu area; this place on the face is fitted.  The
+        # flag belongs to the modes that drive the bearings -- glided flight,
+        # RTLS, and a TAL abort.  The secondary is out of the test: MM 601
+        # leaves that word alone (F.4.104, the control word).
+        brgMode = mm in (304, 305, 601, 602, 603) or mm is None or \
+            (mm in (103, 104) and d.get('abortMode') == 'TAL')
+        if brgMode and not (d.get('hsiHeadingValid') and d.get('hsiPriBearingValid')):
+            hsi.add(self._hsiFlag(HSI_C[0] - 3.2 * HSI_ASP, HSI_FC[1], "BRG"))
+
+        # fixed orbiter symbol, over everything else on the face
+        orb = self._hsiShape(HSI_FC, HSI_ORB, 90, 1, C['lightGray'])
+        orb.renderOrder = HSI_ORD['orb']
+        hsi.add(orb)
+        hsi.position.z = -.001
+        return hsi
 
     def drawHorizGauge(self, value, rangeMin, rangeMid, rangeMax, tickLeft,
                        tickRight, tickBot, sLen, lLen, count, top=True,
@@ -9868,8 +11185,38 @@ class Screen_AE_PFD(MDUScreen):
         return gauge
 
 
+# meds/mduScreen_ORBIT_PFD.coffee -- ORBIT PRIMARY FLIGHT DISPLAY (ORB PFD)
+#
+# [1]   Off Flag - Indicates no updates from GPC. The ADI will freeze in all
+#       axes if IMU data are missing (CF or DG bad), and needles will be
+#       stowed (blanked), and ball static.
+#
+# [2]   Attitude ball - IMU based attitude. Reflects attitude defined by ADI
+#       ATTITUDE switch.
+#
+# [3]   Rate Needles - IMU derived body rates in degrees/second. Reflects
+#       scale selected by ADI Rate switch (see A/E PFD). Scale label is
+#       located at the ends of each scale.
+#
+# [4]   Error Needles - Total attitude or DAP errors in degrees during coast
+#       phases, depending on whether UNIV PTG Item 23 or 24 is selected.
+#       During OMS and RCS burns, the errors displayed are guidance command
+#       errors. During OMS burns, the errors reflect errors in the OMS trim
+#       positions. During +X RCS burns, the error is VGO thrust vector errors.
+#       The scale label is displayed in the right (pitch) scale only and
+#       reflects the ADI Error switch position (see A/E PFD).
+#
+# [5]   Digitals - Digital values of attitude displayed on the attitude ball.
+#
+#       [JSC-48017/6-24]
+#
+# The instrument is the A/E PFD's ADI at the same place and size, alone on
+# the display (JSC-48017 figures 6-8 and 6-24).
 class Screen_ORBIT_PFD(Screen_AE_PFD):
-    pass
+    screenName = 'ORBIT_PFD'
+
+    def parts(self):
+        return ['adi']
 
 
 # ===========================================================================
@@ -11011,9 +12358,6 @@ class MDU(LRU):
 
     # -- the flight instruments (FCInstrumentFeed) ---------------------------
     PFD_SCREENS = ('AE_PFD', 'ORBIT_PFD')
-    ADI_KEYS = frozenset(('adiValid', 'adiRol', 'adiPch', 'adiYaw', 'adiRolRate',
-                          'adiPchRate', 'adiYawRate', 'adiRolErr', 'adiPchErr',
-                          'adiYawErr'))
 
     def _fcMessage(self, m):
         if m['msg'].startswith('MEDS'):
@@ -11050,20 +12394,20 @@ class MDU(LRU):
             self._fcApply(self.curDisplay)
 
     def _fcApply(self, scrName):
+        """A PFD screen takes the selected bus's fields: when shown, and when
+        they change.  The fields that moved go with them, so the screen
+        rebuilds the instruments that read one (mdu.coffee)."""
         scr = self.screens.get(scrName)
         f = self.fcFields
         if scr is None or f is None or getattr(scr, 'curData', None) is None:
             return
-        changed = [k for k, v in f.items() if scr.curData.get(k) != v]
+        changed = [k for k, v in f.items() if not sameField(scr.curData.get(k), v)]
         if not changed:
             return
         scr.curData.update(f)
         if getattr(scr, 'group', None) is None:
             return
-        if all(k in self.ADI_KEYS for k in changed):
-            scr.updateADI()
-        else:
-            scr.refreshFeed()
+        scr.refreshFeed(changed)
         self.redraw()
 
     def setFCBus(self, bus):
