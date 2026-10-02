@@ -642,6 +642,19 @@ static void ff_mfe(int k, uint16_t *w, int n) {
     for (int i = 0; i < n; i++) w[i] = (i < 21) ? b[i] : 0;
 }
 
+/* YAGPC_MDM_TRACE_FA=<k>: every write to aft MDM k's card 10 (the jet fire
+ * B words) and every change in what its HFE read reports as chamber pressure
+ * and driver output, with the vehicle's time -- for ledger #272, a jet PASS
+ * failed off. */
+static int trace_fa(void) {
+    static int k = -1;
+    if (k < 0) {
+        const char *e = yagpc_getenv("YAGPC_MDM_TRACE_FA");
+        k = (e != NULL) ? atoi(e) : 0;
+    }
+    return k;
+}
+
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
     memset(b, 0, sizeof b);
@@ -662,6 +675,13 @@ static void fa_hfe(int k, uint16_t *w, int n) {
      * rotation detectors, which must read running (GQRORB.hal:139-270). */
     b[21] = (uint16_t)(fa_jets_b(k) | 0x00E0u);
     b[22] = fa_jets_b(k);
+    if (trace_fa() == k) {
+        static uint16_t last = 0xFFFFu;
+        if (b[21] != last)
+            fprintf(stderr, "mdmtrace: t=%.4f FA%d HFE read Pc/drv %04x\n",
+                    vehdyn_state()->t, k, (unsigned)b[21]);
+        last = b[21];
+    }
     /* the OMS gimbal positions, words 0-1: FA1/FA2 the left engine's
      * controllers, FA3/FA4 the right's */
     if (vehdyn_enabled()) {
@@ -876,6 +896,12 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                 faAod[fa_unit(busID)][4][ch + (unsigned)i] = (int16_t)words[i];
             push_oms(sharedUs);
         } else if (CMD_MODE(cmd) == 8u) {
+            if (CMD_CARD(cmd) == 10u && trace_fa() == fa_unit(busID)) {
+                fprintf(stderr, "mdmtrace: t=%.4f FA%d write card 10 ch %02x:", vehdyn_state()->t,
+                        fa_unit(busID), (unsigned)CMD_CHAN(cmd));
+                for (int i = 0; i < n; i++) fprintf(stderr, " %04x", (unsigned)words[i]);
+                fprintf(stderr, "\n");
+            }
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
             if (CMD_CARD(cmd) == 10u) push_fire(sharedUs);
             if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
