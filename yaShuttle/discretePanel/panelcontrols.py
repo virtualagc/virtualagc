@@ -28,8 +28,11 @@ A CONTROL is CONTROLS[key] = dict:
                [(unit, dscrt, mask), ...], closed while the button is held.
                unit 1-4 is FF1-4, 5-8 FA1-4 (yaGPC2 mdmdev.c's crew units);
                dscrt is the FF DSCRT word 1-13 (FA: 1-3), mask its bit(s).
-    lamps      for pbi: [(unit, card, channel, mask), ...] -- lit when any
-               of those DOH output bits is set
+    lamps      for pbi / lamp: [(unit, card, channel, mask), ...] -- lit when
+               any of those DOH output bits is set
+    halves     for a split-legend lamp instead of lamps: [(legend, lamps),
+               (legend, lamps)], each half lit on its own; split "h" puts
+               them side by side, "v" one over the other
     hold_ms    for pb/pbi: how long a scripted 'press' holds it (500)
     spring     for switches: positions that spring back to the default when
                let go -- held only while the mouse is down, and for hold_ms
@@ -73,7 +76,10 @@ def check():
                 _check_contacts(where, cs)
         else:
             _check_contacts(where, c.get("contacts") or [])
-            for lamp in c.get("lamps") or ():
+            lamps = list(c.get("lamps") or ())
+            for _leg, ls in c.get("halves") or ():
+                lamps += ls
+            for lamp in lamps:
                 if len(lamp) != 4 or lamp[0] not in FF_UNITS:
                     raise ValueError("%s: lamp %r" % (where, lamp))
     for panel, panes in PANES.items():
@@ -247,11 +253,15 @@ CONTROLS.update({
                                  "TAL": _ff((1, 2, 3), 11, 0x0800),
                                  "RTLS": _ff((1, 2, 3), 11, 0x0400)}),
 })
-for key, legend, mask in (("rcs_roll_l", "ROLL\nL", 0x0100), ("rcs_roll_r", "ROLL\nR", 0x0080),
-                          ("rcs_yaw_l", "YAW\nL", 0x0040), ("rcs_yaw_r", "YAW\nR", 0x0020),
-                          ("rcs_pitch_u", "PITCH\nUP", 0x0010), ("rcs_pitch_d", "PITCH\nDN", 0x0008)):
-    CONTROLS[key] = dict(panel="F6", kind="lamp", caption="", legend=legend,
-                         lamps=[(1, 2, 1, mask), (3, 2, 1, mask)], sources="GFBRCS 1515-1535")
+# SPLIT-LEGEND LIGHTS, as drawn (SCOM 2.7 "RCS COMMAND Lights on Panel F6"):
+# ROLL and YAW split left | right, PITCH split up over down; white.
+for key, cap, split, halves in (
+        ("rcs_roll", "ROLL", "h", (("L", 0x0100), ("R", 0x0080))),
+        ("rcs_yaw", "YAW", "h", (("L", 0x0040), ("R", 0x0020))),
+        ("rcs_pitch", "PITCH", "v", (("U", 0x0010), ("D", 0x0008)))):
+    CONTROLS[key] = dict(panel="F6", kind="lamp", caption=cap, split=split,
+                         halves=[(leg, [(1, 2, 1, m), (3, 2, 1, m)]) for leg, m in halves],
+                         sources="GFBRCS 1515-1535; lights, though they look like rockers")
 
 # O7: TACAN MODE x3; only GPC is read (MFE FFn DSCRT8 bit 16).
 for n in (1, 2, 3):
@@ -280,8 +290,7 @@ PANES.update({
     "F4": [("FLIGHT CONTROL", [["pitch_auto_plt", "pitch_css_plt"],
                                ["ry_auto_plt", "ry_css_plt"]])],
     "F6": [("ABORT", [["abort_mode", "abort_pb"]]),
-           ("RCS COMMAND", [["rcs_roll_l", "rcs_roll_r"], ["rcs_yaw_l", "rcs_yaw_r"],
-                            ["rcs_pitch_u", "rcs_pitch_d"]]),
+           ("RCS COMMAND", [["rcs_roll", "rcs_pitch"], ["rcs_yaw"]]),
            ("DISPLAY SELECT", [["air_data_cdr", "hsi_mode_cdr", "hsi_source_cdr",
                                 "hsi_unit_cdr", "rdr_altm_cdr"]])],
     "F8": [("DISPLAY SELECT", [["air_data_plt", "hsi_mode_plt", "hsi_source_plt",

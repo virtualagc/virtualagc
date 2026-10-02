@@ -829,6 +829,8 @@ class PanelO6:
                         if PC.is_switch(k))
         self.ctl_held = dict((k, False) for k in PC.CONTROLS if PC.is_button(k))
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
+        self.ctl_lamp.update((k, (False,) * len(c["halves"]))
+                             for k, c in PC.CONTROLS.items() if c.get("halves"))
         unconnected = collections.Counter(c["via"] for c in PC.CONTROLS.values()
                                           if c.get("via"))
         for via, n in sorted(unconnected.items()):
@@ -1423,6 +1425,8 @@ class PanelO6:
             units.update(pair)
         for c in PC.CONTROLS.values():
             units.update(l[0] for l in c.get("lamps") or ())
+            for _leg, ls in c.get("halves") or ():
+                units.update(l[0] for l in ls)
         for k in sorted(units):
             try:
                 socks[mdm_receiver(k)] = k
@@ -1485,12 +1489,17 @@ class PanelO6:
                     n for n, on in zip(("AUTO", "MAN"), self.am_lamp[(sd, k)]) if on) or "-")
                 for sd in AM_SIDES for k in AM_PBS))
         for key in self.ctl_lamp:
-            lit = any(out.get((u, card, ch), 0) & m
-                      for u, card, ch, m in PC.CONTROLS[key]["lamps"])
+            c = PC.CONTROLS[key]
+            if c.get("halves"):
+                lit = tuple(any(out.get((u, card, ch), 0) & m for u, card, ch, m in ls)
+                            for _leg, ls in c["halves"])
+            else:
+                lit = any(out.get((u, card, ch), 0) & m for u, card, ch, m in c["lamps"])
             if lit != self.ctl_lamp[key]:
                 self.ctl_lamp[key] = lit
                 am_changed = True
-                log("lamp %s %s" % (key, "lit" if lit else "out"))
+                log("lamp %s %s" % (key, lit if isinstance(lit, tuple) else
+                                    ("lit" if lit else "out")))
         if changed or am_changed:
             self.redraw()
 
@@ -1673,14 +1682,17 @@ class PanelO6:
         font = self._font(size)
         ascent = int(helvetica.ascent(self._tkfont(size)))
         fh = ascent + 2
-        chars = [ch for ch in text if not ch.isspace()]
-        n = len(chars) or 1
-        total = n * fh
-        y0 = self.Y(y) - total / 2.0 + fh / 2.0 - helvetica.lift(self._tkfont(size))
+        # A space between words is a gap of a bit more than half a letter:
+        # dropped, "LO GAIN" read LOGAIN (owner, 2026-10-02).
+        steps = [(0.6 if ch.isspace() else 1.0) for ch in text.strip()]
+        total = sum(steps) * fh or fh
+        y = self.Y(y) - total / 2.0 - helvetica.lift(self._tkfont(size))
         cx = self.X(x)
-        for i, ch in enumerate(chars):
-            self.cv.create_text(cx, y0 + i * fh, text=ch, fill=fill,
-                                font=font, anchor="c")
+        for ch, step in zip(text.strip(), steps):
+            if not ch.isspace():
+                self.cv.create_text(cx, y + fh / 2.0, text=ch, fill=fill,
+                                    font=font, anchor="c")
+            y += step * fh
 
     def _rect(self, x1, y1, x2, y2, **kw):
         return self.cv.create_rectangle(
@@ -1889,6 +1901,7 @@ class PanelO6:
             self._hits = []
             self._bp_cache = {}
             self.pb = self._pb_size()
+            self._placed_panes = set()
             right, bottom = win.draw()
             right, bottom = self._draw_ctl_panes(win.name, right, bottom)
             self._draw_circle()
@@ -2099,6 +2112,25 @@ class PanelO6:
         ex1 = 790
         ey0 = L["out_backup"] - 10
         ey1 = L["mode_line"] + 4
+        # THE RIGHT-HAND COLUMN CLOSE BESIDE THE GPC PANEL (owner,
+        # 2026-10-02: it stood beyond the IPL SOURCE tongue, wasting the
+        # space beside the panel).  IDP LOAD at the top, RHC BFC ENGAGE and
+        # ACTIVITY at the bottom (ACTIVITY's bottom on O6's), and the tongue
+        # moved up between them as far as it must to leave a pane's gap
+        # above RHC BFC ENGAGE.
+        pad = 10
+        th10 = self._th(10)
+        x0 = mx1 + PANE_GAP
+        col_w = max(IDP_LOAD_W, self._tw("RHC BFC ENGAGE", 10) + 2 * 16,
+                    self._tw("INTEGRATED DISPLAY PROCESSOR", 10) + 2 * 24)
+        idp_y1 = self._draw_idp_load(x0, my0, x0 + col_w)
+        act_y1 = my1
+        act_y0 = act_y1 - (3 * pad + 4 * th10)
+        rhc_y1 = act_y0 - PANE_GAP
+        rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + self.pb)
+        up = max(0.0, ey1 + PANE_GAP - rhc_y0)
+        ey0 = max(idp_y1 + PANE_GAP, ey0 - up)
+        ey1 = ey1 - up
 
         outline = [
             (mx0, my0), (mx1, my0), (mx1, ey0), (ex1, ey0),
@@ -2136,19 +2168,6 @@ class PanelO6:
         self._draw_mode_switches()
         self._draw_ipl_source(mx1, ex1, ey0, ey1)
 
-        # The right-hand column, beside the IPL SOURCE tab: IDP LOAD at the
-        # top; RHC BFC ENGAGE and ACTIVITY at the bottom, ACTIVITY's bottom
-        # on O6's.
-        pad = 10
-        th10 = self._th(10)
-        x0 = ex1 + PANE_GAP
-        col_w = max(IDP_LOAD_W, self._tw("RHC BFC ENGAGE", 10) + 2 * 16,
-                    self._tw("INTEGRATED DISPLAY PROCESSOR", 10) + 2 * 24)
-        self._draw_idp_load(x0, my0, x0 + col_w)
-        act_y1 = my1
-        act_y0 = act_y1 - (3 * pad + 4 * th10)
-        rhc_y1 = act_y0 - PANE_GAP
-        rhc_y0 = rhc_y1 - (4 * pad + 4 * th10 + self.pb)
         self._draw_rhc(x0, rhc_y0, x0 + col_w, rhc_y1)
         self._draw_activity(x0, act_y0, x0 + col_w, act_y1)
         return x0 + col_w, my1 + 6
@@ -2175,17 +2194,48 @@ class PanelO6:
         dx0 = x0 + left_w + PANE_GAP
         dw = max(DAP_COL_W, self._dap_width())
         dy1 = self._draw_dap(dx0, y0, dx0 + dw, "FWD")
-        return dx0 + dw, max(left_bottom, dy1)
+        # The table's panes (owner, 2026-10-02): SEPARATION and the PLT's
+        # flap and trims down the right; S-BAND PM and MAIN ENGINE, in that
+        # order, along the bottom under FCS CHANNEL and the DAP block, where
+        # a column of all four had left a hole.
+        rx0 = dx0 + dw + PANE_GAP
+        sw, sh = self._pane("C3", "SEPARATION", 0, 0, measure=True)
+        pw, ph = self._pane("C3", "PLT", 0, 0, measure=True)
+        mw, mh = self._pane("C3", "MAIN ENGINE", 0, 0, measure=True)
+        bw, bh = self._pane("C3", "S-BAND PM", 0, 0, measure=True)
+        col_w = max(sw, pw)
+        self._pane("C3", "SEPARATION", rx0, y0)
+        self._pane("C3", "PLT", rx0, y0 + sh + PANE_GAP)
+        by0 = max(left_bottom, dy1) + PANE_GAP
+        row_h = max(mh, bh)
+        self._pane("C3", "S-BAND PM", x0, by0, h=row_h)
+        self._pane("C3", "MAIN ENGINE", x0 + bw + PANE_GAP, by0, h=row_h)
+        return (max(rx0 + col_w, x0 + bw + PANE_GAP + mw),
+                max(by0 + row_h, y0 + sh + ph + PANE_GAP))
 
     def _draw_win_f6(self):
-        """F6: BFC DISENGAGE and the CDR's ADI switches."""
+        """F6 (owner, 2026-10-02): ADI at the left; across the top to its
+        right BFC DISENGAGE and DISPLAY SELECT; below those, ABORT beside
+        RCS COMMAND."""
         x0 = y0 = MARGIN
         pad, th10 = 10, self._th(10)
-        self._draw_f6(x0, y0, x0 + C3_W, y0 + 4 * pad + 4 * th10 + 58)
-        ax0 = x0 + C3_W + PANE_GAP
         aw = max(ADI_COL_W, self._adi_width())
-        y1 = self._draw_adi(ax0, y0, ax0 + aw, 0, "L")
-        return ax0 + aw, y1
+        adi_y1 = self._draw_adi(x0, y0, x0 + aw, 0, "L")
+        dw, dh = self._pane("F6", "DISPLAY SELECT", 0, 0, measure=True)
+        bh = max(4 * pad + 4 * th10 + 58, dh)
+        bx0 = x0 + aw + PANE_GAP
+        self._draw_f6(bx0, y0, bx0 + C3_W, y0 + bh)
+        dx0 = bx0 + C3_W + PANE_GAP
+        self._pane("F6", "DISPLAY SELECT", dx0, y0, h=bh)
+        top_right = dx0 + dw
+        y2 = y0 + bh + PANE_GAP
+        aw2, ah = self._pane("F6", "ABORT", 0, 0, measure=True)
+        rw, rh = self._pane("F6", "RCS COMMAND", 0, 0, measure=True)
+        h2 = max(ah, rh)
+        self._pane("F6", "ABORT", bx0, y2, h=h2)
+        self._pane("F6", "RCS COMMAND", bx0 + aw2 + PANE_GAP, y2, h=h2)
+        right = max(top_right, bx0 + aw2 + PANE_GAP + rw)
+        return right, max(adi_y1, y2 + h2)
 
     def _draw_win_f8(self):
         x0 = y0 = MARGIN
@@ -2208,7 +2258,8 @@ class PanelO6:
 
     def _draw_win_r11(self):
         x0 = y0 = MARGIN
-        return x0 + R11_W, self._draw_r11(x0, y0, x0 + R11_W)
+        y1 = self._draw_r11(x0, y0, x0 + R11_W)
+        return x0 + 5 + 2 * 115 + 5 + 4, y1
 
     def _draw_win_none(self):
         """A panel window holding only table-driven panes."""
@@ -2248,6 +2299,10 @@ class PanelO6:
             lw = max(self._tw(pos[0]), self._tw(pos[-1]))
             w = max(cap_w, self.TGL3_H + 2 * (lw + 12))
             return w, above + ls, self.TGL_W, 0
+        if k == "lamp" and c.get("halves"):
+            # A split-legend light: the panel's pushbutton size, halved
+            # side by side or one over the other.
+            return max(cap_w, self.pb), above, self.pb, 0
         if k == "lamp":
             lines = self._ctl_lines(c.get("legend"))
             return (max(cap_w, self.pb, max([self._tw(l) for l in lines] or [0]) + 12),
@@ -2293,6 +2348,24 @@ class PanelO6:
                        size=SETTING_SIZE)
             self._text(cx + gw / 2 + 6 + self._tw(pos[-1]) / 2.0, y + gh / 2.0, pos[-1],
                        size=SETTING_SIZE)
+        elif k == "lamp" and c.get("halves"):
+            b = self.pb
+            x1, x2 = cx - b / 2.0, cx + b / 2.0
+            self._rect(x1, y, x2, y + b, fill=C_GUARD, outline=C_GUARD_LO,
+                       width=max(2, int(1.5 * self.s)))
+            m = 6
+            fx1, fy1, fx2, fy2 = x1 + m, y + m, x2 - m, y + b - m
+            lit = self.ctl_lamp.get(key) or (False, False)
+            if c.get("split") == "v":
+                mid = (fy1 + fy2) / 2.0
+                parts = ((fx1, fy1, fx2, mid), (fx1, mid, fx2, fy2))
+            else:
+                mid = (fx1 + fx2) / 2.0
+                parts = ((fx1, fy1, mid, fy2), (mid, fy1, fx2, fy2))
+            for (a1, b1, a2, b2), (leg, _ls), on in zip(parts, c["halves"], lit):
+                self._rect(a1, b1, a2, b2, fill=C_PBI_LIT if on else C_BTN,
+                           outline=C_PADDLE_LO, width=1)
+                self._text((a1 + a2) / 2.0, (b1 + b2) / 2.0, leg, size=SETTING_SIZE)
         elif k == "lamp":
             lw = max(self.pb, max([self._tw(l) for l in self._ctl_lines(c.get("legend"))]
                                   or [0]) + 12)
@@ -2352,19 +2425,32 @@ class PanelO6:
         # knob -- the first
         # half on the left, rising, the rest on the right, falling -- each
         # joined to its tick by a leader (drawn in _rotary).
+        # Each legend starts level with its detent and the column is then
+        # spread to a legible spacing, so the legends fan out from the dial
+        # and the leaders slant to them -- they bunched up when spaced only
+        # by count (owner, 2026-10-02).
         self._rot_columns[key] = True
         span = 300.0
         half = (n + 1) // 2
+        R = r + ls
+        gap = ls * 1.25
+        angles = [90 + span / 2.0 - i * span / (n - 1) for i in range(n)]
+        cols = (list(range(half)), list(range(half, n)))
+        ys = {}
+        for col in cols:
+            if not col:
+                continue
+            want = sorted(col, key=lambda i: -math.sin(math.radians(angles[i])))
+            y = [-R * math.sin(math.radians(angles[i])) for i in want]
+            for j in range(1, len(y)):                       # push apart, downwards
+                y[j] = max(y[j], y[j - 1] + gap)
+            shift = (sum(-R * math.sin(math.radians(angles[i])) for i in want) - sum(y)) / len(y)
+            for i, yy in zip(want, y):
+                ys[i] = yy + shift                           # and re-centred
         for i, p in enumerate(pos):
-            a = 90 + span / 2.0 - i * span / (n - 1)
-            if i < half:
-                y = ((half - 1) / 2.0 - i) * ls * 1.1
-                x = -(r + 22 + self._tw(p) / 2.0)
-            else:
-                j = i - half
-                y = (j - (n - half - 1) / 2.0) * ls * 1.1
-                x = r + 22 + self._tw(p) / 2.0
-            out.append((p, x, y, a))
+            side = -1 if i < half else 1
+            x = side * (r + 30 + self._tw(p) / 2.0)
+            out.append((p, x, ys[i], angles[i]))
         return out
 
     def _rot_bbox(self, key):
@@ -2387,8 +2473,13 @@ class PanelO6:
         angs = [a for _p, _x, _y, a in legends]
         for p, dx, dy, a in legends:
             self._text(cx + dx, cy + dy, p, size=SETTING_SIZE)
+            t = math.radians(a)
+            if not self._rot_columns.get(key):
+                # A short tick at each detent (owner, 2026-10-02).
+                self._line(cx + r * math.cos(t), cy - r * math.sin(t),
+                           cx + (r + 7) * math.cos(t), cy - (r + 7) * math.sin(t),
+                           fill=C_INK_DIM, width=max(1, int(self.s)))
             if self._rot_columns.get(key):
-                t = math.radians(a)
                 inner = dx + (self._tw(p) / 2.0 + 3) * (1 if dx < 0 else -1)
                 self._line(cx + r * math.cos(t), cy - r * math.sin(t), cx + inner, cy + dy,
                            fill=C_INK_DIM, width=1)
@@ -2441,10 +2532,19 @@ class PanelO6:
             y += rh + pad
         return width, height
 
+    def _pane(self, panel, title, x0, y0, measure=False, h=None):
+        """One of the table's panes placed by a window's own layout (so the
+        column of the rest leaves it out).  Returns (w, h)."""
+        rows = dict(PC.PANES[panel])[title]
+        if not measure:
+            self._placed_panes.add(title)
+        return self._draw_ctl_pane(x0, y0, title, rows, measure=measure, h=h)
+
     def _draw_ctl_panes(self, panel, right, bottom):
         """The table's panes for this window, in a column to the right of
         what it drew already.  Returns the new (right, bottom)."""
-        panes = PC.PANES.get(panel)
+        panes = [(t, r) for t, r in PC.PANES.get(panel, ())
+                 if t not in self._placed_panes]
         if not panes:
             return right, bottom
         x0 = right + PANE_GAP
@@ -2979,7 +3079,9 @@ class PanelO6:
         rows = self._idp_rows(y0)
         y1 = rows[7] + (rows[6] - y0)
         left, right = 5, 5 + 4
-        width = R11_W
+        # As wide as the set and those margins: R11_W left a strip on the
+        # right (owner, 2026-10-02).
+        width = left + 2 * 115 + right
         self._rect_panel(x0, y0, x0 + width, y1)
         self._idp_set(x0 + left + 115, 4, rows)
         return y1
