@@ -15,6 +15,22 @@
     clear                    two-stage buffer clear
     hello                    power the NSP without sending a command
     raw H H H [H H H ...]    command words as hex halfword triples
+    downlink [--log FILE] [--show N] [--seconds S]
+                             receive the GPCs' downlist frames: one line a
+                             second per GPC (format ID, frame number, words),
+                             every frame to FILE (JSON lines: GPC, toggle
+                             buffer, simulated time, frame number, format ID,
+                             the words in hex), and with --show N the words of
+                             every Nth frame
+
+THE DOWNLINK.  yaGPC2 watches each GPC's IP bus (BCE 24) and sends every
+downlist frame PASS writes to the PCM master unit, at its end of message, on
+port base + 88 ("DNL1", GPC, toggle buffer, word count, simulated time in
+us, the words).  A frame describes itself (CDWDOWNL.hal, DCDDOW.hal): word 1
+the sync EB90; word 2 a 2-bit counter, the 6-bit frame number 0-49 and the
+8-bit format ID; in frames 0 and 25, word 3 the vehicle, GPC and mission IDs
+and words 4-6 the GPC's time.  Decoding the rest into named measurements is
+the next step (the downlist tables are in the flight source).
 
 HOW IT GETS THERE.  yaGPC2 models NSP1 behind FF MDM 1 (src/mdmdev.c,
 nsp_reply); this program sends it each poll's buffer -- up to ten 48-bit
@@ -55,6 +71,7 @@ import time
 MCAST_GROUP = "239.255.1.1"
 UPLINK_OFFSET = 99
 TRUTH_OFFSET = 98
+DOWNLINK_OFFSET = 88
 FT_M = 0.3048
 
 VEHICLE = 0b010           # CDUV_NSP_VEHICLE_ILOAD
@@ -230,6 +247,96 @@ def truth_state(base, timeout=5.0):
     return None
 
 
+def mcast_listen(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass
+    s.bind(('', port))
+    iface = os.environ.get('NSTS_BUS_IFACE', '127.0.0.1')
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 socket.inet_aton(MCAST_GROUP) + socket.inet_aton(iface))
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1 << 20)
+    return s
+
+
+def parse_downlist(d):
+    """A DNL1 datagram as {gpc, tb, t_us, words}, or None."""
+    if len(d) < 18 or d[:4] != b"DNL1":
+        return None
+    gpc, tb, n = struct.unpack(">3H", d[4:10])
+    (t_us,) = struct.unpack(">d", d[10:18])
+    if len(d) < 18 + 2 * n:
+        return None
+    words = list(struct.unpack(">%dH" % n, d[18:18 + 2 * n]))
+    return {'gpc': gpc, 'tb': tb, 't_us': t_us, 'words': words}
+
+
+def frame_header(words):
+    """Sync, frame number, format ID -- and, in frames 0 and 25, the IDs and
+    the time words -- of a downlist frame."""
+    h = {'sync': words[0] == 0xEB90 if words else False}
+    if len(words) >= 2:
+        h['counter'] = words[1] >> 14
+        h['frame'] = (words[1] >> 8) & 0x3f
+        h['format'] = words[1] & 0xff
+    if len(words) >= 6 and h.get('frame') in (0, 25):
+        h['vehicle'] = words[2] >> 13
+        h['gpc'] = (words[2] >> 10) & 7
+        h['mission'] = words[2] & 0xff
+        h['time_words'] = words[3:6]
+    return h
+
+
+def downlink(base, log=None, show=0, seconds=0):
+    import json
+    s = mcast_listen(base + DOWNLINK_OFFSET)
+    s.settimeout(1.0)
+    out = open(log, "a") if log else None
+    t0 = time.time()
+    last = {}
+    count = {}
+    nframes = 0
+    try:
+        while not seconds or time.time() - t0 < seconds:
+            try:
+                d = s.recv(512)
+            except socket.timeout:
+                continue
+            f = parse_downlist(d)
+            if f is None:
+                continue
+            h = frame_header(f['words'])
+            nframes += 1
+            g = f['gpc']
+            count[g] = count.get(g, 0) + 1
+            if out:
+                out.write(json.dumps({'gpc': g, 'tb': f['tb'], 't_us': f['t_us'],
+                                      'frame': h.get('frame'), 'format': h.get('format'),
+                                      'words': ["%04X" % w for w in f['words']]}) + "\n")
+            if show and nframes % show == 0:
+                print("GPC%d TB%d t=%.3f frame %s format %s:" % (
+                    g, f['tb'], f['t_us'] / 1e6, h.get('frame'), h.get('format')))
+                for i in range(0, len(f['words']), 16):
+                    print("   %3d: %s" % (i, " ".join("%04X" % w for w in f['words'][i:i + 16])))
+            now = time.time()
+            if now - last.get(g, 0) >= 1.0:
+                last[g] = now
+                extra = ""
+                if 'mission' in h:
+                    extra = "  vehicle %d GPC %d mission %d" % (h['vehicle'], h['gpc'], h['mission'])
+                print("GPC%d TB%d t=%9.3f s  %s  format %3s  frame %2s  %3d words  %d frames%s" % (
+                    g, f['tb'], f['t_us'] / 1e6, "EB90" if h['sync'] else "NO SYNC",
+                    h.get('format'), h.get('frame'), len(f['words']), count[g], extra), flush=True)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if out:
+            out.close()
+
+
 def main():
     ap = argparse.ArgumentParser(description="Mission Control's uplink to the simulated Orbiter.")
     ap.add_argument("--port-base", type=int,
@@ -244,9 +351,16 @@ def main():
     rnp.add_argument("day", type=int)
     sub.add_parser("clear", help="two-stage buffer clear")
     sub.add_parser("hello", help="power the NSP")
+    dn = sub.add_parser("downlink", help="receive, show and log the GPCs' downlist frames")
+    dn.add_argument("--log", metavar="FILE", help="append every frame, JSON lines")
+    dn.add_argument("--show", type=int, default=0, metavar="N", help="print every Nth frame's words")
+    dn.add_argument("--seconds", type=float, default=0, help="stop after this long")
     raw = sub.add_parser("raw", help="command words as hex halfword triples")
     raw.add_argument("halfwords", nargs="+")
     args = ap.parse_args()
+    if args.cmd == "downlink":
+        downlink(args.port_base, args.log, args.show, args.seconds)
+        return
     link = Link(args.port_base)
 
     if args.cmd == "sv":
