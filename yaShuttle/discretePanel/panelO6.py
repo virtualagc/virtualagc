@@ -785,6 +785,7 @@ class PanelWin:
         self._snug_set = None
         self._snug_pending = None
         self._cursor_hits = False
+        self.rot_geom = {}
         self._ref_w, self._ref_h = ref0
         for ev, fn in (("<ButtonPress-1>", app._on_press),
                        ("<ButtonRelease-1>", app._on_release),
@@ -2471,6 +2472,21 @@ class PanelO6:
             out.append((p, x, ys[i], angles[i]))
         return out
 
+    def _rot_pick(self, key, x, y):
+        """The position a click or drag at canvas (x, y) asks for: the legend
+        under it, or else the detent nearest its direction from the knob."""
+        geom = self.w.rot_geom.get(key)
+        if not geom:
+            return None
+        cx, cy, legends = geom
+        for p, (x0, y0, x1, y1), _a in legends:
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                return p
+        if abs(x - cx) < 2 and abs(y - cy) < 2:
+            return None
+        ang = math.degrees(math.atan2(cy - y, x - cx))
+        return min(legends, key=lambda l: abs((ang - l[2] + 180) % 360 - 180))[0]
+
     def _rot_bbox(self, key):
         ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
         r = self.ROT_D / 2.0
@@ -2489,6 +2505,19 @@ class PanelO6:
         r = self.ROT_D / 2.0
         legends = self._rot_legends(key)          # see there for the spread
         angs = [a for _p, _x, _y, a in legends]
+        ls = self._tkfont(SETTING_SIZE).metrics("linespace") / max(self.s, 0.01)
+        # Where it is on the canvas, for _rot_pick: the knob's centre and
+        # each legend's box, in this window's canvas pixels.
+        self.w.rot_geom[key] = (self.X(cx), self.Y(cy), [
+            (p, (self.X(cx + dx - self._tw(p) / 2.0 - 3), self.Y(cy + dy - ls / 2.0),
+                 self.X(cx + dx + self._tw(p) / 2.0 + 3), self.Y(cy + dy + ls / 2.0)), a)
+            for p, dx, dy, a in legends])
+        # Each column's legends from top to bottom, for where its leader ends.
+        rank = {}
+        for side in (-1, 1):
+            col = sorted((dy, p) for p, dx, dy, _a in legends if (dx < 0) == (side < 0))
+            for j, (_dy, p) in enumerate(col):
+                rank[p] = j / float(max(1, len(col) - 1))
         for p, dx, dy, a in legends:
             self._text(cx + dx, cy + dy, p, size=SETTING_SIZE)
             t = math.radians(a)
@@ -2499,7 +2528,12 @@ class PanelO6:
                            fill=C_INK_DIM, width=max(1, int(self.s)))
             if self._rot_columns.get(key):
                 inner = dx + (self._tw(p) / 2.0 + 3) * (1 if dx < 0 else -1)
-                self._line(cx + r * math.cos(t), cy - r * math.sin(t), cx + inner, cy + dy,
+                # Ending on the caps' middle, a little low on the top legend
+                # of a column and a little high on the bottom one, pro rata:
+                # ending on the line's centre, they all pointed below their
+                # legends (owner, 2026-10-02).
+                end = dy - ls * 0.08 + (0.5 - rank.get(p, 0.5)) * ls * 0.34
+                self._line(cx + r * math.cos(t), cy - r * math.sin(t), cx + inner, cy + end,
                            fill=C_INK_DIM, width=1)
         self._oval(cx - r, cy - r, cx + r, cy + r, fill=C_BEZEL, outline=C_INK,
                    width=max(1, int(self.s)))
@@ -2509,7 +2543,9 @@ class PanelO6:
         t = math.radians(angs[pos.index(self.ctl[key])])
         self._line(cx, cy, cx + k * math.cos(t), cy - k * math.sin(t),
                    fill=C_INK, width=max(2, int(3 * self.s)))
-        self._hit("ctl", key, cx - r - 4, cy - r - 4, cx + r + 4, cy + r + 4)
+        # The whole rotary takes a click, legends and all.
+        bx0, by0, bx1, by1 = self._rot_bbox(key)
+        self._hit("ctl", key, cx + bx0 - 4, cy + by0 - 4, cx + bx1 + 4, cy + by1 + 4)
 
     def _legend_pb(self, x1, y1, x2, y2, legend, down):
         """A momentary pushbutton with its legend on the face."""
@@ -3830,6 +3866,12 @@ class PanelO6:
             self.cv.configure(cursor="")
 
     def _on_motion(self, event):
+        if self._held is not None and self._held[0] == "ctl_rot":
+            key = self._held[1]
+            pick = self._rot_pick(key, event.x, event.y)
+            if pick is not None and pick != self.ctl[key]:
+                self._set_ctl(key, pick)
+            return
         if self._user_wait is not None:
             if str(self.cv.cget("cursor")) != self.WAIT_CURSOR:
                 self.cv.configure(cursor=self.WAIT_CURSOR)
@@ -3841,6 +3883,7 @@ class PanelO6:
             self.cv.configure(cursor="hand2" if want else "")
 
     def _on_press(self, event):
+        self._held_t0 = time.monotonic()
         if self._user_wait is not None:
             done, self._user_wait = self._user_wait, None
             for win in self.wins.values():
@@ -3926,10 +3969,14 @@ class PanelO6:
                 self._set_ctl(index, True)
                 self._held = (kind, index)
             elif c["kind"] == "rot":
-                pos = c["positions"]
-                i = pos.index(self.ctl[index])
-                i = max(0, i - 1) if event.x < (x1 + x2) / 2.0 else min(len(pos) - 1, i + 1)
-                self._set_ctl(index, pos[i])
+                # TO WHERE IT IS CLICKED, in one turn, and dragged on from
+                # there: stepping one detent per click, and the long way
+                # round as often as not, is not how a hand turns a knob
+                # (owner, 2026-10-02).
+                pick = self._rot_pick(index, event.x, event.y)
+                if pick is not None and pick != self.ctl[index]:
+                    self._set_ctl(index, pick)
+                self._held = ("ctl_rot", index)
             elif c["kind"] != "lamp":
                 pos = c["positions"]
                 z = (self._zone(event.x, x1, x2, len(pos)) if c["kind"] == "h3"
@@ -3939,11 +3986,29 @@ class PanelO6:
                     self._held = ("ctl_spring", index)      # back when let go
 
 
+    # A MOMENTARY BUTTON IS HELD AT LEAST THIS LONG, contact and picture alike.
+    # A quick click let go in well under PASS's 160 ms switch-reading period
+    # (GR2 at 6.25 Hz), so PASS could miss it, and the pressed look was gone
+    # before it could be seen (owner, 2026-10-02).
+    MIN_PRESS_S = 0.4
+
     def _on_release(self, event):
         if self._held is None:
             return
         kind, index = self._held
         self._held = None
+        if kind == "ctl_rot":
+            return                          # a drag of a rotary ends
+        if kind in ("ctl_spring",):
+            self._release(kind, index)
+            return
+        left = self.MIN_PRESS_S - (time.monotonic() - getattr(self, "_held_t0", 0.0))
+        if left > 0:
+            self.root.after(int(left * 1000), lambda: self._release(kind, index))
+        else:
+            self._release(kind, index)
+
+    def _release(self, kind, index):
         if kind == "ipl":
             self._set_ipl(index, False)
         elif kind == "rhc":
