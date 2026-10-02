@@ -2537,18 +2537,21 @@ class PanelO6:
         return width, height
 
     def _pbi_split(self, x1, y1, x2, y2, down, auto_lit, man_lit):
-        """A split-legend PBI: AUTO over MAN, each half lighting on its own,
-        in the DAP lamps' colours."""
+        """A split-legend PBI: AUTO over MAN, each half lighting on its own."""
         self._pushbutton(x1, y1, x2, y2, "", down=down)
         dx = 2 if down else 0
         fy1, fy2 = y1 + 6 + dx + 3, y2 - 6 + dx - 3
         hx1, hx2 = x1 + 6 + dx + 3, x2 - 6 + dx - 3
         mid = (fy1 + fy2) / 2.0
+        # UNLIT, THE BUTTON'S OWN FACE: the DAP strips' dark grey under the
+        # black legends was "very hard to read" (owner, 2026-10-01).  A lit
+        # half fills with the lamp colour; a thin rule divides the two.
         for (ya, yb), legend, lit in (((fy1, mid - 1), "AUTO", auto_lit),
                                       ((mid + 1, fy2), "MAN", man_lit)):
-            self._rect(hx1, ya, hx2, yb, fill=C_PBI_LIT if lit else C_PBI_DARK,
-                       outline=C_PADDLE_LO, width=1)
+            if lit:
+                self._rect(hx1, ya, hx2, yb, fill=C_PBI_LIT, outline=C_PADDLE_LO, width=1)
             self._text((hx1 + hx2) / 2.0, (ya + yb) / 2.0, legend, size=SETTING_SIZE)
+        self._line(hx1, mid, hx2, mid, fill=C_PADDLE_LO, width=1)
 
     def _draw_am(self, x0, y0, x1, sd, measure=False, h=None):
         """F2's (CDR) or F4's (PLT) BODY FLAP and SPD BK/THROT pushbuttons,
