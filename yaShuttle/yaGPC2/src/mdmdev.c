@@ -961,6 +961,17 @@ static void truth_publish(void) {
 
 bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
 
+/* Whether the flight instruments' messages are relayed (fc_output): on
+ * unless YAGPC_FC_RELAY=0, so its cost can be measured by switching it off. */
+bool mdmdev_fc_relay(void) {
+    static int on = -1;
+    if (on < 0) {
+        const char *e = yagpc_getenv("YAGPC_FC_RELAY");
+        on = !(e != NULL && strcmp(e, "0") == 0);
+    }
+    return crewOpen && on;
+}
+
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;

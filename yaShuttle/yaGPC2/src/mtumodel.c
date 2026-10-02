@@ -1723,7 +1723,7 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
          * DDU write bit, X'40000' -- and here the low five bits ARE the
          * word count, not one less (nsts-sim-gpc lru/ddu/dduConf.coffee).
          * mdmdev.c passes them to the displays. */
-        else if (mdmdev_capturing() && (cmd & 0x40000u) &&
+        else if (mdmdev_fc_relay() && (cmd & 0x40000u) &&
                  (CMD_IUA(cmd) == 6u || CMD_IUA(cmd) == 9u || CMD_IUA(cmd) == 15u) &&
                  (cmd & 0x1fu) != 0u) {
             m->outCmd[b] = cmd;

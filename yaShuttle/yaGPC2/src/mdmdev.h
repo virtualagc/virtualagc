@@ -50,6 +50,10 @@ void mdmdev_crew_open(int portBase);
  * device model on, or with a panel to send the lamps to. */
 bool mdmdev_capturing(void);
 
+/* Whether mtumodel.c should collect the DDU and MEDS writes on FC1-4 for
+ * the displays: with a panel, unless YAGPC_FC_RELAY=0. */
+bool mdmdev_fc_relay(void);
+
 /* A session capture's vehdyn.json in dir: the vehicle dynamics' truth state
  * and the devices' memory.  Only with the device model on; a capture
  * without the file restores to the default vehicle, and says so. */
