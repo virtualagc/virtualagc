@@ -2365,15 +2365,16 @@ class PanelO6:
         k = c["kind"]
         if k in ("t2", "t3"):
             pos = c["positions"]
+            leg = c.get("legends") or pos           # as printed
             gw = self.TGL_W
             ex = self._t3_excess(key) / 2.0
-            self._text(cx, y - ls * 0.5 - ex, pos[0], size=SETTING_SIZE)
+            self._text(cx, y - ls * 0.5 - ex, leg[0], size=SETTING_SIZE)
             p = pos.index(self.ctl[key])
             self._guarded_toggle(cx - gw / 2, y, cx + gw / 2, y + body, p, npos=len(pos))
             self._hit("ctl", key, cx - gw / 2, y, cx + gw / 2, y + body)
-            if k == "t3" and pos[1].strip("- "):
-                self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, pos[1])
-            self._text(cx, y + body + ls * 0.5 + ex, pos[-1], size=SETTING_SIZE)
+            if k == "t3" and leg[1].strip("- "):
+                self._vtext(cx + gw / 2 + 14 + self._tw("M") / 2.0, y + body / 2.0, leg[1])
+            self._text(cx, y + body + ls * 0.5 + ex, leg[-1], size=SETTING_SIZE)
         elif k == "h3":
             pos = c["positions"]
             gw, gh = self.TGL3_H, self.TGL_W

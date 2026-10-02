@@ -1,0 +1,164 @@
+# STS-109 (HST Servicing Mission 3B) payload Standard Switch Panels.
+# Source: JSC-48069-109 "STS-109 Payload Systems Data and Malfunction
+# Procedures", PL SYS/109/FIN A, section 10 (REF DATA):
+#   SSP 1 (L12U): figure PDF p.110 (10-4), functions table pp.110-115
+#   SSP 2 (L12L): figure PDF p.117 (10-11), functions table pp.117-119
+#   SSP 3 (L11U): figure PDF p.120 (10-14), functions table pp.120-122
+# Format: PANEL PLACE KIND | CAPTION | POSITIONS | FOLLOWS
+# A place whose device is drawn but carries only its "(Sn)"/"(CBn)" number,
+# with no caption and no table entry, is given kind none.
+# Group labels printed over several devices (e.g. "PCU POWER") are the
+# first caption line of each device under them.
+
+# ---------------------------------------------------------------------------
+# SSP 1, panel L12U  (FSS / TELESCOPE)
+# ---------------------------------------------------------------------------
+# Q1 -- upper left
+L12U  Q1   title | FSS | |
+L12U  S1   none  | | |
+L12U  S2   none  | | |
+L12U  S3   t2    | PCU POWER\nCONTR-B | ON/OFF |
+L12U  S4   t2    | PCU POWER\nCONTR-A | ON/OFF |
+L12U  S5   none  | | |
+L12U  S6   none  | | |
+# DS6 and DS7 are fitted under a single "NOT USED" placard; S7 is fitted with
+# ON/OFF legends but no caption and no table entry.
+L12U  DS6  tb    | NOT USED | GRAY/BP |
+L12U  DS7  tb    | NOT USED | GRAY/BP |
+L12U  S7   t2    | | ON/OFF |
+# Q2 -- upper right (legend box: "UP - ON / BP - OFF")
+L12U  Q2   title | TELESCOPE | |
+L12U  DS13 tb    | | UP/BP | S13
+L12U  S13  t3m   | ESSENTIAL BUS\nEXTERNAL\nPOWER | ON/-/OFF |
+L12U  DS14 tb    | | UP/BP | S14
+L12U  S14  t3m   | ESSENTIAL BUS\nINTERNAL\nPOWER | ON/-/OFF |
+L12U  DS15 tb    | | GRAY/BP | S15
+L12U  S15  t2    | FHST\nSHUTTER | CLOSE/OPEN |
+L12U  DS16 tb    | | GRAY/BP | S16
+L12U  S16  t2    | RSU SURV\nHTR PWR | ON/OFF |
+L12U  DS17 tb    | MN BUS\nPWR ON | GRAY/BP | S17
+L12U  S17  t3m   | MN BUS\nINT PWR | ON/-/OFF |
+L12U  DS18 tb    | | GRAY/BP | S18
+L12U  S18  t2    | ESS/MN\nSW ENA | ON/OFF |
+L12U  S19  none  | | |
+# Q3 -- lower left (no title box)
+L12U  CB2  cb    | FSS A\nSIDE PWR | |
+L12U  CB1  cb    | PDIP PWR 2/\nKu BAND | |
+L12U  DS8  tb    | | GRAY/BP | S8
+L12U  S8   t2    | CCTV HTR\nPWR | ON/OFF |
+L12U  S9   none  | | |
+L12U  DS10 tb    | | GRAY/BP | S10
+L12U  S10  t2    | FSS\nFMDM-A\nPWR | ON/OFF |
+L12U  DS11 tb    | | GRAY/BP | S11
+L12U  S11  t2    | FSS\nFMDM-B\nPWR | ON/OFF |
+L12U  DS12 tb    | | GRAY/BP | S12
+L12U  S12  t3    | FSS HTR\nPWR | PRI/OFF/RED |
+# Q4 -- lower right (no title box)
+L12U  CB4  cb    | SPACE TEL\nSW PWR | |
+L12U  CB3  cb    | PDIP PWR 1 | |
+L12U  S20  none  | | |
+# DS20 is the IPCU RLY CLOSED talkback (IPCU main power switches S1/S2 or
+# S3/S4 closed); the panel draws a line from it to S21, which drives them.
+L12U  DS20 tb    | IPCU RLY\nCLOSED | GRAY/BP | S21
+L12U  DS21 tb    | | GRAY/BP | S21
+L12U  S21  t3m   | MAIN BUS\nEXT PWR | ON/-/OFF |
+L12U  S22  none  | | |
+L12U  S23  none  | | |
+L12U  S24  t3    | SSM WK\nLIGHTS | ON/OFF/ON |
+
+# ---------------------------------------------------------------------------
+# SSP 2, panel L12L  (PSP BY-PASS / SAC)
+# ---------------------------------------------------------------------------
+# Q1 -- upper left
+L12L  Q1   title | PSP BY-PASS | |
+L12L  S1   none  | | |
+L12L  S2   none  | | |
+L12L  S3   none  | | |
+L12L  S4   t2    | PSP\nBY-PASS | ENABLE/DISABLE |
+L12L  S5   none  | | |
+L12L  S6   none  | | |
+L12L  S7   none  | | |
+# Q2 -- upper right (legend box: "UP - ON / BP - OFF")
+L12L  Q2   title | SAC | |
+L12L  DS13 tb    | | UP/BP | S13
+L12L  S13  t3m   | ASIPE HEATER\nA PWR | ON/-/OFF |
+L12L  DS14 tb    | | UP/BP | S14
+L12L  S14  t3m   | ASIPE HEATER\nB PWR | ON/-/OFF |
+L12L  S15  none  | | |
+L12L  S16  none  | | |
+L12L  S17  none  | | |
+L12L  DS18 tb    | | GRAY/BP | S18
+L12L  S18  t2    | SAP HEATER\nA PWR | ON/OFF |
+L12L  DS19 tb    | | GRAY/BP | S19
+L12L  S19  t2    | SAP HEATER\nB PWR | ON/OFF |
+# Q3 -- lower left (no title box)
+L12L  CB2  cb    | SW PWR | |
+L12L  CB1  none  | | |
+L12L  S8   none  | | |
+L12L  S9   none  | | |
+L12L  S10  none  | | |
+L12L  S11  none  | | |
+L12L  S12  none  | | |
+# Q4 -- lower right (no title box)
+L12L  CB4  cb    | SAC A-SIDE\nPWR ENA | |
+L12L  CB3  none  | | |
+# DS20 is drawn above S20 but is not in the functions table; assumed to
+# report SAC B-side power enable.
+L12L  DS20 tb    | | GRAY/BP | S20
+L12L  S20  t2    | SAC B-SIDE\nPWR ENA | ON/OFF |
+L12L  S21  none  | | |
+L12L  DS22 tb    | | GRAY/BP | S22
+L12L  S22  t2    | SAC OPA HEATER\nA PWR | ON/OFF |
+L12L  DS23 tb    | | GRAY/BP | S23
+L12L  S23  t2    | SAC OPA HEATER\nB PWR | ON/OFF |
+L12L  DS24 tb    | | GRAY/BP | S24
+L12L  S24  t3    | SAC\nEPDSU\nHTR PWR | A ON/OFF/B ON |
+
+# ---------------------------------------------------------------------------
+# SSP 3, panel L11U  (KEEL CAM / MULE)
+# ---------------------------------------------------------------------------
+# Q1 -- upper left: only the title box; every place is number-only.
+# (The keel camera switches themselves are in Q3.)
+L11U  Q1   title | KEEL CAM | |
+L11U  S1   none  | | |
+L11U  S2   none  | | |
+L11U  S3   none  | | |
+L11U  S4   none  | | |
+L11U  S5   none  | | |
+L11U  S6   none  | | |
+L11U  S7   none  | | |
+# Q2 -- upper right.  S13/S14 are drawn as momentary switches with an "ON"
+# legend but only their numbers and no table entry.
+L11U  Q2   title | MULE | |
+L11U  S13  none  | | |
+L11U  S14  none  | | |
+L11U  DS15 tb    | | GRAY/BP | S15
+L11U  S15  t2    | MULE\nFMDM-A\nPWR | ON/OFF |
+L11U  DS16 tb    | | GRAY/BP | S16
+L11U  S16  t2    | MULE\nFMDM-B\nPWR | ON/OFF |
+L11U  S17  none  | | |
+# DS18 (SURV HTR PWR) is wired to both S18 and S19: gray if A or B side ON.
+L11U  DS18 tb    | | GRAY/BP | S18
+L11U  S18  t2    | SURV HTR\nB PWR | ON/OFF |
+L11U  S19  t2    | SURV HTR\nA PWR | ON/OFF |
+# Q3 -- lower left (no title box)
+L11U  CB2  none  | | |
+L11U  CB1  cb    | SW PWR | |
+L11U  S8   t2    | KEEL CAM\nHTR/ILLUM | ON/OFF |
+L11U  S9   none  | | |
+L11U  S10  none  | | |
+L11U  S11  t2    | KEEL CAM\nENABLE | ON/OFF |
+L11U  S12  none  | | |
+# Q4 -- lower right (no title box)
+L11U  CB4  cb    | MULE SW\nPWR | |
+L11U  CB3  cb    | KEEL CAM\nPWR | |
+L11U  DS20 tb    | | GRAY/BP | S20
+L11U  S20  t2    | ESM HTR\nA PWR | ON/OFF |
+L11U  S21  none  | | |
+L11U  DS22 tb    | | GRAY/BP | S22
+L11U  S22  t2    | ESM HTR\nB PWR | ON/OFF |
+L11U  DS23 tb    | | GRAY/BP | S23
+L11U  S23  t2    | SOPE HTR\nA PWR | ON/OFF |
+# S24 is 3-position center-off; DOWN is "not wired" but is printed OFF.
+L11U  DS24 tb    | | GRAY/BP | S24
+L11U  S24  t3    | SOPE HTR\nB PWR | ON/OFF/OFF |

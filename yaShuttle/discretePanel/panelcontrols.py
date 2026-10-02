@@ -483,22 +483,31 @@ def load_ssp(path=None):
 
 def _ssp_place(panel, place, spec, default):
     key = _ssp_key(panel, place)
+    named = (panel, place) in spec
     kind, caption, positions, follows = spec.get((panel, place), (default, "", [], ""))
     c = dict(panel=panel, ssp=True, via=SSP_VIA, caption=caption, contacts={})
     if kind == "none":
         c.update(kind="blank")
     elif kind in ("t2", "t3", "t3m"):
-        pos = tuple(positions) or (("ON", "OFF") if kind == "t2" else ("ON", "-", "OFF"))
+        legends = tuple(positions) or (("ON", "OFF") if kind == "t2" else ("ON", "-", "OFF"))
+        # The same legend at both ends (STS-109's ON/OFF/ON): printed as it
+        # is, but the positions are named apart -- "ON 1", "OFF", "ON 3" --
+        # so that a script and a click can tell them apart.
+        pos = tuple(p if legends.count(p) == 1 else "%s %d" % (p, i + 1)
+                    for i, p in enumerate(legends))
+        if pos != legends:
+            c["legends"] = legends
         c.update(kind="t3" if kind == "t3m" else kind, positions=pos,
                  default=pos[1] if len(pos) == 3 else pos[-1],
-                 caption=caption or place)
+                 caption=caption if named else place)     # the bare grid is numbered
         if kind == "t3m":
             c["spring"] = (pos[0], pos[-1])
     elif kind == "tb":
         c.update(kind="tb", positions=tuple(positions) or ("GRAY", "BP"),
                  follows=_ssp_key(panel, follows) if follows else None)
     elif kind == "cb":
-        c.update(kind="cb", positions=("IN", "OUT"), default="IN", caption=caption or place)
+        c.update(kind="cb", positions=("IN", "OUT"), default="IN",
+                 caption=caption if named else place)
     else:
         raise ValueError("SSP %s %s: kind %r" % (panel, place, kind))
     CONTROLS[key] = c
