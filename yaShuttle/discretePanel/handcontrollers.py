@@ -382,6 +382,7 @@ class VirtualControls:
         self._sync_surface()
         self.ptr = {"roll": 0.0, "pitch": 0.0, "yaw": 0.0}   # pointer/touch part
         self.drag = None                     # gimbal: "pr" or "yaw" while held
+        self.buttons = set()                 # gimbal: mouse buttons held (1, 3)
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
         # The REAL keyboard focus, not an assumption: a window that never had
         # it gets no WINDOWFOCUSLOST, so "focused until told otherwise" showed
@@ -475,20 +476,26 @@ class VirtualControls:
             f = self.fingers.pop(e.finger_id, None)
             if f:
                 self._spring(f[0])
+        # THE BUTTONS HELD, not the last one pressed.  With pitch/roll held on
+        # the left button, a right-button yaw used to end the whole drag on
+        # its release, leaving pitch/roll frozen off centre under a left
+        # button still held (Ron, Windows, 2026-10-01).  Now each button's
+        # release springs back only its own axes, and the drag carries on
+        # with whatever is still held.
         elif e.type == pg.MOUSEBUTTONDOWN and not getattr(e, "touch", False):
             if self.style == "gimbal":
                 if e.button in (1, 3):
-                    self.drag = "pr" if e.button == 1 else "yaw"
-                    self._grab(True)
-                    pg.mouse.set_visible(False)
-                    if hasattr(pg.mouse, "get_rel"):
-                        pg.mouse.get_rel()
+                    self.buttons.add(e.button)
+                    self._gimbal_drag()
             elif e.button == 1:
                 self._finger_down(None, self._px(e.pos))  # split, by mouse
         elif e.type == pg.MOUSEBUTTONUP and not getattr(e, "touch", False):
             if self.style == "gimbal":
-                self._release_drag()
-            else:
+                if e.button in self.buttons:
+                    self.buttons.discard(e.button)
+                    self._spring("knob" if e.button == 1 else "ring")
+                    self._gimbal_drag()
+            elif e.button == 1:
                 f = self.fingers.pop("mouse", None)
                 if f:
                     self._spring(f[0])
@@ -511,9 +518,28 @@ class VirtualControls:
             self._release_drag()
         self.focused = now
 
+    def _gimbal_drag(self):
+        """Gimbal: what the held buttons drag -- yaw while the right one is
+        down, pitch/roll while only the left is -- grabbing the pointer
+        while any is, letting it go when none is."""
+        pg = self.pg
+        was = self.drag
+        self.drag = "yaw" if 3 in self.buttons else "pr" if 1 in self.buttons else None
+        if self.drag and not was:
+            self._grab(True)
+            pg.mouse.set_visible(False)
+        elif was and not self.drag:
+            self._grab(False)
+            pg.mouse.set_visible(True)
+        if self.drag != was and hasattr(pg.mouse, "get_rel"):
+            pg.mouse.get_rel()            # no jump from motion under the old one
+
     def _release_drag(self):
-        if self.drag:
-            self._spring("knob" if self.drag == "pr" else "ring")
+        """Focus lost: everything back to centre, nothing held."""
+        if self.drag or self.buttons:
+            self._spring("knob")
+            self._spring("ring")
+            self.buttons.clear()
             self.drag = None
             self._grab(False)
             self.pg.mouse.set_visible(True)
