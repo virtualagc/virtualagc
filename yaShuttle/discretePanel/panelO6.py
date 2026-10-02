@@ -852,6 +852,7 @@ class PanelO6:
         self._out_tb_shown = ["BP"] * N_GPC
 
         self._font_cache = {}
+        self._rot_columns = {}         # rotary key -> legends in columns
         # ONE WINDOW PER NUMBERED PANEL (owner, 2026-10-02): titled with the
         # panel's number alone -- O6, C3, F6 ... -- so no corner tag is
         # needed, each placed and sized by a layout under its own role, and
@@ -2217,7 +2218,8 @@ class PanelO6:
 
     TGL_W, TGL3_H, TGL2_H = 58, 136, 124      # the panel's paddle guards
     ROT_D = 64                                # a rotary's knob
-    CTL_GAP = 18
+    CTL_GAP = 28           # between controls in a row: legends of neighbours
+                           # nearly met at 18 (Mac-integrate, 2026-10-02)
 
     def _ctl_lines(self, text):
         return [l for l in (text or "").split("\n") if l]
@@ -2295,7 +2297,7 @@ class PanelO6:
             lw = max(self.pb, max([self._tw(l) for l in self._ctl_lines(c.get("legend"))]
                                   or [0]) + 12)
             lit = self.ctl_lamp.get(key, False)
-            self._rect(cx - lw / 2, y, cx + lw / 2, y + body, fill=C_PBI_LIT if lit else C_PBI_DARK,
+            self._rect(cx - lw / 2, y, cx + lw / 2, y + body, fill=C_PBI_LIT if lit else C_BTN,
                        outline=C_BEZEL, width=max(1, int(self.s)))
             lines = self._ctl_lines(c.get("legend"))
             for j, l in enumerate(lines):
@@ -2333,11 +2335,24 @@ class PanelO6:
                 t = math.radians(a)
                 out.append((p, (r + 10 + self._tw(p) / 2.0) * math.cos(t),
                             -(r + 4 + ls * 0.8) * math.sin(t), a))
-            return out
-        # MANY POSITIONS (the RMS's 8 and 12): round an arc they cannot all
-        # be read, so they stand in two columns beside the knob -- the first
+            # Round the top only if the legends clear each other and the
+            # knob; long ones (KU-BAND's GPC DESIG, AUTO TRACK) overprinted
+            # (WSL-integration, Mac-integrate, 2026-10-02), and go to columns.
+            boxes = [(dx - self._tw(p) / 2.0 - 2, dy - ls / 2.0, dx + self._tw(p) / 2.0 + 2,
+                      dy + ls / 2.0) for p, dx, dy, _a in out]
+            boxes.append((-r, -r, r, r))
+            clash = any(a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+                        for i, a in enumerate(boxes) for b in boxes[i + 1:])
+            if not clash:
+                self._rot_columns[key] = False
+                return out
+            out = []
+        # MANY POSITIONS (the RMS's 8 and 12), OR LONG LEGENDS: round an arc
+        # they cannot all be read, so they stand in two columns beside the
+        # knob -- the first
         # half on the left, rising, the rest on the right, falling -- each
         # joined to its tick by a leader (drawn in _rotary).
+        self._rot_columns[key] = True
         span = 300.0
         half = (n + 1) // 2
         for i, p in enumerate(pos):
@@ -2372,7 +2387,7 @@ class PanelO6:
         angs = [a for _p, _x, _y, a in legends]
         for p, dx, dy, a in legends:
             self._text(cx + dx, cy + dy, p, size=SETTING_SIZE)
-            if n > 5:
+            if self._rot_columns.get(key):
                 t = math.radians(a)
                 inner = dx + (self._tw(p) / 2.0 + 3) * (1 if dx < 0 else -1)
                 self._line(cx + r * math.cos(t), cy - r * math.sin(t), cx + inner, cy + dy,
@@ -2406,7 +2421,10 @@ class PanelO6:
         sizes = [[self._ctl_size(k) for k in row] for row in rows]
         widths = [sum(s[0] for s in row) + gap * (len(row) - 1) for row in sizes]
         width = max(widths + [self._tw(title, 10) + 24 if title else 0]) + 2 * 24
-        heights = [max(s[1] + s[2] + s[3] for s in row) for row in sizes]
+        # Aligned on their bodies, so a row is as tall as its tallest
+        # caption-and-legend above plus its tallest body-and-legend below
+        # (the ABORT button, with no caption, hung out of its pane).
+        heights = [max(s[1] for s in row) + max(s[2] + s[3] for s in row) for row in sizes]
         height = title_h + sum(heights) + pad * (len(rows) + 1)
         if measure:
             return width, height
