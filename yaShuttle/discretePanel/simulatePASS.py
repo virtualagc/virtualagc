@@ -1338,6 +1338,10 @@ def main():
                     help="display windows CRT1 up to CRT4: 1-4 (default 2 with more than "
                          "one GPC, else 1).  CRT4 is the aft display, on IDP 4 and the aft "
                          "keyboard")
+    ap.add_argument("--truth-ball", action="store_true",
+                    help="start truthball.py, a debugging attitude indicator driven "
+                         "by the vehicle dynamics' truth state (needs YAGPC_MDM_DEVICES=1 "
+                         "YAGPC_VEHDYN=1), beside PASS's own ADI attitude")
     ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default=None,
                     help="start handcontrollers.py for this station: lh (CDR, with the "
                          "forward THC), aft (aft RHC and THC) or rh (PLT, no THC).  One "
@@ -1806,6 +1810,9 @@ def main():
                 if args.style:
                     hc_argv += ["--style", args.style]
                 L.start("handcontrollers", hc_argv, HERE, env)
+            if args.truth_ball:
+                L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
+                                      "--size", str(tk_px(size))], HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
             # instead of the tape: --resume makes each computer load its own
