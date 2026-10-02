@@ -244,6 +244,12 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             if (t / 1000000u != blSec) { blSec = t / 1000000u; fflush(bl); }
         }
     }
+    /* THE DOWNLIST, WATCHED ON ITS WAY: every word on this computer's IP bus
+     * (BCE 24) goes to mdmdev_downlist_tap, which assembles the frames PASS
+     * writes to the PCM master unit and sends them to the ground -- and
+     * changes nothing about where the word goes from here. */
+    if (in->busID == 24 && (svc == GPC_SVC_XMIT_CMD || svc == GPC_SVC_XMIT_WORD))
+        mdmdev_downlist_tap(br->gpcId, (int)svc, (uint32_t)in->in.word, router_shared_us(br));
     /* A DEVICE FOLLOWS THE CLOCK OF WHOEVER IS TALKING TO IT.  The models
      * pace against simulated time -- the mass memory releases a word per word
      * time as the tape turns -- and a transfer is a conversation with ONE

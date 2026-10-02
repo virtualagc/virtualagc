@@ -60,6 +60,11 @@ bool mdmdev_fc_relay(void);
 bool mdmdev_dump(const char *dir);
 bool mdmdev_load(const char *dir);
 
+/* Every word on a computer's IP bus (BCE 24), for the downlist to the
+ * ground: svc GPC_SVC_XMIT_CMD (1) a command, GPC_SVC_XMIT_WORD (0) a
+ * data word.  Watches; answers nothing. */
+void mdmdev_downlist_tap(int gpcId, int svc, uint32_t word, double sharedUs);
+
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 

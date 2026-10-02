@@ -1068,6 +1068,81 @@ static void truth_publish(void) {
     sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
 }
 
+/* ---------------------------------------------------------------------
+ * THE DOWNLIST, to the ground.  Every 40 ms each GPC writes its downlist
+ * frame to the PCM master unit on its own IP bus (BCE 24): 32-word "write
+ * toggle buffer" commands, then an end-of-message command (FIOWCDAT,
+ * SSSRC/FIOPRMPG.asm:177-195).  The command word is the PCMMU's: address
+ * bits 23-21 (011 the PCMMU; anything else, the bit bucket that non-prime
+ * members of a redundant set are pointed at -- FCMBUSCM.asm:645-701),
+ * operation bits 20-17 (0101 write toggle buffer, 111x end of message), a
+ * 12-bit field whose top three bits name the toggle buffer and low nine
+ * the word offset, and the word count less one (JSC-18611 SB 29; the
+ * values nsts-sim-gpc measured, lru/pcmmu/pcmmuConf.coffee).  PASS needs no
+ * answer to either.
+ *
+ * Watched here, not answered: the router hands every bus-24 word to
+ * mdmdev_downlist_tap, which assembles each computer's frame and, at the
+ * end of message, sends it to the ground as one datagram on port base +
+ * DOWNLINK_OFFSET -- "DNL1", the GPC, the toggle buffer, the word count
+ * (halfwords), the simulated time in microseconds (an IEEE double), then
+ * the words as PASS wrote them, big-endian.  The frame describes itself:
+ * EB90, then frame number and format ID (CDWDOWNL.hal, DCDDOW.hal). */
+#define DOWNLINK_OFFSET 88
+#define DL_MAX 128
+
+static struct {
+    uint16_t w[DL_MAX];
+    int at, left;         /* the write in progress */
+    int tb;
+    int hi;               /* highest word written this frame, +1 */
+} dl[6];
+static long dlFrames;
+
+void mdmdev_downlist_tap(int gpcId, int svc, uint32_t word, double sharedUs) {
+    if (!crewOpen || crewFd[1] < 0 || gpcId < 1 || gpcId > 5) return;
+    if (svc == 1) {                                  /* GPC_SVC_XMIT_CMD */
+        uint32_t c = word & 0xffffffu;
+        dl[gpcId].left = 0;
+        if (((c >> 21) & 7u) != 3u) return;         /* not the PCMMU */
+        unsigned op = (c >> 17) & 0xfu, field = (c >> 5) & 0xfffu;
+        int tb = (int)(field >> 9), off = (int)(field & 0x1ffu);
+        if (op == 0x5u) {                            /* write toggle buffer */
+            if (off == 0) dl[gpcId].hi = 0;
+            dl[gpcId].tb = tb;
+            dl[gpcId].at = off;
+            dl[gpcId].left = (int)(c & 0x1fu) + 1;
+        } else if ((op & 0xeu) == 0xeu) {            /* end of message */
+            int n = off + 1;
+            if (n > dl[gpcId].hi) n = dl[gpcId].hi;
+            if (n <= 0 || n > DL_MAX) return;
+            uint8_t b[4 + 6 + 8 + 2 * DL_MAX];
+            memcpy(b, "DNL1", 4);
+            uint16_t h[3] = { (uint16_t)gpcId, (uint16_t)tb, (uint16_t)n };
+            for (int i = 0; i < 3; i++) { b[4 + 2 * i] = (uint8_t)(h[i] >> 8); b[5 + 2 * i] = (uint8_t)h[i]; }
+            put_be_double(b + 10, sharedUs);
+            for (int i = 0; i < n; i++) {
+                b[18 + 2 * i] = (uint8_t)(dl[gpcId].w[i] >> 8);
+                b[19 + 2 * i] = (uint8_t)dl[gpcId].w[i];
+            }
+            struct sockaddr_in to = {0};
+            to.sin_family = AF_INET;
+            to.sin_addr.s_addr = inet_addr("239.255.1.1");
+            to.sin_port = htons((uint16_t)(crewPortBase + DOWNLINK_OFFSET));
+            sendto(crewFd[1], (const char *)b, (size_t)(18 + 2 * n), 0,
+                   (struct sockaddr *)&to, sizeof to);
+            dlFrames++;
+        }
+    } else if (svc == 0 && dl[gpcId].left > 0) {    /* GPC_SVC_XMIT_WORD */
+        if (dl[gpcId].at >= 0 && dl[gpcId].at < DL_MAX) {
+            dl[gpcId].w[dl[gpcId].at] = (uint16_t)(word & 0xffffu);
+            if (dl[gpcId].at + 1 > dl[gpcId].hi) dl[gpcId].hi = dl[gpcId].at + 1;
+        }
+        dl[gpcId].at++;
+        dl[gpcId].left--;
+    }
+}
+
 bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
 
 /* Whether the flight instruments' messages are relayed (fc_output): on
@@ -1339,6 +1414,8 @@ bool mdmdev_load(const char *dir) {
 }
 
 void mdmdev_report(void) {
+    if (dlFrames > 0)
+        fprintf(stderr, "mdmdev: %ld downlist frame(s) sent to the ground\n", dlFrames);
     if (uplinkHeard)
         fprintf(stderr, "mdmdev: NSP1 uplink -- %ld buffer(s), %ld command word(s) delivered, "
                         "%d still queued\n", uplinkBuffers, uplinkWords, uplinkCount);
