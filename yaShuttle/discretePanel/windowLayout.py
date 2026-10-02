@@ -806,7 +806,11 @@ def windows():
     if MAC:
         return _mac_windows()
     if WIN:
-        return _win_windows()
+        # NOT WSLg's: a WSL run's windows are ordinary Windows top-levels on
+        # the same desktop, titled "... (Ubuntu)", and a native save or
+        # restore was taking them as its own (WSL-integration and
+        # Win11-native, 2026-10-02).  They belong to the run inside WSL.
+        return [w for w in _win_windows() if not WSLG_SUFFIX.search(w.get("title", ""))]
     out = []
     listing = run(["wmctrl", "-lpG"])
     if not listing.strip() and _no_client_list():
@@ -952,6 +956,7 @@ def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None
     return len(keep)
 
 
+WSLG_SUFFIX = re.compile(r" \([A-Za-z][\w.-]*\)$")   # WSLg's " (Ubuntu)"
 PORT_BASE_ARG = re.compile(r"--port-base[ =](\d+)")
 
 
