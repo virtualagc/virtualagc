@@ -329,6 +329,114 @@ static bool crewOpen, crewHeard, crewTrace;
 static int crewPortBase;
 static long crewMsgs;
 
+/* ---------------------------------------------------------------------
+ * THE NETWORK SIGNAL PROCESSOR AND THE GROUND'S UPLINK.
+ *
+ * PASS reads NSP1 through FF MDM 1 (bus 20, IUA 10) every 160 ms
+ * (SSSRC/FIONSPPG.asm, FIONSR11): the power discrete (FIONSP1P, card 9
+ * ch 1), the two-stage 'A' block discrete (FIONSPDR, card 4 ch 0), and 32
+ * words of data (FIONSPRD, card 11 ch 3) -- a status word, ten 48-bit
+ * command words as 30 halfwords, and a validity word (CDULNK.hal:266-312).
+ * AIESIP hands the buffer to DUP_NSP_MSG_PROC only when status bit 1, DATA
+ * READY (0x8000), is set; unused command slots must be all zeros; the NSP
+ * answers each buffer once (DUPNSP.hal; nsts-sim-gpc lru/nsp).
+ *
+ * The ground is a program (discretePanel/groundstation.py) that sends each
+ * poll's buffer as one datagram on port base + UPLINK_OFFSET: "UPL1", a
+ * halfword count of command words (1-10), then the words, three halfwords
+ * each, big-endian.  The buffers are delivered one per NSP1 data read, in
+ * order.  UNTIL A GROUND HAS SENT SOMETHING THE NSP IS UNPOWERED, exactly as
+ * before (mtumodel.c: zeros), so a run without a ground station is
+ * unchanged; after it, the power discrete reads on (0x8000) and the block
+ * discrete off. */
+#define UPLINK_OFFSET 99
+#define UPLINK_QMAX 64
+#define NSP_DATA_READ  0x26C7Fu   /* FIONSPRD: card 11 ch 3, 32 words */
+#define NSP1_POWER     0x26420u   /* FIONSP1P: card 9 ch 1, 1 word */
+#define NSP2_POWER     0x27020u   /* FIONSP2P: card 12 ch 1, 1 word */
+#define NSP_DISCRETE   0x25000u   /* FIONSPDR: card 4 ch 0, 1 word */
+
+static int uplinkFd = -1;
+static bool uplinkHeard;
+static uint16_t uplinkQ[UPLINK_QMAX][31];    /* 30 command halfwords + validity */
+static int uplinkHead, uplinkCount;
+static long uplinkBuffers, uplinkWords;
+
+static void uplink_open(int portBase, struct in_addr iface) {
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) return;
+    int reuse = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
+#if defined(SO_REUSEPORT) && !defined(__linux__)
+    setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof reuse);
+#endif
+    struct sockaddr_in addr = {0};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons((uint16_t)(portBase + UPLINK_OFFSET));
+    struct ip_mreq mreq = {0};
+    mreq.imr_multiaddr.s_addr = inet_addr("239.255.1.1");
+    mreq.imr_interface.s_addr = iface.s_addr;
+    if (bind(fd, (struct sockaddr *)&addr, sizeof addr) < 0 ||
+        setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
+        fprintf(stderr, "mdmdev: no uplink (port %d): %s\n", portBase + UPLINK_OFFSET,
+                strerror(errno));
+        close(fd);
+        return;
+    }
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    uplinkFd = fd;
+}
+
+static void uplink_poll(void) {
+    if (uplinkFd < 0) return;
+    uint8_t b[8 + 6 * 10];
+    for (;;) {
+        ssize_t r = recvfrom(uplinkFd, (char *)b, sizeof b, 0, NULL, NULL);
+        if (r <= 0) break;
+        if (r < 6 || memcmp(b, "UPL1", 4) != 0) continue;
+        int n = ((int)b[4] << 8) | b[5];
+        if (n < 0 || n > 10 || r < 6 + 6 * n) continue;
+        uplinkHeard = true;
+        if (n == 0) continue;                      /* a ground saying hello */
+        if (uplinkCount >= UPLINK_QMAX) {
+            fprintf(stderr, "mdmdev: uplink queue full, buffer dropped\n");
+            continue;
+        }
+        uint16_t *q = uplinkQ[(uplinkHead + uplinkCount) % UPLINK_QMAX];
+        memset(q, 0, 31 * sizeof *q);
+        for (int i = 0; i < 3 * n; i++) q[i] = (uint16_t)((b[6 + 2 * i] << 8) | b[7 + 2 * i]);
+        for (int i = 0; i < n; i++) q[30] |= (uint16_t)(0x8000u >> i);
+        uplinkCount++;
+    }
+}
+
+/* The NSP's answer to one of PASS's reads, or false to leave the zeros. */
+static bool nsp_reply(int busID, uint32_t cmd, int n, uint16_t *out) {
+    if (CMD_IUA(cmd) != IUA_FF) return false;
+    int u = ff_unit(busID);
+    uint32_t f = cmd & 0x3ffffu;
+    if (f != NSP_DATA_READ && f != NSP1_POWER && f != NSP2_POWER && f != NSP_DISCRETE)
+        return false;
+    uplink_poll();
+    if (!uplinkHeard) return false;
+    for (int i = 0; i < n; i++) out[i] = 0;
+    if (f == NSP1_POWER) { if (u == 1) out[0] = 0x8000u; return true; }
+    if (f == NSP2_POWER || f == NSP_DISCRETE) return true;     /* NSP2 off; no block */
+    if (u != 1) return true;                                    /* NSP2: no data */
+    if (uplinkCount > 0) {
+        uint16_t *q = uplinkQ[uplinkHead];
+        out[0] = 0x8000u;                                       /* DATA READY */
+        for (int i = 0; i < 31 && 1 + i < n; i++) out[1 + i] = q[i];
+        for (int i = 0; i < 10; i++) if (q[30] & (0x8000u >> i)) uplinkWords++;
+        uplinkHead = (uplinkHead + 1) % UPLINK_QMAX;
+        uplinkCount--;
+        uplinkBuffers++;
+    }
+    return true;
+}
+
 void mdmdev_crew_open(int portBase) {
     if (crewOpen) return;              /* one vehicle, one set of sockets */
     crewOpen = true;
@@ -370,6 +478,7 @@ void mdmdev_crew_open(int portBase) {
         setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&loop, sizeof loop);
         crewFd[k] = fd;
     }
+    uplink_open(portBase, iface);
 }
 
 static void crew_apply(int k, const uint8_t *buf, int len) {
@@ -1032,6 +1141,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
     crew_poll();
+    if (nsp_reply(busID, cmd, n, out)) return true;
     if (!mdmdev_enabled()) {
         /* No device model: zeros, as ever, plus whatever crew contacts the
          * panel is driving -- and only once it has driven some. */
@@ -1229,6 +1339,9 @@ bool mdmdev_load(const char *dir) {
 }
 
 void mdmdev_report(void) {
+    if (uplinkHeard)
+        fprintf(stderr, "mdmdev: NSP1 uplink -- %ld buffer(s), %ld command word(s) delivered, "
+                        "%d still queued\n", uplinkBuffers, uplinkWords, uplinkCount);
     if (fcCalls > 0)
         fprintf(stderr, "mdmdev: %ld flight-instrument message(s) heard on FC1-4, %ld sent "
                         "to the displays\n", fcCalls, fcSent);
