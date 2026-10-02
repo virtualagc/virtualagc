@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <time.h>
@@ -178,6 +179,7 @@ static struct {
 } oms[2];
 
 static PhysState st;
+static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
 
 /* THE RECENT PAST: (t, r, v) after every step, so a sensor can report the
  * state at a moment just gone -- a GPS solution's time of validity -- by
@@ -186,6 +188,25 @@ static PhysState st;
 #define HIST_N 256
 static struct { double t, r[3], v[3]; } hist[HIST_N];
 static int histHead, histCount;
+
+/* YAGPC_VEHDYN_STATELOG=<seconds>: the truth state every so often, in the
+ * flight software's own units and frame -- M50 feet and feet a second, PASS
+ * GMT -- to set beside its navigation state (CGNV_R_FILT_LFE and the rest,
+ * read from a memory snapshot with tools/pasvar.py). */
+static void state_log(void) {
+    static double every = -1.0, next = 0.0;
+    if (every < 0.0) {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_STATELOG");
+        every = (e != NULL) ? atof(e) : 0.0;
+    }
+    if (every <= 0.0 || st.t < next) return;
+    next = (floor(st.t / every) + 1.0) * every;
+    double g = (gmtZero >= 0.0) ? gmtZero + st.t : -1.0;
+    fprintf(stderr, "vehdyn-state: t=%.3f gmt=%.3f r_ft=%.1f %.1f %.1f v_fts=%.3f %.3f %.3f "
+                    "mass_kg=%.1f\n", st.t, g,
+            st.r[0] / 0.3048, st.r[1] / 0.3048, st.r[2] / 0.3048,
+            st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass);
+}
 
 static void hist_push(void) {
     histHead = (histHead + 1) % HIST_N;
@@ -390,6 +411,7 @@ void vehdyn_advance(double sharedUs) {
         phys_step(&st, dt, firing ? f : NULL, firing ? tau : NULL);
         phys_drag_accel(&st, ad1);
         hist_push();
+        state_log();
         for (int i = 0; i < 3; i++) sensedDv[i] += 0.5 * (ad0[i] + ad1[i]) * dt;
         if (firing) {
             double fi[3];
@@ -462,7 +484,6 @@ void vehdyn_set_fire_words(const uint16_t ff[5], const uint16_t fa[5], double sh
  * say 2000 -- does not matter: no part of this simulation looks at stars. */
 #define PASS_EARTH_RATE 0.729211514646E-4
 
-static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
 
 static void pass_rnp(int year, int day, double A[3][3]) {
     const double PI = 3.14159265358979323846;
