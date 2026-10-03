@@ -2146,6 +2146,14 @@ class PanelO6:
             ox, oy = mx, my
         BOTTOM = 0              # the monitors' rectangles already leave it
         G = self.PLACE_GAP
+        # AND THE SIDE BORDERS: neighbours side by side need the gap plus
+        # each one's visible border.  Under WSLg Weston's frame is 38 px a
+        # side, 32 of it an invisible shadow, so 6 px shows -- and with only
+        # the 8-px gap every pair overlapped by 4 (WSL-integration, for Ron).
+        side = max(0, root.winfo_rootx() - root.winfo_x())
+        if os.path.isdir("/mnt/wslg") and side >= 32:
+            side -= 32
+        GX = G + 2 * side
 
         # A SKYLINE PER MONITOR, packed bottom-left: each window at the lowest
         # then leftmost place it fits, tallest first.  Plain rows wasted the
@@ -2157,7 +2165,7 @@ class PanelO6:
                 # O6 is already there: nothing above or beside it to its left
                 # is offered (a first guess, not a puzzle), the space under
                 # it is
-                o_l, o_r = max(mx, ox), min(mx + mw, ox + ow + G)
+                o_l, o_r = max(mx, ox), min(mx + mw, ox + ow + GX)
                 segs = []
                 if o_l > mx:
                     segs.append([mx, o_l - mx, max(my, oy)])
@@ -2206,17 +2214,17 @@ class PanelO6:
 
         lines = [skyline(m) for m in order_m]
         # every rectangle taken, for the gap search below: O6 first
-        taken = [(ox, oy, ow + G, oh + deco + G)]
+        taken = [(ox, oy, ow + GX, oh + deco + G)]
         rest = []
         for win, w, h in sorted(items, key=lambda it: -it[2]):
             hh = h + deco
             for k, m in enumerate(order_m):
-                spot = fit(lines[k], m, w + G, hh + G)
+                spot = fit(lines[k], m, w + GX, hh + G)
                 if spot is not None:
                     x, y = spot
                     win.top.geometry("+%d+%d" % (x, y))
-                    lines[k] = occupy(lines[k], x, w + G, y + hh + G)
-                    taken.append((x, y, w + G, hh + G))
+                    lines[k] = occupy(lines[k], x, w + GX, y + hh + G)
+                    taken.append((x, y, w + GX, hh + G))
                     break
             else:
                 rest.append((win, w, h))
@@ -2233,7 +2241,7 @@ class PanelO6:
 
         still = []
         for win, w, h in rest:
-            ww, hh = w + G, h + deco + G
+            ww, hh = w + GX, h + deco + G
             spot = None
             for mx, my, mw, mh in order_m:
                 xs = {mx} | {tx + tw for tx, ty, tw, th in taken if mx <= tx + tw < mx + mw}
