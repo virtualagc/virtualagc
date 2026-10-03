@@ -26,7 +26,8 @@ right, roll right wing down).  The ball is fixed in the reference frame,
 and the marking at the face's centre is the (pitch, yaw) of the direction
 the nose points, d = Ry(P) Rz(Y) X; roll turns the ball about the line of
 sight.  The texture, adi_ball.png from the Space Shuttle Ultra add-on for
-the Orbiter simulator (samples/), maps 360 deg of pitch along its 1800-pixel
+the Orbiter simulator (samples/, a local copy -- not in the repository; a
+plain ball in the same layout is drawn when it is absent), maps 360 deg of pitch along its 1800-pixel
 height (180 at both ends, 0 in the middle) and yaw -90..+90 across its 900
 pixels, onto a sphere whose longitude runs about the model's Y axis; worked
 through, a ball point of label (P, Y) is the model point
@@ -164,8 +165,60 @@ class Feeds(object):
             self.passAdi[h[1]] = (p, y, r, valid, time.monotonic())
 
 
+def procedural_ball():
+    """The ball's map drawn here, in the texture's own layout, for when
+    adi_ball.png (third-party artwork, not in the repository) is absent:
+    1800 rows of pitch at 5 per degree, 180 at both ends and 0 in the
+    middle, the positive half white and the negative dark; 900 columns of
+    yaw, -90 to +90; pitch lines and labels every 30 deg, yaw meridians every
+    30 deg, and the zero-yaw circle doubled."""
+    surf = pygame.Surface((1024, 2048), pygame.SRCALPHA)
+    surf.fill((0, 0, 0, 0))
+    W, H, PX = 900, 1800, 5
+    white, dark = (235, 235, 235), (60, 62, 80)
+    pygame.draw.rect(surf, white, (0, 0, W, H // 2))
+    pygame.draw.rect(surf, dark, (0, H // 2, W, H // 2))
+    pygame.font.init()
+    font = pygame.font.SysFont("dejavusans,sans", 44, bold=True)
+    small = pygame.font.SysFont("dejavusans,sans", 30, bold=True)
+    for p in range(-180, 181, 10):
+        y = H // 2 - p * PX
+        if y < 0 or y >= H:
+            continue
+        ink = dark if p > 0 else white
+        if p % 30 == 0:
+            pygame.draw.line(surf, ink if p else (20, 20, 20), (0, y), (W, y), 4 if p else 6)
+            lab = "%d" % (((p % 360) // 10) % 36)
+            for x in (225, 450 - 60, 450 + 60, 675):
+                t = font.render(lab, True, ink)
+                surf.blit(t, (x - t.get_width() // 2, y - t.get_height() - 4 if p >= 0 else y + 4))
+        else:
+            for x in range(60, W, 90):
+                pygame.draw.line(surf, ink, (x - 12, y), (x + 12, y), 3)
+    for yw in range(-90, 91, 30):
+        x = 450 + yw * PX
+        x = min(max(x, 2), W - 3)
+        for half, ink in ((0, dark), (1, white)):
+            pygame.draw.line(surf, ink, (x, half * H // 2), (x, (half + 1) * H // 2), 3)
+        if yw:
+            lab = "%d" % ((yw % 360) // 10)
+            for p in (15, 45, -15, -45):
+                y = H // 2 - p * PX
+                ink = dark if p > 0 else white
+                t = small.render(lab, True, ink)
+                surf.blit(t, (x + 6, y - t.get_height() // 2))
+    for dx in (-6, 6):
+        for half, ink in ((0, dark), (1, white)):
+            pygame.draw.line(surf, ink, (450 + dx, half * H // 2), (450 + dx, (half + 1) * H // 2), 3)
+    return surf
+
+
 def load_texture(path):
-    surf = pygame.image.load(path)
+    if os.path.exists(path):
+        surf = pygame.image.load(path)
+    else:
+        print("truthball: %s not found -- drawing a plain ball instead" % path)
+        surf = procedural_ball()
     data = pygame.image.tostring(surf, "RGBA", True)
     w, h = surf.get_rect().size
     tid = glGenTextures(1)
@@ -215,8 +268,15 @@ class Text(object):
         data = pygame.image.tostring(surf, "RGBA", True)
         w, h = surf.get_size()
         H = glGetIntegerv(GL_VIEWPORT)[3]
+        # Pixel rectangles are textured and lit like any fragment: off, or
+        # the text takes the colour of whatever texel the raster position
+        # happens to sample.
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_LIGHTING)
         glWindowPos2d(x, H - y - h)
         glDrawPixels(w, h, GL_RGBA, GL_UNSIGNED_BYTE, data)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_TEXTURE_2D)
 
 
 def draw_symbol(W, H):
