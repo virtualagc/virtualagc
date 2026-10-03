@@ -2205,6 +2205,8 @@ class PanelO6:
             return merged
 
         lines = [skyline(m) for m in order_m]
+        # every rectangle taken, for the gap search below: O6 first
+        taken = [(ox, oy, ow + G, oh + deco + G)]
         rest = []
         for win, w, h in sorted(items, key=lambda it: -it[2]):
             hh = h + deco
@@ -2214,9 +2216,43 @@ class PanelO6:
                     x, y = spot
                     win.top.geometry("+%d+%d" % (x, y))
                     lines[k] = occupy(lines[k], x, w + G, y + hh + G)
+                    taken.append((x, y, w + G, hh + G))
                     break
             else:
                 rest.append((win, w, h))
+
+        # THE GAPS THE SKYLINE CANNOT SEE.  It knows only each monitor's
+        # lowest free edge, so holes under its overhangs went unused while
+        # windows that fitted them cascaded (WSL-integration, --size 768 on
+        # two 4K monitors).  What is left tries every corner made by a
+        # monitor's edges and the windows placed -- lowest, then leftmost --
+        # before anything is cascaded.
+        def clear(x, y, w, h):
+            return all(x + w <= tx or tx + tw <= x or y + h <= ty or ty + th <= y
+                       for tx, ty, tw, th in taken)
+
+        still = []
+        for win, w, h in rest:
+            ww, hh = w + G, h + deco + G
+            spot = None
+            for mx, my, mw, mh in order_m:
+                xs = {mx} | {tx + tw for tx, ty, tw, th in taken if mx <= tx + tw < mx + mw}
+                ys = {my} | {ty + th for tx, ty, tw, th in taken if my <= ty + th < my + mh}
+                for y in sorted(ys):
+                    for x in sorted(xs):
+                        if x + ww <= mx + mw and y + hh <= my + mh and clear(x, y, ww, hh):
+                            spot = (x, y)
+                            break
+                    if spot:
+                        break
+                if spot:
+                    break
+            if spot:
+                win.top.geometry("+%d+%d" % spot)
+                taken.append((spot[0], spot[1], ww, hh))
+            else:
+                still.append((win, w, h))
+        rest = still
         if rest:
             # TOO MANY FOR THE SCREENS: cascade the rest down the last
             # monitor, overlapping -- better than lost.
