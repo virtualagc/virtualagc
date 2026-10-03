@@ -77,13 +77,14 @@ CELL = 76
 GAP = 5
 GRID_PAD = 10          # air between the rounded bezel and the cells
 RADIUS = 16
-# Captions ~half the original point sizes; diagonal numbers ~70%.
-# GPC STATUS is ~30% larger than FAILED GPC.
-SZ_STATUS = 8
-SZ_FAILED = 6
-SZ_NUM = 6
+# Captions: half the original point sizes was too small to read (Ron,
+# 2026-10-02), so 50% up from that -- GPC STATUS still ~30% larger than
+# FAILED GPC.  The numbers in the lamps (SZ_DIAG) stay as they were.
+SZ_STATUS = 12
+SZ_FAILED = 9
+SZ_NUM = 9
 SZ_DIAG = 15
-SZ_VTEXT = 6
+SZ_VTEXT = 9
 # TEXT SIZE ON macOS.  simulatePASS.py halves a Tk window's --size there,
 # because macOS Tk measures in points (two physical pixels on a Retina
 # screen) where Linux Tk measures physical pixels.  The text must not shrink
@@ -264,8 +265,9 @@ class CamPanel:
     def _vtext_packed(self, x, y, text, size=6, fill=C_INK):
         """Stacked caption centred on y.
 
-        Letter pitch is cap-height plus 30% of that height.  A space is
-        just the 30% gap, so VOTING / GPC stay two words without a hole.
+        Letter pitch is cap-height plus 30% of that height.  A space is a
+        whole letter's pitch: with only the 30% gap VOTING and GPC ran
+        together (Ron, 2026-10-02).
         """
         font = self._font(size)
         ascent = float(helvetica.ascent(self._tkfont(size)))
@@ -274,7 +276,7 @@ class CamPanel:
         slots = []
         for ch in text:
             if ch.isspace():
-                slots.append((None, gap))
+                slots.append((None, ascent + gap))
             else:
                 slots.append((ch, ascent + gap))
         total = sum(h for _ch, h in slots) or 1.0
