@@ -39,8 +39,23 @@ void vehdyn_advance(double sharedUs);
 /* The current truth state, for the sensors. */
 const PhysState *vehdyn_state(void);
 
-/* Propellant left in a module: 0 forward, 1 left pod, 2 right pod (kg). */
+/* Propellant left in a module (kg): RCS 0 forward, 1 left pod, 2 right pod;
+ * OMS 3 left, 4 right.  Set it -- for tests that want a vehicle without,
+ * say, the OMS load -- and the mass properties follow. */
 double vehdyn_propellant(int module);
+void vehdyn_set_propellant(int module, double kg);
+
+/* THE OMS ENGINES, 0 left and 1 right: whether the engine's valves are open
+ * (fire), whether an actuator controller is powered, and the gimbal command
+ * it is giving (deg, pitch and yaw as PASS scales them), from sharedUs on.
+ * And what they are doing: burning, and where each gimbal is (axis 0 pitch,
+ * 1 yaw, deg). */
+void vehdyn_set_oms(int e, bool fire, bool powered, double pitchDeg, double yawDeg,
+                    double sharedUs);
+bool vehdyn_oms_burning(int e);
+double vehdyn_oms_thrust(int e);      /* fraction of full, tail-off included */
+double vehdyn_oms_gimbal(int e, int axis);
+double vehdyn_oms_on_seconds(int e);
 
 /* Non-gravitational velocity change sensed since the start, in the inertial
  * frame (m/s) -- what ideal accelerometers on an inertial platform count. */
@@ -53,6 +68,26 @@ const char *vehdyn_jet_name(int k);
 int vehdyn_jet_index(const char *name);
 
 void vehdyn_report(void);
+
+/* THE CLOCK: the Unix time that the state's t = 0 stands for, as the timing
+ * unit reports it (mtumodel.c).  Sets the Earth's orientation to the flight
+ * software's own (GLWRNP, GNFEAR) at that clock.  vehdyn_gmt(t) is the
+ * flight software's GMT in seconds -- day of year x 86400 + seconds of day
+ * -- at state time t, or -1 before the clock is known. */
+void vehdyn_set_gmt_zero(double unixAtZero);
+
+/* The truth position and velocity (inertial, m and m/s) at a recent time t
+ * no later than now -- interpolated from the steps taken; false if t is
+ * outside what is kept (a few hundred steps). */
+bool vehdyn_state_at(double t, double r[3], double v[3]);
+double vehdyn_gmt(double t);
+
+/* A session capture: the state as numbers, into b[0..max-1], returning how
+ * many it takes (call with max 0 to ask); and back, rebased so that the
+ * restored clock's zero is the captured instant.  vehdyn_load returns the
+ * captured time (s), or a negative number for a record it cannot read. */
+int vehdyn_save(double *b, int max);
+double vehdyn_load(const double *b, int n);
 
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */

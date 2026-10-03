@@ -660,6 +660,17 @@ def saved_epoch(snapdir):
     machine travels as a duration and is rebased on load, but the time of day
     is not a duration -- it is what the crew reads.
     """
+    # THE VEHICLE'S OWN GMT where yaGPC2 recorded it (capture.json gmtUnix):
+    # the time of day the timing unit was reporting.  The wall-clock epoch
+    # below equals it only while simulated time keeps exact pace with real
+    # time; any lag would move a restored vehicle's GMT -- the flight
+    # software's and the truth state's -- ahead of where both had been, and
+    # with a --date-time-epoch run the wall clock is not the vehicle's at all.
+    try:
+        with open(os.path.join(snapdir, "capture.json")) as fh:
+            return float(json.load(fh)["gmtUnix"])
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
     try:
         with open(os.path.join(snapdir, "vehicle.json")) as fh:
             return float(json.load(fh)["epoch"])

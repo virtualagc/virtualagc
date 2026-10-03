@@ -32,6 +32,10 @@ int main(void) {
     const double RE = 6378137.0, PI = 3.14159265358979323846;
     PhysState s;
 
+    /* The closed-form checks first, against a point mass in a vacuum. */
+    phys_set_gravity(0, 0);
+    phys_set_drag(0.0, 0.0, 0.0, 0.0);
+
     /* ONE CIRCULAR ORBIT AT 400 km, 51.6 deg: back where it began after one
      * period 2 pi sqrt(a^3 / mu), at constant radius, with energy and
      * angular momentum unchanged. */
@@ -119,6 +123,146 @@ int main(void) {
         phys_body_to_inertial(&s, xb, xi);
         check(fabs((dv[0] * xi[0] + dv[1] * xi[1] + dv[2] * xi[2]) / norm(dv) - 1.0) < 1e-6,
               "along the body X axis", norm(dv), want);
+    }
+
+    /* AN ORBIT FROM ITS ELEMENTS: 300 x 200 km at 28.5 deg, at perigee --
+     * the radius is the perigee's, the energy gives the semi-major axis, the
+     * angular momentum the inclination, and half a period later the vehicle
+     * is at apogee. */
+    {
+        orbiter(&s);
+        phys_init_elements(&s, RE, 300e3, 200e3, 28.5 * PI / 180, 1.0, 0.5, 0.0, 0.0);
+        double ra = RE + 300e3, rp = RE + 200e3, a = 0.5 * (ra + rp), h[3];
+        check(fabs(norm(s.r) - rp) < 1e-6, "elements: perigee radius (m)", norm(s.r), rp);
+        double aE = -PHYS_MU_EARTH / (2 * phys_orbit_energy(&s));
+        check(fabs(aE - a) < 1e-3, "elements: semi-major axis (m)", aE, a);
+        phys_orbit_h(&s, h);
+        double inc = acos(h[2] / norm(h)) * 180 / PI;
+        check(fabs(inc - 28.5) < 1e-9, "elements: inclination (deg)", inc, 28.5);
+        phys_advance_to(&s, PI * sqrt(a * a * a / PHYS_MU_EARTH), 0.5, NULL, NULL);
+        check(fabs(norm(s.r) - ra) < 0.05, "elements: apogee half a period later (m)", norm(s.r), ra);
+    }
+
+    /* THE FIELD'S ZONAL COEFFICIENTS are the textbook J2, J3, J4. */
+    check(fabs(phys_jn(2) / 1.08262668e-3 - 1.0) < 1e-6, "J2", phys_jn(2), 1.08262668e-3);
+    check(fabs(phys_jn(3) / -2.53265649e-6 - 1.0) < 1e-5, "J3", phys_jn(3), -2.53265649e-6);
+    check(fabs(phys_jn(4) / -1.61962159e-6 - 1.0) < 1e-5, "J4", phys_jn(4), -1.61962159e-6);
+
+    /* J2 ALONE AGAINST ITS CLOSED FORM at an arbitrary point:
+     * a = -mu r/r^3 [1 + 1.5 J2 (R/r)^2 (1 - 5 z^2/r^2)] in x, y and
+     * [... (3 - 5 z^2/r^2)] in z. */
+    {
+        phys_set_gravity(2, 0);
+        double r[3] = { 4.1e6, -3.3e6, 4.4e6 }, a[3];
+        phys_gravity(0.0, r, a);
+        double rr = norm(r), R = 6378136.3, j2 = phys_jn(2), z2 = r[2] * r[2] / (rr * rr);
+        double k = -PHYS_MU_EARTH / (rr * rr * rr), c = 1.5 * j2 * (R / rr) * (R / rr);
+        double want[3] = { k * r[0] * (1 + c * (1 - 5 * z2)), k * r[1] * (1 + c * (1 - 5 * z2)),
+                           k * r[2] * (1 + c * (3 - 5 * z2)) };
+        double d[3] = { a[0] - want[0], a[1] - want[1], a[2] - want[2] };
+        check(norm(d) < 1e-12 * norm(want), "J2 acceleration, closed form", norm(a), norm(want));
+    }
+
+    /* THE FULL FIELD IS THE GRADIENT OF ITS POTENTIAL (central differences),
+     * the tesseral terms included, with the Earth turned to some angle. */
+    {
+        phys_set_gravity(PHYS_GRAV_NMAX, PHYS_GRAV_NMAX);
+        double r[3] = { -2.9e6, 5.1e6, 3.2e6 }, a[3], worst = 0.0, h = 1.0;
+        phys_gravity(1234.5, r, a);
+        for (int i = 0; i < 3; i++) {
+            double rp[3], rm[3];
+            memcpy(rp, r, sizeof rp); memcpy(rm, r, sizeof rm);
+            rp[i] += h; rm[i] -= h;
+            double g = (phys_potential(1234.5, rp) - phys_potential(1234.5, rm)) / (2 * h);
+            if (fabs(g - a[i]) > worst) worst = fabs(g - a[i]);
+        }
+        check(worst < 1e-7, "4x4 field is the gradient of its potential (m/s^2)", worst, 0.0);
+        /* and the non-central part is J2-sized: about 1e-3 of the whole */
+        double pm = PHYS_MU_EARTH / (norm(r) * norm(r)), d[3];
+        for (int i = 0; i < 3; i++) d[i] = a[i] + pm * r[i] / norm(r);
+        check(norm(d) / pm > 3e-4 && norm(d) / pm < 3e-3, "the bulge's share of gravity",
+              norm(d) / pm, 1e-3);
+    }
+
+    /* THE NODE REGRESSES under J2 at its secular rate,
+     * -1.5 n J2 (R/a)^2 cos i: about 5 degrees a day at 400 km, 51.6 deg.
+     * Measured over fifteen whole orbits, so the short-period swing of the
+     * osculating node cancels. */
+    {
+        phys_set_gravity(2, 0);
+        orbiter(&s);
+        double inc = 51.6 * PI / 180, a = RE + 400e3, R = 6378136.3;
+        phys_init_circular(&s, RE, 400e3, inc, 0.0, 0.0, 0.0);
+        double n = sqrt(PHYS_MU_EARTH / (a * a * a));
+        double T = 2 * PI / n * (1 - 1.5 * phys_jn(2) * (R / a) * (R / a) * (4 * cos(inc) * cos(inc) - 1));
+        phys_advance_to(&s, 15 * T, 5.0, NULL, NULL);
+        double h[3];
+        phys_orbit_h(&s, h);
+        double node = atan2(h[0], -h[1]);
+        double want = -1.5 * n * phys_jn(2) * (R / a) * (R / a) * cos(inc) * 15 * T;
+        check(fabs(node / want - 1.0) < 0.03, "nodal regression over 15 orbits (rad)", node, want);
+        check(fabs(want * 180 / PI / (15 * T) * 86400 + 5.0) < 0.3, "about -5 deg/day",
+              want * 180 / PI / (15 * T) * 86400, -5.0);
+    }
+
+    /* JACOBI'S INTEGRAL: in a field that turns uniformly about the pole,
+     * v^2/2 - U - omega . (r x v) is conserved -- the energy check for the
+     * full field, which is not static in the inertial frame. */
+    {
+        phys_set_gravity(PHYS_GRAV_NMAX, PHYS_GRAV_NMAX);
+        orbiter(&s);
+        phys_init_circular(&s, RE, 400e3, 51.6 * PI / 180, 0.3, 0.7, 0.0);
+        double h[3];
+        phys_orbit_h(&s, h);
+        double j0 = 0.5 * (s.v[0] * s.v[0] + s.v[1] * s.v[1] + s.v[2] * s.v[2])
+                  - phys_potential(s.t, s.r) - 7.2921158553e-5 * h[2];
+        phys_advance_to(&s, 3 * 5560.0, 1.0, NULL, NULL);
+        phys_orbit_h(&s, h);
+        double j1 = 0.5 * (s.v[0] * s.v[0] + s.v[1] * s.v[1] + s.v[2] * s.v[2])
+                  - phys_potential(s.t, s.r) - 7.2921158553e-5 * h[2];
+        check(fabs(j1 - j0) / fabs(j0) < 1e-10, "Jacobi integral, 4x4 field, 3 orbits", j1, j0);
+    }
+
+    /* DRAG: the density at 400 km is the table's, and over one orbit the
+     * orbit loses energy at rho Cd A v^3 / (2 m) -- the Orbiter nose-first,
+     * 40 m^2, so the 2 e-7 m/s^2 the header promises, give or take. */
+    {
+        check(fabs(phys_air_density(400e3) - 3.725e-12) < 1e-16, "density at 400 km",
+              phys_air_density(400e3), 3.725e-12);
+        phys_set_gravity(0, 0);
+        phys_set_drag(2.2, 40.0, 220.0, 360.0);
+        orbiter(&s);
+        phys_init_circular(&s, RE, 400e3, 0.0, 0.0, 0.0, 0.0);
+        /* nose along the velocity: body X = inertial Y, a turn of 90 deg about Z */
+        s.q[0] = cos(PI / 4); s.q[3] = sin(PI / 4);
+        double ad[3];
+        phys_drag_accel(&s, ad);
+        double v = norm(s.v), vrel = v - 7.2921158553e-5 * (RE + 400e3);
+        double want = 0.5 * 3.725e-12 * 2.2 * 40.0 * vrel * vrel / s.mass;
+        check(fabs(norm(ad) / want - 1.0) < 0.01, "drag nose-first (m/s^2)", norm(ad), want);
+        check(ad[1] < 0.0, "drag opposes the motion", ad[1], -want);
+        /* side-on, five and a half times as much */
+        s.q[0] = 1.0; s.q[3] = 0.0;
+        double ad2[3];
+        phys_drag_accel(&s, ad2);
+        check(fabs(norm(ad2) / norm(ad) - 220.0 / 40.0) < 0.01, "drag follows the attitude",
+              norm(ad2) / norm(ad), 5.5);
+        /* an orbit's loss is the drag's power summed along it -- the area
+         * changing as the wind goes round a body held fixed (a box shows
+         * the wind sum A_i |u_i|, not a constant) */
+        double e0 = phys_orbit_energy(&s), wantDe = 0.0;
+        for (int i = 0; i < 556; i++) {
+            double adp[3];
+            phys_drag_accel(&s, adp);
+            double p0 = adp[0] * s.v[0] + adp[1] * s.v[1] + adp[2] * s.v[2];
+            phys_advance_to(&s, s.t + 10.0, 1.0, NULL, NULL);
+            phys_drag_accel(&s, adp);
+            wantDe += 5.0 * (p0 + adp[0] * s.v[0] + adp[1] * s.v[1] + adp[2] * s.v[2]);
+        }
+        double de = phys_orbit_energy(&s) - e0;
+        check(fabs(de / wantDe - 1.0) < 0.002, "energy lost to drag in an orbit (J/kg)", de, wantDe);
+        check(de < -5.0 && de > -50.0, "a few tens of J/kg an orbit at 400 km", de, -15.0);
+        phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }
 
     printf("physics: %d/%d checks passed\n", checks - failures, checks);

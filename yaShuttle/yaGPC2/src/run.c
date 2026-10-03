@@ -244,6 +244,12 @@ void bus_router_service(void *ctx, GpcServiceNumber svc,
             if (t / 1000000u != blSec) { blSec = t / 1000000u; fflush(bl); }
         }
     }
+    /* THE DOWNLIST, WATCHED ON ITS WAY: every word on this computer's IP bus
+     * (BCE 24) goes to mdmdev_downlist_tap, which assembles the frames PASS
+     * writes to the PCM master unit and sends them to the ground -- and
+     * changes nothing about where the word goes from here. */
+    if (in->busID == 24 && (svc == GPC_SVC_XMIT_CMD || svc == GPC_SVC_XMIT_WORD))
+        mdmdev_downlist_tap(br->gpcId, (int)svc, (uint32_t)in->in.word, router_shared_us(br));
     /* A DEVICE FOLLOWS THE CLOCK OF WHOEVER IS TALKING TO IT.  The models
      * pace against simulated time -- the mass memory releases a word per word
      * time as the tape turns -- and a transfer is a conversation with ONE
@@ -753,8 +759,17 @@ static void batchrunner_write_capture(BatchRunner *r) {
                     if (*c == '"' || *c == '\\') fputc('\\', cf);
                     fputc((unsigned char)*c < 0x20 ? ' ' : *c, cf);
                 }
-                fprintf(cf, "\",\n  \"capturedAtUs\": %.0f\n}\n",
+                fprintf(cf, "\",\n  \"capturedAtUs\": %.0f",
                         r->age.gpc.cpu.elapsedTimeUs);
+                /* THE VEHICLE'S GMT, for the restore to resume at: the time
+                 * of day the timing unit was reporting, not the wall clock
+                 * the capture was asked for at -- equal only while simulated
+                 * time keeps exact pace with real time, and a restore that
+                 * resumed at a later GMT would move it forward under a
+                 * flight software and a truth vehicle that had not moved. */
+                double gmtUnix = mtumodel_unix_now(r->mtuModel);
+                if (gmtUnix > 0.0) fprintf(cf, ",\n  \"gmtUnix\": %.6f", gmtUnix);
+                fprintf(cf, "\n}\n");
                 fclose(cf);
             }
         }

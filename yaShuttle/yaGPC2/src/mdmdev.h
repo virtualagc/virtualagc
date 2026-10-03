@@ -50,6 +50,21 @@ void mdmdev_crew_open(int portBase);
  * device model on, or with a panel to send the lamps to. */
 bool mdmdev_capturing(void);
 
+/* Whether mtumodel.c should collect the DDU and MEDS writes on FC1-4 for
+ * the displays: with a panel, unless YAGPC_FC_RELAY=0. */
+bool mdmdev_fc_relay(void);
+
+/* A session capture's vehdyn.json in dir: the vehicle dynamics' truth state
+ * and the devices' memory.  Only with the device model on; a capture
+ * without the file restores to the default vehicle, and says so. */
+bool mdmdev_dump(const char *dir);
+bool mdmdev_load(const char *dir);
+
+/* Every word on a computer's IP bus (BCE 24), for the downlist to the
+ * ground: svc GPC_SVC_XMIT_CMD (1) a command, GPC_SVC_XMIT_WORD (0) a
+ * data word.  Watches; answers nothing. */
+void mdmdev_downlist_tap(int gpcId, int svc, uint32_t word, double sharedUs);
+
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 

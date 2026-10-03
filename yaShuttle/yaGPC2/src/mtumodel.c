@@ -1,4 +1,5 @@
 #include "mtumodel.h"
+#include "vehdyn.h"
 #include "json.h"
 
 #include <math.h>
@@ -1194,6 +1195,17 @@ static uint16_t mdm_word(const struct MtuModel *m, int b, int r) {
     return (i >= 0 && i < FF_REPLY_MAX) ? m->mdmData[b][i] : 0;
 }
 
+double mtumodel_unix_now(const struct MtuModel *m) {
+    if (m == NULL || m->epochSec == NULL || *m->epochSec <= 0.0) return -1.0;
+    double epochUs;
+    if (!ff_mdm_off() && m->sharedUs >= 0.0)
+        epochUs = m->sharedUs + (m->haveBase ? m->baseUs
+                                 : (m->offsetUs != NULL ? *m->offsetUs : 0.0));
+    else
+        epochUs = (m->clockUs ? *m->clockUs : 0.0) + (m->offsetUs != NULL ? *m->offsetUs : 0.0);
+    return *m->epochSec + epochUs / 1e6;
+}
+
 static void mtu_fill_time(struct MtuModel *m, int b) {
     /* THE UNIT'S OWN TIME, from the vehicle's shared clock where there is one
      * -- see mtumodel_set_shared_us.  Falling back to the caller's clock is
@@ -1221,6 +1233,11 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         us = m->clockUs ? *m->clockUs : 0.0;
         epochUs = us + ((m->offsetUs != NULL) ? *m->offsetUs : 0.0);
     }
+    /* The vehicle's dynamics run on the same clock without the epoch:
+     * tell them what Unix time their zero is, so GPS time and the Earth's
+     * rotation agree with the GMT reported here. */
+    if (m->epochSec != NULL && *m->epochSec > 0.0 && mdm_time_us(m) >= 0.0)
+        vehdyn_set_gmt_zero(*m->epochSec + (epochUs - mdm_time_us(m)) / 1e6);
     double skewUs = mtu_skew_us(m);  /* diagnostic; see mtu_skew_us */
     us += skewUs;
     epochUs += skewUs;
@@ -1698,6 +1715,19 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
             ((cmd >> 14) & 0xfu) == 8u) {
             m->outCmd[b] = cmd;
             m->outWant[b] = (int)((cmd & 0x1fu) + 1u);
+            m->outHave[b] = 0;
+            m->outIssuer[b] = g;
+        }
+        /* OR THE FLIGHT INSTRUMENTS' DATA: the HFE's DDU writes (ADI, HSI,
+         * AVVI, AMI) and MEDS transfers on FC1-4, IUA 6, 9 or 15 with the
+         * DDU write bit, X'40000' -- and here the low five bits ARE the
+         * word count, not one less (nsts-sim-gpc lru/ddu/dduConf.coffee).
+         * mdmdev.c passes them to the displays. */
+        else if (mdmdev_fc_relay() && (cmd & 0x40000u) &&
+                 (CMD_IUA(cmd) == 6u || CMD_IUA(cmd) == 9u || CMD_IUA(cmd) == 15u) &&
+                 (cmd & 0x1fu) != 0u) {
+            m->outCmd[b] = cmd;
+            m->outWant[b] = (int)(cmd & 0x1fu);
             m->outHave[b] = 0;
             m->outIssuer[b] = g;
         }

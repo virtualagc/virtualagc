@@ -7,6 +7,7 @@
 #include <math.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
@@ -14,6 +15,7 @@
 
 #include "compat.h"
 #include "envcache.h"
+#include "json.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -327,6 +329,114 @@ static bool crewOpen, crewHeard, crewTrace;
 static int crewPortBase;
 static long crewMsgs;
 
+/* ---------------------------------------------------------------------
+ * THE NETWORK SIGNAL PROCESSOR AND THE GROUND'S UPLINK.
+ *
+ * PASS reads NSP1 through FF MDM 1 (bus 20, IUA 10) every 160 ms
+ * (SSSRC/FIONSPPG.asm, FIONSR11): the power discrete (FIONSP1P, card 9
+ * ch 1), the two-stage 'A' block discrete (FIONSPDR, card 4 ch 0), and 32
+ * words of data (FIONSPRD, card 11 ch 3) -- a status word, ten 48-bit
+ * command words as 30 halfwords, and a validity word (CDULNK.hal:266-312).
+ * AIESIP hands the buffer to DUP_NSP_MSG_PROC only when status bit 1, DATA
+ * READY (0x8000), is set; unused command slots must be all zeros; the NSP
+ * answers each buffer once (DUPNSP.hal; nsts-sim-gpc lru/nsp).
+ *
+ * The ground is a program (discretePanel/groundstation.py) that sends each
+ * poll's buffer as one datagram on port base + UPLINK_OFFSET: "UPL1", a
+ * halfword count of command words (1-10), then the words, three halfwords
+ * each, big-endian.  The buffers are delivered one per NSP1 data read, in
+ * order.  UNTIL A GROUND HAS SENT SOMETHING THE NSP IS UNPOWERED, exactly as
+ * before (mtumodel.c: zeros), so a run without a ground station is
+ * unchanged; after it, the power discrete reads on (0x8000) and the block
+ * discrete off. */
+#define UPLINK_OFFSET 99
+#define UPLINK_QMAX 64
+#define NSP_DATA_READ  0x26C7Fu   /* FIONSPRD: card 11 ch 3, 32 words */
+#define NSP1_POWER     0x26420u   /* FIONSP1P: card 9 ch 1, 1 word */
+#define NSP2_POWER     0x27020u   /* FIONSP2P: card 12 ch 1, 1 word */
+#define NSP_DISCRETE   0x25000u   /* FIONSPDR: card 4 ch 0, 1 word */
+
+static int uplinkFd = -1;
+static bool uplinkHeard;
+static uint16_t uplinkQ[UPLINK_QMAX][31];    /* 30 command halfwords + validity */
+static int uplinkHead, uplinkCount;
+static long uplinkBuffers, uplinkWords;
+
+static void uplink_open(int portBase, struct in_addr iface) {
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) return;
+    int reuse = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
+#if defined(SO_REUSEPORT) && !defined(__linux__)
+    setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof reuse);
+#endif
+    struct sockaddr_in addr = {0};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons((uint16_t)(portBase + UPLINK_OFFSET));
+    struct ip_mreq mreq = {0};
+    mreq.imr_multiaddr.s_addr = inet_addr("239.255.1.1");
+    mreq.imr_interface.s_addr = iface.s_addr;
+    if (bind(fd, (struct sockaddr *)&addr, sizeof addr) < 0 ||
+        setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof mreq) < 0) {
+        fprintf(stderr, "mdmdev: no uplink (port %d): %s\n", portBase + UPLINK_OFFSET,
+                strerror(errno));
+        close(fd);
+        return;
+    }
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    uplinkFd = fd;
+}
+
+static void uplink_poll(void) {
+    if (uplinkFd < 0) return;
+    uint8_t b[8 + 6 * 10];
+    for (;;) {
+        ssize_t r = recvfrom(uplinkFd, (char *)b, sizeof b, 0, NULL, NULL);
+        if (r <= 0) break;
+        if (r < 6 || memcmp(b, "UPL1", 4) != 0) continue;
+        int n = ((int)b[4] << 8) | b[5];
+        if (n < 0 || n > 10 || r < 6 + 6 * n) continue;
+        uplinkHeard = true;
+        if (n == 0) continue;                      /* a ground saying hello */
+        if (uplinkCount >= UPLINK_QMAX) {
+            fprintf(stderr, "mdmdev: uplink queue full, buffer dropped\n");
+            continue;
+        }
+        uint16_t *q = uplinkQ[(uplinkHead + uplinkCount) % UPLINK_QMAX];
+        memset(q, 0, 31 * sizeof *q);
+        for (int i = 0; i < 3 * n; i++) q[i] = (uint16_t)((b[6 + 2 * i] << 8) | b[7 + 2 * i]);
+        for (int i = 0; i < n; i++) q[30] |= (uint16_t)(0x8000u >> i);
+        uplinkCount++;
+    }
+}
+
+/* The NSP's answer to one of PASS's reads, or false to leave the zeros. */
+static bool nsp_reply(int busID, uint32_t cmd, int n, uint16_t *out) {
+    if (CMD_IUA(cmd) != IUA_FF) return false;
+    int u = ff_unit(busID);
+    uint32_t f = cmd & 0x3ffffu;
+    if (f != NSP_DATA_READ && f != NSP1_POWER && f != NSP2_POWER && f != NSP_DISCRETE)
+        return false;
+    uplink_poll();
+    if (!uplinkHeard) return false;
+    for (int i = 0; i < n; i++) out[i] = 0;
+    if (f == NSP1_POWER) { if (u == 1) out[0] = 0x8000u; return true; }
+    if (f == NSP2_POWER || f == NSP_DISCRETE) return true;     /* NSP2 off; no block */
+    if (u != 1) return true;                                    /* NSP2: no data */
+    if (uplinkCount > 0) {
+        uint16_t *q = uplinkQ[uplinkHead];
+        out[0] = 0x8000u;                                       /* DATA READY */
+        for (int i = 0; i < 31 && 1 + i < n; i++) out[1 + i] = q[i];
+        for (int i = 0; i < 10; i++) if (q[30] & (0x8000u >> i)) uplinkWords++;
+        uplinkHead = (uplinkHead + 1) % UPLINK_QMAX;
+        uplinkCount--;
+        uplinkBuffers++;
+    }
+    return true;
+}
+
 void mdmdev_crew_open(int portBase) {
     if (crewOpen) return;              /* one vehicle, one set of sockets */
     crewOpen = true;
@@ -368,6 +478,7 @@ void mdmdev_crew_open(int portBase) {
         setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&loop, sizeof loop);
         crewFd[k] = fd;
     }
+    uplink_open(portBase, iface);
 }
 
 static void crew_apply(int k, const uint8_t *buf, int len) {
@@ -495,6 +606,84 @@ static void crew_aid_hfe(int k, uint16_t *b, int nb) {
     for (int c = 0; c < 7 && 29 + c < nb; c++) b[29 + c] = (uint16_t)crewAid[k][14][c];
 }
 
+/* ---------------------------------------------------------------------
+ * THE OMS ENGINES (vehdyn.c flies them).  What the computers command and
+ * what the engines answer -- GSDFIR.hal, GPKOMS.hal, GR5OMS.hal, GRNOMS.hal
+ * and the I/O tables CGBOBF/CGBIH1/CGBIM1:
+ *
+ *   VALVES   the GN2 control-valve coils, a DOH bit 2 (0x4000) on all four
+ *            FAs: card 15 ch 1 left, card 7 ch 1 right.  The engine fires
+ *            while ANY of its four is set -- either coil opens a valve --
+ *            AND its OMS ENG switch on panel C3 is at ARM or ARM/PRESS,
+ *            which is hardware: the coils have no power otherwise (SCOM
+ *            2.18-8).  The switch is FA DIH card 3 ch 1 bits 7-8 (0x0300),
+ *            left on FA1/FA3 and right on FA2/FA4, from the panel; or
+ *            YAGPC_OMS_ARMED=1 for a run without one.
+ *   GIMBALS  analog outputs, FA AOD card 4 ch 7 (pitch) and 8 (yaw) --
+ *            VALUES, not set and reset masks -- in 6400 counts a volt:
+ *            counts = deg x C + K, pitch C 3902.08 K -286.72, yaw C
+ *            +/-3912.96 (left/right) K -1660.80 (GPKOMS.hal:145-152).  FA1
+ *            drives the left primary controller, FA2 left secondary, FA4
+ *            right primary, FA3 right secondary; the actuator follows the
+ *            controller whose power PASS has selected, FF DOH card 2 ch 2
+ *            bits 2-3 on FF1/FF2 (left primary/secondary) and FF4/FF3
+ *            (right).
+ *   FEEDBACK the actuator positions in every FA's HFE read words 0-1, the
+ *            inverse scaling (GPLOMS.hal:63-70): deg = counts x C + K, pitch
+ *            C 0.00025625 K 0.0735, yaw C +/-0.00025562 K +/-0.4244.
+ *   Pc       chamber pressure on FA3 (left) and FA4 (right): MFE SEG2(11),
+ *            which the fail logic compares with 16,000 counts
+ *            (CGRS_PC_THRESH), and the 1-word HFE read FIOHI1C5.  20,000
+ *            while burning -- 100%, if 0-5 V spans the meter's 0-160%, which
+ *            is inferred, not documented -- falling with the thrust through
+ *            the tail-off, and 0 otherwise.
+ * ------------------------------------------------------------------- */
+static int16_t faAod[5][NCARD][NCHAN];
+#define PC_FA_READ 0x25A40u     /* FIOHI1C5: card 6 ch 18, 1 word */
+#define OMS_PC_BURNING 20000u
+
+static bool oms_armed(int e) {
+    static int force = -1;
+    if (force < 0) {
+        const char *v = yagpc_getenv("YAGPC_OMS_ARMED");
+        force = v != NULL && *v != '\0' && strcmp(v, "0") != 0;
+    }
+    if (force) return true;
+    int a = (e == 0) ? 1 : 2, b = (e == 0) ? 3 : 4;
+    return ((crewIn[CREW_NFF + a][3][1] | crewIn[CREW_NFF + b][3][1]) & 0x0300u) != 0;
+}
+
+static void push_oms(double sharedUs) {
+    if (!vehdyn_enabled()) return;
+    for (int e = 0; e < 2; e++) {
+        int card = (e == 0) ? 15 : 7;
+        bool coils = false;
+        for (int k = 1; k <= 4; k++) coils = coils || (faOut[k][card][1] & 0x4000u);
+        /* the powered controller, primary first, and the FA that drives it */
+        int pri = (e == 0) ? 1 : 4, sec = (e == 0) ? 2 : 3, fa = 0;
+        if (ffOut[pri][2][2] & 0x6000u) fa = pri;
+        else if (ffOut[sec][2][2] & 0x6000u) fa = sec;
+        double p = 0.0, y = 0.0;
+        if (fa) {
+            p = (faAod[fa][4][7] + 286.72) / 3902.08;
+            y = (faAod[fa][4][8] + 1660.80) / ((e == 0) ? 3912.96 : -3912.96);
+        }
+        vehdyn_set_oms(e, coils && oms_armed(e), fa != 0, p, y, sharedUs);
+    }
+}
+
+/* An actuator's position as its feedback counts. */
+static uint16_t oms_feedback(int e, int axis) {
+    double d = vehdyn_oms_gimbal(e, axis), c;
+    if (axis == 0) c = (d - 0.0735) / 0.00025625;
+    else if (e == 0) c = (d - 0.4244) / 0.00025562;
+    else c = (d + 0.4244) / -0.00025562;
+    c = floor(c + 0.5);
+    if (c > 32767.0) c = 32767.0;
+    if (c < -32768.0) c = -32768.0;
+    return (uint16_t)(int16_t)c;
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
@@ -562,6 +751,19 @@ static void ff_mfe(int k, uint16_t *w, int n) {
     for (int i = 0; i < n; i++) w[i] = (i < 21) ? b[i] : 0;
 }
 
+/* YAGPC_MDM_TRACE_FA=<k>: every write to aft MDM k's card 10 (the jet fire
+ * B words) and every change in what its HFE read reports as chamber pressure
+ * and driver output, with the vehicle's time -- for ledger #272, a jet PASS
+ * failed off. */
+static int trace_fa(void) {
+    static int k = -1;
+    if (k < 0) {
+        const char *e = yagpc_getenv("YAGPC_MDM_TRACE_FA");
+        k = (e != NULL) ? atoi(e) : 0;
+    }
+    return k;
+}
+
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
     memset(b, 0, sizeof b);
@@ -582,6 +784,20 @@ static void fa_hfe(int k, uint16_t *w, int n) {
      * rotation detectors, which must read running (GQRORB.hal:139-270). */
     b[21] = (uint16_t)(fa_jets_b(k) | 0x00E0u);
     b[22] = fa_jets_b(k);
+    if (trace_fa() == k) {
+        static uint16_t last = 0xFFFFu;
+        if (b[21] != last)
+            fprintf(stderr, "mdmtrace: t=%.4f FA%d HFE read Pc/drv %04x\n",
+                    vehdyn_state()->t, k, (unsigned)b[21]);
+        last = b[21];
+    }
+    /* the OMS gimbal positions, words 0-1: FA1/FA2 the left engine's
+     * controllers, FA3/FA4 the right's */
+    if (vehdyn_enabled()) {
+        int e = (k <= 2) ? 0 : 1;
+        b[0] = oms_feedback(e, 0);
+        b[1] = oms_feedback(e, 1);
+    }
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -605,10 +821,133 @@ static void fa_mfe(int k, uint16_t *w, int n) {
         SEG2(2) = RCS_HE_P;   SEG2(5) = RCS_HE_P;
         SEG2(3) = RCS_PRP_T;
         SEG2(1) = RCS_HE_T;
-        SEG2(10) = 16000u;                       /* OMS; SEG2(11), Pc, stays 0 */
+        SEG2(10) = 16000u;                       /* OMS */
+        SEG2(11) = (uint16_t)(OMS_PC_BURNING * vehdyn_oms_thrust(k == 3 ? 0 : 1));
     }
 #undef SEG2
     for (int i = 0; i < n; i++) w[i] = (i < 34) ? b[i] : 0;
+}
+
+/* ---------------------------------------------------------------------
+ * THE GPS RECEIVERS, one behind each of FF1-3 on card 11 channel 2: a
+ * 32-word read every 0.96 s (FIOGPSRD, X'26C5F') and two 32-word writes every
+ * 0.16 s (FIOGPSWT, X'22C5F') -- BCEEQU.asm:618-620, FIOGPSPG.asm.  The
+ * formats are the GPS SOP's (GPBGPS.hal) and the Nav Aids SOP FSSR's
+ * (STS83-0014, 4.17.1.1.2 and 4.17.6.1); HAL bit 1 is the most significant.
+ *
+ * WHAT THE COMPUTERS SEND.  Message 1 (header AAAA) always, then Message 3
+ * (BBBB, attitude and air data) in NAV or Message 2 (CCCC, lever arms) in
+ * INIT.  Its word 2 commands the mode in bits 1-2 -- NAV 10, INIT 01, TEST 00
+ * -- and asks, in bits 3, 9 and 16, for an announced reset, an init-state
+ * set and a filter restart; the receiver answers each in its own status.
+ * Nothing here waits: the receiver is in the commanded mode at once, its
+ * almanac downloaded and its satellites already tracked -- a receiver that
+ * has been on for a while, not one acquiring from cold.
+ *
+ * WHAT IT ANSWERS (VEHDYN only: it reports the truth state, so without one
+ * there is nothing to say, and the read stays zeros -- mode blank on SPEC 55,
+ * which nothing treats as a failure):
+ *   w1     header: DDDD TEST, EEEE INIT, FFFF NAV (GPBGPS.hal:515)
+ *   w2-3   NAV_MODE_WORD: valid, mode, almanac, UTC valid; the completions;
+ *          the mode's complement in w3 bits 15-16, which must match
+ *   w4     GPS week, full count
+ *   w5-7   seconds of week, 48 bits, 1e-8 s
+ *   w8-13  WGS-84 Earth-fixed position, 32-bit, 1/16 ft
+ *   w14-19 Earth-relative velocity in that frame, 32-bit, 1/512 ft/s
+ *   w20    FOM 1 (0-25 m) in bits 12-15, GDOP 2 in bits 8-11
+ *   w22,24,26,28,29  five channels tracking (bits 5-7 101), PRN in 11-16
+ *   w31    TFOM 1
+ *
+ * TIME.  PASS turns week and seconds into its GMT as
+ * week x 604800 + sow - 11 (leap seconds, GPBS_LEAP_SEC_CORR) - 504403200
+ * (CGNS_T_GPS_OFFSET_SECS, 1995-12-31 0h in GPS seconds) - the uplinkable
+ * adjustments (zero) -- GPBGPS.hal:926-932 -- so this is the inverse, from
+ * vehdyn_gmt(): the same arithmetic, not the real GPS-UTC relation, so that
+ * the time PASS recovers is its own GMT exactly.  The solution is valid
+ * GPS_LAG_S before the read: PASS takes a state only within 0.48 s of its MFE
+ * time tag (:950-957) and only once an IMU sample is newer (GPJGPS.hal), so
+ * it must be recent but in the past -- and every read's time is new, or PASS
+ * sees the data as static (:935).
+ *
+ * FRAME.  PASS converts back with M50 = (Rz(lambda) A)^T ECEF and
+ * V = M v_ecef + omega x R (GLJRCV.hal:520-531, GVMVRE.hal), with A and
+ * lambda the GLWRNP/GNFEAR Earth that vehdyn.c gives the physics -- so the
+ * position is phys_inertial_to_earth() applied to the truth, and the
+ * velocity has the Earth's turning taken out, exactly. */
+#define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
+#define GPS_WRITE 0x22C5Fu    /* FIOGPSWT: mode 8, card 11 ch 2, 32 words */
+#define GPS_LAG_S 0.05
+#define GPS_OFFSET_S (504403200.0 + 11.0)
+
+typedef struct {
+    bool haveCmd;
+    unsigned mode;            /* 2 NAV, 1 INIT, 0 TEST: word 2 bits 1-2 */
+    uint16_t done;            /* w3 completions owed: 8000 reset, 4000 init, 1000 restart */
+    long reads, writes;
+} Gps;
+static Gps gps[4];            /* [1..3] */
+
+static void gps_write(int u, const uint16_t *w, int n) {
+    Gps *g = &gps[u];
+    g->writes++;
+    if (n < 2 || w[0] != 0xAAAAu) return;   /* Message 2 or 3: nothing to act on */
+    g->haveCmd = true;
+    g->mode = (w[1] >> 14) & 3u;
+    g->done = 0;
+    if (w[1] & 0x2000u) g->done |= 0x8000u;  /* announced reset -> reset complete */
+    if (w[1] & 0x0080u) g->done |= 0x4000u;  /* init state set -> init states complete */
+    if (w[1] & 0x0001u) g->done |= 0x1000u;  /* filter restart -> restart complete */
+}
+
+static void put32(uint16_t *w, double x) {
+    double c = floor(x + 0.5);
+    if (c > 2147483647.0) c = 2147483647.0;
+    if (c < -2147483648.0) c = -2147483648.0;
+    uint32_t u = (uint32_t)(int32_t)c;
+    w[0] = (uint16_t)(u >> 16); w[1] = (uint16_t)u;
+}
+
+/* The words of a read; false when there is nothing to report. */
+static bool gps_words(int u, uint16_t w[32]) {
+    Gps *g = &gps[u];
+    memset(w, 0, 32 * sizeof *w);
+    if (!vehdyn_enabled() || !g->haveCmd) return false;
+    const PhysState *s = vehdyn_state();
+    double tv = s->t - GPS_LAG_S, gmt = vehdyn_gmt(tv);
+    double r[3], v[3];
+    if (gmt < 0.0 || !vehdyn_state_at(tv, r, v)) return false;
+    static const uint16_t HDR[4] = { 0xDDDDu, 0xEEEEu, 0xFFFFu, 0xDDDDu };
+    static const uint16_t COMPL[4] = { 0x0003u, 0x0002u, 0x0001u, 0x0003u };
+    unsigned mode = (g->mode == 3u) ? 0u : g->mode;
+    w[0] = HDR[mode];
+    w[1] = (uint16_t)((mode << 13) | 0x0200u | 0x0080u);   /* mode, almanac, UTC valid */
+    if (mode == 2u) w[1] |= 0x8000u;                        /* nav data valid */
+    w[2] = (uint16_t)(g->done | COMPL[mode]);
+    double total = gmt + GPS_OFFSET_S;
+    double week = floor(total / 604800.0), sow = total - week * 604800.0;
+    w[3] = (uint16_t)week;
+    uint64_t ticks = (uint64_t)llround(sow * 1e8);
+    w[4] = (uint16_t)(ticks >> 32); w[5] = (uint16_t)(ticks >> 16); w[6] = (uint16_t)ticks;
+    if (mode == 1u) { w[7] = 0; w[8] = (uint16_t)week; return true; }   /* INIT */
+    if (mode != 2u) return true;                                        /* TEST: no faults */
+    double M[3][3], re[3], ve[3], rate = phys_earth_rate();
+    phys_inertial_to_earth(tv, M);
+    for (int i = 0; i < 3; i++) {
+        re[i] = M[i][0] * r[0] + M[i][1] * r[1] + M[i][2] * r[2];
+        ve[i] = M[i][0] * v[0] + M[i][1] * v[1] + M[i][2] * v[2];
+    }
+    ve[0] += rate * re[1];                   /* less the Earth's turning: omega z x r */
+    ve[1] -= rate * re[0];
+    for (int i = 0; i < 3; i++) {
+        put32(&w[7 + 2 * i], re[i] / FT_M * 16.0);
+        put32(&w[13 + 2 * i], ve[i] / FT_M * 512.0);
+    }
+    w[19] = (uint16_t)((2u << 5) | (1u << 1));             /* GDOP 2, FOM 1 */
+    static const uint8_t PRN[5] = { 3, 7, 11, 19, 24 };
+    static const int CHW[5] = { 21, 23, 25, 27, 28 };
+    for (int c = 0; c < 5; c++) w[CHW[c]] = (uint16_t)(0x0A00u | PRN[c]);
+    w[30] = 0x0001u;                                        /* TFOM 1 */
+    return true;
 }
 
 /* ---------------------------------------------------------------------
@@ -624,11 +963,206 @@ static void push_fire(double sharedUs) {
     vehdyn_set_fire_words(ff, fa, sharedUs);
 }
 
+/* ---------------------------------------------------------------------
+ * THE FLIGHT INSTRUMENTS' DATA, to the displays.  Every 40 ms the HFE writes
+ * each of FC1-4 (buses 20-23) the MEDS transfer (four messages to IUA 15)
+ * and the DDU messages -- ADI to DDUs 1-3 (IUAs 6, 9, 15), HSI, AVVI and AMI
+ * to DDUs 1 and 2 (nsts-sim-gpc lru/ddu/dduConf.coffee, from the OI30
+ * listing's FIOHFEPG).  An IDP hears all four buses; its MDU's DATA BUS
+ * edgekey picks the one the PFD follows.  These buses are modelled here,
+ * not on the network, so each message goes to MEDS2 as one datagram on
+ * port base + FC_INSTR_OFFSET, halfwords big-endian:
+ *     FC_INSTR_MAGIC, FC bus 1-4, command high 8 bits, command low 16 bits,
+ *     word count, the words
+ * Sent when its words change, and at least every FC_INSTR_REFRESH_US so a
+ * display can tell a quiet bus (its instruments go invalid) from a steady
+ * one.  Only for a run wired to a panel -- the one that has displays.
+ * ------------------------------------------------------------------- */
+#define FC_INSTR_OFFSET 97
+#define FC_INSTR_MAGIC 0xFC01u
+#define FC_INSTR_REFRESH_US 500000.0
+#define FC_INSTR_SLOTS 16
+
+typedef struct {
+    uint32_t cmd;
+    int n;
+    uint16_t w[32];
+    double sentUs;
+    long sentCalls;
+} FcSlot;
+static FcSlot fcLast[5][FC_INSTR_SLOTS];
+static long fcCalls, fcSent;
+
+static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, double sharedUs) {
+    int fc = busID - 19;
+    if (fc < 1 || fc > 4 || n <= 0 || n > 32 || !crewOpen || crewFd[1] < 0) return;
+    fcCalls++;
+    /* a slot per message: IUA and select bits */
+    int slot = -1;
+    for (int i = 0; i < FC_INSTR_SLOTS; i++) {
+        if (fcLast[fc][i].cmd == cmd) { slot = i; break; }
+        if (fcLast[fc][i].cmd == 0u && slot < 0) slot = i;
+    }
+    if (slot < 0) return;
+    FcSlot *e = &fcLast[fc][slot];
+    bool same = e->cmd == cmd && e->n == n && memcmp(e->w, words, (size_t)n * sizeof *words) == 0;
+    bool due = (sharedUs >= 0.0) ? (sharedUs - e->sentUs >= FC_INSTR_REFRESH_US)
+                                 : (fcCalls - e->sentCalls >= 50);
+    if (same && !due && e->cmd != 0u) return;
+    e->cmd = cmd; e->n = n;
+    memcpy(e->w, words, (size_t)n * sizeof *words);
+    e->sentUs = sharedUs; e->sentCalls = fcCalls;
+    uint8_t b[2 * (5 + 32)];
+    uint16_t h[5] = { FC_INSTR_MAGIC, (uint16_t)fc, (uint16_t)((cmd >> 16) & 0xffu),
+                      (uint16_t)(cmd & 0xffffu), (uint16_t)n };
+    int k = 0;
+    for (int i = 0; i < 5; i++) { b[k++] = (uint8_t)(h[i] >> 8); b[k++] = (uint8_t)h[i]; }
+    for (int i = 0; i < n; i++) { b[k++] = (uint8_t)(words[i] >> 8); b[k++] = (uint8_t)words[i]; }
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + FC_INSTR_OFFSET));
+    sendto(crewFd[1], (const char *)b, (size_t)k, 0, (struct sockaddr *)&to, sizeof to);
+    fcSent++;
+}
+
+/* ---------------------------------------------------------------------
+ * THE TRUTH, for a debugging instrument (discretePanel/truthball.py): the
+ * vehicle dynamics' own state -- not anything the flight software sees --
+ * so that what PASS shows on its ADI can be set beside what the vehicle is
+ * really doing.  One datagram per TRUTH_PERIOD_S of vehicle time on port
+ * base + TRUTH_OFFSET: "TRU1", then big-endian IEEE doubles -- vehicle time
+ * (s), PASS GMT (s), the attitude quaternion body -> M50 (w x y z), body
+ * rates (rad/s), M50 position (m) and velocity (m/s).  Only with the
+ * dynamics on and a panel wired. */
+#define TRUTH_OFFSET 98
+#define TRUTH_PERIOD_S 0.05
+
+static void put_be_double(uint8_t *b, double v) {
+    uint64_t u;
+    memcpy(&u, &v, sizeof u);
+    for (int i = 0; i < 8; i++) b[i] = (uint8_t)(u >> (56 - 8 * i));
+}
+
+static void truth_publish(void) {
+    static double next = -1.0;
+    if (!crewOpen || crewFd[1] < 0 || !vehdyn_enabled()) return;
+    const PhysState *st = vehdyn_state();
+    if (st->t < next && st->t > next - 10.0) return;
+    next = st->t + TRUTH_PERIOD_S;
+    double v[2 + 4 + 3 + 3 + 3];
+    int n = 0;
+    v[n++] = st->t;
+    v[n++] = vehdyn_gmt(st->t);
+    for (int i = 0; i < 4; i++) v[n++] = st->q[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->w[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->r[i];
+    for (int i = 0; i < 3; i++) v[n++] = st->v[i];
+    uint8_t b[4 + 8 * 15];
+    memcpy(b, "TRU1", 4);
+    for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + TRUTH_OFFSET));
+    sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
+}
+
+/* ---------------------------------------------------------------------
+ * THE DOWNLIST, to the ground.  Every 40 ms each GPC writes its downlist
+ * frame to the PCM master unit on its own IP bus (BCE 24): 32-word "write
+ * toggle buffer" commands, then an end-of-message command (FIOWCDAT,
+ * SSSRC/FIOPRMPG.asm:177-195).  The command word is the PCMMU's: address
+ * bits 23-21 (011 the PCMMU; anything else, the bit bucket that non-prime
+ * members of a redundant set are pointed at -- FCMBUSCM.asm:645-701),
+ * operation bits 20-17 (0101 write toggle buffer, 111x end of message), a
+ * 12-bit field whose top three bits name the toggle buffer and low nine
+ * the word offset, and the word count less one (JSC-18611 SB 29; the
+ * values nsts-sim-gpc measured, lru/pcmmu/pcmmuConf.coffee).  PASS needs no
+ * answer to either.
+ *
+ * Watched here, not answered: the router hands every bus-24 word to
+ * mdmdev_downlist_tap, which assembles each computer's frame and, at the
+ * end of message, sends it to the ground as one datagram on port base +
+ * DOWNLINK_OFFSET -- "DNL1", the GPC, the toggle buffer, the word count
+ * (halfwords), the simulated time in microseconds (an IEEE double), then
+ * the words as PASS wrote them, big-endian.  The frame describes itself:
+ * EB90, then frame number and format ID (CDWDOWNL.hal, DCDDOW.hal). */
+#define DOWNLINK_OFFSET 88
+#define DL_MAX 128
+
+static struct {
+    uint16_t w[DL_MAX];
+    int at, left;         /* the write in progress */
+    int tb;
+    int hi;               /* highest word written this frame, +1 */
+} dl[6];
+static long dlFrames;
+
+void mdmdev_downlist_tap(int gpcId, int svc, uint32_t word, double sharedUs) {
+    if (!crewOpen || crewFd[1] < 0 || gpcId < 1 || gpcId > 5) return;
+    if (svc == 1) {                                  /* GPC_SVC_XMIT_CMD */
+        uint32_t c = word & 0xffffffu;
+        dl[gpcId].left = 0;
+        if (((c >> 21) & 7u) != 3u) return;         /* not the PCMMU */
+        unsigned op = (c >> 17) & 0xfu, field = (c >> 5) & 0xfffu;
+        int tb = (int)(field >> 9), off = (int)(field & 0x1ffu);
+        if (op == 0x5u) {                            /* write toggle buffer */
+            if (off == 0) dl[gpcId].hi = 0;
+            dl[gpcId].tb = tb;
+            dl[gpcId].at = off;
+            dl[gpcId].left = (int)(c & 0x1fu) + 1;
+        } else if ((op & 0xeu) == 0xeu) {            /* end of message */
+            int n = off + 1;
+            if (n > dl[gpcId].hi) n = dl[gpcId].hi;
+            if (n <= 0 || n > DL_MAX) return;
+            uint8_t b[4 + 6 + 8 + 2 * DL_MAX];
+            memcpy(b, "DNL1", 4);
+            uint16_t h[3] = { (uint16_t)gpcId, (uint16_t)tb, (uint16_t)n };
+            for (int i = 0; i < 3; i++) { b[4 + 2 * i] = (uint8_t)(h[i] >> 8); b[5 + 2 * i] = (uint8_t)h[i]; }
+            put_be_double(b + 10, sharedUs);
+            for (int i = 0; i < n; i++) {
+                b[18 + 2 * i] = (uint8_t)(dl[gpcId].w[i] >> 8);
+                b[19 + 2 * i] = (uint8_t)dl[gpcId].w[i];
+            }
+            struct sockaddr_in to = {0};
+            to.sin_family = AF_INET;
+            to.sin_addr.s_addr = inet_addr("239.255.1.1");
+            to.sin_port = htons((uint16_t)(crewPortBase + DOWNLINK_OFFSET));
+            sendto(crewFd[1], (const char *)b, (size_t)(18 + 2 * n), 0,
+                   (struct sockaddr *)&to, sizeof to);
+            dlFrames++;
+        }
+    } else if (svc == 0 && dl[gpcId].left > 0) {    /* GPC_SVC_XMIT_WORD */
+        if (dl[gpcId].at >= 0 && dl[gpcId].at < DL_MAX) {
+            dl[gpcId].w[dl[gpcId].at] = (uint16_t)(word & 0xffffu);
+            if (dl[gpcId].at + 1 > dl[gpcId].hi) dl[gpcId].hi = dl[gpcId].at + 1;
+        }
+        dl[gpcId].at++;
+        dl[gpcId].left--;
+    }
+}
+
 bool mdmdev_capturing(void) { return mdmdev_enabled() || crewOpen; }
+
+/* Whether the flight instruments' messages are relayed (fc_output): on
+ * unless YAGPC_FC_RELAY=0, so its cost can be measured by switching it off. */
+bool mdmdev_fc_relay(void) {
+    static int on = -1;
+    if (on < 0) {
+        const char *e = yagpc_getenv("YAGPC_FC_RELAY");
+        on = !(e != NULL && strcmp(e, "0") == 0);
+    }
+    return crewOpen && on;
+}
 
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
+    if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
+        fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
+        return;
+    }
     if (!mdmdev_enabled()) {
         /* No device model, but a panel: record the forward MDMs' discrete
          * outputs and send them to it -- its lamps -- and nothing else. */
@@ -644,6 +1178,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
     if (iua == IUA_FF && ff_unit(busID) > 0) {
         int u = ff_unit(busID);
         ffWrites++;
+        if (f == GPS_WRITE && u <= 3) { gps_write(u, words, n); return; }
         if (f == IMU_WRITE && u <= 3) {
             imu[u].cmd1 = words[0];
             imu[u].cmd2 = (n > 1) ? words[1] : imu[u].cmd2;
@@ -655,12 +1190,25 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             discrete_write(ffOut, ffOutSeen, u, cmd, words, n);
             crew_publish_out(u, cmd, n);
             if (CMD_CARD(cmd) == 13u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 2u) push_oms(sharedUs);
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
         faWrites++;
-        if (CMD_MODE(cmd) == 8u) {
+        if (CMD_MODE(cmd) == 8u && CMD_CARD(cmd) == 4u) {      /* AOD: values */
+            unsigned ch = CMD_CHAN(cmd) & 0x0fu;
+            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++)
+                faAod[fa_unit(busID)][4][ch + (unsigned)i] = (int16_t)words[i];
+            push_oms(sharedUs);
+        } else if (CMD_MODE(cmd) == 8u) {
+            if (CMD_CARD(cmd) == 10u && trace_fa() == fa_unit(busID)) {
+                fprintf(stderr, "mdmtrace: t=%.4f FA%d write card 10 ch %02x:", vehdyn_state()->t,
+                        fa_unit(busID), (unsigned)CMD_CHAN(cmd));
+                for (int i = 0; i < n; i++) fprintf(stderr, " %04x", (unsigned)words[i]);
+                fprintf(stderr, "\n");
+            }
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
             if (CMD_CARD(cmd) == 10u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
         }
     }
 }
@@ -668,6 +1216,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
     crew_poll();
+    if (nsp_reply(busID, cmd, n, out)) return true;
     if (!mdmdev_enabled()) {
         /* No device model: zeros, as ever, plus whatever crew contacts the
          * panel is driving -- and only once it has driven some. */
@@ -695,13 +1244,24 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         }
         return true;
     }
-    if (vehdyn_enabled()) vehdyn_advance(sharedUs);   /* time passes for the vehicle */
+    if (vehdyn_enabled()) {
+        vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
+        truth_publish();
+    }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
     if (iua == IUA_FF) {
         int u = ff_unit(busID);
         if (u >= 1 && u <= 3 && f == IMU_READ) {
             imu_read(u, out, n);
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 3 && f == GPS_READ) {
+            uint16_t w[32];
+            gps[u].reads++;
+            if (!gps_words(u, w)) return false;
+            for (int i = 0; i < n; i++) out[i] = (i < 32) ? w[i] : 0;
             ffReads++;
             return true;
         }
@@ -716,17 +1276,159 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         int u = fa_unit(busID);
         if (u >= 1 && f == HFE_FA_READ) { fa_hfe(u, out, n); faReads++; return true; }
         if (u >= 1 && f == MFE_FA_READ) { fa_mfe(u, out, n); faReads++; return true; }
+        if (u >= 3 && f == PC_FA_READ) {
+            out[0] = (uint16_t)(OMS_PC_BURNING * vehdyn_oms_thrust(u == 3 ? 0 : 1));
+            for (int i = 1; i < n; i++) out[i] = 0;
+            faReads++;
+            return true;
+        }
     }
     return false;
 }
 
+/* ---------------------------------------------------------------------
+ * IN A SESSION CAPTURE: vehdyn.json beside the computers' own files -- the
+ * truth state (vehdyn_save) and what the devices remember between reads:
+ * each IMU's command words and its accelerometers' running counts, each GPS
+ * receiver's mode, and every discrete and analog output the computers have
+ * written.  Without it a restored run started the truth vehicle over in its
+ * default orbit while the flight software carried on in the captured one,
+ * and the IMU velocity counters restarted at zero under a flight software
+ * that differences them.
+ * ------------------------------------------------------------------- */
+static void put_list(FILE *f, const char *key, const double *b, int n, bool more) {
+    fprintf(f, "  \"%s\": [", key);
+    for (int i = 0; i < n; i++) fprintf(f, "%s%.17g", i ? "," : "", b[i]);
+    fprintf(f, "]%s\n", more ? "," : "");
+}
+
+bool mdmdev_dump(const char *dir) {
+    if (!mdmdev_enabled() || dir == NULL) return false;
+    char path[600];
+    snprintf(path, sizeof path, "%s/vehdyn.json", dir);
+    FILE *f = fopen(path, "w");
+    if (f == NULL) { fprintf(stderr, "mdmdev: cannot write %s\n", path); return false; }
+    fprintf(f, "{\n");
+    double vb[256];
+    int nv = vehdyn_save(vb, 256);
+    put_list(f, "vehdyn", vb, nv, true);
+    double ib[4 * 13];
+    int ni = 0;
+    for (int k = 1; k <= 3; k++) {
+        ib[ni++] = imu[k].cmd1; ib[ni++] = imu[k].cmd2; ib[ni++] = imu[k].haveCmd;
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].dvFt[i];
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].carry[i];
+        for (int i = 0; i < 3; i++) ib[ni++] = imuAcc[k].count[i];
+        ib[ni++] = imuAcc[k].started;
+    }
+    put_list(f, "imu", ib, ni, true);
+    double tb[3];
+    for (int k = 1; k <= 3; k++) tb[k - 1] = imuAcc[k].t;
+    put_list(f, "imuTime", tb, 3, true);
+    double gb[9];
+    for (int k = 1; k <= 3; k++) {
+        gb[3 * (k - 1)] = gps[k].haveCmd; gb[3 * (k - 1) + 1] = gps[k].mode;
+        gb[3 * (k - 1) + 2] = gps[k].done;
+    }
+    put_list(f, "gps", gb, 9, true);
+    static double ob[3 * 5 * NCARD * NCHAN];
+    int no = 0;
+    for (int u = 0; u < 5; u++)
+        for (int c = 0; c < NCARD; c++)
+            for (int h = 0; h < NCHAN; h++) {
+                ob[no++] = ffOut[u][c][h]; ob[no++] = faOut[u][c][h]; ob[no++] = faAod[u][c][h];
+            }
+    put_list(f, "outputs", ob, no, false);
+    fprintf(f, "}\n");
+    bool ok = fclose(f) == 0;
+    if (ok) fprintf(stderr, "mdmdev: vehicle dynamics and device state captured\n");
+    return ok;
+}
+
+static int get_list(const JsonValue *root, const char *key, double *b, int max) {
+    const JsonValue *a = json_obj_get(root, key);
+    int n = json_arr_count(a);
+    for (int i = 0; i < n && i < max; i++) b[i] = json_as_number(json_arr_get(a, i), 0.0);
+    return n < max ? n : max;
+}
+
+bool mdmdev_load(const char *dir) {
+    if (!mdmdev_enabled() || dir == NULL) return false;
+    char path[600];
+    snprintf(path, sizeof path, "%s/vehdyn.json", dir);
+    FILE *f = fopen(path, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "mdmdev: no vehdyn.json in this capture -- the vehicle "
+                        "starts over in its default orbit\n");
+        return false;
+    }
+    fseek(f, 0, SEEK_END);
+    long len = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *text = (char *)malloc((size_t)len + 1);
+    if (text == NULL || fread(text, 1, (size_t)len, f) != (size_t)len) {
+        free(text); fclose(f); return false;
+    }
+    text[len] = '\0';
+    fclose(f);
+    JsonValue *root = json_parse(text);
+    free(text);
+    if (root == NULL) { fprintf(stderr, "mdmdev: %s is not JSON\n", path); return false; }
+    double vb[256];
+    int nv = get_list(root, "vehdyn", vb, 256);
+    double tCap = vehdyn_load(vb, nv);
+    if (tCap < 0.0) {
+        fprintf(stderr, "mdmdev: vehdyn.json's vehicle record is unreadable -- default orbit\n");
+        json_free(root);
+        return false;
+    }
+    double ib[4 * 13], tb[3], gb[9];
+    static double ob[3 * 5 * NCARD * NCHAN];
+    int ni = get_list(root, "imu", ib, 39), nt = get_list(root, "imuTime", tb, 3);
+    int ng = get_list(root, "gps", gb, 9), no = get_list(root, "outputs", ob, 3 * 5 * NCARD * NCHAN);
+    if (ni == 39 && nt == 3)
+        for (int k = 1, i = 0; k <= 3; k++) {
+            imu[k].cmd1 = (uint16_t)ib[i++]; imu[k].cmd2 = (uint16_t)ib[i++];
+            imu[k].haveCmd = ib[i++] != 0.0;
+            for (int j = 0; j < 3; j++) imuAcc[k].dvFt[j] = ib[i++];
+            for (int j = 0; j < 3; j++) imuAcc[k].carry[j] = ib[i++];
+            for (int j = 0; j < 3; j++) imuAcc[k].count[j] = (uint16_t)ib[i++];
+            imuAcc[k].started = ib[i++] != 0.0;
+            imuAcc[k].t = tb[k - 1] - tCap;              /* rebased with the vehicle */
+        }
+    if (ng == 9)
+        for (int k = 1; k <= 3; k++) {
+            gps[k].haveCmd = gb[3 * (k - 1)] != 0.0; gps[k].mode = (unsigned)gb[3 * (k - 1) + 1];
+            gps[k].done = (uint16_t)gb[3 * (k - 1) + 2];
+        }
+    if (no == 3 * 5 * NCARD * NCHAN)
+        for (int u = 0, i = 0; u < 5; u++)
+            for (int c = 0; c < NCARD; c++)
+                for (int h = 0; h < NCHAN; h++) {
+                    ffOut[u][c][h] = (uint16_t)ob[i++]; faOut[u][c][h] = (uint16_t)ob[i++];
+                    faAod[u][c][h] = (int16_t)ob[i++];
+                }
+    json_free(root);
+    fprintf(stderr, "mdmdev: vehicle dynamics and device state restored (captured at t=%.3f s)\n", tCap);
+    return true;
+}
+
 void mdmdev_report(void) {
+    if (dlFrames > 0)
+        fprintf(stderr, "mdmdev: %ld downlist frame(s) sent to the ground\n", dlFrames);
+    if (uplinkHeard)
+        fprintf(stderr, "mdmdev: NSP1 uplink -- %ld buffer(s), %ld command word(s) delivered, "
+                        "%d still queued\n", uplinkBuffers, uplinkWords, uplinkCount);
+    if (fcCalls > 0)
+        fprintf(stderr, "mdmdev: %ld flight-instrument message(s) heard on FC1-4, %ld sent "
+                        "to the displays\n", fcCalls, fcSent);
     if (!mdmdev_enabled()) return;
     vehdyn_report();
     fprintf(stderr, "mdmdev: healthy vehicle at rest -- %ld forward and %ld aft MDM "
                     "read(s) answered, %ld and %ld write(s) taken; IMU reads %ld/%ld/%ld, "
-                    "commands %ld/%ld/%ld\n",
+                    "commands %ld/%ld/%ld; GPS reads %ld/%ld/%ld, writes %ld/%ld/%ld\n",
             ffReads, faReads, ffWrites, faWrites,
             imu[1].reads, imu[2].reads, imu[3].reads,
-            imu[1].writes, imu[2].writes, imu[3].writes);
+            imu[1].writes, imu[2].writes, imu[3].writes,
+            gps[1].reads, gps[2].reads, gps[3].reads, gps[1].writes, gps[2].writes, gps[3].writes);
 }
