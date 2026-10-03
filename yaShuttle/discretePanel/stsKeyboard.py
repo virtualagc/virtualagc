@@ -519,6 +519,15 @@ class STSKeyboard:
         # A key goes out when it is pressed, as the MDU window's keydown does.
         if self.bus is not None and self.bus.send(SCAN[name]):
             log("%s  down -> KYBD%d 0x%04X" % (name, self.bus.n, SCAN[name]))
+            # FOR A RECORDING (recordscript.py): the script line that types
+            # this key.  Only a person's presses come through here -- a
+            # script's 'keys' go onto the bus from panelO6.py directly.
+            try:
+                import crewscript
+                crewscript.send_record("kb%d" % self.bus.n, "keys KB%d %s"
+                                       % (self.bus.n, name.replace(" ", "_")), PORT_BASE)
+            except Exception:
+                pass
         else:
             log("%s  down" % name)
         self.redraw()

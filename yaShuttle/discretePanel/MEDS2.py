@@ -12059,7 +12059,7 @@ class MDU(LRU):
     # -- startup ------------------------------------------------------------
     def start(self):
         self._edgeKeys = MDUEdgeKeys(self.win)
-        self._edgeKeys.setHandler(self.handleEdgekey, self.handleEdgekeyFail)
+        self._edgeKeys.setHandler(self._userEdgekey, self.handleEdgekeyFail)
 
         self.disp = VectorDisplay(self.CONFIG)
         self.disp.attachTo(self.win)
@@ -12334,6 +12334,19 @@ class MDU(LRU):
         if item.get('link') is not None:
             self.setCurrentMenu(item['link'])
             self.redraw()
+
+    def _userEdgekey(self, keyId):
+        """A click on an edgekey: press it, and say so for a recording
+        (recordscript.py).  A script's 'edgekey' calls handleEdgekey itself
+        and is not recorded."""
+        name = getattr(self, 'lruName', None)
+        if name:
+            try:
+                crewscript.send_record(name, "edgekey %s %d" % (name, keyId + 1),
+                                       PORT_BASE)
+            except Exception:
+                pass
+        self.handleEdgekey(keyId)
 
     def handleEdgekeyFail(self, keyId):
         self.mdu_menuArea.setEdgekeyFailed(keyId)
@@ -14320,6 +14333,7 @@ class MedsRunner(object):
                                  % (lruConf.get('module'), lruName))
                 continue
             lru = mod(lruConf)
+            lru.lruName = lruName                # crt1 ...: for a recording's edgekey lines
             if isinstance(lru, MDU) and not lruConf.get('shared'):
                 lru.win = win
                 win.lru = lru

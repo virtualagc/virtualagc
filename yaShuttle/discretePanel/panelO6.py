@@ -4736,6 +4736,88 @@ IPL_HOLD_MS = 250
 TB_WORD_SIZE = 9               # RUN / IPL on a talkback flag
 
 
+# ---------------------------------------------------------------------------
+# RECORDING: every control a PERSON moves goes out as the script line that
+# would move it (crewscript.send_record, port base + 89), for recordscript.py
+# to collect into a draft script.  Hooked on the setters every path goes
+# through -- a click, a key, a drag -- so nothing is missed by being reached
+# some other way.  Three things are NOT a person's action and are not sent:
+# whatever a playing script does (panel._rec_quiet, counted up around the
+# player's 'do'), what is merely HEARD back from the IDPs (heard=True), and a
+# release -- a pushbutton letting go or a spring-loaded switch returning,
+# which the press already implies.  The GPC switches are per column, so a
+# 'gpc N' line goes before each of them (recordscript.py drops repeats).
+def _rec_xfeed(v):
+    return {"FROM LEFT": "left", "FROM RIGHT": "right"}.get(v, v.lower())
+
+
+_RECORD = {
+    "_set_power":  lambda s, i, v: ("gpc", i, "power %s" % v.lower()),
+    "_set_output": lambda s, i, v: ("gpc", i, "output %s" % v.lower()),
+    "_set_mode":   lambda s, i, v: ("gpc", i, "mode %s" % {"STBY": "standby"}.get(v, v.lower())),
+    "_set_ipl":    lambda s, i, down: ("gpc", i, "ipl") if down else None,
+    "_set_ipl_source": lambda s, v: "source %s" % {"MMU 1": "mm1", "MMU 2": "mm2"}.get(v, v.lower()),
+    "_set_bfc_display": lambda s, v: "display %s" % v.lower(),
+    "_set_bfc_select": lambda s, v: "select %s" % v,
+    "_set_bfc_disengage": lambda s, v: "disengage %s" % v.lower(),
+    "_set_rhc":    lambda s, i, down: "rhcengage %s" % RHCS[i].lower() if down else None,
+    "_set_adi":    lambda s, st, f, v: "adi %s %s %s" % (st.lower(), f, v.lower()),
+    "_set_sense":  lambda s, v: "sense %s" % v.lower(),
+    "_set_attref": lambda s, i, down: "attref %s" % ADI_STATIONS[i].lower() if down else None,
+    "_set_idp_power": lambda s, n, v, heard=False: None if heard else "idppower %d %s" % (n, v.lower()),
+    "_set_idp_mf": lambda s, n, mf, heard=False:
+        None if heard or MF_NAMES[mf & 3] == "ILLEGAL" else "majfunc %d %s" % (n, MF_NAMES[mf & 3].lower()),
+    "_set_kybd_sel": lambda s, side, v, heard=False: None if heard else "kybdsel %s %s" % (side, v),
+    "_set_idp_load": lambda s, n, down: "idpload %d" % n if down else None,
+    "_set_fcs":    lambda s, i, v: "fcs %d %s" % (i + 1, v.lower()),
+    "_set_oms":    lambda s, sd, v: "omseng %s %s" % ({"L": "left", "R": "right"}[sd], v.lower()),
+    "_set_trim":   lambda s, sd, v: "trim %s %s" % ({"L": "left", "R": "right"}[sd], v.lower()),
+    "_set_xfeed":  lambda s, v: "xfeed %s" % _rec_xfeed(v),
+    "_set_am":     lambda s, key, down: ("%s %s" % ("bodyflap" if key[1] == "BF" else "spdbk",
+                                                     {"L": "cdr", "R": "plt"}[key[0]])) if down else None,
+    "_set_dap":    lambda s, st, k, down: "dap %s %s" % (DAP_PANEL[st].lower(), k.lower()) if down else None,
+    "_set_ctl":    lambda s, key, v: _rec_ctl(key, v),
+}
+
+
+def _rec_ctl(key, v):
+    c = PC.CONTROLS[key]
+    if PC.is_button(key):
+        return "press %s" % key if v else None
+    if c.get("spring") and v == c.get("default"):
+        return None                     # a spring-loaded switch going home
+    return "switch %s %s" % (key, v)
+
+
+def _recording(name, fmt):
+    orig = getattr(PanelO6, name)
+
+    def wrapper(self, *a, **k):
+        r = orig(self, *a, **k)
+        if getattr(self, "_rec_quiet", 0):
+            return r
+        try:
+            out = fmt(self, *a, **k)
+        except Exception:                 # a recording must never break a control
+            return r
+        if out is None:
+            return r
+        if isinstance(out, tuple):
+            # EVERY TIME, not only on a change: a recording may begin after
+            # the last change was sent.  recordscript.py drops the repeats.
+            _tag, i, line = out
+            crewscript.send_record("panel", "gpc %d" % (i + 1), D.PORT_BASE)
+            out = line
+        crewscript.send_record("panel", out, D.PORT_BASE)
+        return r
+    wrapper.__name__ = name
+    setattr(PanelO6, name, wrapper)
+
+
+for _n, _f in _RECORD.items():
+    _recording(_n, _f)
+
+
 def _on(word):
     return word.lower() in ("on", "1", "set", "true")
 
@@ -4751,6 +4833,14 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
     target = [panel.wired]
 
     def do(verb, arg):
+        # THE SCRIPT'S OWN ACTIONS ARE NOT RECORDED: see _RECORD.
+        panel._rec_quiet = getattr(panel, "_rec_quiet", 0) + 1
+        try:
+            return _do(verb, arg)
+        finally:
+            panel._rec_quiet -= 1
+
+    def _do(verb, arg):
         w = target[0]
         if verb == "gpc":
             n = int(arg)

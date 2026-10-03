@@ -38,6 +38,7 @@ MEDS_OFFSET = 95                # MEDS2.py's display-state control: base + 95
 PROGRESS_OFFSET = 96            # how far panelO6.py's script has got: base + 96
 HC_OFFSET = 86                  # crew scripts to handcontrollers.py: base + 86
 HC_ACK_OFFSET = 87              # handcontrollers.py's acknowledgements: base + 87
+RECORD_OFFSET = 89              # a person's actions, as script lines: base + 89
 
 
 def idp_snapshot_files(n):
@@ -1074,6 +1075,31 @@ def send_hc_ack(text, port_base=None):
         sock.sendto(text.encode("utf-8"), (D.GROUP, base + HC_ACK_OFFSET))
     finally:
         sock.close()
+
+
+def send_record(source, line, port_base=None):
+    """WHAT A PERSON JUST DID, AS THE SCRIPT LINE THAT WOULD DO IT, for
+    recordscript.py on port base + 89.  Sent by the program the person used
+    (panelO6, a keyboard, an MDU) whether or not anything is recording: one
+    datagram per action costs nothing, and a recording can then start at any
+    moment.  Never by a script's own actions, which are not the person's."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+        try:
+            base = D.PORT_BASE if port_base is None else port_base
+            sock.sendto(("%s\t%s" % (source, line)).encode("utf-8"),
+                        (D.GROUP, base + RECORD_OFFSET))
+        finally:
+            sock.close()
+    except OSError:
+        pass
+
+
+def record_receiver(port_base=None):
+    """The socket recordscript.py listens on for send_record's lines."""
+    return _group_receiver((D.PORT_BASE if port_base is None else port_base) + RECORD_OFFSET)
 
 
 def meds_receiver(port_base=None):

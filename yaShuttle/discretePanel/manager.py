@@ -269,6 +269,9 @@ class Manager(object):
         self._button(row, "Browse", self.browse_script)
         self._button(row, "Play", self.play, wide=True)
         self._button(row, "Stop", self.stop)
+        # RECORD: what a person does, as a draft script (recordscript.py).
+        self._recorder = self._recordPath = None
+        self.record_button = self._button(row, "Record", self.record)
 
         self._section("LAYOUT", bold)
         self._path_box(self.layout)
@@ -596,6 +599,57 @@ class Manager(object):
             return
         self.say("Playing %s -- %d steps, %d waits (the panel's log has the rest)"
                  % (os.path.basename(path), steps, waits))
+
+    def record(self):
+        """START OR STOP RECORDING a draft script of what a person does --
+        panel switches, keyboard keys, MDU edgekeys -- into recordings/ beside
+        this program.  Stopping puts the recording in the SCRIPT box, ready to
+        open in an editor or play.  recordscript.py rewrites the file after
+        every action, so ending it at any moment loses nothing."""
+        if self._recorder is not None and self._recorder.poll() is None:
+            self._recorder.terminate()
+            try:
+                self._recorder.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self._recorder.kill()
+            self._recorder = None
+            self._relabel(self.record_button, "Record")
+            path = self._recordPath
+            n = 0
+            try:
+                with open(path) as fh:
+                    n = sum(1 for l in fh if l.startswith("+"))
+            except OSError:
+                pass
+            self.script.set(path)
+            self.say("Recorded %d step(s) to %s; it is in the SCRIPT box"
+                     % (n, os.path.basename(path)))
+            return
+        where = os.path.join(HERE, "recordings")
+        os.makedirs(where, exist_ok=True)
+        path = os.path.join(where, time.strftime("recorded-%Y%m%d-%H%M%S.script"))
+        argv = [sys.executable, os.path.join(HERE, "recordscript.py"), path]
+        if self.args.port_base is not None:
+            argv += ["--port-base", str(self.args.port_base)]
+        try:
+            self._recorder = subprocess.Popen(argv, cwd=HERE)
+        except OSError as e:
+            self.say("Cannot start the recorder: %s" % e)
+            return
+        self._recordPath = path
+        self._relabel(self.record_button, "Stop Rec")
+        self.say("Recording to %s -- press Stop Rec to finish" % os.path.basename(path),
+                 sticky=True)
+
+    @staticmethod
+    def _relabel(button, text):
+        try:
+            button.configure(text=text, width=max(6, len(text)))
+        except Exception:
+            try:
+                button.configure(text=text)
+            except Exception:
+                pass
 
     def stop(self):
         try:
@@ -1379,8 +1433,14 @@ def main(argv=None):
     import windowLayout; windowLayout.claim(root)   # whose window this is
     if args.geometry:
         root.geometry(args.geometry)
-    Manager(root, args)
-    root.mainloop()
+    m = Manager(root, args)
+    try:
+        root.mainloop()
+    finally:
+        # A recording outlives nothing: stopped with the window, its file
+        # already complete (recordscript.py writes after every action).
+        if m._recorder is not None and m._recorder.poll() is None:
+            m._recorder.terminate()
     return 0
 
 
