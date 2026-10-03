@@ -2088,6 +2088,22 @@ class PanelO6:
             mons = [(0, 0, sw, sh - FULL)]
         return sorted(mons)
 
+    @staticmethod
+    def _frame_offsets(root):
+        """How far the client area sits inside the window's frame, left and
+        top.  Under WSLg Tk's winfo_x equals winfo_rootx, and the frame shows
+        only in wm geometry: client 506,427 for a geometry of +468+368, the
+        38 and 59 of Weston's _NET_FRAME_EXTENTS (WSL-integration).  The
+        larger of the two differences, so either way of reporting serves."""
+        rx, ry = root.winfo_rootx(), root.winfo_rooty()
+        left, top = rx - root.winfo_x(), ry - root.winfo_y()
+        m = re.match(r"^\d+x\d+([+-]-?\d+)([+-]-?\d+)$", root.wm_geometry())
+        if m:
+            gx, gy = int(m.group(1).replace("+-", "-").lstrip("+")), \
+                     int(m.group(2).replace("+-", "-").lstrip("+"))
+            left, top = max(left, rx - gx), max(top, ry - gy)
+        return max(0, left), max(0, top)
+
     def _auto_place(self):
         root = self.root
         root.update_idletasks()
@@ -2125,7 +2141,9 @@ class PanelO6:
         # THE FRAME, MEASURED: a fixed allowance for the title bar was 7 px
         # short at Windows' 150% scaling, and every row overlapped the one
         # above by that much (Win11-native).
-        deco = max(self.PLACE_TITLE, root.winfo_rooty() - root.winfo_y() + 8)
+        left, top = self._frame_offsets(root)
+        shadow = 32 if os.path.isdir("/mnt/wslg") and left >= 32 else 0
+        deco = max(self.PLACE_TITLE, top - shadow + 8)
         mons = self._monitors(sw, sh)
         ox, oy = root.winfo_x(), root.winfo_y()
         ow, oh = root.winfo_width(), root.winfo_height()
@@ -2150,9 +2168,7 @@ class PanelO6:
         # each one's visible border.  Under WSLg Weston's frame is 38 px a
         # side, 32 of it an invisible shadow, so 6 px shows -- and with only
         # the 8-px gap every pair overlapped by 4 (WSL-integration, for Ron).
-        side = max(0, root.winfo_rootx() - root.winfo_x())
-        if os.path.isdir("/mnt/wslg") and side >= 32:
-            side -= 32
+        side = max(0, left - shadow)
         GX = G + 2 * side
 
         # A SKYLINE PER MONITOR, packed bottom-left: each window at the lowest
