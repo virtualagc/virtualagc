@@ -1959,7 +1959,6 @@ class PanelO6:
         x0 = root.winfo_x() + root.winfo_width() + self.PLACE_GAP
         y0 = max(0, root.winfo_y())
         sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
-        x, y, row_h = x0, y0, 0
         # Not a window the run's layout places: that goes where it says.
         laid = set()
         if self.layout_path:
@@ -1970,22 +1969,53 @@ class PanelO6:
                 pass
         order = list(self.PLACE_ORDER) + [n for n in self.wins
                                            if n not in self.PLACE_ORDER and n != "O6"]
+        # FIRST THE ROWS, THEN WHERE THEY GO.  Each window was once clamped
+        # onto the screen by itself, which pushed a row up into the one above
+        # it -- A8U over C3 on a WSLg desktop where O6 had landed low
+        # (WSL-integration, 2026-10-02).  Now the rows are laid out whole,
+        # each as tall as its tallest window; a row below O6 starts at O6's
+        # left edge rather than its right, using the room under it; and the
+        # block starts level with O6, or failing that at the top of the
+        # screen.  Only if it cannot fit even then are windows pulled up onto
+        # the screen, overlapping -- better than lost.
+        items = []
         for name in order:
             win = self.wins.get(name)
             if win is None or "panel_" + name.lower() in laid:
                 continue
             # Requested, not current: a window not yet up has never been
             # mapped, and measures 1x1.
-            w = max(win.top.winfo_width(), win.top.winfo_reqwidth())
-            h = max(win.top.winfo_height(), win.top.winfo_reqheight())
-            if x + w > sw and x > x0:
-                x, y, row_h = x0, y + row_h + self.PLACE_TITLE + self.PLACE_GAP, 0
-            # ON THE SCREEN: a third row ran off a 1080-point screen's bottom
-            # (Mac-integrate, 2026-10-02).  Overlapping is better than lost.
-            yy = max(0, min(y, sh - h - self.PLACE_TITLE - 48))
-            win.top.geometry("+%d+%d" % (x, yy))
-            x += w + self.PLACE_GAP
-            row_h = max(row_h, h)
+            items.append((win, max(win.top.winfo_width(), win.top.winfo_reqwidth()),
+                          max(win.top.winfo_height(), win.top.winfo_reqheight())))
+        ox = max(0, root.winfo_x())
+        o_bottom = root.winfo_y() + root.winfo_height() + self.PLACE_TITLE
+        bottom_margin = 48 + self.PLACE_TITLE
+
+        def lay(ystart):
+            placed, y, i = [], ystart, 0
+            while i < len(items):
+                left = x0 if y < o_bottom else ox
+                x, row_h, row = left, 0, []
+                while i < len(items):
+                    win, w, h = items[i]
+                    if x + w > sw and row:
+                        break
+                    row.append((win, x, h))
+                    x += w + self.PLACE_GAP
+                    row_h = max(row_h, h)
+                    i += 1
+                placed.append((y, row))
+                y += row_h + self.PLACE_TITLE + self.PLACE_GAP
+            return placed, y
+
+        for ystart in (y0, 0):
+            placed, end = lay(ystart)
+            if end <= sh - bottom_margin + self.PLACE_TITLE + self.PLACE_GAP:
+                break
+        for y, row in placed:
+            for win, xx, h in row:
+                yy = max(0, min(y, sh - h - bottom_margin))
+                win.top.geometry("+%d+%d" % (xx, yy))
         log("placed the panel windows to the right of O6 (no layout yet)")
 
     def _darwin_nudge(self, win):
