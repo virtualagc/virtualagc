@@ -1997,18 +1997,53 @@ class PanelO6:
         finally:
             x11.XCloseDisplay(dpy)
 
+    @staticmethod
+    def _win_monitors():
+        """[(x, y, w, h)] of each monitor's WORK AREA (the taskbar left out),
+        from Windows' EnumDisplayMonitors; [] elsewhere.  Tk on Windows
+        reports only the primary monitor's size (Win11-native)."""
+        import ctypes
+        try:
+            user32 = ctypes.windll.user32
+        except AttributeError:
+            return []
+        from ctypes import wintypes
+
+        class MONITORINFO(ctypes.Structure):
+            _fields_ = [("cbSize", wintypes.DWORD), ("rcMonitor", wintypes.RECT),
+                        ("rcWork", wintypes.RECT), ("dwFlags", wintypes.DWORD)]
+        out = []
+        PROC = ctypes.WINFUNCTYPE(ctypes.c_int, wintypes.HMONITOR, wintypes.HDC,
+                                  ctypes.POINTER(wintypes.RECT), wintypes.LPARAM)
+
+        def each(hmon, hdc, rect, data):
+            mi = MONITORINFO()
+            mi.cbSize = ctypes.sizeof(MONITORINFO)
+            if user32.GetMonitorInfoW(hmon, ctypes.byref(mi)):
+                r = mi.rcWork
+                out.append((r.left, r.top, r.right - r.left, r.bottom - r.top))
+            return 1
+        user32.EnumDisplayMonitors(None, None, PROC(each), 0)
+        return out
+
     @classmethod
-    def _monitor_edges(cls, sw):
-        """The x coordinates where one monitor ends and the next begins --
-        Tk itself knows only the whole desktop, so rows straddled the join
-        (WSL-integration).  From the X server's RandR monitors, or failing
-        that `xrandr --listmonitors`; by geometry, not name (WSLg's are
-        rdp-N).  Empty with one monitor or no X11."""
+    def _monitors(cls, sw, sh):
+        """[(x, y, w, h)] of the monitors, left to right: Windows' work areas,
+        else the X server's RandR monitors (libXrandr, or xrandr as the
+        fallback -- by geometry, not name: WSLg's are rdp-N), else the one
+        screen Tk knows.  Tk alone knows only the whole desktop on X11 and
+        only the primary monitor on Windows, so rows straddled the join or
+        never reached the second monitor (WSL-integration, Win11-native)."""
         mons = []
         try:
-            mons = cls._x_monitors()
+            mons = cls._win_monitors()
         except Exception:
             mons = []
+        if not mons:
+            try:
+                mons = [(x, 0, w, sh) for x, w in cls._x_monitors()]
+            except Exception:
+                mons = []
         if not mons:
             import subprocess
             try:
@@ -2016,15 +2051,11 @@ class PanelO6:
                                      text=True, timeout=3).stdout
             except (OSError, subprocess.SubprocessError):
                 out = ""
-            for m in re.finditer(r"\s(\d+)/\d+x\d+/\d+\+(-?\d+)\+-?\d+", out):
-                mons.append((int(m.group(2)), int(m.group(1))))
-        starts = set()
-        for x, w in mons:
-            if x > 0:
-                starts.add(x)
-            if 0 < x + w < sw:
-                starts.add(x + w)
-        return sorted(starts)
+            for m in re.finditer(r"\s(\d+)/\d+x(\d+)/\d+\+(-?\d+)\+(-?\d+)", out):
+                mons.append((int(m.group(3)), int(m.group(4)), int(m.group(1)), int(m.group(2))))
+        if not mons:
+            mons = [(0, 0, sw, sh)]
+        return sorted(mons)
 
     def _auto_place(self):
         root = self.root
@@ -2060,48 +2091,100 @@ class PanelO6:
             # mapped, and measures 1x1.
             items.append((win, max(win.top.winfo_width(), win.top.winfo_reqwidth()),
                           max(win.top.winfo_height(), win.top.winfo_reqheight())))
-        ox = max(0, root.winfo_x())
-        o_bottom = root.winfo_y() + root.winfo_height() + self.PLACE_TITLE
-        bottom_margin = 48 + self.PLACE_TITLE
+        # THE FRAME, MEASURED: a fixed allowance for the title bar was 7 px
+        # short at Windows' 150% scaling, and every row overlapped the one
+        # above by that much (Win11-native).
+        deco = max(self.PLACE_TITLE, root.winfo_rooty() - root.winfo_y() + 8)
+        mons = self._monitors(sw, sh)
+        ox, oy = root.winfo_x(), root.winfo_y()
+        ow, oh = root.winfo_width(), root.winfo_height()
 
-        edges = self._monitor_edges(sw)
+        def home(m):
+            return m[0] <= ox + ow // 2 < m[0] + m[2] and m[1] <= oy + oh // 2 < m[1] + m[3]
+        # O6's own monitor first, then the rest left to right
+        order_m = [m for m in mons if home(m)] + [m for m in mons if not home(m)]
+        if not order_m:
+            order_m = mons
+        BOTTOM = 48 if len(mons) == 1 and mons[0] == (0, 0, sw, sh) else 8
+        G = self.PLACE_GAP
 
-        bounds = [0] + edges + [sw]
+        # A SKYLINE PER MONITOR, packed bottom-left: each window at the lowest
+        # then leftmost place it fits, tallest first.  Plain rows wasted the
+        # space beside short windows and under O6, and at full size most of
+        # the panels ran off the screen (Win11-native, 2 x 3840x2088 at 150%).
+        def skyline(m):
+            mx, my, mw, mh = m
+            if home(m):
+                # O6 is already there: nothing above or beside it to its left
+                # is offered (a first guess, not a puzzle), the space under
+                # it is
+                o_l, o_r = max(mx, ox), min(mx + mw, ox + ow + G)
+                segs = []
+                if o_l > mx:
+                    segs.append([mx, o_l - mx, max(my, oy)])
+                segs.append([o_l, o_r - o_l, oy + oh + deco + G])
+                if o_r < mx + mw:
+                    segs.append([o_r, mx + mw - o_r, max(my, oy)])
+                return segs
+            return [[mx, mw, my]]
 
-        def past_edge(x, w):
-            """x moved onto the next monitor if the window would straddle a
-            monitor's edge and fits on the next one; else x."""
-            for i in range(1, len(bounds) - 1):
-                e = bounds[i]
-                if x < e < x + w and w <= bounds[i + 1] - e - self.PLACE_GAP:
-                    return e + self.PLACE_GAP
-            return x
+        def fit(segs, m, w, h):
+            mx, my, mw, mh = m
+            best = None
+            for i, (sx, _, _) in enumerate(segs):
+                if sx + w > mx + mw:
+                    break
+                top, cover, j = 0, 0, i
+                while cover < w and j < len(segs):
+                    top = max(top, segs[j][2])
+                    cover += segs[j][1]
+                    j += 1
+                if cover < w or top + h > my + mh - BOTTOM:
+                    continue
+                if best is None or (top, sx) < (best[1], best[0]):
+                    best = (sx, top)
+            return best
 
-        def lay(ystart):
-            placed, y, i = [], ystart, 0
-            while i < len(items):
-                left = x0 if y < o_bottom else ox
-                x, row_h, row = left, 0, []
-                while i < len(items):
-                    win, w, h = items[i]
-                    x = past_edge(x, w)
-                    if x + w > sw and row:
-                        break
-                    row.append((win, x, h))
-                    x += w + self.PLACE_GAP
-                    row_h = max(row_h, h)
-                    i += 1
-                placed.append((y, row))
-                y += row_h + self.PLACE_TITLE + self.PLACE_GAP
-            return placed, y
+        def occupy(segs, x, w, ybot):
+            new = []
+            for sx, sw_, sy in segs:
+                if sx + sw_ <= x or sx >= x + w:
+                    new.append([sx, sw_, sy])
+                    continue
+                if sx < x:
+                    new.append([sx, x - sx, sy])
+                if sx + sw_ > x + w:
+                    new.append([x + w, sx + sw_ - (x + w), sy])
+            new.append([x, w, ybot])
+            new.sort()
+            merged = []
+            for sgm in new:
+                if merged and merged[-1][2] == sgm[2] and merged[-1][0] + merged[-1][1] == sgm[0]:
+                    merged[-1][1] += sgm[1]
+                else:
+                    merged.append(sgm)
+            return merged
 
-        for ystart in (y0, 0):
-            placed, end = lay(ystart)
-            if end <= sh - bottom_margin + self.PLACE_TITLE + self.PLACE_GAP:
-                break
-        for y, row in placed:
-            for win, xx, h in row:
-                yy = max(0, min(y, sh - h - bottom_margin))
+        lines = [skyline(m) for m in order_m]
+        rest = []
+        for win, w, h in sorted(items, key=lambda it: -it[2]):
+            hh = h + deco
+            for k, m in enumerate(order_m):
+                spot = fit(lines[k], m, w + G, hh + G)
+                if spot is not None:
+                    x, y = spot
+                    win.top.geometry("+%d+%d" % (x, y))
+                    lines[k] = occupy(lines[k], x, w + G, y + hh + G)
+                    break
+            else:
+                rest.append((win, w, h))
+        if rest:
+            # TOO MANY FOR THE SCREENS: cascade the rest down the last
+            # monitor, overlapping -- better than lost.
+            mx, my, mw, mh = order_m[-1]
+            for j, (win, w, h) in enumerate(rest):
+                xx = min(mx + 40 * (j + 1), mx + max(0, mw - w))
+                yy = min(my + 40 * (j + 1), my + max(0, mh - h - deco - BOTTOM))
                 win.top.geometry("+%d+%d" % (xx, yy))
         log("placed the panel windows to the right of O6 (no layout yet)")
 
