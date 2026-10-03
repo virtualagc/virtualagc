@@ -1317,7 +1317,7 @@ class Manager(object):
                 counts[name] = counts.get(name, 0) + 1
             # Names a person uses, not the file names the scan found.
             pretty = {"yaGPC2": "GPC", "MEDS2.py": "MEDS", "panelO6.py": "Panel",
-                      "discretePanel.py": "Panel", "cam.py": "CAM",
+                      "discretePanel.py": "Panel", "cam.py": "O1",
                       "stsKeyboard.py": "Keyboard", "subtitles.py": "Captions",
                       "handcontrollers.py": "Hand controllers"}
             shown = []

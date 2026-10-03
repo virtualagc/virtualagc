@@ -70,7 +70,9 @@ import procinfo
 # Tk tells nobody its process id, so its windows are named by title instead.
 TITLE_ROLES = [
     (re.compile(r"^Subtitles$"), "subtitles"),
-    (re.compile(r"^CAM$"), "cam"),
+    # Panel O1, which holds the CAM.  "CAM" is the title it had before, kept
+    # so a layout saved then still finds it; the role stays "cam" either way.
+    (re.compile(r"^(O1|CAM)$"), "cam"),
     # BOTH TITLES THE PANEL HAS WORN.  It is "Panel" now -- the task bar shows
     # a few characters and a long title made every button look alike -- but a
     # layout saved before that, or an older copy of panelO6.py, still says

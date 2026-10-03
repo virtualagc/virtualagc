@@ -147,7 +147,9 @@ def scaled_wh(w, h, size):
 class CamPanel:
     def __init__(self, root, size=FULL_SIZE, bus=True):
         self.root = root
-        root.title("CAM")
+        # BY ITS PANEL, AS EVERY CREW PANEL WINDOW IS TITLED: the CAM is on
+        # panel O1, and O1's other controls belong here, not in panelO6.py.
+        root.title("O1")
         root.configure(bg=C_PANEL)
         self.size = size
 
@@ -641,7 +643,7 @@ def main(argv=None):
     if args.port_base is not None:
         D.set_port_base(args.port_base)
 
-    import macdock; macdock.set_app_name("CAM")                       # its Dock name
+    import macdock; macdock.set_app_name("O1")                       # its Dock name
     root = tk.Tk()
     import windowLayout; windowLayout.claim(root)   # whose window this is
     root.resizable(True, True)
