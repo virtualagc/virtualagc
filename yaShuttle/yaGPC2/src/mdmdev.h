@@ -71,5 +71,7 @@ void mdmdev_report(void);
 /* Test hook: move the clock the jets' chamber-pressure lag is measured on
  * (forward only).  In a run it follows the shared clock of every bus call. */
 void mdmdev_test_clock_us(double us);
+/* For the tests: IMU n's platform orientation, C(M50 <- cluster). */
+void mdmdev_test_platform(int n, double P[3][3]);
 
 #endif

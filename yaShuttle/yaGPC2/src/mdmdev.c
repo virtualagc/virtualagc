@@ -116,10 +116,11 @@ static Imu imu[4];            /* [1..3] */
  * servos it there):  P = asin(-M1[2][0]), OR = atan2(M1[2][1], M1[2][2]),
  * AZ = atan2(M1[1][0], M1[0][0]).
  *
- * THE PLATFORM IS HELD FIXED.  In orbit PASS torques each platform at
- * -GYREST to cancel that IMU's expected gyro drift (GMKGYO, GO2ORB.hal:629);
- * a modelled drift of +GYREST would make the two cancel, and leaving out
- * both is the same thing.  Alignment slews and torquing are not yet applied.
+ * EACH PLATFORM HAS ITS OWN ORIENTATION, P = C(M50 <- cluster), the
+ * identity at IPL as PASS assumes (CGMIPC's TCM50), and it moves three ways
+ * -- see imu_platform below: its gyros drift, PASS torques it a pulse at a
+ * time to cancel that drift and to align it, and PASS slews it at 1.2 deg/s
+ * to reposition it.  So M1 = P^T . R(q) . TNBBODY in general.
  *
  * The accelerometers count the non-gravitational delta-v in the platform
  * frame (= M50 here) at 0.0344488 ft/s a pulse, low gain, Z negated
@@ -199,23 +200,148 @@ static const double ACC_BIAS_UG[3][3] = {
 typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; double t; } ImuAcc;
 static ImuAcc imuAcc[4];
 
-static void imu_dynamic(int n, uint16_t w[14]) {
-    const PhysState *s = vehdyn_state();
-    double R[3][3], M1[3][3];
-    qmat(s->q, R);
+/* ---------------------------------------------------------------------
+ * THE PLATFORMS MOVE.  PASS's alignment is open-loop: it commands torque or
+ * slew and, when the time it allowed is up, simply ASSUMES the cluster went
+ * where it was sent -- it sets TCM50 to the desired orientation
+ * (GMMLAT.hal step 20.2).  A platform that ignores its commands therefore
+ * does not merely fail to align: after an alignment PASS's attitude is wrong
+ * by however far it meant to move the cluster.  The IMU SOP FSSR (STS
+ * 83-0013-34, printed pp. 11-13) and the flight software agree on:
+ *
+ *   TORQUE, command word 1: three 5-bit two's-complement pulse counts, X in
+ *   bits 0-4, Y 5-9, Z 10-14 (FSSR bit 0 = MSB; GMFGYO.hal step 25).  One
+ *   pulse turns the cluster by KTN = -0.5 arc-second about that axis
+ *   (CGMCOM.hal:315, "positive pulses ... cause a negative rotation"), times
+ *   TORSCFA, 1 on this tape.  The IMU pays them out at one per 5 ms, so a
+ *   command's at most 16 have all gone before the next, 160 ms later; they
+ *   are applied when the command arrives.
+ *
+ *   SLEW, command word 2: SX+ 0x4000, SX- 0x2000, SY+ 0x1000, SY- 0x0800,
+ *   SZ+ 0x0400, SZ- 0x0200 (GMMLAT.hal:258-268; HEX'5400' all positive,
+ *   HEX'2A00' all negative).  1.2 deg/s for as long as the bit is set, and
+ *   a POSITIVE bit turns the cluster NEGATIVELY.
+ *
+ *   DRIFT: PASS torques every platform at -COMPGR, which on orbit is
+ *   -GYREST (GMKGYO.hal step 3; GM9MAS.hal: the mass-unbalance terms are
+ *   I-loaded zero), the gyro restraint drift it expects.  A real gyro drifts
+ *   by the I-load and a little more; this one drifts by exactly the I-load
+ *   (CGMCOM.hal:418, the same in memory on this tape -- tools/pasvar.py),
+ *   so the two cancel to within a pulse, plus YAGPC_IMU_DRIFT (below), the
+ *   "little more" an alignment is there to remove.
+ *
+ * A rate w about the cluster's own axes turns P as dP/dt = P [w]x, so each
+ * step is P <- P . Rot(w dt).  The time is the vehicle's (vehdyn).
+ * ------------------------------------------------------------------- */
+static const double GYREST[3][3] = {           /* CGMS_GYREST (IMU, axis), rad/s */
+    { -1.31239e-6,  3.04123e-6, -1.96834e-6 },
+    { -6.1668e-7,   3.518292e-6, 5.502635e-6 },
+    {  5.4250e-7,  -1.0055e-6,   3.77815e-6 },
+};
+#define IMU_KTN_RAD   (-0.5 * 0.48481361e-5)  /* CGMS_KTN, a pulse */
+#define IMU_SLEW_RAD  (1.2 * 3.14159265358979323846 / 180.0)
+#define DEGHR_RADSEC  0.48481361e-5
+
+typedef struct { double P[3][3]; double t; bool started; long pulses; double slewSec; } ImuPlat;
+static ImuPlat plat[4];
+
+/* YAGPC_IMU_DRIFT=<deg/hr>: drift beyond what PASS compensates, so that the
+ * platforms wander apart and away from M50 and an alignment has something to
+ * correct.  Each IMU and axis gets that rate times a fixed pattern of signs
+ * and sizes, so that no two IMUs drift alike.  Unset or 0: none. */
+static double imu_extra_drift(int n, int i) {
+    static int inited = 0;
+    static double v = 0.0;
+    if (!inited) {
+        inited = 1;
+        const char *e = yagpc_getenv("YAGPC_IMU_DRIFT");
+        if (e != NULL) v = atof(e);
+    }
+    static const double PAT[3][3] = { { 1.0, -0.6, 0.3 }, { -0.4, 0.8, -1.0 }, { 0.7, 0.5, -0.5 } };
+    return v * PAT[n - 1][i] * DEGHR_RADSEC;
+}
+
+/* P <- P . Rot(v), v a rotation vector in the cluster's axes (Rodrigues). */
+static void plat_rotate(double P[3][3], const double v[3]) {
+    double th = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (th == 0.0) return;
+    double k[3] = { v[0] / th, v[1] / th, v[2] / th }, c = cos(th), s = sin(th), C = 1.0 - c;
+    double Rm[3][3] = {
+        { c + k[0] * k[0] * C,        k[0] * k[1] * C - k[2] * s, k[0] * k[2] * C + k[1] * s },
+        { k[1] * k[0] * C + k[2] * s, c + k[1] * k[1] * C,        k[1] * k[2] * C - k[0] * s },
+        { k[2] * k[0] * C - k[1] * s, k[2] * k[1] * C + k[0] * s, c + k[2] * k[2] * C        },
+    };
+    double N[3][3];
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            M1[i][j] = R[i][0] * TNBBODY[0][j] + R[i][1] * TNBBODY[1][j] + R[i][2] * TNBBODY[2][j];
+            N[i][j] = P[i][0] * Rm[0][j] + P[i][1] * Rm[1][j] + P[i][2] * Rm[2][j];
+    memcpy(P, N, sizeof N);
+}
+
+/* Bring IMU n's platform up to vehicle time t: drift, and any slew the last
+ * command word 2 has running. */
+static void imu_platform(int n, double t) {
+    ImuPlat *p = &plat[n];
+    if (!p->started) {
+        if (p->P[0][0] == 0.0 && p->P[1][1] == 0.0 && p->P[2][2] == 0.0)
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++) p->P[i][j] = (i == j) ? 1.0 : 0.0;
+        p->t = t;
+        p->started = true;
+        return;
+    }
+    double dt = t - p->t;
+    if (dt <= 0.0) return;
+    p->t = t;
+    uint16_t c2 = imu[n].cmd2;
+    static const uint16_t POS[3] = { 0x4000u, 0x1000u, 0x0400u }, NEG[3] = { 0x2000u, 0x0800u, 0x0200u };
+    double v[3];
+    bool slewing = false;
+    for (int i = 0; i < 3; i++) {
+        double w = GYREST[n - 1][i] + imu_extra_drift(n, i);
+        if (c2 & POS[i]) { w -= IMU_SLEW_RAD; slewing = true; }
+        else if (c2 & NEG[i]) { w += IMU_SLEW_RAD; slewing = true; }
+        v[i] = w * dt;
+    }
+    if (slewing) p->slewSec += dt;
+    plat_rotate(p->P, v);
+}
+
+/* Command word 1's torque pulses, applied when the word arrives. */
+static void imu_torque(int n, uint16_t cmd1, double t) {
+    imu_platform(n, t);
+    double v[3];
+    for (int i = 0; i < 3; i++) {
+        int f = (cmd1 >> (11 - 5 * i)) & 0x1f;
+        if (f & 0x10) f -= 32;
+        v[i] = f * IMU_KTN_RAD;
+        plat[n].pulses += (f < 0) ? -f : f;
+    }
+    plat_rotate(plat[n].P, v);
+}
+
+static void imu_dynamic(int n, uint16_t w[14]) {
+    const PhysState *s = vehdyn_state();
+    double R[3][3], CR[3][3], M1[3][3];
+    qmat(s->q, R);
+    imu_platform(n, s->t);
+    const double (*P)[3] = (const double (*)[3])plat[n].P;
+    for (int i = 0; i < 3; i++)                    /* C(cluster <- body) = P^T R */
+        for (int j = 0; j < 3; j++)
+            CR[i][j] = P[0][i] * R[0][j] + P[1][i] * R[1][j] + P[2][i] * R[2][j];
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            M1[i][j] = CR[i][0] * TNBBODY[0][j] + CR[i][1] * TNBBODY[1][j] + CR[i][2] * TNBBODY[2][j];
     double sp = -M1[2][0];
     if (sp > 1.0) sp = 1.0;
     if (sp < -1.0) sp = -1.0;
     const double D = 180.0 / 3.14159265358979323846;
-    double P = asin(sp) * D;
+    double PIT = asin(sp) * D;
     double OR = atan2(M1[2][1], M1[2][2]) * D;
     double AZ = atan2(M1[1][0], M1[0][0]) * D;
     w[2] = 0;                                      /* inner roll 8X: null */
     resolver_words(OR, &w[3], &w[4]);
-    resolver_words(P, &w[5], &w[6]);
+    resolver_words(PIT, &w[5], &w[6]);
     resolver_words(AZ, &w[7], &w[8]);
     /* the velocity counters */
     ImuAcc *a = &imuAcc[n];
@@ -232,15 +358,18 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     double dt = a->started ? s->t - a->t : 0.0;
     if (dt < 0.0) dt = 0.0;
     double k = (imu[n].cmd2 & IMU_CMD2_HIGAIN) ? IMU_FT_PER_PULSE / 10.0 : IMU_FT_PER_PULSE;
+    /* the inertial increment since the last read, in the cluster's axes */
+    double ft[3], inc[3], incC[3];
+    for (int i = 0; i < 3; i++) { ft[i] = dv[i] / FT_M + vnb[i]; inc[i] = ft[i] - a->dvFt[i]; }
+    for (int i = 0; i < 3; i++) incC[i] = P[0][i] * inc[0] + P[1][i] * inc[1] + P[2][i] * inc[2];
     for (int i = 0; i < 3; i++) {
-        double ft = dv[i] / FT_M + vnb[i];
-        if (!a->started) { a->dvFt[i] = ft; continue; }
+        if (!a->started) { a->dvFt[i] = ft[i]; continue; }
         double weight = (1.0 + ACC_SF_PPM[n - 1][i] * 1e-6) * k;
         double bias = ACC_BIAS_UG[n - 1][i] * 1e-6 * G0_FTS2;
-        double pulses = (ft - a->dvFt[i] + bias * dt) / weight + a->carry[i];
+        double pulses = (incC[i] + bias * dt) / weight + a->carry[i];
         double whole = floor(pulses);
         a->carry[i] = pulses - whole;
-        a->dvFt[i] = ft;
+        a->dvFt[i] = ft[i];
         int d = (int)whole;
         if (i == 2) d = -d;                        /* Z counts the other way */
         a->count[i] = (uint16_t)(a->count[i] + (unsigned)d);
@@ -1275,6 +1404,8 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         ffWrites++;
         if (f == GPS_WRITE && u <= 3) { gps_write(u, words, n); return; }
         if (f == IMU_WRITE && u <= 3) {
+            /* the slew running until now ran under the OLD word 2 */
+            if (vehdyn_enabled()) imu_torque(u, words[0], vehdyn_state()->t);
             imu[u].cmd1 = words[0];
             imu[u].cmd2 = (n > 1) ? words[1] : imu[u].cmd2;
             imu[u].haveCmd = true;
@@ -1421,6 +1552,15 @@ bool mdmdev_dump(const char *dir) {
     double tb[3];
     for (int k = 1; k <= 3; k++) tb[k - 1] = imuAcc[k].t;
     put_list(f, "imuTime", tb, 3, true);
+    double pb[3 * 11];
+    int np = 0;
+    for (int k = 1; k <= 3; k++) {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++) pb[np++] = plat[k].P[i][j];
+        pb[np++] = plat[k].started;
+        pb[np++] = plat[k].t;
+    }
+    put_list(f, "imuPlatform", pb, np, true);
     double gb[9];
     for (int k = 1; k <= 3; k++) {
         gb[3 * (k - 1)] = gps[k].haveCmd; gb[3 * (k - 1) + 1] = gps[k].mode;
@@ -1492,6 +1632,16 @@ bool mdmdev_load(const char *dir) {
             imuAcc[k].started = ib[i++] != 0.0;
             imuAcc[k].t = tb[k - 1] - tCap;              /* rebased with the vehicle */
         }
+    /* THE PLATFORMS' ORIENTATIONS: a capture made before they could move
+     * has none, and its platforms are where they always were, at M50. */
+    double pb[3 * 11];
+    if (get_list(root, "imuPlatform", pb, 33) == 33)
+        for (int k = 1, i = 0; k <= 3; k++) {
+            for (int r = 0; r < 3; r++)
+                for (int c = 0; c < 3; c++) plat[k].P[r][c] = pb[i++];
+            plat[k].started = pb[i++] != 0.0;
+            plat[k].t = pb[i++] - tCap;                 /* rebased with the vehicle */
+        }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {
             gps[k].haveCmd = gb[3 * (k - 1)] != 0.0; gps[k].mode = (unsigned)gb[3 * (k - 1) + 1];
@@ -1509,7 +1659,25 @@ bool mdmdev_load(const char *dir) {
     return true;
 }
 
+/* The angle, degrees, through which IMU n's cluster has turned from M50. */
+static double plat_angle_deg(int n) {
+    const double (*P)[3] = (const double (*)[3])plat[n].P;
+    double c = (P[0][0] + P[1][1] + P[2][2] - 1.0) / 2.0;
+    if (c > 1.0) c = 1.0;
+    if (c < -1.0) c = -1.0;
+    return acos(c) * 180.0 / 3.14159265358979323846;
+}
+
+void mdmdev_test_platform(int n, double P[3][3]) {
+    if (n >= 1 && n <= 3) memcpy(P, plat[n].P, sizeof plat[n].P);
+}
+
 void mdmdev_report(void) {
+    for (int k = 1; k <= 3; k++)
+        if (plat[k].started)
+            fprintf(stderr, "mdmdev: IMU%d platform %.4f deg from M50; %ld torque "
+                            "pulse(s), %.2f s slewing\n", k, plat_angle_deg(k),
+                    plat[k].pulses, plat[k].slewSec);
     if (dlFrames > 0)
         fprintf(stderr, "mdmdev: %ld downlist frame(s) sent to the ground\n", dlFrames);
     if (uplinkHeard)

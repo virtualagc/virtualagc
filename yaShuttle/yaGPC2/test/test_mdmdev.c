@@ -179,6 +179,72 @@ int main(void) {
               "imu2 discretes good");
     }
 
+    /* THE PLATFORM MOVES AS PASS COMMANDS IT (IMU 1, bus 20).  Each check
+     * compares C(cluster after <- cluster before) = P0^T P1 with the rotation
+     * that should have happened; for small angles its (3,2), (1,3) and (2,1)
+     * elements are the X, Y and Z angles. */
+    {
+        const double KTN = -0.5 * 0.48481361e-5, D = 3.14159265358979323846 / 180.0;
+        double P0[3][3], P1[3][3], Q[3][3];
+        #define REL() do { mdmdev_test_platform(1, P1); \
+            for (int i_ = 0; i_ < 3; i_++) for (int k_ = 0; k_ < 3; k_++) \
+                Q[i_][k_] = P0[0][i_] * P1[0][k_] + P0[1][i_] * P1[1][k_] + P0[2][i_] * P1[2][k_]; } while (0)
+        vehdyn_reset(0.0);
+        uint16_t c[2] = { 0x0000u, 0x0000u };
+        write_words(20, FF(0x20C01u), c, 2);                /* starts the platform */
+        mdmdev_test_platform(1, P0);
+        check(P0[0][0] == 1.0 && P0[1][1] == 1.0 && P0[2][2] == 1.0, "imu1 platform starts at M50");
+
+        /* TORQUE: X +15, Y -16, Z +1 pulses, no time passing */
+        c[0] = (uint16_t)((15u << 11) | (0x10u << 6) | (1u << 1));
+        write_words(20, FF(0x20C01u), c, 2);
+        REL();
+        double ex = fabs(Q[2][1] - 15 * KTN) + fabs(Q[0][2] - (-16) * KTN) + fabs(Q[1][0] - 1 * KTN);
+        if (ex > 1e-8) printf("torque: %.4g %.4g %.4g rad\n", Q[2][1], Q[0][2], Q[1][0]);
+        check(ex < 1e-8, "imu1 torque pulses turn the cluster -0.5 arcsec each, per axis");
+
+        /* SLEW: SX+ for one second turns the cluster -1.2 deg about X */
+        mdmdev_test_platform(1, P0);
+        c[0] = 0; c[1] = 0x4000u;
+        write_words(20, FF(0x20C01u), c, 2);
+        vehdyn_advance(1e6);
+        c[1] = 0x0000u;
+        write_words(20, FF(0x20C01u), c, 2);                /* stops it */
+        REL();
+        double ax = atan2(Q[2][1], Q[1][1]) / D;
+        if (fabs(ax + 1.2) > 1e-3) printf("slew: %.6f deg about X\n", ax);
+        check(fabs(ax + 1.2) < 1e-3, "imu1 SX+ slews the cluster -1.2 deg/s about X");
+
+        /* DRIFT, CANCELLED THE WAY PASS CANCELS IT: every 0.16 s, GMFGYO's
+         * pulses for a rate of -GYREST (GMKGYO), the residual carried.  Five
+         * minutes of it must leave the platform within a few pulses of where
+         * it began; uncompensated, it would have gone 1e-3 rad. */
+        {
+            const double GY1[3] = { -1.31239e-6, 3.04123e-6, -1.96834e-6 };
+            double res[3] = { 0, 0, 0 };
+            mdmdev_test_platform(1, P0);
+            for (int cyc = 0; cyc < 1875; cyc++) {
+                int p[3];
+                for (int i = 0; i < 3; i++) {
+                    double want = -GY1[i] * 0.16 / KTN + res[i];
+                    p[i] = (int)lround(want);
+                    if (p[i] > 15) p[i] = 15;
+                    if (p[i] < -16) p[i] = -16;
+                    res[i] = want - p[i];
+                }
+                c[0] = (uint16_t)(((p[0] & 0x1f) << 11) | ((p[1] & 0x1f) << 6) | ((p[2] & 0x1f) << 1));
+                c[1] = 0;
+                vehdyn_advance(1e6 + (cyc + 1) * 0.16e6);   /* a time, not a step */
+                write_words(20, FF(0x20C01u), c, 2);
+            }
+            REL();
+            double e = fabs(Q[2][1]) + fabs(Q[0][2]) + fabs(Q[1][0]);
+            if (e > 4 * fabs(KTN)) printf("drift left %.3g rad after 300 s\n", e);
+            check(e < 4 * fabs(KTN), "imu1 gyro drift is cancelled by PASS's -GYREST torquing");
+        }
+        #undef REL
+    }
+
     /* THE RETURN-WORD PATTERN CHECK (ledger #262): the pattern in the
      * command's low fourteen bits comes back shifted left two. */
     check(read_words(14, FA(0x32AAAu), 1, w) == 1 && w[0] == 0xAAA8u,
@@ -505,6 +571,8 @@ int main(void) {
         memcpy(r0, vehdyn_state()->r, sizeof r0);
         memcpy(v0, vehdyn_state()->v, sizeof v0);
         double gim = vehdyn_oms_gimbal(1, 0);
+        double Pcap[3][3];
+        mdmdev_test_platform(1, Pcap);
         check(mdmdev_dump(dir), "capture: vehdyn.json written");
         vehdyn_advance(150e6);
         memcpy(rFut, vehdyn_state()->r, sizeof rFut);       /* where it goes next */
@@ -515,6 +583,11 @@ int main(void) {
         for (int i = 0; i < 3; i++) { dr += fabs(st->r[i] - r0[i]); dv += fabs(st->v[i] - v0[i]); }
         check(dr == 0.0 && dv == 0.0 && st->t == 0.0, "capture: state restored, time rebased to 0");
         check(vehdyn_propellant(4) == 4000.0 && vehdyn_oms_gimbal(1, 0) == gim, "capture: OMS restored");
+        {
+            double Pl[3][3];
+            mdmdev_test_platform(1, Pl);
+            check(memcmp(Pl, Pcap, sizeof Pl) == 0, "capture: IMU1's platform orientation restored");
+        }
         vehdyn_advance(30e6);                               /* 30 s on the restored clock */
         double d = 0;
         for (int i = 0; i < 3; i++) d += (vehdyn_state()->r[i] - rFut[i]) * (vehdyn_state()->r[i] - rFut[i]);
