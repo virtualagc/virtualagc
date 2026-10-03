@@ -3043,7 +3043,7 @@ class PanelO6:
         title_h = (pad + 2 * th10) if title else pad
         # A string row is a group legend: one line of text across the pane.
         legend = lambda row: isinstance(row, str)
-        sizes = [[(self._tw(row, SETTING_SIZE), 2 * self._th(SETTING_SIZE) + 2, 0, 0)] if legend(row)
+        sizes = [[(self._tw(row, SETTING_SIZE), 2 * self._th(SETTING_SIZE) + 8, 0, 0)] if legend(row)
                  else [self._ctl_size(k) for k in row] for row in rows]
         if opts.get("grid"):
             ncol = max(len(r) for r in sizes)
@@ -3069,7 +3069,9 @@ class PanelO6:
         y = y0 + title_h + pad
         for row, sz, rw, rh in zip(rows, sizes, widths, heights):
             if legend(row):
-                self._text(x0 + width / 2.0, y + rh / 2.0, row, size=SETTING_SIZE)
+                # in the lower part of its row: clear of the controls above
+                self._text(x0 + width / 2.0, y + rh - self._th(SETTING_SIZE) - 2, row,
+                           size=SETTING_SIZE)
                 y += rh + pad
                 continue
             x = x0 + (width - rw) / 2.0
