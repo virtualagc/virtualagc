@@ -115,19 +115,33 @@ int main(void) {
           "fa2 right manifold 5 open");
 
     /* FIRE L1A (FA1 bit 1) and L5L (bit 8): B is card 10 channel 0, the
-     * reset word then the set word, channel 1 alongside. */
+     * reset word then the set word, channel 1 alongside.  The driver follows
+     * the command at once; chamber pressure lags it both ways -- up after
+     * 20 ms, down 40 ms after the off command -- on the shared clock
+     * (ledger #272: GRORCS reads Pc 27 ms after an even pass's write). */
     {
         uint16_t reset[2] = { 0x7EFFu, 0xFFFFu }, set[2] = { 0x8100u, 0x0000u };
+        mdmdev_test_clock_us(1000.0);
         write_words(14, FA(0x22801u), reset, 2);
         write_words(14, FA(0x22A01u), set, 2);
+        mdmdev_test_clock_us(1000.0 + 10000.0);
         read_words(14, FA(0x0836Eu), 54, w);
-        check(w[21] == 0x81E0u, "fa1 chamber pressure follows the fire command");
+        check(w[21] == 0x00E0u, "fa1 chamber pressure not up 10 ms after the fire command");
         check(w[22] == 0x8100u, "fa1 jet drivers follow the fire command");
+        mdmdev_test_clock_us(1000.0 + 25000.0);
+        read_words(14, FA(0x0836Eu), 54, w);
+        check(w[21] == 0x81E0u, "fa1 chamber pressure up 25 ms after the fire command");
         uint16_t off[2] = { 0x0000u, 0x0000u }, none[2] = { 0xFFFFu, 0xFFFFu };
+        mdmdev_test_clock_us(100000.0);
         write_words(14, FA(0x22801u), none, 2);
         write_words(14, FA(0x22A01u), off, 2);
+        mdmdev_test_clock_us(100000.0 + 27000.0);
         read_words(14, FA(0x0836Eu), 54, w);
-        check(w[21] == 0x00E0u && w[22] == 0, "fa1 jets off again");
+        check(w[21] == 0x81E0u && w[22] == 0,
+              "fa1 drivers off at once, chamber pressure still up 27 ms later");
+        mdmdev_test_clock_us(100000.0 + 67000.0);
+        read_words(14, FA(0x0836Eu), 54, w);
+        check(w[21] == 0x00E0u && w[22] == 0, "fa1 jets off again 67 ms later");
     }
 
     /* FORWARD, AT REST: FF3 (bus 22) carries manifold 5 and IMU 3. */
@@ -145,13 +159,15 @@ int main(void) {
     /* FIRE F1F (FF1 bit 1): card 13 channel 0. */
     {
         uint16_t reset = 0x7FFFu, set = 0x8040u;     /* with IMU 1 operate */
+        mdmdev_test_clock_us(200000.0);
         write_words(20, FF(0x23400u), &reset, 1);
         write_words(20, FF(0x23600u), &set, 1);
+        mdmdev_test_clock_us(200000.0 + 30000.0);
         read_words(20, FF(0x082E8u), 36, w);
         check(w[3] == 0x8000u && w[5] == 0x8000u,
               "ff1 chamber pressure and driver follow F1F only");
     }
-
+    
     /* IMU 2 (bus 21): command words in, BITE and echoes out. */
     {
         uint16_t cmd[2] = { 0x1234u, 0x8000u };      /* high gain */

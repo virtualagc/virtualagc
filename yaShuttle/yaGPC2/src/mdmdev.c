@@ -279,6 +279,78 @@ static uint16_t ff_jets_b(int k) { return (uint16_t)(ffOut[k][13][0] & 0xF000u);
 static uint16_t fa_jet_mask(int k) { return (k <= 2) ? 0xFF00u : 0xFC00u; }
 static uint16_t fa_jets_b(int k) { return (uint16_t)(faOut[k][10][0] & fa_jet_mask(k)); }
 
+/* CHAMBER PRESSURE LAGS THE FIRE COMMAND, both ways.  A real jet's Pc
+ * discrete (from its reaction jet driver) comes up only once the valves have
+ * opened, < 10 ms, and thrust has built, ~20 ms; and it stays up after the
+ * off command while the valves close, < 10 ms, and thrust tails off, ~20 ms
+ * (CSDL-C-4576 sec. 2, "normal RCS jet firing"; transport to the driver adds
+ * more, TBD there).
+ *
+ * The flight software depends on the OFF lag.  GRORCS runs on the odd HFE
+ * passes only, assembling CGRB_JET_FIRE from the output buffer at the END of
+ * a pass (GRORCS.hal:315-330) and testing it at the START of its next one,
+ * 80 ms later, against the Pc read that began that pass (:134-161).  The RCS
+ * command SOP refreshes the buffer every pass (GEIORB.hal: GP1 before the
+ * dispatcher), so in between the even pass writes whatever the DAP decided --
+ * 27 ms before the read.  A jet the DAP turned off there is still "fire" in
+ * CGRB_JET_FIRE; a Pc that drops at once reads as a jet that failed to fire,
+ * one fail-off pass at the END of every firing, and a run of short firings
+ * never clears the count: three and the jet is failed OFF (ledger #272).
+ * With the off lag the read 27 ms after the command still sees pressure, and
+ * the one 67 ms after does not.  The driver-output discrete stays immediate:
+ * it is the driver's own electrical state. */
+#define PC_ON_LAG_US  20000.0
+#define PC_OFF_LAG_US 40000.0
+static double pcNowUs;
+static double pcOnUs[2][5][16], pcOffUs[2][5][16];     /* [0 FF, 1 FA] */
+static uint16_t pcPrevB[2][5];
+static bool pcInited;
+
+static void pc_init(void) {
+    for (int m = 0; m < 2; m++)
+        for (int k = 0; k < 5; k++)
+            for (int b = 0; b < 16; b++) pcOnUs[m][k][b] = pcOffUs[m][k][b] = -1e30;
+    pcInited = true;
+}
+
+static void pc_clock(double sharedUs) {
+    if (sharedUs >= 0.0 && sharedUs > pcNowUs) pcNowUs = sharedUs;
+}
+
+/* For test_mdmdev, whose bus model runs without a shared clock. */
+void mdmdev_test_clock_us(double us) { pc_clock(us); }
+
+/* Note when each jet's B bit changed: after every write to a fire card. */
+static void pc_track(void) {
+    if (!pcInited) pc_init();
+    for (int m = 0; m < 2; m++)
+        for (int k = 1; k <= 4; k++) {
+            uint16_t now = m ? fa_jets_b(k) : ff_jets_b(k);
+            uint16_t chg = (uint16_t)(now ^ pcPrevB[m][k]);
+            for (int b = 0; b < 16; b++) {
+                uint16_t bit = (uint16_t)(0x8000u >> b);
+                if (!(chg & bit)) continue;
+                if (now & bit) pcOnUs[m][k][b] = pcNowUs;
+                else pcOffUs[m][k][b] = pcNowUs;
+            }
+            pcPrevB[m][k] = now;
+        }
+}
+
+static uint16_t pc_word(int m, int k) {
+    if (!pcInited) pc_init();
+    uint16_t cmd = m ? fa_jets_b(k) : ff_jets_b(k), pc = 0;
+    for (int b = 0; b < 16; b++) {
+        uint16_t bit = (uint16_t)(0x8000u >> b);
+        if (cmd & bit) {
+            if (pcNowUs - pcOnUs[m][k][b] >= PC_ON_LAG_US) pc |= bit;
+        } else if (pcNowUs - pcOffUs[m][k][b] < PC_OFF_LAG_US) {
+            pc |= bit;
+        }
+    }
+    return pc;
+}
+
 /* 2.5 V, as the A/D reports it: 6400 counts a volt (the leak limits are
  * written 6400 x volts, GRRRCS.hal:142-149).  The only check on an injector
  * temperature is a LOW one -- a leak -- at 0.625 V oxidizer and 0.425 V fuel
@@ -701,7 +773,7 @@ static void ff_discretes(int k, uint16_t d[13]) {
      * fire command -- a healthy jet makes pressure when it is fired and its
      * driver is on exactly then.  Fail-off is commanded with no pressure for
      * three passes, fail-on is a driver on with no command. */
-    d[3] = ff_jets_b(k);
+    d[3] = pc_word(0, k);
     d[5] = ff_jets_b(k);
     /* The IMU discretes (DIL card 15 ch 0) come in here too, for the IMU
      * behind this MDM. */
@@ -782,7 +854,7 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     /* Chamber pressure and driver output follow the fire command, as
      * forward; bits 9-11 of the Pc word are the rate gyros' spin-motor
      * rotation detectors, which must read running (GQRORB.hal:139-270). */
-    b[21] = (uint16_t)(fa_jets_b(k) | 0x00E0u);
+    b[21] = (uint16_t)(pc_word(1, k) | 0x00E0u);
     b[22] = fa_jets_b(k);
     if (trace_fa() == k) {
         static uint16_t last = 0xFFFFu;
@@ -1159,6 +1231,7 @@ bool mdmdev_fc_relay(void) {
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
+    pc_clock(sharedUs);
     if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
         fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
         return;
@@ -1189,7 +1262,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         if (CMD_MODE(cmd) == 8u) {
             discrete_write(ffOut, ffOutSeen, u, cmd, words, n);
             crew_publish_out(u, cmd, n);
-            if (CMD_CARD(cmd) == 13u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 13u) { pc_track(); push_fire(sharedUs); }
             if (CMD_CARD(cmd) == 2u) push_oms(sharedUs);
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
@@ -1207,7 +1280,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                 fprintf(stderr, "\n");
             }
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
-            if (CMD_CARD(cmd) == 10u) push_fire(sharedUs);
+            if (CMD_CARD(cmd) == 10u) { pc_track(); push_fire(sharedUs); }
             if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
         }
     }
@@ -1215,6 +1288,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
+    pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;
     if (!mdmdev_enabled()) {
