@@ -18,6 +18,8 @@
 #include "json.h"
 #include "startrk.h"
 #include "lpsmodel.h"
+#include "eiumodel.h"
+#include "mecmodel.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -1008,6 +1010,8 @@ static int trace_fa(void) {
     return k;
 }
 
+#define SRB_PC_AMBIENT 950u    /* about 14.7 psia */
+
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
     memset(b, 0, sizeof b);
@@ -1041,6 +1045,24 @@ static void fa_hfe(int k, uint16_t *w, int n) {
         int e = (k <= 2) ? 0 : 1;
         b[0] = oms_feedback(e, 0);
         b[1] = oms_feedback(e, 1);
+    }
+    /* SEGMENT 7, words 28-35 (CGBIH1.hal:528-541): the SRBs' chamber
+     * pressures (32 right, 34 left; FA1-3) and the SRB ignition PIC
+     * capacitor voltages (33 right, 35 left; FA1 cap A, FA2 cap B).
+     *   - PIC: GSRRSL checks them >= 28032 counts (35.7 V, "438 x 64") from
+     *     T-12 s, after it has armed SRM ignition at T-15 s; charged here
+     *     once a MEC has that ARM, and not before.
+     *   - SRB Pc: psia = counts x 0.0313211 + K, K about -9.5 to -15.5
+     *     (CGCCOM.hal:279-290); zero counts read -15 psia, which the SRB
+     *     separation cue takes for burn-out.  On the pad, ambient. */
+    if (k <= 2) {
+        uint16_t pic = (mec_armed(MEC_SRM_IGN) && mec_fired_at(MEC_SRM_IGN) < 0.0) ? 30000u : 0u;
+        b[33] = pic;
+        b[35] = pic;
+    }
+    if (k <= 3) {
+        b[32] = SRB_PC_AMBIENT;
+        b[34] = SRB_PC_AMBIENT;
     }
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
@@ -1404,6 +1426,11 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
     if (lps_owns(busID, cmd)) { lps_write(cmd, words, n); return; }
+    if (eiu_engine(busID, cmd) && eiu_is_command(cmd)) {
+        eiu_command(busID, cmd, words, n, sharedUs / 1e6);
+        return;
+    }
+    if (mec_owns(busID, cmd)) { mec_command(busID, cmd, words, n, sharedUs / 1e6); return; }
     pc_clock(sharedUs);
     if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
         fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
@@ -1469,6 +1496,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
     if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
+    if (eiu_engine(busID, cmd)) return eiu_reply(busID, cmd, n, out, sharedUs / 1e6);
     pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;
@@ -1600,6 +1628,10 @@ bool mdmdev_dump(const char *dir) {
         double sb[512];
         int ns = startrk_save(sb, 512);
         put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+        ns = eiu_save(sb, 512);
+        put_list(f, "engines", sb, ns < 512 ? ns : 512, true);
+        ns = mec_save(sb, 512);
+        put_list(f, "mecs", sb, ns < 512 ? ns : 512, true);
     }
     double gb[9];
     for (int k = 1; k <= 3; k++) {
@@ -1686,6 +1718,10 @@ bool mdmdev_load(const char *dir) {
         double sb[512];
         int ns = get_list(root, "starTrackers", sb, 512);
         if (ns > 0) startrk_load(sb, ns, tCap);
+        ns = get_list(root, "engines", sb, 512);
+        if (ns > 0) eiu_load(sb, ns, tCap);
+        ns = get_list(root, "mecs", sb, 512);
+        if (ns > 0) mec_load(sb, ns, tCap);
     }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {
@@ -1719,6 +1755,9 @@ void mdmdev_test_platform(int n, double P[3][3]) {
 
 void mdmdev_report(void) {
     startrk_report();
+    lps_report();
+    eiu_report();
+    mec_report();
     for (int k = 1; k <= 3; k++)
         if (plat[k].started)
             fprintf(stderr, "mdmdev: IMU%d platform %.4f deg from M50; %ld torque "

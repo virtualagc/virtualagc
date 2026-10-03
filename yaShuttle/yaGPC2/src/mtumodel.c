@@ -21,6 +21,8 @@
 #include "envcache.h"
 #include "mdmdev.h"
 #include "lpsmodel.h"
+#include "eiumodel.h"
+#include "mecmodel.h"
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
  * The BUS address comes from the BCE program that reads it, FIOPRMPG:
@@ -1683,7 +1685,13 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
                 if (lpsMtu == NULL) { lpsMtu = m; lps_set_gmt_source(lps_gmt_now); }
                 lps_note_command(cmd);
             }
+            /* THE MAIN ENGINES, behind their EIUs (eiumodel.c): answered
+             * only on the buses a real EIU sends on.  THE MECs take commands
+             * only; a master reset is a command with no words. */
+            int eiuE = eiu_engine(in->busID, cmd);
+            if (mec_owns(in->busID, cmd)) mec_note_command(in->busID, cmd, mdm_time_us(m) / 1e6);
             int nsp = lps ? lps_read_words(cmd, m->armedWords)
+                    : eiuE ? eiu_read_words(in->busID, cmd, m->armedWords)
                     : (cu == MTU_IUA || cu == 12u || fc_any_iua())
                           ? ff_nsp_words(cmd, m->armedWords) : 0;
             if (cu != MTU_IUA && cu != 12u && !ff_mdm_off() && !fc_any_iua())
@@ -1747,6 +1755,14 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         if (lps_owns(in->busID, cmd) && lps_is_transmit(cmd)) {
             m->outCmd[b] = cmd;
             m->outWant[b] = lps_transmit_words(cmd);
+            m->outHave[b] = 0;
+            m->outIssuer[b] = g;
+        }
+        /* OR A COMMAND TO A MAIN ENGINE (two words) or to a MEC */
+        else if ((eiu_engine(in->busID, cmd) && eiu_is_command(cmd)) ||
+                 (mec_owns(in->busID, cmd) && mec_words(cmd) > 0)) {
+            m->outCmd[b] = cmd;
+            m->outWant[b] = eiu_is_command(cmd) ? 2 : mec_words(cmd);
             m->outHave[b] = 0;
             m->outIssuer[b] = g;
         }
