@@ -1954,20 +1954,72 @@ class PanelO6:
     PLACE_TITLE = 32       # allowance for a title bar
 
     @staticmethod
-    def _monitor_edges(sw):
-        """The x coordinates where one monitor ends and the next begins,
-        from `xrandr --listmonitors` (X11, WSLg's Xwayland included); empty
-        where there is no xrandr or one monitor -- Tk itself knows only the
-        whole desktop, so rows straddled the join (WSL-integration)."""
-        import subprocess
+    def _x_monitors():
+        """[(x, width)] of each monitor, asked of the X server itself through
+        libXrandr's XRRGetMonitors -- no xrandr program needed (a default WSL
+        Ubuntu has none, though Xwayland reports both of WSLg's monitors:
+        WSL-integration).  [] without X11 or RandR, as on macOS and Windows."""
+        import ctypes
+        import ctypes.util
+
+        class MonitorInfo(ctypes.Structure):
+            _fields_ = [("name", ctypes.c_ulong), ("primary", ctypes.c_int),
+                        ("automatic", ctypes.c_int), ("noutput", ctypes.c_int),
+                        ("x", ctypes.c_int), ("y", ctypes.c_int),
+                        ("width", ctypes.c_int), ("height", ctypes.c_int),
+                        ("mwidth", ctypes.c_int), ("mheight", ctypes.c_int),
+                        ("outputs", ctypes.c_void_p)]
         try:
-            out = subprocess.run(["xrandr", "--listmonitors"], capture_output=True,
-                                 text=True, timeout=3).stdout
-        except (OSError, subprocess.SubprocessError):
+            x11 = ctypes.CDLL(ctypes.util.find_library("X11") or "libX11.so.6")
+            xrr = ctypes.CDLL(ctypes.util.find_library("Xrandr") or "libXrandr.so.2")
+        except OSError:
             return []
+        x11.XOpenDisplay.restype = ctypes.c_void_p
+        x11.XOpenDisplay.argtypes = [ctypes.c_char_p]
+        x11.XDefaultRootWindow.restype = ctypes.c_ulong
+        x11.XDefaultRootWindow.argtypes = [ctypes.c_void_p]
+        x11.XCloseDisplay.argtypes = [ctypes.c_void_p]
+        xrr.XRRGetMonitors.restype = ctypes.POINTER(MonitorInfo)
+        xrr.XRRGetMonitors.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int,
+                                       ctypes.POINTER(ctypes.c_int)]
+        xrr.XRRFreeMonitors.argtypes = [ctypes.POINTER(MonitorInfo)]
+        dpy = x11.XOpenDisplay(None)
+        if not dpy:
+            return []
+        try:
+            n = ctypes.c_int(0)
+            mons = xrr.XRRGetMonitors(dpy, x11.XDefaultRootWindow(dpy), 1, ctypes.byref(n))
+            if not mons:
+                return []
+            out = [(mons[i].x, mons[i].width) for i in range(n.value)]
+            xrr.XRRFreeMonitors(mons)
+            return out
+        finally:
+            x11.XCloseDisplay(dpy)
+
+    @classmethod
+    def _monitor_edges(cls, sw):
+        """The x coordinates where one monitor ends and the next begins --
+        Tk itself knows only the whole desktop, so rows straddled the join
+        (WSL-integration).  From the X server's RandR monitors, or failing
+        that `xrandr --listmonitors`; by geometry, not name (WSLg's are
+        rdp-N).  Empty with one monitor or no X11."""
+        mons = []
+        try:
+            mons = cls._x_monitors()
+        except Exception:
+            mons = []
+        if not mons:
+            import subprocess
+            try:
+                out = subprocess.run(["xrandr", "--listmonitors"], capture_output=True,
+                                     text=True, timeout=3).stdout
+            except (OSError, subprocess.SubprocessError):
+                out = ""
+            for m in re.finditer(r"\s(\d+)/\d+x\d+/\d+\+(-?\d+)\+-?\d+", out):
+                mons.append((int(m.group(2)), int(m.group(1))))
         starts = set()
-        for m in re.finditer(r"\s(\d+)/\d+x(\d+)/\d+\+(-?\d+)\+(-?\d+)", out):
-            w, x = int(m.group(1)), int(m.group(3))
+        for x, w in mons:
             if x > 0:
                 starts.add(x)
             if 0 < x + w < sw:
