@@ -6140,6 +6140,14 @@ class Screen_DPS(MDUScreen):
                         _gridTally['bad'] += 1
                     st['beamY'] = (v['y'] + (st['ty'] if st['xyRef'] else 0)) % _g['grid']
                     st['homeY'] = st['beamY']
+                    # ...and a Y position word re-homes the beam horizontally,
+                    # as an X word does vertically: a display's YC= with no
+                    # XC= starts at the block's column, not where the last
+                    # text ended.  UNIV PTG's item-12 LON value and its CUR
+                    # label depend on it; over the static text of every
+                    # OI340600 .dfg, keeping X collides 88 characters on 19
+                    # displays and re-homing it collides none.
+                    st['beamX'] = st['homeX']
             elif nm == 'CIRCLE':
                 drawCircle(v['radius'])
             elif nm == 'LSITE1':
