@@ -244,7 +244,7 @@ produces **zero output**, exit code 0. `yaGPC` run the same way
 completes the program correctly (prints `RESULTS OF TESTING X` /
 `0 SAMPLES CORRECT, 3 SAMPLES INCORRECT` and halts) — see
 `yaGPC/src/run.c`'s `interactive_input_cb` comment for the full
-writeup, and `run_matrix.sh`'s `read_eof_onerror` check (which asserts
+writeup, and `run_matrix.sh`'s (deleted 2026-09-29, 0f90c0dcc) `read_eof_onerror` check (which asserts
 `yaGPC`'s own correct output directly, since diffing against `gpc`
 would never pass here by design).
 
@@ -1287,7 +1287,7 @@ Permanent regression coverage, both run as part of `make test`:
   deadline (not free-running with instruction count) across a `REPEAT
   EVERY` + `WAIT` scenario.
 
-Not added to `test/run_matrix.sh`: that script's whole design is
+Not added to `test/run_matrix.sh` (since deleted, 2026-09-29, 0f90c0dcc): that script's whole design is
 diffing `yaGPC2` against the frozen pre-rename `yaGPC` snapshot and the
 original Node.js `gpc` (see this file's own "authoritative parity
 target going forward" policy note near the top) — both permanently
@@ -2721,7 +2721,7 @@ disables; QUIT/unknown-code handling is unaffected by the flag either
 way. Full `yaGPC2` unit test suite re-run showed zero regressions (the
 one pre-existing `test_cpu_instr_exec` CVFX failure, 114650/114801, is
 unrelated and identical before/after this fix). The old `compare.sh`/
-`run_matrix.sh` `gpc.js`-reference suite could not even be run in this
+`run_matrix.sh` `gpc.js`-reference suite (deleted 2026-09-29, 0f90c0dcc) could not even be run in this
 environment (`dist/gpc.js` and `yaGPC/yaGPC` both absent) — a pre-existing,
 unrelated infra gap; that comparison axis was already superseded by the
 `yaHALMAT2` cross-check (see Methodology below). Fixed in commit

@@ -392,12 +392,15 @@ now — see the multi-unit note above.
   build across a batch/interactive/trace/watch/break argument matrix
   (the corpus test harness itself needs external `../yaGPC` and
   `../dist/gpc.js` reference builds that aren't present in every
-  environment, so this ran as a direct old-vs-new binary comparison
+  environment -- and that harness, `test/run_all.sh`, `compare.sh`,
+  `compare_stdin.sh` and `run_matrix.sh`, was deleted on 2026-09-29 in
+  0f90c0dcc, since it compared frozen `gpc` with the old `yaGPC`, never
+  `yaGPC2`, so this ran as a direct old-vs-new binary comparison
   instead where the harness itself couldn't run).
 - Stage 1+: `test/test_debugger.sh` — three golden-transcript,
   scripted-stdin end-to-end cases (`hello`/`watch`/`srcmap`) against
-  `test/fixtures/hello.fcm`, in the style of `test/run_all.sh`/
-  `compare.sh`, wired into `make test`. A separate `test/test_debugger.c`
+  `test/fixtures/hello.fcm`, in the style of the since-deleted
+  `test/run_all.sh`/`compare.sh`, wired into `make test`. A separate `test/test_debugger.c`
   white-box unit test (as originally planned) wasn't added — it would
   have meant breaking the debugger's intentional opaque-state
   encapsulation for no real benefit over the behavioral end-to-end

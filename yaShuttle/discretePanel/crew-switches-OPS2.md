@@ -78,10 +78,17 @@ UNIV PTG itself is driven from the keyboard, by item entries, not by switches.
 
 ---
 
-## Currently faulting: SENSE SW and DISPLAY SW L/R/A
+## SENSE SW and DISPLAY SW L/R/A (faulted until 2026-10-01; now driven)
 
-Both appear at every OPS 2 transition in the simulator today (ledger #262),
-because nothing drives these contacts and all-zero is invalid.
+Both messages used to appear at every OPS 2 transition in the simulator
+(ledger #262), because nothing drove these contacts and all-zero is invalid.
+Since 2026-10-01 (c61974a12) panelO6 drives them: the ADI ATTITUDE, ERROR and
+RATE switches on F6, F8 and A6U, the three ATT REF pushbuttons, and the A6U
+SENSE switch, as forward-MDM crew contacts on the FF*k* hardware-side ports
+(port base + 100..103).  PASS's flags read clean in OPS 201
+(`CGDB_VALIDITY_FLAGS1` and `CGEB_FLT_LG2_FLAG1_HFE` both 0000, run mdm/crew1).
+Crew scripts set them with `adi l|r|a att|err|rate POSITION`, `attref l|r|a`
+and `sense -z|-x`.  What follows is how PASS reads them.
 
 ### SENSE SW: aft sense switch, −X / −Z (panel A6U)
 
@@ -312,35 +319,44 @@ bit 5 of DSCRT6, on FF1 and FF2 respectively.
 - Used by `CGRB_SW_SEL(1:6-9)` (GR2ORB:475). In OPS 8 they also drive
   actuator reset (VXCDCSWI.hal:49-94).
 
-**RCS MASTER CROSSFEED,** FROM LEFT / FROM RIGHT (panel not found).
+**RCS MASTER CROSSFEED,** FROM LEFT / FROM RIGHT (panel O7; SCOM 2.18-18).
 
 - FF1/2/3 DSCRT11 b2 `0x4000` for FROM LEFT and b3 `0x2000` for FROM RIGHT
   (V72K4510-4512X, 4515-4517X).
+- CGBIH1 names these bits `MST_XFEED_SW_OP` / `_CL`, but GSAXFD uses
+  `SW_SEL(1:1)` = FEED FROM LEFT (b2) and `(1:2)` = FROM RIGHT (b3).
 - Both on means hold the last valid value (GR2ORB:407-416; FSSR Table 4.12-4).
 
 **AUTO/MAN pushbuttons.** Three contacts each, slow triple bits 22, 23 and 8
-(GR2ORB:216-240, 478-480). Their panels, F2 (CDR) and F4 (PLT), are
-*(inferred)*.
+(GR2ORB:216-240, 478-480). Their panels are F2 (CDR) and F4 (PLT), confirmed by
+SCOM 2.13-39.
 
 | Pushbutton | Contacts | MSIDs |
 |---|---|---|
 | LH BODY FLAP AUTO/MAN | FF1/2/3 DSCRT2 b16 `0x0001` | V72K4993-4995X |
 | LH SPD BK/THROT AUTO/MAN | FF1/2/3 DSCRT3 b1 `0x8000` | V72K1570-1572X |
 | RH SPD BK/THROT AUTO/MAN | FF2/3/4 DSCRT11 b1 `0x8000` | V72K1600-1602X |
+| RH BODY FLAP AUTO/MAN | FF2/3/4 DSCRT10 b16 `0x0001` (CGBIH1:2812) | not used by GR2 in OPS 2 |
 
-On docking flights these three pushbuttons are reused as post-contact-thrusting
-arm and disarm (the speed-brake pushbuttons) and activate (the body-flap
-pushbutton) (GC1ORB.hal:140-142, 209-262).
+The AUTO/MAN lamps are FF DOH card 10 channel 0, SET words: bit 5 `0x0800` is
+BODY FLAP and bit 6 `0x0400` is SPD BK.  AUTO is on FF1 (left) and FF3 (right),
+MAN on FF2 and FF4 (GC1ORB:117-122, GPHSBT:183-259).
 
-**LH / RH TRIM RHC INHIBIT** (panel F3, TRIM RHC/PANEL; SCOM Part 2, around
-line 19223).
+On docking flights these pushbuttons are reused as post-contact-thrusting arm
+and disarm (the speed-brake pushbuttons) and activate (the body-flap
+pushbutton) (GC1ORB.hal:140-142, 209-262).  Verified live in OPS 201: a SPD BK
+press arms or disarms, and PASS lights or clears the LH and RH AUTO SB lamps.
+
+**LH / RH TRIM RHC INHIBIT** (panel F3, where the switch is printed "TRIM
+RHC/PNL"; SCOM Part 2, around line 19223).
 
 - Two contacts each.
 - LH: FF1/FF2 DSCRT10 b9 `0x0080` (V72K1160/1161X). RH: FF3/FF4 DSCRT10 b9
   (1210/1211).
 - GR2ORB:352-353, 486-487.
 
-**OMS ENG L / R,** ARM/PRESS, ARM, OFF (panel C3).
+**OMS ENG L / R,** ARM (up) / ARM/PRESS (middle) / OFF (down) (panel C3; the
+order follows the SCOM 2.18-8 legend convention).
 
 - Two contacts each, on the aft MDMs.
 - L: FA3/FA1 DSCRT2 b7 `0x0200` for ARM/PRESS and b8 `0x0100` for ARM.
@@ -373,10 +389,29 @@ line 19223).
 
 ## The simulator today
 
-`yaGPC2/src/mdmdev.c` (`YAGPC_MDM_DEVICES`) answers these words with every
-switch contact at 0. That is correct for the DAP pushbuttons and THCs at rest,
-and it is why SENSE SW and DISPLAY SW fault. The bits the device model does set
-in the same words are listed below, checked against this list for overlap:
+**Every control in this document is driven.**  panelO6.py publishes the
+switches and pushbuttons, and handcontrollers.py the THCs and RHCs, as crew
+contacts on the MDMs' hardware-side ports: FF1-4 on port base + 100..103 and
+FA1-4 on base + 104..107 (eba627fbc, 85f935cd7).  yaGPC2's `mdmdev.c` ORs them
+into the discrete words PASS reads in any run wired to a panel (`--discretes`),
+with or without `YAGPC_MDM_DEVICES`; until a panel drives a contact, reads are
+untouched.
+
+| Section | Controls | Window | Script command |
+|---|---|---|---|
+| A | THC forward, aft; RHC LH, RH, aft | hand-controller windows | `thc`, `rhc` |
+| B, C | ORBITAL DAP pushbuttons | C3, A6U | `dap c3\|a6u ...` |
+| SENSE, DISPLAY | ADI switches, ATT REF, SENSE | F6, F8, A6U | `adi`, `attref`, `sense` |
+| D | FCS CHANNEL, OMS ENG | C3 | `fcs`, `omseng` |
+| D | MASTER RCS CROSSFEED | O7 | `xfeed` |
+| D | BODY FLAP and SPD BK/THROT AUTO/MAN | F2, F4 | `bodyflap`, `spdbk` |
+| D | TRIM RHC/PNL | F3 | `trim` |
+
+`SCRIPTABLE_CONTROLS.md` has every command with an example.
+
+With `YAGPC_MDM_DEVICES=1` the device model also sets bits of its own in the
+same words.  These were checked against the contacts above for overlap; none of
+them is a switch contact:
 
 | Word | Bits set | Meaning | Mask |
 |---|---|---|---|
@@ -385,5 +420,3 @@ in the same words are listed below, checked against this list for overlap:
 | DSCRT4 | bits 1-4 | chamber pressure | `0xF000` |
 | DSCRT6 | bits 1-4 | jet driver output | `0xF000` |
 | DSCRT12 | bits 1-6 | IMU discretes | `0xFC00` |
-
-None of them is a switch contact.
