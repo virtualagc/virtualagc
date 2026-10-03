@@ -7921,6 +7921,14 @@ HDOT_MAX = 3000
 
 # ball geometry
 BALL_R = 9.405
+# Don's ball, painted: white hemisphere and white strokes, grey hemisphere and
+# grey strokes, and the dark halo under white labels.  Ron's contrast edit
+# (2026-10-03; samples/don_ball2.png is the same edit applied to the ball as a
+# picture): the palette's white 0xffffff, darkGray 0x777780 and black 0x101336
+# became these.  The rest of the display keeps the palette.
+BALL_LIGHT = 0xe4e4e4
+BALL_DARK = 0x000006
+BALL_HALO = 0x000000
 LINE_R = BALL_R * 1.012
 WIN_R = 6.69       # ball window / roll gauge ring radius
 ERR_R = 7.65       # attitude error scale radius
@@ -9993,7 +10001,7 @@ class Screen_AE_PFD(MDUScreen):
             for wa, wb in ((wc - CUT_W / 2, wc), (wc, wc + CUT_W / 2)):
                 band(white, 359.5 - CUT_H, 359.5, wa, wb, BALL_R + 0.03)
         g = Object3D()
-        for arr, c in ((white, self.d.c2h['white']), (gray, self.d.c2h['darkGray'])):
+        for arr, c in ((white, BALL_LIGHT), (gray, BALL_DARK)):
             geom = BufferGeometry()
             geom.setAttribute('position', Float32BufferAttribute(arr, 3))
             geom.setIndex(list(range(len(arr) // 3)))
@@ -10166,23 +10174,23 @@ class Screen_AE_PFD(MDUScreen):
             m.renderOrder = order
             g.add(m)
         if b['w']:
-            mk(makeSDFLinesGeometry(b['w']), self.d.mats[0][self.d.c2h['white']], -1)
+            mk(makeSDFLinesGeometry(b['w']), self.d.solidMat(BALL_LIGHT), -1)
         if b['d']:
-            mk(makeSDFLinesGeometry(b['d']), self.d.mats[0][self.d.c2h['darkGray']], -1)
+            mk(makeSDFLinesGeometry(b['d']), self.d.solidMat(BALL_DARK), -1)
         # the labels: made after `d`, so at the default width they draw in
         # the same order as when they were the tail of that bucket
         ts = self.d.TEXT_STROKE
         if b['dt']:
             mk(makeSDFLinesGeometry(b['dt']),
-               self.d.solidMat(self.d.c2h['darkGray'], ts), -1)
+               self.d.solidMat(BALL_DARK, ts), -1)
         if b['wb']:
             geom = makeSDFLinesGeometry(b['wb'])
             if self._ballBMat is None:
                 self._ballBMat = makeSDFLineMaterial(self.d.sdfOpt(
-                    {'color': self.d.c2h['black'],
+                    {'color': BALL_HALO,
                      'widthPx': self.d.LINE_PX * ts + 2.5}))
             mk(geom, self._ballBMat, -2)
-            mk(geom, self.d.solidMat(self.d.c2h['white'], ts), -1)
+            mk(geom, self.d.solidMat(BALL_LIGHT, ts), -1)
         return g
 
     def updateADI(self):
