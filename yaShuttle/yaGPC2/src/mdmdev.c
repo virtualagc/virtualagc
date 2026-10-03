@@ -146,6 +146,20 @@ static const double TNBBODY[3][3] = {
     { 0.18395135, 0.0,  0.98293535 },
 };
 #define IMU_FT_PER_PULSE 0.0344488
+
+/* THE IMUs ARE NOT AT THE CENTRE OF GRAVITY.  They sit in the navigation
+ * base, which PASS places at (57.959, -0.067, -3.967) ft from the CG in body
+ * axes (GRWIMU.hal:72, GRW_R_NB_CG); an accelerometer there senses the CG's
+ * motion plus the base's own about the CG, so its velocity is the CG's plus
+ * w x r carried into the platform frame.  PASS takes that term back out
+ * (GRWIMU.hal:81-87: CGMV_VEL_SEL_CG = CGMV_VEL_SEL - Q(w x r), with its
+ * estimated body rates) before Average-G uses the velocity (GHCORB.hal).
+ * Counted at the CG, as these were, every change of body rate left PASS a
+ * phantom delta-V of -(delta w) x r -- 0.226 ft/s when the rates moved by
+ * (0.09, 0, -0.23) deg/s just after an OMS cutoff, which powered-flight
+ * navigation accepted and kept (ledger #274).  So the counts include it,
+ * with the same lever arm PASS assumes. */
+static const double R_NB_CG_FT[3] = { 57.959, -0.067, -3.967 };
 #define FT_M 0.3048
 
 static void qmat(const double q[4], double R[3][3]) {
@@ -207,11 +221,19 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     ImuAcc *a = &imuAcc[n];
     double dv[3];
     vehdyn_sensed_dv(dv);
+    /* the navigation base's velocity about the CG, inertial, ft/s */
+    double wr[3] = {
+        s->w[1] * R_NB_CG_FT[2] - s->w[2] * R_NB_CG_FT[1],
+        s->w[2] * R_NB_CG_FT[0] - s->w[0] * R_NB_CG_FT[2],
+        s->w[0] * R_NB_CG_FT[1] - s->w[1] * R_NB_CG_FT[0],
+    };
+    double vnb[3];
+    for (int i = 0; i < 3; i++) vnb[i] = R[i][0] * wr[0] + R[i][1] * wr[1] + R[i][2] * wr[2];
     double dt = a->started ? s->t - a->t : 0.0;
     if (dt < 0.0) dt = 0.0;
     double k = (imu[n].cmd2 & IMU_CMD2_HIGAIN) ? IMU_FT_PER_PULSE / 10.0 : IMU_FT_PER_PULSE;
     for (int i = 0; i < 3; i++) {
-        double ft = dv[i] / FT_M;
+        double ft = dv[i] / FT_M + vnb[i];
         if (!a->started) { a->dvFt[i] = ft; continue; }
         double weight = (1.0 + ACC_SF_PPM[n - 1][i] * 1e-6) * k;
         double bias = ACC_BIAS_UG[n - 1][i] * 1e-6 * G0_FTS2;

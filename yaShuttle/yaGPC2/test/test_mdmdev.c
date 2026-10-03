@@ -247,7 +247,10 @@ int main(void) {
          * 0.0344488 ft/s times (1 + SFLO 1e-6), and each axis has its BILO
          * bias.  GMHACP's compensation -- counts x weight - bias x dt, Z
          * negated first -- must give back the true delta-V: 2 F t / m along X
-         * and nothing along Y or Z. */
+         * and nothing along Y or Z -- once GRWIMU has taken out the
+         * navigation base's motion about the CG, w x r carried to the
+         * platform (the aft pair also starts the vehicle turning, and the
+         * accelerometers sit 58 ft forward of the CG: ledger #274). */
         double ident[4] = { 1, 0, 0, 0 };
         vehdyn_reset(0.0);
         vehdyn_set_attitude(ident, NULL);
@@ -263,10 +266,24 @@ int main(void) {
         const double SF[3] = { -35780.0, -34250.0, -48240.0 };   /* IMU 2 */
         const double BI[3] = { -17842.0, -13376.0, -32666.0 };
         double truth[3] = { 2.0 * 3870.0 * 4.0 / m0 / 0.3048, 0.0, 0.0 };
+        const PhysState *ps = vehdyn_state();
+        const double RNB[3] = { 57.959, -0.067, -3.967 };
+        double wr[3] = { ps->w[1] * RNB[2] - ps->w[2] * RNB[1], ps->w[2] * RNB[0] - ps->w[0] * RNB[2],
+                         ps->w[0] * RNB[1] - ps->w[1] * RNB[0] };
+        double qa = ps->q[0], qx = ps->q[1], qy = ps->q[2], qz = ps->q[3];
+        double Q[3][3] = {
+            { 1 - 2 * (qy * qy + qz * qz), 2 * (qx * qy - qa * qz), 2 * (qx * qz + qa * qy) },
+            { 2 * (qx * qy + qa * qz), 1 - 2 * (qx * qx + qz * qz), 2 * (qy * qz - qa * qx) },
+            { 2 * (qx * qz - qa * qy), 2 * (qy * qz + qa * qx), 1 - 2 * (qx * qx + qy * qy) } };
+        double vnb[3];
+        for (int i = 0; i < 3; i++) vnb[i] = Q[i][0] * wr[0] + Q[i][1] * wr[1] + Q[i][2] * wr[2];
+        check(fabs(vnb[0]) + fabs(vnb[1]) + fabs(vnb[2]) > 0.001,
+              "the aft pair turns the vehicle, so the lever arm is exercised");
         for (int ax = 0; ax < 3; ax++) {
             int d = (int16_t)(uint16_t)(w[9 + ax] - c0[ax]);
             if (ax == 2) d = -d;
-            double comp = d * (1.0 + SF[ax] * 1e-6) * 0.00344488 - BI[ax] * 1e-6 * 32.174 * 4.0;
+            double comp = d * (1.0 + SF[ax] * 1e-6) * 0.00344488 - BI[ax] * 1e-6 * 32.174 * 4.0
+                          - vnb[ax];
             if (fabs(comp - truth[ax]) > 0.01)
                 printf("axis %d: compensated %.4f ft/s, truth %.4f\n", ax, comp, truth[ax]);
             check(fabs(comp - truth[ax]) <= 0.01, "PASS-compensated accelerometer delta-V equals the truth");
