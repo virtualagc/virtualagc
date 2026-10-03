@@ -966,7 +966,12 @@ class sdf:
         elif symbolTypeString == "STRUCTURE":  # Major Structure
             scell.symbolNumberOfTemplate = self.getHalfword(
                 18, "12\tSymbol number (index) of template", indent=indent)
-        elif flagEQUATE:  # Equate Labels
+        elif symbolClass == 2 and symbolType == 8:  # EQUATE labels
+            # Field 12E belongs to an EQUATE LABEL, symbol class 2 type 8 (ICD
+            # fields 6-7).  Flag bit 23 (flagEQUATE) says only that a symbol is
+            # REFERENCED in an EQUATE statement; a VECTOR or MATRIX with that
+            # flag still has its rows and columns here (CGMS_ACC_SFLO: 3,3,
+            # which read as a symbol number would be 771, past the table).
             scell.symbolNumberOfExternalEquate = self.getHalfword(
                 18, "12\tSymbol number (index) of external equate reference", 
                 indent=indent)

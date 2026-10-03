@@ -121,6 +121,7 @@ class Sym:
         self.type = d.symbolType
         self.flags = d.flagBits
         self.offset = getattr(d, "relativeMemoryAddressOfSymbol", None)
+        self.block = getattr(d, "blockID", None)
         self.bits = getattr(d, "numberOfBitsOrCharInString", None)
         self.dense = (getattr(d, "alignment", None),
                       getattr(d, "numberOfBits", None))
@@ -201,7 +202,7 @@ class Sym:
 
 
 class Compool:
-    def __init__(self, name, csect, syms, init):
+    def __init__(self, name, csect, syms, init, blocks=None):
         self.name, self.csect, self.init = name, csect, init
         self.syms = syms                         # by symbol number, 1-based
         # EXTERNAL symbols are allocated by another compool (##CAASCC
@@ -210,6 +211,13 @@ class Compool:
         named = [s for s in syms[1:] if s and s.cls == 1]
         self.vars = {s.name: s for s in named if s.offset is not None
                      and not s.flags & (F_EXTERNAL | F_CONSTANT)}
+        # AND ONLY THIS COMPOOL'S OWN BLOCK.  A compool that includes another
+        # carries that one's symbols too, each offset from ITS csect: ##CDLANN
+        # has CANN_COM's CANV_ANN_MSG in block 1 (#PCANNCO) beside its own
+        # twenty in block 2 (#PCDLANN).  blocks maps block ID -> csect.
+        if blocks and csect in blocks.values():
+            own = {b for b, cs in blocks.items() if cs == csect}
+            self.vars = {n: v for n, v in self.vars.items() if v.block in own}
         self.consts = {s.name: s for s in named if s.flags & F_CONSTANT}
         self._copy = {}
 
@@ -269,23 +277,41 @@ class SDFLib:
         self.c.monitor22(0, 0x100)
         self.cache = {}
 
+    def sdf_name(self, name):
+        """The SDF member for a compool name: SDF names are six characters,
+        so a five-character one is padded -- ##CRATE .sdf."""
+        for n in (name, name.ljust(6)):
+            if os.path.exists(os.path.join(self.path, "##%s.sdf" % n)):
+                return n
+        return None
+
     def has(self, name):
-        return os.path.exists(os.path.join(self.path, "##%s.sdf" % name))
+        return self.sdf_name(name) is not None
 
     def compool(self, name):
         if name in self.cache:
             return self.cache[name]
         if not self.has(name):
             raise KeyError("no SDF ##%s in %s" % (name, self.path))
-        self.c.fromNative({"SDFNAM": "##" + name})
+        self.c.fromNative({"SDFNAM": "##" + self.sdf_name(name)})
         self.c.monitor22(4)
         s = self.sdf(self.c)
         s.parseSDF()
-        csect = self.sdf.convertEbcdicToAscii(s.blockIndexTable[0]
-                                              .blockCsectName).strip()
+        blocks = {b.blockDataCell.blockID:
+                  self.sdf.convertEbcdicToAscii(b.blockCsectName).strip()
+                  for b in s.blockIndexTable}
+        # THE COMPOOL'S OWN CSECT, #P + its name, wherever it is in the block
+        # table.  Block 0 names it only when the compool includes nothing
+        # first: ##CDLANN's block 0 is CANN_COM's #PCANNCO and ##CDMUIC's is
+        # the program $0ASCTIM, while #PCDLANN and #PCDMUIC -- where their
+        # variables live -- come later.
+        own = "#P" + name.strip()
+        csect = own if own in blocks.values() else \
+            self.sdf.convertEbcdicToAscii(s.blockIndexTable[0]
+                                          .blockCsectName).strip()
         syms = [None] + [Sym(self.sdf, e, i + 1)
                          for i, e in enumerate(s.symbolIndexTable)]
-        cp = Compool(name, csect, syms, list(s.initializationTable))
+        cp = Compool(name, csect, syms, list(s.initializationTable), blocks)
         self.cache[name] = cp
         return cp
 
@@ -349,7 +375,7 @@ def build_index(lib, config):
     configuration's table places.  Cached beside nothing in the repository:
     under ~/.cache/pasvar."""
     tab, _ = csect_table(config)
-    stamp = "3|%s|%s|%s|%d" % (lib.path, PFSREV, config,
+    stamp = "4|%s|%s|%s|%d" % (lib.path, PFSREV, config,
                              int(os.path.getmtime(lib.path)))
     cdir = os.path.join(HOME, ".cache", "pasvar")
     cfile = os.path.join(cdir, "index-%s.json" % config)

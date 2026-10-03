@@ -193,7 +193,6 @@ class Universe:
                 if cs.startswith("#P"):
                     names.add(cs[2:])
                     lengths[cs[2:]].add(e["end"] - e["start"] + 1)
-        self.equated = []
         self.label = {}           # compool SDF name -> its COMPOOL label
         self.by_label = {}        # label (what D INCLUDE TEMPLATE names) -> SDF names
         src_names = set()
@@ -223,12 +222,11 @@ class Universe:
                 continue
             if cp.csect.strip() != "#P" + n and len(cp.init) not in lengths.get(n, ()) \
                     and n not in src_names:
-                # pasvar's rule -- block 0 names the compool's own csect --
-                # misses CDM_UI_COMPOOL ($0ASCTIM) and CDL_ANNUN (#PCANNCO),
-                # whose initialization images are exactly their csects' size
+                # not the compool's own #P csect anywhere in its block
+                # table, nor sized like one, nor declared COMPOOL in the
+                # source: a program's SDF, carrying the compools it includes
                 continue
             self.comps[n] = cp
-        self._fix_equated(tree)
         # name -> [(compool, var Sym, qualified member path or None, member)]
         self.byname = defaultdict(list)
         self.spans = {}                # compool -> sorted [(start, end, Sym)]
@@ -244,44 +242,6 @@ class Universe:
             sp.sort(key=lambda t: (t[0], -t[1]))
             self.spans[n] = sp
         self._terms = {}
-
-    def _fix_equated(self, tree):
-        """A VECTOR or MATRIX that an EXTERNAL EQUATE names (flag 0x100)
-        carries the equate's symbol number in field 12 of its Symbol Data
-        Cell, where the rows and columns would be (modules/sdf reads it so),
-        so the SDF does not give its size: CGMS_ACC_BILO, CGMS_GYMSPIN.
-        Take it from the DECLARE in the source; HAL's defaults are VECTOR(3)
-        and MATRIX(3,3)."""
-        need = {}
-        for n, cp in self.comps.items():
-            for v in cp.vars.values():
-                if v.type in (pasvar.T_VEC, pasvar.T_MAT, pasvar.T_VECD,
-                              pasvar.T_MATD) and not (v.rows or v.cols):
-                    need.setdefault(v.name, []).append(v)
-        if not need:
-            return
-        pat = re.compile(r"\b(%s)\b\s+(?:ARRAY\s*\([\d\s,]*\)\s*)?"
-                         r"(MATRIX|VECTOR)\s*(?:\(\s*(\d+)\s*(?:,\s*(\d+))?\s*\))?"
-                         % "|".join(map(re.escape, need)))
-        found = {}
-        for p in (tree.files() if tree else ()):
-            txt = "\n".join(l[:72] for l in io.open(p, encoding="latin-1")
-                            if l[:1] not in ("C", "D"))
-            for m in pat.finditer(txt):
-                found.setdefault(m.group(1), m.groups()[1:])
-        for name, vs in need.items():
-            g = found.get(name)
-            for v in vs:
-                if g is None:
-                    self.equated.append("%s: size unknown (no DECLARE found)" % name)
-                    continue
-                kind, a, b = g
-                if kind == "MATRIX":
-                    v.rows, v.cols = int(a or 3), int(b or a or 3)
-                else:
-                    v.rows, v.cols = int(a or 3), 1
-                self.equated.append("%s %s(%d%s)" % (name, kind, v.rows,
-                                    ",%d" % v.cols if kind == "MATRIX" else ""))
 
     def terms(self, n, v):
         """Sorted terminals of structure variable v: [(off, end, q, m)]."""
@@ -998,8 +958,6 @@ def main():
     print("release %s: source %s; SDFs %s" % (a.release, " + ".join(tree.roots), sdflib))
     uni = Universe(sdflib, tree)
     print("  compools: %d" % len(uni.comps))
-    if uni.equated:
-        print("  EQUATEd vectors/matrices sized from their DECLARE: %s" % "; ".join(uni.equated))
     g = Generator(tree, uni)
     formats, report = g.run(a.format)
     outp = a.out or os.path.join(HERE, "downlist-%s.json" % a.release)
