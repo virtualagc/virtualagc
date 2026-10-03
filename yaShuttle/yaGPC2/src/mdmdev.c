@@ -17,6 +17,7 @@
 #include "envcache.h"
 #include "json.h"
 #include "startrk.h"
+#include "lpsmodel.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -711,6 +712,7 @@ void mdmdev_crew_open(int portBase) {
         crewFd[k] = fd;
     }
     uplink_open(portBase, iface);
+    lps_open(portBase);
 }
 
 static void crew_apply(int k, const uint8_t *buf, int len) {
@@ -1401,6 +1403,7 @@ bool mdmdev_fc_relay(void) {
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
+    if (lps_owns(busID, cmd)) { lps_write(cmd, words, n); return; }
     pc_clock(sharedUs);
     if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
         fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
@@ -1465,6 +1468,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
 
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
+    if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
     pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;

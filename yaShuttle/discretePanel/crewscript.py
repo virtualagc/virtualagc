@@ -39,6 +39,7 @@ PROGRESS_OFFSET = 96            # how far panelO6.py's script has got: base + 96
 HC_OFFSET = 86                  # crew scripts to handcontrollers.py: base + 86
 HC_ACK_OFFSET = 87              # handcontrollers.py's acknowledgements: base + 87
 RECORD_OFFSET = 89              # a person's actions, as script lines: base + 89
+LPS_OFFSET = 108                # yaGPC2's ground Launch Processing System: base + 108
 
 
 def idp_snapshot_files(n):
@@ -139,6 +140,10 @@ PANEL_ARGS = {
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
     "edgekey": r"crt[1-4]\s+[1-6]",
+    # The GROUND: a launch-sequence command from the Launch Processing System
+    # over the launch data bus (yaGPC2's lpsmodel.c).
+    "lps": r"(hold|resume|recycle|go_auto|go_engine|bypass_a|bypass_b|pogo"
+           r"|gmtlo\s+[+=]\d+(\.\d+)?|code\s+\d+(\s+[0-9a-fA-F]{1,4})*)",
     # The hand controllers, through handcontrollers.py's window for that
     # station: a THC direction held for SECONDS, or an RHC axis deflected by
     # a FRACTION of full throw (-1 to 1) for SECONDS.
@@ -164,6 +169,8 @@ PANEL_USAGE = {
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
     "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
+    "lps": "lps hold|resume|recycle|go_auto|go_engine|gmtlo +S|gmtlo =S|bypass_a|bypass_b|pogo"
+           "|code N [hex ...]",
     "thc": "thc fwd|aft +x|-x|+y|-y|+z|-z SECONDS",
     "rhc": "rhc lh|rh|aft roll|pitch|yaw FRACTION SECONDS -- FRACTION of full throw, -1 to 1",
 }
@@ -363,6 +370,19 @@ HELP = """\
    The MDUs (MEDS2), not a crew panel:
     edgekey crtN K      press edgekey K (1-6, left to right) under CRT N; the
                         MDU runs it itself, as a click would
+   The ground, not the crew -- the Launch Processing System's launch-sequence
+   commands over the launch data bus (yaGPC2's lpsmodel.c; polling must be on:
+   DPS UTILITY SPEC 1 ITEM 50 in OPS 9):
+    lps gmtlo +S        GMT OF PREDICTED LIFTOFF, S seconds from now (only
+                        accepted while the count is holding)
+    lps gmtlo =S        the same, as absolute GPC GMT seconds
+    lps resume          RESUME the count (needs a GMTLO since the last start)
+    lps hold            COUNTDOWN HOLD; after engine start, a pad abort
+    lps recycle         RECYCLE (while holding)
+    lps go_auto         GO FOR AUTO SEQUENCE (by T-31 s)
+    lps go_engine       GO FOR ENGINE START (by about T-10 s)
+    lps bypass_a|bypass_b|pogo   the LO2 bleed and POGO recirculation bypasses
+    lps code N [hex..]  any launch-sequence code, with data words
    The hand controllers (handcontrollers.py's window for that station must be
    running -- the manager's HAND CONTROLLERS buttons, or simulatePASS --rhc):
     thc fwd|aft DIR S   hold THC direction DIR (+x -x +y -y +z -z) for S s
@@ -1028,6 +1048,19 @@ def send_meds(text, port_base=None):
     try:
         base = D.PORT_BASE if port_base is None else port_base
         sock.sendto(text.encode("utf-8"), (D.GROUP, base + MEDS_OFFSET))
+    finally:
+        sock.close()
+
+
+def send_lps(text, port_base=None):
+    """A launch-sequence command for yaGPC2's ground model: "LPS1 " and the
+    command line, one datagram on port base + 108."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(("LPS1 " + text).encode("utf-8"), (D.GROUP, base + LPS_OFFSET))
     finally:
         sock.close()
 

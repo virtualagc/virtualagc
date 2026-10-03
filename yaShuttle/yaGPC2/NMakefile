@@ -128,6 +128,7 @@ LIB_OBJS = \
 	$(BUILD_DIR)\mcm.obj \
 	$(BUILD_DIR)\mdmdev.obj \
 	$(BUILD_DIR)\startrk.obj \
+	$(BUILD_DIR)\lpsmodel.obj \
 	$(BUILD_DIR)\membus.obj \
 	$(BUILD_DIR)\mmumodel.obj \
 	$(BUILD_DIR)\mtumodel.obj \
@@ -310,11 +311,11 @@ $(TEST_BIN_DIR)\test_iop_discretes.exe: test\test_iop_discretes.c $(IOP_TEST_DEP
 $(TEST_BIN_DIR)\test_bce_status.exe: test\test_bce_status.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c src\iop.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_bce_status.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c $(W32) $(LDLIBS)
 
-$(TEST_BIN_DIR)\test_mtumodel.exe: test\test_mtumodel.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\startrk.c src\startrk.h src\startable.h src\vehdyn.c src\physics.c src\envcache.c src\json.c $(TEST_BIN_DIR)
-	$(TEST_CC) test\test_mtumodel.c src\mtumodel.c src\mdmdev.c src\startrk.c src\vehdyn.c src\physics.c src\envcache.c src\json.c $(W32) $(LDLIBS)
+$(TEST_BIN_DIR)\test_mtumodel.exe: test\test_mtumodel.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\startrk.c src\startrk.h src\startable.h src\lpsmodel.c src\lpsmodel.h src\vehdyn.c src\physics.c src\envcache.c src\json.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_mtumodel.c src\mtumodel.c src\mdmdev.c src\startrk.c src\lpsmodel.c src\vehdyn.c src\physics.c src\envcache.c src\json.c $(W32) $(LDLIBS)
 
-$(TEST_BIN_DIR)\test_mdmdev.exe: test\test_mdmdev.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\startrk.c src\startrk.h src\startable.h src\vehdyn.c src\physics.c src\envcache.c src\json.c $(TEST_BIN_DIR)
-	$(TEST_CC) test\test_mdmdev.c src\mtumodel.c src\mdmdev.c src\startrk.c src\vehdyn.c src\physics.c src\envcache.c src\json.c $(W32) $(LDLIBS)
+$(TEST_BIN_DIR)\test_mdmdev.exe: test\test_mdmdev.c src\mtumodel.c src\mtumodel.h src\mdmdev.c src\mdmdev.h src\startrk.c src\startrk.h src\startable.h src\lpsmodel.c src\lpsmodel.h src\vehdyn.c src\physics.c src\envcache.c src\json.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_mdmdev.c src\mtumodel.c src\mdmdev.c src\startrk.c src\lpsmodel.c src\vehdyn.c src\physics.c src\envcache.c src\json.c $(W32) $(LDLIBS)
 
 $(TEST_BIN_DIR)\test_physics.exe: test\test_physics.c src\physics.c src\physics.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_physics.c src\physics.c $(W32) $(LDLIBS)

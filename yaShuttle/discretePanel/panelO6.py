@@ -5058,6 +5058,11 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             # whichever holds that CRT presses it, exactly as a click would.
             crewscript.send_meds("edgekey %s" % " ".join(arg.lower().split()),
                                  D.PORT_BASE)
+        elif verb == "lps":
+            # THE GROUND, not a crew panel: yaGPC2's Launch Processing System
+            # model takes it and sends it over the launch data bus when the
+            # GPC next interrogates.
+            crewscript.send_lps(" ".join(arg.split()), D.PORT_BASE)
         elif verb in ("thc", "rhc"):
             # THE HAND CONTROLLERS BELONG TO handcontrollers.py, which sends
             # the RHC every 50 ms even at rest -- so the command goes to it

@@ -20,6 +20,7 @@
 
 #include "envcache.h"
 #include "mdmdev.h"
+#include "lpsmodel.h"
 /* FIOCBLKS names the MTU device 22 -- FIO22020/1/2 -- but that is FCOS's
  * own device number, not the bus address: the NSP beside it is device 24.
  * The BUS address comes from the BCE program that reads it, FIOPRMPG:
@@ -54,7 +55,13 @@
  * self-fails it rather than commfaulting a string.  18 and 19 are mass
  * memory, whose device IS modelled, so they stay out and a time-out there
  * remains the real defect it is. */
-#define MTU_BUS_FIRST  14
+/* 12 AND 13 ARE THE LAUNCH DATA BUSES, LB1 and LB2: the ground's Launch
+ * Processing System answers on them at IUA 17 (lpsmodel.c), and the four
+ * SRB MDMs at IUAs 9, 6, 15 and 18.  They are shared buses with commanders
+ * and listeners like the flight-critical ones, so this model's machinery --
+ * a reply per reader, the echo of the command, the armed length -- serves
+ * them as it is. */
+#define MTU_BUS_FIRST  12
 #define MTU_BUS_LAST   23
 
 /* The command word's IUA field, the same extraction iop.c's mia_xmit_cmd
@@ -1206,6 +1213,20 @@ double mtumodel_unix_now(const struct MtuModel *m) {
     return *m->epochSec + epochUs / 1e6;
 }
 
+/* THE GPC'S GMT, for the ground's 'gmtlo +N': this unit's own time in the
+ * flight software's convention -- day of the year (from 1) x 86400 plus the
+ * seconds of the day, as vehdyn_set_gmt_zero converts it too. */
+static const struct MtuModel *lpsMtu;
+static double lps_gmt_now(void) {
+    double u = mtumodel_unix_now(lpsMtu);
+    if (u < 0.0) return -1.0;
+    time_t whole = (time_t)floor(u);
+    struct tm g;
+    gmtime_r(&whole, &g);
+    return (g.tm_yday + 1) * 86400.0 + g.tm_hour * 3600.0 + g.tm_min * 60.0 + g.tm_sec
+           + (u - (double)whole);
+}
+
 static void mtu_fill_time(struct MtuModel *m, int b) {
     /* THE UNIT'S OWN TIME, from the vehicle's shared clock where there is one
      * -- see mtumodel_set_shared_us.  Falling back to the caller's clock is
@@ -1654,7 +1675,16 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
              * only a read NAMED in the survey WITH a receive length, that a
              * BCE has ARMED a receive for, is answered -- ff_nsp_words'
              * by-name tests still decide it. */
-            int nsp = (cu == MTU_IUA || cu == 12u || fc_any_iua())
+            /* THE GROUND, on the launch data buses: its own protocol, its
+             * own model, and every command to it -- read or not -- noted,
+             * because STATUS carries its meaning in the command word. */
+            bool lps = lps_owns(in->busID, cmd);
+            if (lps) {
+                if (lpsMtu == NULL) { lpsMtu = m; lps_set_gmt_source(lps_gmt_now); }
+                lps_note_command(cmd);
+            }
+            int nsp = lps ? lps_read_words(cmd, m->armedWords)
+                    : (cu == MTU_IUA || cu == 12u || fc_any_iua())
                           ? ff_nsp_words(cmd, m->armedWords) : 0;
             if (cu != MTU_IUA && cu != 12u && !ff_mdm_off() && !fc_any_iua())
                 mtu_declined(cmd, m->armedWords, "IUA not 10 or 12");
@@ -1711,7 +1741,16 @@ void mtumodel_service_as(struct MtuModel *m, int gpcId, GpcServiceNumber svc,
         /* A WRITE TO ONE OF THE TWO MDMs: its data words follow from the
          * computer that issued it, and go to mdmdev.c when all have come. */
         m->outWant[b] = 0;
-        if (mdmdev_capturing() && (CMD_IUA(cmd) == MTU_IUA || CMD_IUA(cmd) == 12u) &&
+        /* OR A MESSAGE TO THE GROUND: TRANSMISSION ENABLE, its words to
+         * follow from the commander -- PASS's launch-sequence responses,
+         * which the ground must take (lpsmodel.c). */
+        if (lps_owns(in->busID, cmd) && lps_is_transmit(cmd)) {
+            m->outCmd[b] = cmd;
+            m->outWant[b] = lps_transmit_words(cmd);
+            m->outHave[b] = 0;
+            m->outIssuer[b] = g;
+        }
+        else if (mdmdev_capturing() && (CMD_IUA(cmd) == MTU_IUA || CMD_IUA(cmd) == 12u) &&
             ((cmd >> 14) & 0xfu) == 8u) {
             m->outCmd[b] = cmd;
             m->outWant[b] = (int)((cmd & 0x1fu) + 1u);

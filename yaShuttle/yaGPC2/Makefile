@@ -218,11 +218,11 @@ $(TEST_BIN_DIR)/test_iop_discretes: test/test_iop_discretes.c $(IOP_TEST_DEPS) s
 $(TEST_BIN_DIR)/test_bce_status: test/test_bce_status.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_bce_status.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c $(LDLIBS)
 
-$(TEST_BIN_DIR)/test_mtumodel: test/test_mtumodel.c src/mtumodel.c src/mtumodel.h src/mdmdev.c src/mdmdev.h src/startrk.c src/startrk.h src/startable.h src/vehdyn.c src/physics.c src/envcache.c src/json.c | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_mtumodel.c src/mtumodel.c src/mdmdev.c src/startrk.c src/vehdyn.c src/physics.c src/envcache.c src/json.c $(LDLIBS)
+$(TEST_BIN_DIR)/test_mtumodel: test/test_mtumodel.c src/mtumodel.c src/mtumodel.h src/mdmdev.c src/mdmdev.h src/startrk.c src/startrk.h src/startable.h src/lpsmodel.c src/lpsmodel.h src/vehdyn.c src/physics.c src/envcache.c src/json.c | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_mtumodel.c src/mtumodel.c src/mdmdev.c src/startrk.c src/lpsmodel.c src/vehdyn.c src/physics.c src/envcache.c src/json.c $(LDLIBS)
 
-$(TEST_BIN_DIR)/test_mdmdev: test/test_mdmdev.c src/mtumodel.c src/mtumodel.h src/mdmdev.c src/mdmdev.h src/startrk.c src/startrk.h src/startable.h src/vehdyn.c src/physics.c src/envcache.c src/json.c | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_mdmdev.c src/mtumodel.c src/mdmdev.c src/startrk.c src/vehdyn.c src/physics.c src/envcache.c src/json.c $(LDLIBS)
+$(TEST_BIN_DIR)/test_mdmdev: test/test_mdmdev.c src/mtumodel.c src/mtumodel.h src/mdmdev.c src/mdmdev.h src/startrk.c src/startrk.h src/startable.h src/lpsmodel.c src/lpsmodel.h src/vehdyn.c src/physics.c src/envcache.c src/json.c | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_mdmdev.c src/mtumodel.c src/mdmdev.c src/startrk.c src/lpsmodel.c src/vehdyn.c src/physics.c src/envcache.c src/json.c $(LDLIBS)
 
 $(TEST_BIN_DIR)/test_physics: test/test_physics.c src/physics.c src/physics.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_physics.c src/physics.c $(LDLIBS)
