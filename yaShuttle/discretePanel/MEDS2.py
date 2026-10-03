@@ -2896,18 +2896,22 @@ class MeshBasicMaterial(Material):
 class MeshTextureMaterial(Material):
     """A mesh painted with an image: not three.js's MeshBasicMaterial with a
     map, but the same idea, and only what the textured ADI ball needs.  The
-    image is a file path; the renderer makes the GL texture on first use."""
+    image is a file path; the renderer makes the GL texture on first use.
+    crop, if given, is the (width, height) fraction of the image, from its
+    top-left corner, that holds the picture: only that part is uploaded, so
+    no filtering can blend in whatever pads the rest."""
     isTextureMaterial = True
 
-    def __init__(self, path, side=None):
+    def __init__(self, path, side=None, crop=None):
         Material.__init__(self)
         self.path = path
+        self.crop = crop
         self.side = side if side is not None else FrontSide
         self.opacity = 1.0
         self._tex = None
 
     def clone(self):
-        m = MeshTextureMaterial(self.path, self.side)
+        m = MeshTextureMaterial(self.path, self.side, self.crop)
         m.depthTest, m.depthWrite = self.depthTest, self.depthWrite
         m.clippingPlanes = self.clippingPlanes
         return m
@@ -3598,10 +3602,30 @@ class GLRenderer(object):
                     from PyQt6.QtGui import QImage
                     from PyQt6.QtOpenGL import QOpenGLTexture
                     # Qt 6: the image is NOT mirrored -- v = 0 is its top row
-                    t = QOpenGLTexture(QImage(mat.path))
-                    t.setMinificationFilter(QOpenGLTexture.Filter.LinearMipMapLinear)
+                    img = QImage(mat.path)
+                    if mat.crop:
+                        img = img.copy(0, 0, round(mat.crop[0] * img.width()),
+                                       round(mat.crop[1] * img.height()))
+                    t = QOpenGLTexture(img)
+                    # Mipmaps alone blur a sphere map at its poles, where a
+                    # whole row of the map shrinks to a point: the GPU picks
+                    # the level for the most-squeezed direction and loses the
+                    # other.  Anisotropic filtering samples along the squeeze
+                    # instead (a no-op where the driver lacks it).
+                    # NSTS_ADI_FILTER=linear is the sample fdai_ball.py's
+                    # filtering -- no mipmaps: sharp, but shimmers when small.
+                    if os.environ.get('NSTS_ADI_FILTER', '').lower() == 'linear':
+                        t.setMinificationFilter(QOpenGLTexture.Filter.Linear)
+                    else:
+                        t.setMinificationFilter(QOpenGLTexture.Filter.LinearMipMapLinear)
+                        t.setMaximumAnisotropy(16.0)
                     t.setMagnificationFilter(QOpenGLTexture.Filter.Linear)
-                    t.setWrapMode(QOpenGLTexture.WrapMode.Repeat)
+                    # u is yaw -90..+90 and stops at the poles; v is pitch,
+                    # which goes all the way round
+                    t.setWrapMode(QOpenGLTexture.CoordinateDirection.DirectionS,
+                                  QOpenGLTexture.WrapMode.ClampToEdge)
+                    t.setWrapMode(QOpenGLTexture.CoordinateDirection.DirectionT,
+                                  QOpenGLTexture.WrapMode.Repeat)
                     mat._tex = t
                 mat._tex.bind(0)
                 pr.prog.setUniformValue(pr.u('map'), 0)
@@ -10043,14 +10067,14 @@ class Screen_AE_PFD(MDUScreen):
     # layout of the Space Shuttle Ultra add-on's adi_ball.png (samples/, a
     # local copy, not in the repository): 360 deg of pitch along 1800 rows
     # (180 at both ends, 0 in the middle, the white half above) and yaw -90
-    # to +90 across 900 columns, the map at the TOP of a 1024 x 2048 image --
-    # so the texture coordinates are scaled to 900/1024 and 1800/2048 and
-    # kept clear of the 248 empty rows at the bottom.  Each vertex
+    # to +90 across 900 columns, the map at the TOP-LEFT of a 1024 x 2048
+    # image, white padding beyond.  Only the map is uploaded (the material's
+    # crop), so the texture coordinates span it whole and neither mipmaps nor
+    # wrapping can blend the padding into the ball's edges.  Each vertex
     # is placed by ballPt like Don's marks, so the ball turns by the same
     # rotation and reads the same attitude.  None here: Don's geometry.
     BALL_TEX_U = 900.0 / 1024.0
     BALL_TEX_V = 1800.0 / 2048.0
-    BALL_TEX_V0 = (2048.0 - 1800.0) / 2048.0
 
     def ballTexture(self):
         return None
@@ -10063,11 +10087,11 @@ class Screen_AE_PFD(MDUScreen):
             p = 180.0 + i * step              # 180 .. 540: the map's own seam
             # Qt 6's QOpenGLTexture does not mirror the image, so v runs from
             # the image's TOP row: the bottom-up coordinate turned over
-            v = 1.0 - (self.BALL_TEX_V0 + (i * step / 360.0) * self.BALL_TEX_V)
+            v = 1.0 - i * step / 360.0
             for j in range(W + 1):
                 w = -90.0 + j * step
                 verts += ballPt(p, w, BALL_R)
-                uvs += [(j * step / 180.0) * self.BALL_TEX_U, v]
+                uvs += [j * step / 180.0, v]
         for i in range(P):
             for j in range(W):
                 a = i * (W + 1) + j
@@ -10079,7 +10103,8 @@ class Screen_AE_PFD(MDUScreen):
         geom.setAttribute('position', Float32BufferAttribute(verts, 3))
         geom.setAttribute('uv', Float32BufferAttribute(uvs, 2))
         geom.setIndex(idx)
-        return Mesh(geom, MeshTextureMaterial(path, DoubleSide))
+        return Mesh(geom, MeshTextureMaterial(
+            path, DoubleSide, (self.BALL_TEX_U, self.BALL_TEX_V)))
 
     def _ballFills(self):
         """Hemisphere fills: white pitch 0..180, grey 180..360, smooth
