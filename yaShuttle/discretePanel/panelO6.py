@@ -1991,7 +1991,8 @@ class PanelO6:
             mons = xrr.XRRGetMonitors(dpy, x11.XDefaultRootWindow(dpy), 1, ctypes.byref(n))
             if not mons:
                 return []
-            out = [(mons[i].x, mons[i].width) for i in range(n.value)]
+            out = [(mons[i].x, mons[i].y, mons[i].width, mons[i].height)
+                   for i in range(n.value)]
             xrr.XRRFreeMonitors(mons)
             return out
         finally:
@@ -2026,6 +2027,24 @@ class PanelO6:
         user32.EnumDisplayMonitors(None, None, PROC(each), 0)
         return out
 
+    @staticmethod
+    def _weston_workareas():
+        """WSLg's work areas, the taskbar left out: RandR has none and Weston
+        keeps no _NET_WORKAREA, but its log records each as "Translated
+        workarea:(x0,y0)-(x1,y1) at rdp-N" (the last for each name is
+        current) -- WSL-integration.  [] elsewhere."""
+        try:
+            with open("/mnt/wslg/weston.log", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            return []
+        last = {}
+        for m in re.finditer(r"Translated workarea:\((-?\d+),(-?\d+)\)-\((-?\d+),(-?\d+)\)"
+                             r" at (\S+?)[:\s]", text):
+            x0, y0, x1, y1 = map(int, m.groups()[:4])
+            last[m.group(5)] = (x0, y0, x1 - x0, y1 - y0)
+        return list(last.values())
+
     @classmethod
     def _monitors(cls, sw, sh):
         """[(x, y, w, h)] of the monitors, left to right: Windows' work areas,
@@ -2039,11 +2058,22 @@ class PanelO6:
             mons = cls._win_monitors()
         except Exception:
             mons = []
+        WORK, FULL = 8, 80      # bottom margin: a work area known, or not
+        if mons:
+            mons = [(x, y, w, h - WORK) for x, y, w, h in mons]
         if not mons:
             try:
-                mons = [(x, 0, w, sh) for x, w in cls._x_monitors()]
+                xm = cls._x_monitors()
             except Exception:
-                mons = []
+                xm = []
+            areas = cls._weston_workareas() if xm else []
+            for x, y, w, h in xm:
+                wa = [a for a in areas if a[0] <= x + w // 2 < a[0] + a[2]]
+                if wa:
+                    ax, ay, aw, ah = wa[0]
+                    mons.append((ax, ay, aw, ah - WORK))
+                else:
+                    mons.append((x, y, w, h - FULL))
         if not mons:
             import subprocess
             try:
@@ -2052,9 +2082,10 @@ class PanelO6:
             except (OSError, subprocess.SubprocessError):
                 out = ""
             for m in re.finditer(r"\s(\d+)/\d+x(\d+)/\d+\+(-?\d+)\+(-?\d+)", out):
-                mons.append((int(m.group(3)), int(m.group(4)), int(m.group(1)), int(m.group(2))))
+                mons.append((int(m.group(3)), int(m.group(4)), int(m.group(1)),
+                             int(m.group(2)) - FULL))
         if not mons:
-            mons = [(0, 0, sw, sh)]
+            mons = [(0, 0, sw, sh - FULL)]
         return sorted(mons)
 
     def _auto_place(self):
@@ -2105,7 +2136,7 @@ class PanelO6:
         order_m = [m for m in mons if home(m)] + [m for m in mons if not home(m)]
         if not order_m:
             order_m = mons
-        BOTTOM = 48 if len(mons) == 1 and mons[0] == (0, 0, sw, sh) else 8
+        BOTTOM = 0              # the monitors' rectangles already leave it
         G = self.PLACE_GAP
 
         # A SKYLINE PER MONITOR, packed bottom-left: each window at the lowest
