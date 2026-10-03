@@ -213,13 +213,19 @@ def procedural_ball():
     return surf
 
 
+# pygame-ce deprecates tostring/fromstring; tobytes/frombytes exist in both
+# pygame 2.1.3+ and pygame-ce.
+_tobytes = getattr(pygame.image, "tobytes", None) or pygame.image.tostring
+_frombytes = getattr(pygame.image, "frombytes", None) or pygame.image.fromstring
+
+
 def load_texture(path):
     if os.path.exists(path):
         surf = pygame.image.load(path)
     else:
         print("truthball: %s not found -- drawing a plain ball instead" % path)
         surf = procedural_ball()
-    data = pygame.image.tostring(surf, "RGBA", True)
+    data = _tobytes(surf, "RGBA", True)
     w, h = surf.get_rect().size
     tid = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, tid)
@@ -265,7 +271,7 @@ class Text(object):
     def draw(self, x, y, s, color=(255, 255, 255)):
         """At window pixel (x, y) from the top left."""
         surf = self.font.render(s, True, color, (0, 0, 0))
-        data = pygame.image.tostring(surf, "RGBA", True)
+        data = _tobytes(surf, "RGBA", True)
         w, h = surf.get_size()
         H = glGetIntegerv(GL_VIEWPORT)[3]
         # Pixel rectangles are textured and lit like any fragment: off, or
@@ -423,7 +429,7 @@ def main():
             text.draw(8, 6 + i * (text.font.get_linesize() + 2), s, col)
         if args.snapshot and (args.test or time.monotonic() - started > 1.0):
             px = glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE)
-            pygame.image.save(pygame.image.fromstring(px, (W, H), "RGBA", True), args.snapshot)
+            pygame.image.save(_frombytes(px, (W, H), "RGBA", True), args.snapshot)
             return
         pygame.display.flip()
         clock.tick(30)
