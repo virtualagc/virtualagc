@@ -68,4 +68,8 @@ void mdmdev_downlist_tap(int gpcId, int svc, uint32_t word, double sharedUs);
 /* One line of what was answered, for the end-of-run report. */
 void mdmdev_report(void);
 
+/* Test hook: move the clock the jets' chamber-pressure lag is measured on
+ * (forward only).  In a run it follows the shared clock of every bus call. */
+void mdmdev_test_clock_us(double us);
+
 #endif
