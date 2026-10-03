@@ -4875,6 +4875,37 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             # whichever holds that CRT presses it, exactly as a click would.
             crewscript.send_meds("edgekey %s" % " ".join(arg.lower().split()),
                                  D.PORT_BASE)
+        elif verb in ("thc", "rhc"):
+            # THE HAND CONTROLLERS BELONG TO handcontrollers.py, which sends
+            # the RHC every 50 ms even at rest -- so the command goes to it
+            # (base + 86) and it deflects its own stick, rather than this
+            # program writing contacts that program would overwrite.  It
+            # answers on base + 87; no answer means no window for that
+            # station is running, and the script says so instead of having
+            # moved nothing in silence.
+            text = "%s %s" % (verb, " ".join(arg.lower().split()))
+            try:
+                ack = crewscript.hc_ack_receiver(D.PORT_BASE)
+                ack.setblocking(False)
+            except OSError:
+                ack = None
+            crewscript.send_hc(text, D.PORT_BASE)
+
+            def heard(ack=ack, text=text):
+                got = ack is None
+                while ack is not None:
+                    try:
+                        data, _a = ack.recvfrom(4096)
+                    except OSError:
+                        break
+                    got = got or data.decode("utf-8", "replace").strip() == "ok " + text
+                if ack is not None:
+                    ack.close()
+                if not got:
+                    log("script: '%s' moved nothing -- no hand-controller window "
+                        "for that station is running (the manager's HAND "
+                        "CONTROLLERS buttons, or simulatePASS --rhc)" % text)
+            root.after(600, heard)
         elif verb == "kybdsel":
             side, val = arg.split()
             side = side.lower()

@@ -331,6 +331,82 @@ THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
 # The window's title names the controllers it stands in for -- "THC FWD /
 # RHC LH" -- so two instances (the CDR's and the aft station's) can be told
 # apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
+class ScriptInput:
+    """CREW-SCRIPT DEFLECTIONS, on top of the stick or the window's controls.
+
+    panelO6.py plays 'thc fwd +x 2' and 'rhc lh roll 0.5 3' by multicasting
+    them on port base + 86 (crewscript.send_hc).  Each instance of this
+    program takes only its own station's -- its THC (fwd, aft) and its RHC
+    (lh, rh, aft) -- and acknowledges on base + 87, so a command no running
+    window took can be reported by the script instead of doing nothing
+    silently.  Applied HERE, by the program that already owns these contacts,
+    rather than by panelO6 writing them itself: this program sends the RHC
+    every 50 ms even at rest, and a second writer would be put back in detent
+    within 50 ms.  A THC direction is ORed into whatever the stick or keys
+    hold (both directions on one axis cancel, as for the keys); an RHC
+    fraction is added to the stick's and clipped to full throw."""
+
+    def __init__(self, rhc_name, thc_name):
+        import threading
+        import crewscript
+        self.rhc_name, self.thc_name = rhc_name, thc_name
+        self.cs = crewscript
+        self.lock = threading.Lock()
+        self.thc = {}          # "+X" -> monotonic time it is released
+        self.rhc = {}          # "roll" -> (fraction, monotonic time it ends)
+        try:
+            self.sock = crewscript.hc_receiver(D.PORT_BASE)
+        except OSError as e:
+            log("no crew-script listener (%s)" % e)
+            return
+        threading.Thread(target=self._listen, daemon=True).start()
+
+    def _listen(self):
+        while True:
+            try:
+                data, _a = self.sock.recvfrom(4096)
+            except OSError:
+                return
+            w = data.decode("utf-8", errors="replace").lower().split()
+            now = time.monotonic()
+            try:
+                if len(w) == 4 and w[0] == "thc" and w[1] == self.thc_name:
+                    with self.lock:
+                        self.thc[w[2].upper()] = now + float(w[3])
+                elif len(w) == 5 and w[0] == "rhc" and w[1] == self.rhc_name \
+                        and w[2] in RHC_AXES:
+                    with self.lock:
+                        self.rhc[w[2]] = (max(-1.0, min(1.0, float(w[3]))),
+                                          now + float(w[4]))
+                else:
+                    continue
+            except ValueError:
+                continue
+            log("crew script: %s" % " ".join(w))
+            self.cs.send_hc_ack("ok " + " ".join(w), D.PORT_BASE)
+
+    def apply(self, bits, counts):
+        """(bits, counts) with whatever a script is holding added in."""
+        now = time.monotonic()
+        with self.lock:
+            self.thc = dict((d, t) for d, t in self.thc.items() if t > now)
+            self.rhc = dict((a, v) for a, v in self.rhc.items() if v[1] > now)
+            held, defl = set(self.thc), dict((a, v[0]) for a, v in self.rhc.items())
+        if held:
+            want = held | set(d for d, b in THC_BITS.items() if bits & b)
+            for axis in "XYZ":
+                if "+" + axis in want and "-" + axis in want:
+                    want -= {"+" + axis, "-" + axis}
+            bits = 0
+            for d in want:
+                bits |= THC_BITS[d]
+        if defl:
+            counts = dict(counts)
+            for a, f in defl.items():
+                counts[a] = max(-RHC_FULL, min(RHC_FULL, counts.get(a, 0) + round(f * RHC_FULL)))
+        return bits, counts
+
+
 def window_title(thc, rhc):
     if not thc:
         return "RHC %s" % rhc.upper()
@@ -705,7 +781,7 @@ class VirtualControls:
             pg.display.flip()
 
 
-def run_virtual(pg, args, pub, rp, status):
+def run_virtual(pg, args, pub, rp, status, script=None):
     """The window loop: publish what the virtual controllers command."""
     style = args.style
     if style is None:
@@ -731,6 +807,9 @@ def run_virtual(pg, args, pub, rp, status):
         defl = vc.deflection()
         rp.counts = dict((a, round(defl[a] * RHC_FULL)) for a in RHC_AXES)
         pub.bits = vc.thc_bits()
+        if script is not None:
+            pub.bits, rp.counts = script.apply(pub.bits, rp.counts)
+            defl = dict((a, rp.counts[a] / float(RHC_FULL)) for a in RHC_AXES)
         pub.send()
         rp.send()
         status.show(rp.counts, pub.bits)
@@ -793,6 +872,7 @@ def main(argv=None):
             run_test(pub, args.test)
         return 0
 
+    script = ScriptInput(args.rhc, args.thc)
     os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
     # SDL otherwise takes SIGINT and SIGTERM for itself and turns them into a
     # quit event, so neither Ctrl-C nor simulatePASS's shutdown stopped this.
@@ -822,7 +902,7 @@ def main(argv=None):
         if sys.platform == "darwin":
             os.environ.setdefault("SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK", "1")
         pygame.init()
-        return run_virtual(pygame, args, pub, rp, status)
+        return run_virtual(pygame, args, pub, rp, status, script)
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
     pygame.init()
 
@@ -864,13 +944,14 @@ def main(argv=None):
         if js is None:
             pub.bits = 0
             rp.counts = dict((a, 0) for a in RHC_AXES)
+            pub.bits, rp.counts = script.apply(pub.bits, rp.counts)
             pub.send()
             rp.send()
             time.sleep(0.1)
             continue
-        pub.bits = thc_bits(js, mapping, hat_seen)
+        pub.bits, rp.counts = script.apply(thc_bits(js, mapping, hat_seen),
+                                           rhc_counts(js, mapping, seen_axes))
         pub.send()
-        rp.counts = rhc_counts(js, mapping, seen_axes)
         rp.send()
         status.show(rp.counts, pub.bits, js)
         time.sleep(0.02)

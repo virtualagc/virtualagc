@@ -540,6 +540,35 @@ page changes.  Example: `wait crt 1 title UNIV PTG timeout 60`.
 
 ---
 
+## Hand-controller windows "THC FWD / RHC LH", "RHC RH" and "THC AFT / RHC AFT"
+
+These are `handcontrollers.py`'s windows, one per station: the commander's
+(the left RHC with the forward THC), the pilot's (the right RHC; there is no
+THC there) and the aft station's.  A script command is carried out by the
+window for its station, which deflects its own controller exactly as its
+keys or a joystick would.  The window shows the deflection, and when the
+command ends it returns to whatever the stick or keys are doing.
+
+| Control | Command | Example | Notes |
+|---|---|---|---|
+| THC (forward / aft) | `thc fwd\|aft DIR SECONDS` | `+0  thc fwd +x 2` | Holds direction DIR (`+x -x +y -y +z -z`, orbiter axes, so `-z` is "up") for SECONDS, then releases it.  It is added to whatever the stick or keys hold, and both directions on one axis cancel. |
+| RHC (left / right / aft) | `rhc lh\|rh\|aft AXIS FRACTION SECONDS` | `+0  rhc lh roll 0.5 3` | Deflects AXIS (`roll pitch yaw`) by FRACTION of full throw (-1 to 1) for SECONDS, then back to centre.  Full throw is 23.8 deg in roll, so 0.5 is about 12 deg of stick.  PASS's detent is at 0.072 of full throw in roll and pitch and 0.070 in yaw, and its softstop at 0.889 in roll and pitch and 0.822 in yaw.  So 0.1 is just out of detent, and 1 is past the softstop, hard against the stop.  It is added to the stick's own deflection. |
+
+* **The window for that station must be running**: the manager's HAND
+  CONTROLLERS buttons (CDR, PLT, Aft), or `simulatePASS.py --rhc lh|rh|aft`.
+  If it is not, nothing moves, and the panel log says so
+  ("... moved nothing -- no hand-controller window for that station is
+  running") about half a second later.  The script carries on.
+* `thc rh ...` is refused when the script is read: the pilot's station has no
+  THC.
+* What the controllers do depends on PASS.  In OPS 2 the orbit DAP takes RHC
+  deflection only with the ORBITAL DAP in INRTL or LVLH (or with AUTO, which
+  the RHC "downmodes" to INRTL), and THC translation only out of detent; see
+  `crew-switches-OPS2.md`.  The aft controllers are transformed by the A6U
+  SENSE switch (`sense -z|-x`).
+
+---
+
 ## Window "Subtitles" (the caption box)
 
 | Control | Command | Example | Notes |
@@ -553,7 +582,6 @@ page changes.  Example: `wait crt 1 title UNIV PTG timeout 60`.
 | Window | What it has | Why not, and what to do instead |
 |---|---|---|
 | "O1" (`cam.py`, the CAM) | GPC lamps and failure buttons | Not wired to crew scripts.  O1's own controls, when they come, belong in `cam.py`. |
-| "THC FWD / RHC LH", "RHC RH", "THC AFT / RHC AFT" (`handcontrollers.py`) | hand-controller deflections | Not scriptable; they are flown by hand or by joystick.  The RHC BFC ENGAGE pushbuttons are scriptable, from O6 (`rhcengage`). |
 | "Manager" | SCRIPT, LAYOUT, SNAPSHOT, ... buttons | Not controls of the vehicle.  The SNAPSHOT **Save** button's script equivalent is `snapshot DIR` (see `crewscript.py --help`). |
 | "Truth ADI" (`truthball.py`) | a display only | Nothing to operate. |
 | Panel F7 | caution and warning lights | Only lights: every F7 entry in `panelcontrols.py` is an annunciator. |

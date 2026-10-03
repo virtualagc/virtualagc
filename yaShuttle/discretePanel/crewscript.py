@@ -36,6 +36,8 @@ SESSION_OFFSET = 93             # simulatePASS.py's own control: port base + 93
 RESULT_OFFSET = 94              # simulatePASS.py's answer to those: base + 94
 MEDS_OFFSET = 95                # MEDS2.py's display-state control: base + 95
 PROGRESS_OFFSET = 96            # how far panelO6.py's script has got: base + 96
+HC_OFFSET = 86                  # crew scripts to handcontrollers.py: base + 86
+HC_ACK_OFFSET = 87              # handcontrollers.py's acknowledgements: base + 87
 
 
 def idp_snapshot_files(n):
@@ -136,6 +138,11 @@ PANEL_ARGS = {
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
     "edgekey": r"crt[1-4]\s+[1-6]",
+    # The hand controllers, through handcontrollers.py's window for that
+    # station: a THC direction held for SECONDS, or an RHC axis deflected by
+    # a FRACTION of full throw (-1 to 1) for SECONDS.
+    "thc": r"(fwd|aft)\s+[+-][xyz]\s+(\d+\.?\d*|\.\d+)",
+    "rhc": r"(lh|rh|aft)\s+(roll|pitch|yaw)\s+-?(1(\.0*)?|0?\.\d+|0)\s+(\d+\.?\d*|\.\d+)",
 }
 PANEL_USAGE = {
     "gpc": "gpc 1-5", "power": "power on|off", "output": "output backup|normal|terminate",
@@ -156,6 +163,8 @@ PANEL_USAGE = {
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
     "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
+    "thc": "thc fwd|aft +x|-x|+y|-y|+z|-z SECONDS",
+    "rhc": "rhc lh|rh|aft roll|pitch|yaw FRACTION SECONDS -- FRACTION of full throw, -1 to 1",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -353,6 +362,13 @@ HELP = """\
    The MDUs (MEDS2), not a crew panel:
     edgekey crtN K      press edgekey K (1-6, left to right) under CRT N; the
                         MDU runs it itself, as a click would
+   The hand controllers (handcontrollers.py's window for that station must be
+   running -- the manager's HAND CONTROLLERS buttons, or simulatePASS --rhc):
+    thc fwd|aft DIR S   hold THC direction DIR (+x -x +y -y +z -z) for S s
+    rhc lh|rh|aft AXIS F S
+                        deflect that RHC's AXIS (roll pitch yaw) by F of full
+                        throw (-1 to 1; past detent about 0.1, softstop about
+                        0.9) for S s, then back to centre
    F6, F8 and A6U, the ADI switches (l CDR F6, r PLT F8, a aft A6U):
     adi S att inrtl|lvlh|ref
                         ADI ATTITUDE
@@ -1011,6 +1027,51 @@ def send_meds(text, port_base=None):
     try:
         base = D.PORT_BASE if port_base is None else port_base
         sock.sendto(text.encode("utf-8"), (D.GROUP, base + MEDS_OFFSET))
+    finally:
+        sock.close()
+
+
+def send_hc(text, port_base=None):
+    """A crew-script command for handcontrollers.py, on port base + 86.  Each
+    running instance takes the ones for its own station and acknowledges on
+    base + 87 (hc_ack_receiver), so a command nobody took can be reported."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + HC_OFFSET))
+    finally:
+        sock.close()
+
+
+def _group_receiver(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    D.share_port(s)
+    s.bind(("", port))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP),
+                             socket.inet_aton(D.IFACE)))
+    return s
+
+
+def hc_receiver(port_base=None):
+    """The socket handcontrollers.py listens on for send_hc's commands."""
+    return _group_receiver((D.PORT_BASE if port_base is None else port_base) + HC_OFFSET)
+
+
+def hc_ack_receiver(port_base=None):
+    """The socket panelO6.py hears handcontrollers.py's acknowledgements on."""
+    return _group_receiver((D.PORT_BASE if port_base is None else port_base) + HC_ACK_OFFSET)
+
+
+def send_hc_ack(text, port_base=None):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(text.encode("utf-8"), (D.GROUP, base + HC_ACK_OFFSET))
     finally:
         sock.close()
 
