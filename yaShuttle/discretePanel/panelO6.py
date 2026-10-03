@@ -205,6 +205,22 @@ DEFAULT_SENSE = "-Z"
 MDM_IO_OFFSET = 100            # _FF1_mdmIO's port offset; FF2-4 follow
 MDM_OP_SET, MDM_OP_RESET = 1, 2
 MDM_TYPE_DIH = 2
+# THE STAR TRACKERS' HARDWIRED SIDE (O6 STAR TRACKER; panelcontrols.py), to
+# yaGPC2's startrk.c on the MDM each hangs off: op 4 VALUE, type 7, card 3
+# channel 2, one word -- 0x8000 powered, 0x4000 door fully open.
+MDM_OP_VALUE = 4
+MDM_TYPE_STU = 7
+STU_UNIT = {"z": 1, "y": 3}                    # -Z on FF1, -Y on FF3
+STU_POWERED, STU_DOOR_OPEN = 0x8000, 0x4000
+# The doors (TD0216 pp. 3-1 to 3-6): two motors through a differential, 6 s
+# end to end with both, 12 s with one; opening needs the tracker's POWER,
+# closing does not.  SYS 1 and SYS 2 each drive one motor of BOTH doors.
+DOOR_MOTOR_RATE = 1.0 / 12.0                   # of full travel a second, a motor
+DOOR_TICK_MS = 200
+# The -Y door's limit-switch contacts (JSC-12770 Vol 6 B-35; CGBIH1.hal
+# 2877-2880): OP on FF1, CL on FF3, DSCRT11 bits 14 and 13.
+STRK_Y_DOOR_OP = (1, 11, 0x0004)
+STRK_Y_DOOR_CL = (3, 11, 0x0008)
 ATT_REF_HOLD_MS = 500          # three GR2 passes at 6.25 Hz, and some
 
 # ---- the ORBITAL DAP pushbuttons (C3 forward, A6U aft) ----------------------
@@ -846,6 +862,10 @@ class PanelO6:
             f = c.get("follows") if c["kind"] == "tb" else None
             if f in PC.CONTROLS:
                 self.tb_on[k] = PC.CONTROLS[f].get("default") == PC.positions_of(f)[0]
+        # THE STAR TRACKER DOORS: 1.0 fully open, 0.0 fully closed.  Open
+        # by default, as they are from post-insertion to deorbit prep.
+        self.strk_door = {"y": 1.0, "z": 1.0}
+        self._strk_t = None
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.ctl_lamp.update((k, (False,) * len(c["halves"]))
                              for k, c in PC.CONTROLS.items() if c.get("halves"))
@@ -921,6 +941,8 @@ class PanelO6:
         self._pub_columns = None
         self._pub_crew = None
         self._crew_published = None
+        self._pub_stu = None
+        self._stu_published = None
         self._pub_wake = threading.Event()
         self._tick_last = None
         threading.Thread(target=self._pub_loop, daemon=True).start()
@@ -1128,7 +1150,43 @@ class PanelO6:
         self._dump_state("startup")
         self._idp_publish()
         self.root.after(IDP_REPUBLISH_MS, self._idp_tick)
+        self.root.after(DOOR_TICK_MS, self._strk_tick)
         self._tick()
+
+    def door_tb(self, sd):
+        """A star tracker door's talkback: OP, CL, or barberpole between."""
+        p = self.strk_door[sd]
+        return "OP" if p >= 1.0 else "CL" if p <= 0.0 else "BP"
+
+    def _strk_tick(self):
+        """Tk tick: move the star tracker doors as their motors drive them."""
+        now = time.monotonic()
+        dt = 0.0 if self._strk_t is None else min(now - self._strk_t, 1.0)
+        self._strk_t = now
+        changed = False
+        for sd in ("y", "z"):
+            powered = self.ctl.get("strk_pwr_" + sd) == "ON"
+            sys_pos = [self.ctl.get("strk_door_sys%d" % n) for n in (1, 2)]
+            rate = DOOR_MOTOR_RATE * ((sum(p == "OPEN" for p in sys_pos) if powered else 0)
+                                      - sum(p == "CLOSE" for p in sys_pos))
+            if rate == 0.0:
+                continue
+            was = self.door_tb(sd)
+            self.strk_door[sd] = min(1.0, max(0.0, self.strk_door[sd] + rate * dt))
+            now_tb = self.door_tb(sd)
+            if now_tb != was:
+                log("STAR TRACKER -%s DOOR  %s -> %s" % (sd.upper(), was, now_tb))
+                changed = True
+        if changed:
+            self._publish()
+            self.redraw()
+        self.root.after(DOOR_TICK_MS, self._strk_tick)
+
+    def stu_words(self):
+        """What the star trackers' hardwired side tells yaGPC2: (unit, word)."""
+        return [(STU_UNIT[sd], (STU_POWERED if self.ctl.get("strk_pwr_" + sd) == "ON" else 0)
+                 | (STU_DOOR_OPEN if self.strk_door[sd] >= 1.0 else 0))
+                for sd in ("z", "y")]
 
     # The switch positions, and nothing else.  A panel is a set of switches;
     # everything else it shows is either momentary (IPL, the RHC ENGAGE
@@ -1175,12 +1233,14 @@ class PanelO6:
             value, ", ".join(repr(a) for a in allowed))
 
     def snapshot(self):
-        """The switch positions, as JSON-able plain data."""
+        """The switch positions, as JSON-able plain data -- and the star
+        tracker doors, which are where their motors left them."""
         out = {}
         for name in self.SWITCHES:
             v = getattr(self, name)
             out[name] = dict(v) if isinstance(v, dict) else (
                 list(v) if isinstance(v, list) else v)
+        out["strk_door"] = dict(self.strk_door)
         return out
 
     def restore(self, state):
@@ -1224,6 +1284,11 @@ class PanelO6:
                 if bad:
                     raise ValueError(bad)
                 setattr(self, name, new)
+        doors = state.get("strk_door")
+        if isinstance(doors, dict):
+            for sd, v in doors.items():
+                if sd in self.strk_door and isinstance(v, (int, float)):
+                    self.strk_door[sd] = min(1.0, max(0.0, float(v)))
         # The BFC latches follow from the switches; they are not saved.
         self._update_latches()
         self.redraw()
@@ -1279,6 +1344,10 @@ class PanelO6:
         for key, contacts in AM_CONTACTS.items():
             for u, d, m in contacts:
                 contact(u, d, m, self.am[key])
+        # The -Y star tracker door's limit switches, as its talkback shows.
+        tb = self.door_tb("y")
+        contact(*STRK_Y_DOOR_OP, tb == "OP")
+        contact(*STRK_Y_DOOR_CL, tb == "CL")
         # The table-driven controls: each contact closed in its position(s),
         # or while its button is held.  One record per (word, bit) owned.
         for key, c in PC.CONTROLS.items():
@@ -1297,9 +1366,17 @@ class PanelO6:
         """Hand every column's discretes to _pub_loop, and wake it."""
         columns = [self.discretes(w) for w in range(N_GPC)]
         crew = self.crew_fields()
+        stu = self.stu_words()
         with self._pub_lock:
             self._pub_columns = columns
             self._pub_crew = crew
+            self._pub_stu = stu
+        if stu != self._stu_published:
+            log("star trackers  " + "  ".join(
+                "%s %s, door %s" % ("-Z" if u == 1 else "-Y", "ON" if w & STU_POWERED else "OFF",
+                                    "open" if w & STU_DOOR_OPEN else "NOT open")
+                for u, w in stu))
+            self._stu_published = stu
         if crew != self._crew_published:
             log("MDM crew contacts  " + "  ".join(
                 "%s %d/%d=%04x" % (mdm_name(u), c, ch, b) for u, c, ch, m, b in crew))
@@ -1327,6 +1404,7 @@ class PanelO6:
             with self._pub_lock:
                 columns = self._pub_columns
                 crew = self._pub_crew
+                stu = self._pub_stu
             if columns is None:
                 continue
             try:
@@ -1337,6 +1415,10 @@ class PanelO6:
                             self.sock.sendto(struct.pack(
                                 ">HHHHH", op, MDM_TYPE_DIH, (card << 8) | ch, 1, w),
                                 (D.GROUP, port))
+                for u, w in stu or ():
+                    self.sock.sendto(struct.pack(">HHHHH", MDM_OP_VALUE, MDM_TYPE_STU,
+                                                 (3 << 8) | 2, 1, w),
+                                     (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET + u - 1))
             except OSError as e:
                 if not self._send_failed:
                     log("cannot publish the MDM crew contacts: %s" % e)
@@ -2738,7 +2820,8 @@ class PanelO6:
                            size=SETTING_SIZE)
         elif k == "tb":
             pos = c["positions"]
-            state = pos[0] if self.tb_on.get(key) else pos[-1]
+            state = (self.door_tb(c["door"]) if c.get("door")
+                     else pos[0] if self.tb_on.get(key) else pos[-1])
             self._talkback(cx - self.TB_W / 2.0, y, cx + self.TB_W / 2.0, y + self.TB_H,
                            state.upper() if state.upper() in ("GRAY", "BP") else state)
         elif k == "cb":

@@ -388,6 +388,32 @@ _sm("rms_select", "A8L", "t3", "RMS SELECT", ("PORT", "OFF", "STBD"), "OFF", _MC
 _sm("rms_power", "A8L", "t3", "RMS POWER", ("PRIMARY", "OFF", "BACKUP"), "OFF", _MCIU,
     sources="display only (SPEC 94)")
 
+# O6 STAR TRACKER (TD0216 Fig 3-4, pp. 3-1 to 3-6; SCOM 2.13-11; JSC-12770
+# Vol 6 Table B-XI).  All hardwired: POWER feeds a tracker (CB on O14/O15),
+# DOOR CONTROL SYS 1 / SYS 2 drive the doors' two motors through the FMCAs,
+# and the DOOR POSITION talkbacks show the doors' limit switches -- OP, CL,
+# barberpole between.  The computers neither command nor read them, apart
+# from the -Y door's OP/CL contacts (FF1 / FF3 DSCRT11 bits 14 / 13,
+# CGBB_STAR_Y_DOOR_OP/CL, downlist only), which panelO6 drives from its
+# door model, as it does the trackers' power and doors in yaGPC2 (startrk.c).
+for _sd in ("y", "z"):
+    CONTROLS["strk_pwr_" + _sd] = dict(
+        panel="O6", kind="t2", caption="POWER\n-%s" % _sd.upper(), positions=("ON", "OFF"),
+        default="ON", contacts={},
+        sources="TD0216 Fig 3-4 (S4/S5); JSC-12770 Vol 6 B-34; hardwired to the tracker")
+    CONTROLS["strk_door_tb_" + _sd] = dict(
+        panel="O6", kind="tb", caption="DOOR POS\n-%s" % _sd.upper(), positions=("OP", "CL"),
+        door=_sd, sources="TD0216 Fig 3-4 (DS1/DS2); JSC-12770 Vol 6 B-35")
+for _n in (1, 2):
+    CONTROLS["strk_door_sys%d" % _n] = dict(
+        panel="O6", kind="t3", caption="DOOR CONTROL\nSYS %d" % _n,
+        positions=("OPEN", "OFF", "CLOSE"), default="OFF", contacts={},
+        sources="TD0216 Fig 3-4 (S2/S3); JSC-12770 Vol 6 B-34: both doors' system-%d motors"
+                % _n)
+PANES["O6"] = [("STAR TRACKER", [["strk_door_tb_y", "strk_door_tb_z"],
+                                 ["strk_door_sys1", "strk_door_sys2"],
+                                 ["strk_pwr_y", "strk_pwr_z"]])]
+
 PANES["R13L"] = [("PAYLOAD BAY", [["plbd"]])]
 PANES["R11U"] = [("FUEL CELL PURGE", [["fc_purge_seq", "fc_purge_htr"],
                                       ["fc_purge_vlv1", "fc_purge_vlv2", "fc_purge_vlv3"]])]
