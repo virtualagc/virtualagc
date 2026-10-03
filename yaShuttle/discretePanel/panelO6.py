@@ -3041,7 +3041,10 @@ class PanelO6:
         pad, gap = 10, self.CTL_GAP
         th10 = self._th(10)
         title_h = (pad + 2 * th10) if title else pad
-        sizes = [[self._ctl_size(k) for k in row] for row in rows]
+        # A string row is a group legend: one line of text across the pane.
+        legend = lambda row: isinstance(row, str)
+        sizes = [[(self._tw(row, SETTING_SIZE), 2 * self._th(SETTING_SIZE) + 2, 0, 0)] if legend(row)
+                 else [self._ctl_size(k) for k in row] for row in rows]
         if opts.get("grid"):
             ncol = max(len(r) for r in sizes)
             colw = [max(r[j][0] for r in sizes if j < len(r)) for j in range(ncol)]
@@ -3058,12 +3061,17 @@ class PanelO6:
             return width, height
         self._rect_panel(x0, y0, x0 + width, y0 + max(height, h or 0))
         if title:
-            keys = [k for row in rows for k in row if PC.CONTROLS[k]["kind"] != "blank"]
+            keys = [k for row in rows if not legend(row) for k in row
+                    if PC.CONTROLS[k]["kind"] != "blank"]
             self._dim = bool(keys) and all(PC.CONTROLS[k].get("via") for k in keys)
             self._text(x0 + width / 2.0, y0 + pad + th10, title, size=10)
             self._dim = False
         y = y0 + title_h + pad
         for row, sz, rw, rh in zip(rows, sizes, widths, heights):
+            if legend(row):
+                self._text(x0 + width / 2.0, y + rh / 2.0, row, size=SETTING_SIZE)
+                y += rh + pad
+                continue
             x = x0 + (width - rw) / 2.0
             tops = max(s[1] for s in sz)        # align the bodies along the row
             for k, (w, above, body, below) in zip(row, sz):
