@@ -2182,6 +2182,20 @@ bool mtumodel_load(struct MtuModel *m, const char *path) {
     }
     m->lastBus = (int)json_as_number(json_obj_get(root, "lastBus"), m->lastBus);
     json_free(root);
+    /* A RESTORED UNIT RESUMES AT THE CAPTURED TIME OF DAY.  The base is the
+     * written-off time the unit counts into GMT, latched at its first read
+     * (mtu_fill_time) -- right for a fresh run, whose computers are held in
+     * HALT until IPL and then set their clocks from this unit.  A restored
+     * computer does not: PASS's software clock comes back with its memory,
+     * at the capture, and only validates the unit afterwards (FPMMTURM TMP,
+     * every 960 ms).  Latching the restore's hold -- ~3.8 s, the pacer's
+     * write-off before the vehicle resumes -- put the unit, and vehdyn's GMT
+     * with it, that far ahead of PASS on every restore; navigation then
+     * booked a burn early by the gap (10 ft/s x 11 s = 115 ft after three
+     * restores, ledger #274).  So no base: GMT continues from the epoch the
+     * capture recorded, and the hold is time the vehicle did not have. */
+    m->baseUs = 0.0;
+    m->haveBase = true;
     fprintf(stderr, "mtu: pending replies restored\n");
     return true;
 }
