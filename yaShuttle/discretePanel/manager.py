@@ -235,6 +235,20 @@ class Manager(object):
         # takes the line for a few seconds and then it goes back.
         self.note = tk.StringVar(value="")
         self._note_until = 0.0
+        # REAL TIME THE MANAGER'S OWN ACTIONS COST THE VEHICLE.  A save stops
+        # the vehicle while the capture is written, and a restore holds it
+        # until the replacement is running; the vehicle's clock (PASS's, the
+        # timing unit's and the truth's alike) does not count that time, so
+        # after these the GMT on the displays is behind the wall clock by
+        # their total.  Measured HERE, from the request to simulatePASS's
+        # answer, and not reported by the simulation: a loss from anything
+        # else then shows up as a GMT that disagrees with this figure,
+        # instead of being folded into it.  Layout saves and restores only
+        # move windows and do not stop the vehicle, so they are not counted.
+        self._rtLost = 0.0
+        self._rtCount = {"save": 0, "resume": 0}
+        self._rtStart = {}
+        self.rt = tk.StringVar(value=self._rt_text())
         self._busy = self._busyText = None      # the "please wait" modal
         self._busyPending = False
 
@@ -320,7 +334,10 @@ class Manager(object):
         # filling the width instead means the text never drives the size.
         tk.Label(bar, textvariable=self.note, bg=C_STATUS, fg=C_STATUS_FG,
                  anchor="w", justify="left", width=1
-                 ).pack(fill="x", padx=pad(10), pady=(pad(6), pad(6) + BOTTOM_MARGIN))
+                 ).pack(fill="x", padx=pad(10), pady=(pad(6), 0))
+        tk.Label(bar, textvariable=self.rt, bg=C_STATUS, fg=C_STATUS_FG,
+                 anchor="w", justify="left", width=1
+                 ).pack(fill="x", padx=pad(10), pady=(pad(2), pad(6) + BOTTOM_MARGIN))
         root.bind_all("<Control-q>", lambda _e: root.quit())
         # AND PINNED ONCE, at the size the controls actually need.  Without
         # this the toplevel keeps taking its size from its contents, and any
@@ -837,6 +854,8 @@ class Manager(object):
             return
         # Anything else is the answer, so the modal has done its job.
         self._busy_done()
+        if verdict in ("ok", "fail"):
+            self._rt_finish(verdict, verb)
         if verdict == "ok" and verb == "windows":
             self.say("Windows: %s" % detail)
             return
@@ -1083,7 +1102,30 @@ class Manager(object):
         except OSError as e:
             self.say("Cannot reach simulatePASS: %s" % e)
             return False
+        if verb in ("save", "save-and-quit", "resume"):
+            self._rtStart[verb] = time.monotonic()
         return True
+
+    def _rt_text(self):
+        """The second status line: the real time lost to this window's saves
+        and restores, as minutes and seconds."""
+        m, sec = divmod(self._rtLost, 60.0)
+        n_s, n_r = self._rtCount["save"], self._rtCount["resume"]
+        return "\u0394RT \u2212%d:%04.1f  (%d save%s, %d restore%s)" % (
+            int(m), sec, n_s, "" if n_s == 1 else "s", n_r, "" if n_r == 1 else "s")
+
+    def _rt_finish(self, verdict, verb):
+        """A save or restore this window asked for has been answered: add the
+        time it held the vehicle.  A failed save still stopped the vehicle
+        while it tried; a failed restore was refused before anything was
+        stopped, so it costs nothing."""
+        t0 = self._rtStart.pop(verb, None)
+        if t0 is None or not (verdict == "ok" or (verdict == "fail" and verb == "save")):
+            return
+        self._rtLost += time.monotonic() - t0
+        key = "resume" if verb == "resume" else "save"
+        self._rtCount[key] += 1
+        self.rt.set(self._rt_text())
 
     def save_snapshot(self):
         path = self._snapshot_dir(replacing=True)
