@@ -14340,6 +14340,7 @@ class MedsRunner(object):
         # and the listener that lets a later Save ask for it.
         self._restoreIDPs()
         self._startSnapshotListener()
+        self._startEdgekeyListener()
 
         # dev/test hook: NSTS_EXEC runs once the LRUs are up (2s after load)
         if env('NSTS_EXEC'):
@@ -14417,6 +14418,41 @@ class MedsRunner(object):
                 continue
             BusPump.get().call(
                 lambda idp=idp, st=state, m=mem: idp.restoreState(st, m))
+
+    def _startEdgekeyListener(self):
+        """'edgekey crtN K' on port base + 95, from a crew script: press edgekey
+        K (1-6, left to right) on that MDU if this process holds it.  Read by
+        a QSocketNotifier, so the press runs on the Qt thread like a click;
+        the snapshot listener's thread on the same port ignores it."""
+        try:
+            sock = crewscript.meds_receiver(PORT_BASE)
+            sock.setblocking(False)
+        except Exception as e:
+            sys.stderr.write("meds: no edgekey listener (%s)\n" % e)
+            return
+        self._edgeSock = sock
+        self._edgeNotifier = QSocketNotifier(sock.fileno(), QSocketNotifier.Type.Read)
+
+        def readable(_fd):
+            while True:
+                try:
+                    data, _a = sock.recvfrom(4096)
+                except (BlockingIOError, OSError):
+                    return
+                words = data.decode("utf-8", errors="replace").split()
+                if len(words) != 3 or words[0].lower() != "edgekey":
+                    continue
+                lru = self.lrus.get(words[1].lower())
+                if not isinstance(lru, MDU):
+                    continue                 # another process's display
+                try:
+                    k = int(words[2])
+                except ValueError:
+                    continue
+                if 1 <= k <= 6:
+                    print("meds: script edgekey %s %d" % (words[1], k))
+                    lru.handleEdgekey(k - 1)
+        self._edgeNotifier.activated.connect(readable)
 
     def _startSnapshotListener(self):
         """'save DIR' on port base + 95, from simulatePASS."""

@@ -4867,6 +4867,14 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)
             root.after(ATT_REF_HOLD_MS, lambda: panel._set_attref(i, False))
+        elif verb == "edgekey":
+            # NOT A CREW-PANEL SWITCH: the edgekeys are the MDU's own, under
+            # each display, and MEDS2 runs them without the GPC.  So the
+            # press goes to the MEDS2 processes on this port base (base + 95,
+            # the channel simulatePASS's snapshot save already uses) and
+            # whichever holds that CRT presses it, exactly as a click would.
+            crewscript.send_meds("edgekey %s" % " ".join(arg.lower().split()),
+                                 D.PORT_BASE)
         elif verb == "kybdsel":
             side, val = arg.split()
             side = side.lower()

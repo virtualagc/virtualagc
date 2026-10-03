@@ -134,6 +134,8 @@ PANEL_ARGS = {
     "nocircle": r"",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
+    # An MDU edgekey, by position under the display, 1-6 left to right.
+    "edgekey": r"crt[1-4]\s+[1-6]",
 }
 PANEL_USAGE = {
     "gpc": "gpc 1-5", "power": "power on|off", "output": "output backup|normal|terminate",
@@ -153,6 +155,7 @@ PANEL_USAGE = {
     "press": "press NAME -- a pushbutton from panelcontrols.py, held 0.5 s",
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
+    "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
 }
 PANEL_VERBS = tuple(PANEL_ARGS)
 TALKBACK_STATES = ("RUN", "IPL", "BP")
@@ -347,6 +350,9 @@ HELP = """\
     majfunc N gnc|sm|pl IDP/CRT MAJ FUNC
     kybdsel left 1|3    LEFT IDP/CRT SEL
     kybdsel right 2|3   RIGHT IDP/CRT SEL
+   The MDUs (MEDS2), not a crew panel:
+    edgekey crtN K      press edgekey K (1-6, left to right) under CRT N; the
+                        MDU runs it itself, as a click would
    F6, F8 and A6U, the ADI switches (l CDR F6, r PLT F8, a aft A6U):
     adi S att inrtl|lvlh|ref
                         ADI ATTITUDE
