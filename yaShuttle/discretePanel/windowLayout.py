@@ -82,6 +82,8 @@ TITLE_ROLES = [
     (re.compile(r"^THC (FWD|AFT) / RHC (LH|AFT)$"),
      lambda m: "hc_%s_%s" % (m.group(1).lower(), m.group(2).lower())),
     (re.compile(r"^RHC RH$"), "hc_rh"),
+    # truthball.py, the debugging attitude indicator driven by the truth.
+    (re.compile(r"^Truth ADI$"), "truthball"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
     # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
     # command line is tried first and normally answers; this is the fallback
@@ -112,6 +114,8 @@ ROLE_PATTERNS = [
     # hc_aft_aft (aft), hc_rh (PLT, no THC).
     (re.compile(r"handcontrollers\.py(?=.*--rhc[ =](\w+))?"),
      lambda m: _hc_role(m.group(1))),
+    # truthball.py's window (simulatePASS --truth-ball).
+    (re.compile(r"truthball\.py"), lambda m: "truthball"),
 ]
 
 
