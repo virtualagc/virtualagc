@@ -2136,6 +2136,14 @@ class PanelO6:
         order_m = [m for m in mons if home(m)] + [m for m in mons if not home(m)]
         if not order_m:
             order_m = mons
+        # O6 TO ITS MONITOR'S TOP LEFT, unless someone placed it (--geometry,
+        # or a layout that names it): packed around wherever the window
+        # manager first dropped it, the space to its left went unused, and at
+        # full size the rest piled up (WSL-integration, O6 at 1058,249).
+        if not getattr(self, "o6_placed", False) and "panel_o6" not in laid:
+            mx, my = order_m[0][0], order_m[0][1]
+            root.geometry("+%d+%d" % (mx, my))
+            ox, oy = mx, my
         BOTTOM = 0              # the monitors' rectangles already leave it
         G = self.PLACE_GAP
 
@@ -5089,6 +5097,7 @@ def main(argv=None):
     import windowLayout; windowLayout.claim(root)   # whose window this is
     panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)
     geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
+    panel.o6_placed = bool(geom)       # placed by the user: first placement keeps it
     if geom:
         try:
             root.geometry(geom)
