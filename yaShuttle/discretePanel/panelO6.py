@@ -1953,6 +1953,27 @@ class PanelO6:
     PLACE_GAP = 8          # between windows, real pixels
     PLACE_TITLE = 32       # allowance for a title bar
 
+    @staticmethod
+    def _monitor_edges(sw):
+        """The x coordinates where one monitor ends and the next begins,
+        from `xrandr --listmonitors` (X11, WSLg's Xwayland included); empty
+        where there is no xrandr or one monitor -- Tk itself knows only the
+        whole desktop, so rows straddled the join (WSL-integration)."""
+        import subprocess
+        try:
+            out = subprocess.run(["xrandr", "--listmonitors"], capture_output=True,
+                                 text=True, timeout=3).stdout
+        except (OSError, subprocess.SubprocessError):
+            return []
+        starts = set()
+        for m in re.finditer(r"\s(\d+)/\d+x(\d+)/\d+\+(-?\d+)\+(-?\d+)", out):
+            w, x = int(m.group(1)), int(m.group(3))
+            if x > 0:
+                starts.add(x)
+            if 0 < x + w < sw:
+                starts.add(x + w)
+        return sorted(starts)
+
     def _auto_place(self):
         root = self.root
         root.update_idletasks()
@@ -1991,6 +2012,19 @@ class PanelO6:
         o_bottom = root.winfo_y() + root.winfo_height() + self.PLACE_TITLE
         bottom_margin = 48 + self.PLACE_TITLE
 
+        edges = self._monitor_edges(sw)
+
+        bounds = [0] + edges + [sw]
+
+        def past_edge(x, w):
+            """x moved onto the next monitor if the window would straddle a
+            monitor's edge and fits on the next one; else x."""
+            for i in range(1, len(bounds) - 1):
+                e = bounds[i]
+                if x < e < x + w and w <= bounds[i + 1] - e - self.PLACE_GAP:
+                    return e + self.PLACE_GAP
+            return x
+
         def lay(ystart):
             placed, y, i = [], ystart, 0
             while i < len(items):
@@ -1998,6 +2032,7 @@ class PanelO6:
                 x, row_h, row = left, 0, []
                 while i < len(items):
                     win, w, h = items[i]
+                    x = past_edge(x, w)
                     if x + w > sw and row:
                         break
                     row.append((win, x, h))
