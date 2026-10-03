@@ -16,6 +16,7 @@
 #include "compat.h"
 #include "envcache.h"
 #include "json.h"
+#include "startrk.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -85,6 +86,8 @@ static void discrete_write(uint16_t (*out)[NCARD][NCHAN], bool (*seen)[NCARD][NC
 #define IMU_READ   0x24C0Du   /* FIOIMUC1: card 3 ch 0, 14 data words      */
 #define IMU_DSCRT  0x27C00u   /* FIOIMUC2: card 15 ch 0, the IMU discretes  */
 #define IMU_WRITE  0x20C01u   /* FIOIMUC3: card 3 ch 0, command words 1, 2  */
+#define STU_READ   0x24C42u   /* FIOFFIC5: card 3 ch 2, a star tracker's 3 words */
+#define STU_WRITE  0x20C40u   /* FIOHO203: card 3 ch 2, its command word     */
 
 typedef struct {
     uint16_t cmd1, cmd2;      /* the last two command words, echoed back */
@@ -544,6 +547,12 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * Signed halfwords, 6400 counts a volt; 0 is in detent.  Sent by
  * handcontrollers.py as op 4 VALUE records of type 6 (AID). */
 #define CREW_TYPE_AID 6
+/* A STAR TRACKER'S HARDWIRED SIDE: its POWER switch and its door, which the
+ * computers neither command nor read (panel O6; JSC-12770 Vol 6 Table B-XI),
+ * from the panel on the MDM it hangs off -- FF1 for -Z, FF3 for -Y -- as op 4
+ * VALUE, type 7, card 3 channel 2 (the tracker's serial channel), one word:
+ * 0x8000 powered, 0x4000 door fully open. */
+#define CREW_TYPE_STU 7
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -710,6 +719,16 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
     unsigned type = ((unsigned)buf[2] << 8) | buf[3];
     unsigned card = buf[4], ch = buf[5];
     int cnt = ((int)buf[6] << 8) | buf[7];
+    if (type == CREW_TYPE_STU) {
+        int st = (k <= CREW_NFF) ? startrk_unit(k) : 0;
+        if (op != CREW_OP_VALUE || st == 0 || cnt < 1 || len < 10) return;
+        uint16_t w = (uint16_t)(((unsigned)buf[8] << 8) | buf[9]);
+        startrk_hardware(st, (w & 0x8000u) != 0, (w & 0x4000u) != 0,
+                         vehdyn_enabled() ? vehdyn_state()->t : 0.0);
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
     if (type == CREW_TYPE_AID) {
         if (op != CREW_OP_VALUE || k > CREW_NFF) return;
         if (cnt > (len - 8) / 2) cnt = (len - 8) / 2;
@@ -1403,6 +1422,11 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         int u = ff_unit(busID);
         ffWrites++;
         if (f == GPS_WRITE && u <= 3) { gps_write(u, words, n); return; }
+        if (f == STU_WRITE && startrk_unit(u)) {
+            startrk_command(startrk_unit(u), words[0], vehdyn_enabled() ? vehdyn_state()->t
+                                                                         : sharedUs / 1e6);
+            return;
+        }
         if (f == IMU_WRITE && u <= 3) {
             /* the slew running until now ran under the OLD word 2 */
             if (vehdyn_enabled()) imu_torque(u, words[0], vehdyn_state()->t);
@@ -1492,6 +1516,13 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
+        if (f == STU_READ && startrk_unit(u) && n >= 3) {
+            uint16_t sw[3];
+            startrk_read(startrk_unit(u), sw, vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6);
+            for (int i = 0; i < n; i++) out[i] = (i < 3) ? sw[i] : 0;
+            ffReads++;
+            return true;
+        }
         if (u >= 1 && u <= 3 && f == IMU_DSCRT) {
             for (int i = 0; i < n; i++) out[i] = (i == 0) ? IMU_DSCRT_ALL_GOOD : 0;
             ffReads++;
@@ -1561,6 +1592,11 @@ bool mdmdev_dump(const char *dir) {
         pb[np++] = plat[k].t;
     }
     put_list(f, "imuPlatform", pb, np, true);
+    {
+        double sb[512];
+        int ns = startrk_save(sb, 512);
+        put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+    }
     double gb[9];
     for (int k = 1; k <= 3; k++) {
         gb[3 * (k - 1)] = gps[k].haveCmd; gb[3 * (k - 1) + 1] = gps[k].mode;
@@ -1642,6 +1678,11 @@ bool mdmdev_load(const char *dir) {
             plat[k].started = pb[i++] != 0.0;
             plat[k].t = pb[i++] - tCap;                 /* rebased with the vehicle */
         }
+    {
+        double sb[512];
+        int ns = get_list(root, "starTrackers", sb, 512);
+        if (ns > 0) startrk_load(sb, ns, tCap);
+    }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {
             gps[k].haveCmd = gb[3 * (k - 1)] != 0.0; gps[k].mode = (unsigned)gb[3 * (k - 1) + 1];
@@ -1673,6 +1714,7 @@ void mdmdev_test_platform(int n, double P[3][3]) {
 }
 
 void mdmdev_report(void) {
+    startrk_report();
     for (int k = 1; k <= 3; k++)
         if (plat[k].started)
             fprintf(stderr, "mdmdev: IMU%d platform %.4f deg from M50; %ld torque "

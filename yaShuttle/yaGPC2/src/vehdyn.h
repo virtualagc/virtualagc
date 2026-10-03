@@ -81,6 +81,9 @@ void vehdyn_set_gmt_zero(double unixAtZero);
  * outside what is kept (a few hundred steps). */
 bool vehdyn_state_at(double t, double r[3], double v[3]);
 double vehdyn_gmt(double t);
+/* The same clock as a Unix time (s), which carries the year -- for the Sun
+ * and the Moon; -1 before the clock is known. */
+double vehdyn_unix(double t);
 
 /* A session capture: the state as numbers, into b[0..max-1], returning how
  * many it takes (call with max 0 to ask); and back, rebased so that the

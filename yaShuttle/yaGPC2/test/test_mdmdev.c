@@ -28,6 +28,8 @@
 #include "../src/busword.h"
 #include "../src/vehdyn.h"
 #include "../src/mdmdev.h"
+#include "../src/startrk.h"
+#include "../src/startable.h"
 #include <math.h>
 
 static struct MtuModel *m;
@@ -95,6 +97,54 @@ static void crew_send(int k, int op, int card, int ch, uint16_t word) {
     to.sin_port = htons((uint16_t)(CREW_BASE + 100 + k - 1));
     sendto(fd, (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
     close(fd);
+}
+
+/* THE STAR TRACKERS' GEOMETRY, as the flight software applies it: tracker
+ * words -> line of sight in the tracker's axes (GY8DAT.hal:194-197, 431-434)
+ * -> nav base (CGYS_TNBST^T) -> body (TNBBODY) -> M50 (the truth attitude). */
+static const double T_NBST[3][3][3] = {
+    { { 0 } },
+    { { -0.00651344657, 0.999492586, -0.0311769098 }, { 0.989126801, 0.00185892172, -0.147052646 },
+      { -0.146920085, -0.0314957425, -0.98863709 } },
+    { { -0.965746284, -0.184594095, 0.182370245 }, { -0.186074317, 0.00279755401, -0.982531488 },
+      { 0.180859327, -0.982810736, -0.0370500423 } },
+};
+static const double T_NBBODY[3][3] = { { 0.98293535, 0.0, -0.18395135 }, { 0, 1, 0 },
+                                       { 0.18395135, 0.0, 0.98293535 } };
+static void st_qmat(const double q[4], double R[3][3]) {
+    double w = q[0], x = q[1], y = q[2], z = q[3];
+    R[0][0] = 1 - 2 * (y * y + z * z); R[0][1] = 2 * (x * y - w * z); R[0][2] = 2 * (x * z + w * y);
+    R[1][0] = 2 * (x * y + w * z); R[1][1] = 1 - 2 * (x * x + z * z); R[1][2] = 2 * (y * z - w * x);
+    R[2][0] = 2 * (x * z - w * y); R[2][1] = 2 * (y * z + w * x); R[2][2] = 1 - 2 * (x * x + y * y);
+}
+/* PASS's decode of a tracker's words to an M50 line of sight. */
+static void st_decode(int k, const uint16_t w[3], double u[3]) {
+    const double LSB = 0.0025390625 * 3.14159265358979323846 / 180.0;
+    double H = (double)((int16_t)(w[1] & 0xFFF0u) >> 4) * LSB;
+    double V = (double)((int16_t)(w[2] & 0xFFF0u) >> 4) * LSB;
+    double D = sqrt(tan(H) * tan(H) + tan(V) * tan(V) + 1.0);
+    double st[3] = { -tan(V) / D, tan(H) / D, 1.0 / D }, nb[3], b[3], R[3][3];
+    for (int i = 0; i < 3; i++) nb[i] = T_NBST[k][0][i] * st[0] + T_NBST[k][1][i] * st[1] + T_NBST[k][2][i] * st[2];
+    for (int i = 0; i < 3; i++) b[i] = T_NBBODY[i][0] * nb[0] + T_NBBODY[i][1] * nb[1] + T_NBBODY[i][2] * nb[2];
+    st_qmat(vehdyn_state()->q, R);
+    for (int i = 0; i < 3; i++) u[i] = R[i][0] * b[0] + R[i][1] * b[1] + R[i][2] * b[2];
+}
+/* Point tracker k's boresight at the M50 direction d (the shortest turn). */
+static void st_point(int k, const double d[3]) {
+    double b[3];
+    for (int i = 0; i < 3; i++)
+        b[i] = T_NBBODY[i][0] * T_NBST[k][2][0] + T_NBBODY[i][1] * T_NBST[k][2][1] + T_NBBODY[i][2] * T_NBST[k][2][2];
+    double ax[3] = { b[1] * d[2] - b[2] * d[1], b[2] * d[0] - b[0] * d[2], b[0] * d[1] - b[1] * d[0] };
+    double sn = sqrt(ax[0] * ax[0] + ax[1] * ax[1] + ax[2] * ax[2]);
+    double cs = b[0] * d[0] + b[1] * d[1] + b[2] * d[2];
+    double a = atan2(sn, cs), q[4] = { cos(a / 2), 0, 0, 0 }, zero[3] = { 0, 0, 0 };
+    for (int i = 0; i < 3; i++) q[i + 1] = (sn > 0 ? ax[i] / sn : 0) * sin(a / 2);
+    vehdyn_set_attitude(q, zero);
+}
+static double st_ang(const double a[3], const double b[3]) {
+    double c = (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]) /
+               sqrt((a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) * (b[0] * b[0] + b[1] * b[1] + b[2] * b[2]));
+    return acos(c > 1 ? 1 : c < -1 ? -1 : c) * 180.0 / 3.14159265358979323846;
 }
 
 int main(void) {
@@ -243,6 +293,151 @@ int main(void) {
             check(e < 4 * fabs(KTN), "imu1 gyro drift is cancelled by PASS's -GYREST torquing");
         }
         #undef REL
+    }
+
+    /* THE STAR TRACKERS: -Z on FF1 (bus 20), -Y on FF3 (bus 22).  A star
+     * well away from the Earth, the Sun and the Moon, for the -Z tracker. */
+    {
+        /* a date on which the test orbit's start is in sunlight: the Sun
+         * moves round M50 in a year, and the vehicle starts where it starts */
+        const PhysState *ps = vehdyn_state();
+        double nadir[3], sun[3];
+        for (int d = 0; d < 12; d++) {
+            vehdyn_set_gmt_zero(1790000000.0 + d * 30.0 * 86400.0);
+            vehdyn_reset(0.0);
+            double rn = sqrt(ps->r[0] * ps->r[0] + ps->r[1] * ps->r[1] + ps->r[2] * ps->r[2]);
+            for (int i = 0; i < 3; i++) nadir[i] = -ps->r[i] / rn;
+            startrk_test_sun(0.0, sun);
+            if (st_ang(sun, nadir) > 100.0) break;
+        }
+        check(sun[0] != 0 || sun[1] != 0, "startrk: the Sun is known once the clock is");
+        int pick = -1;
+        for (int i = 0; i < STAR_TABLE_N && pick < 0; i++)
+            if (STAR_TABLE[i].id != 11 && st_ang(STAR_TABLE[i].u, nadir) > 110.0 &&
+                st_ang(STAR_TABLE[i].u, sun) > 60.0 && STAR_TABLE[i].mag < 2.0)
+                pick = i;
+        check(pick >= 0, "startrk: a star to point at");
+        if (pick >= 0) {
+            st_point(1, STAR_TABLE[pick].u);
+            /* FULL-FIELD SCAN, the power-on default: some star within 12 s */
+            uint16_t cmd0[1] = { 0x0000u };
+            write_words(20, FF(0x20C40u), cmd0, 1);
+            double t = 0.0;
+            int got = 0;
+            for (int n = 0; n < 80 && !got; n++) {
+                t += 0.16;
+                vehdyn_advance(t * 1e6);
+                read_words(20, FF(0x24C42u), 3, w);
+                if (w[0] & 0x0400u) got = startrk_test_locked(1);
+            }
+            check(got > 0, "startrk: -Z full-field scan acquires a catalog star");
+            check((w[0] & 0xA200u) == 0xA200u && (w[2] & 0x0003u) == 0x0003u && !(w[0] & 0x1000u),
+                  "startrk: good, word good, power good, no alert, shutter open");
+            if (got > 0) {
+                /* PASS's decode gives the star's apparent direction: within
+                 * the noise (20 arcsec) and a count (9 arcsec), plus the
+                 * aberration it removes (<= 25 arcsec) */
+                double u[3], worst = 0;
+                int idx = -1;
+                for (int i = 0; i < STAR_TABLE_N; i++) if (STAR_TABLE[i].id == got) idx = i;
+                for (int n = 0; n < 20; n++) {
+                    t += 0.16;
+                    vehdyn_advance(t * 1e6);
+                    read_words(20, FF(0x24C42u), 3, w);
+                    st_decode(1, w, u);
+                    double e = st_ang(u, STAR_TABLE[idx].u) * 3600.0;
+                    if (e > worst) worst = e;
+                }
+                if (worst > 120.0) printf("startrk: decoded LOS %.1f arcsec from star %d\n", worst, got);
+                check(worst < 120.0, "startrk: PASS's decode of the words gives the star's direction");
+            }
+            /* OFFSET SCAN onto the star we pointed at (H = V = 0 is offset
+             * code 15.5 -- use 16, +0.15 deg), after a break track */
+            uint16_t brk[1] = { 0x2000u }, off[1] = { (uint16_t)(0x8000u | (16u << 5) | 16u) };
+            write_words(20, FF(0x20C40u), brk, 1);
+            t += 0.04; vehdyn_advance(t * 1e6);
+            write_words(20, FF(0x20C40u), off, 1);
+            int got2 = 0;
+            for (int n = 0; n < 10 && !got2; n++) {
+                t += 0.16;
+                vehdyn_advance(t * 1e6);
+                read_words(20, FF(0x24C42u), 3, w);
+                if (w[0] & 0x0400u) got2 = startrk_test_locked(1);
+            }
+            check(got2 == STAR_TABLE[pick].id, "startrk: offset scan acquires the star in its box within 1.6 s");
+            int16_t hcount = (int16_t)(w[1] & 0xFFF0u) >> 4, vcount = (int16_t)(w[2] & 0xFFF0u) >> 4;
+            check(abs(hcount) < 15 && abs(vcount) < 15, "startrk: it is on the boresight");
+            /* BREAK TRACK in the offset box: nothing else there */
+            uint16_t offbrk[1] = { (uint16_t)(off[0] | 0x2000u) };
+            write_words(20, FF(0x20C40u), offbrk, 1);
+            t += 0.16; vehdyn_advance(t * 1e6);
+            read_words(20, FF(0x24C42u), 3, w);
+            check(!(w[0] & 0x0400u), "startrk: break track drops the star and does not reacquire it");
+
+            /* THE SELF-TEST as GY1STS runs it: offset to the light (H code
+             * 29, V code 2), then with H reversed (code 2), then off */
+            uint16_t st1[1] = { (uint16_t)(0xC000u | (29u << 5) | 2u) };
+            write_words(20, FF(0x20C40u), st1, 1);
+            bool pass1 = false;
+            for (int n = 0; n < 19 && !pass1; n++) {
+                t += 0.16; vehdyn_advance(t * 1e6);
+                read_words(20, FF(0x24C42u), 3, w);
+                pass1 = (w[0] & 0x1C00u) == 0x1C00u && (w[2] & 0x000Du) == 0 && (w[0] & 0x8000u);
+            }
+            check(pass1, "startrk: self-test pass 1 -- shutter closed, engaged, light present, alert, no errors");
+            uint16_t st2[1] = { (uint16_t)(0xC000u | (2u << 5) | 2u) };
+            write_words(20, FF(0x20C40u), st2, 1);
+            bool pass2 = false;
+            for (int n = 0; n < 19 && !pass2; n++) {
+                t += 0.16; vehdyn_advance(t * 1e6);
+                read_words(20, FF(0x24C42u), 3, w);
+                pass2 = !(w[0] & 0x8000u);
+            }
+            check(pass2, "startrk: self-test pass 2 (H reversed) -- tracker good goes 0 within 3 s");
+            write_words(20, FF(0x20C40u), cmd0, 1);
+            t += 0.16; vehdyn_advance(t * 1e6);
+            read_words(20, FF(0x24C42u), 3, w);
+            check(!(w[0] & 0x0800u) && (w[0] & 0x8000u) && (w[0] & 0x1000u),
+                  "startrk: self-test off -- disengaged, good again, shutter latched closed");
+            uint16_t unl[1] = { 0x1000u };
+            write_words(20, FF(0x20C40u), unl, 1);
+            write_words(20, FF(0x20C40u), cmd0, 1);
+            t += 0.16; vehdyn_advance(t * 1e6);
+            read_words(20, FF(0x24C42u), 3, w);
+            check(!(w[0] & 0x1000u), "startrk: the unlatch pulse opens the shutter");
+
+            /* THE SUN in the field: alert, shutter closed, no star */
+            st_point(1, sun);
+            t += 0.16; vehdyn_advance(t * 1e6);
+            read_words(20, FF(0x24C42u), 3, w);
+            check(!(w[2] & 0x0001u) && (w[0] & 0x1000u) && !(w[0] & 0x0400u),
+                  "startrk: the Sun at the boresight -- bright object alert, shutter closed");
+            st_point(1, STAR_TABLE[pick].u);
+            t += 0.16; vehdyn_advance(t * 1e6);
+            read_words(20, FF(0x24C42u), 3, w);
+            check((w[2] & 0x0001u) && (w[0] & 0x1000u), "startrk: Sun gone -- alert off, shutter stays latched");
+
+            /* POWER AND DOOR (the panel's side) */
+            startrk_hardware(1, false, true, t);
+            read_words(20, FF(0x24C42u), 3, w);
+            check(w[0] == 0 && w[1] == 0 && w[2] == 0, "startrk: switched off -- all zeros (BITE)");
+            startrk_hardware(1, true, false, t);
+            write_words(20, FF(0x20C40u), unl, 1);
+            write_words(20, FF(0x20C40u), cmd0, 1);
+            for (int n = 0; n < 80; n++) { t += 0.16; vehdyn_advance(t * 1e6); read_words(20, FF(0x24C42u), 3, w); }
+            check((w[0] & 0x8000u) && !(w[0] & 0x0400u), "startrk: door closed -- good, but no star in 12 s");
+            startrk_hardware(1, true, true, t);
+            got = 0;
+            for (int n = 0; n < 80 && !got; n++) {
+                t += 0.16; vehdyn_advance(t * 1e6);
+                read_words(20, FF(0x24C42u), 3, w);
+                if (w[0] & 0x0400u) got = startrk_test_locked(1);
+            }
+            check(got > 0, "startrk: door open -- stars again");
+            /* the -Y tracker answers on FF3 and nowhere else */
+            check(read_words(22, FF(0x24C42u), 3, w) == 3 && (w[0] & 0x2200u) == 0x2200u,
+                  "startrk: -Y tracker answers on FF3");
+        }
     }
 
     /* THE RETURN-WORD PATTERN CHECK (ledger #262): the pattern in the
@@ -573,6 +768,7 @@ int main(void) {
         double gim = vehdyn_oms_gimbal(1, 0);
         double Pcap[3][3];
         mdmdev_test_platform(1, Pcap);
+        int lockCap = startrk_test_locked(1);
         check(mdmdev_dump(dir), "capture: vehdyn.json written");
         vehdyn_advance(150e6);
         memcpy(rFut, vehdyn_state()->r, sizeof rFut);       /* where it goes next */
@@ -587,6 +783,8 @@ int main(void) {
             double Pl[3][3];
             mdmdev_test_platform(1, Pl);
             check(memcmp(Pl, Pcap, sizeof Pl) == 0, "capture: IMU1's platform orientation restored");
+            check(startrk_test_locked(1) == lockCap && lockCap != 0,
+                  "capture: the -Z star tracker is still locked on the same star");
         }
         vehdyn_advance(30e6);                               /* 30 s on the restored clock */
         double d = 0;

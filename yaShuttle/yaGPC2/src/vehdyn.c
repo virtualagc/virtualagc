@@ -190,6 +190,7 @@ static struct {
 
 static PhysState st;
 static double gmtZero = -1.0;   /* PASS GMT seconds at t = 0; < 0 unknown */
+static double unixZero = -1.0;  /* the Unix time at t = 0, the same clock with its year */
 /* After a restore, the GMT the restored state belongs to, until the timing
  * unit says what GMT the restored clock's zero is (vehdyn_set_gmt_zero). */
 static double restoredGmt = -1.0;
@@ -552,6 +553,7 @@ static void pass_rnp(int year, int day, double A[3][3]) {
 }
 
 void vehdyn_set_gmt_zero(double unixAtZero) {
+    unixZero = unixAtZero;
     time_t whole = (time_t)floor(unixAtZero);
     struct tm g;
     gmtime_r(&whole, &g);
@@ -621,6 +623,7 @@ bool vehdyn_state_at(double t, double r[3], double v[3]) {
 }
 
 double vehdyn_gmt(double t) { return (gmtZero >= 0.0) ? gmtZero + t : -1.0; }
+double vehdyn_unix(double t) { return (unixZero >= 0.0) ? unixZero + t : -1.0; }
 
 const PhysState *vehdyn_state(void) { return &st; }
 double vehdyn_propellant(int module) { return (module >= 0 && module < NMOD) ? prop[module] : 0.0; }
@@ -748,6 +751,7 @@ double vehdyn_load(const double *b, int n) {
     histCount = 0;
     hist_push();
     if (gmtZero >= 0.0) gmtZero += t;
+    if (unixZero >= 0.0) unixZero += t;
     restoredGmt = gmtCap;
     return t;
 }
