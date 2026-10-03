@@ -54,7 +54,9 @@ A CONTROL is CONTROLS[key] = dict:
 
 A PANE is a titled group of controls in rows: PANES[panel] is a list of
 (title, [[key, key, ...], [key, ...]]), drawn in that order in the panel's
-window after its older, hand-drawn panes.
+window after its older, hand-drawn panes.  A row may instead be a string: a
+legend across the pane over the rows that follow, as a panel's own group
+legends are printed (O6's STAR TRACKER DOOR CONTROL over SYS 1 and SYS 2).
 """
 
 CONTROLS = {}
@@ -100,6 +102,8 @@ def check():
     for panel, panes in PANES.items():
         for title, rows, *_opts in panes:
             for row in rows:
+                if isinstance(row, str):
+                    continue
                 for key in row:
                     if key not in CONTROLS:
                         raise ValueError("panelcontrols pane %s/%s: no control %r"
@@ -387,6 +391,32 @@ _sm("rms_select", "A8L", "t3", "RMS SELECT", ("PORT", "OFF", "STBD"), "OFF", _MC
     sources="V54X2025J/2026J")
 _sm("rms_power", "A8L", "t3", "RMS POWER", ("PRIMARY", "OFF", "BACKUP"), "OFF", _MCIU,
     sources="display only (SPEC 94)")
+
+# O6 STAR TRACKER (TD0216 Fig 3-4, pp. 3-1 to 3-6; SCOM 2.13-11; JSC-12770
+# Vol 6 Table B-XI).  All hardwired: POWER feeds a tracker (CB on O14/O15),
+# DOOR CONTROL SYS 1 / SYS 2 drive the doors' two motors through the FMCAs,
+# and the DOOR POSITION talkbacks show the doors' limit switches -- OP, CL,
+# barberpole between.  The computers neither command nor read them, apart
+# from the -Y door's OP/CL contacts (FF1 / FF3 DSCRT11 bits 14 / 13,
+# CGBB_STAR_Y_DOOR_OP/CL, downlist only), which panelO6 drives from its
+# door model, as it does the trackers' power and doors in yaGPC2 (startrk.c).
+for _sd in ("y", "z"):
+    CONTROLS["strk_pwr_" + _sd] = dict(
+        panel="O6", kind="t2", caption="-%s" % _sd.upper(), positions=("ON", "OFF"),
+        default="ON", contacts={},
+        sources="TD0216 Fig 3-4 (S4/S5); JSC-12770 Vol 6 B-34; hardwired to the tracker")
+    CONTROLS["strk_door_tb_" + _sd] = dict(
+        panel="O6", kind="tb", caption="-%s" % _sd.upper(), positions=("OP", "CL"),
+        door=_sd, sources="TD0216 Fig 3-4 (DS1/DS2); JSC-12770 Vol 6 B-35")
+for _n in (1, 2):
+    CONTROLS["strk_door_sys%d" % _n] = dict(
+        panel="O6", kind="t3", caption="SYS %d" % _n,
+        positions=("OPEN", "OFF", "CLOSE"), default="OFF", contacts={},
+        sources="TD0216 Fig 3-4 (S2/S3); JSC-12770 Vol 6 B-34: both doors' system-%d motors"
+                % _n)
+PANES["O6"] = [("STAR TRACKER", ["DOOR POSITION", ["strk_door_tb_y", "strk_door_tb_z"],
+                                 "DOOR CONTROL", ["strk_door_sys1", "strk_door_sys2"],
+                                 "POWER", ["strk_pwr_y", "strk_pwr_z"]])]
 
 PANES["R13L"] = [("PAYLOAD BAY", [["plbd"]])]
 PANES["R11U"] = [("FUEL CELL PURGE", [["fc_purge_seq", "fc_purge_htr"],
