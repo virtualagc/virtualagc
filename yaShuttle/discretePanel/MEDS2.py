@@ -2893,6 +2893,26 @@ class MeshBasicMaterial(Material):
         return m
 
 
+class MeshTextureMaterial(Material):
+    """A mesh painted with an image: not three.js's MeshBasicMaterial with a
+    map, but the same idea, and only what the textured ADI ball needs.  The
+    image is a file path; the renderer makes the GL texture on first use."""
+    isTextureMaterial = True
+
+    def __init__(self, path, side=None):
+        Material.__init__(self)
+        self.path = path
+        self.side = side if side is not None else FrontSide
+        self.opacity = 1.0
+        self._tex = None
+
+    def clone(self):
+        m = MeshTextureMaterial(self.path, self.side)
+        m.depthTest, m.depthWrite = self.depthTest, self.depthWrite
+        m.clippingPlanes = self.clippingPlanes
+        return m
+
+
 class ShaderMaterial(Material):
     isShaderMaterial = True
 
@@ -3181,6 +3201,41 @@ void main() {
 """
 
 
+TEX_VERT = """#version 330 core
+in vec3 position;
+in vec2 uv;
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
+out vec3 vClipPosition;
+out vec2 vUv;
+void main() {
+  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+  vClipPosition = -mvPosition.xyz;
+  vUv = uv;
+  gl_Position = projectionMatrix * mvPosition;
+}
+"""
+
+TEX_FRAG = """#version 330 core
+uniform sampler2D map;
+uniform float opacity;
+uniform int numClippingPlanes;
+uniform vec4 clippingPlanes[4];
+in vec3 vClipPosition;
+in vec2 vUv;
+out vec4 fragColor;
+void main() {
+  for (int i = 0; i < 4; i++) {
+    if (i >= numClippingPlanes) break;
+    vec4 plane = clippingPlanes[i];
+    if (dot(vClipPosition, plane.xyz) > plane.w) discard;
+  }
+  vec4 c = texture(map, vUv);
+  fragColor = vec4(c.rgb, c.a * opacity);
+}
+"""
+
+
 def _sdfAttrs(coords_list, z=100.0):
     """Shared expansion: a list of polylines -> the five SDF attributes."""
     segs = []
@@ -3371,6 +3426,7 @@ class GLRenderer(object):
             return _Program(p, attrs)
 
         self.programs['basic'] = build(BASIC_VERT, BASIC_FRAG, [('position', 3)])
+        self.programs['tex'] = build(TEX_VERT, TEX_FRAG, [('position', 3), ('uv', 2)])
         self.programs['sdf'] = build(SDF_VERT, SDF_FRAG,
                                      [('position', 3), ('endA', 3), ('endB', 3),
                                       ('corner', 2), ('segDist', 2)])
@@ -3498,7 +3554,12 @@ class GLRenderer(object):
         info = self._geominfo(geom)
         if info['count'] == 0:
             return
-        kind = mat.kind if mat.isShaderMaterial else 'basic'
+        if mat.isShaderMaterial:
+            kind = mat.kind
+        elif getattr(mat, 'isTextureMaterial', False):
+            kind = 'tex'
+        else:
+            kind = 'basic'
         pr = self.programs[kind]
         if self._curProg is not pr:
             pr.prog.bind()
@@ -3532,6 +3593,19 @@ class GLRenderer(object):
                 res = u['resolution']['value']
                 pr.prog.setUniformValue(pr.u('resolution'), QVector2D(res[0], res[1]))
                 pr.prog.setUniformValue(pr.u('pxRatio'), float(u['pxRatio']['value']))
+            elif kind == 'tex':
+                if mat._tex is None:
+                    from PyQt6.QtGui import QImage
+                    from PyQt6.QtOpenGL import QOpenGLTexture
+                    # Qt 6: the image is NOT mirrored -- v = 0 is its top row
+                    t = QOpenGLTexture(QImage(mat.path))
+                    t.setMinificationFilter(QOpenGLTexture.Filter.LinearMipMapLinear)
+                    t.setMagnificationFilter(QOpenGLTexture.Filter.Linear)
+                    t.setWrapMode(QOpenGLTexture.WrapMode.Repeat)
+                    mat._tex = t
+                mat._tex.bind(0)
+                pr.prog.setUniformValue(pr.u('map'), 0)
+                pr.prog.setUniformValue(pr.u('opacity'), float(mat.opacity))
             else:
                 col = mat.color
                 pr.prog.setUniformValue(pr.u('diffuse'), QVector3D(col.r, col.g, col.b))
@@ -9948,8 +10022,12 @@ class Screen_AE_PFD(MDUScreen):
         # rotor: everything painted on the ball; updateADI() sets its rotation
         self.adiBallRot = Object3D()
         self.adiBallRot.userData['flattenApart'] = True   # updateADI turns it
-        self.adiBallRot.add(self._ballFills())
-        self.adiBallRot.add(self._ballMarkMeshes(self._ballMarks()))
+        tex = self.ballTexture()
+        if tex:
+            self.adiBallRot.add(self._ballTextured(tex))
+        else:
+            self.adiBallRot.add(self._ballFills())
+            self.adiBallRot.add(self._ballMarkMeshes(self._ballMarks()))
         g.add(self.adiBallRot)
         # circular window: opaque background-colour ring just behind the case
         # plane depth-masks the ball outside r 6.6
@@ -9959,6 +10037,49 @@ class Screen_AE_PFD(MDUScreen):
         g.add(mask)
         g.position.z = -10
         return g
+
+    # THE BALL AS A PICTURE.  Don's ball is geometry: fills and strokes drawn
+    # on a sphere.  A screen may instead paint the ball with an image in the
+    # layout of the Space Shuttle Ultra add-on's adi_ball.png (samples/, a
+    # local copy, not in the repository): 360 deg of pitch along 1800 rows
+    # (180 at both ends, 0 in the middle, the white half above) and yaw -90
+    # to +90 across 900 columns, the map at the TOP of a 1024 x 2048 image --
+    # so the texture coordinates are scaled to 900/1024 and 1800/2048 and
+    # kept clear of the 248 empty rows at the bottom.  Each vertex
+    # is placed by ballPt like Don's marks, so the ball turns by the same
+    # rotation and reads the same attitude.  None here: Don's geometry.
+    BALL_TEX_U = 900.0 / 1024.0
+    BALL_TEX_V = 1800.0 / 2048.0
+    BALL_TEX_V0 = (2048.0 - 1800.0) / 2048.0
+
+    def ballTexture(self):
+        return None
+
+    def _ballTextured(self, path, step=3.0):
+        verts, uvs, idx = [], [], []
+        P = int(round(360 / step))
+        W = int(round(180 / step))
+        for i in range(P + 1):
+            p = 180.0 + i * step              # 180 .. 540: the map's own seam
+            # Qt 6's QOpenGLTexture does not mirror the image, so v runs from
+            # the image's TOP row: the bottom-up coordinate turned over
+            v = 1.0 - (self.BALL_TEX_V0 + (i * step / 360.0) * self.BALL_TEX_V)
+            for j in range(W + 1):
+                w = -90.0 + j * step
+                verts += ballPt(p, w, BALL_R)
+                uvs += [(j * step / 180.0) * self.BALL_TEX_U, v]
+        for i in range(P):
+            for j in range(W):
+                a = i * (W + 1) + j
+                b = a + 1
+                c = a + (W + 1)
+                d = c + 1
+                idx += [a, c, b, b, c, d]
+        geom = BufferGeometry()
+        geom.setAttribute('position', Float32BufferAttribute(verts, 3))
+        geom.setAttribute('uv', Float32BufferAttribute(uvs, 2))
+        geom.setIndex(idx)
+        return Mesh(geom, MeshTextureMaterial(path, DoubleSide))
 
     def _ballFills(self):
         """Hemisphere fills: white pitch 0..180, grey 180..360, smooth
@@ -11214,6 +11335,16 @@ class Screen_AE_PFD(MDUScreen):
 # the display (JSC-48017 figures 6-8 and 6-24).
 class Screen_ORBIT_PFD(Screen_AE_PFD):
     screenName = 'ORBIT_PFD'
+
+    # THE SSU BALL HERE, DON'S ON THE A/E PFD -- a side-by-side comparison
+    # Ron asked for (2026-10-02).  NSTS_ADI_TEXTURE names another image, or
+    # "none" for Don's ball on both.
+    def ballTexture(self):
+        path = os.environ.get('NSTS_ADI_TEXTURE') or os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'samples', 'adi_ball.png')
+        if path.lower() == 'none' or not os.path.exists(path):
+            return None
+        return path
 
     def parts(self):
         return ['adi']
