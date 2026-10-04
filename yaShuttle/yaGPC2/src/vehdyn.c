@@ -392,15 +392,18 @@ static void qmat_body(const double q[4], double R[3][3]);
  * vectors CGCS_RME1..3 are these divided by 12) and null directions -- the
  * upper engine pitched 16 deg, the lower two 10 deg and 3.5 deg outboard
  * (SCOM; SSV80-1): thrust forward and toward the tank.  100% = 470,000 lbf
- * vacuum (CGGS_SSME_THRUST_NOM), 1,032.5 lb/s (CGGS_SSME_M_RATE_NOM), Isp
- * 455.2 s; exit area 6,461 in^2, which gives the sea-level 375,000 lbf. */
+ * vacuum (CGGS_SSME_THRUST_NOM); exit area 6,461 in^2, which gives the
+ * sea-level 375,000 lbf.  Isp 452.07 s, STS-134's predicted average at
+ * 104.5% (JSC 37461 sec. SSME): the controller holds the thrust, so the
+ * flow is the thrust over it, 1,039.7 lb/s at 100% -- PASS's own I-loads
+ * (1,032.5 lb/s, 455.2 s) are its nominal model, not the engines. */
 static const double ME_XYZ[3][3] = { { 1445.0, 0.0, 443.0 }, { 1468.17, -53.0, 342.64 },
                                      { 1468.17, 53.0, 342.64 } };
 static const double ME_CANT_P[3] = { 16.0, 10.0, 10.0 };   /* deg, thrust toward +Z body */
 static const double ME_CANT_Y[3] = { 0.0, 3.5, -3.5 };     /* deg, thrust toward +Y body: outboard
                                                                nozzle, inboard thrust */
 #define ME_TVAC_N        (470000.0 * LBF_N)
-#define ME_ISP_VAC       455.2
+#define ME_ISP_VAC       452.07
 #define ME_AE_M2         (6461.0 * IN_M * IN_M)
 #define ME_LIM_P         10.5
 #define ME_LIM_Y         8.5
