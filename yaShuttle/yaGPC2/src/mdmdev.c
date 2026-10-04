@@ -430,7 +430,8 @@ static void imu_read(int n, uint16_t *out, int words) {
  * YAGPC_IMU_OPERATE=command or =always overrides either way. */
 #define IMU_OPER_CMD  0x0040u
 #define IMU_RUNUP_S   40.0
-static double imuOpT[4] = { -1.0, -1.0, -1.0, -1.0 };   /* the operate command's time */
+#define IMU_NO_CMD    (-1e30)
+static double imuOpT[4] = { IMU_NO_CMD, IMU_NO_CMD, IMU_NO_CMD, IMU_NO_CMD };   /* the operate command's time */
 static bool imuOper[4];                                /* run up, in operate */
 
 static bool imu_by_command(void) {
@@ -458,13 +459,13 @@ static bool imu_in_operate(int n) {
     if (!imu_by_command()) return true;
     double t = vehdyn_state()->t;
     if (!(ffOut[n][13][0] & IMU_OPER_CMD)) {
-        if (imuOpT[n] >= 0.0)
+        if (imuOpT[n] > IMU_NO_CMD)
             fprintf(stderr, "mdmdev: IMU%d commanded to STANDBY at t=%.2f\n", n, t);
-        imuOpT[n] = -1.0;
+        imuOpT[n] = IMU_NO_CMD;
         imuOper[n] = false;
         return false;
     }
-    if (imuOpT[n] < 0.0) {
+    if (imuOpT[n] <= IMU_NO_CMD) {
         imuOpT[n] = t;
         fprintf(stderr, "mdmdev: IMU%d commanded to OPERATE at t=%.2f -- running up\n", n, t);
     }
@@ -1787,7 +1788,7 @@ bool mdmdev_dump(const char *dir) {
     put_list(f, "imuPlatform", pb, np, true);
     double ob6[6];
     for (int k = 1; k <= 3; k++) {
-        ob6[2 * k - 2] = imuOpT[k] < 0.0 ? -1.0 : imuOpT[k];
+        ob6[2 * k - 2] = imuOpT[k] <= IMU_NO_CMD ? IMU_NO_CMD : imuOpT[k];
         ob6[2 * k - 1] = imuOper[k];
     }
     put_list(f, "imuOperate", ob6, 6, true);
@@ -1886,7 +1887,9 @@ bool mdmdev_load(const char *dir) {
     double ob6[6];
     if (get_list(root, "imuOperate", ob6, 6) == 6)
         for (int k = 1; k <= 3; k++) {
-            imuOpT[k] = ob6[2 * k - 2] < 0.0 ? -1.0 : ob6[2 * k - 2] - tCap;
+            /* rebased with the vehicle: a command before the capture is
+             * now at a negative time, which is still a command */
+            imuOpT[k] = ob6[2 * k - 2] <= IMU_NO_CMD ? IMU_NO_CMD : ob6[2 * k - 2] - tCap;
             imuOper[k] = ob6[2 * k - 1] != 0.0;
         }
     {
