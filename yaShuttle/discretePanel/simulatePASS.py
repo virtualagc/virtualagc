@@ -1839,13 +1839,17 @@ def main():
             # carries GMT across, and it needs no C at all -- the MEDS header
             # clock is anchored to it, so handing back the epoch recorded at
             # capture makes the display continue rather than restart.
+            global EPOCH_SHIFT
             if resume:
                 gpc_argv += ["--resume", os.path.abspath(resume)]
                 epoch = saved_epoch(resume)
                 if epoch is not None:
                     gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
+                    # and the captures this run takes record the vehicle's
+                    # epoch too, not the wall clock's (a restored 2011 flight
+                    # wrote 2026 into vehicle.json)
+                    EPOCH_SHIFT = epoch - time.time()
             elif args.date_time_epoch:
-                global EPOCH_SHIFT
                 start = parse_epoch(args.date_time_epoch)
                 EPOCH_SHIFT = start - time.time()
                 gpc_argv += ["--date-time-epoch", "%.3f" % start]
