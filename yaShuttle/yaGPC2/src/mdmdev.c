@@ -1650,6 +1650,49 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
     }
 }
 
+/* THE OUTPUT READ-BACK AT AN OPS TRANSITION ("BITE 4", FIOGNIPG.asm,
+ * OPSINIT(INITINP) in GO1ASC/GO2ORB/GO3ENT/VG9OPS9).  PASS reads every
+ * discrete output channel's latched state back into its output buffer
+ * (CGBOBF.hal), then makes each RESET word the complement of its SET word.
+ * Mode 2 executes the MDM's PROM from address card x 32 + channel; each
+ * step here returns one output channel's register (DPS Console Handbook:
+ * the raw BITE 4 data of a DOL/DOH module is its command pattern).  The
+ * per-address layout is inferred from where the BCE program lands each word
+ * (#MIN displacements against CGBOBF): only the SET positions are used, so
+ * RESET and FILL positions read zero.  Unanswered, the reads came back zero
+ * and the next RESET words switched every flight-critical discrete off --
+ * among them the IMUs' OPERATE, at the OPS 9 to OPS 1 transition. */
+static bool readback(char mdm, int k, uint32_t f, int n, uint16_t *out) {
+    const uint16_t (*o)[NCHAN] = (mdm == 'F') ? ffOut[k] : faOut[k];
+    uint16_t w[12];
+    int len;
+    memset(w, 0, sizeof w);
+#define W(...) do { const uint16_t v_[] = { __VA_ARGS__ }; len = (int)(sizeof v_ / sizeof v_[0]); memcpy(w, v_, sizeof v_); } while (0)
+    if (mdm == 'F') {
+        switch (f) {
+        case 0x08543u: W(o[5][0], 0, o[13][0], 0); break;
+        case 0x08583u: W(o[13][0], 0, o[2][0], 0); break;
+        case 0x085C3u: W(o[2][0], 0, o[10][0], 0); break;
+        case 0x08601u: W(o[10][0], 0); break;
+        case 0x083EAu: W(o[2][1], o[2][2], o[2][1], o[2][2], o[5][1], 0, o[5][1], 0,
+                         o[10][1], o[10][2], o[10][1], o[10][2]); break;
+        default: return false;
+        }
+    } else {
+        switch (f) {
+        case 0x08545u: W(o[2][0], o[2][1], 0, 0, o[7][0], o[7][1]); break;
+        case 0x085CBu: W(o[7][0], o[7][1], o[7][2], 0, 0, 0, o[10][0], o[10][1], 0, 0,
+                         o[12][0], o[12][1]); break;
+        case 0x08707u: W(o[12][0], o[12][1], o[12][2], 0, 0, 0, o[15][0], o[15][1]); break;
+        case 0x087C3u: W(o[15][0], o[15][1], o[15][2], 0); break;
+        default: return false;
+        }
+    }
+#undef W
+    for (int i = 0; i < n; i++) out[i] = (i < len) ? w[i] : 0;
+    return true;
+}
+
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
     if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
@@ -1722,10 +1765,12 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
+        if (u >= 1 && readback('F', u, f, n, out)) { ffReads++; return true; }
         if (u >= 1 && f == HFE_FF_READ) { ff_hfe(u, out, n); ffReads++; return true; }
         if (u >= 1 && f == MFE_FF_READ) { ff_mfe(u, out, n); ffReads++; return true; }
     } else if (iua == IUA_FA) {
         int u = fa_unit(busID);
+        if (u >= 1 && readback('A', u, f, n, out)) { faReads++; return true; }
         if (u >= 1 && f == HFE_FA_READ) { fa_hfe(u, out, n); faReads++; return true; }
         if (u >= 1 && f == MFE_FA_READ) { fa_mfe(u, out, n); faReads++; return true; }
         if (u >= 3 && f == PC_FA_READ) {
