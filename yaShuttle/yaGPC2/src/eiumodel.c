@@ -191,7 +191,15 @@ void eiu_command(int busID, uint32_t cmd, const uint16_t *w, int n, double t) {
     unsigned c = w[0] & 0xff00u;
     int ok = 3;                                /* 11 accepted; 2 = 10 not allowed now */
     if (c >= 0x4700u && c <= 0x7300u) {        /* throttle: (K + 6) << 8, K 65..109 */
-        s->target = (double)((c >> 8) - 6);
+        /* THE BLOCK II CONTROLLER'S OWN LEVELS.  PASS commands whole percent
+         * (GPTSSM's CGPV_THROTTLE_SET, 65-109), yet STS-134's engines ran
+         * 104.5% where PASS can only have sent 104, and 67% where it sent
+         * its minimum, 65 -- "Throttle Up 104.5 Percent ... Command
+         * Accepted", "Throttle down to 67 percent for Cutoff" (JSC 37461
+         * Appendix A).  So the controller runs the 104 command at 104.5%
+         * and nothing below its 67% minimum power level. */
+        int k = (int)(c >> 8) - 6;
+        s->target = (k == 104) ? 104.5 : (k < 67) ? 67.0 : (double)k;
     } else switch (c) {
     case 0x8F00: s->startEn = true; break;                              /* start enable */
     case 0x8100:                                                        /* start */
