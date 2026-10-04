@@ -739,7 +739,11 @@ static void pad_state(double t) {
 static void pad_init(double t) {
     const char *az = yagpc_getenv("YAGPC_VEHDYN_PAD_AZ");
     if (az != NULL) padAz = atof(az);
-    double a = 6378137.0, f = 1.0 / 298.257223563, e2 = f * (2.0 - f);
+    /* ON PASS'S OWN ELLIPSOID, as GNKGEO.hal converts the same I-loads: the
+     * equatorial radius 20,925,646.3255 ft (CGNS_EARTH_EQU_RADIUS_D) and
+     * flattening 1/298.3 -- so that the truth's nav base is exactly where
+     * PASS's navigation starts it (WGS-84 put it 9 ft away). */
+    double a = 20925646.3255 * 0.3048, f = 1.0 / 298.3, e2 = f * (2.0 - f);
     double sl = sin(PAD_LAT_RAD), cl = cos(PAD_LAT_RAD), so = sin(PAD_LON_RAD), co = cos(PAD_LON_RAD);
     double N = a / sqrt(1.0 - e2 * sl * sl);
     padR[0] = (N + PAD_ALT_M) * cl * co;
