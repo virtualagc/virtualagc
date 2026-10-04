@@ -439,31 +439,49 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
 #define SRB_SCALE 0.99
 #define SRB_NT (int)(sizeof SRB_T / sizeof SRB_T[0])
 
-/* The air on the stack: an axial-force coefficient on the orbiter's wing
- * reference area, 2,690 ft^2 (SODB).  NO mated-stack aero data exists in
- * the documents found (STS 85-0118 is missing): SYNTHESIZED, calibrated so
- * the drag loss is about 350 ft/s (107 m/s, the figure usually given for
- * the Shuttle's ascent) on the trajectory PASS flies with the STS-134
- * DOLILU: 2/3 of a first guess that lost 530 ft/s there and fell 150-180
- * ft/s short at MECO. */
+/* The air on the stack, on the orbiter's wing reference area, 2,690 ft^2.
+ * From STS-1's ascent OFP (JSC-14483, 78-FM-51 Vol. III, Cycle 3, May
+ * 1980), whose aerodynamics are the IA156 wind-tunnel data of the Mated
+ * Vehicle ADDB, SD72-SH-0060-2K (sec. 5.2): its nominal ascent plotted
+ * against time the forebody axial and normal force coefficients (fig.
+ * 6.2-1(ww)), the angle of attack (o), the Mach number (l), the dynamic
+ * pressure (k) and the base drag in pounds (yy), here digitized and put on
+ * Mach.  The axial force the OFP plots (zz) is CA q S plus that base drag
+ * to a few percent, so the base force is an extra term, as here; it is
+ * power-on (the plumes lower the base pressure), and its coefficient on
+ * the OFP's q is a function of Mach along STS-1's trajectory only.  The
+ * thrust convention matches SVDS's: vacuum thrust less p_amb Ae. */
 #define ASC_SREF_M2      (2690.0 * 0.09290304)
-static const double CA_TAB[][2] = { { 0.0, 0.165 }, { 0.6, 0.165 }, { 0.9, 0.23 }, { 1.1, 0.33 },
-                                    { 1.3, 0.33 }, { 2.0, 0.23 }, { 3.0, 0.185 }, { 10.0, 0.185 } };
+static const double CA_TAB[][2] = {   /* forebody, (ww) */
+    { 0.0, 0.085 }, { 0.3, 0.100 }, { 0.4, 0.111 }, { 0.6, 0.113 }, { 0.74, 0.122 },
+    { 0.83, 0.137 }, { 0.89, 0.151 }, { 0.95, 0.171 }, { 0.97, 0.209 }, { 1.03, 0.239 },
+    { 1.08, 0.255 }, { 1.15, 0.268 }, { 1.21, 0.286 }, { 1.3, 0.290 }, { 1.7, 0.293 },
+    { 2.0, 0.287 }, { 2.2, 0.258 }, { 2.42, 0.252 }, { 2.7, 0.239 }, { 3.0, 0.231 },
+    { 3.35, 0.217 }, { 3.6, 0.211 }, { 10.0, 0.211 } };
 #define CA_NT (int)(sizeof CA_TAB / sizeof CA_TAB[0])
-/* Normal and side force, per degree of angle of attack and of sideslip, on
- * the same area: SYNTHESIZED too, sized so that the stack at the -2 to -4
- * deg it flies through max-q gives the ascent DAP the normal acceleration it
- * expects there (its NZREF trim table, about -0.1 g with the main engines'
- * cant toward the tank, CGCUN1.hal) -- without it load relief steers for an
- * acceleration the air never supplies, and lofts the first stage; with
- * twice this, the stack read -0.29 g at -2.4 deg and load relief pitched
- * it 8 deg below PASS's attitude schedule, flattening the climb into a
- * 1,100 psf max-q.  Through
- * the CG: no moment data exists here either. */
-static const double CNA_TAB[][2] = { { 0.0, 0.027 }, { 0.8, 0.036 }, { 1.2, 0.045 }, { 2.0, 0.036 },
-                                     { 4.0, 0.027 }, { 10.0, 0.022 } };
+static const double CAB_TAB[][2] = {  /* base, (yy) / (q S) */
+    { 0.0, 0.23 }, { 0.3, 0.23 }, { 0.41, 0.180 }, { 0.53, 0.162 }, { 0.62, 0.153 },
+    { 0.74, 0.151 }, { 0.83, 0.161 }, { 0.89, 0.206 }, { 0.95, 0.195 }, { 0.97, 0.168 },
+    { 1.03, 0.140 }, { 1.15, 0.118 }, { 1.3, 0.081 }, { 1.43, 0.064 }, { 1.61, 0.040 },
+    { 1.86, 0.026 }, { 2.0, 0.021 }, { 2.23, 0.010 }, { 2.42, -0.004 }, { 2.7, -0.013 },
+    { 3.0, -0.017 }, { 3.35, -0.025 }, { 3.7, -0.036 }, { 10.0, -0.036 } };
+#define CAB_NT (int)(sizeof CAB_TAB / sizeof CAB_TAB[0])
+/* Normal force, CN = CNA (alpha - ALPHA0), alpha in degrees.  The OFP has
+ * one (alpha, CN) pair per Mach number, so slope and zero-lift angle are not
+ * separable there except below Mach 0.4, where alpha swept 8 to 1 deg
+ * (slope 0.059, zero lift -0.5 to -0.8); above it the slope is assumed,
+ * rising into the transonic and falling after, and ALPHA0 is what puts
+ * every OFP point on the line.  Supersonic, the OFP's load relief holds the
+ * stack at zero normal force, at alpha +2.2 to +2.9 deg.  Through the CG:
+ * the OFP plots moments too (xx), but nothing here uses them yet. */
+static const double CNA_TAB[][2] = { { 0.0, 0.059 }, { 0.6, 0.059 }, { 1.0, 0.066 }, { 1.3, 0.066 },
+                                     { 2.0, 0.055 }, { 3.0, 0.045 }, { 4.0, 0.040 }, { 10.0, 0.040 } };
+static const double AL0_TAB[][2] = { { 0.0, -0.8 }, { 0.8, -0.8 }, { 0.95, -0.4 }, { 1.05, 0.2 },
+                                     { 1.4, 0.2 }, { 1.8, 0.8 }, { 2.1, 0.9 }, { 2.5, 2.2 },
+                                     { 3.0, 2.6 }, { 3.6, 2.95 }, { 10.0, 2.95 } };
 static double cnaScale = -1.0;     /* YAGPC_VEHDYN_CNA_SCALE, for calibration */
 #define CNA_NT (int)(sizeof CNA_TAB / sizeof CNA_TAB[0])
+#define AL0_NT (int)(sizeof AL0_TAB / sizeof AL0_TAB[0])
 /* Side force per degree of sideslip, as a fraction of the normal force's:
  * the stack seen from the side is the tank and boosters without the wing.
  * At 1.0 the DAP's lateral load relief (gain KN_NY 55.4 against KM_NZ
@@ -628,7 +646,8 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
         double sp = sqrt(va[0] * va[0] + va[1] * va[1] + va[2] * va[2]);
         if (sp > 1.0 && rho > 0.0) {
             double mach = sp / sqrt(1.4 * 287.05 * T);
-            double q = 0.5 * rho * sp * sp, D = q * ASC_SREF_M2 * interp(CA_TAB, CA_NT, mach);
+            double q = 0.5 * rho * sp * sp, D = q * ASC_SREF_M2 *
+                       (interp(CA_TAB, CA_NT, mach) + interp(CAB_TAB, CAB_NT, mach));
             double R[3][3], dB[3];
             qmat_body(st.q, R);
             for (int i = 0; i < 3; i++)
@@ -651,9 +670,10 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
                 cnaScale = e ? atof(e) : 1.0;
             }
             double qsc = q * ASC_SREF_M2 * interp(CNA_TAB, CNA_NT, mach) * cnaScale;
-            f[2] -= qsc * al;
+            double cnal = al - interp(AL0_TAB, AL0_NT, mach);
+            f[2] -= qsc * cnal;
             f[1] -= CYB_FRAC * qsc * be;
-            aeroFb[2] -= qsc * al;
+            aeroFb[2] -= qsc * cnal;
             aeroFb[1] -= CYB_FRAC * qsc * be;
         }
     }
