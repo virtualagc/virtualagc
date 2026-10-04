@@ -252,6 +252,7 @@ static const double GYREST[3][3] = {           /* CGMS_GYREST (IMU, axis), rad/s
 
 typedef struct { double P[3][3]; double t; bool started; long pulses; double slewSec; } ImuPlat;
 static ImuPlat plat[4];
+static bool imu_in_operate(int n);
 
 /* YAGPC_IMU_DRIFT=<deg/hr>: drift beyond what PASS compensates, so that the
  * platforms wander apart and away from M50 and an alignment has something to
@@ -394,7 +395,7 @@ static void imu_read(int n, uint16_t *out, int words) {
     w[0] = (uint16_t)(IMU_BITE_GOOD | ((u->cmd2 & IMU_CMD2_HIGAIN) ? IMU_BITE_D1D8 : 0));
     if (vehdyn_enabled()) {
         w[1] = 0x8000u;                            /* redundant rate: zero, positive */
-        imu_dynamic(n, w);
+        if (imu_in_operate(n)) imu_dynamic(n, w);  /* caged: null gimbals, no counts */
     }
     /* w[1] redundant-axis rate: zero, not saturated -- a platform at rest.
      * w[2..8] the resolvers, inner roll 8X then outer roll, pitch and
@@ -413,6 +414,69 @@ static void imu_read(int n, uint16_t *out, int words) {
  * operate, pressure good, platform temperature ready and safe, CAPRI
  * temperature ready and safe.  All good. */
 #define IMU_DSCRT_ALL_GOOD 0xFC00u
+#define IMU_DSCRT_STANDBY  0x7C00u     /* powered and warm, not in operate */
+
+/* STANDBY AND OPERATE.  PASS commands an IMU to operate with FF card 13
+ * channel 0, HAL bit 10 (CGBB_OUT12_HFF_SEG3_DSCRT4, CGBOBF.hal:576-580,
+ * 2114; SPEC 104 items 13-15, GUCIMU.hal:293-315), and believes it there
+ * when the in-operate discrete comes on (GMESTA.hal:1078-1085).  The KT-70
+ * runs up for 29.4 to 45.4 s after the command (IMU SOP FSSR p. 10): 40 s
+ * here.  Until then the cluster is caged to the case -- gimbals at null,
+ * accelerometers not counting -- and it is released where it stands.
+ *
+ * This is the vehicle on the pad (YAGPC_VEHDYN_PAD), where the countdown
+ * brings the IMUs up by the book in OPS 9.  A vehicle IPL'd straight to
+ * OPS 2 keeps IMUs that are in operate from the start, as it always had;
+ * YAGPC_IMU_OPERATE=command or =always overrides either way. */
+#define IMU_OPER_CMD  0x0040u
+#define IMU_RUNUP_S   40.0
+static double imuOpT[4] = { -1.0, -1.0, -1.0, -1.0 };   /* the operate command's time */
+static bool imuOper[4];                                /* run up, in operate */
+
+static bool imu_by_command(void) {
+    if (!vehdyn_enabled()) return false;
+    static int forced = -1;
+    if (forced < 0) {
+        const char *e = yagpc_getenv("YAGPC_IMU_OPERATE");
+        forced = (e && strcmp(e, "command") == 0) ? 1 : (e && strcmp(e, "always") == 0) ? 0 : 2;
+    }
+    return forced == 2 ? vehdyn_ascent_phase() != 0 : forced == 1;
+}
+
+static void imu_uncage(int n, double t) {
+    double R[3][3];
+    qmat(vehdyn_state()->q, R);
+    for (int i = 0; i < 3; i++)          /* P = R . TNBBODY: gimbals at null */
+        for (int j = 0; j < 3; j++)
+            plat[n].P[i][j] = R[i][0] * TNBBODY[0][j] + R[i][1] * TNBBODY[1][j] + R[i][2] * TNBBODY[2][j];
+    plat[n].t = t;
+    plat[n].started = true;
+    imuAcc[n].started = false;           /* the counters start from here */
+}
+
+static bool imu_in_operate(int n) {
+    if (!imu_by_command()) return true;
+    double t = vehdyn_state()->t;
+    if (!(ffOut[n][13][0] & IMU_OPER_CMD)) {
+        if (imuOpT[n] >= 0.0)
+            fprintf(stderr, "mdmdev: IMU%d commanded to STANDBY at t=%.2f\n", n, t);
+        imuOpT[n] = -1.0;
+        imuOper[n] = false;
+        return false;
+    }
+    if (imuOpT[n] < 0.0) {
+        imuOpT[n] = t;
+        fprintf(stderr, "mdmdev: IMU%d commanded to OPERATE at t=%.2f -- running up\n", n, t);
+    }
+    if (!imuOper[n] && t - imuOpT[n] >= IMU_RUNUP_S) {
+        imuOper[n] = true;
+        imu_uncage(n, t);
+        fprintf(stderr, "mdmdev: IMU%d IN OPERATE at t=%.2f, the cluster released at the vehicle's attitude\n", n, t);
+    }
+    return imuOper[n];
+}
+
+static uint16_t imu_discretes(int n) { return imu_in_operate(n) ? IMU_DSCRT_ALL_GOOD : IMU_DSCRT_STANDBY; }
 
 /* ---------------------------------------------------------------------
  * THE REACTION CONTROL SYSTEM -- 44 jets, 16 manifolds, their injector
@@ -995,7 +1059,7 @@ static void ff_discretes(int k, uint16_t d[13]) {
     d[5] = ff_jets_b(k);
     /* The IMU discretes (DIL card 15 ch 0) come in here too, for the IMU
      * behind this MDM. */
-    if (k <= 3) d[11] = IMU_DSCRT_ALL_GOOD;
+    if (k <= 3) d[11] = imu_discretes(k);
     /* The crew's contacts LAST: the words above are assigned, not ORed, so
      * contacts added first were wiped -- DSCRT4's THC and DSCRT6's DAP
      * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
@@ -1653,7 +1717,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             return true;
         }
         if (u >= 1 && u <= 3 && f == IMU_DSCRT) {
-            for (int i = 0; i < n; i++) out[i] = (i == 0) ? IMU_DSCRT_ALL_GOOD : 0;
+            for (int i = 0; i < n; i++) out[i] = (i == 0) ? imu_discretes(u) : 0;
             ffReads++;
             return true;
         }
@@ -1721,6 +1785,12 @@ bool mdmdev_dump(const char *dir) {
         pb[np++] = plat[k].t;
     }
     put_list(f, "imuPlatform", pb, np, true);
+    double ob6[6];
+    for (int k = 1; k <= 3; k++) {
+        ob6[2 * k - 2] = imuOpT[k] < 0.0 ? -1.0 : imuOpT[k];
+        ob6[2 * k - 1] = imuOper[k];
+    }
+    put_list(f, "imuOperate", ob6, 6, true);
     {
         double sb[512];
         int ns = startrk_save(sb, 512);
@@ -1812,6 +1882,12 @@ bool mdmdev_load(const char *dir) {
                 for (int c = 0; c < 3; c++) plat[k].P[r][c] = pb[i++];
             plat[k].started = pb[i++] != 0.0;
             plat[k].t = pb[i++] - tCap;                 /* rebased with the vehicle */
+        }
+    double ob6[6];
+    if (get_list(root, "imuOperate", ob6, 6) == 6)
+        for (int k = 1; k <= 3; k++) {
+            imuOpT[k] = ob6[2 * k - 2] < 0.0 ? -1.0 : ob6[2 * k - 2] - tCap;
+            imuOper[k] = ob6[2 * k - 1] != 0.0;
         }
     {
         double sb[512];
