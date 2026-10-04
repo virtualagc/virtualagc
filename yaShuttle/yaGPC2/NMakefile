@@ -323,8 +323,8 @@ $(TEST_BIN_DIR)\test_mdmdev.exe: test\test_mdmdev.c src\mtumodel.c src\mtumodel.
 $(TEST_BIN_DIR)\test_physics.exe: test\test_physics.c src\physics.c src\physics.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_physics.c src\physics.c $(W32) $(LDLIBS)
 
-$(TEST_BIN_DIR)\test_vehdyn.exe: test\test_vehdyn.c src\vehdyn.c src\vehdyn.h src\physics.c src\physics.h src\envcache.c $(TEST_BIN_DIR)
-	$(TEST_CC) test\test_vehdyn.c src\vehdyn.c src\physics.c src\envcache.c $(W32) $(LDLIBS)
+$(TEST_BIN_DIR)\test_vehdyn.exe: test\test_vehdyn.c src\vehdyn.c src\vehdyn.h src\physics.c src\physics.h src\envcache.c src\eiumodel.c src\mecmodel.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_vehdyn.c src\vehdyn.c src\physics.c src\envcache.c src\eiumodel.c src\mecmodel.c $(W32) $(LDLIBS)
 
 $(TEST_BIN_DIR)\test_iop_dkbuses.exe: test\test_iop_dkbuses.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c src\iop.h $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_iop_dkbuses.c $(IOP_TEST_DEPS) src\cpu_instr.c src\strfmt.c $(W32) $(LDLIBS)

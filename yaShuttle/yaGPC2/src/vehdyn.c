@@ -8,6 +8,8 @@
 #include <time.h>
 
 #include "envcache.h"
+#include "eiumodel.h"
+#include "mecmodel.h"
 
 /* =====================================================================
  * THE JETS.
@@ -279,6 +281,397 @@ static double jet_mdot(const Jet *j) {
     return jet_thrust(j) / ((j->vernier ? ISP_VER_S : ISP_PRI_S) * G0);
 }
 
+static void mass_properties(void);
+static void qmat_body(const double q[4], double R[3][3]);
+
+/* =====================================================================
+ * THE ASCENT: THE STACK ON THE PAD, IN FLIGHT, AND SHEDDING ITS PARTS.
+ *
+ * YAGPC_VEHDYN_PAD (simulatePASS --pad) starts the vehicle on the launch
+ * pad instead of in orbit: the whole stack -- orbiter, external tank full,
+ * both solid rocket boosters -- standing on its hold-down posts, fixed to the
+ * turning Earth.  Then, as the flight software commands them:
+ *
+ *   ON THE PAD   held: it goes round with the Earth whatever the main
+ *                engines do (their 1.1 Mlbf is less than the stack's weight,
+ *                and the posts take the overturning moment); its
+ *                accelerometers feel the pad's reaction, about 1 g up.
+ *   LIFTOFF      when the master events controllers FIRE SRM IGNITION
+ *                (mecmodel.c) -- the same command blows the hold-down nuts.
+ *   SRB SEP      when they FIRE SRB SEPARATION: the boosters' mass goes.
+ *   ET SEP       when they FIRE ET SEPARATION: the tank goes, and the
+ *                orbiter flies on as the on-orbit model above it.
+ *
+ * Forces: the three SSMEs at the chamber pressure their controllers report
+ * (eiumodel.c), less the back pressure on their nozzles, along their null
+ * axes deflected by the gimbals PASS commands through the ATVCs (mdmdev.c's
+ * decoding, vehdyn_set_tvc); the SRBs on a thrust-time profile from
+ * ignition, through their rock/tilt nozzles; gravity (physics.c); and the
+ * air, a crude axial-force model on a Mach table.  Mass flows out of the
+ * tank and the boosters as they burn, and the mass properties follow.
+ *
+ * THE NUMBERS ARE IN ONE PLACE, below, each with where it came from, so
+ * that better ones replace them.  Several are published round values or
+ * estimates, said so.
+ * ===================================================================== */
+
+/* -- the pad: the flight software's own nav-base I-loads (CGGS_NAVBASE_LAT,
+ * _LONG, _ALT in memory, CGNCOM.hal:208-213), so that its navigation, which
+ * starts from them, starts from the truth.  Geodetic, WGS-84 here. */
+#define PAD_LAT_RAD      0.49931150
+#define PAD_LON_RAD      (-1.4068068)
+#define PAD_ALT_M        (-2.4 * 0.3048)
+/* The orbiter's heading on the pad: the azimuth (deg from north, toward
+ * east) of body +Z, the belly, which faces the tank.  "-Z body points
+ * south" (JSC-14483 Vol 3, STS-1 Ascent OFP, 4.2.1.21): belly north, 0.
+ * YAGPC_VEHDYN_PAD_AZ. */
+#define PAD_AZ_DEG_DEFAULT 0.0
+/* The navigation base, where the IMUs are: Xo 404.5, Yo -0.8, Zo 422.6 --
+ * the dry CG less GRW_R_NB_CG (57.959, -0.067, -3.967 ft, GRWIMU.hal:72). */
+#define NB_XO 404.5
+#define NB_YO (-0.8)
+#define NB_ZO 422.6
+
+/* -- the external tank and the boosters.  Frames: Xt = Xo + 741.0,
+ * Zt = Zo + 336.5; the ET's axis and both SRBs' at Zo 63.5, the SRBs at
+ * Yo -/+250.5 (JSC-08934 Vol 1 Rev E, SODB Table 2-1).  Masses: the tape's
+ * guidance mass, orbiter + full ET at liftoff 1,865,417 lb (CGGV_MASS_MFE)
+ * less its orbiter 203,193 lb (CGGS_MASS_ORBITER_LIFTOFF) is an ET of
+ * 1,662,224 lb; SLWT inert 58,500 lb (SCOM), the rest LO2:LH2 6:1.
+ * Stations (ESTIMATED from the geometry; they reproduce PASS's own
+ * second-stage CG table): ET inert Xo 525, LO2 Xo 59, LH2 Xo 869.  SRBs:
+ * 1,300 klb each loaded, 1,110 klb propellant (SCOM), CG Xo 975. */
+#define ET_INERT_KG      (58500.0 * 0.45359237)
+#define ET_LO2_KG        (1603724.0 * 6.0 / 7.0 * 0.45359237)
+#define ET_LH2_KG        (1603724.0 / 7.0 * 0.45359237)
+#define ET_AXIS_ZO       63.5
+#define ET_INERT_XO      525.0
+#define ET_LO2_XO        59.0
+#define ET_LH2_XO        869.0
+#define ET_RADIUS_M      4.2
+#define SRB_INERT_KG     (190000.0 * 0.45359237)
+#define SRB_PROP_KG      (1110000.0 * 0.45359237)
+#define SRB_YO           250.5
+#define SRB_AXIS_ZO      63.5
+#define SRB_XO           975.0
+/* the nozzle pivot Xt 2410.5 = Xo 1669.5, no cant (SODB Table 6.3.4-1);
+ * exit area 16,660 in^2 (STS-1 OFP); Isp 266 s vacuum (SODB Table
+ * 6.3.1-1) */
+#define SRB_NOZ_XO       1669.5
+#define SRB_ISP_VAC      266.0
+#define SRB_AE_M2        (16660.0 * IN_M * IN_M)
+#define SRB_RADIUS_M     1.85
+/* -- the SSMEs: gimbal points (STS-1 OFP; SSV80-1; the tape's own engine
+ * vectors CGCS_RME1..3 are these divided by 12) and null directions -- the
+ * upper engine pitched 16 deg, the lower two 10 deg and 3.5 deg outboard
+ * (SCOM; SSV80-1): thrust forward and toward the tank.  100% = 470,000 lbf
+ * vacuum (CGGS_SSME_THRUST_NOM), 1,032.5 lb/s (CGGS_SSME_M_RATE_NOM), Isp
+ * 455.2 s; exit area 6,461 in^2, which gives the sea-level 375,000 lbf. */
+static const double ME_XYZ[3][3] = { { 1445.0, 0.0, 443.0 }, { 1468.17, -53.0, 342.64 },
+                                     { 1468.17, 53.0, 342.64 } };
+static const double ME_CANT_P[3] = { 16.0, 10.0, 10.0 };   /* deg, thrust toward +Z body */
+static const double ME_CANT_Y[3] = { 0.0, 3.5, -3.5 };     /* deg, thrust toward +Y body: outboard
+                                                               nozzle, inboard thrust */
+#define ME_TVAC_N        (470000.0 * LBF_N)
+#define ME_ISP_VAC       455.2
+#define ME_AE_M2         (6461.0 * IN_M * IN_M)
+#define ME_LIM_P         10.5
+#define ME_LIM_Y         8.5
+#define SRB_LIM          5.0
+#define TVC_RATE_DEG_S   10.0
+/* Sign conventions of the gimbal commands (+1 or -1), which the documents
+ * found here could not show (their figures did not survive): set by the
+ * flight software's own behaviour -- the wrong sign makes its loop diverge
+ * within seconds of liftoff.  YAGPC_VEHDYN_TVC_SIGNS=mp,my,sp,sy. */
+static double tvcSign[4] = { 1, 1, 1, 1 };
+
+/* The SRBs' thrust, each, in vacuum, against time from ignition: the
+ * nominal RSRM at 60 F, SODB Fig 6.3.1-2 (klbf), with a 0.3 s ignition
+ * ramp; scaled by 0.99 so its integral at 266 s matches the propellant. */
+static const double SRB_T[][2] = {   /* s, Mlbf */
+    { 0.0, 0.0 }, { 0.3, 2.85 }, { 2, 3.082 }, { 5, 3.128 }, { 10, 3.202 }, { 15, 3.242 },
+    { 20, 3.286 }, { 21, 3.296 }, { 25, 3.147 }, { 30, 2.930 }, { 35, 2.744 }, { 40, 2.592 },
+    { 45, 2.477 }, { 50, 2.364 }, { 53, 2.313 }, { 55, 2.318 }, { 60, 2.370 }, { 65, 2.414 },
+    { 70, 2.504 }, { 75, 2.527 }, { 78, 2.561 }, { 80, 2.554 }, { 85, 2.426 }, { 90, 2.272 },
+    { 95, 2.167 }, { 100, 2.024 }, { 105, 1.887 }, { 110, 1.747 }, { 112, 1.715 },
+    { 114, 1.564 }, { 116, 1.013 }, { 118, 0.558 }, { 120, 0.382 }, { 122, 0.265 },
+    { 124, 0.157 }, { 126, 0.062 }, { 128, 0.024 }, { 130, 0.0 } };
+#define SRB_SCALE 0.99
+#define SRB_NT (int)(sizeof SRB_T / sizeof SRB_T[0])
+
+/* The air on the stack: an axial-force coefficient on the orbiter's wing
+ * reference area, 2,690 ft^2 (SODB).  NO mated-stack aero data exists in
+ * the documents found (STS 85-0118 is missing): SYNTHESIZED, calibrated so
+ * the drag loss is about 350 ft/s and max-q 575-700 psf near 50-60 s. */
+#define ASC_SREF_M2      (2690.0 * 0.09290304)
+static const double CA_TAB[][2] = { { 0.0, 0.25 }, { 0.6, 0.25 }, { 0.9, 0.35 }, { 1.1, 0.50 },
+                                    { 1.3, 0.50 }, { 2.0, 0.35 }, { 3.0, 0.28 }, { 10.0, 0.28 } };
+#define CA_NT (int)(sizeof CA_TAB / sizeof CA_TAB[0])
+
+enum { ASC_NONE = 0, ASC_PAD, ASC_STACK, ASC_ORB_ET };
+static int asc = ASC_NONE;
+static double etLo2, etLh2, srbProp;
+static double srbIgnT = -1.0;
+static double tvcCmd[5][2], tvcPos[5][2];
+static double padAz = PAD_AZ_DEG_DEFAULT;
+static double padR[3];            /* the nav base, Earth-fixed, m */
+static double padCbe[3][3];       /* body -> Earth-fixed */
+static double sfB[3];             /* the specific force, body, m/s^2, last step */
+
+static double interp(const double (*tab)[2], int n, double x) {
+    if (x <= tab[0][0]) return tab[0][1];
+    for (int i = 1; i < n; i++)
+        if (x <= tab[i][0])
+            return tab[i - 1][1] + (tab[i][1] - tab[i - 1][1]) * (x - tab[i - 1][0]) /
+                                       (tab[i][0] - tab[i - 1][0]);
+    return tab[n - 1][1];
+}
+
+int vehdyn_ascent_phase(void) { return asc; }
+
+void vehdyn_set_tvc(const double cmd[5][2]) { memcpy(tvcCmd, cmd, sizeof tvcCmd); }
+
+void vehdyn_specific_force(double out[3]) { memcpy(out, sfB, sizeof sfB); }
+
+/* An SRB thrust, vacuum, N, at time tau from ignition. */
+static double srb_thrust_vac(double tau) {
+    if (tau < 0.0) return 0.0;
+    return interp(SRB_T, SRB_NT, tau) * 1e6 * LBF_N * SRB_SCALE;
+}
+
+/* Height above the WGS-84 ellipsoid (first order), m, and the air there. */
+static double height_m(const double r[3]) {
+    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+    double sl = r[2] / rn, f = 1.0 / 298.257223563;
+    return rn - 6378137.0 * (1.0 - f * sl * sl);
+}
+/* THE 1976 STANDARD ATMOSPHERE to 86 km, layer by layer: physics.c's
+ * single exponential below 25 km is 20-26% thin where max-q happens. */
+static void us1976(double h, double *rho, double *temp) {
+    static const double HB[] = { 0, 11000, 20000, 32000, 47000, 51000, 71000, 86000 };
+    static const double LB[] = { -0.0065, 0.0, 0.001, 0.0028, 0.0, -0.0028, -0.002 };
+    static const double PB[] = { 101325.0, 22632.06, 5474.889, 868.0187, 110.9063, 66.93887,
+                                 3.956420 };
+    static const double TB[] = { 288.15, 216.65, 216.65, 228.65, 270.65, 270.65, 214.65 };
+    if (h < 0.0) h = 0.0;
+    if (h >= 86000.0) {
+        *temp = 186.87;
+        *rho = phys_air_density(h);
+        return;
+    }
+    int i = 0;
+    while (i < 6 && h >= HB[i + 1]) i++;
+    double T = TB[i] + LB[i] * (h - HB[i]), P;
+    if (LB[i] == 0.0) P = PB[i] * exp(-9.80665 * 0.0289644 * (h - HB[i]) / (8.3144598 * TB[i]));
+    else P = PB[i] * pow(TB[i] / T, 9.80665 * 0.0289644 / (8.3144598 * LB[i]));
+    *temp = T;
+    *rho = P / (287.053 * T);
+}
+
+/* Rotate unit vector u (body) by a pitch angle (toward +Z) and a yaw angle
+ * (toward +Y), degrees -- small-angle composition, then normalised. */
+static void deflect(double u[3], double pitchDeg, double yawDeg) {
+    double p = pitchDeg * VD_PI / 180.0, y = yawDeg * VD_PI / 180.0;
+    double v[3] = { u[0] - p * u[2] - y * u[1], u[1] + y * u[0], u[2] + p * u[0] };
+    double n = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    for (int i = 0; i < 3; i++) u[i] = v[i] / n;
+}
+
+static void add_force(double f[3], double tau[3], const double fk[3], const double pB[3]) {
+    double r[3] = { pB[0] - cgB[0], pB[1] - cgB[1], pB[2] - cgB[2] };
+    tau[0] += r[1] * fk[2] - r[2] * fk[1];
+    tau[1] += r[2] * fk[0] - r[0] * fk[2];
+    tau[2] += r[0] * fk[1] - r[1] * fk[0];
+    for (int i = 0; i < 3; i++) f[i] += fk[i];
+}
+
+/* The ascent's forces and torques (body), and the flows out of the tank and
+ * the boosters, kg/s. */
+static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdotSrb) {
+    *mdotEt = *mdotSrb = 0.0;
+    if (asc == ASC_NONE) return;
+    double h = height_m(st.r), rho, T;
+    us1976(h, &rho, &T);
+    double pamb = rho * 287.05 * T;
+    /* the main engines, while the tank has propellant */
+    if (etLo2 > 0.0 && etLh2 > 0.0)
+        for (int e = 0; e < 3; e++) {
+            double pc = eiu_pc_percent(e + 1, st.t) / 100.0;
+            if (pc <= 0.0) continue;
+            double thr = pc * ME_TVAC_N - pamb * ME_AE_M2;
+            if (thr < 0.0) thr = 0.0;
+            double u[3] = { 1, 0, 0 }, pB[3], fk[3];
+            deflect(u, ME_CANT_P[e] + tvcSign[0] * tvcPos[e][0], ME_CANT_Y[e] + tvcSign[1] * tvcPos[e][1]);
+            to_body(ME_XYZ[e][0], ME_XYZ[e][1], ME_XYZ[e][2], pB);
+            for (int i = 0; i < 3; i++) fk[i] = thr * u[i];
+            add_force(f, tau, fk, pB);
+            *mdotEt += pc * ME_TVAC_N / (ME_ISP_VAC * G0);
+        }
+    /* the boosters, once lit and while attached */
+    if (asc == ASC_STACK && srbIgnT >= 0.0 && srbProp > 0.0)
+        for (int b = 0; b < 2; b++) {
+            double tv = srb_thrust_vac(st.t - srbIgnT);
+            if (tv <= 0.0) continue;
+            double thr = tv - pamb * SRB_AE_M2;
+            if (thr < 0.0) thr = 0.0;
+            /* rock and tilt act on axes at 45 deg to the body's: pitch and
+             * yaw of the nozzle (STS 83-0008 mixing; TD0358A 5-45) */
+            double rk = tvcPos[3 + b][0], tl = tvcPos[3 + b][1], pd, yd;
+            if (b == 0) { pd = (rk - tl) / sqrt(2.0); yd = -(rk + tl) / sqrt(2.0); }
+            else        { pd = (tl - rk) / sqrt(2.0); yd = (tl + rk) / sqrt(2.0); }
+            double u[3] = { 1, 0, 0 }, pB[3], fk[3];
+            deflect(u, tvcSign[2] * pd, tvcSign[3] * yd);
+            to_body(SRB_NOZ_XO, b == 0 ? -SRB_YO : SRB_YO, SRB_AXIS_ZO, pB);
+            for (int i = 0; i < 3; i++) fk[i] = thr * u[i];
+            add_force(f, tau, fk, pB);
+            *mdotSrb += tv / (SRB_ISP_VAC * G0);
+        }
+    /* the air: axial force against the air-relative velocity */
+    {
+        double we[3] = { 0, 0, phys_earth_rate() }, va[3];
+        va[0] = st.v[0] - (we[1] * st.r[2] - we[2] * st.r[1]);
+        va[1] = st.v[1] - (we[2] * st.r[0] - we[0] * st.r[2]);
+        va[2] = st.v[2] - (we[0] * st.r[1] - we[1] * st.r[0]);
+        double sp = sqrt(va[0] * va[0] + va[1] * va[1] + va[2] * va[2]);
+        if (sp > 1.0 && rho > 0.0) {
+            double mach = sp / sqrt(1.4 * 287.05 * T);
+            double q = 0.5 * rho * sp * sp, D = q * ASC_SREF_M2 * interp(CA_TAB, CA_NT, mach);
+            double R[3][3], dB[3];
+            qmat_body(st.q, R);
+            for (int i = 0; i < 3; i++)
+                dB[i] = -D * (R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2]) / sp;
+            for (int i = 0; i < 3; i++) f[i] += dB[i];   /* through the CG, here */
+        }
+    }
+}
+
+/* The gimbals follow their commands at TVC_RATE_DEG_S, inside their limits. */
+static void tvc_slew(double dt) {
+    for (int a = 0; a < 5; a++)
+        for (int x = 0; x < 2; x++) {
+            double lim = a < 3 ? (x == 0 ? ME_LIM_P : ME_LIM_Y) : SRB_LIM;
+            double want = tvcCmd[a][x];
+            if (want > lim) want = lim;
+            if (want < -lim) want = -lim;
+            double d = want - tvcPos[a][x], mx = TVC_RATE_DEG_S * dt;
+            tvcPos[a][x] += (d > mx) ? mx : (d < -mx) ? -mx : d;
+        }
+}
+
+/* THE PAD: where the stack is at time t, held to the Earth. */
+static void pad_state(double t) {
+    double M[3][3];                                  /* inertial -> Earth-fixed */
+    phys_inertial_to_earth(t, M);
+    double Rbi[3][3];                                /* body -> inertial = M^T Cbe */
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            Rbi[i][j] = M[0][i] * padCbe[0][j] + M[1][i] * padCbe[1][j] + M[2][i] * padCbe[2][j];
+    /* the CG: the nav base less the body vector from CG to nav base */
+    double nb[3], dEf[3], d[3];
+    to_body(NB_XO, NB_YO, NB_ZO, nb);
+    for (int i = 0; i < 3; i++) d[i] = nb[i] - cgB[i];
+    for (int i = 0; i < 3; i++)
+        dEf[i] = padCbe[i][0] * d[0] + padCbe[i][1] * d[1] + padCbe[i][2] * d[2];
+    double rEf[3] = { padR[0] - dEf[0], padR[1] - dEf[1], padR[2] - dEf[2] };
+    for (int i = 0; i < 3; i++) st.r[i] = M[0][i] * rEf[0] + M[1][i] * rEf[1] + M[2][i] * rEf[2];
+    double w = phys_earth_rate();
+    st.v[0] = -w * st.r[1];
+    st.v[1] = w * st.r[0];
+    st.v[2] = 0.0;
+    /* the attitude, as a quaternion, and the Earth's rate in body axes */
+    double tr = Rbi[0][0] + Rbi[1][1] + Rbi[2][2], q[4];
+    if (tr > 0.0) {
+        double s4 = sqrt(tr + 1.0) * 2.0;
+        q[0] = 0.25 * s4; q[1] = (Rbi[2][1] - Rbi[1][2]) / s4;
+        q[2] = (Rbi[0][2] - Rbi[2][0]) / s4; q[3] = (Rbi[1][0] - Rbi[0][1]) / s4;
+    } else if (Rbi[0][0] > Rbi[1][1] && Rbi[0][0] > Rbi[2][2]) {
+        double s4 = sqrt(1.0 + Rbi[0][0] - Rbi[1][1] - Rbi[2][2]) * 2.0;
+        q[0] = (Rbi[2][1] - Rbi[1][2]) / s4; q[1] = 0.25 * s4;
+        q[2] = (Rbi[0][1] + Rbi[1][0]) / s4; q[3] = (Rbi[0][2] + Rbi[2][0]) / s4;
+    } else if (Rbi[1][1] > Rbi[2][2]) {
+        double s4 = sqrt(1.0 + Rbi[1][1] - Rbi[0][0] - Rbi[2][2]) * 2.0;
+        q[0] = (Rbi[0][2] - Rbi[2][0]) / s4; q[1] = (Rbi[0][1] + Rbi[1][0]) / s4;
+        q[2] = 0.25 * s4; q[3] = (Rbi[1][2] + Rbi[2][1]) / s4;
+    } else {
+        double s4 = sqrt(1.0 + Rbi[2][2] - Rbi[0][0] - Rbi[1][1]) * 2.0;
+        q[0] = (Rbi[1][0] - Rbi[0][1]) / s4; q[1] = (Rbi[0][2] + Rbi[2][0]) / s4;
+        q[2] = (Rbi[1][2] + Rbi[2][1]) / s4; q[3] = 0.25 * s4;
+    }
+    memcpy(st.q, q, sizeof q);
+    for (int i = 0; i < 3; i++) st.w[i] = Rbi[2][i] * w;   /* R^T (0,0,w) */
+    st.t = t;
+}
+
+/* Put the stack on the pad (YAGPC_VEHDYN_PAD), at time t. */
+static void pad_init(double t) {
+    const char *az = yagpc_getenv("YAGPC_VEHDYN_PAD_AZ");
+    if (az != NULL) padAz = atof(az);
+    const char *sg = yagpc_getenv("YAGPC_VEHDYN_TVC_SIGNS");
+    if (sg != NULL)
+        sscanf(sg, "%lf,%lf,%lf,%lf", &tvcSign[0], &tvcSign[1], &tvcSign[2], &tvcSign[3]);
+    double a = 6378137.0, f = 1.0 / 298.257223563, e2 = f * (2.0 - f);
+    double sl = sin(PAD_LAT_RAD), cl = cos(PAD_LAT_RAD), so = sin(PAD_LON_RAD), co = cos(PAD_LON_RAD);
+    double N = a / sqrt(1.0 - e2 * sl * sl);
+    padR[0] = (N + PAD_ALT_M) * cl * co;
+    padR[1] = (N + PAD_ALT_M) * cl * so;
+    padR[2] = (N * (1.0 - e2) + PAD_ALT_M) * sl;
+    double up[3] = { cl * co, cl * so, sl }, east[3] = { -so, co, 0.0 },
+           north[3] = { -sl * co, -sl * so, cl };
+    double A = padAz * VD_PI / 180.0, zb[3], yb[3];
+    for (int i = 0; i < 3; i++) zb[i] = cos(A) * north[i] + sin(A) * east[i];
+    /* body Y = Z x X */
+    yb[0] = zb[1] * up[2] - zb[2] * up[1];
+    yb[1] = zb[2] * up[0] - zb[0] * up[2];
+    yb[2] = zb[0] * up[1] - zb[1] * up[0];
+    for (int i = 0; i < 3; i++) { padCbe[i][0] = up[i]; padCbe[i][1] = yb[i]; padCbe[i][2] = zb[i]; }
+    asc = ASC_PAD;
+    etLo2 = ET_LO2_KG; etLh2 = ET_LH2_KG; srbProp = SRB_PROP_KG;
+    srbIgnT = -1.0;
+    memset(tvcPos, 0, sizeof tvcPos);
+    phys_set_drag(0.0, 0.0, 0.0, 0.0);           /* the stack's air is ascent_loads' */
+    mass_properties();
+    pad_state(t);
+    fprintf(stderr, "vehdyn: the stack is on the pad at %.5f N %.5f E, belly toward %.0f deg; "
+                    "%.0f kg\n", PAD_LAT_RAD * 180 / VD_PI, PAD_LON_RAD * 180 / VD_PI, padAz, st.mass);
+}
+
+/* The events that change what the vehicle is, as the MECs fire them. */
+static void ascent_events(void) {
+    if (asc == ASC_PAD) {
+        double ig = mec_fired_at(MEC_SRM_IGN);
+        if (ig >= 0.0 && st.t >= ig) {
+            asc = ASC_STACK;
+            srbIgnT = ig;
+            fprintf(stderr, "vehdyn: LIFTOFF -- the hold-down posts let go at t=%.3f\n", st.t);
+        }
+    } else if (asc == ASC_STACK) {
+        double sep = mec_fired_at(MEC_SRB_SEP);
+        if (sep >= 0.0 && st.t >= sep) {
+            asc = ASC_ORB_ET;
+            fprintf(stderr, "vehdyn: SRB SEPARATION at t=%.3f, %.0f kg of booster gone\n", st.t,
+                    2.0 * (SRB_INERT_KG + srbProp));
+            srbProp = 0.0;
+            mass_properties();
+        }
+    } else if (asc == ASC_ORB_ET) {
+        double sep = mec_fired_at(MEC_ET_SEP);
+        if (sep >= 0.0 && st.t >= sep) {
+            asc = ASC_NONE;
+            fprintf(stderr, "vehdyn: ET SEPARATION at t=%.3f; %.0f kg LO2 and %.0f kg LH2 left in it\n",
+                    st.t, etLo2, etLh2);
+            phys_set_drag(2.2, 40.0, 220.0, 360.0);
+            mass_properties();
+        }
+    }
+}
+
+static void qmat_body(const double q[4], double R[3][3]) {
+    double w = q[0], x = q[1], y = q[2], z = q[3];
+    R[0][0] = 1 - 2 * (y * y + z * z); R[0][1] = 2 * (x * y - w * z); R[0][2] = 2 * (x * z + w * y);
+    R[1][0] = 2 * (x * y + w * z); R[1][1] = 1 - 2 * (x * x + z * z); R[1][2] = 2 * (y * z - w * x);
+    R[2][0] = 2 * (x * z - w * y); R[2][1] = 2 * (y * z + w * x); R[2][2] = 1 - 2 * (x * x + y * y);
+}
+
 /* Total mass, the CG (as an offset from the dry CG) and the inertia tensor
  * about it, from the dry vehicle and the propellant left: parallel-axis
  * shifts of the dry body and of each module's propellant as a point mass. */
@@ -290,8 +683,42 @@ static void mass_properties(void) {
         m += prop[k];
         for (int i = 0; i < 3; i++) c[i] += prop[k] * tank[k][i];
     }
+    /* THE STACK'S OTHER PARTS while attached (see the ascent, below) */
+    double part[6][4];               /* body x, y, z, kg */
+    int np = 0;
+    if (asc != ASC_NONE) {
+        double b[3];
+        to_body(ET_INERT_XO, 0.0, ET_AXIS_ZO, b);
+        part[np][0] = b[0]; part[np][1] = b[1]; part[np][2] = b[2]; part[np++][3] = ET_INERT_KG;
+        to_body(ET_LO2_XO, 0.0, ET_AXIS_ZO, b);
+        part[np][0] = b[0]; part[np][1] = b[1]; part[np][2] = b[2]; part[np++][3] = etLo2;
+        to_body(ET_LH2_XO, 0.0, ET_AXIS_ZO, b);
+        part[np][0] = b[0]; part[np][1] = b[1]; part[np][2] = b[2]; part[np++][3] = etLh2;
+        if (asc == ASC_PAD || asc == ASC_STACK)
+            for (int k = 0; k < 2; k++) {
+                to_body(SRB_XO, k ? SRB_YO : -SRB_YO, SRB_AXIS_ZO, b);
+                part[np][0] = b[0]; part[np][1] = b[1]; part[np][2] = b[2];
+                part[np++][3] = SRB_INERT_KG + srbProp;
+            }
+    }
+    for (int k = 0; k < np; k++) {
+        m += part[k][3];
+        for (int i = 0; i < 3; i++) c[i] += part[k][3] * part[k][i];
+    }
     for (int i = 0; i < 3; i++) c[i] /= m;
     double I[3][3] = { { DRY_IXX, 0, 0 }, { 0, DRY_IYY, 0 }, { 0, 0, DRY_IZZ } };
+    for (int k = 0; k < np; k++) {
+        /* each part: a point mass at its centre plus its own inertia as a
+         * cylinder along body X (tank or booster) */
+        double p[3] = { part[k][0] - c[0], part[k][1] - c[1], part[k][2] - c[2] };
+        double pp = p[0] * p[0] + p[1] * p[1] + p[2] * p[2], mk = part[k][3];
+        double rad = (k < 3) ? ET_RADIUS_M : SRB_RADIUS_M, len = (k < 3) ? 15.0 : 45.0;
+        double ia = 0.5 * mk * rad * rad, it = mk * (3 * rad * rad + len * len) / 12.0;
+        I[0][0] += ia; I[1][1] += it; I[2][2] += it;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                I[i][j] += mk * ((i == j ? pp : 0.0) - p[i] * p[j]);
+    }
     /* the dry body, from its own CG (the origin) to the new one */
     double d[3] = { -c[0], -c[1], -c[2] };
     double dd = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
@@ -425,6 +852,12 @@ void vehdyn_reset(double t) {
             st.w[0] = a * VD_PI / 180; st.w[1] = b * VD_PI / 180; st.w[2] = c * VD_PI / 180;
         }
     }
+    asc = ASC_NONE;
+    phys_set_drag(2.2, 40.0, 220.0, 360.0);
+    {
+        const char *pad = yagpc_getenv("YAGPC_VEHDYN_PAD");
+        if (pad != NULL && *pad != '\0' && strcmp(pad, "0") != 0) pad_init(t);
+    }
     haveTime = true;
     fireChanges = 0;
     histCount = 0;
@@ -443,14 +876,40 @@ void vehdyn_advance(double sharedUs) {
     /* A long gap -- the computers in HALT, say -- is coasted in larger
      * steps when nothing is firing; with jets on, every step is short. */
     while (st.t < t) {
-        double f[3], tau[3], mdot[NMOD];
+        ascent_events();
+        /* ON THE PAD the stack goes round with the Earth whatever its engines
+         * do; its accelerometers feel the pad holding it up. */
+        if (asc == ASC_PAD) {
+            double dt = t - st.t;
+            if (dt > 0.02) dt = 0.02;
+            if (dt < 1e-9) { st.t = t; break; }
+            double v0[3], g[3], R[3][3];
+            memcpy(v0, st.v, sizeof v0);
+            tvc_slew(dt);
+            pad_state(st.t + dt);
+            phys_gravity(st.t, st.r, g);
+            double a[3];
+            for (int i = 0; i < 3; i++) {
+                a[i] = (st.v[i] - v0[i]) / dt - g[i];
+                sensedDv[i] += a[i] * dt;
+            }
+            qmat_body(st.q, R);
+            for (int i = 0; i < 3; i++) sfB[i] = R[0][i] * a[0] + R[1][i] * a[1] + R[2][i] * a[2];
+            hist_push();
+            state_log();
+            continue;
+        }
+        double f[3], tau[3], mdot[NMOD], mdotEt = 0.0, mdotSrb = 0.0;
         jet_loads(f, tau, mdot);
-        bool firing = (mdot[0] + mdot[1] + mdot[2] + mdot[3] + mdot[4]) > 0.0;
+        ascent_loads(f, tau, &mdotEt, &mdotSrb);
+        bool firing = (mdot[0] + mdot[1] + mdot[2] + mdot[3] + mdot[4]) > 0.0 ||
+                      asc != ASC_NONE;
         double dt = t - st.t;
         double maxDt = firing ? STEP_S : 1.0;
         if (dt > maxDt) dt = maxDt;
         if (dt < 1e-9) { st.t = t; break; }
         oms_slew(dt);
+        tvc_slew(dt);
         /* What the accelerometers feel: everything but gravity -- the jets
          * and the air, the drag taken at the middle of the step. */
         double ad0[3], ad1[3];
@@ -471,6 +930,15 @@ void vehdyn_advance(double sharedUs) {
             for (int m = 0; m < NMOD; m++) {
                 prop[m] -= mdot[m] * dt;
                 if (prop[m] < 0.0) prop[m] = 0.0;
+            }
+            if (asc != ASC_NONE) {
+                etLo2 -= mdotEt * dt * 6.0 / 7.0;
+                etLh2 -= mdotEt * dt / 7.0;
+                srbProp -= 0.5 * mdotSrb * dt;
+                if (etLo2 < 0.0) etLo2 = 0.0;
+                if (etLh2 < 0.0) etLh2 = 0.0;
+                if (srbProp < 0.0) srbProp = 0.0;
+                for (int i = 0; i < 3; i++) sfB[i] = f[i] / st.mass;
             }
             mass_properties();
         }
@@ -716,6 +1184,12 @@ int vehdyn_save(double *b, int max) {
     }
     PUT(gmtZero >= 0.0 ? gmtZero + st.t : -1.0);      /* the state's GMT */
     PUT(oms[0].tail); PUT(oms[1].tail);
+    /* the ascent: what the vehicle is, and what it has left */
+    PUT(asc); PUT(etLo2); PUT(etLh2); PUT(srbProp); PUT(srbIgnT < 0.0 ? -1.0 : srbIgnT - st.t);
+    PUT(padAz);
+    for (int i = 0; i < 3; i++) PUT(padR[i]);
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) PUT(padCbe[i][j]);
+    for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { PUT(tvcCmd[a][x]); PUT(tvcPos[a][x]); }
 #undef PUT
     return n;
 }
@@ -743,8 +1217,18 @@ double vehdyn_load(const double *b, int n) {
     double gmtCap = (i < n) ? b[i] : -1.0;
     i++;
     for (int e = 0; e < 2; e++, i++) oms[e].tail = (i < n) ? b[i] : 0.0;
+    if (i < n) {
+        asc = (int)GET(); etLo2 = GET(); etLh2 = GET(); srbProp = GET();
+        double ig = GET();
+        srbIgnT = ig < 0.0 ? -1.0 : ig;            /* rebased: the clock restarts at 0 */
+        padAz = GET();
+        for (int k = 0; k < 3; k++) padR[k] = GET();
+        for (int k = 0; k < 3; k++) for (int j = 0; j < 3; j++) padCbe[k][j] = GET();
+        for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { tvcCmd[a][x] = GET(); tvcPos[a][x] = GET(); }
+        if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
+    }
 #undef GET
-    if (i > n + 3) return -1.0;     /* the GMT and the tail-offs may be missing: older */
+    if (i > n + 3 && asc == ASC_NONE) return -1.0;     /* the GMT and the tail-offs may be missing: older */
     haveTime = had;
     st.t = 0.0;                    /* the restored clock's zero */
     mass_properties();

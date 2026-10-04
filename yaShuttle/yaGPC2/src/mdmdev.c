@@ -203,6 +203,7 @@ static const double ACC_BIAS_UG[3][3] = {
     {  14332.0,  12666.0, -39545.0 },
 };
 #define G0_FTS2 32.174
+static uint16_t sat16(double c);
 
 typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; double t; } ImuAcc;
 static ImuAcc imuAcc[4];
@@ -892,6 +893,42 @@ static void crew_aid_hfe(int k, uint16_t *b, int nb) {
  *            the tail-off, and 0 otherwise.
  * ------------------------------------------------------------------- */
 static int16_t faAod[5][NCARD][NCHAN];
+static bool faAodSeen[5];
+
+/* ---------------------------------------------------------------------
+ * THE ASCENT THRUST-VECTOR COMMANDS: three SSMEs (pitch, yaw) and two SRBs
+ * (rock, tilt), as PASS writes them to the FA analog outputs, FA k driving
+ * ATVC k (STS 83-0016 Tables 4.60-3, 4.62-3).  counts = floor(deg C + K),
+ * constants volts x 6400 (CGCCOM.hal:352-363, CGCUN1.hal:396-399; the DASS
+ * load agrees); so deg = (counts + 0.5 - K) / C.  Engines 1 and 3 have the
+ * opposite pitch voltage sign to engine 2 -- the actuators are mounted so;
+ * the degrees mean the same for all three.  The four FAs carry the same
+ * values; each actuator's four servovalves force-fight, which comes out as
+ * the average.  PASS reads no position back (only port-fail discretes).
+ * ------------------------------------------------------------------- */
+static const struct { unsigned card, ch; double c, k; } TVC[5][2] = {
+    { { 0, 4, -2775.68, 929.92 }, { 4, 4, 3425.92, 627.20 } },   /* ME1 pitch, yaw */
+    { { 0, 3,  2775.68, 929.92 }, { 0, 9, 3484.16, 721.28 } },   /* ME2 */
+    { { 4, 3, -2775.68, 929.92 }, { 4, 2, 3362.56, 736.64 } },   /* ME3 */
+    { { 4, 0, 4120.3125, 0.0 },   { 0, 10, 4120.3125, 0.0 } },   /* LH SRB rock, tilt */
+    { { 0, 1, 4120.3125, 0.0 },   { 4, 1, 4120.3125, 0.0 } },    /* RH SRB rock, tilt */
+};
+
+static void push_tvc(void) {
+    double cmd[5][2];
+    for (int a = 0; a < 5; a++)
+        for (int x = 0; x < 2; x++) {
+            double sum = 0.0;
+            int n = 0;
+            for (int k = 1; k <= 4; k++) {
+                if (!faAodSeen[k]) continue;
+                sum += (faAod[k][TVC[a][x].card][TVC[a][x].ch] + 0.5 - TVC[a][x].k) / TVC[a][x].c;
+                n++;
+            }
+            cmd[a][x] = n ? sum / n : 0.0;
+        }
+    vehdyn_set_tvc(cmd);
+}
 #define PC_FA_READ 0x25A40u     /* FIOHI1C5: card 6 ch 18, 1 word */
 #define OMS_PC_BURNING 20000u
 
@@ -975,6 +1012,16 @@ static void ff_hfe(int k, uint16_t *w, int n) {
      * (GRRRCS.hal:184-215). */
     for (int i = 13; i <= 20; i++) b[i] = INJ_WARM;
     crew_aid_hfe(k, b, 36);
+    /* Words 34-35, ACCELEROMETER ASSEMBLY k: lateral and normal specific
+     * force, 0.2/6400 and 0.8/6400 g a count (GPFORB.hal:112-113,
+     * 192-201), along +Y and +Z body (AA_NORM about -1 g in level flight,
+     * GCHGRT.hal:913).  AFTER the hand controllers, which fill words 21-35. */
+    if (vehdyn_enabled()) {
+        double sf[3];
+        vehdyn_specific_force(sf);
+        b[34] = sat16(sf[1] / G0_FTS2 / 0.3048 * 32000.0);
+        b[35] = sat16(sf[2] / G0_FTS2 / 0.3048 * 8000.0);
+    }
     for (int i = 0; i < n; i++) w[i] = (i < 36) ? b[i] : 0;
 }
 
@@ -1019,6 +1066,15 @@ static int trace_fa(void) {
 }
 
 #define SRB_PC_AMBIENT 950u    /* about 14.7 psia */
+
+/* An analog count, rounded and saturated as an AID channel would (+/-5 V at
+ * 6400 counts a volt). */
+static uint16_t sat16(double c) {
+    c = floor(c + 0.5);
+    if (c > 32000.0) c = 32000.0;
+    if (c < -32000.0) c = -32000.0;
+    return (uint16_t)(int16_t)c;
+}
 
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
@@ -1073,6 +1129,23 @@ static void fa_hfe(int k, uint16_t *w, int n) {
         b[34] = SRB_PC_AMBIENT;
     }
     valve_inputs('A', k, b, 54);       /* MPS valves, ET latches, aft vent doors */
+    /* SEGMENT 10, words 47-51: orbiter rate gyro k (roll, pitch, yaw: 8/6400
+     * and 4/6400 deg/s a count, GPFORB.hal:111-116 -- 800 and 1600 counts per
+     * deg/s) and SRB rate gyro k (pitch, yaw: 2/6400, CGCUN1.hal:649-652 --
+     * 3200 per deg/s) while the boosters are attached.  Body rates, inertial,
+     * right-handed about +X, +Y, +Z (TD0209A Fig 1-2, 1-3). */
+    if (vehdyn_enabled()) {
+        const PhysState *ps = vehdyn_state();
+        const double D = 180.0 / 3.14159265358979323846;
+        b[47] = sat16(ps->w[0] * D * 800.0);
+        b[48] = sat16(ps->w[1] * D * 1600.0);
+        b[49] = sat16(ps->w[2] * D * 1600.0);
+        int ph = vehdyn_ascent_phase();
+        if (ph == 1 || ph == 2) {
+            b[50] = sat16(ps->w[1] * D * 3200.0);
+            b[51] = sat16(ps->w[2] * D * 3200.0);
+        }
+    }
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -1483,11 +1556,19 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
         faWrites++;
-        if (CMD_MODE(cmd) == 8u && CMD_CARD(cmd) == 4u) {      /* AOD: values */
-            unsigned ch = CMD_CHAN(cmd) & 0x0fu;
-            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++)
-                faAod[fa_unit(busID)][4][ch + (unsigned)i] = (int16_t)words[i];
+        if (CMD_MODE(cmd) == 8u && (CMD_CARD(cmd) == 4u || CMD_CARD(cmd) == 0u)) {
+            /* AOD: values.  Card 4 carries the OMS gimbals and five of the
+             * ten ascent thrust-vector commands; card 0 the other five and
+             * the aerosurfaces (FIOHO101/108/103; CGBOBF.hal:1669-1691) --
+             * card 0 used to go to discrete_write as a "reset" word and was
+             * lost. */
+            unsigned card = CMD_CARD(cmd), ch = CMD_CHAN(cmd) & 0x0fu;
+            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++) {
+                faAod[fa_unit(busID)][card][ch + (unsigned)i] = (int16_t)words[i];
+                faAodSeen[fa_unit(busID)] = true;
+            }
             push_oms(sharedUs);
+            push_tvc();
         } else if (CMD_MODE(cmd) == 8u) {
             if (CMD_CARD(cmd) == 10u && trace_fa() == fa_unit(busID)) {
                 fprintf(stderr, "mdmtrace: t=%.4f FA%d write card 10 ch %02x:", vehdyn_state()->t,

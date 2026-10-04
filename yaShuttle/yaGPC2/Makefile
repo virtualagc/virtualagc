@@ -227,8 +227,8 @@ $(TEST_BIN_DIR)/test_mdmdev: test/test_mdmdev.c src/mtumodel.c src/mtumodel.h sr
 $(TEST_BIN_DIR)/test_physics: test/test_physics.c src/physics.c src/physics.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_physics.c src/physics.c $(LDLIBS)
 
-$(TEST_BIN_DIR)/test_vehdyn: test/test_vehdyn.c src/vehdyn.c src/vehdyn.h src/physics.c src/physics.h src/envcache.c | $(TEST_BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ test/test_vehdyn.c src/vehdyn.c src/physics.c src/envcache.c $(LDLIBS)
+$(TEST_BIN_DIR)/test_vehdyn: test/test_vehdyn.c src/vehdyn.c src/vehdyn.h src/physics.c src/physics.h src/envcache.c src/eiumodel.c src/mecmodel.c | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_vehdyn.c src/vehdyn.c src/physics.c src/envcache.c src/eiumodel.c src/mecmodel.c $(LDLIBS)
 
 $(TEST_BIN_DIR)/test_iop_dkbuses: test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c $(LDLIBS)

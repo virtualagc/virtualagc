@@ -92,6 +92,19 @@ double vehdyn_unix(double t);
 int vehdyn_save(double *b, int max);
 double vehdyn_load(const double *b, int n);
 
+/* THE ASCENT THRUST-VECTOR COMMANDS, degrees: [0..2] the SSMEs' pitch and
+ * yaw bell deflections, [3] the left and [4] the right SRB's rock and tilt.
+ * The actuators follow at their own rate. */
+void vehdyn_set_tvc(const double cmd[5][2]);
+
+/* The ascent: 0 not (on orbit), 1 on the pad, 2 the stack in flight, 3 the
+ * orbiter and tank after SRB separation (YAGPC_VEHDYN_PAD). */
+int vehdyn_ascent_phase(void);
+
+/* What the accelerometers feel now: the specific force in body axes, m/s^2
+ * (set on the pad and in powered flight). */
+void vehdyn_specific_force(double out[3]);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);
