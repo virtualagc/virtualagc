@@ -1,7 +1,7 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
   <head>
-    <title>HAL/S Development Chain</title>
+    <title>Space Shuttle Orbiter Flight Software</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="Author" content="Ronald Burkey">
     <link rel="icon" type="image/png" href="favicon.png">
@@ -16,13 +16,13 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
     <h1>Table of Contents </h1>
     <ul>
       <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#simulatorTour">A Brief Tour
+          of PASS in the Simulator</a></li>
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#PASS">PASS, BFS, and Other
           Shuttle Source Code</a></li>
       <li><a moz-do-not-send="true" href="#EBCDIC">Is this the Original
           Source Code?</a></li>
-      <li><a moz-do-not-send="true" href="#simulatorTour">A Brief Tour
-          of PASS in the Simulator</a></li>
       <li><a moz-do-not-send="true" href="#HALS">HAL/S</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Versioning">Software
@@ -50,11 +50,12 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
 
+
+
+
+
           Interface</a><br>
       </li>
-      <li><a moz-do-not-send="true" href="#Emulation">Modern Development
-          Tools for AP-101 Assembly Language and HAL/S<br>
-        </a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>Insofar as the Space Shuttle is concerned, the Virtual AGC
@@ -162,6 +163,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -194,6 +199,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         shared <i>roughly</i> the same assembly language, known as <i>Basic
 
 
+
+
+
+
           Assembly Language (BAL)</i>.<br>
         <blockquote><font size="-1"><b>Aside:</b>&nbsp; To be perfectly
             <strike>pedantic</strike>accurate, the GPCs were originally
@@ -211,6 +220,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
+
+
 
 
 
@@ -310,12 +323,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+
+
+
 
 
 
@@ -461,19 +482,178 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software was in use, there were certainly changes to this
         structure.<br>
         <br>
-        <div align="center"><img moz-do-not-send="true"
-            src="Shuttle%20flight%20computer%20software.png" alt=""
-            width="626" height="538"><br>
+        <div align="center"><a
+            href="Shuttle%20flight%20computer%20software%20USA006083%20B.png"><img
+              moz-do-not-send="true"
+              src="Shuttle%20flight%20computer%20software%20USA006083%20B.png"
+              alt="" title="Click to enlarge" width="480" height="495"
+              border="2"></a><br>
         </div>
       </div>
     </div>
     <ul>
     </ul>
+    <h1><a name="simulatorTour"></a>A Brief Tour of PASS in the
+      Simulator</h1>
+    <p><i>(This section is under construction, and there's nothing much
+        to see yet.)</i><br>
+    </p>
+    <p>I explained earlier that we provide an emulator in which the
+      Shuttle's flight software can be run by executing the actual
+      software on an emulated GPC. Of course, you can't get by with <i>just</i>
+      a GPC, you need emulations of other peripheral devices as well,
+      such a displays, keyboards, a control panel, an Inertial
+      Measurement Unit (IMU), and so on.&nbsp; A full range of such
+      emulated devices will only be available, I'm sure, when the
+      emulated GPC is integrated into actual spaceflight-simulation
+      systems.&nbsp; Be we've nevertheless thrown together a set of
+      emulated peripherals that a least allow us to walk through various
+      display screens PASS wants to show you, and perform manipulations
+      via the keyboards and control panel.&nbsp; We don't need a full
+      5-GPC set to do that, so we'll just make it as simple as possible,
+      with a single GPC, display, keyboard, and portions of a control
+      panel ... along with a few peripherals that have no visual
+      interface, and so are just chugging along behind the scenes.
+      Because a full Orbiter control panel is quite a large thing, we've
+      economized a little bit by showing just the portions of the
+      control panel needed at any given time; I should also warn that in
+      order to save as much screen space as possible, the control panels
+      are stylized and the positions of the controls have been moved
+      around somewhat, so don't expect to see exactly what an actual
+      Orbiter pilot would see.<br>
+    </p>
+    <blockquote>
+      <p><font size="-1"><b>Note:</b> It's important to give credit
+          where credit is due, so let me say at the outside that Don
+          Schmidt has made a very outsized contribution to what I'm
+          about to show you. More about his work will be described
+          later, but for now let me just say that without that
+          contribution there would actually be very little to show you
+          at the time I'm writing this.</font><br>
+      </p>
+    </blockquote>
+    In the video below, we start up after an Initial Program Load (IPL)
+    has been performed to load OPS 0 into the GPC, and we'll proceed
+    from there.&nbsp; Realize that there many more display screens in
+    PASS than those I'm going to show you today, in the interest of
+    keeping the video to a finite size! <br>
+    <p><video controls="controls" style="height:600px; width:auto;
+        display:block; margin:0 auto"> <source src="briefTourPASS.mp4"
+          type="video/mp4"> </video></p>
+    <p><br>
+      So, I hope you thought that was fun! Even so, it is ultimately
+      just a survey of a lot of menu screens, without much evidence they
+      actually <i>do</i> anything aside from looking pretty ...
+      depending on your personal aesthetics, of course, as to what
+      prettiness might be. Fortunately, we do have enough of a
+      simulation built to do a bit of orbital maneuvering for you, so
+      that's what the video below demonstrates. In it we run OPS 2,
+      along with models of simulated physics, thrusters, Inertial
+      Measurement Unit (IMU), to changing the attitude of the spacecraft
+      and perform small orbit changes.<br>
+    </p>
+    <p align="center">TBD<br>
+    </p>
+    <p>TBD<br>
+    </p>
+    <p>If you're one of the lucky to whom I've provided the necessary
+      passwords for one or the other of the MMU tapes we've prepared,
+      you can in fact try out the simulation for yourself, and maybe
+      make your own videos if you're so inclined.&nbsp; <br>
+    </p>
+    <p>TBD<br>
+    </p>
+    This has just been a very brief foretaste of what's covered in a lot
+    more detail in a whole series of pages dedicated to the various
+    stages stretching from just having flight-software source code to
+    actually running it:<br>
+    <ol start="0">
+      <li>(Optional.) <a moz-do-not-send="true" href="XPL-I.html">XPL/I
+          and its compiler</a>.&nbsp; XPL/I is the high-level computer
+        language in which most of the original development tools for the
+        Space Shuttle flight software were written.</li>
+      <li><a moz-do-not-send="true" href="ASM101S.html">AP-101S
+          assembler</a>. For assembling the operating system and runtime
+        library of the Space Shuttle's flight software.</li>
+      <li><a moz-do-not-send="true" href="ASM101S.html">AP-101S linker</a>.
+        For turning AP-101S object files into executable memory images.</li>
+      <li><a moz-do-not-send="true" href="emulation-shuttle.html#yaGPC2">AP-101S
+
+
+          emulator</a>. For running AP-101S executable memory images on
+        your Linux, macOS, or Windows computer.</li>
+      <li><a moz-do-not-send="true" href="HAL.html">HAL/S and its
+          compiler</a>. HAL/S is the high-level computer language in
+        which most of the Space Shuttle flight software was written.</li>
+      <li><a moz-do-not-send="true"
+          href="emulation-shuttle.html#yaHALMAT2">HALMAT emulator</a>.
+        For running simple (non-flight-software) HAL/S programs without
+        AP101S object code, linker, memory images, or emulator.</li>
+      <li><a moz-do-not-send="true" href="BuildingPASS.html#compilePASS">Compiling,
+
+
+          assembling, and linking PASS</a>. I.e., creating memory images
+        of an entire "memory configuration" of Space Shuttle flight
+        software ... a much harder task than doing so for a simple,
+        non-flight-software HAL/S or AP-101S program!<br>
+      </li>
+      <li><a moz-do-not-send="true" href="BuildingPASS.html#taping">Building
+
+
+          "tapes" of flight software</a>. Real Space Shuttle software is
+        run not from images of memory, but rather from memory overlays
+        downloaded from a Mass Memory Unit (MMU), originally a magnetic
+        tape drive but eventually a solid-state device.</li>
+      <li>Running the simulation program. TBD<br>
+      </li>
+      <li><a moz-do-not-send="true" href="BuildingPASS.html#ipl">Initial
+          Program Load (IPL)</a>. The process of getting the flight
+        software from the MMU into the computers.</li>
+      <li>And of course, the actual process of running the flight
+        software, for which you'll have to consult the original
+        documentation rather than looking to me. <a
+          moz-do-not-send="true" href="links-shuttle.html">Our Shuttle
+          Library</a> has many documents that may be of use to you, such
+        as checklists for the various flight phases, but some I'd point
+        you to, albeit some not fully contemporaneous with our
+        flight-software versions (OI-30, OI-34), include:</li>
+      <ul>
+        <li><a moz-do-not-send="true"
+            href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf">PASS
+            User's Guide, OI-32</a>.</li>
+        <li><a moz-do-not-send="true"
+href="Shuttle/Crew%20Training/Shuttle%20Crew%20Operations%20Manual%20OI-29.pdf">Shuttle
+
+
+            Crew Operations Manual, OI-29</a>.<br>
+        </li>
+        <li><a moz-do-not-send="true"
+            href="Shuttle/Space%20Shuttle%20Crew%20Operations%20Manual%20OI-32.pdf">Shuttle
+
+
+            Crew Operations Manual, OI-32</a>.</li>
+        <li><a moz-do-not-send="true"
+            href="Shuttle/Space%20Shuttle%20Crew%20Operations%20Manual.pdf">Shuttle
+
+
+            Crew Operations Manual, OI-33</a>.</li>
+        <li><a moz-do-not-send="true"
+href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%2020040714.pdf">Data
+
+
+            Processing System Dictionary, OI-30 and subsequent</a>.<br>
+        </li>
+      </ul>
+    </ol>
     <h1><a name="References"></a>References</h1>
     <p>All documents I can find that I feel are relevant to discussion
       of the Space Shuttle's onboard computer systems and their software
       have been collected on <b><a moz-do-not-send="true"
           href="links-shuttle.html">our Space Shuttle Library page</a></b>.&nbsp;
+
+
+
+
 
 
 
@@ -550,6 +730,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
           Hollis's Space Shuttle page</a>.</li>
       <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
           NASA Technical Reports Server (NTRS)</a>.</li>
@@ -587,6 +771,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </p>
     <p>Here's a rough summary of the Shuttle flight software that I do
       have on hand <a moz-do-not-send="true" href="HAL.html#wildThings">(see
+
+
+
+
 
         here</a> for more information):<br>
     </p>
@@ -632,6 +820,10 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS
         and BFS.&nbsp; More specifically, <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC
+
+
+
+
 
 
 
@@ -731,12 +923,20 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
           y</tt>" in the original HAL/S source code or documentation,
         we'd expect "<tt>x ~= y</tt>" instead! </li>
       <li>A compiler directive of the form "<tt>D VERSION <i>v</i></tt>"
         was sometimes used in original HAL/S source code or
         template-library files.&nbsp; Here, "<i><tt>v</tt></i>" is a
         numerical version code in the range of 1 through 255, <i>represented
+
+
+
+
 
 
 
@@ -2123,92 +2323,13 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
+
+
+
     </i>sequences 0xC2 0xAC and 0xC2 0xA2, respectively, and they don't
     appear at all among the 128 characters of ASCII, but do appear among
     the 256 characters of <i>some</i> versions of EBCDIC.<br>
-    <h1><a name="simulatorTour"></a>A Brief Tour of PASS in the
-      Simulator</h1>
-    <p>So, I mentioned above that some versions of PASS source code are
-      "available", along with development tools to compile/assemble it,
-      and that it's my long-term goal for you to be able to run it via a
-      simulation of the Shuttle's on-board computers and peripherals.
-      While the <i>ultimate</i> goal is to do that within a competent
-      spaceflight-simulation system like Orbiter, that's very tricky
-      currently due to the potential ITAR restrictions I mentioned.
-      However, here within Virtual AGC, we do have our own versions of
-      these simulation systems, and hopefully they'll suffice for at
-      least somewhat of a tour of the simulation in action. PASS is far
-      too big for me even to show you every menu screen, let along to
-      demonstrate in any detail how to use them. So the tour is what it
-      is: A birds-eye view, consisting mainly of a walkthrough of a lot
-      (but not all) of PASS's menu screens.<br>
-    </p>
-    <blockquote>
-      <p><b><font size="-1">Note:</font></b><font size="-1"> A lot of
-          credit for what you're about to see belongs to Don Schmidt,
-          who independently created the AP-101S linker that's crucial to
-          building the PASS software, along with the initial version of
-          the AP-101S and MEDS emulators, <i>and</i> working out almost
-          all of the IPL process, including how to create the MMU tapes.
-          Good job, Don!</font><br>
-      </p>
-    </blockquote>
-    <p>I've devoted <a moz-do-not-send="true" href="BuildingPASS.html">an
-        entire page</a> to how to perform an Initial Program Load (IPL)
-      of the PASS software from the "tape" in the Shuttle's Mass Memory
-      Units (MMU), as well as how to build that tape from the PASS
-      source code in the first place, and you can see videos of the IPL
-      process for either a single GPC or multiple GPCs there. There's no
-      need to retrace all of that here.&nbsp; So we'll simplify and just
-      start out in OPS 0 <i>after</i> the IPL, using a single GPC for
-      illustration.&nbsp; I used flight software version OI-34.07
-      (STS-134) in the video below:<br>
-    </p>
-    <p><video controls="controls" style="height:600px; width:auto;
-        display:block; margin:0 auto"> <source src="simulatorTour.mp4"
-          type="video/mp4"> </video></p>
-    <p>If you're one of the lucky to whom I've provided the necessary
-      passwords for one or the other of the MMU tapes we've prepared,
-      you can in fact try out the simulation for yourself, and maybe
-      make your own videos if you're so inclined.&nbsp; <br>
-    </p>
-    <p>TBD<br>
-    </p>
-    <p>A word about "port ranges": As I've mentioned before, the devices
-      in the physical Orbiter's Data Processing System (DPS, which
-      include the computers and most of their peripheral devices) mostly
-      intercommunicated over a set of MIL-STD-1553 "databuses". Those
-      databuses had logical properties similar to the networking in
-      modern computer systems via what are known as UDP datagrams, so in
-      the simulation system the databuses are in fact modeled via
-      network UDP ports. If you have enough computing power, you can in
-      fact run multiple simulations at once, but each one of those
-      requires a non-overlapping block of UDP ports, and which block is
-      used is determined by the command-line parameters used when the
-      simulation is started.&nbsp; Here are the rules of thumb for
-      selecting port blocks you can use:<br>
-    </p>
-    <ul>
-      <li>If you specify a port base of (say) <i>N</i>, that means that
-        port numbers in the range <i>N</i>-400 through <i>N</i>+99 are
-        reserved for the simulator.</li>
-      <li>I'd suggest using only the port bases 1900, 2400, 2900, 3400,
-        ..., 31900.&nbsp; (Port numbers below 1024 are privileged, and
-        port numbers 32768 and above may be randomly assigned by the
-        operating system, depending on which particular operating system
-        you run.<br>
-      </li>
-      <li>The simulator's default port base is 6900 — i.e., port numbers
-        6500-6999.</li>
-      <li>There's no guarantee that the ports in the suggested ranges
-        are actually free on your computer, so it's up to you to choose
-        a range that is! For example, Virtual AGC's Apollo simulations
-        by default use port numbers in the vicinity of 19600-19800, so a
-        port base of 19900 would likely conflict with them. (Why you
-        would be simultaneously running an Apollo simulation and a
-        Shuttle simulation, I don't know.)<br>
-      </li>
-    </ul>
     <h1><a name="HALS"></a>HAL/S<br>
     </h1>
     <p>HAL/S is a high-level programming language in which the PASS and
@@ -2241,6 +2362,10 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
+
+
+
 
 
 
@@ -2324,12 +2449,20 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
+
+
+
           in HAL/S</a>" by Michael Ryer, which was intended as an
         introduction to programming in HAL/S and is organized as a
         tutorial.</li>
       <li>A great supplement to Ryer is the course material for "<a
           moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
+
+
+
 
 
 
@@ -2345,6 +2478,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
         of the language, and recommends proceeding afterward to the <a
           moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
+
+
+
 
 
 
@@ -2410,9 +2547,17 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
+
+
 
 
 
@@ -2484,6 +2629,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
+
+
+
 
 
 
@@ -2587,6 +2736,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -2599,6 +2752,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2647,6 +2804,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -2654,6 +2815,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2741,6 +2906,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -2765,7 +2934,15 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2814,10 +2991,18 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -2899,6 +3084,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
     <br>
     <br>
     And '<tt>-</tt>' isn't the only datatype-related character that can
@@ -2923,6 +3112,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
 
 
@@ -3022,6 +3215,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -3033,6 +3230,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
+
+
+
 
 
 
@@ -3403,6 +3604,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -3415,6 +3620,10 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
           that said, there's actually quite a lot of information PASS
           source code about display-screen formats.&nbsp; <a
             moz-do-not-send="true" href="HAL.html#morePreprocessors">Refer
+
+
+
+
 
             to the HAL/S page's discussion of preprocessors</a>.</font><br>
       </p>
@@ -3504,11 +3713,19 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
+
+
 
 
 
@@ -3612,6 +3829,10 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
+
+
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -3623,69 +3844,6 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     </p>
     <p>TBD<br>
     </p>
-    <h1><a name="Emulation"></a>Modern Development Tools for AP-101
-      Assembly-Language and HAL/S<br>
-    </h1>
-    To resurrect Space Shuttle flight software requires development
-    tools for the HAL/S language that can be run on modern (Linux, Mac
-    OS, Windows) computers.&nbsp; A minimum subset of tools would seem
-    to be:<br>
-    <ul>
-      <li>A HAL/S compiler.&nbsp; Known as <b>HALSFC</b>, this is
-        available and <a moz-do-not-send="true" href="HAL.html">is
-          covered on its own dedicated page</a>, though it is not 100%
-        bug-free yet.<br>
-      </li>
-      <li>An IBM AP-101S/AP-101B assembler.&nbsp; Known as <b>ASM101S</b>,
-        this is a <a moz-do-not-send="true" href="ASM101S.html">work in
-          progress</a>.<br>
-      </li>
-      <li>An IBM AP-101S linker.&nbsp; Known as <b>lnk101</b>, this is
-        not something provided by Virtual AGC as such, but rather by Don
-        Schmidt, though it is compatible.&nbsp; <a
-          moz-do-not-send="true" href="HALLINK101S.html">Read about it
-          here</a>.<br>
-      </li>
-      <li>An IBM AP-101S emulator.&nbsp; There's work in progress here,
-        on several fronts:</li>
-      <ul>
-        <li>A true AP-101S emulator, written by Don Schmidt, capable of
-          running and acting as a debugger for AP-101S machine code is
-          available in two forms:&nbsp; A command-line version (<b>gps-batch</b>)
-          and a full-screen version (<b>gps-gui</b>).&nbsp; <a
-            moz-do-not-send="true" href="HALLINK101S.html#scenario1">Both
-
-
-            are discussed on our linker page</a>.</li>
-        <li>Another true AP-101S emulator, written by Dan Weaver.&nbsp;
-          No code or documentation for it is available as yet.&nbsp;
-          Although these two emulators have some overlap in terms of use
-          cases, each is expected to have some advantages that the other
-          lacks.<br>
-        </li>
-        <li>A HALMAT emulator, <b>yaHALMAT</b>, by Zane Hambly.&nbsp;
-          HALMAT is language used internally by the HAL/S compiler, in
-          which the parser pass converts HAL/S into HALMAT, the
-          optimizer passes optimizes the HALMAT, and the code-generation
-          pass converts HALMAT into AP-101S object code.&nbsp; By
-          emulating HALMAT directly, a HAL/S program can be run without
-          running any of the compiler's passes beyond the first
-          one.&nbsp; <a moz-do-not-send="true"
-            href="HAL.html#emulatingHALMAT">See the discussion on our
-            HAL/S compiler page</a>.<br>
-        </li>
-      </ul>
-    </ul>
-    Besides these tools there are various others, such as <b>ibmobjdump</b>
-    for viewing AP-101S object files.&nbsp; And there's a HAL/S
-    interpreter that implements only a subset of full HAL/S
-    functionality.&nbsp; The interpreter can be used interactively on
-    Linux/Mac/Windows, accepting HAL/S statements from the keyboard and
-    outputting results to the display.&nbsp; Though superseded and no
-    longer being developed, it may be a useful tool for somebody
-    learning to program in HAL/S.&nbsp; <a moz-do-not-send="true"
-      href="hal-s-interpreter.html">It is covered on its own dedicated
-      page</a>.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center><br>
@@ -3701,7 +3859,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-06-02<br>
+          2026-10-04<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
