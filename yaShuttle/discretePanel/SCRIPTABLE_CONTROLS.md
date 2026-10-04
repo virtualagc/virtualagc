@@ -99,6 +99,17 @@ wait gpc 1 mode-tb RUN timeout 900
   `title GPCIPL` wait would otherwise be met at once by the previous
   computer's menu still on the screen.
 
+### STAR TRACKER pane
+
+| Control | Command | Example | Notes |
+|---|---|---|---|
+| POWER -Y / -Z | `switch strk_pwr_y\|strk_pwr_z ON\|OFF` | `+0  switch strk_pwr_z ON` | Off makes the tracker show BITE on SPEC 22: no data. |
+| DOOR CONTROL SYS 1 / SYS 2 | `switch strk_door_sys1\|strk_door_sys2 OPEN\|OFF\|CLOSE` | `+0  switch strk_door_sys1 OPEN` | One SYS switch moves a door in 12 s, both together in 6 s. |
+| DOOR POSITION -Y / -Z | none (display only) | | Talkbacks: OP, CL, or barberpole while travelling. |
+
+* **Opening a door needs that tracker's POWER ON.** Closing does not.
+* **A door that is not fully open means no stars** for that tracker.
+
 ### Not controls, but set from O6's side
 
 | What | Command | Example | Notes |

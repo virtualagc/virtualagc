@@ -1,5 +1,17 @@
 # Star tracker emulation: plan
 
+**Status: DONE (phases 1-3), merged.** The device is `src/startrk.c` (its
+header comment is the current description), first committed as 1dcdf8fc4,
+followed by the O6 panel commit.  Verified live:
+- both trackers show ST PASS on SPEC 22;
+- the S TABLE fills and ALIGN ENA appears;
+- a star alignment brings the platforms to within 0.017° of M50.
+
+One departure from the interface below: threshold code 0 accepts the whole
+catalog (to IDT magnitude 3.5), not the documented 3.0, because 21 catalog
+stars are fainter than 3.0.  The COAS remains a separate, later item: it needs
+a visual sky with non-catalog stars.  What follows is the plan as written.
+
 Written 2026-10-03.  Prerequisite: IMU alignment torquing (branch
 `review/imu-alignment`), without which a star alignment would leave PASS's
 attitude wrong (GMMLAT/GX4 assume the platform moved as commanded).
@@ -121,15 +133,17 @@ software and a 10 deg square in hardware.
     only).  The -Z door state needs a private panel-to-model channel.
 - Scriptable verbs for each control, and an entry in `SCRIPTABLE_CONTROLS.md`.
 
-## Decisions for the user
+## Decisions (the user's, 2026-10-03)
 
-1. **Phase 3 scope.** Model the power, door and talkback controls, or
-   start with the trackers always powered and doors open, which is how they
-   spend the whole mission after insertion.
-2. **Sky content.** Catalog stars only, or also non-catalog stars that a real
-   tracker could lock onto and PASS must reject (FALSE TK).  Catalog only is
-   the proposed first step.
-3. **Bright-object shutter:** in Phase 1, or later.
+1. **Phase 3 scope: model the controls now.** These are the O6 STAR TRACKER
+   POWER -Y/-Z and DOOR CONTROL SYS1/SYS2 switches and the DOOR POSITION
+   talkbacks.  Checklists must be followable exactly.  Power off gates the
+   tracker's signals (BITE, no data); a closed door blacks out the star field.
+2. **Sky content: the onboard catalog stars only.** The trackers are
+   automatic.  The user's point about "other stars" concerned the COAS, which
+   a crew member looks through; that is a separate, later item needing a real
+   visual sky.
+3. **Bright-object shutter: modelled.** Sun 23/29°, lit horizon 16/19°.
 
 ## Known gaps carried forward
 

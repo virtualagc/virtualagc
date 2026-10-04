@@ -33,7 +33,7 @@ is its `BMTENT` CFBIT in `RCV/MLIB80/FCMBMTMC`, counted globally from 0):
 | word 3, bits 17-20 | SRB MDMs LL1, LL2, LR1, LR2 | Launch buses 12/13 are unanswered. |
 | word 5 | payload MDMs PF1/PF2, low-rate elements | Payload buses unanswered.  Harmless for GNC. |
 | word 3, bit 8 | NSP2 data on FF3 | The NSP is not powered. |
-| word 3, bits 26-27 and 30-31 | **IMU 2 and IMU 3 data and discretes** | **Unexplained.**  Not cleared by I/O RESET EXEC.  The IMU discrete read (`FIOIMUC2`) ran only 78 times, against about 12,800 data reads.  OPEN. |
+| word 3, bits 26-27 and 30-31 | **IMU 2 and IMU 3 data and discretes** | **Explained (2026-10-04).** Only memory configuration 1 had been given the all-strings-to-GPC-1 NBAT; configuration 9 kept its default, so OPS 9 commanded string 1 alone, and IMUs 2 and 3 were never read or put in operate.  Give configuration 9 the same NBAT (see section 7). |
 | word 3, bits 22-23 | not identified | Configuration-specific table entries. |
 | word 2 | EIUs | Clean: answered with zeros.  But zeros fail PASS's ID-complement test, so every engine data path fails. |
 
@@ -273,6 +273,50 @@ All are harmless at zero.  Everything else PASS reads in OPS 1 is driven.
 - `mdmdev.c` stores FF analog-output writes as discrete masks, which garbles
   them.  These are the SPI and the MPS chamber-pressure outputs.
 
+### 7. IMUs on the pad, by the book (OPS 9)
+
+Since 73de632ea, an IMU on the pad vehicle stays in standby until PASS's
+OPERATE command arrives (FF card 13 ch 0, HAL bit 10; SPEC 104 items 13-15).
+It then runs up for about 40 s, and its cluster is released at the vehicle's
+attitude.  REFS_RDY is no longer preset: the RSLS releases the platforms at
+T−4:30.
+
+The sequence that works:
+1. **GPC MEMORY:** give memory configuration 9 the same NBAT as configuration
+   1 (`ITEM 1 +9`, then the same string items).  Otherwise OPS 9 commands
+   string 1 only, and IMUs 2 and 3 show I/O "M".
+2. **SPEC 104:** `ITEM 13`, `14`, `15` (OPER), then wait about 60 s.
+3. `ITEM 16`, `17`, `18` (SEL), then `ITEM 19` (ATT DET, about 4 min).
+4. **ATT DET deselects the IMUs when it completes**, so `ITEM 16`, `17`, `18`
+   again.
+5. `ITEM 24` (GYROCOMP): about 47 min here; 35-42 min on the vehicle.
+
+## STS-134: the first flight flown
+
+The sources found locally:
+- **JSC 37461, the STS-134 mission report.** Events: SRB ignition
+  136/12:56:27.994; 104.5% at T+4.1 s; 72% from T+39.5 to T+51.3 s; SRB
+  separation T+125 s; OMS assist T+134 to T+300 s; 3-g throttling from
+  T+440 s; MECO T+501 s; ET separation T+522 s; OMS-2 TIG at MET 37:58,
+  168.6 s, 259.2 ft/s, giving 124.3 × 175.8 nmi.
+- **The STS-134 Ascent Checklist:** MECO VI 25,819 ft/s, and the OMS-2
+  procedure.
+- **The STS-134 MOD FRR flight-design charts:** 122 nm / 51.6°, a 170 s OMS
+  assist, DOLILU II.
+
+The tools:
+- `examples/flights/sts134-dolilu.json`, sent by `groundstation.py dolilu`;
+- `omstarget.py`, which designs the OMS targets;
+- `tools/mission_reconfig.py` with `sts134-reconfig.json`;
+- `examples/flights/fly_sts134.py`, which flies the whole flight.
+
+Not uplinkable, because they live in the OPS 1 overlay: RD_NOM, VD_NOM,
+K_CMD_NOM, KMAX_NOM, EF_PLANE_SW and NODE_SLOPE.  The two the flight needed
+(VD_NOM, K_CMD_NOM) go on the volume with `mission_reconfig.py`.  THROT is an
+INTEGER, so 104.5% is flown as 104.
+
+The timeline, data and results are in `TIMELINE-STS134.md`.
+
 ## Phases
 
 Each phase is verified with PASS flying before the next starts.  The C goes
@@ -333,6 +377,5 @@ on review branches and to master after the peers test it, as before.
 - **Hydraulics:** the count scale.
 - **Vehicle data:** aerodynamic coefficients and the SRB thrust-time curve
   (not in the mirror); OI-34-era masses.
-- **IMU 2/3 commfaults in MM 101** (see "Where things stand").
 - **Multi-GPC:** four-GPC OPS 1 has open ledger entries (#204, #210, #215,
   #216).  Each phase is verified on one GPC first, then four.
