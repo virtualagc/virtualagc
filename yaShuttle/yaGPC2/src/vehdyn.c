@@ -425,18 +425,27 @@ static void tvc_signs(void) {          /* read once, whether the pad was set up 
         sscanf(sg, "%lf,%lf,%lf,%lf", &tvcSign[0], &tvcSign[1], &tvcSign[2], &tvcSign[3]);
 }
 
-/* The SRBs' thrust, each, in vacuum, against time from ignition: the
- * nominal RSRM at 60 F, SODB Fig 6.3.1-2 (klbf), with a 0.3 s ignition
- * ramp; scaled by 0.99 so its integral at 266 s matches the propellant. */
+/* The SRBs' thrust, each, in vacuum, against time from ignition: the RSRM
+ * population nominal at 60 F (burn rate 0.368 in/s at 625 psia), digitized
+ * from JSC-19041 SRB Overview Rev F (2003) Figure 4.3-I, with a 0.3 s
+ * ignition ramp.  (The earlier table was SODB JSC-08934 Fig 6.3.1-2, the
+ * pre-Challenger HPM, whose tail-off is about 3 s longer: it put Pc 50 psia
+ * at +123.4 and staging at +129.8, where STS-134's RSRMs reached 50 psia at
+ * +120.0/+120.3 and staged at +124.7 -- JSC 37461 Appendix A; PMBT 62 F.)
+ * Its integral, 295 Mlbf s, is the 1,110,000 lb of propellant at Isp 266 s
+ * to 0.1%, so it is not scaled. */
 static const double SRB_T[][2] = {   /* s, Mlbf */
-    { 0.0, 0.0 }, { 0.3, 2.85 }, { 2, 3.082 }, { 5, 3.128 }, { 10, 3.202 }, { 15, 3.242 },
-    { 20, 3.286 }, { 21, 3.296 }, { 25, 3.147 }, { 30, 2.930 }, { 35, 2.744 }, { 40, 2.592 },
-    { 45, 2.477 }, { 50, 2.364 }, { 53, 2.313 }, { 55, 2.318 }, { 60, 2.370 }, { 65, 2.414 },
-    { 70, 2.504 }, { 75, 2.527 }, { 78, 2.561 }, { 80, 2.554 }, { 85, 2.426 }, { 90, 2.272 },
-    { 95, 2.167 }, { 100, 2.024 }, { 105, 1.887 }, { 110, 1.747 }, { 112, 1.715 },
-    { 114, 1.564 }, { 116, 1.013 }, { 118, 0.558 }, { 120, 0.382 }, { 122, 0.265 },
-    { 124, 0.157 }, { 126, 0.062 }, { 128, 0.024 }, { 130, 0.0 } };
-#define SRB_SCALE 0.99
+    { 0.0, 0.0 }, { 0.3, 3.132 }, { 1, 3.134 }, { 3, 3.145 }, { 5, 3.199 }, { 7, 3.251 },
+    { 10, 3.282 }, { 15, 3.294 }, { 20, 3.312 }, { 21, 3.312 }, { 22, 3.289 }, { 25, 3.125 },
+    { 30, 2.925 }, { 35, 2.764 }, { 40, 2.618 }, { 45, 2.507 }, { 48, 2.441 }, { 50, 2.382 },
+    { 52, 2.363 }, { 55, 2.382 }, { 60, 2.447 }, { 65, 2.503 }, { 70, 2.553 }, { 75, 2.575 },
+    { 77, 2.576 }, { 78, 2.572 }, { 80, 2.524 }, { 85, 2.388 }, { 88, 2.281 }, { 90, 2.207 },
+    { 92, 2.183 }, { 95, 2.115 }, { 100, 1.980 }, { 105, 1.803 }, { 108, 1.718 }, { 110, 1.652 },
+    { 111, 1.566 }, { 112, 1.435 }, { 113, 1.257 }, { 114, 1.033 }, { 115, 0.824 },
+    { 116, 0.660 }, { 117, 0.537 }, { 118, 0.433 }, { 119, 0.350 }, { 120, 0.272 },
+    { 121, 0.200 }, { 122, 0.146 }, { 123, 0.103 }, { 124, 0.074 }, { 125, 0.049 },
+    { 127, 0.0 } };
+#define SRB_SCALE 1.0
 #define SRB_NT (int)(sizeof SRB_T / sizeof SRB_T[0])
 
 /* The air on the stack, on the orbiter's wing reference area, 2,690 ft^2.
@@ -569,7 +578,7 @@ static void us1976(double h, double *rho, double *temp) {
 double vehdyn_srb_pc_psia(void) {
     if (asc == ASC_PAD || (asc == ASC_STACK && srbIgnT < 0.0)) return 14.7;
     if (asc != ASC_STACK) return -1.0;
-    double pc = 914.0 * srb_thrust_vac(st.t - srbIgnT) / (3.296e6 * LBF_N * SRB_SCALE);
+    double pc = 914.0 * srb_thrust_vac(st.t - srbIgnT) / (3.312e6 * LBF_N * SRB_SCALE);
     double h = height_m(st.r), rho, T;
     us1976(h, &rho, &T);
     double pamb = rho * 287.05 * T / 6894.757;

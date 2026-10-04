@@ -4,7 +4,7 @@
   "The nominal MECO target lives in the OPS 1 overlay (CGGC01), where no uplink reaches: the DOLILU's VDMAG (message 96) is only the pseudo-target second-stage guidance starts from. With the tape's 25,668 ft/s PASS cut off at 25,605 truth.",
   "VD_NOM: 25,819 ft/s, the STS-134 Ascent Checklist's MECO VI (ASC/134/FIN). The radius and flight-path angle stay the tape's (60 nmi, 0.5 deg): no STS-134 values found.",
   "K_CMD_NOM: second stage's throttle (GG42ND step 5601, 'the rated power level setting'), 100 on the tape; STS-134 flew 104.5% to the 3-g throttling (JSC 37461 Appendix A) -- 104, the command's resolution being 1%. With 100 the simulated stack ran the second stage at 100%.",
-  "RD_NOM and FPA_NOM: a MECO about 107 km above the ellipsoid at the simulated flight's MECO latitude (37.5 deg) -- a figure quoted for STS-134 (unsourced) that agrees with the MOD FRR's 'insertion altitude 122 nm': with VI 25,819 ft/s and 0.65 deg the post-MECO apogee is about 122-125 nmi.  The tape's (111 km above the equatorial radius, ~120 km above the ellipsoid there) left a 137 x 43 nmi orbit and an OMS-2 of 292 ft/s; this one 125 x 28 and 266 ft/s (STS-134: 259.2)."
+  "RD_NOM: STS-134 flew a '52 nautical mile MECO' as a performance enhancement (Space Shuttle Missions Summary, NASA 20110001406, STS-134 page 2-240). PASS's convention is altitude above its equatorial radius a = 20,925,646.3 ft (the tape's own RD_NOM is a + 60.02 nmi), so RD_NOM = a + 52 nmi = 21,241,604 ft. (Previously 21,250,656 ft, 53.5 nmi: 107 km above the ellipsoid at MECO latitude, an unsourced figure.)  FPA_NOM 0.65 deg: no STS-134 value found; with VI 25,819 ft/s it gives a post-MECO apogee near the MOD FRR's 'insertion altitude 122 nm'. The tape's (60 nmi, 0.5 deg) left a 137 x 43 nmi orbit and an OMS-2 of 292 ft/s."
  ],
  "cells": [
   {
@@ -25,9 +25,9 @@
    "name": "CGGS_RAD_MECO_NOM",
    "config": "G16",
    "addr": "0f13c",
-   "H": "4714442600000000",
+   "H": "471441F040000000",
    "was": "47144DD440000000",
-   "value": "21,250,656 ft (tape 21,290,308)"
+   "value": "21,241,604 ft = a + 52 nmi (tape 21,290,308 = a + 60.02 nmi)"
   },
   {
    "name": "CGGS_FPA_MECO_NOM",
