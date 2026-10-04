@@ -161,7 +161,7 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 |---|---|---|
 | Apogee × perigee, just after the burn (osculating) | **176.3 × 127.1 nmi** above the equatorial radius | **175.8 × 124.3 nmi** |
 | Inclination | **51.62°** to the equator of date | **51.6°** |
-| One-orbit average | to be added when the run's ORBIT phase ends | |
+| One-orbit average (1,091 samples over 5,450 s) | **171.0 × 126.9 nmi** above the equatorial radius (osculating range: apogee 165.6-176.7, perigee 121.7-132.3); 175.3 × 131.1 above the WGS-84 ellipsoid; **51.60°** (51.58-51.62) | 175.8 × 124.3 nmi, 51.6° |
 
 Osculating apsides move about ±5.5 nmi around an orbit (J2).  An earlier
 test flight's post-OMS-2 orbit averaged 171.4 × 127.6 nmi (175.5 × 131.7
@@ -193,7 +193,19 @@ above the WGS-84 ellipsoid) and 51.60° over one orbit.
 - **SRB ignition came 2.8 s after the uplinked GMT of liftoff** by the truth's clock.  Not yet explained.
 - **The pre-launch timetable is compressed into 85 minutes.** The real one spanned the day before launch (S0007: IMU power-up at L-27h30m; OPERATE and ATT DET by L-8h20m; gyrocompass about 42 min). GO FOR AUTO SEQUENCE comes at T−47 s, not the GLS's T−31 s.
 - **The crew's post-MECO procedures are abridged to what the flight needs.** Omitted: MPS dump, APU shutdown, ET umbilical doors.
-- **The MECO radius and flight-path angle are the tape's** (60 nmi, 0.5°). No STS-134 values were found.
+- **The MECO radius and flight-path angle are the tape's** (60 nmi, 0.5°).
+  - The tape's RD_NOM is 111 km above the equatorial radius, which is about
+    120 km above the ellipsoid at the 37.5° MECO latitude.  The flight
+    therefore left MECO in a 137 × 43 nmi orbit, and OMS 2 needed 292 ft/s
+    where STS-134's took 259.
+  - A MECO at 107 km (a figure quoted by Google, so far unsourced), with VI
+    25,819 ft/s and γ 0.6-0.7°, gives a 119-124 nmi apogee.  That matches
+    the MOD FRR's "insertion altitude 122 nm".
+  - Candidate reconfiguration cells: RD_NOM lowered by about 41,000 ft, and
+    GAMD_NOM about 0.65°.
+- **MECO time:** JSC 37461 puts it at T+501.1 (SSME shutdown commands at
+  13:04:49.10).  The T+504 also quoted elsewhere is not supported by the
+  report.
 
 ## References
 
