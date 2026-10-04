@@ -213,6 +213,7 @@ static int histHead, histCount;
  * flight software's own units and frame -- M50 feet and feet a second, PASS
  * GMT -- to set beside its navigation state (CGNV_R_FILT_LFE and the rest,
  * read from a memory snapshot with tools/pasvar.py). */
+static void ascent_log(void);
 static void state_log(void) {
     static double every = -1.0, next = 0.0;
     if (every < 0.0) {
@@ -226,6 +227,7 @@ static void state_log(void) {
                     "mass_kg=%.1f\n", st.t, g,
             st.r[0] / 0.3048, st.r[1] / 0.3048, st.r[2] / 0.3048,
             st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass);
+    ascent_log();
 }
 
 static void hist_push(void) {
@@ -386,8 +388,21 @@ static const double ME_CANT_Y[3] = { 0.0, 3.5, -3.5 };     /* deg, thrust toward
 /* Sign conventions of the gimbal commands (+1 or -1), which the documents
  * found here could not show (their figures did not survive): set by the
  * flight software's own behaviour -- the wrong sign makes its loop diverge
- * within seconds of liftoff.  YAGPC_VEHDYN_TVC_SIGNS=mp,my,sp,sy. */
-static double tvcSign[4] = { 1, 1, 1, 1 };
+ * within seconds of liftoff.  PITCH, main engines and boosters both: -1.
+ * With +1 PASS drove the nozzles to their stops at liftoff while the pitch
+ * rate ran away the same way (-0.5, -3, -10, -32 deg/s in four seconds);
+ * with -1 it held the stack to 0.2 deg/s and flew the pitch-over.  YAW +1:
+ * the roll program and the yaw steering through max-q stay under 1 deg/s.
+ * YAGPC_VEHDYN_TVC_SIGNS=mp,my,sp,sy overrides. */
+static double tvcSign[4] = { -1, 1, -1, 1 };
+static void tvc_signs(void) {          /* read once, whether the pad was set up or restored */
+    static bool done = false;
+    if (done) return;
+    done = true;
+    const char *sg = yagpc_getenv("YAGPC_VEHDYN_TVC_SIGNS");
+    if (sg != NULL)
+        sscanf(sg, "%lf,%lf,%lf,%lf", &tvcSign[0], &tvcSign[1], &tvcSign[2], &tvcSign[3]);
+}
 
 /* The SRBs' thrust, each, in vacuum, against time from ignition: the
  * nominal RSRM at 60 F, SODB Fig 6.3.1-2 (klbf), with a 0.3 s ignition
@@ -510,6 +525,7 @@ static void add_force(double f[3], double tau[3], const double fk[3], const doub
 static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdotSrb) {
     *mdotEt = *mdotSrb = 0.0;
     if (asc == ASC_NONE) return;
+    tvc_signs();
     double h = height_m(st.r), rho, T;
     us1976(h, &rho, &T);
     double pamb = rho * 287.05 * T;
@@ -579,6 +595,23 @@ static void tvc_slew(double dt) {
 }
 
 /* THE PAD: where the stack is at time t, held to the Earth. */
+/* With the state log, during the ascent: the body rates (deg/s), local
+ * up in body axes, and the gimbal positions (deg) -- to see a TVC loop's
+ * sense at a glance. */
+static void ascent_log(void) {
+    if (asc == ASC_NONE) return;
+    double R[3][3], rn = sqrt(st.r[0] * st.r[0] + st.r[1] * st.r[1] + st.r[2] * st.r[2]), up[3];
+    qmat_body(st.q, R);                     /* body -> inertial */
+    for (int i = 0; i < 3; i++)
+        up[i] = (R[0][i] * st.r[0] + R[1][i] * st.r[1] + R[2][i] * st.r[2]) / rn;
+    const double D = 180.0 / VD_PI;
+    fprintf(stderr, "vehdyn-asc: t=%.2f w=%.2f %.2f %.2f up_b=%.3f %.3f %.3f "
+                    "me_p=%.2f %.2f %.2f me_y=%.2f %.2f %.2f srb_rt=%.2f %.2f %.2f %.2f\n",
+            st.t, st.w[0] * D, st.w[1] * D, st.w[2] * D, up[0], up[1], up[2],
+            tvcPos[0][0], tvcPos[1][0], tvcPos[2][0], tvcPos[0][1], tvcPos[1][1], tvcPos[2][1],
+            tvcPos[3][0], tvcPos[3][1], tvcPos[4][0], tvcPos[4][1]);
+}
+
 static void pad_state(double t) {
     double M[3][3];                                  /* inertial -> Earth-fixed */
     phys_inertial_to_earth(t, M);
@@ -626,9 +659,6 @@ static void pad_state(double t) {
 static void pad_init(double t) {
     const char *az = yagpc_getenv("YAGPC_VEHDYN_PAD_AZ");
     if (az != NULL) padAz = atof(az);
-    const char *sg = yagpc_getenv("YAGPC_VEHDYN_TVC_SIGNS");
-    if (sg != NULL)
-        sscanf(sg, "%lf,%lf,%lf,%lf", &tvcSign[0], &tvcSign[1], &tvcSign[2], &tvcSign[3]);
     double a = 6378137.0, f = 1.0 / 298.257223563, e2 = f * (2.0 - f);
     double sl = sin(PAD_LAT_RAD), cl = cos(PAD_LAT_RAD), so = sin(PAD_LON_RAD), co = cos(PAD_LON_RAD);
     double N = a / sqrt(1.0 - e2 * sl * sl);

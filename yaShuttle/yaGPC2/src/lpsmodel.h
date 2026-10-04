@@ -46,6 +46,10 @@ void lps_command_line(const char *line);
  * sequence has the vehicle (valvemodel.c lets go of what the ground held). */
 bool lps_auto_sequence_given(void);
 
+/* The countdown's state for a capture: what the ground has said so far. */
+int lps_save(double *b, int max);
+void lps_load(const double *b, int n);
+
 void lps_report(void);
 
 #endif

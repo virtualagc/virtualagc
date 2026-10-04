@@ -1847,6 +1847,8 @@ bool mdmdev_dump(const char *dir) {
         put_list(f, "mecs", sb, ns < 512 ? ns : 512, true);
         ns = valve_save(sb, 512);
         put_list(f, "valves", sb, ns < 512 ? ns : 512, true);
+        ns = lps_save(sb, 512);
+        put_list(f, "lps", sb, ns < 512 ? ns : 512, true);
     }
     double gb[9];
     for (int k = 1; k <= 3; k++) {
@@ -1947,6 +1949,8 @@ bool mdmdev_load(const char *dir) {
         if (ns > 0) mec_load(sb, ns, tCap);
         ns = get_list(root, "valves", sb, 512);
         if (ns > 0) valve_load(sb, ns);
+        ns = get_list(root, "lps", sb, 512);
+        if (ns > 0) lps_load(sb, ns);
     }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {

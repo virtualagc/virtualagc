@@ -316,6 +316,21 @@ void lps_write(uint32_t cmd, const uint16_t *w, int n) {
 
 bool lps_auto_sequence_given(void) { return autoSeqGiven; }
 
+/* A capture taken after GO FOR AUTO SEQUENCE must come back with it given:
+ * otherwise the ground takes back the valves it had handed over, and the
+ * onboard sequence, finding them wrong, cuts the engines off. */
+int lps_save(double *b, int max) {
+    if (max < 2) return 0;
+    b[0] = autoSeqGiven ? 1.0 : 0.0;
+    b[1] = (double)txid;
+    return 2;
+}
+
+void lps_load(const double *b, int n) {
+    if (n >= 1) autoSeqGiven = b[0] != 0.0;
+    if (n >= 2) txid = (unsigned)b[1];
+}
+
 void lps_report(void) {
     if (polls == 0) return;
     fprintf(stderr, "lps: %ld launch-data-bus command(s) to the ground, %ld interrogate(s); "
