@@ -118,12 +118,20 @@ static void update(int e, double t) {
             if (s->pc < s->target) s->pc = fmin(s->target, s->pc + step);
             else s->pc = fmax(s->target, s->pc - step);
         }
-    } else if (s->phase == PH_SHUT) {
+    } else if (s->phase == PH_SHUT || s->phase == PH_POST) {
+        /* SHUTDOWN: the thrust decays with the time constant PASS itself
+         * assumes -- its MECO cutoff leads by a tail-off of 0.958 s at the
+         * engines' current thrust (CGGS_T_TAILOFF, three engines; GG42ND
+         * step 87).  At 0.25 s the vehicle cut off 63 ft/s short of the
+         * targeted velocity.  The status words still go to post-shutdown
+         * at 2 s. */
         double tau = t - s->shutT;
-        s->pc = s->shutPc * exp(-tau / 0.25);
+        s->pc = s->shutPc * exp(-tau / 0.958);
         if (s->pc < 0.5) s->pc = 0.0;
-        s->mode = tau < 0.1 ? 1 : tau < 0.8 ? 2 : 3;
-        if (tau >= 2.0) set_phase(s, PH_POST, 1, s->shutT + 2.0);
+        if (s->phase == PH_SHUT) {
+            s->mode = tau < 0.1 ? 1 : tau < 0.8 ? 2 : 3;
+            if (tau >= 2.0) set_phase(s, PH_POST, 1, s->shutT + 2.0);
+        }
     } else {
         s->pc = 0.0;
     }
