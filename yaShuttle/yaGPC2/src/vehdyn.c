@@ -468,6 +468,22 @@ static void us1976(double h, double *rho, double *temp) {
     *rho = P / (287.053 * T);
 }
 
+/* An SRB's chamber pressure, psia, for the FA's transducers: 914 psia
+ * (the motor's maximum, SCOM 2.16 / SODB) scaled by the thrust, which
+ * puts the 50 psia separation cue (GSESRB) in the tail-off, near 123 s.
+ * Ambient before ignition; negative once the boosters have gone (no
+ * signal -- the words read zero). */
+double vehdyn_srb_pc_psia(void) {
+    if (asc == ASC_PAD || (asc == ASC_STACK && srbIgnT < 0.0)) return 14.7;
+    if (asc != ASC_STACK) return -1.0;
+    double pc = 914.0 * srb_thrust_vac(st.t - srbIgnT) / (3.296e6 * LBF_N * SRB_SCALE);
+    double h = height_m(st.r), rho, T;
+    us1976(h, &rho, &T);
+    double pamb = rho * 287.05 * T / 6894.757;
+    return pc > pamb ? pc : pamb;
+}
+
+
 /* Rotate unit vector u (body) by a pitch angle (toward +Z) and a yaw angle
  * (toward +Y), degrees -- small-angle composition, then normalised. */
 static void deflect(double u[3], double pitchDeg, double yawDeg) {

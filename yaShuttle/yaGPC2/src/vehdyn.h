@@ -104,6 +104,8 @@ int vehdyn_ascent_phase(void);
 /* What the accelerometers feel now: the specific force in body axes, m/s^2
  * (set on the pad and in powered flight). */
 void vehdyn_specific_force(double out[3]);
+/* An SRB's chamber pressure, psia (< 0: the boosters have gone). */
+double vehdyn_srb_pc_psia(void);
 
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */

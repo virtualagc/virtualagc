@@ -1065,7 +1065,6 @@ static int trace_fa(void) {
     return k;
 }
 
-#define SRB_PC_AMBIENT 950u    /* about 14.7 psia */
 
 /* An analog count, rounded and saturated as an AID channel would (+/-5 V at
  * 6400 counts a volt). */
@@ -1125,8 +1124,11 @@ static void fa_hfe(int k, uint16_t *w, int n) {
         b[35] = pic;
     }
     if (k <= 3) {
-        b[32] = SRB_PC_AMBIENT;
-        b[34] = SRB_PC_AMBIENT;
+        /* word 32 the right SRB (K5 calibration), 34 the left (K4), GPXSRB.hal:49-54 */
+        static const double K5[3] = { -14.07, -15.47, -14.99 }, K4[3] = { -15.09, -9.52, -14.09 };
+        double pc = vehdyn_enabled() ? vehdyn_srb_pc_psia() : 14.7;
+        b[32] = pc < 0.0 ? 0u : (uint16_t)lround((pc - K5[k - 1]) / 0.0313211);
+        b[34] = pc < 0.0 ? 0u : (uint16_t)lround((pc - K4[k - 1]) / 0.0313211);
     }
     valve_inputs('A', k, b, 54);       /* MPS valves, ET latches, aft vent doors */
     /* SEGMENT 10, words 47-51: orbiter rate gyro k (roll, pitch, yaw: 8/6400
