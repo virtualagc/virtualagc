@@ -125,6 +125,10 @@ static const Jet JETS[VEHDYN_NJETS] = {
  * better numbers as they are found.
  * ===================================================================== */
 #define DRY_MASS_KG      100000.0
+/* YAGPC_VEHDYN_ORBITER_KG: a flight's orbiter at liftoff, kg, payload and
+ * full OMS and RCS included (STS-134: 121,826 kg, JSC 37461 / spacefacts);
+ * the dry mass is what is left after the propellant modelled below. */
+static double dryKg = DRY_MASS_KG;
 #define DRY_CG_XO        1100.0
 #define DRY_CG_ZO        375.0
 #define DRY_IXX          1.29e6
@@ -692,7 +696,7 @@ static void qmat_body(const double q[4], double R[3][3]) {
  * about it, from the dry vehicle and the propellant left: parallel-axis
  * shifts of the dry body and of each module's propellant as a point mass. */
 static void mass_properties(void) {
-    double m = DRY_MASS_KG, c[3] = { 0, 0, 0 };
+    double m = dryKg, c[3] = { 0, 0, 0 };
     double tank[NMOD][3];
     for (int k = 0; k < NMOD; k++) {
         to_body(TANK_XYZ[k][0], TANK_XYZ[k][1], TANK_XYZ[k][2], tank[k]);
@@ -740,7 +744,7 @@ static void mass_properties(void) {
     double dd = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            I[i][j] += DRY_MASS_KG * ((i == j ? dd : 0.0) - d[i] * d[j]);
+            I[i][j] += dryKg * ((i == j ? dd : 0.0) - d[i] * d[j]);
     for (int k = 0; k < NMOD; k++) {
         double p[3] = { tank[k][0] - c[0], tank[k][1] - c[1], tank[k][2] - c[2] };
         double pp = p[0] * p[0] + p[1] * p[1] + p[2] * p[2];
@@ -819,6 +823,15 @@ void vehdyn_reset(double t) {
     memset(&st, 0, sizeof st);
     for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG;
     prop[3] = prop[4] = OMS_LOAD_KG;
+    {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_ORBITER_KG");
+        double kg = e ? atof(e) : 0.0, p = 0.0;
+        for (int k = 0; k < NMOD; k++) p += prop[k];
+        dryKg = (kg > p + 50000.0) ? kg - p : DRY_MASS_KG;
+        if (kg > 0.0)
+            fprintf(stderr, "vehdyn: the orbiter %.0f kg at liftoff (dry %.0f + propellant %.0f)\n",
+                    dryKg + p, dryKg, p);
+    }
     memset(oms, 0, sizeof oms);
     memset(on, 0, sizeof on);
     memset(onSec, 0, sizeof onSec);
@@ -1206,6 +1219,7 @@ int vehdyn_save(double *b, int max) {
     for (int i = 0; i < 3; i++) PUT(padR[i]);
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) PUT(padCbe[i][j]);
     for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { PUT(tvcCmd[a][x]); PUT(tvcPos[a][x]); }
+    PUT(dryKg);
 #undef PUT
     return n;
 }
@@ -1241,6 +1255,7 @@ double vehdyn_load(const double *b, int n) {
         for (int k = 0; k < 3; k++) padR[k] = GET();
         for (int k = 0; k < 3; k++) for (int j = 0; j < 3; j++) padCbe[k][j] = GET();
         for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { tvcCmd[a][x] = GET(); tvcPos[a][x] = GET(); }
+        if (i < n) dryKg = GET();
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }
 #undef GET
