@@ -9,7 +9,8 @@
  "notes": [
   "IYD: the 51.6 deg plane through the nav base (NAVBASE I-loads) heading north-east, Earth-fixed (CGGB_EF_PLANE_SW is ON: GG2ASC freezes it into M50 at the predicted liftoff); inertial azimuth 44.95 deg",
   "THROT is INTEGER: 104 for the flight's 104.5",
-  "Message 37 is the tape's own 58 halfwords with the named fields changed; masses in slugs, the orbiter-dependent ones moved by the STS-134 orbiter's difference from the tape's 203,193 lb"
+  "Message 37 is the tape's own 58 halfwords with the named fields changed; masses in slugs, the orbiter-dependent ones moved by the STS-134 orbiter's difference from the tape's 203,193 lb",
+  "First stage: PSI/PHI/QPOLY/TREF from the simulated stack, not from the flight's own (unavailable) DOLILU: the yaw table turned to the 51.6-deg azimuth and the throttle velocities placed at the report's throttle times"
  ],
  "messages": [
   {
@@ -55,6 +56,92 @@
     {
      "D": 0.0,
      "name": "T_GMTLO_PHASE"
+    }
+   ]
+  },
+  {
+   "op": 12,
+   "name": "yaw table PSI (first stage)",
+   "fields": [
+    {
+     "E": [
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.280503,
+      0.229862,
+      0.218662,
+      0.212566,
+      0.208824,
+      0.201735,
+      0.194521,
+      0.186517,
+      0.183895,
+      0.186056,
+      0.189661,
+      0.19631,
+      0.19967,
+      0.199525,
+      0.19972,
+      0.198196,
+      0.198159,
+      0.198413,
+      0.198413,
+      0.198413,
+      0.198413
+     ],
+     "name": "PSI(1-30): the tape's 38-deg table turned by -18.71 deg, to the STS-134 inertial azimuth 44.95 (PSI = tan(yaw/4), GG31ST.hal step 16)"
+    }
+   ]
+  },
+  {
+   "op": 40,
+   "name": "roll table PHI (first stage)",
+   "fields": [
+    {
+     "E": [
+      0.280503,
+      0.280503,
+      0.303037,
+      0.372452,
+      0.483025,
+      0.602314,
+      0.737665,
+      0.871225,
+      0.966222,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "name": "PHI(1-15): the same turn at liftoff (PHI(1) = PSI(1): no roll on the pad), blended out by heads-down 180 deg"
+    }
+   ]
+  },
+  {
+   "op": 14,
+   "name": "throttle velocities and TREF",
+   "fields": [
+    {
+     "E": [
+      55.0,
+      935.0,
+      1100.0,
+      10000.0
+     ],
+     "name": "QPOLY(1-4): Vrel ft/s where THROT(J) applies -- the simulated vehicle's Vrel at STS-134's throttle times T+4.1, 39.5, 51.3 s"
+    },
+    {
+     "E": 22.5,
+     "name": "TREF_ADJUST: the simulated vehicle reaches VREF_ADJUST 488 ft/s at T+22.5 (so adaptive throttling stays off, as on STS-134)"
     }
    ]
   },
