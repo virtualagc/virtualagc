@@ -480,6 +480,18 @@ static double padR[3];            /* the nav base, Earth-fixed, m */
 static double padCbe[3][3];       /* body -> Earth-fixed */
 static double sfB[3];             /* the specific force, body, m/s^2, last step */
 static double aeroAl, aeroBe, aeroQ; /* angle of attack, sideslip (deg), dynamic pressure (Pa) */
+static double aeroFb[3];             /* the air's force, body, N, last step */
+/* THE ASCENT'S BUDGET, m/s, integrated while the stack flies: thrust,
+ * thrust along the velocity (the rest is steering loss), drag and gravity
+ * along the velocity -- to set beside the published figures. */
+static double budThrust, budThrustAlong, budDrag, budGrav;
+static void budget_report(const char *when) {
+    const double F = 0.3048;
+    fprintf(stderr, "vehdyn: ascent budget at %s: thrust %.0f ft/s, of it along the velocity %.0f "
+                    "(steering loss %.0f); drag loss %.0f; gravity loss %.0f ft/s\n", when,
+            budThrust / F, budThrustAlong / F, (budThrust - budThrustAlong) / F, budDrag / F,
+            budGrav / F);
+}
 
 static double interp(const double (*tab)[2], int n, double x) {
     if (x <= tab[0][0]) return tab[0][1];
@@ -607,6 +619,7 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
             *mdotSrb += tv / (SRB_ISP_VAC * G0);
         }
     /* the air: axial force against the air-relative velocity */
+    aeroFb[0] = aeroFb[1] = aeroFb[2] = 0.0;
     {
         double we[3] = { 0, 0, phys_earth_rate() }, va[3];
         va[0] = st.v[0] - (we[1] * st.r[2] - we[2] * st.r[1]);
@@ -621,6 +634,7 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
             for (int i = 0; i < 3; i++)
                 dB[i] = -D * (R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2]) / sp;
             for (int i = 0; i < 3; i++) f[i] += dB[i];   /* through the CG, here */
+            for (int i = 0; i < 3; i++) aeroFb[i] = dB[i];
             /* normal and side force from the angle of attack and sideslip
              * of the air-relative velocity in body axes (limited to 10 deg) */
             double vb[3];
@@ -639,6 +653,8 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
             double qsc = q * ASC_SREF_M2 * interp(CNA_TAB, CNA_NT, mach) * cnaScale;
             f[2] -= qsc * al;
             f[1] -= CYB_FRAC * qsc * be;
+            aeroFb[2] -= qsc * al;
+            aeroFb[1] -= CYB_FRAC * qsc * be;
         }
     }
 }
@@ -764,6 +780,7 @@ static void ascent_events(void) {
             asc = ASC_ORB_ET;
             fprintf(stderr, "vehdyn: SRB SEPARATION at t=%.3f, %.0f kg of booster gone\n", st.t,
                     2.0 * (SRB_INERT_KG + srbProp));
+            budget_report("SRB separation");
             srbProp = 0.0;
             mass_properties();
         }
@@ -773,6 +790,7 @@ static void ascent_events(void) {
             asc = ASC_NONE;
             fprintf(stderr, "vehdyn: ET SEPARATION at t=%.3f; %.0f kg LO2 and %.0f kg LH2 left in it\n",
                     st.t, etLo2, etLh2);
+            budget_report("ET separation");
             phys_set_drag(2.2, 40.0, 220.0, 360.0);
             mass_properties();
         }
@@ -1053,6 +1071,23 @@ void vehdyn_advance(double sharedUs) {
             for (int m = 0; m < NMOD; m++) {
                 prop[m] -= mdot[m] * dt;
                 if (prop[m] < 0.0) prop[m] = 0.0;
+            }
+            if (asc == ASC_STACK || asc == ASC_ORB_ET) {
+                double vn = sqrt(st.v[0] * st.v[0] + st.v[1] * st.v[1] + st.v[2] * st.v[2]);
+                double rn = sqrt(st.r[0] * st.r[0] + st.r[1] * st.r[1] + st.r[2] * st.r[2]);
+                double ai[3], ti[3], tn = 0, ta = 0, da = 0, ga = 0;
+                phys_body_to_inertial(&st, aeroFb, ai);
+                for (int i = 0; i < 3; i++) {
+                    ti[i] = fi[i] - ai[i];
+                    tn += ti[i] * ti[i];
+                    ta += ti[i] * st.v[i] / vn;
+                    da -= ai[i] * st.v[i] / vn;
+                    ga += 3.986004418e14 / (rn * rn) * (st.r[i] / rn) * st.v[i] / vn;
+                }
+                budThrust += sqrt(tn) / st.mass * dt;
+                budThrustAlong += ta / st.mass * dt;
+                budDrag += da / st.mass * dt;
+                budGrav += ga * dt;
             }
             if (asc != ASC_NONE) {
                 etLo2 -= mdotEt * dt * 6.0 / 7.0;

@@ -119,15 +119,22 @@ class Flight:
                "--snapshot-dir", self.a.logs, "--duration", "20000"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         os.makedirs(self.a.logs, exist_ok=True)
-        self.out = open(os.path.join(self.a.logs, "simulatePASS.out"), "a")
+        # a fresh output file, so that an earlier run's lines are never taken
+        # for this one's (a run still up on the port refuses to start)
+        outp = os.path.join(self.a.logs, "simulatePASS.out")
+        if os.path.exists(outp):
+            os.replace(outp, outp + ".%d" % int(time.time()))
+        self.out = open(outp, "w")
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
-        self.wait_file(os.path.join(self.a.logs, "simulatePASS.out"), "session commands on port", 180)
+        self.wait_file(outp, "session commands on port", 180)
         time.sleep(5)
 
     def wait_file(self, path, text, timeout):
         end = time.time() + timeout
         while time.time() < end:
+            if getattr(self, "proc", None) is not None and self.proc.poll() is not None:
+                raise SystemExit("fly_sts134: simulatePASS.py has exited (see simulatePASS.out)")
             try:
                 if text in open(path, errors="replace").read():
                     return True
@@ -154,11 +161,13 @@ class Flight:
         return n
 
     def truth(self):
-        for _ in range(10):
+        # the feed goes quiet while the GPC is off its buses -- an OPS
+        # transition reloading from mass memory takes tens of seconds
+        for _ in range(100):
             tr = groundstation.truth_state(self.base, timeout=3.0)
             if tr:
                 return tr
-        raise SystemExit("fly_sts134: no truth state")
+        raise SystemExit("fly_sts134: no truth state for five minutes")
 
     def wait_gmt(self, gmt):
         while True:
