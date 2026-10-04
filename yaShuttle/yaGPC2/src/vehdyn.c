@@ -421,10 +421,13 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
 /* The air on the stack: an axial-force coefficient on the orbiter's wing
  * reference area, 2,690 ft^2 (SODB).  NO mated-stack aero data exists in
  * the documents found (STS 85-0118 is missing): SYNTHESIZED, calibrated so
- * the drag loss is about 350 ft/s and max-q 575-700 psf near 50-60 s. */
+ * the drag loss is about 350 ft/s (107 m/s, the figure usually given for
+ * the Shuttle's ascent) on the trajectory PASS flies with the STS-134
+ * DOLILU: 2/3 of a first guess that lost 530 ft/s there and fell 150-180
+ * ft/s short at MECO. */
 #define ASC_SREF_M2      (2690.0 * 0.09290304)
-static const double CA_TAB[][2] = { { 0.0, 0.25 }, { 0.6, 0.25 }, { 0.9, 0.35 }, { 1.1, 0.50 },
-                                    { 1.3, 0.50 }, { 2.0, 0.35 }, { 3.0, 0.28 }, { 10.0, 0.28 } };
+static const double CA_TAB[][2] = { { 0.0, 0.165 }, { 0.6, 0.165 }, { 0.9, 0.23 }, { 1.1, 0.33 },
+                                    { 1.3, 0.33 }, { 2.0, 0.23 }, { 3.0, 0.185 }, { 10.0, 0.185 } };
 #define CA_NT (int)(sizeof CA_TAB / sizeof CA_TAB[0])
 /* Normal and side force, per degree of angle of attack and of sideslip, on
  * the same area: SYNTHESIZED too, sized so that the stack at the -2 to -4

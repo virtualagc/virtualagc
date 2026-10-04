@@ -85,6 +85,64 @@ def burn(state, ht, theta, c1, c2):
     return apsides(r, vd), dv, ang
 
 
+def kepler(r, v, dt):
+    """Two-body coast by dt seconds (universal variables, ft and ft/s)."""
+    r0, v0 = norm(r), norm(v)
+    vr0 = dot(r, v) / r0
+    alpha = 2.0 / r0 - v0 * v0 / MU
+    x = math.sqrt(MU) * abs(alpha) * dt
+    for _ in range(60):
+        z = alpha * x * x
+        if z > 1e-8:
+            C = (1 - math.cos(math.sqrt(z))) / z
+            S = (math.sqrt(z) - math.sin(math.sqrt(z))) / z ** 1.5
+        else:
+            C, S = 0.5, 1.0 / 6.0
+        F = r0 * vr0 / math.sqrt(MU) * x * x * C + (1 - alpha * r0) * x ** 3 * S + r0 * x - math.sqrt(MU) * dt
+        dF = r0 * vr0 / math.sqrt(MU) * x * (1 - z * S) + (1 - alpha * r0) * x * x * C + r0
+        dx = F / dF
+        x -= dx
+        if abs(dx) < 1e-9:
+            break
+    z = alpha * x * x
+    if z > 1e-8:
+        C = (1 - math.cos(math.sqrt(z))) / z
+        S = (math.sqrt(z) - math.sin(math.sqrt(z))) / z ** 1.5
+    else:
+        C, S = 0.5, 1.0 / 6.0
+    f = 1 - x * x / r0 * C
+    g = dt - x ** 3 / math.sqrt(MU) * S
+    rr = add(scale(f, r), scale(g, v))
+    rn = norm(rr)
+    fd = math.sqrt(MU) / (rn * r0) * (alpha * x ** 3 * S - x)
+    gd = 1 - x * x / rn * C
+    return rr, add(scale(fd, r), scale(gd, v))
+
+
+def state_from_log(log, tig_after_etsep):
+    """From a yaGPC2 log with YAGPC_VEHDYN_STATELOG: the truth at liftoff
+    (the launch site), and the state after ET separation coasted to TIG."""
+    import re
+    lift = etsep = None
+    rows = []
+    for l in open(log, errors="replace"):
+        if "LIFTOFF" in l:
+            lift = float(l.split("t=")[-1])
+        if l.startswith("vehdyn: ET SEPARATION"):
+            etsep = float(re.search(r"t=([\d.]+)", l).group(1))
+        if l.startswith("vehdyn-state"):
+            t = float(re.search(r"t=([\d.]+)", l).group(1))
+            r = [float(x) for x in re.search(r"r_ft=(\S+) (\S+) (\S+)", l).groups()]
+            v = [float(x) for x in re.search(r"v_fts=(\S+) (\S+) (\S+)", l).groups()]
+            rows.append((t, r, v))
+    rl = min(rows, key=lambda x: abs(x[0] - lift))[1]
+    after = [x for x in rows if x[0] > etsep + 5.0][0]
+    tig = etsep + tig_after_etsep
+    r, v = kepler(after[1], after[2], tig - after[0])
+    return {"tig_state": {"r": r, "v": v}, "r_liftoff": rl,
+            "tig_met": tig - lift, "etsep_met": etsep - lift}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -99,7 +157,16 @@ def main():
     d.add_argument("hp", type=float)
     d.add_argument("ha", type=float)
     d.add_argument("--thetat", type=float)
+    lg = sub.add_parser("fromlog", help="make STATE.json from a flight's log")
+    lg.add_argument("log")
+    lg.add_argument("dtig", type=float, help="TIG, seconds after ET separation")
+    lg.add_argument("out")
     a = ap.parse_args()
+    if a.cmd == "fromlog":
+        st = state_from_log(a.log, a.dtig)
+        json.dump(st, open(a.out, "w"), indent=1)
+        print("ET sep MET %.1f s, TIG MET %.1f s" % (st["etsep_met"], st["tig_met"]))
+        return
     with open(a.state) as fh:
         st = json.load(fh)
     r, v = st["tig_state"]["r"], st["tig_state"]["v"]
@@ -108,18 +175,24 @@ def main():
         (hp, ha), dv, ang = burn(st, a.ht, a.theta, a.c1, a.c2)
         print("after:  HP %.1f HA %.1f nmi, dV %.1f ft/s, target %.1f deg ahead" % (hp, ha, dv, ang))
         return
-    # here to the launch site's angle: the target half an orbit on, by default
+    # here to the launch site's angle; an apsis target (C1 = C2 = 0) at
+    # --thetat, or searched for over the half orbit ahead with its height
     _, here = target_position(0.0, 0.0, r, v, st["r_liftoff"])
-    theta = a.thetat if a.thetat is not None else (-here + 180.0) % 360.0
+    thetas = ([a.thetat] if a.thetat is not None else
+              [(-here + d) % 360.0 for d in [60.0 + 0.5 * i for i in range(481)]])
     best = None
-    for ht in [a.ha + 0.1 * i for i in range(-300, 301)]:
-        (hp, ha), dv, ang = burn(st, ht, theta, 0.0, 0.0)
-        err = (hp - a.hp) ** 2 + (ha - a.ha) ** 2
-        if best is None or err < best[0]:
-            best = (err, ht, hp, ha, dv)
-    _, ht, hp, ha, dv = best
-    print("HT %.1f  THETA T %.1f  C1 0  C2 0  ->  HP %.1f HA %.1f nmi, dV %.1f ft/s"
-          % (ht, theta, hp, ha, dv))
+    for theta in thetas:
+        for ht in [min(a.hp, a.ha) - 20 + 0.25 * i for i in range(int((abs(a.ha - a.hp) + 40) / 0.25) + 1)]:
+            try:
+                (hp, ha), dv, ang = burn(st, ht, theta, 0.0, 0.0)
+            except (ValueError, ZeroDivisionError):
+                continue
+            err = (hp - a.hp) ** 2 + (ha - a.ha) ** 2
+            if best is None or err < best[0]:
+                best = (err, ht, theta, hp, ha, dv, ang)
+    _, ht, theta, hp, ha, dv, ang = best
+    print("HT %.2f  THETA T %.2f  C1 0  C2 0  ->  HP %.1f HA %.1f nmi, dV %.1f ft/s, target %.1f deg ahead"
+          % (ht, theta, hp, ha, dv, ang))
 
 
 if __name__ == "__main__":

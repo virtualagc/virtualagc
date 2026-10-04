@@ -2,9 +2,23 @@
  "flight": "STS-134, Endeavour",
  "notes": [
   "The nominal MECO target lives in the OPS 1 overlay (CGGC01), where no uplink reaches: the DOLILU's VDMAG (message 96) is only the pseudo-target second-stage guidance starts from. With the tape's 25,668 ft/s PASS cut off at 25,605 truth.",
-  "VD_NOM: 25,819 ft/s, the STS-134 Ascent Checklist's MECO VI (ASC/134/FIN). The radius and flight-path angle stay the tape's (60 nmi, 0.5 deg): no STS-134 values found."
+  "VD_NOM: 25,819 ft/s, the STS-134 Ascent Checklist's MECO VI (ASC/134/FIN). The radius and flight-path angle stay the tape's (60 nmi, 0.5 deg): no STS-134 values found.",
+  "K_CMD_NOM: second stage's throttle (GG42ND step 5601, 'the rated power level setting'), 100 on the tape; STS-134 flew 104.5% to the 3-g throttling (JSC 37461 Appendix A) -- 104, the command's resolution being 1%. With 100 the simulated stack ran the second stage at 100%."
  ],
  "cells": [
-  {"name": "CGGS_V_MAG_MECO_NOM", "config": "G16", "addr": "0f102", "E": 25819.0, "was": 25668.0}
+  {
+   "name": "CGGS_V_MAG_MECO_NOM",
+   "config": "G16",
+   "addr": "0f102",
+   "E": 25819.0,
+   "was": 25668.0
+  },
+  {
+   "name": "CGGS_K_CMD_NOM",
+   "config": "G16",
+   "addr": "0fba6",
+   "E": 104.0,
+   "was": 100.0
+  }
  ]
 }

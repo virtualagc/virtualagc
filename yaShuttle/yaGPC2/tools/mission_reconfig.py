@@ -120,9 +120,32 @@ def main():
                   % (c["name"], " ".join("%04X" % x for x in here), " ".join("%04X" % x for x in was)))
             bad += 1
             continue
-        ctx = [int(x) for x in mem[addr - CTX:addr + n + CTX]]
-        pat = re.compile(b"(?=" + b"".join(re.escape(struct.pack(">H", v)) for v in ctx) + b")", re.DOTALL)
-        hits = [m.start() // 2 + CTX for m in pat.finditer(blob) if m.start() % 2 == 0]
+        # both sides first; then one side, then the other -- an overlay's
+        # neighbours can be working variables the flight software has
+        # changed since it was loaded.  The cell itself must hold "was".
+        hits = []
+        for lo, hi in ((CTX, CTX), (CTX, 0), (0, CTX), (2 * CTX, 0), (0, 2 * CTX)):
+            ctx = [int(x) for x in mem[addr - lo:addr]] + was + [int(x) for x in mem[addr + n:addr + n + hi]]
+            pat = re.compile(b"(?=" + b"".join(re.escape(struct.pack(">H", v)) for v in ctx) + b")", re.DOTALL)
+            hits = [m.start() // 2 + lo for m in pat.finditer(blob) if m.start() % 2 == 0]
+            if hits:
+                if len(hits) > 1 and (lo == 0 or hi == 0):
+                    # more than one: the copy that agrees best with the whole
+                    # neighbourhood in memory (+/-256), if clearly the best --
+                    # another configuration can share a few lines of layout
+                    def agree(p):
+                        return sum(int(F[p + k]) == int(mem[addr + k]) for k in range(-256, 256)
+                                   if 0 <= p + k < len(F) and 0 <= addr + k < len(mem))
+                    score = sorted(((agree(p), p) for p in hits), reverse=True)
+                    if score[0][0] - score[1][0] >= 32:
+                        print("  %-26s %d matches on a one-sided context; the copy agreeing on %d of 512"
+                              " (next %d) is the configuration's" % (c["name"], len(hits), score[0][0], score[1][0]))
+                        hits = [score[0][1]]
+                    else:
+                        print("  %-26s %d matches on a one-sided context, none clearly the one -- refused"
+                              % (c["name"], len(hits)))
+                        hits = []
+                break
         if not hits:
             print("  %-26s NOT FOUND on the volume -- a different build; refused" % c["name"])
             bad += 1
