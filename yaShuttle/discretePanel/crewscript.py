@@ -1534,7 +1534,9 @@ class Player(object):
             # read as this capture succeeding.
             word, _, rest = text.partition(" ")
             what, _, why = rest.partition(" ")
-            if what != "save":
+            # 'progress save N M' is the file count the manager's wait modal
+            # shows while the capture is written -- not the verdict.
+            if what != "save" or word == "progress":
                 continue
             sock.close()
             self.origin = time.monotonic()
