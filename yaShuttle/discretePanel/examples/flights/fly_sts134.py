@@ -222,6 +222,13 @@ class Flight:
         self.say("gyrocompass alignment: the time it took on the ground (47 min) has passed")
 
     def count(self):
+        if self.a.reuplink:
+            # the day-of-launch I-loads again, in OPS 9, before OPS 101: a
+            # revised DOLILU onto an already-aligned vehicle
+            subprocess.run([sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base",
+                            str(self.base), "dolilu", os.path.join(HERE, "sts134-dolilu.json")],
+                           check=True)
+            self.wait_sim(10)
         self.play("+1     keys OPS 1 0 1 PRO\n", "ops101")
         self.wait_sim(40)
         crewscript.send_lps("gmtlo =%.0f" % GMTLO, self.base)
@@ -283,6 +290,8 @@ def main():
     ap.add_argument("--logs", required=True, help="directory for the logs, scripts and captures")
     ap.add_argument("--port-base", type=int, default=38000)
     ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
+    ap.add_argument("--reuplink", action="store_true",
+                    help="with --from COUNT: send the DOLILU again before OPS 101")
     ap.add_argument("--from", dest="from_", choices=PHASES[1:],
                     help="resume from the capture the previous phase left")
     Flight(ap.parse_args()).run()
