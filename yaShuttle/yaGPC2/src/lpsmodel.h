@@ -42,6 +42,10 @@ void lps_set_gmt_source(double (*now)(void));
 /* For the tests: queue a command line as the socket would. */
 void lps_command_line(const char *line);
 
+/* Whether the ground has sent GO FOR AUTO SEQUENCE: from then the onboard
+ * sequence has the vehicle (valvemodel.c lets go of what the ground held). */
+bool lps_auto_sequence_given(void);
+
 void lps_report(void);
 
 #endif

@@ -66,6 +66,7 @@ static int qHead, qLen;
 static unsigned txid = 0;
 static double (*gmtNow)(void) = NULL;
 static int sockFd = -1;
+static bool autoSeqGiven;
 static long polls, interrogates, delivered, responses, rejects, statuses, badStatus;
 
 void lps_set_gmt_source(double (*now)(void)) { gmtNow = now; }
@@ -275,6 +276,7 @@ bool lps_reply(uint32_t cmd, int n, uint16_t *out) {
             Msg *m = &queue[qHead];
             for (int i = 0; i < n && i < m->n; i++) out[i] = m->w[i];
             fprintf(stderr, "lps: sent %s\n", m->what);
+            if (m->n >= 2 && m->w[1] == 1u) autoSeqGiven = true;
             qHead = (qHead + 1) % MAXQ;
             qLen--;
             delivered++;
@@ -311,6 +313,8 @@ void lps_write(uint32_t cmd, const uint16_t *w, int n) {
         fprintf(stderr, "%s\n", sumOk ? "" : " (sumcheck wrong)");
     }
 }
+
+bool lps_auto_sequence_given(void) { return autoSeqGiven; }
 
 void lps_report(void) {
     if (polls == 0) return;

@@ -20,6 +20,7 @@
 #include "lpsmodel.h"
 #include "eiumodel.h"
 #include "mecmodel.h"
+#include "valvemodel.h"
 #include "vehdyn.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
@@ -672,6 +673,12 @@ static bool nsp_reply(int busID, uint32_t cmd, int n, uint16_t *out) {
     return true;
 }
 
+/* The valves' view of the outputs: the net state of an output channel. */
+static uint16_t out_word(char mdm, int unit, unsigned card, unsigned ch) {
+    if (unit < 1 || unit > 4 || card >= NCARD || ch >= NCHAN) return 0;
+    return mdm == 'F' ? ffOut[unit][card][ch] : faOut[unit][card][ch];
+}
+
 void mdmdev_crew_open(int portBase) {
     if (crewOpen) return;              /* one vehicle, one set of sockets */
     crewOpen = true;
@@ -955,6 +962,7 @@ static void ff_discretes(int k, uint16_t d[13]) {
     /* The crew's contacts LAST: the words above are assigned, not ORed, so
      * contacts added first were wiped -- DSCRT4's THC and DSCRT6's DAP
      * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
+    valve_inputs('F', k, d, 13);       /* the vent doors' feedback */
     crew_dscrt(k, d);
 }
 
@@ -1064,6 +1072,7 @@ static void fa_hfe(int k, uint16_t *w, int n) {
         b[32] = SRB_PC_AMBIENT;
         b[34] = SRB_PC_AMBIENT;
     }
+    valve_inputs('A', k, b, 54);       /* MPS valves, ET latches, aft vent doors */
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -1497,6 +1506,11 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
     if (n <= 0) return false;
     if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
     if (eiu_engine(busID, cmd)) return eiu_reply(busID, cmd, n, out, sharedUs / 1e6);
+    {
+        static bool wired = false;
+        if (!wired) { wired = true; valve_set_output_source(out_word); }
+    }
+    valve_update(sharedUs / 1e6);
     pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;
@@ -1632,6 +1646,8 @@ bool mdmdev_dump(const char *dir) {
         put_list(f, "engines", sb, ns < 512 ? ns : 512, true);
         ns = mec_save(sb, 512);
         put_list(f, "mecs", sb, ns < 512 ? ns : 512, true);
+        ns = valve_save(sb, 512);
+        put_list(f, "valves", sb, ns < 512 ? ns : 512, true);
     }
     double gb[9];
     for (int k = 1; k <= 3; k++) {
@@ -1722,6 +1738,8 @@ bool mdmdev_load(const char *dir) {
         if (ns > 0) eiu_load(sb, ns, tCap);
         ns = get_list(root, "mecs", sb, 512);
         if (ns > 0) mec_load(sb, ns, tCap);
+        ns = get_list(root, "valves", sb, 512);
+        if (ns > 0) valve_load(sb, ns);
     }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {
@@ -1758,6 +1776,7 @@ void mdmdev_report(void) {
     lps_report();
     eiu_report();
     mec_report();
+    valve_report();
     for (int k = 1; k <= 3; k++)
         if (plat[k].started)
             fprintf(stderr, "mdmdev: IMU%d platform %.4f deg from M50; %ld torque "
