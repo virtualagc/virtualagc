@@ -1079,13 +1079,18 @@ static void ff_hfe(int k, uint16_t *w, int n) {
     crew_aid_hfe(k, b, 36);
     /* Words 34-35, ACCELEROMETER ASSEMBLY k: lateral and normal specific
      * force, 0.2/6400 and 0.8/6400 g a count (GPFORB.hal:112-113,
-     * 192-201), along +Y and +Z body (AA_NORM about -1 g in level flight,
-     * GCHGRT.hal:913).  AFTER the hand controllers, which fill words 21-35. */
+     * 192-201), LATERAL along +Y body, NORMAL POSITIVE UP, along -Z: the
+     * entry displays show LOAD = AA_NORM x g0 (GDRENT.hal:107), the g's of
+     * lift; and the ascent DAP's load relief expects AA_NORM -0.1 to -0.18 g
+     * through max-q (CGCS_NZREF_TRIM_TAB), where the air pushes the stack
+     * toward the tank.  (With +Z, load relief diverged in pitch at max-q;
+     * with -Y the lateral loop diverged sooner than with +Y.)
+     * AFTER the hand controllers, which fill words 21-35. */
     if (vehdyn_enabled()) {
         double sf[3];
         vehdyn_specific_force(sf);
         b[34] = sat16(sf[1] / G0_FTS2 / 0.3048 * 32000.0);
-        b[35] = sat16(sf[2] / G0_FTS2 / 0.3048 * 8000.0);
+        b[35] = sat16(-sf[2] / G0_FTS2 / 0.3048 * 8000.0);
     }
     for (int i = 0; i < n; i++) w[i] = (i < 36) ? b[i] : 0;
 }

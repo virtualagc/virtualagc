@@ -341,15 +341,15 @@ static void qmat_body(const double q[4], double R[3][3]);
 /* -- the external tank and the boosters.  Frames: Xt = Xo + 741.0,
  * Zt = Zo + 336.5; the ET's axis and both SRBs' at Zo 63.5, the SRBs at
  * Yo -/+250.5 (JSC-08934 Vol 1 Rev E, SODB Table 2-1).  Masses: the tape's
- * guidance mass, orbiter + full ET at liftoff 1,865,417 lb (CGGV_MASS_MFE)
- * less its orbiter 203,193 lb (CGGS_MASS_ORBITER_LIFTOFF) is an ET of
- * 1,662,224 lb; SLWT inert 58,500 lb (SCOM), the rest LO2:LH2 6:1.
+ * SLWT: inert 58,500 lb (SCOM), LO2 1,387,457 lb and LH2 234,265 lb loaded
+ * (Wikipedia, Space Shuttle external tank, SLWT); the tape's own generic
+ * guidance mass implied 18,000 lb less, which cost about 180 ft/s at MECO.
  * Stations (ESTIMATED from the geometry; they reproduce PASS's own
  * second-stage CG table): ET inert Xo 525, LO2 Xo 59, LH2 Xo 869.  SRBs:
  * 1,300 klb each loaded, 1,110 klb propellant (SCOM), CG Xo 975. */
 #define ET_INERT_KG      (58500.0 * 0.45359237)
-#define ET_LO2_KG        (1603724.0 * 6.0 / 7.0 * 0.45359237)
-#define ET_LH2_KG        (1603724.0 / 7.0 * 0.45359237)
+#define ET_LO2_KG        (1387457.0 * 0.45359237)
+#define ET_LH2_KG        (234265.0 * 0.45359237)
 #define ET_AXIS_ZO       63.5
 #define ET_INERT_XO      525.0
 #define ET_LO2_XO        59.0
@@ -426,6 +426,25 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
 static const double CA_TAB[][2] = { { 0.0, 0.25 }, { 0.6, 0.25 }, { 0.9, 0.35 }, { 1.1, 0.50 },
                                     { 1.3, 0.50 }, { 2.0, 0.35 }, { 3.0, 0.28 }, { 10.0, 0.28 } };
 #define CA_NT (int)(sizeof CA_TAB / sizeof CA_TAB[0])
+/* Normal and side force, per degree of angle of attack and of sideslip, on
+ * the same area: SYNTHESIZED too, sized so that the stack at the -2 to -4
+ * deg it flies through max-q gives the ascent DAP the normal acceleration it
+ * expects there (its NZREF trim table, about -0.1 g with the main engines'
+ * cant toward the tank, CGCUN1.hal) -- without it load relief steers for an
+ * acceleration the air never supplies, and lofts the first stage; with
+ * twice this, the stack read -0.29 g at -2.4 deg and load relief pitched
+ * it 8 deg below PASS's attitude schedule, flattening the climb into a
+ * 1,100 psf max-q.  Through
+ * the CG: no moment data exists here either. */
+static const double CNA_TAB[][2] = { { 0.0, 0.027 }, { 0.8, 0.036 }, { 1.2, 0.045 }, { 2.0, 0.036 },
+                                     { 4.0, 0.027 }, { 10.0, 0.022 } };
+static double cnaScale = -1.0;     /* YAGPC_VEHDYN_CNA_SCALE, for calibration */
+#define CNA_NT (int)(sizeof CNA_TAB / sizeof CNA_TAB[0])
+/* Side force per degree of sideslip, as a fraction of the normal force's:
+ * the stack seen from the side is the tank and boosters without the wing.
+ * At 1.0 the DAP's lateral load relief (gain KN_NY 55.4 against KM_NZ
+ * 29.5, CGCUN1.hal) oscillated with growing amplitude through max-q. */
+#define CYB_FRAC 0.4
 
 enum { ASC_NONE = 0, ASC_PAD, ASC_STACK, ASC_ORB_ET };
 static int asc = ASC_NONE;
@@ -436,6 +455,7 @@ static double padAz = PAD_AZ_DEG_DEFAULT;
 static double padR[3];            /* the nav base, Earth-fixed, m */
 static double padCbe[3][3];       /* body -> Earth-fixed */
 static double sfB[3];             /* the specific force, body, m/s^2, last step */
+static double aeroAl, aeroBe, aeroQ; /* angle of attack, sideslip (deg), dynamic pressure (Pa) */
 
 static double interp(const double (*tab)[2], int n, double x) {
     if (x <= tab[0][0]) return tab[0][1];
@@ -577,6 +597,24 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
             for (int i = 0; i < 3; i++)
                 dB[i] = -D * (R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2]) / sp;
             for (int i = 0; i < 3; i++) f[i] += dB[i];   /* through the CG, here */
+            /* normal and side force from the angle of attack and sideslip
+             * of the air-relative velocity in body axes (limited to 10 deg) */
+            double vb[3];
+            for (int i = 0; i < 3; i++) vb[i] = R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2];
+            double D2 = 180.0 / VD_PI;
+            double al = atan2(vb[2], vb[0]) * D2, be = asin(vb[1] / sp) * D2;
+            aeroAl = al; aeroBe = be; aeroQ = q;
+            if (al > 10.0) al = 10.0;
+            if (al < -10.0) al = -10.0;
+            if (be > 10.0) be = 10.0;
+            if (be < -10.0) be = -10.0;
+            if (cnaScale < 0.0) {
+                const char *e = yagpc_getenv("YAGPC_VEHDYN_CNA_SCALE");
+                cnaScale = e ? atof(e) : 1.0;
+            }
+            double qsc = q * ASC_SREF_M2 * interp(CNA_TAB, CNA_NT, mach) * cnaScale;
+            f[2] -= qsc * al;
+            f[1] -= CYB_FRAC * qsc * be;
         }
     }
 }
@@ -606,8 +644,10 @@ static void ascent_log(void) {
         up[i] = (R[0][i] * st.r[0] + R[1][i] * st.r[1] + R[2][i] * st.r[2]) / rn;
     const double D = 180.0 / VD_PI;
     fprintf(stderr, "vehdyn-asc: t=%.2f w=%.2f %.2f %.2f up_b=%.3f %.3f %.3f "
+                    "alpha=%.2f beta=%.2f q=%.0f nz=%.3f ny=%.3f "
                     "me_p=%.2f %.2f %.2f me_y=%.2f %.2f %.2f srb_rt=%.2f %.2f %.2f %.2f\n",
             st.t, st.w[0] * D, st.w[1] * D, st.w[2] * D, up[0], up[1], up[2],
+            aeroAl, aeroBe, aeroQ / 47.880259, -sfB[2] / 9.80665, sfB[1] / 9.80665,
             tvcPos[0][0], tvcPos[1][0], tvcPos[2][0], tvcPos[0][1], tvcPos[1][1], tvcPos[2][1],
             tvcPos[3][0], tvcPos[3][1], tvcPos[4][0], tvcPos[4][1]);
 }
