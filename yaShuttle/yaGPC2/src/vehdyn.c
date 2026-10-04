@@ -228,6 +228,27 @@ static void state_log(void) {
             st.r[0] / 0.3048, st.r[1] / 0.3048, st.r[2] / 0.3048,
             st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass);
     ascent_log();
+    /* in orbit: the osculating apsides -- nmi above the equatorial radius
+     * and above the WGS-84 ellipsoid under each -- and the inclination to
+     * the equator of date, to set beside a flight's published orbit */
+    if (vehdyn_ascent_phase() == 0) {
+        const double MU = 3.986004418e14, RE = 6378137.0, F = 1.0 / 298.257223563, NM = 1852.0;
+        const double *r = st.r, *v = st.v;
+        double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+        double vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2], rv = r[0] * v[0] + r[1] * v[1] + r[2] * v[2];
+        double h[3] = { r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0] };
+        double hn = sqrt(h[0] * h[0] + h[1] * h[1] + h[2] * h[2]), e[3], pole[3];
+        for (int i = 0; i < 3; i++) e[i] = ((vv - MU / rn) * r[i] - rv * v[i]) / MU;
+        double en = sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
+        double a = 1.0 / (2.0 / rn - vv / MU), ra = a * (1 + en), rp = a * (1 - en);
+        phys_earth_pole(pole);
+        double inc = acos((h[0] * pole[0] + h[1] * pole[1] + h[2] * pole[2]) / hn) * 180.0 / VD_PI;
+        double sl = en > 1e-9 ? (e[0] * pole[0] + e[1] * pole[1] + e[2] * pole[2]) / en : 0.0;
+        double gp = RE * (1.0 - F * sl * sl), ga = RE * (1.0 - F * sl * sl);  /* +/- e: same latitude magnitude */
+        fprintf(stderr, "vehdyn-orbit: t=%.1f HA %.2f HP %.2f nmi (eq radius) HA %.2f HP %.2f nmi (ellipsoid) "
+                        "inc %.3f deg (of date)\n", st.t, (ra - RE) / NM, (rp - RE) / NM,
+                (ra - ga) / NM, (rp - gp) / NM, inc);
+    }
 }
 
 static void hist_push(void) {
