@@ -14,9 +14,9 @@ It starts simulatePASS.py and then, phase by phase:
            day-of-launch I-loads (sts134-dolilu.json)
   IMU      SPEC 104: the three IMUs to OPERATE, selected, ATT DET, selected
            again (ATT DET deselects them), GYROCOMP; about 50 minutes
-  COUNT    OPS 101; the ground's GMT of liftoff 136/12:56:28 and RESUME;
-           GO FOR AUTO SEQUENCE at T-47 s and GO FOR ENGINE START at T-27 s,
-           by the vehicle's own clock
+  COUNT    OPS 101; the ground's GMT of liftoff 136/12:56:25 (SRB ignition
+           follows 2.8 s later) and RESUME; GO FOR AUTO SEQUENCE at T-31 s and
+           GO FOR ENGINE START at T-10 s, by the vehicle's own clock
   ASCENT   PASS's: RSLS, liftoff, SRB and ET separation
   OMS 2    the STS-134 Ascent Checklist's OMS 2 cards: DAP AUTO, OPS 105,
            TRIM LOAD, LOAD, TIMER, MNVR, and EXEC at TIG
@@ -25,7 +25,7 @@ It starts simulatePASS.py and then, phase by phase:
 with a capture at the end of each phase (sts134-<phase> in DIR), and
 --from STAGE to resume from one.  The vehicle's clock starts at
 2011-05-16 11:30:00 UTC so that liftoff, when the alignment is done, is at
-STS-134's own 12:56:28.
+STS-134's own 12:56:27.994.
 
 The STS-134 volume is the generic OI-34 tape with the flight's OPS 1
 overlay I-loads (yaGPC2/tools/mission_reconfig.py with
@@ -36,6 +36,7 @@ sts134-reconfig.json): make it once with
         --mem <an OPS 1 capture's gpc1.mem.bin> --out STS134.mmv
 """
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -49,7 +50,14 @@ import crewscript    # noqa: E402
 import groundstation  # noqa: E402
 
 EPOCH = "2011-05-16T11:30:00"
-GMTLO = 136 * 86400 + 12 * 3600 + 56 * 60 + 28.0     # 136/12:56:28
+# THE GROUND'S "GMT OF PREDICTED LIFTOFF" IS NOT T-0.  PASS's RSLS starts the
+# main engines when the countdown (GMT - GMTLO) passes CGSV_T_SSME_ST, -3.8 s,
+# and fires SRB ignition CGSV_T_ENG_OK_CK, 6.6 s, later: T-0 = GMTLO + 2.8 s
+# (GSRRSL.hal:370, 379, 822-823, 1859-1872).  GMTLO goes up as whole seconds,
+# so for STS-134's SRB ignition at 136/12:56:27.994 the ground sent
+# 12:56:25, giving 12:56:27.8 plus the RSLS's own latency.
+T0 = 136 * 86400 + 12 * 3600 + 56 * 60 + 27.994        # STS-134's SRB ignition
+GMTLO = 136 * 86400 + 12 * 3600 + 56 * 60 + 25.0       # what the ground sends
 OMS2_DTIG = 1756.0                                  # after ET separation (DOLILU message 25)
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "ORBIT"]
 
@@ -234,14 +242,17 @@ class Flight:
         crewscript.send_lps("gmtlo =%.0f" % GMTLO, self.base)
         time.sleep(2)
         crewscript.send_lps("resume", self.base)
-        self.say("ground: GMT of liftoff 136/12:56:28, count resumed")
-        self.wait_gmt(GMTLO - 47.0)
+        self.say("ground: GMT of liftoff 136/12:56:25 (T-0 2.8 s later), count resumed")
+        # the GLS's own times (KLO-82-0071 App A): GO FOR AUTO SEQUENCE at
+        # T-31 s -- PASS acts on it from GMTLO - 25 s, CGSV_LPS_GO_AUTO_SEQ_TIME
+        # -- and GO FOR ENGINE START at about T-10 s
+        self.wait_gmt(T0 - 31.0)
         crewscript.send_lps("go_auto", self.base)
-        self.say("ground: GO FOR AUTO SEQUENCE")
-        self.wait_gmt(GMTLO - 27.0)
+        self.say("ground: GO FOR AUTO SEQUENCE (T-31 s)")
+        self.wait_gmt(T0 - 10.0)
         crewscript.send_lps("go_engine", self.base)
-        self.say("ground: GO FOR ENGINE START")
-        self.wait_gmt(GMTLO - 15.0)
+        self.say("ground: GO FOR ENGINE START (T-10 s)")
+        self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
         while "ET SEPARATION at" not in self.log_text():
@@ -258,9 +269,38 @@ class Flight:
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
         self.wait_sim(20)
 
+    def oms2_targets(self):
+        """THE GROUND'S OMS-2 TARGETS from the actual insertion: the truth
+        state after ET separation coasted to TIG (standing in for Mission
+        Control's tracking), designed with omstarget.py for STS-134's
+        124.3 x 175.8 nmi, and uplinked as message 25 (legal in OPS 1,
+        GTCUPL) -- as the ground updated OMS-2 targets after MECO."""
+        omst = os.path.join(PANEL, "omstarget.py")
+        state = os.path.join(self.a.logs, "oms2-state.json")
+        log = self.log if "ET SEPARATION at" in self.log_text() else None
+        if log is None:
+            self.say("no ET separation in this run's log: OMS-2 targets as uplinked before launch")
+            return
+        subprocess.run([sys.executable, omst, "fromlog", log, "%.1f" % OMS2_DTIG, state], check=True)
+        out = subprocess.run([sys.executable, omst, "design", state, "124.3", "175.8"], check=True,
+                             capture_output=True, text=True).stdout
+        m = re.search(r"HT ([\d.]+)\s+THETA T ([\d.]+)", out)
+        ht, th = float(m.group(1)), float(m.group(2))
+        dol = json.load(open(os.path.join(HERE, "sts134-dolilu.json")))
+        msg = [x for x in dol["messages"] if x["op"] == 25][0]
+        msg["fields"][3]["E"] = [OMS2_DTIG, ht, th, 0.0, 0.0]
+        path = os.path.join(self.a.logs, "oms2-targets.json")
+        json.dump({"messages": [msg]}, open(path, "w"), indent=1)
+        subprocess.run([sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base",
+                        str(self.base), "dolilu", path], check=True)
+        self.say("ground: OMS-2 targets HT %.2f THETA T %.2f uplinked (%s)"
+                 % (ht, th, out.strip().splitlines()[-1]))
+
     def oms2(self):
         etsep = float(open(os.path.join(self.a.logs, "etsep.gmt")).read())
         tig = etsep + OMS2_DTIG
+        self.wait_gmt(etsep + 120.0)
+        self.oms2_targets()
         self.wait_gmt(etsep + 600.0)        # the post-MECO procedures first
         self.play(OMS2_SETUP, "oms2-setup")
         self.wait_gmt(tig - 8.0)
