@@ -4999,6 +4999,11 @@ for _n, _f in _RECORD.items():
     _recording(_n, _f)
 
 
+# autocircle's SECONDS when a script gives none: how long a control stays
+# circled after it moves (it was circled 1 s before, crewscript.AUTOCIRCLE_LEAD_S).
+AUTOCIRCLE_S = 1.0
+
+
 def _on(word):
     return word.lower() in ("on", "1", "set", "true")
 
@@ -5079,9 +5084,14 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         return []
 
     def autocircle_words(arg):
+        """autocircle [SECONDS] [COLOR] [DIAMETER]: a leading number is
+        SECONDS (1 if there is none); after it a word is COLOR, a number
+        DIAMETER."""
         words = arg.split()
-        seconds, colour, diam = float(words[0]), "yellow", 2.0
-        for word in words[1:]:
+        seconds, colour, diam = AUTOCIRCLE_S, "yellow", 2.0
+        if words and re.fullmatch(r"\d+\.?\d*|\.\d+", words[0]):
+            seconds = float(words.pop(0))
+        for word in words:
             try:
                 diam = float(word)
             except ValueError:

@@ -140,7 +140,9 @@ PANEL_ARGS = {
     "press": r"\S+",
     "circle": r"(" + PANEL_FEATURE + r")(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
     "nocircle": r"",
-    "autocircle": r"(\d+\.?\d*|\.\d+)(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
+    # autocircle [SECONDS] [COLOR] [DIAMETER]: a leading number is SECONDS.
+    "autocircle": r"((\d+\.?\d*|\.\d+)(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?"
+                  r"|(#[0-9a-f]{6}|[a-z]+[0-9]*)(\s+(\d+\.?\d*|\.\d+))?|)",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
@@ -173,7 +175,7 @@ PANEL_USAGE = {
     "press": "press NAME -- a pushbutton from panelcontrols.py, held 0.5 s",
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
-    "autocircle": "autocircle SECONDS [COLOR] [DIAMETER] -- 0 seconds turns it off",
+    "autocircle": "autocircle [SECONDS] [COLOR] [DIAMETER] -- SECONDS 1 unless given; 0 turns it off",
     "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
     "lps": "lps hold|resume|recycle|go_auto|go_engine|gmtlo +S|gmtlo =S|bypass_a|bypass_b|pogo"
            "|code N [hex ...]",
@@ -430,9 +432,9 @@ HELP = """\
                         until the next circle or nocircle; COLOR a colour name
                         or #RRGGBB (yellow), DIAMETER in pushbutton sizes (2)
     nocircle            take it away
-    autocircle SECONDS [COLOR] [DIAMETER]
+    autocircle [SECONDS] [COLOR] [DIAMETER]
                         from now on circle every control the script moves,
-                        from 1 s before each move to SECONDS after it, and
+                        from 1 s before each move to SECONDS (1) after it, and
                         the MODE talkback a 'wait gpc N mode-tb' is waiting
                         on, until it is met.  A move due sooner than 1 s
                         away (just after a wait, typing or the start) waits
@@ -1527,9 +1529,10 @@ class Player(object):
             # would -- an overdue line would have gone at once, not when due.
             due = max(now, self.origin + firsts[0]["ms"] / 1000.0)
             self.origin += short
-            self.log("autocircle: '%s' held %.2f s so that its circle shows first"
-                     % (firsts[0]["text"],
-                        self.origin + firsts[0]["ms"] / 1000.0 - due))
+            held = self.origin + firsts[0]["ms"] / 1000.0 - due
+            if held >= 0.01:
+                self.log("autocircle: '%s' held %.2f s so that its circle shows first"
+                         % (firsts[0]["text"], held))
         for e, n in zip(steps, names):
             if n:
                 at = self.origin + e["ms"] / 1000.0 - AUTOCIRCLE_LEAD_S - now
