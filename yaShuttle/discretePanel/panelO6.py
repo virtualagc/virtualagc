@@ -2472,9 +2472,40 @@ class PanelO6:
                 if not win.layout_placed:
                     win.layout_placed = True
                     self._place_from_layout(win)
+                elif getattr(win, "home", None) is not None:
+                    self.root.after(300, lambda w=win: self._return_home(w))
             elif not up and win.shown:
+                # WHERE IT IS, kept for when it comes back: withdrawn and
+                # mapped again, a window the layout (or its user) had moved
+                # came back somewhere else -- C3, L2 and F7, up for OPS 9 and
+                # placed then, were never in place in OPS 1 (owner,
+                # 2026-10-05).  The content's corner on the screen, since that
+                # is the one thing every window manager agrees on.
+                win.top.update_idletasks()
+                win.home = (win.top.winfo_rootx(), win.top.winfo_rooty())
                 win.top.withdraw()
                 win.shown = False
+
+    def _return_home(self, win, tries=3):
+        """A panel window shown again: back to where it was when it was
+        hidden (_panels_follow).  Moved by the difference between where its
+        content is and where it was, because what a geometry's +X+Y means
+        -- the frame's corner or the content's -- differs between window
+        managers, and a difference is the same in either."""
+        if not win.shown or win.home is None:
+            return
+        win.top.update_idletasks()
+        dx = win.home[0] - win.top.winfo_rootx()
+        dy = win.home[1] - win.top.winfo_rooty()
+        if abs(dx) <= 1 and abs(dy) <= 1:
+            return
+        # "WxH+X+Y", X and Y from the left and top ("+-5" is 5 off the left)
+        m = re.match(r"\d+x\d+\+(-?\d+)\+(-?\d+)$", win.top.geometry())
+        if not m:
+            return
+        win.top.geometry("+%d+%d" % (int(m.group(1)) + dx, int(m.group(2)) + dy))
+        if tries > 1:                     # and look again once it has moved
+            self.root.after(300, lambda: self._return_home(win, tries - 1))
 
     def _place_from_layout(self, win):
         """A panel window appearing for the first time goes where the run's
