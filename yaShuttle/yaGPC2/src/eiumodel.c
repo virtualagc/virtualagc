@@ -194,16 +194,16 @@ void eiu_command(int busID, uint32_t cmd, const uint16_t *w, int n, double t) {
         /* THE BLOCK II/IIA CONTROLLER'S OWN LEVELS.  PASS sends one fixed
          * word per whole percent, 65-109 (GPTSSM's CGPV_THROTTLE_SET: the
          * command K+6 in the high byte, then 15 BCH bits), and "each power
-         * level is its own individual command" (JSC-17239 Rev F, 2003, SB
-         * 1.11).  The controller turns the command into a chamber-pressure
-         * reference linear in power level, 1840.5 psia at 67% to 2994.2 at
-         * 109% (SB 1.17), and closes its loop on that.  On Block II/IIA
+         * level is its own individual command" (JSC-19041 Rev F, 2003, the
+         * SSME Overview, SB 1.11).  The controller turns the command into
+         * a chamber-pressure reference linear in power level, 1840.5 psia
+         * at 67% to 2994.2 at 109% (SB 1.17), and closes its loop on that.  On Block II/IIA
          * engines the 100 command is still 100% -- "launch at 100 percent
          * (Pc = 2747 psia for the Block II/IIA SSME)" (SB 1.7) -- but the
          * 104 command runs at 2871 psia, which is 104.5%: "normally about
          * 2871 psia (Block II/IIA at 104% RPL)" (SB 1.7), "2870.6 psia for a
-         * power level of 104.5 percent" (SB 1.17).  (The SB 1.7 and 1.11
-         * pages are headed JSC-19041 Rev F.)  The reports call it 104.5
+         * power level of 104.5 percent" (SB 1.17, whose pages are headed
+         * JSC-17239, the console handbook).  The reports call it 104.5
          * from STS-89, Block IIA's first flight with its "A-Cal software"
          * (NASA 20120001539 Table 1), and 104 before.  So: 104 -> 104.5,
          * every other command at its face value, and nothing below the 67%
