@@ -336,6 +336,9 @@ class Flight:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
             self.snapshot(ph.lower())
+        # every phase captured: end the simulation, which would otherwise run
+        # on to its --duration (hours) holding a core
+        crewscript.send_session("quit", self.base)
         self.say("done")
 
 
