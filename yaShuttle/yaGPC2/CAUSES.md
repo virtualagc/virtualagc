@@ -1109,6 +1109,9 @@ which are reachable in about fifteen minutes with two computers
 - **#266** *(emulator)* An undecodable halfword halts the run ('invalid instruction', cpu.c decodeFailed / run.c) where the AP-101S takes an operation-exception program check (code 0000) to FCOS's handler. Upstream gpc did this in 818df88. Bears on ledger #1 (0xc6c6 stop at 0x648da) and #56.
   - evidence: tools/gpc-upstream.py review 2026-10-01; src/cpu.c:1600-1607, src/run.c:2865-2879.
   - instrs `operation exception` &middot; files `src/cpu.c,src/run.c` &middot; symptom `invalid instruction, run stops`
+- **#276** *(emulator)* A one-GPC session 'save' (stop-the-world snapshot) froze the vehicle: the capture was written completely, then yaGPC2 never resumed. Both threads asleep in hrtimer_nanosleep, yaGPC2.log silent after the capture's 'mdmdev: vehicle dynamics and device state captured' and one more state line. The flight driver's next step (OPS 101) got no truth state for five minutes and exited. Earlier captures in the same run (sts134-ipl, sts134-uplink) and in sts134c resumed fine.
+  - evidence: Run sts134d (fly_sts134.py, 1 GPC, --port-base 40000, DISPLAY :84): capture sts134-imu at vehicle t=3784.5 s; log last line t=3785.01; process 246183 State S, threads R/S both in hrtimer_nanosleep, 75 min elapsed. Restarting from that capture (--from COUNT --reuplink) ran on. Not reproduced or diagnosed yet.
+  - procs `CPU` &middot; env `YAGPC_VEHDYN,YAGPC_MDM_DEVICES` &middot; files `src/run.c,src/vehicle.c,discretePanel/simulatePASS.py` &middot; symptom `frozen after save,no truth state for five minutes,log stops after capture` &middot; run `sts134d`
 
 ## Confirmed
 
