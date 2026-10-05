@@ -102,7 +102,7 @@ _DAP_KEYS = (r"(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch
              r"|low_z|z_norm|z_pulse|high_z)")
 import panelcontrols as PC
 
-PANEL_FEATURE = (r"(power|output|mode|ipl|modetb)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
+PANEL_FEATURE = (r"(power|output|mode|ipl|modetb|outputtb)[1-5]|activity-mm[12]|iplsource|bfcdisplay|bfcselect|disengage"
                  r"|rhcengage-(cdr|plt)|kybdsel-(left|right)|(idppower|majfunc|idpload)[1-4]"
                  r"|adi-(l|r|a)-(att|err|rate)|attref-(l|r|a)|sense"
                  r"|dap-(c3|a6u)-" + _DAP_KEYS +
@@ -446,7 +446,10 @@ HELP = """\
                         keys, edgekeys or hand controllers.  autocircle 0
                         turns it off and takes its circles away.
                         FEATURE names: power1-5 output1-5 mode1-5 ipl1-5
-                        modetb1-5 (the MODE talkbacks)
+                        modetb1-5 outputtb1-5 (the MODE and OUTPUT
+                        talkbacks) activity-mm1|mm2 (the ACTIVITY lamps);
+                        and every panelcontrols.py name, its lamps,
+                        talkbacks and annunciators included
                         iplsource bfcdisplay bfcselect disengage
                         rhcengage-cdr|plt idppower1-4 majfunc1-4 idpload1-4
                         kybdsel-left|right adi-l|r|a-att|err|rate

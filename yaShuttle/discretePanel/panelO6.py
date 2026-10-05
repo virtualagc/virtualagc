@@ -2827,6 +2827,7 @@ class PanelO6:
             self._rect(cx - w / 2.0, y, cx + w / 2.0, y + body,
                        fill=C_ANN[c["color"]] if lit else C_BTN, outline=C_BEZEL,
                        width=max(1, int(self.s)))
+            self._mark(key, cx - w / 2.0, y, cx + w / 2.0, y + body)
             lines = self._ctl_lines(c.get("legend"))
             for j, l in enumerate(lines):
                 self._text(cx, y + body / 2.0 + ls * (j - (len(lines) - 1) / 2.0), l,
@@ -2837,6 +2838,7 @@ class PanelO6:
                      else pos[0] if self.tb_on.get(key) else pos[-1])
             self._talkback(cx - self.TB_W / 2.0, y, cx + self.TB_W / 2.0, y + self.TB_H,
                            state.upper() if state.upper() in ("GRAY", "BP") else state)
+            self._mark(key, cx - self.TB_W / 2.0, y, cx + self.TB_W / 2.0, y + self.TB_H)
         elif k == "cb":
             d = self.CB_D
             out = self.ctl[key] == "OUT"
@@ -2858,6 +2860,7 @@ class PanelO6:
             x1, x2 = cx - b / 2.0, cx + b / 2.0
             self._rect(x1, y, x2, y + b, fill=C_GUARD, outline=C_GUARD_LO,
                        width=max(2, int(1.5 * self.s)))
+            self._mark(key, x1, y, x2, y + b)
             m = 6
             fx1, fy1, fx2, fy2 = x1 + m, y + m, x2 - m, y + b - m
             lit = self.ctl_lamp.get(key) or (False, False)
@@ -2879,6 +2882,7 @@ class PanelO6:
             lit = self.ctl_lamp.get(key, False)
             self._rect(cx - lw / 2, y, cx + lw / 2, y + body, fill=C_PBI_LIT if lit else C_BTN,
                        outline=C_BEZEL, width=max(1, int(self.s)))
+            self._mark(key, cx - lw / 2, y, cx + lw / 2, y + body)
             lines = self._ctl_lines(c.get("legend"))
             for j, l in enumerate(lines):
                 self._text(cx, y + body / 2.0 + ls * (j - (len(lines) - 1) / 2.0), l,
@@ -3435,6 +3439,7 @@ class PanelO6:
         for i, cx in enumerate(self.col):
             x1, x2 = cx - win_w / 2, cx + win_w / 2
             self._talkback(x1, y1, x2, y1 + win_h, self.output_tb(i))
+            self._mark("outputtb%d" % (i + 1), x1, y1, x2, y1 + win_h)
             self._text(cx, L["out_nums"], str(i + 1), size=11)
 
     def _draw_output_switches(self):
@@ -3619,7 +3624,8 @@ class PanelO6:
         row_y = y + th10 + pad + th10
         quarter = (x1 - x0) / 4.0
         for i, (name, state) in enumerate(zip(MMUS, self.activity)):
-            self._lamp(cx + (2 * i - 1) * quarter, row_y, name, state)
+            self._lamp(cx + (2 * i - 1) * quarter, row_y, name, state,
+                       mark="activity-" + name.lower())
 
     def _draw_c2(self, x0, y0, x1):
         """Panel C2: POWER and MAJ FUNC for IDP/CRT 1, 3, 2, and the two
@@ -4227,7 +4233,7 @@ class PanelO6:
             self._text(sx, s_x, "-X", size=SETTING_SIZE)
         return y1
 
-    def _lamp(self, gx, y, caption, state, size=10):
+    def _lamp(self, gx, y, caption, state, size=10, mark=None):
         """Caption then disk, the pair centred on gx.
 
         The disk's diameter is the caption's cap height, and its centre
@@ -4251,6 +4257,8 @@ class PanelO6:
         self._oval(lx, cy - d / 2.0, lx + d, cy + d / 2.0,
                    fill=C_LAMP[state], outline=C_INK,
                    width=max(1, int(self.s)))
+        if mark:                           # for a script's circle: the disk
+            self._mark(mark, lx, cy - d / 2.0, lx + d, cy + d / 2.0)
 
     # ---- control bodies -------------------------------------------------
 
