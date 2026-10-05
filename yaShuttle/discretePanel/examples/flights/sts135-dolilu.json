@@ -1,0 +1,443 @@
+{
+ "flight": "STS-135, Atlantis, LC-39A, 2011-07-08 15:29:04 UTC",
+ "sources": [
+  "JSC STS-135 Space Shuttle Mission Report: events Appendix A (SRB ignition 189/15:29:03.996; 72% at +38.7, 104.5% at +56.8; both SRMs 50 psia +118.51/118.67; SRB separation command +123.0; 3-g +442.1; MECO MET 8:24; ET sep MET 8:45; OMS assist 83.2 s; OMS-2 TIG MET 37:45, 64.4 s, 97.0 ft/s, 85.2 x 123.9 nmi; SSME Isp tag 451.78 s)",
+  "Space Shuttle Missions Summary (NASA 20110001406) STS-135 and App. A: in-plane time 189:15:26:46; max-q 745 (P) / 734 (A) psf; SRB staging 2:02.8 (P) / 2:03.0 (A); FPR 2,821 lb, fuel bias 954 lb; 52 nmi MECO; orbiter 266,050 lb, ET 1,657,525 lb, SRBs 1,298,160 / 1,298,628 lb at SRB ignition",
+  "STS-135 Ascent Checklist CC: ASCENT ADI - NOMINAL (the same as STS-134's)",
+  "Everything else as sts134-dolilu.json: this flight is flown to test the model built for STS-134"
+ ],
+ "notes": [
+  "A CROSS-CHECK FLIGHT: the vehicle model and first-stage tables were built for STS-134; STS-135 is flown with them to see which differences from the real flight are the model's.",
+  "IYD: the 51.6484-deg plane through the pad at the in-plane time 189:15:26:46 (Missions Summary), its node moved 1.191 deg east -- the offset between that construction and the ISS's own node on STS-134 (322.024 vs 323.215, Space-Track TLE) -- so node 53.132 deg (of date), Earth-fixed at SRB ignition 254.6288 deg.  No STS-135 TLE was available.",
+  "Yaw, pitch and roll tables: STS-134's (the same nominal card; the yaw table was built for an in-plane launch, STS-135 launched 2 min 18 s after its in-plane time).",
+  "QPOLY at STS-135's throttle times on the simulated vehicle (estimated from STS-134's trajectory, its SRBs 2% faster): T+38.7 and 56.8."
+ ],
+ "messages": [
+  {
+   "op": 15,
+   "name": "launch targeting",
+   "fields": [
+    {
+     "D": 16385206.0,
+     "name": "T_GMTLO_REF 189/15:26:46 (the in-plane time)"
+    },
+    {
+     "D": [
+      0.75617,
+      -0.20787,
+      -0.62049
+     ],
+     "name": "IY_MIN"
+    },
+    {
+     "D": [
+      0.75617,
+      -0.20787,
+      -0.62049
+     ],
+     "name": "IYD"
+    },
+    {
+     "D": [
+      0.75617,
+      -0.20787,
+      -0.62049
+     ],
+     "name": "IYD_NOM"
+    },
+    {
+     "E": 0.0,
+     "name": "DELTA_PSI"
+    },
+    {
+     "E": 0.0,
+     "name": "DELTA_NODE_PHASE"
+    },
+    {
+     "D": 0.0,
+     "name": "T_GMTLO_PHASE"
+    }
+   ]
+  },
+  {
+   "op": 12,
+   "name": "yaw table PSI (first stage)",
+   "fields": [
+    {
+     "E": [
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.233977,
+      0.184351,
+      0.173346,
+      0.167352,
+      0.163671,
+      0.156694,
+      0.14959,
+      0.141702,
+      0.139117,
+      0.141248,
+      0.144801,
+      0.151352,
+      0.154661,
+      0.154518,
+      0.15471,
+      0.153209,
+      0.153173,
+      0.153423,
+      0.153423,
+      0.153423,
+      0.153423
+     ],
+     "name": "PSI(1-30): the tape's 38-deg table turned by -28.71 deg: -18.71 for the inertial azimuth (63.66 -> 44.95), and -10 found by flight -- the first stage then ends 18 nmi out of the final plane instead of 29, the MECO target is reached (-18 and -26 fall short) (PSI = tan(yaw/4), GG31ST.hal step 16)"
+    }
+   ]
+  },
+  {
+   "op": 13,
+   "name": "pitch table THET (first stage, row 1)",
+   "fields": [
+    {
+     "E": [
+      0.414214,
+      0.335347,
+      0.335323,
+      0.331565,
+      0.33112,
+      0.331106,
+      0.333144,
+      0.335975,
+      0.326932,
+      0.323898,
+      0.329008,
+      0.331025,
+      0.335741,
+      0.340114,
+      0.347622,
+      0.355571,
+      0.357985,
+      0.354503,
+      0.34699,
+      0.342163,
+      0.319592,
+      0.265453,
+      0.180801,
+      0.160645,
+      0.165622,
+      0.158447,
+      0.153187,
+      0.145742,
+      0.141286,
+      0.117247
+     ],
+     "name": "THET(1,1-30), tan(theta/4): shaped by flight to STS-134's ASCENT ADI - NOMINAL cue card (Ascent Checklist CC 10-11, ASC-14a/134; the same on every OI-34 flight's card): pitch 69/62/52/39/30 deg, H 10/27/51/85/126 kft, Hdot 670/1007/1441/1902/2200 ft/s at T+30/50/70/90/110. Flight p10: 70.1/63.3/56.1/38.9/29.3 deg, 8.9/25.8/49.9/84.3/126.4 kft, 646/1001/1460/1928/2226 ft/s; max-q 716 psf (STS-134: 733.1 at T+60); second stage within ~5 kft of the card from Vi 10,000 on. THET is applied before the yaw turn and load relief takes several degrees at max-q, so it runs well above the flown pitch (to 78.8 deg near Vrel 1,280). Was the tape's table with the pitch-over scaled 0.88 (max-q ~950 psf)."
+    }
+   ]
+  },
+  {
+   "op": 40,
+   "name": "roll table PHI (first stage)",
+   "fields": [
+    {
+     "E": [
+      0.233977,
+      0.233977,
+      0.257876,
+      0.331369,
+      0.448236,
+      0.5744,
+      0.718127,
+      0.860976,
+      0.963395,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "name": "PHI(1-15): the same turn at liftoff (PHI(1) = PSI(1): no roll on the pad), blended out by heads-down 180 deg"
+    }
+   ]
+  },
+  {
+   "op": 14,
+   "name": "throttle velocities and TREF",
+   "fields": [
+    {
+     "E": [
+      55.0,
+      975.0,
+      1380.0,
+      10000.0
+     ],
+     "name": "QPOLY(1-4): Vrel at STS-135's throttle times T+3.8, 38.7, 56.8 s (estimated)"
+    },
+    {
+     "E": 21.0,
+     "name": "TREF_ADJUST: estimated time to 488 ft/s (+0.27 s) with STS-135's faster SRBs"
+    }
+   ]
+  },
+  {
+   "op": 39,
+   "name": "throttle levels",
+   "fields": [
+    {
+     "I": [
+      104,
+      72,
+      104,
+      104
+     ],
+     "name": "THROT(1-4)"
+    }
+   ]
+  },
+  {
+   "op": 96,
+   "name": "MECO pseudo and ATO targets",
+   "fields": [
+    {
+     "E": 0.011344640137963142,
+     "name": "GAMD 0.65 deg, as the tape reconfiguration's FPA_NOM (sts134-reconfig.json)"
+    },
+    {
+     "E": 25819.0,
+     "name": "VDMAG"
+    },
+    {
+     "E": 0.008726646259971648,
+     "name": "GAMD_ATO (tape)"
+    },
+    {
+     "E": 25668.0,
+     "name": "VD_ATO (tape)"
+    }
+   ]
+  },
+  {
+   "op": 37,
+   "name": "OMS assist, dump timers, masses",
+   "fields": [
+    {
+     "H": "0001"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "E": 83.0,
+     "was": 109.0,
+     "name": "ASSIST_OMS_DT",
+     "note": "STS-135: 83.2 s (mission report)"
+    },
+    {
+     "H": "428C"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "0001"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "4318"
+    },
+    {
+     "H": "B000"
+    },
+    {
+     "H": "4317"
+    },
+    {
+     "H": "C000"
+    },
+    {
+     "H": "0001"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "4317"
+    },
+    {
+     "H": "C000"
+    },
+    {
+     "H": "431B"
+    },
+    {
+     "H": "D000"
+    },
+    {
+     "H": "4316"
+    },
+    {
+     "H": "7000"
+    },
+    {
+     "H": "431D"
+    },
+    {
+     "H": "2000"
+    },
+    {
+     "H": "42B9"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "4278"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "41A0"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "425A"
+    },
+    {
+     "H": "0000"
+    },
+    {
+     "H": "4315"
+    },
+    {
+     "H": "E000"
+    },
+    {
+     "E": 11784.67,
+     "was": 9831.0,
+     "name": "M_EMPTY"
+    },
+    {
+     "E": 59786.63,
+     "was": 57979.02,
+     "name": "MASS_VEHICLE_ET",
+     "note": "orbiter 266,050 + ET 1,657,525 lb at SRB ignition"
+    },
+    {
+     "E": 11534.67,
+     "was": 9581.0,
+     "name": "ET_LEVEL_SENSOR_MASS"
+    },
+    {
+     "H": "4320"
+    },
+    {
+     "H": "A70C"
+    },
+    {
+     "E": 8269.1,
+     "was": 6315.438,
+     "name": "MASS_ORBITER_LIFTOFF",
+     "note": "orbiter at SRB ignition 266,050 lb (Missions Summary App. A, STS-135); the other orbiter masses move with it"
+    },
+    {
+     "E": 11738.67,
+     "was": 9785.0,
+     "name": "OMS_CUTOFF_MASS(1)"
+    },
+    {
+     "E": 12524.67,
+     "was": 10571.0,
+     "name": "OMS_CUTOFF_MASS(2)"
+    },
+    {
+     "E": 11738.67,
+     "was": 9785.0,
+     "name": "MBOD_ONE"
+    },
+    {
+     "E": 12524.67,
+     "was": 10571.0,
+     "name": "MBOD_TWO"
+    },
+    {
+     "H": "3F7A"
+    },
+    {
+     "H": "0F90"
+    },
+    {
+     "H": "4417"
+    },
+    {
+     "H": "A500"
+    },
+    {
+     "H": "4418"
+    },
+    {
+     "H": "9400"
+    },
+    {
+     "H": "4418"
+    },
+    {
+     "H": "9400"
+    }
+   ]
+  },
+  {
+   "op": 25,
+   "name": "OMS targeting",
+   "fields": [
+    {
+     "D": [
+      0.75617,
+      -0.20787,
+      -0.62049
+     ],
+     "name": "IYD_OMS(1): the STS-134 plane (PEG 4 flies the present orbit's plane regardless, GGILTV step 31)"
+    },
+    {
+     "D": [
+      0.75617,
+      -0.20787,
+      -0.62049
+     ],
+     "name": "IYD_OMS(2)"
+    },
+    {
+     "E": [
+      109.0,
+      149.2,
+      160.9,
+      0.0,
+      0.0
+     ],
+     "name": "OMS 1: DTIG, HT, THETA, C1, C2 -- the tape's; STS-134 did not need OMS 1 (JSC 37461 Appendix A)"
+    },
+    {
+     "E": [
+      1740.0,
+      123.9,
+      330.0,
+      0.0,
+      0.0
+     ],
+     "name": "OMS 2: TIG = ET separation + 1,740 s (STS-135: ET sep MET 8:45, OMS-2 TIG MET 37:45); pre-flight targets placeholders -- the ground designs them after MECO for 85.2 x 123.9 nmi"
+    }
+   ]
+  }
+ ]
+}

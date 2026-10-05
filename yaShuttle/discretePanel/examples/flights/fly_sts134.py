@@ -59,6 +59,11 @@ EPOCH = "2011-05-16T11:30:00"
 T0 = 136 * 86400 + 12 * 3600 + 56 * 60 + 27.994        # STS-134's SRB ignition
 GMTLO = 136 * 86400 + 12 * 3600 + 56 * 60 + 25.0       # what the ground sends
 OMS2_DTIG = 1756.0                                  # after ET separation (DOLILU message 25)
+# THE FLIGHT: STS-134 unless --flight FILE names another (a JSON object with
+# any of these keys; "t0" and "gmtlo" as [day, h, m, s]; "env" extra
+# environment for the vehicle, e.g. vehdyn's YAGPC_VEHDYN_ET_LB)
+FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
+      "orbiter_kg": 121912, "oms2_hp": 124.3, "oms2_ha": 175.8, "env": {}}
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "ORBIT"]
 
 IPL_SCRIPT = """
@@ -119,8 +124,9 @@ class Flight:
     # --- the vehicle ----------------------------------------------------
     def start(self, resume=None):
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
-                   YAGPC_VEHDYN_ORBITER_KG="121912", YAGPC_OMS_ARMED="1",
-                   YAGPC_RNP="2011,136", YAGPC_VEHDYN_STATELOG="5", PYTHONUNBUFFERED="1")
+                   YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
+                   YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG="5",
+                   PYTHONUNBUFFERED="1", **FL["env"])
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
@@ -190,7 +196,7 @@ class Flight:
             time.sleep(min(30.0, max(0.5, dt / 20.0)))
 
     def snapshot(self, name):
-        target = os.path.join(self.a.logs, "sts134-" + name)
+        target = os.path.join(self.a.logs, FL["name"] + "-" + name)
         crewscript.send_session("save %s" % target, self.base)
         self.wait_file(os.path.join(target, "vehicle.json"), "{", 180)
         self.say("captured %s" % target)
@@ -211,11 +217,11 @@ class Flight:
 
     def uplink(self):
         link = groundstation.Link(self.base)
-        link.send_message(groundstation.two_stage(groundstation.OP_RNP, [2011, 136]))
-        self.say("ground: RNP epoch 2011 day 136 (message 59)")
+        link.send_message(groundstation.two_stage(groundstation.OP_RNP, list(FL["rnp"])))
+        self.say("ground: RNP epoch %d day %d (message 59)" % tuple(FL["rnp"]))
         time.sleep(3)
         subprocess.run([sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base",
-                        str(self.base), "dolilu", os.path.join(HERE, "sts134-dolilu.json")], check=True)
+                        str(self.base), "dolilu", os.path.join(HERE, FL["dolilu"])], check=True)
         self.wait_sim(10)
 
     def imu(self):
@@ -234,7 +240,7 @@ class Flight:
             # the day-of-launch I-loads again, in OPS 9, before OPS 101: a
             # revised DOLILU onto an already-aligned vehicle
             subprocess.run([sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base",
-                            str(self.base), "dolilu", os.path.join(HERE, "sts134-dolilu.json")],
+                            str(self.base), "dolilu", os.path.join(HERE, FL["dolilu"])],
                            check=True)
             self.wait_sim(10)
         self.play("+1     keys OPS 1 0 1 PRO\n", "ops101")
@@ -242,7 +248,9 @@ class Flight:
         crewscript.send_lps("gmtlo =%.0f" % GMTLO, self.base)
         time.sleep(2)
         crewscript.send_lps("resume", self.base)
-        self.say("ground: GMT of liftoff 136/12:56:25 (T-0 2.8 s later), count resumed")
+        g = int(GMTLO)
+        self.say("ground: GMT of liftoff %03d/%02d:%02d:%02d (T-0 2.8 s later), count resumed"
+                 % (g // 86400, g % 86400 // 3600, g % 3600 // 60, g % 60))
         # the GLS's own times (KLO-82-0071 App A): GO FOR AUTO SEQUENCE at
         # T-31 s -- PASS acts on it from GMTLO - 25 s, CGSV_LPS_GO_AUTO_SEQ_TIME
         # -- and GO FOR ENGINE START at about T-10 s
@@ -282,11 +290,11 @@ class Flight:
             self.say("no ET separation in this run's log: OMS-2 targets as uplinked before launch")
             return
         subprocess.run([sys.executable, omst, "fromlog", log, "%.1f" % OMS2_DTIG, state], check=True)
-        out = subprocess.run([sys.executable, omst, "design", state, "124.3", "175.8"], check=True,
+        out = subprocess.run([sys.executable, omst, "design", state, str(FL["oms2_hp"]), str(FL["oms2_ha"])], check=True,
                              capture_output=True, text=True).stdout
         m = re.search(r"HT ([\d.]+)\s+THETA T ([\d.]+)", out)
         ht, th = float(m.group(1)), float(m.group(2))
-        dol = json.load(open(os.path.join(HERE, "sts134-dolilu.json")))
+        dol = json.load(open(os.path.join(HERE, FL["dolilu"])))
         msg = [x for x in dol["messages"] if x["op"] == 25][0]
         msg["fields"][3]["E"] = [OMS2_DTIG, ht, th, 0.0, 0.0]
         path = os.path.join(self.a.logs, "oms2-targets.json")
@@ -315,7 +323,7 @@ class Flight:
 
     def run(self):
         start = PHASES.index(self.a.from_) if self.a.from_ else 0
-        resume = (os.path.join(self.a.logs, "sts134-" + PHASES[start - 1].lower())
+        resume = (os.path.join(self.a.logs, FL["name"] + "-" + PHASES[start - 1].lower())
                   if start else None)
         self.start(resume)
         for ph in PHASES[start:]:
@@ -334,7 +342,18 @@ def main():
                     help="with --from COUNT: send the DOLILU again before OPS 101")
     ap.add_argument("--from", dest="from_", choices=PHASES[1:],
                     help="resume from the capture the previous phase left")
-    Flight(ap.parse_args()).run()
+    ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
+    a = ap.parse_args()
+    if a.flight:
+        global EPOCH, T0, GMTLO, OMS2_DTIG
+        f = json.load(open(a.flight))
+        FL.update(f)
+        hms = lambda x: x[0] * 86400 + x[1] * 3600 + x[2] * 60 + x[3]
+        EPOCH = f.get("epoch", EPOCH)
+        T0 = hms(f["t0"]) if "t0" in f else T0
+        GMTLO = hms(f["gmtlo"]) if "gmtlo" in f else GMTLO
+        OMS2_DTIG = f.get("oms2_dtig", OMS2_DTIG)
+    Flight(a).run()
 
 
 if __name__ == "__main__":

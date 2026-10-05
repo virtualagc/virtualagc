@@ -375,14 +375,14 @@ static void qmat_body(const double q[4], double R[3][3]);
  * 1,110 klb propellant (SCOM) and the rest inert, 1,299,069 lb each (the
  * mean of the two), CG Xo 975. */
 #define ET_INERT_KG      (58500.0 * 0.45359237)
-#define ET_LO2_KG        (1381587.0 * 0.45359237)
-#define ET_LH2_KG        (231218.0 * 0.45359237)
+#define ET_LO2_KG        (fl.etLo2Lb * 0.45359237)
+#define ET_LH2_KG        (fl.etLh2Lb * 0.45359237)
 #define ET_AXIS_ZO       63.5
 #define ET_INERT_XO      525.0
 #define ET_LO2_XO        59.0
 #define ET_LH2_XO        869.0
 #define ET_RADIUS_M      4.2
-#define SRB_INERT_KG     (189069.0 * 0.45359237)
+#define SRB_INERT_KG     (fl.srbInertLb * 0.45359237)
 #define SRB_PROP_KG      (1110000.0 * 0.45359237)
 #define SRB_YO           250.5
 #define SRB_AXIS_ZO      63.5
@@ -409,7 +409,7 @@ static const double ME_CANT_P[3] = { 16.0, 10.0, 10.0 };   /* deg, thrust toward
 static const double ME_CANT_Y[3] = { 0.0, 3.5, -3.5 };     /* deg, thrust toward +Y body: outboard
                                                                nozzle, inboard thrust */
 #define ME_TVAC_N        (470000.0 * LBF_N)
-#define ME_ISP_VAC       452.07
+#define ME_ISP_VAC       (fl.isp)
 #define ME_AE_M2         (6461.0 * IN_M * IN_M)
 #define ME_LIM_P         10.5
 #define ME_LIM_Y         8.5
@@ -458,7 +458,40 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
 /* STS-134's motors (RSRM-113, PMBT 62 F) reached 50 psia at T+119.95 and
  * +120.31 (JSC 37461 App. A), 0.9 s ahead of the population nominal: the
  * trace is run 0.74% fast, its thrust 0.74% up, the impulse unchanged. */
-#define SRB_TSCALE (120.13 / 121.0)
+#define SRB_TSCALE (fl.pc50 / 121.0)
+
+/* THE FLIGHT: the values above that differ from flight to flight, STS-134's
+ * by default, each overridable from the environment so another flight can
+ * be flown with the same model (Space Shuttle Missions Summary App. A and
+ * the flight's mission report give them):
+ *   YAGPC_VEHDYN_ET_LB         ET at SRB ignition, inert and propellant, lb
+ *   YAGPC_VEHDYN_FUEL_BIAS_LB  the flight's fuel bias, lb (LH2 beyond MR 6.0)
+ *   YAGPC_VEHDYN_SRB_LB        each SRB at SRB ignition, lb
+ *   YAGPC_VEHDYN_SRB_PC50_S    the SRMs' 50 psia time after ignition, s
+ *   YAGPC_VEHDYN_SSME_ISP      the SSMEs' predicted Isp tag value, s
+ * The ET's split assumes the SLWT's 58,500 lb inert and the 13,860 lb the
+ * main engines burn on the pad here. */
+static struct {
+    double etLo2Lb, etLh2Lb, srbInertLb, pc50, isp;
+} fl = { 1381587.0, 231218.0, 189069.0, 120.13, 452.07 };
+static void flight_params(void) {
+    static bool done = false;
+    if (done) return;
+    done = true;
+    const char *e;
+    double etLb = 1657445.0, bias = 954.0;
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_ET_LB")) != NULL) etLb = atof(e);
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_FUEL_BIAS_LB")) != NULL) bias = atof(e);
+    double loaded = etLb - 58500.0 + 13860.0;
+    fl.etLh2Lb = (loaded - bias) / 7.0 + bias;
+    fl.etLo2Lb = (loaded - bias) * 6.0 / 7.0;
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_SRB_LB")) != NULL) fl.srbInertLb = atof(e) - 1110000.0;
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_SRB_PC50_S")) != NULL) fl.pc50 = atof(e);
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_SSME_ISP")) != NULL) fl.isp = atof(e);
+    fprintf(stderr, "vehdyn: flight: ET %.0f lb at SRB ignition (LO2 %.0f, LH2 %.0f loaded), "
+                    "SRBs %.0f lb, SRM 50 psia at %.2f s, SSME Isp %.2f s\n",
+            etLb, fl.etLo2Lb, fl.etLh2Lb, fl.srbInertLb + 1110000.0, fl.pc50, fl.isp);
+}
 #define SRB_NT (int)(sizeof SRB_T / sizeof SRB_T[0])
 
 /* The air on the stack, on the orbiter's wing reference area, 2,690 ft^2.
@@ -645,6 +678,7 @@ static void add_force(double f[3], double tau[3], const double fk[3], const doub
 /* The ascent's forces and torques (body), and the flows out of the tank and
  * the boosters, kg/s. */
 static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdotSrb) {
+    flight_params();
     *mdotEt = *mdotSrb = 0.0;
     if (asc == ASC_NONE) return;
     tvc_signs();
@@ -807,6 +841,7 @@ static void pad_state(double t) {
 
 /* Put the stack on the pad (YAGPC_VEHDYN_PAD), at time t. */
 static void pad_init(double t) {
+    flight_params();
     const char *az = yagpc_getenv("YAGPC_VEHDYN_PAD_AZ");
     if (az != NULL) padAz = atof(az);
     /* ON PASS'S OWN ELLIPSOID, as GNKGEO.hal converts the same I-loads: the
@@ -885,6 +920,7 @@ static void qmat_body(const double q[4], double R[3][3]) {
  * about it, from the dry vehicle and the propellant left: parallel-axis
  * shifts of the dry body and of each module's propellant as a point mass. */
 static void mass_properties(void) {
+    flight_params();
     double m = dryKg, c[3] = { 0, 0, 0 };
     double tank[NMOD][3];
     for (int k = 0; k < NMOD; k++) {
@@ -1009,6 +1045,7 @@ static void oms_slew(double dt) {
 }
 
 void vehdyn_reset(double t) {
+    flight_params();
     memset(&st, 0, sizeof st);
     for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG;
     prop[3] = prop[4] = OMS_LOAD_KG;
