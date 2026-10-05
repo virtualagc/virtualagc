@@ -127,7 +127,7 @@ def state_from_log(log, tig_after_etsep):
     rows = []
     for l in open(log, errors="replace"):
         if "LIFTOFF" in l:
-            lift = float(l.split("t=")[-1])
+            lift = float(re.search(r"t=([\d.]+)", l).group(1))
         if l.startswith("vehdyn: ET SEPARATION"):
             etsep = float(re.search(r"t=([\d.]+)", l).group(1))
         if l.startswith("vehdyn-state"):

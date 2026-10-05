@@ -361,22 +361,28 @@ static void qmat_body(const double q[4], double R[3][3]);
 
 /* -- the external tank and the boosters.  Frames: Xt = Xo + 741.0,
  * Zt = Zo + 336.5; the ET's axis and both SRBs' at Zo 63.5, the SRBs at
- * Yo -/+250.5 (JSC-08934 Vol 1 Rev E, SODB Table 2-1).  Masses: the tape's
- * SLWT: inert 58,500 lb (SCOM), LO2 1,387,457 lb and LH2 234,265 lb loaded
- * (Wikipedia, Space Shuttle external tank, SLWT); the tape's own generic
- * guidance mass implied 18,000 lb less, which cost about 180 ft/s at MECO.
+ * Yo -/+250.5 (JSC-08934 Vol 1 Rev E, SODB Table 2-1).  Masses are STS-134's
+ * at SRB ignition (Space Shuttle Missions Summary, NASA 20110001406, App. A):
+ * ET 1,657,445 lb, SRBs 1,298,824 and 1,299,313 lb.  The ET's split is not
+ * given: SLWT inert 58,500 lb (SCOM), so 1,598,945 lb of propellant at SRB
+ * ignition, plus the 13,860 lb the main engines burn on the pad here, is
+ * 1,612,805 lb loaded -- shared at the engines' mixture ratio of 6.0 with
+ * STS-134's 954 lb fuel bias (Missions Summary, STS-134 page) on the LH2.
+ * (These were the tank's capacities, LO2 1,387,457 and LH2 234,265 lb, and
+ * the pad burn was not drawn: the stack was 23,700 lb heavy at T-0.)
  * Stations (ESTIMATED from the geometry; they reproduce PASS's own
  * second-stage CG table): ET inert Xo 525, LO2 Xo 59, LH2 Xo 869.  SRBs:
- * 1,300 klb each loaded, 1,110 klb propellant (SCOM), CG Xo 975. */
+ * 1,110 klb propellant (SCOM) and the rest inert, 1,299,069 lb each (the
+ * mean of the two), CG Xo 975. */
 #define ET_INERT_KG      (58500.0 * 0.45359237)
-#define ET_LO2_KG        (1387457.0 * 0.45359237)
-#define ET_LH2_KG        (234265.0 * 0.45359237)
+#define ET_LO2_KG        (1381587.0 * 0.45359237)
+#define ET_LH2_KG        (231218.0 * 0.45359237)
 #define ET_AXIS_ZO       63.5
 #define ET_INERT_XO      525.0
 #define ET_LO2_XO        59.0
 #define ET_LH2_XO        869.0
 #define ET_RADIUS_M      4.2
-#define SRB_INERT_KG     (190000.0 * 0.45359237)
+#define SRB_INERT_KG     (189069.0 * 0.45359237)
 #define SRB_PROP_KG      (1110000.0 * 0.45359237)
 #define SRB_YO           250.5
 #define SRB_AXIS_ZO      63.5
@@ -808,7 +814,10 @@ static void ascent_events(void) {
         if (ig >= 0.0 && st.t >= ig) {
             asc = ASC_STACK;
             srbIgnT = ig;
-            fprintf(stderr, "vehdyn: LIFTOFF -- the hold-down posts let go at t=%.3f\n", st.t);
+            fprintf(stderr, "vehdyn: LIFTOFF -- the hold-down posts let go at t=%.3f; the stack %.0f lb, "
+                            "the ET's propellant %.0f lb (LO2 %.0f, LH2 %.0f)\n", st.t,
+                    st.mass / 0.45359237, (etLo2 + etLh2) / 0.45359237, etLo2 / 0.45359237,
+                    etLh2 / 0.45359237);
         }
     } else if (asc == ASC_STACK) {
         double sep = mec_fired_at(MEC_SRB_SEP);
@@ -1072,6 +1081,20 @@ void vehdyn_advance(double sharedUs) {
             }
             qmat_body(st.q, R);
             for (int i = 0; i < 3; i++) sfB[i] = R[0][i] * a[0] + R[1][i] * a[1] + R[2][i] * a[2];
+            /* the main engines run for 6.6 s before the SRBs light: their
+             * propellant comes out of the tank here, though the hold-down
+             * posts take their thrust */
+            {
+                double fp[3] = { 0, 0, 0 }, tp[3] = { 0, 0, 0 }, me = 0.0, ms = 0.0;
+                ascent_loads(fp, tp, &me, &ms);
+                if (me > 0.0) {
+                    etLo2 -= me * dt * 6.0 / 7.0;
+                    etLh2 -= me * dt / 7.0;
+                    if (etLo2 < 0.0) etLo2 = 0.0;
+                    if (etLh2 < 0.0) etLh2 = 0.0;
+                    mass_properties();
+                }
+            }
             hist_push();
             state_log();
             continue;

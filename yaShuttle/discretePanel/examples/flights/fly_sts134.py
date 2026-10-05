@@ -119,7 +119,7 @@ class Flight:
     # --- the vehicle ----------------------------------------------------
     def start(self, resume=None):
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
-                   YAGPC_VEHDYN_ORBITER_KG="121826", YAGPC_OMS_ARMED="1",
+                   YAGPC_VEHDYN_ORBITER_KG="121912", YAGPC_OMS_ARMED="1",
                    YAGPC_RNP="2011,136", YAGPC_VEHDYN_STATELOG="5", PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
