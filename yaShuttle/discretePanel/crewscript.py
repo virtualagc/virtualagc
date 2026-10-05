@@ -63,6 +63,10 @@ MAX_SCRIPT_DEPTH = 8            # a script calling a script calling a script...
 WAIT_TIMEOUT_S = 600
 KEY_GAP_S = 0.35
 WAIT_POLL_MS = 100
+# AUTOCIRCLE'S LEAD: a control's circle appears this long BEFORE the control
+# moves, so the eye gets there first.  Circled after the move, the circle only
+# ever pointed at something that had already happened (owner, 2026-10-05).
+AUTOCIRCLE_LEAD_S = 1.0
 # HOW LONG A 'snapshot' LINE WAITS for simulatePASS.py to say it is written.
 # A capture stops every computer, writes each one's memory and each display's,
 # and starts them again; seconds, not minutes, but a loaded host and five
@@ -428,8 +432,12 @@ HELP = """\
     nocircle            take it away
     autocircle SECONDS [COLOR] [DIAMETER]
                         from now on circle every control the script moves,
-                        for SECONDS after each move, and the MODE talkback a
-                        'wait gpc N mode-tb' is waiting on, until it is met;
+                        from 1 s before each move to SECONDS after it, and
+                        the MODE talkback a 'wait gpc N mode-tb' is waiting
+                        on, until it is met.  A move due sooner than 1 s
+                        away (just after a wait, typing or the start) waits
+                        for its circle, and the lines after it keep their
+                        spacing;
                         COLOR and DIAMETER as for circle.  Independent of
                         circle and nocircle, and of each other: a control
                         can carry both.  Panel O6's windows only -- not
@@ -1259,13 +1267,20 @@ class Player(object):
     marks(e, on)        optional: told when a wait on a panel control (a
                         'wait gpc N mode-tb') begins (on) and when it ends,
                         met, timed out or stopped (off) -- autocircle
+    plan(steps)         optional, with circle: [(verb, arg), ...] -> for each,
+                        what autocircle will circle when it runs ([] for
+                        nothing); circle(that) shows it AUTOCIRCLE_LEAD_S
+                        ahead of the step.  See _plan.
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None, gap=None, snaps=None, unattended=False, marks=None):
+                 source=None, gap=None, snaps=None, unattended=False, marks=None,
+                 plan=None, circle=None):
         self.entries, self.after, self.panel = entries, after, panel
         self.marks = marks
+        self.plan, self.circle = plan, circle
+        self._plan_end = 0          # entries before this are planned (_plan)
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
         self.unattended = unattended
@@ -1334,6 +1349,8 @@ class Player(object):
     def _run(self, k):
         while k < len(self.entries) and not self.stopped:
             e = self.entries[k]
+            if k >= self._plan_end:
+                self._plan(k)
             self._note(k, e)
             if e["kind"] == "wait_user" and self.unattended:
                 # --no-wait-user means NO waiting for a person, whoever asked
@@ -1475,6 +1492,50 @@ class Player(object):
         else:
             self._run(k + 1)
 
+    # The lines that can hold the script for a time nobody knows in advance:
+    # the run of timed lines a plan covers ends at the first of them.
+    _BLOCKING = ("keys", "script", "snapshot")
+
+    def _plan(self, k):
+        """AUTOCIRCLE'S CIRCLES, A SECOND EARLY.  The timed lines from k up
+        to the next wait, typing, called script or snapshot all have known
+        times, so each control among them can be circled AUTOCIRCLE_LEAD_S
+        before it moves.  When the first of them is due sooner than that --
+        straight after a wait, at the start, after typing -- the whole run
+        moves later by the shortfall, keeping its spacing: every line after
+        the first is then at least as far off, so all of them get the lead."""
+        steps = []
+        for e in self.entries[k:]:
+            if e["kind"] != "step" or e["verb"] in self._BLOCKING:
+                break
+            steps.append(e)
+        self._plan_end = k + max(1, len(steps))
+        if self.plan is None or self.circle is None or not steps:
+            return
+        try:
+            names = self.plan([(e["verb"], e["arg"]) for e in steps])
+        except Exception as err:         # never worth stopping a script for
+            self.log("autocircle: %s" % err)
+            return
+        firsts = [e for e, n in zip(steps, names) if n]
+        if not firsts:
+            return
+        now = time.monotonic()
+        short = AUTOCIRCLE_LEAD_S - (self.origin + firsts[0]["ms"] / 1000.0 - now)
+        if short > 0.0005:
+            # Reported as how much LATER it now happens than it otherwise
+            # would -- an overdue line would have gone at once, not when due.
+            due = max(now, self.origin + firsts[0]["ms"] / 1000.0)
+            self.origin += short
+            self.log("autocircle: '%s' held %.2f s so that its circle shows first"
+                     % (firsts[0]["text"],
+                        self.origin + firsts[0]["ms"] / 1000.0 - due))
+        for e, n in zip(steps, names):
+            if n:
+                at = self.origin + e["ms"] / 1000.0 - AUTOCIRCLE_LEAD_S - now
+                self.after(max(0, int(at * 1000)),
+                           lambda n=n: None if self.stopped else self.circle(n))
+
     def _mark(self, e, on):
         if self.marks is not None:
             try:
@@ -1608,7 +1669,8 @@ class Player(object):
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
                        source=os.path.basename(e["path"]), gap=self.gap,
-                       snaps=self.snaps, unattended=self.unattended, marks=self.marks)
+                       snaps=self.snaps, unattended=self.unattended, marks=self.marks,
+                       plan=self.plan, circle=self.circle)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):

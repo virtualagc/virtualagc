@@ -3230,6 +3230,7 @@ class PanelO6:
         seconds, colour, diam = self.autocircle
         if name in self._auto_timers:
             self.root.after_cancel(self._auto_timers.pop(name))
+        colour, diam = self.auto_circles.get(name, (colour, diam))   # the lead's own
         self.auto_circles[name] = (colour, diam)
 
         def expire(name=name):
@@ -3240,6 +3241,26 @@ class PanelO6:
         self.redraw()
         if not self._has_feature(name):
             log("autocircle: no feature %r in any panel window" % name)
+
+    # A lead circle whose control has not moved by then (a script stopped
+    # in between) goes away on its own after this long.
+    LEAD_HOLD_S = 5.0
+
+    def lead_circle(self, items):
+        """Circles put up AHEAD of a scripted move (crewscript
+        AUTOCIRCLE_LEAD_S): [(feature, colour, diameter), ...].  The move
+        itself (auto_circle) then gives each its SECONDS."""
+        for name, colour, diam in items:
+            if name in self._auto_timers:
+                self.root.after_cancel(self._auto_timers.pop(name))
+            self.auto_circles[name] = (colour, diam)
+
+            def expire(name=name):
+                self._auto_timers.pop(name, None)
+                self.auto_circles.pop(name, None)
+                self.redraw()
+            self._auto_timers[name] = self.root.after(int(self.LEAD_HOLD_S * 1000), expire)
+        self.redraw()
 
     def wait_circle(self, name, on):
         """What a wait is on: circled while it waits, if autocircle is on."""
@@ -5057,6 +5078,36 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                 return ["bfcdisplay", "bfcselect"]
         return []
 
+    def autocircle_words(arg):
+        words = arg.split()
+        seconds, colour, diam = float(words[0]), "yellow", 2.0
+        for word in words[1:]:
+            try:
+                diam = float(word)
+            except ValueError:
+                colour = word
+        return seconds, colour, diam
+
+    def plan(steps):
+        """For the Player's _plan: what autocircle will circle for each of
+        these steps when it runs, [(feature, colour, diameter), ...] -- worked
+        out ahead, following the 'gpc N' and 'autocircle' lines among them,
+        since the circles go up before any of them has happened."""
+        col, on = target[0], panel.autocircle
+        out = []
+        for verb, arg in steps:
+            if verb == "gpc":
+                col = int(arg) - 1
+            elif verb == "autocircle":
+                sec, colour, diam = autocircle_words(arg)
+                on = (sec, colour, diam) if sec > 0 else None
+            try:
+                names = moved(verb, arg, col) if on is not None else []
+            except (ValueError, KeyError, IndexError):
+                names = []
+            out.append([(n, on[1], on[2]) for n in names])
+        return out
+
     def marks(e, on):
         """autocircle's circle on what a wait is on: GPC N's MODE talkback."""
         if e.get("kind") == "wait":
@@ -5176,13 +5227,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         elif verb == "nocircle":
             panel.set_circle(None)
         elif verb == "autocircle":
-            words = arg.split()
-            seconds, colour, diam = float(words[0]), "yellow", 2.0
-            for w in words[1:]:
-                try:
-                    diam = float(w)
-                except ValueError:
-                    colour = w
+            seconds, colour, diam = autocircle_words(arg)
             try:
                 root.winfo_rgb(colour)
             except tk.TclError:
@@ -5322,7 +5367,8 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                                      unattended=getattr(panel, "unattended", False),
                                      screens=panel.screens,
                                      progress=show_progress,
-                                     source=source, marks=marks)
+                                     source=source, marks=marks,
+                                     plan=plan, circle=panel.lead_circle)
     panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
