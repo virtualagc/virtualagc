@@ -187,8 +187,11 @@ def main():
                 (hp, ha), dv, ang = burn(st, ht, theta, 0.0, 0.0)
             except (ValueError, ZeroDivisionError):
                 continue
-            err = (hp - a.hp) ** 2 + (ha - a.ha) ** 2
-            if best is None or err < best[0]:
+            # the apsides first; among the (HT, THETA T) pairs that reach
+            # them (to 0.1 nmi), the cheapest burn -- many do, at very
+            # different cost
+            err = max((hp - a.hp) ** 2 + (ha - a.ha) ** 2, 0.01)
+            if best is None or (err, dv) < (best[0], best[5]):
                 best = (err, ht, theta, hp, ha, dv, ang)
     _, ht, theta, hp, ha, dv, ang = best
     print("HT %.2f  THETA T %.2f  C1 0  C2 0  ->  HP %.1f HA %.1f nmi, dV %.1f ft/s, target %.1f deg ahead"
