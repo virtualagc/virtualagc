@@ -91,6 +91,7 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | CGGV_RAD_MECO | 21,290,308 ft | **21,241,604** ft, the same as RD_NOM | The radius second-stage guidance flies to until the guidance parameter reset (GG42ND step 54, T+218); the flight source initializes it to RD_NOM's value (CGGC01).  Left at the tape's 60 nmi it lofted second stage and dove at the reset (commit 7190ce67d). |
 | CGGS_FPA_MECO_NOM | 0.5° | **0.65°** | No STS-134 value found. With VI 25,819 it gives a post-MECO apogee near the MOD FRR's "insertion altitude 122 nm". |
 | CGGS_ASSUMED_SSME_FAIL_MET (TFAIL) | 218 s | **0**: no second-stage trajectory lofting | FSSR STS 83-0002-34 §4.8 ("if trajectory lofting is desired (TFAIL is not zero)").  No STS-134 value is published; the tape's 218 s lofted second stage ~30,000 ft above the card and dove at the RTLS/AOA boundary (also 218 s); with 0 the climb rate follows the card (commit 63608afdb). |
+| CGGS_ROLL_CMD_CHANGE_V (V_RHO_PHI) | 12,500 ft/s | **12,000** ft/s | The Earth-relative velocity at which second-stage guidance commands the roll to heads-up (PHI_2STG).  A second-stage I-load built into each flight's load: FSSR Table 4.2-1 (the DOLILU parameters) and §4.12 (the uplink memory groups) do not include it.  12,000 puts the roll on the Ascent Checklist's "VI = 13.2K √Roll Heads Up"; the tape's value started it near Vi 13,700 (commit 531edd4a6). |
 
 ### IMU operate and gyrocompass alignment (OPS 9, SPEC 104)
 
@@ -139,7 +140,7 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | +126.68 | 106% (K_CMD_STG2, a GG42ND constant) | |
 | ≈ +130 to +300 | OMS assist, both engines, 170 s | +134 to +300.5 (164.2 s) |
 | +218.84 | 104.5% (K_CMD_NOM) at the guidance parameter reset | |
-| ≈ +357 | Roll to heads-up begins (Vi ≈ 13,700) | crew cue: VI 13.2K |
+| ≈ +350 | Roll to heads-up begins (Vi ≈ 13,280 by the time it shows, flight `p12`; V_RHO_PHI on the tape, Vrel 12,000) | crew cue: VI 13.2K |
 | +439.64 to +496.60 | 3-g throttling, 100% → 67% | 3-g throttle-down from +440.0; 67% at +494.7 |
 | **+502.88** | **MECO command** (guided).  VI **25,821 ft/s** truth (target 25,819); 1,329 kg LO2 and 654 kg LH2 left at ET separation | **MECO +501.1** (Missions Summary: 8:21.5); VI 25,819 (P), 25,818 (A) |
 | +516.72 | MEC: ET umbilical unlatch fired | |
@@ -278,8 +279,6 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
   insertion apogees a few nmi low; STS-135's MECO was 5 ft/s low.
 - **No second-stage lofting** (TFAIL 0) is chosen to fit the card; STS-134's
   value is not published.
-- **The heads-up roll starts near Vi 13,700**, the crew's cue is 13.2K (the
-  tape's ROLL_CMD_CHANGE_V, Vrel 12,500, not changed).
 - **The first stage ends out of the final plane**, which second stage steers
   out.  The yaw table was tuned for best MECO margin, not zero plane error.
 - **The pre-launch timetable is compressed into 85 minutes.** The real one
@@ -290,7 +289,9 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
 - **MECO flight-path angle** 0.65° is chosen, not sourced; the card's MECO
   climb rate is 272 ft/s against our 310.
 - **No winds.**  The STS-1 OFP's April mean wind (figs 5.3-1/-2) peaks at
-  112 ft/s near 42,000 ft, mostly a tailwind on this azimuth.
+  112 ft/s near 42,000 ft, mostly a tailwind on this azimuth.  PASS takes
+  measured winds on launch day too, as DOLILU parameters (FSSR Table 4.2-1:
+  WNDE_TAB / WNDN_TAB, 8 points each); none are uplinked here.
 - **A one-GPC session save once froze the vehicle** after its capture
   (gpc-causes #276); the flight resumed from that capture.
 
@@ -307,7 +308,7 @@ All are in the local ibiblio mirror (`~/Desktop/sandroid.org/public_html/apollo/
 - **Booster Console Handbook**: `MCC/Booster Console Handbook.pdf`. "At 50 psia, an SRB may produce approximately 200,000 lbs of thrust"; the separation cue logic.
 - **JSC-08964, Cubic spline function interpolation in atmosphere models for the SDL** (Kirkpatrick): App. A, the 1963 Patrick AFB reference atmosphere tables.
 - **JSC-14483 (78-FM-51) Vol 3, STS-1 Operational Flight Profile, Ascent, Cycle 3**: Table 6.2-I, SRB separation state; §5.2 and fig. 6.2-1, the IA156 aerodynamics along its nominal ascent.
-- **STS 83-0002-34, GN&C FSSR, Guidance Ascent/RTLS**: §4.2 DOLILU parameters and uplinks, §4.8 PEG and trajectory lofting (TFAIL, T_RTLS_AOA), §4.12 I-load memory layout.
+- **STS 83-0002-34, GN&C FSSR, Guidance Ascent/RTLS**: §4.2 DOLILU parameters and uplinks (Table 4.2-1), Table 4.3.5-3 second-stage I-loads (V_RHO_PHI, PHI_2STG), §4.12 uplink memory groups, §4.8 PEG and trajectory lofting (TFAIL, T_RTLS_AOA), §4.12 I-load memory layout.
 - **STS 83-0013-34, IMU SOP FSSR**: OPERATE runup, discretes.
 - **S0007 Vols 1-2 (OMI) and the GLS document** (`Countdown/`): the real countdown's IMU and G9 → G1 schedule.
 - **DPS Console Handbook; DPS Dictionary Rev J**: BITE 4 output read-back at OPS transitions.
