@@ -612,9 +612,59 @@ static double geodetic_h_ft(const double r[3]) {
     }
     return h / 0.3048;
 }
+/* THE 1963 PATRICK AFB REFERENCE ATMOSPHERE, the one the Shuttle's ascent
+ * design used (STS-1 OFP JSC-14483 Vol 3 sec. 5.3; Smith & Weidner, NASA
+ * TM X-53139, 1964), as tabulated for SVDS in JSC-08964 (Kirkpatrick,
+ * "Cubic spline function interpolation in atmosphere models...", App. A,
+ * IOP = 5): pressure (mb) and density (kg/m^3) at 55 of its 123 altitudes,
+ * 0-66 km.  Temperature is p / (rho R).  A subtropical column: 3% thinner
+ * than the 1976 standard at the ground, 2-7% denser at 10-12 km where
+ * max-q is, 12% denser at 14-16 km.  Above 66 km, and with
+ * YAGPC_VEHDYN_ATMOS=us1976, the 1976 standard below is used instead. */
+static const double PAT_H[] = {
+    0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3500, 4000, 4500,
+    5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000,
+    18000, 19000, 20000, 22000, 24000, 26000, 28000, 30000, 32000, 34000, 36000, 38000, 40000,
+    42000, 44000, 46000, 48000, 50000, 52000, 54000, 56000, 58000, 60000, 62000, 64000, 66000 };
+static const double PAT_P[] = {      /* mb */
+    1017.0147, 988.29373, 960.22651, 932.80664, 906.03418, 879.89596, 854.38573, 829.49430,
+    805.21168, 781.52728, 758.43002, 735.90840, 713.95065, 671.67869, 631.51745, 593.37050,
+    557.14348, 490.09912, 429.67959, 375.32040, 326.49869, 282.77555, 243.73144, 209.09281,
+    178.61068, 151.99026, 128.92856, 109.11841, 92.252642, 78.097365, 66.260092, 56.315652,
+    40.899191, 29.918759, 22.038159, 16.327363, 12.146273, 9.0905080, 6.8429914, 5.1807184,
+    3.9447995, 3.0209180, 2.3262411, 1.8004513, 1.3994781, 1.0910568, 0.85180215, 0.66393197,
+    0.51553130, 0.39852059, 0.30651143, 0.23442082, 0.17818466, 0.13454170, 0.10086976 };
+static const double PAT_RHO[] = {    /* kg/m^3 */
+    1.1835467, 1.1573534, 1.1312045, 1.1051789, 1.0793462, 1.0537666, 1.0284922, 1.0035670,
+    0.97902601, 0.95490, 0.93122447, 0.90800345, 0.88525681, 0.84122243, 0.79915662,
+    0.75904647, 0.72084275, 0.64983435, 0.58535153, 0.52651817, 0.47249382, 0.42255460,
+    0.37638429, 0.33302120, 0.29232218, 0.25432637, 0.21920326, 0.18717685, 0.15845601,
+    0.13239218, 0.11096236, 0.093193799, 0.066193250, 0.047478898, 0.034382489, 0.025119029,
+    0.018334060, 0.013457797, 0.0099301028, 0.0073654170, 0.0054934199, 0.0041220200,
+    0.0031134715, 0.0023684559, 0.0018151546, 0.0014015768, 0.0010965534, 0.00086526723,
+    0.00068253221, 0.00053756684, 0.00042227457, 0.00033048920, 0.00025745233, 0.00019944483,
+    0.00015352539 };
+#define PAT_N (int)(sizeof PAT_H / sizeof PAT_H[0])
+static int patrick(double h, double *rho, double *temp) {
+    static int use = -1;
+    if (use < 0) {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_ATMOS");
+        use = !(e != NULL && strcmp(e, "us1976") == 0);
+    }
+    if (!use || h >= PAT_H[PAT_N - 1]) return 0;
+    if (h < 0.0) h = 0.0;
+    int i = 0;
+    while (i < PAT_N - 2 && h > PAT_H[i + 1]) i++;
+    double f = (h - PAT_H[i]) / (PAT_H[i + 1] - PAT_H[i]);
+    double p = exp(log(PAT_P[i]) + f * (log(PAT_P[i + 1]) - log(PAT_P[i]))) * 100.0;
+    *rho = exp(log(PAT_RHO[i]) + f * (log(PAT_RHO[i + 1]) - log(PAT_RHO[i])));
+    *temp = p / (*rho * 287.05);
+    return 1;
+}
 /* THE 1976 STANDARD ATMOSPHERE to 86 km, layer by layer: physics.c's
  * single exponential below 25 km is 20-26% thin where max-q happens. */
 static void us1976(double h, double *rho, double *temp) {
+    if (patrick(h, rho, temp)) return;
     static const double HB[] = { 0, 11000, 20000, 32000, 47000, 51000, 71000, 86000 };
     static const double LB[] = { -0.0065, 0.0, 0.001, 0.0028, 0.0, -0.0028, -0.002 };
     static const double PB[] = { 101325.0, 22632.06, 5474.889, 868.0187, 110.9063, 66.93887,
