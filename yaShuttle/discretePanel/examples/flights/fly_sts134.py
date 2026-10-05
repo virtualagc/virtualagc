@@ -67,7 +67,10 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       # the day's air and wind for the truth (vehdyn); the same sounding
       # makes the DOLILU's wind table (message 11).  A flight file's
       # relative sounding path is taken from this directory.
-      "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-2011051612Z.csv"}}
+      # The truth flies the air at launch, 12:56Z: the 12Z and 15Z Cape
+      # soundings interpolated in time.  PASS's table is from 12Z alone, the
+      # last balloon before launch (none earlier is archived for 74794).
+      "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "ORBIT"]
 
 IPL_SCRIPT = """

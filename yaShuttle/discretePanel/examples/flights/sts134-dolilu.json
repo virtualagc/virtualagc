@@ -11,7 +11,8 @@
   "THROT is INTEGER: 104 for the flight's 104.5",
   "Message 37 is the tape's own 58 halfwords with the named fields changed; masses in slugs, the orbiter-dependent ones moved by the STS-134 orbiter's difference from the tape's 203,193 lb",
   "First stage: PSI/PHI/QPOLY/TREF from the simulated stack, not from the flight's own (unavailable) DOLILU: the yaw table turned to the 51.6-deg azimuth and the throttle velocities placed at the report's throttle times",
-  "Message 11, the wind table: STS-134's measured winds (FSSR Table 4.2-1 lists WNDE_TAB/WNDN_TAB as DOLILU parameters).  First-stage guidance subtracts them from the relative velocity to index the pitch and yaw tables by the aerodynamic reference velocity VREL_AERO_REF (GG31ST, FSSR 4.2.3), so the tables must be shaped with this wind in place.  The truth model flies the same sounding (YAGPC_VEHDYN_SOUNDING)."
+  "Message 11, the wind table: STS-134's measured winds (FSSR Table 4.2-1 lists WNDE_TAB/WNDN_TAB as DOLILU parameters).  First-stage guidance subtracts them from the relative velocity to index the pitch and yaw tables by the aerodynamic reference velocity VREL_AERO_REF (GG31ST, FSSR 4.2.3), so the tables must be shaped with this wind in place.  The truth model flies the same sounding (YAGPC_VEHDYN_SOUNDING).",
+  "Wind sources: PASS's table (message 11) is the 12Z Cape sounding (74794), the last balloon before launch in the University of Wyoming archive (released ~11:00Z; nothing earlier is archived for 74794 on 15-16 May 2011, and the ground's own DOLILU winds -- Jimsphere and the 50 MHz profiler, prepared hours ahead -- are not available).  The truth flies the air at launch: 12Z and 15Z interpolated to 12:56Z (sts134-sounding-74794-20110516-1256Z.csv).  Between 12Z and 15Z the westerly at 10-12 km strengthened 7-11 m/s, matching JSC 37461's 'late predicted change in the wind at approximately 30,000 to 40,000 ft'; density changed < 1%."
  ],
  "messages": [
   {
