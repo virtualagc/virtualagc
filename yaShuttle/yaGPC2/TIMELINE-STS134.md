@@ -44,6 +44,7 @@ data bus, through the T-0 umbilical.  Here that is `lpsmodel.c`.
 |---|---|---|
 | Pre-launch | Run `sts134` (panel and yaGPC2 logs) | Accurate to about ±10 s. The pre-launch timetable is *ours*: STS-134's real countdown spread these activities over a day (S0007 and the GLS document; see References). |
 | Terminal count | Run `sts134c` | The procedure and its times are unchanged since. |
+| The baseline: IPL to the orbit after OMS 2 | Run **`sts134f`** (scratch-2026-10-03), from IPL on the current tape (every reconfiguration cell, the separation I-loads included) with the day's weather | Shown first wherever it measured the event.  It logs the state only every 5 s after first stage, and not the throttle commands, so rows it has no number for are `sts134e`'s. |
 | Ascent, OMS 2 and the orbit | Run `sts134e` (scratch-2026-10-03) | Resumed from the countdown capture of the full reference flight `sts134d` (from IPL), with the current model and DOLILU.  Times are from its SRB ignition, 136/12:56:27.81. |
 | Max-q and SRB separation with the day's weather and the flight's separation I-loads | Runs `w2` and `s1` (scratch-2026-10-03) | Resumed from a first-stage capture (`cap-w1`) with the 12:56Z sounding as the truth; `s1` adds the separation I-loads to its memory.  Shown in the ascent table where they differ from `sts134e`. |
 | STS-134 actual | JSC 37461, Appendix A | Shown alongside where it exists. |
@@ -132,7 +133,7 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | −0:00:08.3, −0:00:07.3 | | PASS | LH2 prevalves PV4-6 OPEN; LO2 overboard bleed PV19 CLOSED | |
 | **−6.56 / −6.44 / −6.32 s** | | PASS | **SSME 3, 2, 1 start.** STS-134: −6.555 / −6.430 / −6.317 s. | JSC 37461 App. A |
 
-### Ascent (PASS, MM 102 → 103 → 104), run `sts134e`
+### Ascent (PASS, MM 102 → 103 → 104), runs `sts134f` and `sts134e`
 
 | T | Event | STS-134 actual (JSC 37461; Missions Summary) |
 |---|---|---|
@@ -142,20 +143,21 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | ≈ +7 to +20 | Roll program to heads-down | |
 | +39.48 | Throttle down for max-q to **72%** (AGT not activated) | 72% at +39.5; AGT not activated |
 | +51.32 | Throttle up to 104.5% | +51.3 |
-| +57.6 | Max-q, **715 psf** (721 in flight `p11`).  With the day's winds and atmosphere (`w2`, `s1`): **723 psf** at +47.6 | Max-q **733.1 psf** at +60.0 |
-| +122.96 | MEC: SRB SEPARATION ARMED (PASS's moding time, cue + 2.23 s; run `s1`) | Both SRMs at 50 psia +119.95 / +120.31; end of action +122.5 / +122.9 |
-| **+124.72** | **SRB separation** (cue + 3.94 s; run `s1`.  `sts134e`, with the release's 6 s command delay: +126.40) | **+124.72** (APU loss of signal; Missions Summary: 2:04.8) |
+| +56.4 | Max-q, **698 psf** (`sts134f`, the day's winds and atmosphere; `w2` and `s1` 697 at +56.6).  `sts134e`, the Patrick atmosphere and no wind: 715 psf at +57.6 | Max-q **733.1 psf** at +60.0 |
+| +123.08 | MEC: SRB SEPARATION ARMED (PASS's moding time, cue + 2.23 s; `sts134f`; `s1` +122.96) | Both SRMs at 50 psia +119.95 / +120.31; end of action +122.5 / +122.9 |
+| **+124.84** | **SRB separation** (cue + 3.94 s; `sts134f`; `s1` +124.72.  `sts134e`, with the release's 6 s command delay: +126.40) | **+124.72** (APU loss of signal; Missions Summary: 2:04.8) |
 | +126.68 | 106% (K_CMD_STG2, a GG42ND constant) | |
 | ≈ +130 to +300 | OMS assist, both engines, 170 s | +134 to +300.5 (164.2 s) |
 | +218.84 | 104.5% (K_CMD_NOM) at the guidance parameter reset | |
 | ≈ +350 | Roll to heads-up begins (Vi ≈ 13,280 by the time it shows, flight `p12`; V_RHO_PHI on the tape, Vrel 12,000) | crew cue: VI 13.2K |
 | +439.64 to +496.60 | 3-g throttling, 100% → 67% | 3-g throttle-down from +440.0; 67% at +494.7 |
-| **+502.88** | **MECO command** (guided).  VI **25,821 ft/s** truth (target 25,819); 1,329 kg LO2 and 654 kg LH2 left at ET separation | **MECO +501.1** (Missions Summary: 8:21.5); VI 25,819 (P), 25,818 (A) |
+| **≈ +502.8** | **MECO command** (guided; ET separation less PASS's 21.2 s).  VI **25,819 ft/s** truth (target 25,819), at about 343,000 ft; 1,420 kg LO2 and 669 kg LH2 left at ET separation (`sts134f`.  `sts134e`: +502.88, 25,821, 1,329 / 654 kg) | **MECO +501.1** (Missions Summary: 8:21.5); VI 25,819 (P), 25,818 (A) |
 | +516.72 | MEC: ET umbilical unlatch fired | |
-| **+524.08** | **ET separation**.  Post-MECO orbit 124.1 × 25.7 nmi osculating above the equatorial radius; PASS's display (J2-mean) 125.3 × 25.1 | ET sep +522; MOD FRR: "insertion altitude 122 nm" |
+| **+523.96** | **ET separation** (`sts134f`; `sts134e` +524.08).  Post-MECO orbit 120.9 × 25.9 nmi osculating above the equatorial radius (`sts134e` 124.1 × 25.7; PASS's display, J2-mean, 125.3 × 25.1) | ET sep +522; MOD FRR: "insertion altitude 122 nm" |
 
-The truth's velocity budget to ET separation (vehdyn): 30,353 ft/s of thrust,
-of it 27,542 along the velocity; drag loss 424 ft/s; gravity loss 2,634 ft/s.
+The truth's velocity budget to ET separation (vehdyn, `sts134f`): 30,356 ft/s
+of thrust, of it 27,500 along the velocity; drag loss 377 ft/s; gravity loss
+2,641 ft/s (`sts134e`: 30,353, 27,542, 424, 2,634).
 
 The vehicle crosses the abort-boundary velocities of the checklist's no-comm
 table 2-4 s behind STS-134's actual calls (Missions Summary: 2 ENG MRN 2:36,
@@ -167,33 +169,42 @@ The STS-134 Ascent Checklist's **ASCENT ADI – NOMINAL** cue card (CC 10-11,
 ASC-14a/134) gives the nominal pitch, altitude and altitude rate at fixed
 times in first stage and fixed inertial velocities in second.  The same card
 appears, to about 4,000 ft and 2°, in every OI-34 flight's checklist
-(STS-128 to STS-135): it is the standard ISS ascent design.  Run `sts134e`
-(altitude is geodetic, on PASS's ellipsoid, as the vehicle logs it):
+(STS-128 to STS-135): it is the standard ISS ascent design.  Altitude above
+the ellipsoid; the second stage at the first sample at or past each velocity
+(`sts134f` samples every 5 s there):
 
-| | Card θ / H / Ḣ | Simulated H / Ḣ |
-|---|---|---|
-| T+0:30 | 69° / 10K / 670 | 9.7K / 674 |
-| T+0:50 | 62° / 27K / 1,007 | 27.0K / 1,018 |
-| T+1:10 | 52° / 51K / 1,441 | 51.8K / 1,497 |
-| T+1:30 | 39° / 85K / 1,903 | 86.8K / 1,953 |
-| T+1:50 | 30° / 126K / 2,200 | 129.3K / 2,237 |
-| Vi 6,000 | 19° / 220K / 1,698 | 237K / 1,610 |
-| Vi 8,000 | 14° / 311K / 903 | 319K / 850 |
-| Vi 12,000 | 6° / 357K / 56 | 358K / 10 |
-| Vi 18,000 | 23° / 344K / −268 | 344K / −245 |
-| Vi 24,000 | 17° / 337K / 66 | 335K / 20 |
-| MECO, Vi 25,819 | 13° / 345K / 272 | 345K / 310 |
+| | Card θ / H / Ḣ | `sts134f` H / Ḣ (day's weather) | `sts134e` H / Ḣ (no wind) |
+|---|---|---|---|
+| T+0:30 | 69° / 10K / 670 | 9.7K / 684 | 9.7K / 674 |
+| T+0:50 | 62° / 27K / 1,007 | 27.2K / 1,028 | 27.0K / 1,018 |
+| T+1:10 | 52° / 51K / 1,441 | 52.4K / 1,528 | 51.8K / 1,497 |
+| T+1:30 | 39° / 85K / 1,903 | 88.2K / 1,985 | 86.8K / 1,953 |
+| T+1:50 | 30° / 126K / 2,200 | 131.3K / 2,258 | 129.3K / 2,237 |
+| Vi 6,000 | 19° / 220K / 1,698 | 248.4K / 1,571 | 237K / 1,610 |
+| Vi 8,000 | 14° / 311K / 903 | 326.3K / 817 | 319K / 850 |
+| Vi 12,000 | 6° / 357K / 56 | 362.7K / −30 | 358K / 10 |
+| Vi 18,000 | 23° / 344K / −268 | 347.7K / −283 | 344K / −245 |
+| Vi 24,000 | 17° / 337K / 66 | 339.0K / 66 | 335K / 20 |
+| MECO, Vi 25,819 | 13° / 345K / 272 | ≈343K | 348K / 319 |
+
+With the day's weather the first stage ends higher and the second stage climbs
+well above the card (+28,000 ft at Vi 6,000), coming back to it by MECO.  The
+pitch table and QPOLY/TREF were shaped on flights with no wind.  The MECO
+altitude follows PEG's radius error at cutoff, a few thousand feet either side
+of RD_NOM: at 37° latitude a cutoff exactly on RD_NOM reads about 341K above
+the ellipsoid, so the card's 345K is about 3,600 ft above it.  `sts134e`'s
+MECO row earlier read 345K / 310, from a sample of the coast after cutoff.
 
 (The pitch flown in `p10`, the same table: 70.1 / 63.3 / 56.1 / 38.9 / 29.3°
 at T+30 to T+110.)
 
-### OMS 2 (MM 105), run `sts134e`
+### OMS 2 (MM 105), run `sts134e` (`sts134f` the same procedure)
 
 The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 to 3-7 and the OMS 2 cue cards.
 
 | T | MET | Who | Event |
 |---|---|---|---|
-| ET sep + 120 s | 0:10:44 | GROUND | Message 25 with the OMS-2 targets designed from the insertion: HT 171.95, θT 344.30° (264.6 ft/s) |
+| ET sep + 120 s | 0:10:44 | GROUND | Message 25 with the OMS-2 targets designed from the insertion: HT 171.95, θT 344.30° (264.6 ft/s).  `sts134f`: HT 171.95, θT 320.91° (263.3 ft/s) |
 | ET sep + 600 s | 0:18:44 | CREW | `dap c3 auto`, `OPS 105 PRO`, TRIM LOAD `ITEM 6 +0.4 −5.7 +5.7 EXEC`, LOAD `ITEM 22`, TIMER `ITEM 23`, MNVR `ITEM 27 EXEC` |
 | — | — | SIM | OMS engines ARM/PRESS (`YAGPC_OMS_ARMED=1`; the checklist's TIG−2 switch) |
 | +2,272.1 | 0:37:52 | CREW | `EXEC` at TIG−8 s |
@@ -203,7 +214,10 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 
 | | Simulated (truth) | STS-134 |
 |---|---|---|
-| Just after the burn (osculating) | **172.5 × 121.4 nmi** above the equatorial radius = **176.4 × 125.2** above the 6,371 km mean radius | **175.8 × 124.3 nmi** (JSC 37461) |
+| Just after the burn (osculating), `sts134f` | **172.1 × 120.7 nmi** above the equatorial radius = **176.0 × 124.6** above the 6,371 km mean radius | **175.8 × 124.3 nmi** (JSC 37461) |
+| One-orbit average, `sts134f` (1,149 samples over 5,740 s) | 166.0 × 120.5 above the equatorial radius (169.9 × 124.3 above the mean radius); inclination 51.63-51.67° | |
+| OMS-2 burn, `sts134f` | 263.3 ft/s | 259.2 ft/s |
+| Just after the burn, `sts134e` | 172.5 × 121.4 nmi above the equatorial radius = 176.4 × 125.2 above the mean radius | |
 | PASS's display (J2-mean, GZIASC) | 166.1 × 120.9 | |
 | One-orbit average (1,090 samples over 5,450 s) | 166.4 × 121.0 osculating above the equatorial radius (170.2 × 124.8 above the mean radius); inclination **51.63°** | |
 | Plane | Ascending node within ±0.05° of the ISS's (Space-Track TLE, regressed), inclination 51.63-51.65° against the TLE's mean 51.648° | the ISS's |
@@ -288,10 +302,12 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
   generic-release separation timings instead of the flight's I-loads; with
   them it is +124.72 against +124.72 (run `s1`).  No sensor offset was
   needed.
-- **Max-q is ~1.4% low** with the day's winds and atmosphere (723 psf
-  against 733.1; 715-721 with the Patrick atmosphere and no wind).
-  STS-135's (721 against 734) was flown without its day's weather.
-- **The OMS-2 burn is 2% (STS-134) to 20% (STS-135) dearer** than flown, from
+- **Max-q is ~4.8% low** with the day's winds and atmosphere (698 psf
+  against 733.1; 715 with the Patrick atmosphere and no wind): the day's air
+  lowers it.  STS-135's (721 against 734) was flown without its day's
+  weather.  (The 723 psf given here before was a recomputation from the 1976
+  atmosphere with no wind, not the truth's.)
+- **The OMS-2 burn is 1.6% (STS-134, `sts134f`) to 20% (STS-135) dearer** than flown, from
   insertion apogees a few nmi low; STS-135's MECO was 5 ft/s low.
 - **No second-stage lofting** (TFAIL 0) is chosen to fit the card; STS-134's
   value is not published.
