@@ -455,6 +455,10 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
     { 121, 0.200 }, { 122, 0.146 }, { 123, 0.103 }, { 124, 0.074 }, { 125, 0.049 },
     { 127, 0.0 } };
 #define SRB_SCALE 1.0
+/* STS-134's motors (RSRM-113, PMBT 62 F) reached 50 psia at T+119.95 and
+ * +120.31 (JSC 37461 App. A), 0.9 s ahead of the population nominal: the
+ * trace is run 0.74% fast, its thrust 0.74% up, the impulse unchanged. */
+#define SRB_TSCALE (120.13 / 121.0)
 #define SRB_NT (int)(sizeof SRB_T / sizeof SRB_T[0])
 
 /* The air on the stack, on the orbiter's wing reference area, 2,690 ft^2.
@@ -547,7 +551,7 @@ void vehdyn_specific_force(double out[3]) { memcpy(out, sfB, sizeof sfB); }
 /* An SRB thrust, vacuum, N, at time tau from ignition. */
 static double srb_thrust_vac(double tau) {
     if (tau < 0.0) return 0.0;
-    return interp(SRB_T, SRB_NT, tau) * 1e6 * LBF_N * SRB_SCALE;
+    return interp(SRB_T, SRB_NT, tau / SRB_TSCALE) * 1e6 * LBF_N * SRB_SCALE / SRB_TSCALE;
 }
 
 /* Height above the WGS-84 ellipsoid (first order), m, and the air there. */
@@ -606,7 +610,14 @@ static void us1976(double h, double *rho, double *temp) {
 double vehdyn_srb_pc_psia(void) {
     if (asc == ASC_PAD || (asc == ASC_STACK && srbIgnT < 0.0)) return 14.7;
     if (asc != ASC_STACK) return -1.0;
-    double pc = 914.0 * srb_thrust_vac(st.t - srbIgnT) / (3.312e6 * LBF_N * SRB_SCALE);
+    /* Head pressure per pound of thrust falls as the throat erodes: 914
+     * psia at the 3.312 Mlbf peak, and "at 50 psia, an SRB may produce
+     * approximately 200,000 lbs of thrust" at the end (Booster Console
+     * Handbook, SRB separation) -- taken linear in time between. */
+    double tau = st.t - srbIgnT, end = 121.0 * SRB_TSCALE;
+    double k0 = 914.0 / 3.312e6, k1 = 50.0 / 0.2e6;
+    double kk = k0 + (k1 - k0) * (tau > end ? 1.0 : tau < 0.0 ? 0.0 : tau / end);
+    double pc = kk * srb_thrust_vac(tau) / LBF_N;
     double h = height_m(st.r), rho, T;
     us1976(h, &rho, &T);
     double pamb = rho * 287.05 * T / 6894.757;
