@@ -551,10 +551,29 @@ static double srb_thrust_vac(double tau) {
 }
 
 /* Height above the WGS-84 ellipsoid (first order), m, and the air there. */
+/* The state is in M50, whose Z is the 1950 pole: latitude is measured from
+ * the pole of date (about 0.34 deg away by 2011, up to ~100 m of height). */
 static double height_m(const double r[3]) {
-    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
-    double sl = r[2] / rn, f = 1.0 / 298.257223563;
+    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]), p[3];
+    phys_earth_pole(p);
+    double sl = (r[0] * p[0] + r[1] * p[1] + r[2] * p[2]) / rn, f = 1.0 / 298.257223563;
     return rn - 6378137.0 * (1.0 - f * sl * sl);
+}
+/* Geodetic height above PASS's ellipsoid (GNKGEO's: a 20,925,646.3255 ft,
+ * f 1/298.3), feet -- what PASS's altitude, and so the crew's cue cards, use. */
+static double geodetic_h_ft(const double r[3]) {
+    double p[3];
+    phys_earth_pole(p);
+    double a = 20925646.3255 * 0.3048, f = 1.0 / 298.3, e2 = f * (2.0 - f);
+    double z = r[0] * p[0] + r[1] * p[1] + r[2] * p[2];
+    double rr = r[0] * r[0] + r[1] * r[1] + r[2] * r[2], w = sqrt(rr > z * z ? rr - z * z : 0.0);
+    double lat = atan2(z, w * (1.0 - e2)), h = 0.0;
+    for (int i = 0; i < 4; i++) {
+        double sl = sin(lat), N = a / sqrt(1.0 - e2 * sl * sl);
+        h = w / cos(lat) - N;
+        lat = atan2(z, w * (1.0 - e2 * N / (N + h)));
+    }
+    return h / 0.3048;
 }
 /* THE 1976 STANDARD ATMOSPHERE to 86 km, layer by layer: physics.c's
  * single exponential below 25 km is 20-26% thin where max-q happens. */
@@ -723,11 +742,13 @@ static void ascent_log(void) {
     const double D = 180.0 / VD_PI;
     fprintf(stderr, "vehdyn-asc: t=%.2f w=%.2f %.2f %.2f up_b=%.3f %.3f %.3f "
                     "alpha=%.2f beta=%.2f q=%.0f nz=%.3f ny=%.3f "
-                    "me_p=%.2f %.2f %.2f me_y=%.2f %.2f %.2f srb_rt=%.2f %.2f %.2f %.2f\n",
+                    "me_p=%.2f %.2f %.2f me_y=%.2f %.2f %.2f srb_rt=%.2f %.2f %.2f %.2f "
+                    "h_ft=%.0f hdot_fts=%.1f\n",
             st.t, st.w[0] * D, st.w[1] * D, st.w[2] * D, up[0], up[1], up[2],
             aeroAl, aeroBe, aeroQ / 47.880259, -sfB[2] / 9.80665, sfB[1] / 9.80665,
             tvcPos[0][0], tvcPos[1][0], tvcPos[2][0], tvcPos[0][1], tvcPos[1][1], tvcPos[2][1],
-            tvcPos[3][0], tvcPos[3][1], tvcPos[4][0], tvcPos[4][1]);
+            tvcPos[3][0], tvcPos[3][1], tvcPos[4][0], tvcPos[4][1], geodetic_h_ft(st.r),
+            (st.r[0] * st.v[0] + st.r[1] * st.v[1] + st.r[2] * st.v[2]) / rn / 0.3048);
 }
 
 static void pad_state(double t) {
