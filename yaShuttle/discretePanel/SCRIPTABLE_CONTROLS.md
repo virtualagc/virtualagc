@@ -30,10 +30,32 @@ are not controls (`wait`, `keygap`, `script`, `audio`, `snapshot`).
   has moved, not when PASS has reacted.  To wait for PASS, use a `wait` line:
   `wait gpc N mode-tb RUN`, `wait crt N title TEXT` or
   `wait crt N new-screen`.
-* **`circle FEATURE` / `nocircle`** draw attention to a control during a
-  demonstration.  They move nothing.  The FEATURE names are listed in
+* **`circle FEATURE [COLOR] [DIAMETER]` / `nocircle`** draw attention to a
+  control or an indicator during a demonstration.  They move nothing, and
+  only one `circle` is up at a time.  The FEATURE names are listed in
   `crewscript.py --help`; for example `circle mode2` circles GPC 2's MODE
-  switch.
+  switch.  Indicators can be circled too, though they cannot be moved:
+  `modetb1`-`modetb5` and `outputtb1`-`outputtb5` (the GPC MODE and OUTPUT
+  talkbacks), `activity-mm1` and `activity-mm2` (the ACTIVITY lamps), and
+  every lamp, talkback and annunciator listed under "Named controls" below,
+  by its own name (the caution and warning matrix `cw_r1c1` ..., `rcs_roll`,
+  `strk_door_tb_y`, ...).
+* **`autocircle [SECONDS] [COLOR] [DIAMETER]`** circles, from that line on,
+  every O6-program control a script moves: from 1 s **before** the move, so
+  the eye is there when it happens, until SECONDS (default 1) after it.  A
+  move due sooner than 1 s away (at the start, just after a `wait` or typing)
+  is held until its circle has been up for 1 s, and the lines after it keep
+  their spacing; the log says so ("held 1.00 s so that its circle shows
+  first").  While a `wait gpc N mode-tb ...` waits, GPC N's MODE talkback is
+  circled until the wait ends.  COLOR and DIAMETER are as for `circle`.  It
+  is independent of `circle` and `nocircle`, and a control may carry both;
+  `autocircle 0` turns it off and takes its circles away.  Keys, MDU
+  edgekeys, the hand controllers and `lps` are not panel O6 controls and are
+  not circled.
+
+      +0  autocircle
+      +0  autocircle red 2.5
+      +0  autocircle 3 #00ff00
 
 ---
 

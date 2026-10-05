@@ -45,6 +45,7 @@ data bus, through the T-0 umbilical.  Here that is `lpsmodel.c`.
 | Pre-launch | Run `sts134` (panel and yaGPC2 logs) | Accurate to about ±10 s. The pre-launch timetable is *ours*: STS-134's real countdown spread these activities over a day (S0007 and the GLS document; see References). |
 | Terminal count | Run `sts134c` | The procedure and its times are unchanged since. |
 | Ascent, OMS 2 and the orbit | Run `sts134e` (scratch-2026-10-03) | Resumed from the countdown capture of the full reference flight `sts134d` (from IPL), with the current model and DOLILU.  Times are from its SRB ignition, 136/12:56:27.81. |
+| Max-q and SRB separation with the day's weather and the flight's separation I-loads | Runs `w2` and `s1` (scratch-2026-10-03) | Resumed from a first-stage capture (`cap-w1`) with the 12:56Z sounding as the truth; `s1` adds the separation I-loads to its memory.  Shown in the ascent table where they differ from `sts134e`. |
 | STS-134 actual | JSC 37461, Appendix A | Shown alongside where it exists. |
 
 ## The timeline
@@ -76,12 +77,13 @@ The ground sends these through the NSP with `groundstation.py`, between T−1:20
 | GROUND | **13** pitch table THET(1,30) | **Shaped by flight to the ASCENT ADI – NOMINAL cue card** (see "Against the card" below).  THET is applied before the yaw turn, and load relief takes several degrees at max-q, so it runs well above the flown pitch: up to 78.8° near Vrel 1,280 ft/s. | STS-134 Ascent Checklist CC 10-11 (ASC-14a/134); flights `p7`, `p10` (commits 63608afdb, a34c5a538). Calibrated on the simulated vehicle, as the real DOLILU was for the real one. |
 | GROUND | **40** roll table PHI(15) | The same −28.71° turn at liftoff (PHI(1) = PSI(1): no roll on the pad), blended out by heads-down (180°) | |
 | GROUND | **14** QPOLY, TREF | QPOLY = 55, 955, 1187, 10000 ft/s: the simulated vehicle's Vrel at STS-134's throttle times. TREF_ADJUST = **21.4 s**: the vehicle reaches VREF_ADJUST 488 ft/s at T+21.15, and guidance sees it on its next pass, so TDEL stays inside the 0.21 s deadband and adaptive throttling stays off.  Both must be re-read whenever the first stage changes: 0.3-0.7 s off moves the bucket to 65-92%. | JSC 37461 Appendix A: 104.5% at T+4.1, 72% at T+39.5, 104.5% at T+51.3; JSC 37461 SSME section: single-step bucket to 72%, AGT not activated. GG31ST (THRT_FAC 6000/4500, deadband 0.21 s). |
+| GROUND | **11** winds WNDE_TAB / WNDN_TAB | ft/s toward east / north at ALT_WND 0, 8, 18, 28, 38, 48, 58, 80 kft: east 6.9, 49.3, 39.9, 69.9, 111.6, 84.7, 42.3, −47.5; north 0.0, −8.7, 7.2, −2.2, −45.6, −17.6, −37.1, 5.9.  First-stage guidance flies its pitch and yaw tables against air-relative velocity, so these shift it as the day's winds would.  The tape's are all 0. | The Cape Canaveral sounding (station 74794) of 2011-05-16 **12Z**, the last balloon before launch in the University of Wyoming archive (nothing from 00Z-09Z exists for that day).  The ground's own DOLILU winds (Jimsphere, the 50 MHz profiler) are not available. |
 | GROUND | **39** THROT | 104, 72, 104, 104 (INTEGER; the Block II controller runs a 104 command at 104.5%) | JSC 37461 (SSME section, Appendix A) |
 | GROUND | **96** MECO pseudo targets | VDMAG 25,819 ft/s; GAMD 0.65° | STS-134 Ascent Checklist (ASC/134/FIN): MECO "√VI = 25819" |
 | GROUND | **37** OMS assist and masses | ASSIST_OMS_DT 170 s. MASS_ORBITER_LIFTOFF 8,353.6 slug (268,769 lb), and the tape's other orbiter masses moved with it. MASS_VEHICLE_ET 59,868.7 slug (orbiter + ET at SRB ignition). The rest is the tape's own 58 halfwords. | MOD FRR FDD p26: "170 sec OMS Assist". Masses: Missions Summary App. A. |
 | GROUND | **25** OMS targeting | IYD_OMS(1,2) = the plane of message 15. OMS 1 is the tape's (not flown). OMS 2: DTIG 1,756 s after ET separation, with pre-flight targets HT 175.8 nmi, θT 330.43°, C1 0, C2 0. **After MECO the ground designs the real targets from the insertion and uplinks message 25 again, in OPS 1** (`fly_sts134.py`, `oms2_targets`): the cheapest burn that reaches STS-134's 124.3 × 175.8 nmi, read as heights above a 6,371 km mean radius (120.45 × 171.95 above the equatorial radius).  In run `sts134e`: HT 171.95, θT 344.30°, 264.6 ft/s. | TIG: JSC 37461, ET sep at MET 8:42 and OMS-2 TIG at MET 37:58. Targets: `omstarget.py fromlog` and `design` (PASS's GGOTGT + GGILTV, ported). The convention: see "Derived data". |
 
-Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.py` with `sts134-reconfig.json`, OPS 1 overlay):
+Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.py` with `sts134-reconfig.json`, OPS 1 overlay; the GSE_ cells are in GSESRB's data, G16 39a0c-39a37):
 
 | Cell | Tape | STS-134 | Data source |
 |---|---|---|---|
@@ -92,6 +94,12 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | CGGS_FPA_MECO_NOM | 0.5° | **0.65°** | No STS-134 value found. With VI 25,819 it gives a post-MECO apogee near the MOD FRR's "insertion altitude 122 nm". |
 | CGGS_ASSUMED_SSME_FAIL_MET (TFAIL) | 218 s | **0**: no second-stage trajectory lofting | FSSR STS 83-0002-34 §4.8 ("if trajectory lofting is desired (TFAIL is not zero)").  No STS-134 value is published; the tape's 218 s lofted second stage ~30,000 ft above the card and dove at the RTLS/AOA boundary (also 218 s); with 0 the climb rate follows the card (commit 63608afdb). |
 | CGGS_ROLL_CMD_CHANGE_V (V_RHO_PHI) | 12,500 ft/s | **12,000** ft/s | The Earth-relative velocity at which second-stage guidance commands the roll to heads-up (PHI_2STG).  A second-stage I-load built into each flight's load: FSSR Table 4.2-1 (the DOLILU parameters) and §4.12 (the uplink memory groups) do not include it.  12,000 puts the roll on the Ascent Checklist's "VI = 13.2K √Roll Heads Up"; the tape's value started it near Vi 13,700 (commit 531edd4a6). |
+| GSE_SEP_CMD_DELAY (V97U9753C) | 6 s | **4.42 s** | The SRB separation command delay after both SRMs' Pc < 50 psia.  GSESRB declares it and the five below as locals carrying the generic release's values, which a flight's I-loads replace (commit d63cfcfd2, gpc-causes #277).  All six: Booster Console Handbook SCP 2.2.1, Table 2.2.1-I (typical values).  Checked against the mission reports' Appendix A: 2002-2011 flights separated 4.32-4.80 s (mean 4.53, 20 flights) after the later SRM's 50 psi, which is 4.42 plus half of GSESRB's 0.16 s cycle; 1989-96 flights 4.88-5.60 s (mean 5.10), an earlier value. |
+| GSE_SEP_MOD_DELAY (V97U9752C) | 4.3 s | **2.71 s** | Moding: the SRB nozzles to null, the PICs armed |
+| GSE_BU_CUE_TIME (V97U9751C) | 130.6 s | **131.28 s** MET | The backup cue, if the Pc test fails |
+| GSE_SEP_CMD_ABORT_DELAY (V99U7589C) | 8.16 s | **10 s** | One SSME out |
+| GSE_SEP_CMD_CONT_ABORT_DELAY (V99U7676C) | 10 s | **14 s** | Two SSMEs out |
+| GSE_MAX_SEP_CUE (V97U9761C) | 5.9 s | **5 s** | The most the two SRMs' 50 psia times may differ |
 
 ### IMU operate and gyrocompass alignment (OPS 9, SPEC 104)
 
@@ -134,9 +142,9 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | ≈ +7 to +20 | Roll program to heads-down | |
 | +39.48 | Throttle down for max-q to **72%** (AGT not activated) | 72% at +39.5; AGT not activated |
 | +51.32 | Throttle up to 104.5% | +51.3 |
-| +57.6 | Max-q, **715 psf** (721 in flight `p11`) | Max-q **733.1 psf** at +60.0 |
-| +124.64 | MEC: SRB SEPARATION ARMED (PASS's moding time, cue + 3.82 s) | Both SRMs at 50 psia +119.95 / +120.31; end of action +122.5 / +122.9 |
-| **+126.40** | **SRB separation** (cue + 5.52 s) | **+124.7** (Missions Summary: 2:04.8) |
+| +57.6 | Max-q, **715 psf** (721 in flight `p11`).  With the day's winds and atmosphere (`w2`, `s1`): **723 psf** at +47.6 | Max-q **733.1 psf** at +60.0 |
+| +122.96 | MEC: SRB SEPARATION ARMED (PASS's moding time, cue + 2.23 s; run `s1`) | Both SRMs at 50 psia +119.95 / +120.31; end of action +122.5 / +122.9 |
+| **+124.72** | **SRB separation** (cue + 3.94 s; run `s1`.  `sts134e`, with the release's 6 s command delay: +126.40) | **+124.72** (APU loss of signal; Missions Summary: 2:04.8) |
 | +126.68 | 106% (K_CMD_STG2, a GG42ND constant) | |
 | ≈ +130 to +300 | OMS assist, both engines, 170 s | +134 to +300.5 (164.2 s) |
 | +218.84 | 104.5% (K_CMD_NOM) at the guidance parameter reset | |
@@ -216,15 +224,21 @@ through the pad at its in-plane time.
 | Stack at SRB ignition | 4,520,355 lb | 4,521,103 less the 740 → 4,520,363 |
 | Throttle down / up | +38.48 / +57.36 | +38.72 / +56.80 |
 | Max-q | 721 psf | 734 (745 planned) |
-| SRB separation | +124.9 | +123.0 (2:03.0) |
+| SRB separation | +124.9 (the release's 6 s command delay) | +123.0 (2:03.0) |
 | 3-g throttling | +442.0 | +442.09 |
 | MECO | +504.4, VI 25,812 | +503.8 (8:23.8), VI 25,817 |
 | ET separation | +525.6 | +525 |
 | After OMS 2 | 123.3 × 86.0 nmi (mean radius) | 123.9 × 85.2 |
 | OMS-2 burn (cheapest design from the insertion) | 119.5 ft/s | 97.0 |
 
-The differences common to both flights are the model's, not one flight's
-tuning: SRB separation ~1.7-1.9 s late, max-q ~2% low.
+The differences common to both flights were the model's, not one flight's
+tuning: SRB separation ~1.7-1.9 s late, since traced to the tape's
+separation I-loads (now fixed for STS-134), and max-q ~2% low.  `sts135b`
+had neither the separation I-loads nor its day's weather.  **Before STS-135
+is flown again** it needs its own Cape sounding (74794, 2011-07-08 12Z) as
+the truth, a message 11 wind table made from it, and the separation cells
+in its reconfiguration; then the pitch table re-shaped and QPOLY/TREF
+re-read with that wind.
 
 ### How the model got here
 
@@ -243,6 +257,8 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
 | Pitch table to the ADI nominal card; no second-stage lofting | ASC-14a/134; FSSR §4.8 | 63608afdb, a34c5a538 |
 | The 1963 Patrick AFB reference atmosphere below 66 km | STS-1 OFP §5.3; JSC-08964 App. A | e82d94d21 |
 | OMS-2 targets in the reports' mean-radius convention, cheapest burn | omstarget; JSC 37461 | 0de0adbab, cd05369b3 |
+| The day's atmosphere and wind: the truth flies the Cape sounding at launch (12Z and 15Z interpolated to 12:56Z), PASS the 12Z winds as DOLILU message 11 | Cape Canaveral station 74794 soundings, University of Wyoming archive; JSC 37461 | 60ceb8368, eaaba5cc0 |
+| SRB separation I-loads: command delay 4.42 s and five more | Booster Console Handbook Table 2.2.1-I; mission reports App. A | d63cfcfd2 |
 
 ## Derived data and how it was obtained
 
@@ -255,7 +271,7 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
 | MECO radius | a + 52 nmi, with a and the convention from the tape's own RD_NOM (a + 60.02 nmi) | Missions Summary |
 | OMS 2 HT, θT | `omstarget.py`: PASS's PEG 4 target geometry (GGOTGT) and linear-terminal-velocity constraint (GGILTV), ported; the cheapest (HT, θT) that reaches the target apsides at the fixed TIG.  In flight, `fromlog` takes the truth after ET separation and coasts it to TIG. | |
 | Apsis conventions | The reports' orbits are heights above a spherical Earth of 6,371 km, 3.854 nmi below the equatorial radius: read against the equatorial radius, STS-134's 124.3 nmi perigee is unreachable from its ~122-125 nmi insertion apogee, and converted it designs to 262-265 ft/s against the 259.2 flown.  PASS's own displayed HA/HP (GZIASC) are J2-mean heights above the equatorial radius 3,443.934 nmi. | GZIASC.hal; JSC 37461 |
-| Atmosphere | The 1963 Patrick AFB reference atmosphere, pressure and density at 55 altitudes 0-66 km read from JSC-08964's tables, temperature p/ρR; the 1976 standard above (and with `YAGPC_VEHDYN_ATMOS=us1976`) | JSC-08964 App. A |
+| Atmosphere and wind | **The day's**: the Cape Canaveral sounding (station 74794) nearest launch, by default 12Z and 15Z of 2011-05-16 interpolated to 12:56Z (`YAGPC_VEHDYN_SOUNDING`, set by `fly_sts134.py`; 85 levels to 24 km): pressure, geopotential height made geometric, temperature made virtual from the mixing ratio, and the wind, subtracted from the vehicle's Earth-relative velocity along local east and north.  Above the sounding, and without one, the 1963 Patrick AFB reference atmosphere, pressure and density at 55 altitudes 0-66 km read from JSC-08964's tables, temperature p/ρR, no wind; the 1976 standard above that (and with `YAGPC_VEHDYN_ATMOS=us1976`).  Between 12Z and 15Z the westerly at 10-12 km strengthened 7-11 m/s, JSC 37461's "late predicted change in the wind"; density changed < 1%, and the 12Z and 12:56Z truths fly within ~2,000 ft of each other. | Wyoming archive; JSC-08964 App. A |
 | Gimbal pitch sense | −1 for SSMEs and SRBs. With +1 the loop diverged at liftoff. | vehdyn.c |
 | AA normal axis | Positive up (−Z) | GDRENT.hal:107 (LOAD = AA_NORM × g0); NZREF table (CGCUN1.hal) |
 | Stack aerodynamics | IA156 wind-tunnel data, digitized from the STS-1 OFP's plots of its nominal ascent: forebody CA and base drag (as a coefficient on the OFP's q) on Mach; CN = CNα (α − α₀), the slope measured below Mach 0.4 and assumed above, α₀ fitted to every OFP point.  Run `sts134c` flew synthesized tables. | JSC-14483 Vol 3 fig. 6.2-1; vehdyn.c |
@@ -267,14 +283,14 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
 
 ## Known differences from STS-134
 
-- **SRB separation is ~1.7 s late** (+126.4 against +124.7), and STS-135's
-  ~1.9 s.  On both flights the real separation came 4.4-4.5 s after the
-  reported "both SRMs at 50 psia" time, where PASS's own logic (GSESRB: four
-  passes at or below 50 psia, then 5.52 s) needs at least 5.7 s; our chamber
-  pressure crosses 50 psia at the reported times.  Unresolved: no sensor
-  offset has been invented to close it.
-- **Max-q is ~2% low** (715-721 psf against 733.1; STS-135 721 against 734).
-  The Patrick atmosphere is an annual reference, not the day's.
+- **SRB separation: resolved.**  It was ~1.7 s late (+126.4 against
+  +124.7), and STS-135's ~1.9 s, because the tape carried GSESRB's
+  generic-release separation timings instead of the flight's I-loads; with
+  them it is +124.72 against +124.72 (run `s1`).  No sensor offset was
+  needed.
+- **Max-q is ~1.4% low** with the day's winds and atmosphere (723 psf
+  against 733.1; 715-721 with the Patrick atmosphere and no wind).
+  STS-135's (721 against 734) was flown without its day's weather.
 - **The OMS-2 burn is 2% (STS-134) to 20% (STS-135) dearer** than flown, from
   insertion apogees a few nmi low; STS-135's MECO was 5 ft/s low.
 - **No second-stage lofting** (TFAIL 0) is chosen to fit the card; STS-134's
@@ -288,10 +304,9 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
   Omitted: MPS dump, APU shutdown, ET umbilical doors.
 - **MECO flight-path angle** 0.65° is chosen, not sourced; the card's MECO
   climb rate is 272 ft/s against our 310.
-- **No winds.**  The STS-1 OFP's April mean wind (figs 5.3-1/-2) peaks at
-  112 ft/s near 42,000 ft, mostly a tailwind on this azimuth.  PASS takes
-  measured winds on launch day too, as DOLILU parameters (FSSR Table 4.2-1:
-  WNDE_TAB / WNDN_TAB, 8 points each); none are uplinked here.
+- **PASS's winds are the 12Z balloon's**, as an uplink built before launch
+  would be; the truth flies the air at launch.  The ground's own DOLILU
+  winds (Jimsphere, the 50 MHz profiler) are not available.
 - **A one-GPC session save once froze the vehicle** after its capture
   (gpc-causes #276); the flight resumed from that capture.
 
@@ -305,7 +320,8 @@ All are in the local ibiblio mirror (`~/Desktop/sandroid.org/public_html/apollo/
 - **STS-134 MOD FRR, Flight Design and Dynamics** (Mar 2011): `FRR/FDD/STS-134 FRR FDD.pdf`. Insertion 122 nm / 51.6°, DOLILU II, 170 s OMS assist, ascent performance margins (I-load design 1,566 lb, projected 1,107 lb).
 - **Space Shuttle Missions Summary** (NASA 20110001406, `20110001406.pdf`, pdf pp. 258-263, STS-134; pp. 264-266, STS-135; App. A pp. 280-281, flight weights): max-q 733.5 (P) / 733.1 (A) psf; SRB staging 2:04.8; MECO command 8:21.5; VI 25,819 (P) / 25,818 (A); throttle 104.5/72/104.5; FPR 2,821 lb, fuel bias 954 lb; performance enhancements operational high-q, OMS assist, a 52 nmi MECO, Del Psi; post-OMS-2 predicted 175.9 × 124.7. (Its "4,365,726 LBS" is accumulated program cargo, not a liftoff weight.)
 - **JSC-19041 SRB Overview** (Rev F, 2003): `Reference/SRB Overview.pdf`, Fig 4.3-I, the RSRM nominal thrust trace.
-- **Booster Console Handbook**: `MCC/Booster Console Handbook.pdf`. "At 50 psia, an SRB may produce approximately 200,000 lbs of thrust"; the separation cue logic.
+- **Booster Console Handbook**: `MCC/Booster Console Handbook.pdf`. "At 50 psia, an SRB may produce approximately 200,000 lbs of thrust"; the separation cue logic; SCP 2.2.1 Table 2.2.1-I, the SRB separation I-loads.
+- **Mission reports, Appendix A** (`Reports/Mission Reports/`, STS-33 to STS-135): "Both SRMs at 50 psi" and "SRB Physical Separation", for the separation delay by era.
 - **JSC-08964, Cubic spline function interpolation in atmosphere models for the SDL** (Kirkpatrick): App. A, the 1963 Patrick AFB reference atmosphere tables.
 - **JSC-14483 (78-FM-51) Vol 3, STS-1 Operational Flight Profile, Ascent, Cycle 3**: Table 6.2-I, SRB separation state; §5.2 and fig. 6.2-1, the IA156 aerodynamics along its nominal ascent.
 - **STS 83-0002-34, GN&C FSSR, Guidance Ascent/RTLS**: §4.2 DOLILU parameters and uplinks (Table 4.2-1), Table 4.3.5-3 second-stage I-loads (V_RHO_PHI, PHI_2STG), §4.12 uplink memory groups, §4.8 PEG and trajectory lofting (TFAIL, T_RTLS_AOA), §4.12 I-load memory layout.
@@ -318,3 +334,4 @@ All are in the local ibiblio mirror (`~/Desktop/sandroid.org/public_html/apollo/
   - SLWT inert 58,500 lb (SCOM figure, as quoted by Wikipedia's Space Shuttle external tank article).
   - The commonly cited ascent drag loss of about 107 m/s.
   - Space-Track: ISS TLEs for 2011 days 135-136 (supplied by the user).
+  - University of Wyoming upper-air archive: Cape Canaveral (74794) soundings, 2011-05-16 12Z and 15Z (`weather.uwyo.edu`; saved as `discretePanel/examples/flights/sts134-sounding-74794-*.csv`).
