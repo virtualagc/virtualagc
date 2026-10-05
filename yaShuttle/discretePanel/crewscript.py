@@ -98,7 +98,7 @@ _DAP_KEYS = (r"(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch
              r"|low_z|z_norm|z_pulse|high_z)")
 import panelcontrols as PC
 
-PANEL_FEATURE = (r"(power|output|mode|ipl)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
+PANEL_FEATURE = (r"(power|output|mode|ipl|modetb)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
                  r"|rhcengage-(cdr|plt)|kybdsel-(left|right)|(idppower|majfunc|idpload)[1-4]"
                  r"|adi-(l|r|a)-(att|err|rate)|attref-(l|r|a)|sense"
                  r"|dap-(c3|a6u)-" + _DAP_KEYS +
@@ -136,6 +136,7 @@ PANEL_ARGS = {
     "press": r"\S+",
     "circle": r"(" + PANEL_FEATURE + r")(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
     "nocircle": r"",
+    "autocircle": r"(\d+\.?\d*|\.\d+)(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
@@ -168,6 +169,7 @@ PANEL_USAGE = {
     "press": "press NAME -- a pushbutton from panelcontrols.py, held 0.5 s",
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
+    "autocircle": "autocircle SECONDS [COLOR] [DIAMETER] -- 0 seconds turns it off",
     "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
     "lps": "lps hold|resume|recycle|go_auto|go_engine|gmtlo +S|gmtlo =S|bypass_a|bypass_b|pogo"
            "|code N [hex ...]",
@@ -424,7 +426,17 @@ HELP = """\
                         until the next circle or nocircle; COLOR a colour name
                         or #RRGGBB (yellow), DIAMETER in pushbutton sizes (2)
     nocircle            take it away
+    autocircle SECONDS [COLOR] [DIAMETER]
+                        from now on circle every control the script moves,
+                        for SECONDS after each move, and the MODE talkback a
+                        'wait gpc N mode-tb' is waiting on, until it is met;
+                        COLOR and DIAMETER as for circle.  Independent of
+                        circle and nocircle, and of each other: a control
+                        can carry both.  Panel O6's windows only -- not
+                        keys, edgekeys or hand controllers.  autocircle 0
+                        turns it off and takes its circles away.
                         FEATURE names: power1-5 output1-5 mode1-5 ipl1-5
+                        modetb1-5 (the MODE talkbacks)
                         iplsource bfcdisplay bfcselect disengage
                         rhcengage-cdr|plt idppower1-4 majfunc1-4 idpload1-4
                         kybdsel-left|right adi-l|r|a-att|err|rate
@@ -1244,12 +1256,16 @@ class Player(object):
                         once, in this script and every one it calls
     screens             optional: a ScreenWatch; without it a 'wait crt'
                         stops the script
+    marks(e, on)        optional: told when a wait on a panel control (a
+                        'wait gpc N mode-tb') begins (on) and when it ends,
+                        met, timed out or stopped (off) -- autocircle
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None, gap=None, snaps=None, unattended=False):
+                 source=None, gap=None, snaps=None, unattended=False, marks=None):
         self.entries, self.after, self.panel = entries, after, panel
+        self.marks = marks
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
         self.unattended = unattended
@@ -1346,6 +1362,7 @@ class Player(object):
                 return
             if e["kind"] == "wait":
                 self.log(e["text"])
+                self._mark(e, True)
                 self._poll(k, e, time.monotonic())
                 return
             if e["kind"] == "step" and e["verb"] == "script":
@@ -1458,17 +1475,27 @@ class Player(object):
         else:
             self._run(k + 1)
 
+    def _mark(self, e, on):
+        if self.marks is not None:
+            try:
+                self.marks(e, on)
+            except Exception as err:    # a circle is never worth stopping a script for
+                self.log("autocircle: %s" % err)
+
     def _poll(self, k, e, begun):
         if self.stopped:
+            self._mark(e, False)
             return
         waited = time.monotonic() - begun
         if self.talkback(e["gpc"]) == e["state"]:
             self.log("wait met after %.1f s: %s" % (waited, e["text"]))
+            self._mark(e, False)
             self.origin = time.monotonic()
             self._run(k + 1)
         elif waited > e["timeout"]:
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
                      % (e["timeout"], e["text"]))
+            self._mark(e, False)
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
@@ -1581,7 +1608,7 @@ class Player(object):
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
                        source=os.path.basename(e["path"]), gap=self.gap,
-                       snaps=self.snaps, unattended=self.unattended)
+                       snaps=self.snaps, unattended=self.unattended, marks=self.marks)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):

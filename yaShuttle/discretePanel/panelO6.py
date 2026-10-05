@@ -795,6 +795,7 @@ class PanelWin:
         top.minsize(*self._minsize)
         self.s, self.ox, self.oy = 1.0, 0.0, 0.0
         self._hits = []
+        self._marks = []        # (feature, x1, y1, x2, y2): drawn, not clickable
         self._bp_cache = {}
         self._wh = (0, 0)
         self._fit_passes = 0
@@ -824,6 +825,11 @@ class PanelO6:
         self.root = root
         self._size = size
         self.circle = None      # (feature, colour, diameter): a script's 'circle'
+        # A SCRIPT'S 'autocircle': (seconds, colour, diameter) or None, and
+        # the circles it has drawn -- {feature: (colour, diameter)} for the
+        # controls it moved (each with its timer) and for what a wait is on.
+        self.autocircle = None
+        self.auto_circles, self._auto_timers, self.wait_circles = {}, {}, {}
         self._circle_missed = None
 
         self.power = list(DEFAULT_POWER)
@@ -1865,6 +1871,11 @@ class PanelO6:
                            self.X(x1), self.Y(y1),
                            self.X(x2), self.Y(y2)))
 
+    def _mark(self, name, x1, y1, x2, y2):
+        """Something a circle can find that a click cannot: a talkback.  Not
+        a hit, so it neither takes a press nor turns the cursor into a hand."""
+        self._marks.append((name, self.X(x1), self.Y(y1), self.X(x2), self.Y(y2)))
+
     # ---- the panel ------------------------------------------------------
 
     def _layout(self):
@@ -1977,7 +1988,8 @@ class PanelO6:
     def _win_sig(self, win):
         own = [k for k, c in PC.CONTROLS.items() if c["panel"] == win.name]
         return repr([getattr(self, a, None) for a in self.WIN_STATE.get(win.name, ())]
-                    + [self.circle]
+                    + [self.circle, sorted(self.auto_circles.items()),
+                       sorted(self.wait_circles.items())]
                     + [(self.ctl.get(k), self.ctl_held.get(k), self.ctl_lamp.get(k),
                         self.tb_on.get(k)) for k in own])
 
@@ -2006,6 +2018,7 @@ class PanelO6:
                 self._scale()
             self.cv.delete("all")
             self._hits = []
+            self._marks = []
             self._bp_cache = {}
             self.pb = self._pb_size()
             self._placed_panes = set()
@@ -3159,29 +3172,82 @@ class PanelO6:
     CIRCLE_PX = 2          # its stroke: real pixels, whatever --size
 
     def _draw_circle(self):
-        """A script's 'circle': on top of everything, centred on the named
-        control, DIAMETER pushbuttons across, clipped by the window as the
-        canvas clips anything."""
-        if self.circle is None:
+        """A script's circles -- its 'circle', and autocircle's -- on top of
+        everything, each centred on the named control, DIAMETER pushbuttons
+        across, clipped by the window as the canvas clips anything."""
+        want = ([self.circle] if self.circle is not None else []) \
+            + [(n, c, d) for n, (c, d) in self.auto_circles.items()] \
+            + [(n, c, d) for n, (c, d) in self.wait_circles.items()]
+        if not want:
             return
-        name, colour, diam = self.circle
+        where = {}
         for kind, index, x1, y1, x2, y2 in self._hits:
-            if feature_name(kind, index) == name:
-                cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
-                r = diam * self.pb * self.s / 2.0
-                self.cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline=colour,
-                                    width=self.CIRCLE_PX, tags=("circle",))
-                return
+            where.setdefault(feature_name(kind, index), (x1, y1, x2, y2))
+        for name, x1, y1, x2, y2 in self._marks:
+            where.setdefault(name, (x1, y1, x2, y2))
+        for name, colour, diam in want:
+            if name not in where:
+                continue
+            x1, y1, x2, y2 = where[name]
+            cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            r = diam * self.pb * self.s / 2.0
+            self.cv.create_oval(cx - r, cy - r, cx + r, cy + r, outline=colour,
+                                width=self.CIRCLE_PX, tags=("circle",))
+
+    def _has_feature(self, name):
+        return any(feature_name(k, i) == name for win in self.wins.values()
+                   for k, i, *_ in win._hits) or \
+            any(m[0] == name for win in self.wins.values() for m in win._marks)
 
     def set_circle(self, name, colour="yellow", diameter=2.0):
         self.circle = None if name is None else (name, colour, float(diameter))
         log("circle: %s" % ("none" if name is None else
                             "%s, %s, %g pushbuttons" % (name, colour, diameter)))
         self.redraw()
-        if name is not None and not any(
-                feature_name(k, i) == name for win in self.wins.values()
-                for k, i, *_ in win._hits):
+        if name is not None and not self._has_feature(name):
             log("circle: no feature %r in any panel window" % name)
+
+    def set_autocircle(self, seconds, colour="yellow", diameter=2.0):
+        """A script's 'autocircle': circle each control it moves from now on,
+        for SECONDS, and whatever a wait is on until the wait ends; 0 turns
+        it off and takes away the circles it drew."""
+        if seconds <= 0:
+            self.autocircle = None
+            for t in self._auto_timers.values():
+                self.root.after_cancel(t)
+            self.auto_circles, self._auto_timers, self.wait_circles = {}, {}, {}
+            log("autocircle: off")
+        else:
+            self.autocircle = (float(seconds), colour, float(diameter))
+            log("autocircle: %g s, %s, %g pushbuttons" % (seconds, colour, diameter))
+        self.redraw()
+
+    def auto_circle(self, name):
+        """A control the script just moved: circle it for autocircle's
+        SECONDS, starting again if it is moved again before they are up."""
+        if self.autocircle is None or name is None:
+            return
+        seconds, colour, diam = self.autocircle
+        if name in self._auto_timers:
+            self.root.after_cancel(self._auto_timers.pop(name))
+        self.auto_circles[name] = (colour, diam)
+
+        def expire(name=name):
+            self._auto_timers.pop(name, None)
+            self.auto_circles.pop(name, None)
+            self.redraw()
+        self._auto_timers[name] = self.root.after(int(seconds * 1000), expire)
+        self.redraw()
+        if not self._has_feature(name):
+            log("autocircle: no feature %r in any panel window" % name)
+
+    def wait_circle(self, name, on):
+        """What a wait is on: circled while it waits, if autocircle is on."""
+        if on and self.autocircle is not None:
+            self.wait_circles[name] = self.autocircle[1:]
+        elif not on:
+            self.wait_circles.pop(name, None)
+        self.redraw()
 
     def _snug(self):
         """ONCE, when the fit has settled: give a window still at its natural
@@ -3388,6 +3454,7 @@ class PanelO6:
             x1, x2 = cx - win_w / 2, cx + win_w / 2
             self._talkback(x1, y1, x2, y1 + win_h, self.mode_tb(i),
                            legend_always="RUN")
+            self._mark("modetb%d" % (i + 1), x1, y1, x2, y1 + win_h)
 
     def _draw_mode_switches(self):
         L = self.L
@@ -4928,10 +4995,72 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
     def do(verb, arg):
         # THE SCRIPT'S OWN ACTIONS ARE NOT RECORDED: see _RECORD.
         panel._rec_quiet = getattr(panel, "_rec_quiet", 0) + 1
+        w = target[0]
         try:
             return _do(verb, arg)
         finally:
             panel._rec_quiet -= 1
+            if panel.autocircle is not None:
+                try:
+                    for name in moved(verb, arg, w):
+                        panel.auto_circle(name)
+                except (ValueError, KeyError, IndexError) as err:
+                    log("autocircle: %s %s: %s" % (verb, arg, err))
+
+    def moved(verb, arg, w):
+        """The panel features a scripted command moves, by the names 'circle'
+        takes (feature_name), for 'autocircle'.  w is the column the command
+        was aimed at.  Edgekeys, keys, hand controllers, the ground and the
+        commands that are not controls move nothing here."""
+        a = arg.split()
+        col = {"mode": "mode", "ipl": "ipl", "power": "power", "output": "output"}
+        if verb in col:
+            return ["%s%d" % (col[verb], w + 1)]
+        one = {"source": "iplsource", "display": "bfcdisplay", "select": "bfcselect",
+               "disengage": "disengage", "sense": "sense", "xfeed": "xfeed"}
+        if verb in one:
+            return [one[verb]]
+        if verb == "crt":
+            return ["bfcdisplay"] + (["bfcselect"] if int(arg) else [])
+        if verb in ("rhcengage", "bodyflap", "spdbk"):
+            return ["%s-%s" % (verb, a[0].lower())]
+        if verb == "bfsengage":
+            return ["rhcengage-cdr" if _on(arg) else "disengage"]
+        if verb in ("idppower", "majfunc"):
+            return ["%s%d" % (verb, int(a[0]))]
+        if verb == "idpload":
+            return ["idpload%d" % int(arg)]
+        if verb == "kybdsel":
+            return ["kybdsel-" + a[0].lower()]
+        if verb == "adi":
+            f = {"att": "att", "attitude": "att", "err": "err", "error": "err",
+                 "rate": "rate"}[a[1].lower()]
+            return ["adi-%s-%s" % (a[0].lower(), f)]
+        if verb == "attref":
+            return ["attref-" + arg.strip().lower()]
+        if verb == "dap":
+            st = {"C3": "FWD", "FWD": "FWD", "A6U": "AFT", "AFT": "AFT"}[a[0].upper()]
+            return ["dap-%s-%s" % (DAP_PANEL[st].lower(), a[1].lower())]
+        if verb == "fcs":
+            return ["fcs%d" % int(a[0])]
+        if verb in ("omseng", "trim"):
+            return ["%s-%s" % (verb, {"l": "left", "r": "right"}[a[0][0].lower()])]
+        if verb in ("switch", "press"):
+            return [a[0].lower()]
+        if verb == "bit":
+            reg, num, on = a[0].upper(), int(a[1]), _on(a[2])
+            if reg == "A" and num == TERM_B_BIT:
+                return ["output%d" % (w + 1)]
+            if reg == "B" and num in BFS_ENGAGE_BITS:
+                return ["rhcengage-cdr" if on else "disengage"]
+            if reg == "B" and num in CRT_SELECT_BITS:
+                return ["bfcdisplay", "bfcselect"]
+        return []
+
+    def marks(e, on):
+        """autocircle's circle on what a wait is on: GPC N's MODE talkback."""
+        if e.get("kind") == "wait":
+            panel.wait_circle("modetb%d" % e["gpc"], on)
 
     def _do(verb, arg):
         w = target[0]
@@ -5046,6 +5175,19 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             panel.set_circle(name, colour, diam)
         elif verb == "nocircle":
             panel.set_circle(None)
+        elif verb == "autocircle":
+            words = arg.split()
+            seconds, colour, diam = float(words[0]), "yellow", 2.0
+            for w in words[1:]:
+                try:
+                    diam = float(w)
+                except ValueError:
+                    colour = w
+            try:
+                root.winfo_rgb(colour)
+            except tk.TclError:
+                raise SystemExit("panelO6: autocircle: %r is not a colour" % colour)
+            panel.set_autocircle(seconds, colour, diam)
         elif verb == "attref":
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)
@@ -5180,7 +5322,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                                      unattended=getattr(panel, "unattended", False),
                                      screens=panel.screens,
                                      progress=show_progress,
-                                     source=source)
+                                     source=source, marks=marks)
     panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)
@@ -5291,7 +5433,7 @@ def _per_window(name):
                     lambda self, v: setattr(self.w, name, v))
 
 
-for _n in ("cv", "s", "ox", "oy", "_hits", "_bp_cache", "_wh", "_fit_passes",
+for _n in ("cv", "s", "ox", "oy", "_hits", "_marks", "_bp_cache", "_wh", "_fit_passes",
            "_fit_grow", "_fit_bracket", "_fit_need", "_fit_moved", "_snugged",
            "_snug_set", "_snug_pending", "_cursor_hits", "_ref_w", "_ref_h",
            "natural", "_minsize"):
