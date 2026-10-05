@@ -10,7 +10,8 @@
   "IYD: the ISS's own plane at SRB ignition, Earth-fixed: from the ISS two-line elements of 2011 day 136.48289737 (Space-Track, NORAD 25544): inclination 51.6484, node 323.5050 regressing -5.1476 deg/day -> 323.2151 at 136/12:56:27.994, less GMST 68.0094 = 255.2057 deg east.  CGGB_EF_PLANE_SW is ON, so GG2ASC freezes it into M50 at the predicted liftoff.  The pad was 44.8 nmi (0.75 deg) off this plane at liftoff -- about five minutes from the in-plane time, inside the MOD FRR's window 'centered at in-plane'; guidance steers the rest, as on the real flight.  (The first DOLILU assumed an in-plane launch: the 51.6-deg plane through the pad, 0.97 deg from this one.)",
   "THROT is INTEGER: 104 for the flight's 104.5",
   "Message 37 is the tape's own 58 halfwords with the named fields changed; masses in slugs, the orbiter-dependent ones moved by the STS-134 orbiter's difference from the tape's 203,193 lb",
-  "First stage: PSI/PHI/QPOLY/TREF from the simulated stack, not from the flight's own (unavailable) DOLILU: the yaw table turned to the 51.6-deg azimuth and the throttle velocities placed at the report's throttle times"
+  "First stage: PSI/PHI/QPOLY/TREF from the simulated stack, not from the flight's own (unavailable) DOLILU: the yaw table turned to the 51.6-deg azimuth and the throttle velocities placed at the report's throttle times",
+  "Message 11, the wind table: STS-134's measured winds (FSSR Table 4.2-1 lists WNDE_TAB/WNDN_TAB as DOLILU parameters).  First-stage guidance subtracts them from the relative velocity to index the pitch and yaw tables by the aerodynamic reference velocity VREL_AERO_REF (GG31ST, FSSR 4.2.3), so the tables must be shaped with this wind in place.  The truth model flies the same sounding (YAGPC_VEHDYN_SOUNDING)."
  ],
  "messages": [
   {
@@ -164,6 +165,38 @@
       1.0
      ],
      "name": "PHI(1-15): the same turn at liftoff (PHI(1) = PSI(1): no roll on the pad), blended out by heads-down 180 deg"
+    }
+   ]
+  },
+  {
+   "op": 11,
+   "name": "wind table (WNDE_TAB, WNDN_TAB)",
+   "fields": [
+    {
+     "E": [
+      6.9,
+      49.3,
+      39.9,
+      69.9,
+      111.6,
+      84.7,
+      42.3,
+      -47.5
+     ],
+     "name": "WNDE_TAB(1-8), ft/s toward east, at ALT_WND 0/8/18/28/38/48/58/80 kft: the Cape Canaveral sounding 74794 of 2011-05-16 12Z (University of Wyoming archive; sts134-sounding-74794-2011051612Z.csv), an hour before launch, averaged over +-1,000 ft. The tape's: 0/-36/-67/-107/-151/-122/-48/0"
+    },
+    {
+     "E": [
+      0.0,
+      -8.7,
+      7.2,
+      -2.2,
+      -45.6,
+      -17.6,
+      -37.1,
+      5.9
+     ],
+     "name": "WNDN_TAB(1-8), ft/s toward north, the same sounding. The tape's: all 0"
     }
    ]
   },

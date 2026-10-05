@@ -63,7 +63,11 @@ OMS2_DTIG = 1756.0                                  # after ET separation (DOLIL
 # any of these keys; "t0" and "gmtlo" as [day, h, m, s]; "env" extra
 # environment for the vehicle, e.g. vehdyn's YAGPC_VEHDYN_ET_LB)
 FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
-      "orbiter_kg": 121912, "oms2_hp": 124.3, "oms2_ha": 175.8, "env": {}}
+      "orbiter_kg": 121912, "oms2_hp": 124.3, "oms2_ha": 175.8,
+      # the day's air and wind for the truth (vehdyn); the same sounding
+      # makes the DOLILU's wind table (message 11).  A flight file's
+      # relative sounding path is taken from this directory.
+      "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-2011051612Z.csv"}}
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "ORBIT"]
 
 IPL_SCRIPT = """
@@ -123,10 +127,12 @@ class Flight:
 
     # --- the vehicle ----------------------------------------------------
     def start(self, resume=None):
+        fenv = {k: (os.path.join(HERE, v) if k == "YAGPC_VEHDYN_SOUNDING" and not os.path.isabs(v) else v)
+                for k, v in FL["env"].items()}
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
                    YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
                    YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG="5",
-                   PYTHONUNBUFFERED="1", **FL["env"])
+                   PYTHONUNBUFFERED="1", **fenv)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),

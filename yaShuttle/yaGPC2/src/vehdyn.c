@@ -612,6 +612,94 @@ static double geodetic_h_ft(const double r[3]) {
     }
     return h / 0.3048;
 }
+/* THE DAY'S AIR: a radiosonde sounding, YAGPC_VEHDYN_SOUNDING naming its
+ * file in the University of Wyoming archive's CSV form (pressure hPa,
+ * geopotential height m, temperature and dew point C, mixing ratio g/kg,
+ * wind direction deg (from) and speed m/s) -- for STS-134, Cape Canaveral
+ * (74794) at 2011-05-16 12Z, an hour before launch.  Below its top it gives
+ * the atmosphere (pressure log-linear in height, virtual temperature linear)
+ * and the wind; above, the reference atmospheres below and no wind.
+ * Heights are made geometric from geopotential (Re 6,356,766 m). */
+#define SND_MAX 400
+static int sndN = -1;
+static double sndZ[SND_MAX], sndLnP[SND_MAX], sndTv[SND_MAX], sndWE[SND_MAX], sndWN[SND_MAX];
+static void sounding_load(void) {
+    if (sndN >= 0) return;
+    sndN = 0;
+    const char *path = yagpc_getenv("YAGPC_VEHDYN_SOUNDING");
+    if (path == NULL || !*path) return;
+    FILE *fp = fopen(path, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "vehdyn: sounding %s: cannot open\n", path);
+        return;
+    }
+    char line[512];
+    double lastWE = 0.0, lastWN = 0.0;
+    while (fgets(line, sizeof line, fp) != NULL && sndN < SND_MAX) {
+        /* time,lon,lat,p,z,T,Td,Ti,RH,RHi,w,dir,speed */
+        char *f[16];
+        int nf = 0;
+        for (char *c = line, *s0 = line; nf < 16; c++)
+            if (*c == ',' || *c == '\n' || *c == '\0') {
+                int end = (*c == '\n' || *c == '\0');
+                *c = '\0';
+                f[nf++] = s0;
+                s0 = c + 1;
+                if (end) break;
+            }
+        if (nf < 13) continue;
+        char *e1, *e2, *e3;
+        double p = strtod(f[3], &e1), zg = strtod(f[4], &e2), t = strtod(f[5], &e3);
+        if (e1 == f[3] || e2 == f[4] || e3 == f[5]) continue;     /* the header, or a gap */
+        char *e4;
+        double w = strtod(f[10], &e4);
+        if (e4 == f[10]) w = 0.0;
+        double tv = (t + 273.15) * (1.0 + 0.61 * w / 1000.0);
+        char *e5, *e6;
+        double dir = strtod(f[11], &e5), spd = strtod(f[12], &e6);
+        double we = lastWE, wn = lastWN;
+        if (e5 != f[11] && e6 != f[12]) {      /* toward = from + 180 */
+            we = -spd * sin(dir * VD_PI / 180.0);
+            wn = -spd * cos(dir * VD_PI / 180.0);
+            lastWE = we; lastWN = wn;
+        }
+        double z = 6356766.0 * zg / (6356766.0 - zg);
+        if (sndN > 0 && z <= sndZ[sndN - 1]) continue;
+        sndZ[sndN] = z; sndLnP[sndN] = log(p * 100.0); sndTv[sndN] = tv;
+        sndWE[sndN] = we; sndWN[sndN] = wn;
+        sndN++;
+    }
+    fclose(fp);
+    fprintf(stderr, "vehdyn: sounding %s: %d levels to %.0f m\n", path, sndN,
+            sndN ? sndZ[sndN - 1] : 0.0);
+}
+static int sounding_seg(double h, double *f) {
+    sounding_load();
+    if (sndN < 2 || h >= sndZ[sndN - 1]) return -1;
+    if (h < sndZ[0]) h = sndZ[0];
+    int i = 0;
+    while (i < sndN - 2 && h > sndZ[i + 1]) i++;
+    *f = (h - sndZ[i]) / (sndZ[i + 1] - sndZ[i]);
+    return i;
+}
+static int sounding(double h, double *rho, double *temp) {
+    double f;
+    int i = sounding_seg(h, &f);
+    if (i < 0) return 0;
+    double p = exp(sndLnP[i] + f * (sndLnP[i + 1] - sndLnP[i]));
+    *temp = sndTv[i] + f * (sndTv[i + 1] - sndTv[i]);
+    *rho = p / (287.05 * *temp);
+    return 1;
+}
+/* The wind at height h, m/s toward east and north (zero above the sounding). */
+static void sounding_wind(double h, double *we, double *wn) {
+    double f;
+    int i = sounding_seg(h, &f);
+    if (i < 0) { *we = *wn = 0.0; return; }
+    *we = sndWE[i] + f * (sndWE[i + 1] - sndWE[i]);
+    *wn = sndWN[i] + f * (sndWN[i + 1] - sndWN[i]);
+}
+
 /* THE 1963 PATRICK AFB REFERENCE ATMOSPHERE, the one the Shuttle's ascent
  * design used (STS-1 OFP JSC-14483 Vol 3 sec. 5.3; Smith & Weidner, NASA
  * TM X-53139, 1964), as tabulated for SVDS in JSC-08964 (Kirkpatrick,
@@ -664,6 +752,7 @@ static int patrick(double h, double *rho, double *temp) {
 /* THE 1976 STANDARD ATMOSPHERE to 86 km, layer by layer: physics.c's
  * single exponential below 25 km is 20-26% thin where max-q happens. */
 static void us1976(double h, double *rho, double *temp) {
+    if (sounding(h, rho, temp)) return;
     if (patrick(h, rho, temp)) return;
     static const double HB[] = { 0, 11000, 20000, 32000, 47000, 51000, 71000, 86000 };
     static const double LB[] = { -0.0065, 0.0, 0.001, 0.0028, 0.0, -0.0028, -0.002 };
@@ -775,6 +864,21 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
         va[0] = st.v[0] - (we[1] * st.r[2] - we[2] * st.r[1]);
         va[1] = st.v[1] - (we[2] * st.r[0] - we[0] * st.r[2]);
         va[2] = st.v[2] - (we[0] * st.r[1] - we[1] * st.r[0]);
+        {                                   /* and the day's wind, east and north */
+            double wE, wN, pole[3], rn = sqrt(st.r[0] * st.r[0] + st.r[1] * st.r[1] + st.r[2] * st.r[2]);
+            sounding_wind(height_m(st.r), &wE, &wN);
+            if (wE != 0.0 || wN != 0.0) {
+                phys_earth_pole(pole);
+                double up[3] = { st.r[0] / rn, st.r[1] / rn, st.r[2] / rn };
+                double e[3] = { pole[1] * up[2] - pole[2] * up[1], pole[2] * up[0] - pole[0] * up[2],
+                                pole[0] * up[1] - pole[1] * up[0] };
+                double en = sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
+                for (int k = 0; k < 3; k++) e[k] /= en;
+                double n[3] = { up[1] * e[2] - up[2] * e[1], up[2] * e[0] - up[0] * e[2],
+                                up[0] * e[1] - up[1] * e[0] };
+                for (int k = 0; k < 3; k++) va[k] -= wE * e[k] + wN * n[k];
+            }
+        }
         double sp = sqrt(va[0] * va[0] + va[1] * va[1] + va[2] * va[2]);
         if (sp > 1.0 && rho > 0.0) {
             double mach = sp / sqrt(1.4 * 287.05 * T);
