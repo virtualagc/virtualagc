@@ -290,7 +290,13 @@ class Flight:
             self.say("no ET separation in this run's log: OMS-2 targets as uplinked before launch")
             return
         subprocess.run([sys.executable, omst, "fromlog", log, "%.1f" % OMS2_DTIG, state], check=True)
-        out = subprocess.run([sys.executable, omst, "design", state, str(FL["oms2_hp"]), str(FL["oms2_ha"])], check=True,
+        # the reports give HA x HP above a spherical Earth of the mean radius,
+        # 6,371 km -- 3.854 nmi below the equatorial radius omstarget and PASS
+        # measure from: STS-134's 124.3 x 175.8 for 259.2 ft/s is unreachable
+        # otherwise, and taken so it designs to 262.0 (flight sts134d)
+        mr = (6378137.0 - 6371000.0) / 1852.0
+        out = subprocess.run([sys.executable, omst, "design", state, "%.2f" % (FL["oms2_hp"] - mr),
+                              "%.2f" % (FL["oms2_ha"] - mr)], check=True,
                              capture_output=True, text=True).stdout
         m = re.search(r"HT ([\d.]+)\s+THETA T ([\d.]+)", out)
         ht, th = float(m.group(1)), float(m.group(2))
