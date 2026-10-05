@@ -4,7 +4,8 @@
   "The nominal MECO target lives in the OPS 1 overlay (CGGC01), where no uplink reaches: the DOLILU's VDMAG (message 96) is only the pseudo-target second-stage guidance starts from. With the tape's 25,668 ft/s PASS cut off at 25,605 truth.",
   "VD_NOM: 25,819 ft/s, the STS-134 Ascent Checklist's MECO VI (ASC/134/FIN). The radius and flight-path angle stay the tape's (60 nmi, 0.5 deg): no STS-134 values found.",
   "K_CMD_NOM: second stage's throttle (GG42ND step 5601, 'the rated power level setting'), 100 on the tape; STS-134 flew 104.5% to the 3-g throttling (JSC 37461 Appendix A) -- 104, the command's resolution being 1%. With 100 the simulated stack ran the second stage at 100%.",
-  "RD_NOM: STS-134 flew a '52 nautical mile MECO' as a performance enhancement (Space Shuttle Missions Summary, NASA 20110001406, STS-134 page 2-240). PASS's convention is altitude above its equatorial radius a = 20,925,646.3 ft (the tape's own RD_NOM is a + 60.02 nmi), so RD_NOM = a + 52 nmi = 21,241,604 ft. (Previously 21,250,656 ft, 53.5 nmi: 107 km above the ellipsoid at MECO latitude, an unsourced figure.)  FPA_NOM 0.65 deg: no STS-134 value found; with VI 25,819 ft/s it gives a post-MECO apogee near the MOD FRR's 'insertion altitude 122 nm'. The tape's (60 nmi, 0.5 deg) left a 137 x 43 nmi orbit and an OMS-2 of 292 ft/s."
+  "RD_NOM: STS-134 flew a '52 nautical mile MECO' as a performance enhancement (Space Shuttle Missions Summary, NASA 20110001406, STS-134 page 2-240). PASS's convention is altitude above its equatorial radius a = 20,925,646.3 ft (the tape's own RD_NOM is a + 60.02 nmi), so RD_NOM = a + 52 nmi = 21,241,604 ft. (Previously 21,250,656 ft, 53.5 nmi: 107 km above the ellipsoid at MECO latitude, an unsourced figure.)  FPA_NOM 0.65 deg: no STS-134 value found; with VI 25,819 ft/s it gives a post-MECO apogee near the MOD FRR's 'insertion altitude 122 nm'. The tape's (60 nmi, 0.5 deg) left a 137 x 43 nmi orbit and an OMS-2 of 292 ft/s.",
+  "CGGV_RAD_MECO (RDMAG, the pseudo MECO radius second stage flies to until the guidance parameter reset) must equal RD_NOM: CGGC01 initializes both to 21,290,308. The other two pseudo targets, VDMAG and GAMD, come from DOLILU message 96."
  ],
  "cells": [
   {
@@ -28,6 +29,14 @@
    "H": "471441F040000000",
    "was": "47144DD440000000",
    "value": "21,241,604 ft = a + 52 nmi (tape 21,290,308 = a + 60.02 nmi)"
+  },
+  {
+   "name": "CGGV_RAD_MECO",
+   "config": "G16",
+   "addr": "0f140",
+   "H": "471441F040000000",
+   "was": "47144DD440000000",
+   "value": "21,241,604 ft, the same as RD_NOM: this is the radius PEG flies to until CGGV_GUID_PARM_RESET_GMT (GG42ND step 54), and the flight source initializes it to RD_NOM's value (CGGC01). Left at the tape's 60 nmi, it lofted second stage ~25,000 ft and dove at the switch."
   },
   {
    "name": "CGGS_FPA_MECO_NOM",
