@@ -2422,7 +2422,14 @@ class PanelO6:
         win._wh = (w, h)
         self.cv.configure(width=w, height=h)
         top.geometry("")                  # the window follows its canvas
-        top.minsize(min(w, win._minsize[0]), min(h, win._minsize[1]))
+        # THE CONTENT SIZE IS THE FLOOR.  Panel controls never shrink (owner):
+        # a layout saved on another display, whose fonts measured smaller,
+        # used to set this window below its content, and the fit then drew
+        # every control at two-thirds size -- F2, F4 and F7 at 0.65 on the
+        # owner's screen from an Xvfb-made layout (2026-10-06).  w and h are
+        # already capped by the screen, so this never asks for more than it
+        # holds; a window can still be made LARGER.
+        top.minsize(w, h)
         if sys.platform == "darwin":
             self.root.after(400, lambda: self._darwin_nudge(win))
         log("size: %s %dx%d, the content at scale %.3f%s"
@@ -3379,7 +3386,7 @@ class PanelO6:
         # The new design size is applied on the Configure that follows.
         self._snug_pending = ((tw, th), want)
         w, h = size[0] + tw - cw, size[1] + th - ch
-        root.minsize(min(self._minsize[0], w), min(self._minsize[1], h))
+        root.minsize(w, h)              # never below the content: see _size_to_content
         self._snug_set = (w, h)
         # ON THE SCREEN: the cap limits the size, but a window placed toward
         # the right went off the edge (Mac-integrate: x 87 + 1904 on a 1920
