@@ -5,6 +5,7 @@ doing the flying.
 
     python3 examples/flights/fly_sts134.py --logs DIR [--port-base N]
                                            [--tape VOLUME] [--from STAGE]
+                                           [--to STAGE]
 
 It starts simulatePASS.py and then, phase by phase:
 
@@ -20,12 +21,16 @@ It starts simulatePASS.py and then, phase by phase:
   ASCENT   PASS's: RSLS, liftoff, SRB and ET separation
   OMS 2    the STS-134 Ascent Checklist's OMS 2 cards: DAP AUTO, OPS 105,
            TRIM LOAD, LOAD, TIMER, MNVR, and EXEC at TIG
+  OPS2     the Ascent Checklist's post-burn MAJOR MODE CHANGE (OPS 106 PRO),
+           then at MET 0:50 the Post Insertion book's TRANSITION TO GNC
+           OPS 2 for a single G2: GPC MEMORY configuration 2 per its table,
+           and OPS 201 PRO
   ORBIT    one orbit coasting, the truth's osculating orbit logged
 
-with a capture at the end of each phase (sts134-<phase> in DIR), and
---from STAGE to resume from one.  The vehicle's clock starts at
-2011-05-16 11:30:00 UTC so that liftoff, when the alignment is done, is at
-STS-134's own 12:56:27.994.
+with a capture at the end of each phase (sts134-<phase> in DIR), --from
+STAGE to resume from one, and --to STAGE to stop after one.  The vehicle's
+clock starts at 2011-05-16 11:30:00 UTC so that liftoff, when the alignment
+is done, is at STS-134's own 12:56:27.994.
 
 The STS-134 volume is the generic OI-34 tape with the flight's OPS 1
 overlay I-loads (yaGPC2/tools/mission_reconfig.py with
@@ -71,7 +76,7 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       # soundings interpolated in time.  PASS's table is from 12Z alone, the
       # last balloon before launch (none earlier is archived for 74794).
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
-PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "ORBIT"]
+PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT"]
 
 IPL_SCRIPT = """
 +0     gpc 1
@@ -117,6 +122,30 @@ OMS2_SETUP = """
 +5     keys ITEM 2 3 EXEC
 +10    keys ITEM 2 7 EXEC
 """
+# STS-134 Ascent Checklist (ASC/134/FIN) 5-2, after the post-burn checks:
+# MAJOR MODE CHANGE, "CRT1 GNC, OPS 106 PRO".
+OPS106 = """
++1     keys OPS 1 0 6 PRO
+"""
+# STS-134 Post Insertion (PI/134/FIN) 1-2, CONFIG GPCs FOR OPS 2, step 4
+# TRANSITION TO GNC OPS 2, the SINGLE G2 column: GNC 0 GPC MEMORY,
+# CONFIG - ITEM 1 +2 EXEC, "Modify MC 2 per table" -- GPC 10000; STR 1-4
+# to GPC 1; PL 1/2 0; CRT 1,2,4 to 1, CRT 3 0; L 1,2 0; MM 1,2 to 1 -- then
+# GNC, OPS 201 PRO, whose base page is GNC UNIV PTG.  Steps 1-3 (freeze-
+# drying a second GPC) and the BFC CRT switch steps belong to the
+# redundant set and the BFS, which a one-GPC vehicle has not got.  GPC
+# MEMORY's items 2-6 are the GPCs, 7-19 the buses: STR 1-4, PL 1/2, CRT
+# 1-4, L 1-2, MM 1-2 (CD0001.dfg, CZ2V_STRNG_MC 1-13).
+OPS201_ITEMS = ["2 + 1", "3 + 0", "4 + 0", "5 + 0", "6 + 0",
+                "7 + 1", "8 + 1", "9 + 1", "1 0 + 1", "1 1 + 0",
+                "1 2 + 1", "1 3 + 1", "1 4 + 0", "1 5 + 1",
+                "1 6 + 0", "1 7 + 0", "1 8 + 1", "1 9 + 1"]
+OPS201 = ("+1     keys SPEC 0 PRO\n"
+          "+5     keys ITEM 1 + 2 EXEC\n"
+          + "".join("+8     keys ITEM %s EXEC\n" % i for i in OPS201_ITEMS)
+          + "+10    keys OPS 2 0 1 PRO\n"
+          "wait crt 1 title 2011/ timeout 600\n"
+          "+5     subtitle\n")
 
 
 class Flight:
@@ -331,6 +360,18 @@ class Flight:
         self.say("crew: EXEC at TIG-8 s (TIG GMT %.1f)" % tig)
         self.wait_gmt(tig + 300.0)
 
+    def ops2(self):
+        # PRO to post-OMS-2 coast once the burn is done and checked; the
+        # OMS 2 phase ends at TIG + 300 s
+        self.play(OPS106, "ops106")
+        self.script_done("ops106", 120)
+        # the Post Insertion timeline puts CONFIG GPCs FOR OPS 2 at MET 0:50
+        self.wait_gmt(T0 + 50 * 60.0)
+        self.play(OPS201, "ops201")
+        self.script_done("ops201", 900)
+        self.say("OPS 201: GNC UNIV PTG on CRT 1")
+        self.wait_sim(30)
+
     def orbit(self):
         self.wait_sim(5600)
         orb = [l for l in self.log_text().splitlines() if l.startswith("vehdyn-orbit")]
@@ -341,7 +382,8 @@ class Flight:
         resume = (os.path.join(self.a.logs, FL["name"] + "-" + PHASES[start - 1].lower())
                   if start else None)
         self.start(resume)
-        for ph in PHASES[start:]:
+        stop = PHASES.index(self.a.to) + 1 if self.a.to else len(PHASES)
+        for ph in PHASES[start:stop]:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
             self.snapshot(ph.lower())
@@ -358,6 +400,8 @@ def main():
     ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
     ap.add_argument("--reuplink", action="store_true",
                     help="with --from COUNT: send the DOLILU again before OPS 101")
+    ap.add_argument("--to", choices=PHASES,
+                    help="stop after this phase (an ascent test needs no OPS 2 or orbit: --to OMS2)")
     ap.add_argument("--from", dest="from_", choices=PHASES[1:],
                     help="resume from the capture the previous phase left")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
