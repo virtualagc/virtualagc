@@ -8,7 +8,8 @@
     "LENGTH 15,000 ft (each, plus 1,000 ft overrun) and MLS channels 8 (KSC 15) / 6 (KSC 33): the STS-134 LANDING SITE TABLE, Entry Checklist ENT/134/FIN FS 3-2 (local mirror, Shuttle/Entry Checklist) -- the flight's own figure, preferred to the FAA's 15,001. MLS is not loaded yet (msbls_index 0).",
     "TACAN channels: STS-115 Navaids Chart (local mirror, Shuttle/Charts): KSC 15 TTS 59Y (dual string), COF 97 (single string); KSC 33 LAL 107.",
     "COF: FAA NAVAID record via airnav.com: 28-14-15.660N 080-36-42.330W, 5 ft, channel 97X, variation 07W (2020).",
-    "TTS: NOT in current FAA data (a NASA TACAN, decommissioned after the program). PLACEHOLDER: abeam the runway midpoint, 1,000 ft east of the centreline, at field elevation -- replace when a source is found."
+    "TTS: FAA NAVAID record (pilotnav.com/navaid/faa-571, supplied by Ron Burkey 2026-10-06): 28-37-34.200N 080-41-45.000W, elevation 57 ft MSL, magnetic variation 00E as listed.",
+    "MSBLS (for the MLS table, not loaded yet): station near the runway 15 (NW) end 28-37-51N 080-42-05W, near the runway 33 (SE) end 28-36-01N 080-41-17W -- supplied by Ron Burkey 2026-10-06 (+/-50 ft); MSBLS-GS siting: az/DME 1,300 ft beyond the rollout end (newer: 1,500 ft short of it), elevation 3,360 ft from the threshold (newer: 1,500 ft), both 300 ft off the centreline (Holloway & Hale, 'Space Shuttle Landing System Certification', IFIS 2004, local mirror Shuttle/Space_Shuttle_Landing_System.pdf p.224)."
   ],
   "runways": [
     {
@@ -46,12 +47,11 @@
       "id": "TTS",
       "channel": 59,
       "mode": "Y",
-      "placeholder": true,
-      "abeam_runway_slot": 1,
-      "east_offset_ft": 1000.0,
-      "alt_ft": 8.3,
+      "lat_dms": "28-37-34.200N",
+      "lon_dms": "080-41-45.000W",
+      "alt_ft": 57.0,
       "delh_ft": 0.0,
-      "mag_var_deg": -5.0
+      "mag_var_deg": 0.0
     },
     {
       "slot": 2,
@@ -63,6 +63,20 @@
       "alt_ft": 5.0,
       "delh_ft": 0.0,
       "mag_var_deg": -7.0
+    }
+  ],
+  "msbls_stations": [
+    {
+      "near_end": "KSC15 (NW)",
+      "lat_dms": "28-37-51N",
+      "lon_dms": "080-42-05W",
+      "accuracy_ft": 50
+    },
+    {
+      "near_end": "KSC33 (SE)",
+      "lat_dms": "28-36-01N",
+      "lon_dms": "080-41-17W",
+      "accuracy_ft": 50
     }
   ]
 }
