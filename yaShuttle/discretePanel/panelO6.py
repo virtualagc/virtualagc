@@ -751,6 +751,13 @@ OPS_PANELS = {
                 "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
+# AN OPS TRANSITION SHOWS AN OPS 0 PAGE while the new OPS loads from mass
+# memory -- 13 s for OPS 1 -> 2, 30 s for OPS 9 -> 1 -- and following it
+# blinked every panel but O6, C2 and R11 out of a recorded video (owner,
+# 2026-10-05).  So when nothing but OPS 0 is on the displays and a real OPS
+# was there within this long, its panels stay until the next OPS appears.
+# Longer than this it is a real return to OPS 0, and the panels follow.
+OPS_TRANSITION_S = 120.0
 SCREEN_OPS = re.compile(r"^\s*(\d)\d{3}/")
 
 IDP_LOAD_W = 420       # O6's IDP LOAD inset: four switches
@@ -2449,6 +2456,17 @@ class PanelO6:
         for key in self._ops_on_screens():
             self._ops_seen[key] = now
         ops = sorted(k for k, t in self._ops_seen.items() if now - t <= OPS_HOLD_S)
+        held = ""
+        if not any(k[1] for k in ops):
+            # Only OPS 0, or nothing: an OPS transition, if a real OPS was
+            # on the displays a moment ago (OPS_TRANSITION_S) -- keep it.
+            real = [(t, k) for k, t in self._ops_seen.items()
+                    if k[1] and now - t <= OPS_TRANSITION_S]
+            if real:
+                last = max(t for t, _ in real)
+                keep = sorted(k for t, k in real if last - t <= OPS_HOLD_S)
+                ops = sorted(set(ops) | set(keep))
+                held = " (transition: keeping %s)" % ", ".join("%s OPS %d" % k for k in keep)
         want = set(BASE_PANELS)
         for k in ops:
             want.update(OPS_PANELS.get(k, ()))
@@ -2458,7 +2476,7 @@ class PanelO6:
         if (shown, tuple(ops)) != self._ops_shown:
             log("panels: %s -- showing %s"
                 % (", ".join("%s OPS %d" % k for k in ops) or "no OPS on the displays",
-                   " ".join(shown)) + (" (all)" if self.panel_mode == "all" else ""))
+                   " ".join(shown)) + (" (all)" if self.panel_mode == "all" else "") + held)
             self._ops_shown = (shown, tuple(ops))
         if not self.may_map:
             return
