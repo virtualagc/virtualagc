@@ -1391,6 +1391,12 @@ def main():
     ap.add_argument("--yagpc-extra", metavar="ARGS", default="",
                     help="extra yaGPC2 options, quoted as one string, e.g. "
                          "\"--barrier-spin-us 50 --rt-idle-poll-ms 2\"")
+    ap.add_argument("--rt-factor", type=float, default=1.0, metavar="X",
+                    help="simulated time per wall second (default 1). 2 was measured "
+                         "clean on a one-GPC orbital coast: rate 1.92 over a minute, no bus "
+                         "time-outs, no I/O errors, MEDS2 taking fills throughout. The "
+                         "display bus is the limit to watch: MEDS2 answers in wall time "
+                         "against a 5 ms SIMULATED receive time-out")
     ap.add_argument("--yagpc", metavar="PATH",
                     help="the yaGPC2 executable (default ../yaGPC2/yaGPC2)")
     ap.add_argument("--logs", metavar="DIR", default="simulatePASS-logs",
@@ -1895,7 +1901,7 @@ def main():
             # asked for at start-up.  It costs nothing until SIGUSR1 arrives.
             gpc_argv += ["--snapshot", snapshot_staging]
             gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
-                         "--rt-factor", "1", "--port-base", str(args.port_base),
+                         "--rt-factor", "%g" % args.rt_factor, "--port-base", str(args.port_base),
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
                          "--verbose"] + shlex.split(args.yagpc_extra)
             gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,
