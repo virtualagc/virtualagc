@@ -30,6 +30,15 @@ more than once), each load block's checksum restamped (tools/
 patch_unresolved.py's block finder: a block is the nearest 512-halfword
 boundary before the cell whose two-halfword tail 0000,sum verifies and is
 followed by C6C6 padding).
+
+A CELL WITH "flat": its position on the volume, in halfwords, given outright
+-- for tables whose blank initial image repeats so often that no context
+can place them (CGN13R's landing sites: tools/landing_sites.py works the
+positions out from the table's load block).  "was" is still checked, now
+against the volume, and the block still restamped; --mem is not needed when
+every cell has one.  "block": [start, length] names the load block outright
+(verified by its own checksum) -- the 512-boundary search can be fooled by
+a run of zeros.
 """
 import argparse
 import json
@@ -97,23 +106,43 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("spec")
     ap.add_argument("volume")
-    ap.add_argument("--mem", required=True, help="memory image with the configuration loaded")
+    ap.add_argument("--mem", help="memory image with the configuration loaded (not needed for 'flat' cells)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
     spec = json.load(open(a.spec))
-    mem = np.frombuffer(open(a.mem, "rb").read(), dtype=">u2").astype(np.int64)
+    if a.mem is None and any("flat" not in c for c in spec["cells"]):
+        ap.error("--mem is needed for cells without a 'flat' position")
+    mem = np.frombuffer(open(a.mem, "rb").read(), dtype=">u2").astype(np.int64) if a.mem else None
     raw, hw, off, F = load(a.volume)
     F = F.copy()
     P = np.concatenate(([0], np.cumsum(F)))
     blob = F.astype(">u2").tobytes()
     touched, bad = {}, 0
     for c in spec["cells"]:
-        addr = int(c["addr"], 16)
         new = encode(c, c.get("E", c.get("D", c.get("H"))))
         was = encode(c, c["was"])
         n = len(new)
+        if "flat" in c:
+            p = int(c["flat"])
+            here = [int(x) for x in F[p:p + n]]
+            if "block" in c:
+                # given outright: inside a blank table the 512-boundary search
+                # can find a false block (zeros sum to zero); accept it only if
+                # its own checksum verifies
+                S, L = (int(v) for v in c["block"])
+                lb = (S, L) if (int(F[S:S + L].sum()) & 0xFFFF) == int(F[S + L + 1]) else None
+            else:
+                lb = find_lb(F, P, hw, p)
+            if here != was or lb is None or p + n > lb[0] + lb[1]:
+                print("  %-26s volume holds %s at flat %d, not %s (or no load block) -- refused"
+                      % (c["name"], " ".join("%04X" % x for x in here), p, " ".join("%04X" % x for x in was)))
+                bad += 1
+            else:
+                touched.setdefault(lb, []).append((p, new, c["name"]))
+            continue
+        addr = int(c["addr"], 16)
         here = [int(x) for x in mem[addr:addr + n]]
         if here != was:
             print("  %-26s memory image holds %s, not %s -- refused"
