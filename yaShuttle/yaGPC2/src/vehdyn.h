@@ -125,5 +125,7 @@ void vehdyn_reset(double t);
 /* For tests: set the attitude (body -> inertial, [w x y z], normalised here)
  * and body rates directly. */
 void vehdyn_set_attitude(const double q[4], const double w[3]);
+/* For tests: set the position and velocity directly (M50, m and m/s). */
+void vehdyn_set_rv(const double r[3], const double v[3]);
 
 #endif

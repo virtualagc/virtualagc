@@ -929,7 +929,10 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
  * and 10.27; LA66, NASA CR-147621, M 0.29) at the LEVEL and TRIM of the
  * STS-1 descent OFP (JSC-14483 Vol. 5, April 1979 ADDB) -- see that file.
  * Body-axis CN and CA through the MRP, X 1076.7 / Z 375.0 in, and CM about
- * it; the lateral-directional set is still to come.
+ * it.  Lateral-directional derivatives against Mach (TP-1011 above 1.3, the
+ * data book subsonic) and damping against alpha (TP-1634), linear in
+ * sideslip, aileron and rudder; the rudder below Mach 1.3 and all damping
+ * above it are held from where the sources stop.
  *
  * The aerosurfaces follow PASS's commands (mdmdev, FA AOD) at their rates,
  * inside their travel; the body flap runs while its up or down discrete
@@ -947,6 +950,7 @@ static void ascent_loads(double f[3], double tau[3], double *mdotEt, double *mdo
 #define EA_NBF (int)(sizeof EA_DBF / sizeof EA_DBF[0])
 #define EA_NSB (int)(sizeof EA_DSB / sizeof EA_DSB[0])
 #define EA_CREF_M   (474.8 * IN_M)
+#define EA_BREF_M   (936.68 * IN_M)
 #define EA_ALT_M    130000.0      /* below this the tables, above the cannonball */
 
 enum { SURF_LIB, SURF_LOB, SURF_RIB, SURF_ROB, SURF_SB, SURF_RUD, SURF_N };
@@ -1049,13 +1053,42 @@ static bool entry_aero(double f[3], double tau[3]) {
     double c[3];
     ea_coeffs(mach, al, de, bfPos, surfPos[SURF_SB], c);
     double qs = q * ASC_SREF_M2;
-    double fk[3] = { -c[1] * qs, 0.0, -c[0] * qs }, pB[3];   /* CA aft, CN up (-Z) */
+    /* lateral-directional, per degree, at this Mach (log interpolation):
+     * aileron (left - right)/2, elevon pairs; rudder + trailing edge left */
+    double lat[9], fl;
+    {
+        static double logL[sizeof EA_LAT_MACH / sizeof EA_LAT_MACH[0]];
+        static int ready;
+        const int nl = (int)(sizeof EA_LAT_MACH / sizeof EA_LAT_MACH[0]);
+        if (!ready) { for (int i = 0; i < nl; i++) logL[i] = log(EA_LAT_MACH[i]); ready = 1; }
+        int i = ea_brk(logL, nl, log(mach > 0.05 ? mach : 0.05), &fl);
+        for (int k = 0; k < 9; k++) lat[k] = EA_LAT[i][k] + fl * (EA_LAT[i + 1][k] - EA_LAT[i][k]);
+    }
+    double da = 0.25 * ((surfPos[SURF_LIB] + surfPos[SURF_LOB]) - (surfPos[SURF_RIB] + surfPos[SURF_ROB]));
+    double dr = surfPos[SURF_RUD];
+    double cy = lat[0] * be + lat[3] * da + lat[6] * dr;
+    double cn = lat[1] * be + lat[4] * da + lat[7] * dr;
+    double cl = lat[2] * be + lat[5] * da + lat[8] * dr;
+    /* damping, per radian, on rate x length / 2V (TP-1634, against alpha) */
+    double dmp[5], fd;
+    {
+        const int nd = (int)(sizeof EA_DAMP_ALPHA / sizeof EA_DAMP_ALPHA[0]);
+        int i = ea_brk(EA_DAMP_ALPHA, nd, al, &fd);
+        for (int k = 0; k < 5; k++) dmp[k] = EA_DAMP[i][k] + fd * (EA_DAMP[i + 1][k] - EA_DAMP[i][k]);
+    }
+    double bs = EA_BREF_M / (2.0 * sp), cs = EA_CREF_M / (2.0 * sp);
+    double cm = c[2] + dmp[0] * st.w[1] * cs;
+    cl += bs * (dmp[1] * st.w[0] + dmp[2] * st.w[2]);
+    cn += bs * (dmp[3] * st.w[0] + dmp[4] * st.w[2]);
+    double fk[3] = { -c[1] * qs, cy * qs, -c[0] * qs }, pB[3];   /* CA aft, CY right, CN up (-Z) */
     to_body(1076.7, 0.0, 375.0, pB);
     add_force(f, tau, fk, pB);
-    tau[1] += c[2] * qs * EA_CREF_M;                         /* CM + nose up, about +Y */
+    tau[0] += cl * qs * EA_BREF_M;                           /* + right wing down */
+    tau[1] += cm * qs * EA_CREF_M;                           /* + nose up */
+    tau[2] += cn * qs * EA_BREF_M;                           /* + nose right */
     for (int i = 0; i < 3; i++) aeroFb[i] = fk[i];
     aeroAl = al; aeroBe = be; aeroQ = q;
-    eaMach = mach; eaCN = c[0]; eaCA = c[1]; eaCM = c[2];
+    eaMach = mach; eaCN = c[0]; eaCA = c[1]; eaCM = cm;
     return true;
 }
 
@@ -1862,6 +1895,11 @@ double vehdyn_load(const double *b, int n) {
     if (unixZero >= 0.0) unixZero += t;
     restoredGmt = gmtCap;
     return t;
+}
+
+void vehdyn_set_rv(const double r[3], const double v[3]) {
+    memcpy(st.r, r, sizeof st.r);
+    memcpy(st.v, v, sizeof st.v);
 }
 
 void vehdyn_set_attitude(const double q[4], const double w[3]) {

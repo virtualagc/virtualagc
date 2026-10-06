@@ -4,7 +4,8 @@ primary sources.  `python3 tools/entryaero.py --header` writes src/entryaero.h
 (the tables vehdyn interpolates); with no argument it prints the OFP
 calibration.  Data in tools/aero/: oa98-final.csv (CR-141550 appendix, read
 from the scans and proofread), la66-run{1,2,3}.txt (CR-147621 runs 1-3),
-sts1-entry-ofp.csv (JSC-14483 Vol. 5, digitized).
+sts1-entry-ofp.csv (JSC-14483 Vol. 5, digitized), tp1011-lat.csv,
+tp1634-dyn.csv, tp1779-static.csv (NASA TP-1011/1634/1779, digitized).
 
 THE RULE.  Wind-tunnel tables give the SHAPES: how CN, CA and Cm vary with
 alpha, and what each surface does.  The STS-1 descent OFP (JSC-14483 Vol. 5,
@@ -174,6 +175,44 @@ def _interp_clamped(xs, ys, x):
     if x >= xs[-1]: return ys[-1]
     return _interp(xs, ys, x)
 
+# ---------- lateral-directional (per degree, body axes, Cl Cn on qSb) ----------
+# Against Mach along the trim alpha schedule, about the MRP (TP-1011's c.g.
+# is 65% of the fuselage reference length, Xo 1076.7 -- the same point).
+#   M >= 1.3   NASA TP-1011 fig 4 (Stone & Powell 1977, June 1974 data set)
+#   M 0.5      the data book lines TP-1779 figs 6-7 reproduce, at alpha 6
+#   rudder     TP-1011 only gives M 1.2-4.05: held below and above that range
+#              (FLAGGED: no subsonic rudder source yet)
+# Damping (per radian, on qcbar/2V and pb/2V, rb/2V): TP-1634 figs 4-8,
+# the data book line at M 0.4, against alpha 0-18 and held beyond; used at
+# every Mach (FLAGGED: no supersonic or hypersonic source).
+LAT_KEYS = ['Cy_beta', 'Cn_beta', 'Cl_beta', 'Cy_da', 'Cn_da', 'Cl_da', 'Cy_dr', 'Cn_dr', 'Cl_dr']
+SUBSONIC_M05 = dict(Cy_beta=-0.0179, Cn_beta=0.00151, Cl_beta=-0.00172,
+                    Cy_da=-0.00396, Cn_da=0.00076, Cl_da=0.00398)     # TP-1779 data book, M 0.4, alpha 6
+
+def _csv_rows(name):
+    return list(csv.DictReader(l for l in open(os.path.join(DATA, name)) if not l.startswith('#')))
+
+def lateral_table():
+    rows = [r for r in _csv_rows('tp1011-lat.csv') if float(r['Mach']) >= 1.3]
+    ms = [0.5] + [float(r['Mach']) for r in rows]
+    out = {}
+    for k in LAT_KEYS:
+        pts = [(0.5, SUBSONIC_M05[k])] if k in SUBSONIC_M05 else []
+        pts += [(float(r['Mach']), float(r[k])) for r in rows if r[k]]
+        xs = [math.log(m) for m, v in pts]; ys = [v for m, v in pts]
+        out[k] = [_interp_clamped(xs, ys, math.log(m)) for m in ms]
+    return ms, out
+
+def damping_table():
+    want = {'Cmq': 'Cmq+Cmalphadot', 'Clp': 'Clp (flt)', 'Clr': 'Clr-Clbetadot', 'Cnp': 'Cnp (flt)', 'Cnr': 'Cnr-Cnbetadot'}
+    rows = [r for r in _csv_rows('tp1634-dyn.csv') if r['source'].startswith('Ref.9') and r['Mach'] == '0.4']
+    alphas = [float(a) for a in range(0, 19, 2)]
+    out = {}
+    for k, pre in want.items():
+        pts = sorted((float(r['alpha_deg']), float(r['value_per_rad'])) for r in rows if r['parameter'].startswith(pre))
+        out[k] = [_interp_clamped([a for a, v in pts], [v for a, v in pts], a) for a in alphas]
+    return alphas, out
+
 # ---------- src/entryaero.h ----------
 # Mach breakpoints include every OFP calibration Mach and both tunnel Machs,
 # so interpolating in log Mach between them reproduces coeffs() exactly
@@ -231,6 +270,20 @@ def write_header(path):
         fp.write(table('EA_D_ELEVON', incr(H_DE, 0)))
         fp.write(table('EA_D_BODYFLAP', incr(H_DBF, 1)))
         fp.write(table('EA_D_SPEEDBRAKE', incr(H_DSB, 2)))
+        ms, lt = lateral_table()
+        fp.write('/* Lateral-directional, per degree, against EA_LAT_MACH (log): ' + ' '.join(LAT_KEYS) + ' */\n')
+        fp.write(arr('EA_LAT_MACH', ms))
+        fp.write('static const double EA_LAT[%d][%d] = {\n' % (len(ms), len(LAT_KEYS)))
+        for i in range(len(ms)):
+            fp.write('    { ' + ', '.join('%.6f' % lt[k][i] for k in LAT_KEYS) + ' },\n')
+        fp.write('};\n')
+        al, dt = damping_table()
+        fp.write('/* Damping, per radian, against EA_DAMP_ALPHA: Cmq Clp Clr Cnp Cnr */\n')
+        fp.write(arr('EA_DAMP_ALPHA', al))
+        fp.write('static const double EA_DAMP[%d][5] = {\n' % len(al))
+        for i in range(len(al)):
+            fp.write('    { ' + ', '.join('%.4f' % dt[k][i] for k in ('Cmq', 'Clp', 'Clr', 'Cnp', 'Cnr')) + ' },\n')
+        fp.write('};\n')
 
 if __name__ == '__main__':
     import sys

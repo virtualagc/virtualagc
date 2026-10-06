@@ -255,6 +255,42 @@ int main(void) {
         check(bf[2] < b0[2], "body flap down is nose down", bf[2] - b0[2], -0.05);
     }
 
+    /* THE AIR ON THE VEHICLE: at 60 km, 6 km/s through the air, nose 40 deg
+     * above the air-relative velocity, wings level, surfaces at zero.  The
+     * accelerometers feel the air alone: axial (-X) and normal (-Z) in the
+     * tables' ratio CA : CN, both pushing back and up -- which proves the
+     * axes, alpha's sign and the force path together. */
+    {
+        vehdyn_reset(0.0);
+        const double Re = 6378137.0, h = 60000.0, A = 40.0 * 3.14159265358979323846 / 180.0;
+        double r[3] = { Re + h, 0.0, 0.0 };
+        double we = 7.2921158553e-5;              /* the air turns with the Earth */
+        double vair = 6000.0;
+        double v[3] = { 0.0, vair + we * (Re + h), 0.0 };
+        vehdyn_set_rv(r, v);
+        /* velocity frame: x along the air velocity (+Y), z down (-X) */
+        double xv[3] = { 0, 1, 0 }, zv[3] = { -1, 0, 0 }, yv[3] = { 0, 0, -1 };   /* y = z x x */
+        double xb[3], zb[3], R[3][3];
+        for (int i = 0; i < 3; i++) {
+            xb[i] = cos(A) * xv[i] - sin(A) * zv[i];
+            zb[i] = sin(A) * xv[i] + cos(A) * zv[i];
+            R[i][0] = xb[i]; R[i][1] = yv[i]; R[i][2] = zb[i];
+        }
+        double qw = 0.5 * sqrt(1.0 + R[0][0] + R[1][1] + R[2][2]);
+        double q[4] = { qw, (R[2][1] - R[1][2]) / (4 * qw), (R[0][2] - R[2][0]) / (4 * qw),
+                        (R[1][0] - R[0][1]) / (4 * qw) };
+        double w0[3] = { 0, 0, 0 };
+        vehdyn_set_attitude(q, w0);
+        vehdyn_advance(0.05e6);
+        double sf[3], c[3];
+        vehdyn_specific_force(sf);
+        double mach = 6000.0 / sqrt(1.4 * 287.05 * 247.0);    /* ~247 K at 60 km */
+        vehdyn_aero_coeffs(mach, 40.0, 0.0, 0.0, 0.0, c);
+        check(sf[0] < 0.0 && sf[2] < 0.0, "the air pushes back and up", sf[2], -1.0);
+        check(fabs(sf[0] / sf[2] - c[1] / c[0]) < 0.01, "felt axial : normal = CA : CN", sf[0] / sf[2], c[1] / c[0]);
+        check(fabs(sf[1]) < 0.01 * fabs(sf[2]), "no side force at zero sideslip", sf[1], 0.0);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }
