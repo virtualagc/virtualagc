@@ -1201,8 +1201,26 @@ static void push_aerosurf(void) {
     vehdyn_set_aerosurf(cmd, (en && dn && !up) ? 1 : (en && up && !dn) ? -1 : 0);
 }
 
+/* THE HYDRAULIC SYSTEMS' SUPPLY PRESSURES, the FA's HFE SEG6 = words 26-27
+ * (AIS card 6 ch 29, card 14 ch 23; CGBIH1.hal:526-531): GP8HYD.hal:94-102
+ * votes each system from three of them and fails one that reads below
+ * CGPS_HYD_LOLMT, 13,926.4 counts -- so the zeros these words used to carry
+ * failed all three.  3,000 psi nominal (SCOM 2.1); the transducer's span is
+ * NOT documented here and is taken as 0-4,000 psi across 0-5 V, which puts
+ * 3,000 psi at 24,000 counts -- above the limit whatever the span within
+ * reason; only a display could be wrong.  The APUs are taken as running
+ * (no APU model yet). */
+#define HYD_PRESS_COUNTS 24000u
+
 static void aerosurf_feedback(uint16_t *b, int nb) {
     if (!vehdyn_enabled() || nb < 43) return;
+    static long hyd = -1;               /* YAGPC_HYD_PRESS_COUNTS overrides, for experiments */
+    if (hyd < 0) {
+        const char *e = yagpc_getenv("YAGPC_HYD_PRESS_COUNTS");
+        hyd = e ? atol(e) : (long)HYD_PRESS_COUNTS;
+    }
+    b[26] = (uint16_t)hyd;
+    b[27] = (uint16_t)hyd;
     double p[7];
     vehdyn_aerosurf_pos(p);
     b[36] = sat16((p[0] + 7.641) / (5.624 / 6400.0));

@@ -170,6 +170,8 @@ class Flight:
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", "20000"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
+        if os.environ.get("FLY_YAGPC"):          # another build, for bisecting
+            cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         os.makedirs(self.a.logs, exist_ok=True)
         # a fresh output file, so that an earlier run's lines are never taken
         # for this one's (a run still up on the port refuses to start)
