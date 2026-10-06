@@ -5,22 +5,64 @@
     "Coordinates are taken as geodetic on PASS's own ellipsoid (GNKGEO). They are survey values on NAD83/WGS-84; the datum difference (~100 m) moves the whole site, not its geometry, and both sides use the same numbers.",
     "Heights: DELH (mean sea level above the ellipsoid) is set to 0, so MSL and the ellipsoid coincide here -- a self-consistent choice, since there is no real geoid to agree with.",
     "Runway ends and elevation: FAA KTTS airport record (runway 15 end 28-37.965150N 080-42.363693W, runway 33 end 28-35.821563N 080-40.960818W, 15,001 x 300 ft, true 150 / magnetic 155 so variation 5 W).",
+    "LENGTH 15,000 ft (each, plus 1,000 ft overrun) and MLS channels 8 (KSC 15) / 6 (KSC 33): the STS-134 LANDING SITE TABLE, Entry Checklist ENT/134/FIN FS 3-2 (local mirror, Shuttle/Entry Checklist) -- the flight's own figure, preferred to the FAA's 15,001. MLS is not loaded yet (msbls_index 0).",
     "TACAN channels: STS-115 Navaids Chart (local mirror, Shuttle/Charts): KSC 15 TTS 59Y (dual string), COF 97 (single string); KSC 33 LAL 107.",
     "COF: FAA NAVAID record via airnav.com: 28-14-15.660N 080-36-42.330W, 5 ft, channel 97X, variation 07W (2020).",
     "TTS: NOT in current FAA data (a NASA TACAN, decommissioned after the program). PLACEHOLDER: abeam the runway midpoint, 1,000 ft east of the centreline, at field elevation -- replace when a source is found."
   ],
   "runways": [
-    {"slot": 1, "id": "KSC15", "lat_dms": "28-37-57.9090N", "lon_dms": "080-42-21.8216W",
-     "other_end_lat_dms": "28-35-49.2938N", "other_end_lon_dms": "080-40-57.6491W",
-     "alt_ft": 8.3, "delh_ft": 0.0, "length_ft": 15001, "mag_var_deg": -5.0, "msbls_index": 0},
-    {"slot": 2, "id": "KSC33", "lat_dms": "28-35-49.2938N", "lon_dms": "080-40-57.6491W",
-     "other_end_lat_dms": "28-37-57.9090N", "other_end_lon_dms": "080-42-21.8216W",
-     "alt_ft": 8.3, "delh_ft": 0.0, "length_ft": 15001, "mag_var_deg": -5.0, "msbls_index": 0}
+    {
+      "slot": 1,
+      "id": "KSC15",
+      "lat_dms": "28-37-57.9090N",
+      "lon_dms": "080-42-21.8216W",
+      "other_end_lat_dms": "28-35-49.2938N",
+      "other_end_lon_dms": "080-40-57.6491W",
+      "alt_ft": 8.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": -5.0,
+      "msbls_index": 0,
+      "mls_channel": 8
+    },
+    {
+      "slot": 2,
+      "id": "KSC33",
+      "lat_dms": "28-35-49.2938N",
+      "lon_dms": "080-40-57.6491W",
+      "other_end_lat_dms": "28-37-57.9090N",
+      "other_end_lon_dms": "080-42-21.8216W",
+      "alt_ft": 8.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": -5.0,
+      "msbls_index": 0,
+      "mls_channel": 6
+    }
   ],
   "tacans": [
-    {"slot": 1, "id": "TTS", "channel": 59, "mode": "Y", "placeholder": true,
-     "abeam_runway_slot": 1, "east_offset_ft": 1000.0, "alt_ft": 8.3, "delh_ft": 0.0, "mag_var_deg": -5.0},
-    {"slot": 2, "id": "COF", "channel": 97, "mode": "X",
-     "lat_dms": "28-14-15.660N", "lon_dms": "080-36-42.330W", "alt_ft": 5.0, "delh_ft": 0.0, "mag_var_deg": -7.0}
+    {
+      "slot": 1,
+      "id": "TTS",
+      "channel": 59,
+      "mode": "Y",
+      "placeholder": true,
+      "abeam_runway_slot": 1,
+      "east_offset_ft": 1000.0,
+      "alt_ft": 8.3,
+      "delh_ft": 0.0,
+      "mag_var_deg": -5.0
+    },
+    {
+      "slot": 2,
+      "id": "COF",
+      "channel": 97,
+      "mode": "X",
+      "lat_dms": "28-14-15.660N",
+      "lon_dms": "080-36-42.330W",
+      "alt_ft": 5.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": -7.0
+    }
   ]
 }
