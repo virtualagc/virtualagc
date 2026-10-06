@@ -97,6 +97,17 @@ double vehdyn_load(const double *b, int n);
  * The actuators follow at their own rate. */
 void vehdyn_set_tvc(const double cmd[5][2]);
 
+/* THE AEROSURFACE COMMANDS, degrees, as PASS writes them (mdmdev, FA AOD):
+ * left inboard, left outboard, right inboard, right outboard elevon
+ * (+ trailing edge down), speedbrake (0..98.6), rudder; and the body flap's
+ * drive from its discretes, +1 down, -1 up, 0 stopped. */
+void vehdyn_set_aerosurf(const double cmd[6], int bodyFlapDrive);
+/* Where the surfaces are, degrees: the six above, then the body flap. */
+void vehdyn_aerosurf_pos(double pos[7]);
+/* For tests: the entry tables' CN, CA and CM (about the MRP) at Mach,
+ * alpha and elevon, body flap, speedbrake deflection (degrees). */
+void vehdyn_aero_coeffs(double mach, double alpha, double de, double dbf, double dsb, double c[3]);
+
 /* The ascent: 0 not (on orbit), 1 on the pad, 2 the stack in flight, 3 the
  * orbiter and tank after SRB separation (YAGPC_VEHDYN_PAD). */
 int vehdyn_ascent_phase(void);

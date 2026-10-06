@@ -211,6 +211,50 @@ int main(void) {
               0.729211514646E-4 * 3600.0);
     }
 
+    /* THE ENTRY TABLES AGAINST THE STS-1 DESCENT OFP (JSC-14483 Vol. 5):
+     * at its points -- t from entry interface (min), Mach, alpha, the flown
+     * elevon, body flap and speedbrake (deg; speedbrake % x 0.986), and the
+     * trimmed CL and CD worked from its load factors (fig 6.2-35, W 191,902
+     * lb, S 2690 ft^2) -- the tables give that CL and CD, and pitching
+     * moment zero about the OFP's entry c.g., Xo 1098.6 / Zo 374.0 in
+     * (Table 5.0-I).  tools/entryaero.py builds them to do exactly this;
+     * the check is that the generated header and vehdyn's interpolation
+     * still do. */
+    {
+        static const double OFP[][8] = {
+            { 29.00,  0.611,  6.99,  4.61,  3.80,  41.02, 0.357, 0.106 },
+            { 25.00,  2.589, 13.99,  1.22, -0.93,  68.34, 0.385, 0.214 },
+            { 22.00,  5.872, 24.47,  3.08,  8.59,  98.74, 0.567, 0.342 },
+            { 19.00, 10.342, 37.02,  0.38,  7.80,   0.00, 0.843, 0.726 },
+            { 14.00, 19.494, 39.48, -0.21,  6.62,   0.00, 0.891, 0.829 },
+            {  7.00, 25.186, 39.98, -0.58,  6.60,   0.00, 0.884, 0.846 },
+        };
+        for (size_t i = 0; i < sizeof OFP / sizeof OFP[0]; i++) {
+            const double *o = OFP[i];
+            double c[3], r = o[2] * 3.14159265358979323846 / 180.0;
+            vehdyn_aero_coeffs(o[1], o[2], o[3], o[4], o[5] * 0.986, c);
+            double cl = c[0] * cos(r) - c[1] * sin(r), cd = c[0] * sin(r) + c[1] * cos(r);
+            double cmcg = c[2] + c[0] * (1098.6 - 1076.7) / 474.8 - c[1] * (375.0 - 374.0) / 474.8;
+            char w[96];
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: CL", o[0], o[1]);
+            check(fabs(cl - o[6]) < 0.01, w, cl, o[6]);
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: CD", o[0], o[1]);
+            check(fabs(cd - o[7]) < 0.01, w, cd, o[7]);
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: trimmed, CM about the c.g.", o[0], o[1]);
+            check(fabs(cmcg) < 0.003, w, cmcg, 0.0);
+        }
+        /* and the surfaces push the right way: trailing edge up pitches the
+         * nose up, the body flap down pitches it down (OA98, M 10.27) */
+        double up[3], dn[3], bf[3];
+        vehdyn_aero_coeffs(10.27, 40.0, -10.0, 0.0, 0.0, up);
+        vehdyn_aero_coeffs(10.27, 40.0, 10.0, 0.0, 0.0, dn);
+        vehdyn_aero_coeffs(10.27, 40.0, 0.0, 16.3, 0.0, bf);
+        check(up[2] > dn[2], "elevon TE up is nose up", up[2] - dn[2], 0.02);
+        double b0[3];
+        vehdyn_aero_coeffs(10.27, 40.0, 0.0, 0.0, 0.0, b0);
+        check(bf[2] < b0[2], "body flap down is nose down", bf[2] - b0[2], -0.05);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

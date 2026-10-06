@@ -1145,6 +1145,76 @@ static uint16_t sat16(double c) {
     return (uint16_t)(int16_t)c;
 }
 
+
+/* ---------------------------------------------------------------------
+ * THE AEROSURFACES (GPCAER.hal; CGBOBF.hal:1697-1708, 1746-1812).
+ *   Commands, FA AOD: counts = (deg x SF + BI) x 6400, SEG2A on card 0
+ *   channels 5-8 (left inboard elevon, left outboard, speedbrake, rudder),
+ *   SEG2B on card 4 channels 5-6 (right inboard, right outboard) -- the
+ *   same segment-to-channel pattern as the TVC commands above.  Averaged
+ *   over the FAs, as the force-fighting servovalves would.
+ *   Body flap: FA discrete output card 2 channel 1, HAL bit 15 UP and 16
+ *   DOWN (0x0002, 0x0001), with the enable on card 10 channel 1 bit 3
+ *   (0x2000).
+ *   Feedback, the FA's HFE SEG8 = words 36-42 (AID card 1 ch 0-6,
+ *   CGBIH1.hal:542-544): LIB LOB RIB ROB speedbrake rudder body-flap, in
+ *   the flight software's own scaling -- elevons GPEELV.hal:117-124
+ *   (deg = counts x SF + BI), speedbrake GPABFS.hal:56-58 (deg = counts x
+ *   10.85/6400 + 44.35), rudder GPORUD.hal:61-62 (deg = counts x
+ *   5.526/6400), body flap CGZRMCSC.hal:193-197 (percent = counts x
+ *   0.12885/64 + 50; 0% full up -11.7, 100% full down +22.5, SCOM 2.7).
+ * ------------------------------------------------------------------- */
+static const struct { unsigned card, ch; double sf, bi; } SURF_CMD[6] = {
+    { 0, 5, 0.1778, 1.3585 },   /* left inboard elevon */
+    { 0, 6, 0.1776, 1.381 },    /* left outboard elevon */
+    { 4, 5, 0.1778, 1.3585 },   /* right inboard elevon */
+    { 4, 6, 0.1776, 1.381 },    /* right outboard elevon */
+    { 0, 7, 0.09217, -4.0876 }, /* speedbrake */
+    { 0, 8, 0.181, 0.0 },       /* rudder */
+};
+
+static void push_aerosurf(void) {
+    if (!vehdyn_enabled()) return;
+    double cmd[6];
+    for (int a = 0; a < 6; a++) {
+        double sum = 0.0;
+        int n = 0;
+        for (int k = 1; k <= 4; k++) {
+            if (!faAodSeen[k]) continue;
+            sum += (faAod[k][SURF_CMD[a].card][SURF_CMD[a].ch] + 0.5 - SURF_CMD[a].bi * 6400.0) /
+                   (SURF_CMD[a].sf * 6400.0);
+            n++;
+        }
+        cmd[a] = n ? sum / n : 0.0;
+    }
+    if (!faAodSeen[1] && !faAodSeen[2] && !faAodSeen[3] && !faAodSeen[4]) {
+        double pos[7];
+        vehdyn_aerosurf_pos(pos);           /* nothing commanded yet: stay put */
+        for (int a = 0; a < 6; a++) cmd[a] = pos[a];
+    }
+    bool en = false, up = false, dn = false;
+    for (int k = 1; k <= 4; k++) {
+        en = en || (faOut[k][10][1] & 0x2000u);
+        up = up || (faOut[k][2][1] & 0x0002u);
+        dn = dn || (faOut[k][2][1] & 0x0001u);
+    }
+    vehdyn_set_aerosurf(cmd, (en && dn && !up) ? 1 : (en && up && !dn) ? -1 : 0);
+}
+
+static void aerosurf_feedback(uint16_t *b, int nb) {
+    if (!vehdyn_enabled() || nb < 43) return;
+    double p[7];
+    vehdyn_aerosurf_pos(p);
+    b[36] = sat16((p[0] + 7.641) / (5.624 / 6400.0));
+    b[37] = sat16((p[1] + 7.776) / (5.631 / 6400.0));
+    b[38] = sat16((p[2] + 7.641) / (5.624 / 6400.0));
+    b[39] = sat16((p[3] + 7.776) / (5.631 / 6400.0));
+    b[40] = sat16((p[4] - 44.35) / (10.85 / 6400.0));
+    b[41] = sat16(p[5] / (5.526 / 6400.0));
+    double pct = (p[6] + 11.7) / 34.2 * 100.0;
+    b[42] = sat16((pct - 50.0) / (0.12885 / 64.0));
+}
+
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
     memset(b, 0, sizeof b);
@@ -1218,6 +1288,7 @@ static void fa_hfe(int k, uint16_t *w, int n) {
             b[51] = sat16(ps->w[2] * D * 3200.0);
         }
     }
+    aerosurf_feedback(b, 54);
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -1641,6 +1712,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             }
             push_oms(sharedUs);
             push_tvc();
+            push_aerosurf();
         } else if (CMD_MODE(cmd) == 8u) {
             if (CMD_CARD(cmd) == 10u && trace_fa() == fa_unit(busID)) {
                 fprintf(stderr, "mdmtrace: t=%.4f FA%d write card 10 ch %02x:", vehdyn_state()->t,
@@ -1650,6 +1722,7 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             }
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
             if (CMD_CARD(cmd) == 10u) { pc_track(); push_fire(sharedUs); }
+            if (CMD_CARD(cmd) == 2u || CMD_CARD(cmd) == 10u) push_aerosurf();
             if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
         }
     }
