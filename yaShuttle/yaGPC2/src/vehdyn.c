@@ -245,9 +245,11 @@ static void state_log(void) {
         double inc = acos((h[0] * pole[0] + h[1] * pole[1] + h[2] * pole[2]) / hn) * 180.0 / VD_PI;
         double sl = en > 1e-9 ? (e[0] * pole[0] + e[1] * pole[1] + e[2] * pole[2]) / en : 0.0;
         double gp = RE * (1.0 - F * sl * sl), ga = RE * (1.0 - F * sl * sl);  /* +/- e: same latitude magnitude */
+        double sf[3];                  /* what the accelerometer assemblies feel, g */
+        vehdyn_specific_force(sf);
         fprintf(stderr, "vehdyn-orbit: t=%.1f HA %.2f HP %.2f nmi (eq radius) HA %.2f HP %.2f nmi (ellipsoid) "
-                        "inc %.3f deg (of date)\n", st.t, (ra - RE) / NM, (rp - RE) / NM,
-                (ra - ga) / NM, (rp - gp) / NM, inc);
+                        "inc %.3f deg (of date) sf_g=%.5f %.5f %.5f\n", st.t, (ra - RE) / NM, (rp - RE) / NM,
+                (ra - ga) / NM, (rp - gp) / NM, inc, sf[0] / 9.80665, sf[1] / 9.80665, sf[2] / 9.80665);
     }
 }
 
@@ -1381,6 +1383,22 @@ void vehdyn_advance(double sharedUs) {
                 for (int i = 0; i < 3; i++) sfB[i] = f[i] / st.mass;
             }
             mass_properties();
+        }
+        /* THE ORBITER ALONE: what the accelerometer assemblies feel is the
+         * jets' and engines' thrust over the mass plus the air's drag, the
+         * same quantity sensedDv integrates.  It was set only while the stack
+         * flew, so after ET separation the AAs read the last ascent value
+         * through OMS burns, RCS firings and (to come) entry. */
+        if (asc == ASC_NONE) {
+            double a[3], R[3][3];
+            for (int i = 0; i < 3; i++) a[i] = 0.5 * (ad0[i] + ad1[i]);
+            if (firing) {
+                double fi[3];
+                phys_body_to_inertial(&st, f, fi);
+                for (int i = 0; i < 3; i++) a[i] += fi[i] / st.mass;
+            }
+            qmat_body(st.q, R);
+            for (int i = 0; i < 3; i++) sfB[i] = R[0][i] * a[0] + R[1][i] * a[1] + R[2][i] * a[2];
         }
     }
 }
