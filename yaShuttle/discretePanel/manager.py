@@ -23,6 +23,9 @@ WHAT IT DOES.
              size, colours -- is saved with it.
     Caption  Start the caption box (subtitles.py) with the look the layout
              file holds, or Stop the one this window started.
+    Speed    1x to 16x simulated time per wall second, changed while the
+             vehicle runs -- fast through long quiet stretches (about 4x is
+             what a 2026 host manages; more asks for what it can do).
     Hand     Start the hand controllers (handcontrollers.py) for one
              station -- CDR, PLT or Aft -- or Stop them: the RHC and THC, from
              a joystick or, without one, a window of virtual controllers.  So
@@ -319,6 +322,18 @@ class Manager(object):
         self._button(row, "PLT", lambda: self.start_hands("rh"))
         self._button(row, "Aft", lambda: self.start_hands("aft"))
         self._button(row, "Stop", self.stop_hands)
+
+        # SIMULATED TIME PER WALL SECOND, changed while the vehicle runs
+        # (simulatePASS session `rate X`, rtpacer.c rate_poll): fast through
+        # long quiet stretches, 1x where there is something to watch.  On the
+        # 2026 host about 4x is the ceiling -- one GPC on orbit managed 3.8
+        # when asked for 8 -- and MEDS2 kept taking every fill throughout; 8x
+        # and 16x are here for faster hosts (Ron, 2026-10-06): asking for more
+        # than the host can do just gets what it can.
+        self._section("SPEED", bold)
+        row = self._row()
+        for x in (1, 2, 4, 8, 16):
+            self._button(row, "%dx" % x, lambda x=x: self.set_rate(x))
 
         self._section("SIMULATION", bold)
         row = self._row()
@@ -1227,6 +1242,10 @@ class Manager(object):
             self.say("Cannot reach the panel: %s" % e)
             return
         self.say("Asked the crew panel to show itself")
+
+    def set_rate(self, x):
+        if self._session("rate %g" % x):
+            self.say("Speed %gx asked for: simulated seconds per wall second" % x)
 
     def end_simulation(self):
         """The only control here that destroys a run without saving it, so it

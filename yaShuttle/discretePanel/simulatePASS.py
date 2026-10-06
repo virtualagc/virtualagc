@@ -395,7 +395,7 @@ def session_listener(port_base, stop_event):
         return
     sock.settimeout(0.5)
     log("session commands on port %d ('save DIR', 'save-and-quit DIR', "
-        "'resume DIR', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
+        "'resume DIR', 'rate X', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
     while not stop_event.is_set():
         try:
             data, _ = sock.recvfrom(4096)

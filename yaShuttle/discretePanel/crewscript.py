@@ -310,6 +310,13 @@ HELP = """\
                         a leading <left>, <center> or <right> aligns that
                         caption.
 
+  speeding through quiet stretches:
+    rate X              simulated seconds per wall second from here on (1 is
+                        real time; about 4 is the most one GPC manages).  The
+                        '+N' times stay wall seconds.  MEDS2 keeps up: one GPC
+                        on orbit at 3.8x took every display fill, and was back
+                        to normal at once at 1x.
+
   capturing the vehicle as it goes:
     snapshot DIR        capture the whole vehicle into DIR -- every computer's
                         memory, every display's, the panel -- exactly as the
@@ -767,6 +774,17 @@ def parse(text, path=None, _depth=0, _seen=None):
                     else:
                         entry["audio"] = snd
 
+            elif verb == "rate":
+                # SIMULATED SECONDS PER WALL SECOND from here on (simulatePASS
+                # session `rate X`).  The script's own '+N' times stay WALL
+                # seconds, so a quiet stretch at 'rate 4' covers four times
+                # the simulated time per '+N'.
+                try:
+                    entry["rate"] = float(arg)
+                except ValueError:
+                    raise ScriptError("rate takes a number, got %r" % arg)
+                if not entry["rate"] > 0.0:
+                    raise ScriptError("rate must be more than 0, got %r" % arg)
             elif verb == "snapshot":
                 # WHERE, CHECKED NOW.  A capture is the one step in a script
                 # whose whole value is the file it leaves behind, so a name
@@ -1437,6 +1455,14 @@ class Player(object):
                 self.log(e["text"])
                 self._snapshot(k, e)
                 return
+            if e["verb"] == "rate":
+                self.log(e["text"])
+                try:
+                    send_session("rate %g" % e["rate"])
+                except OSError as err:
+                    self.log("rate: cannot reach simulatePASS: %s" % err)
+                k += 1
+                continue
             if e["verb"] == "keygap":
                 # Not a panel control: it changes how the NEXT keys are
                 # typed, and the list is shared with any nested script.
