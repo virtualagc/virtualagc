@@ -85,6 +85,7 @@ import subprocess
 import sys
 import textwrap
 import threading
+import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -412,6 +413,21 @@ def session_listener(port_base, stop_event):
             # place entirely.  The wait polls this instead.
             SESSION["cancel"] = True
             log("session command: cancel")
+            continue
+        if word == "rate":
+            # SIMULATED SECONDS PER WALL SECOND, changed while the vehicle
+            # runs: yaGPC2's pacer reads YAGPC_RATE_FILE twice a second and
+            # re-origins its clocks on a change (rtpacer.c rate_poll).  Fast
+            # through quiet stretches, 1 where there is something to watch.
+            try:
+                v = float(rest)
+                if not v > 0.0:
+                    raise ValueError
+                with open(SESSION["ratefile"], "w") as fh:
+                    fh.write("%g\n" % v)
+                log("session command: rate %g" % v)
+            except (ValueError, KeyError, OSError) as e:
+                log("session command rate %r not taken: %s" % (rest, e))
             continue
         if word not in ("save", "save-and-quit", "resume", "quit"):
             log("session command not understood: %r" % text)
@@ -1734,6 +1750,11 @@ def main():
         kb_geom, o6_geom, cam_geom = to_x(kb_geom), to_x(o6_geom), to_x(cam_geom)
 
     env = dict(os.environ)
+    # the run-time rate control (session command `rate X`)
+    SESSION["ratefile"] = os.path.join(tempfile.gettempdir(), "simulatePASS-rate-%d" % args.port_base)
+    with open(SESSION["ratefile"], "w") as fh:
+        fh.write("%g\n" % args.rt_factor)
+    env["YAGPC_RATE_FILE"] = SESSION["ratefile"]
     if args.orbit:
         env["YAGPC_VEHDYN_ORBIT"] = args.orbit
     if tk_font_scale != 1:

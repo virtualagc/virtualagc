@@ -98,6 +98,7 @@ static double idle_catchup_max_ns(void) {
 void rtpacer_init(RTPacer *p, struct CPU *cpu, double factor, double idleTimeoutMs) {
     p->cpu = cpu;
     p->factor = factor;
+    p->rateCheckSeconds = 0.0;
     p->idleTimeoutMs = idleTimeoutMs;
     p->minSleepMs = 2.0;
     p->idlePollSeconds = RTPACE_IDLE_POLL_SECONDS;
@@ -163,6 +164,42 @@ static void rtpacer_report(RTPacer *p) {
     p->statLastReportSeconds = now;
 }
 
+
+/* THE RATE CAN CHANGE WHILE THE MACHINE RUNS.  YAGPC_RATE_FILE names a file
+ * holding a number -- simulated seconds per wall second -- which simulatePASS's
+ * session command `rate X` writes.  It is read twice a (wall) second from the
+ * pacing and wait paths; a new value RE-ORIGINS the clocks (wall and
+ * simulated both "now") before the factor changes, so time already run at
+ * the old rate is never re-judged at the new one -- without that, a step
+ * from 4x down to 1x would find the machine minutes "ahead" and sleep them
+ * off, and a step up would find it minutes behind and repay them in a burst.
+ * The point (Ron Burkey, 2026-10-06): run slow where there is something to
+ * watch, fast through long quiet stretches, accepting that MEDS2 may drop
+ * out while fast -- the open question being whether the displays come back
+ * at 1x. */
+static void rate_poll(RTPacer *p) {
+    static const char *path = NULL;
+    static int init = 0;
+    if (!init) { init = 1; path = yagpc_getenv("YAGPC_RATE_FILE"); }
+    if (path == NULL) return;
+    double now = yagpc_monotonic_seconds();
+    if (now - p->rateCheckSeconds < 0.5) return;
+    p->rateCheckSeconds = now;
+    FILE *f = fopen(path, "r");
+    if (f == NULL) return;
+    double v = 0.0;
+    int ok = fscanf(f, "%lf", &v);
+    fclose(f);
+    if (ok != 1 || !(v > 0.0) || v == p->factor) return;
+    p->wallStartSeconds = now;
+    p->simStartUs = p->cpu->elapsedTimeUs;
+    p->idleStartWallSeconds = now;
+    p->idleStartSimUs = p->simStartUs;
+    fprintf(stderr, "rtpacer: gpc=%d rate %g -> %g at sim t=%.3f s\n", p->gpcId, p->factor, v,
+            p->cpu->elapsedTimeUs / 1e6);
+    p->factor = v;
+}
+
 double rtpacer_ahead_ms(const RTPacer *p) {
     double simMs = (p->cpu->elapsedTimeUs - p->simStartUs) / 1000.0 / p->factor;
     double wallMs = (yagpc_monotonic_seconds() - p->wallStartSeconds) * 1000.0;
@@ -170,6 +207,7 @@ double rtpacer_ahead_ms(const RTPacer *p) {
 }
 
 void rtpacer_pace(RTPacer *p) {
+    rate_poll(p);
     rtpacer_report(p);
     double ahead = rtpacer_ahead_ms(p);
     if (ahead > p->minSleepMs) {
@@ -247,6 +285,7 @@ void rtpacer_enter_idle(RTPacer *p) {
  * to cover the wall time elapsed since rtpacer_enter_idle(), servicing
  * interrupts as each step lands. */
 RTPaceResult rtpacer_advance_idle(RTPacer *p) {
+    rate_poll(p);
     rtpacer_report(p);
     double statT0 = yagpc_monotonic_seconds();
     p->statIdleCalls++;
