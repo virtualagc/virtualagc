@@ -72,7 +72,8 @@ Agreed with PASS-IDLE 2026-10-07.
    - the ~118,000 Hipparcos stars (CDS I/239) drawn as points, brightness by
      V magnitude, colour by B-V, carried to the flight's date by proper motion.
    Light adds up linearly in a floating-point buffer per view; one exposure
-   (`--exposure`, `--milkyway`, keys + - [ ]) sets how the sky looks.
+   (`--exposure`, `--milkyway`, keys + - [ ]) sets how the sky looks, the
+   same in every view.
 2. **Planets** (Saturn, Jupiter, Mars, Venus): 1-pixel points in the given
    colours, with brightness from magnitude.
 3. **Sun:** a #FFFFFF disk 32 arcmin across (about 50 physical px at the design
@@ -203,7 +204,7 @@ the hand-built renderer.
   entry (a level-of-detail texture lookup keyed by latitude/longitude, and
   heights).  Blue Marble NG by month (16384x8192, compressed by the driver:
   ~90 MB of GPU memory), Black Marble lights, GEBCO water mask for glint,
-  single-scattering atmosphere, the Moon's shadow, per-view eye adaptation.
+  single-scattering atmosphere, the Moon's shadow.
   Checked: the Americas at noon from 20,000 km; the Galapagos at nadir; the
   2017-08-21 eclipse (total at Hopkinsville at 18:26:40, 83-85% at Chicago
   and Atlanta).  Apple's OpenGL falls back to software for dual-source
@@ -212,4 +213,7 @@ the hand-built renderer.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed
   `*.layout` files are never overwritten).
-- **P6 — polish:** star dimming, glare, Moon-lit Earth at night.
+- **P6 — polish:** Moon-lit Earth at night.  No simulated glare or eye
+  adaptation (Ron, 2026-10-07): the viewer's own eyes dim the stars next to
+  a bright object on the screen, and a view dimming its own stars looks
+  wrong beside one that doesn't.

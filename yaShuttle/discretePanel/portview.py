@@ -59,13 +59,14 @@ sidereal time from [17], ~0.7 deg off; lacking both, a plain dark Earth):
   - the atmosphere (Rayleigh, Mie, ozone; single scattering through a
     transmittance table), giving the blue limb, twilight, haze, and the
     dimming and reddening of whatever is seen through it.
-EYE ADAPTATION.  Each view estimates how much sunlit Earth (and Sun) it holds
-and dims the stars and the Milky Way to match: the stars vanish against a
-daylit Earth and come back, more slowly, in the dark.
+NO SIMULATED GLARE OR ADAPTATION.  Every view shows the sky at the same
+exposure, whatever bright object is in it: the viewer's own eyes already dim
+the stars next to a Sun, Moon or daylit Earth on the screen, and a view that
+dimmed its own stars would look wrong beside one that didn't.
 Light is added up linearly in a floating-point buffer per view and only then
 clipped and encoded for the screen, so exposure is one physical factor.  How
-the sky "looks" from orbit is a matter of exposure (the eye's adaptation):
---exposure and --milkyway set it, and the keys below change it live.
+the sky "looks" from orbit is a matter of exposure: --exposure and
+--milkyway set it, and the keys below change it live.
 
 SIZE.  --size N scales every window as panelO6.py does: 768 is full size,
 384 half.  Resizing a window (by --size or by dragging) scales the view, which
@@ -633,8 +634,7 @@ void main() {
 }
 """
 
-# The view's buffer to the screen: clip (keeping the hue) and encode sRGB.  (Tone mapping,
-# glare and the eye's adaptation belong here later.)
+# The view's buffer to the screen: clip (keeping the hue) and encode sRGB.
 PRESENT_FS = """
 #version 410 core
 out vec4 fragColor;
@@ -916,8 +916,7 @@ class MilkyWayLayer(object):
         cam_to_j2k = J2000_TO_M50.T @ fs.C @ view.basis
         GL.glUniformMatrix3fv(u["uCamToJ2k"], 1, GL.GL_TRUE, cam_to_j2k.astype(np.float32))
         GL.glUniform2f(u["uTan"], view.tanX, view.tanY)
-        GL.glUniform1f(u["uGain"], self.GAIN * self.exposure.factor * self.exposure.milkyway
-                       * view.adapt)
+        GL.glUniform1f(u["uGain"], self.GAIN * self.exposure.factor * self.exposure.milkyway)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
 
@@ -1120,8 +1119,7 @@ class PointLayer(object):
         j2k_to_cam = (J2000_TO_M50.T @ fs.C @ view.basis).T
         GL.glUniformMatrix3fv(u["uJ2kToCam"], 1, GL.GL_TRUE, j2k_to_cam.astype(np.float32))
         GL.glUniform2f(u["uTan"], view.tanX, view.tanY)
-        GL.glUniform1f(u["uMagRef"], self.MAG_REF
-                       + 2.5 * math.log10(self.exposure.factor * view.adapt))
+        GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
         GL.glUniform1f(u["uCore"], 1.0 * view.devicePixelRatioF())
         GL.glUniform1f(u["uCut"], self.CUT)
         GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)
@@ -1421,27 +1419,6 @@ class EarthLayer(object):
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
 
-def sunlit_fraction(view, fs, m, sun_ef, nx=16, ny=9):
-    """How much of a view sunlit ground fills, weighted by the Sun's height
-    there (0..1), from a coarse grid of rays: what the eye adapts to."""
-    xs = (np.arange(nx) + 0.5) / nx * 2 - 1
-    ys = (np.arange(ny) + 0.5) / ny * 2 - 1
-    X, Y = np.meshgrid(xs * view.tanX, ys * view.tanY)
-    cam = np.stack([X.ravel(), Y.ravel(), np.ones(X.size)])
-    k = np.array([1.0, 1.0, EARTH_A / EARTH_B])[:, None]
-    d = (m @ fs.C @ view.basis @ cam) * k
-    d /= np.linalg.norm(d, axis=0)
-    o = (m @ fs.r) * k[:, 0]
-    b = o @ d
-    disc = b * b - (o @ o - EARTH_A * EARTH_A)
-    t = -b - np.sqrt(np.maximum(disc, 0))
-    hit = (disc > 0) & (t > 0)
-    p = o[:, None] + t * d
-    n = p / np.linalg.norm(p, axis=0)
-    mus = np.clip(sun_ef @ n, 0, 1)
-    return float(np.mean(np.where(hit, mus, 0.0)))
-
-
 # --------------------------------------------------------------------------
 # The windows.
 
@@ -1459,33 +1436,12 @@ class ViewWidget(QOpenGLWidget):
         self.tanX = self.tanY = 1.0
         self.vao = None
         self.pointVaos = {}
-        self.adapt = 1.0               # the eye's adaptation: 1 dark-adapted, less in daylight
         self.hdrFbo = self.hdrTex = None
         self.earthFbo = self.earthTex = self.earthTransTex = None
         self.hdrSize = None
         self.setWindowTitle("Portview: %s" % spec['title'])
         self.resize(max(64, round(spec['w'] * scale)) + 2 * FRAME_PX,
                     max(36, round(spec['h'] * scale)) + 2 * FRAME_PX)
-
-    # Adaptation: the stars and the Milky Way fade as sunlit Earth (or the Sun)
-    # fills the view; to the light in ~0.3 s, back to the dark in ~3 s.
-    ADAPT_K = 0.003
-    ADAPT_UP_S, ADAPT_DOWN_S = 3.0, 0.3
-
-    def adapt_to(self, fs, dt):
-        target = 1.0
-        if fs.ok and fs.sky is not None:
-            self._fov()
-            m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
-            sun_ef = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
-            lum = 0.3 * sunlit_fraction(self, fs, m, sun_ef)
-            sun_cam = (J2000_TO_M50.T @ fs.C @ self.basis).T @ unit(fs.sky.pos['sun'] - fs.r_j2k)
-            if sun_cam[2] > 0 and abs(sun_cam[0] / sun_cam[2]) < self.tanX \
-                    and abs(sun_cam[1] / sun_cam[2]) < self.tanY:
-                lum += 0.1
-            target = 1.0 / (1.0 + lum / self.ADAPT_K)
-        tau = self.ADAPT_UP_S if target > self.adapt else self.ADAPT_DOWN_S
-        self.adapt += (target - self.adapt) * (1.0 - math.exp(-dt / tau))
 
     def initializeGL(self):
         Resources.get().build()
@@ -1617,7 +1573,6 @@ class Portview(object):
         self.frame = FrameState()
         self.hud = False
         self.ticks = 0
-        self.lastTick = time.monotonic()
         self.timer = QtCore.QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.tick)
@@ -1644,10 +1599,6 @@ class Portview(object):
         if fs.ok and fs.unix is not None:
             fs.sky = self.ephemeris.at(fs.unix)
         self.frame = fs
-        wall = time.monotonic()
-        dt, self.lastTick = wall - self.lastTick, wall
-        for v in self.views:
-            v.adapt_to(fs, min(dt, 0.5))
         for v in self.views:
             if v.isVisible():
                 v.update()
