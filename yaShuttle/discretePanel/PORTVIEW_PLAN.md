@@ -184,6 +184,32 @@ of the four windows would be a separate engine with its own memory, and
 offline terrain means building and hosting tile sets anyway.  The plan keeps
 the hand-built renderer.
 
+## Landing-site imagery (built 2026-10-07)
+
+Ron asked for real ground imagery near the ground.  The resolution needed
+falls with the distance to the ground seen (about 1.4 mrad x distance per
+texel at the views' scale), and close ground only occurs near the runway,
+so each site has four nested rings, 8192 x 8192 each in geodetic lat/lon,
+centred on the runway's midpoint from the navaids file:
+
+| Ring | Size | Resolution | Source |
+|---|---|---|---|
+| 0 | +-4 km | ~1 m | USDA NAIP via the USGS National Map (public domain; US only) |
+| 1 | +-40 km | ~10 m | Sentinel-2 cloudless 2016, EOX (CC BY 4.0) |
+| 2 | +-400 km | ~100 m | the same |
+| 3 | +-2000 km | ~500 m | the same |
+
+~70 MB of JPEG per site in the cache; ~400 MB of GPU memory (ring 0
+uncompressed, the others DXT1).  Each ring's colours are matched to the
+next coarser one's.  Rings 0 and 1 are placed in the shader from the eye's
+east-north-up offset from the site (double precision on the CPU), and the
+ground intersection uses a cancellation-free root, so the runway is steady
+at cockpit height.  Checked: the view down KSC 15's centreline from 600 m
+past the threshold is centred and symmetric, so the imagery and PASS's
+navaids agree to a few metres.  KSC only so far; Edwards and White Sands
+are entries in fetch_assets.py's SITES table.  Later: terrain heights
+(Copernicus GLO-30), and a finer ring (NAIP's native 0.3-0.6 m) for rollout.
+
 ## Phases
 
 - **P0 — coordinate with PASS-IDLE:** done 2026-10-07 (see "Data in").

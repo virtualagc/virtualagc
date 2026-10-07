@@ -57,8 +57,13 @@ sidereal time from [17], ~0.7 deg off; lacking both, a plain dark Earth):
     land/water mask) and the Moon's shadow in solar eclipses;
   - by night, NASA Black Marble's city lights;
   - the atmosphere (Rayleigh, Mie, ozone; single scattering through a
-    transmittance table), giving the blue limb, twilight, haze, and the
-    dimming and reddening of whatever is seen through it.
+    transmittance table), giving the blue limb, twilight, haze, the sky's
+    blue seen from the ground, and the dimming and reddening of whatever is
+    seen through it;
+  - near a landing site (--site, default ksc), the site's own imagery from
+    portview/fetch_assets.py, four nested rings from +-2000 km at ~500 m
+    down to +-4 km at ~1 m (NAIP), so the approach and the runway are real
+    photographs; the ground there at the runway's height from the navaids.
 NO SIMULATED GLARE OR ADAPTATION.  Every view shows the sky at the same
 exposure, whatever bright object is in it: the viewer's own eyes already dim
 the stars next to a Sun, Moon or daylit Earth on the screen, and a view that
@@ -101,6 +106,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, "portview", "cache")
 MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
+SITES_DIR = os.path.join(CACHE, "sites")
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
 NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
@@ -414,13 +420,16 @@ class TestFeed(TruthFeed):
     mode (ra, dec): inertial hold, nose at that J2000 direction (deg) and
     the top of the forward view toward the celestial north pole.
     mode 'sun', 'moon', 'venus', ...: the same, at that body's direction from
-    the Earth's centre at the start."""
+    the Earth's centre at the start.
+    mode ('hover', lat, lon, alt_m, heading, pitch): fixed over the ground (on
+    PASS's ellipsoid, degrees and metres), nose at that heading and pitch, wings
+    level: for looking at a landing site."""
     PERIOD_S = 0.05
 
     def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None):
         QtCore.QObject.__init__(self)
         self.unix0 = time.time() if unix0 is None else unix0
-        if isinstance(mode, str) and mode not in ('lvlh', 'baydown'):
+        if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover'):
             d = unit(ephemeris.at(self.unix0).pos[mode])
             mode = (math.degrees(math.atan2(d[1], d[0])) % 360.0,
                     math.degrees(math.asin(d[2])))
@@ -447,6 +456,10 @@ class TestFeed(TruthFeed):
         return "test orbit"
 
     def _orbit(self, t):
+        if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
+            r, _, m = self._hover(t)
+            w = np.array([0.0, 0.0, 7.2921159e-5])
+            return m.T @ r, m.T @ np.cross(w, r)
         u = self.n * t
         cO, sO, ci, si = math.cos(self.raan), math.sin(self.raan), math.cos(self.inc), math.sin(self.inc)
         P = np.array([cO, sO, 0.0])
@@ -455,7 +468,27 @@ class TestFeed(TruthFeed):
         v = self.R * self.n * (-math.sin(u) * P + math.cos(u) * Q)
         return r, v
 
+    def _hover(self, t):
+        """Earth-fixed position and body axes, and the M50 -> Earth-fixed matrix."""
+        _, lat, lon, alt, hdg, pitch = self.mode
+        e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
+        la, lo = math.radians(lat), math.radians(lon)
+        Nr = EARTH_A / math.sqrt(1.0 - e2 * math.sin(la) ** 2)
+        r = np.array([(Nr + alt) * math.cos(la) * math.cos(lo), (Nr + alt) * math.cos(la) * math.sin(lo),
+                      (Nr * (1.0 - e2) + alt) * math.sin(la)])
+        east = np.array([-math.sin(lo), math.cos(lo), 0.0])
+        north = np.array([-math.sin(la) * math.cos(lo), -math.sin(la) * math.sin(lo), math.cos(la)])
+        up = np.cross(east, north)
+        h, p = math.radians(hdg), math.radians(pitch)
+        fwd = math.cos(h) * north + math.sin(h) * east
+        x = math.cos(p) * fwd + math.sin(p) * up
+        y = math.cos(h) * east - math.sin(h) * north
+        return r, np.column_stack([x, y, np.cross(x, y)]), gmst_matrix(self.unix0 + t)
+
     def _attitude(self, t):
+        if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
+            r, axes, m = self._hover(t)
+            return m.T @ axes
         if self.mode in ('lvlh', 'baydown'):
             r, v = self._orbit(t)
             z = -unit(r)
@@ -769,6 +802,29 @@ def make_mask_texture(a):
     return tid
 
 
+def make_ring_texture(rgb, compress):
+    """A site ring: sRGB, mipmapped, clamped at its edges (it fades out
+    before them).  The innermost, magnified close to the ground, uncompressed;
+    the others DXT1 (1/6 the memory)."""
+    h, w, _ = rgb.shape
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if compress else GL.GL_SRGB8,
+                    w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+    GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+    for wrap in (GL.GL_TEXTURE_WRAP_S, GL.GL_TEXTURE_WRAP_T):
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, wrap, GL.GL_CLAMP_TO_EDGE)
+    try:
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, 0x84FE, min(8.0, GL.glGetFloatv(0x84FF)))
+    except GL.GLError:
+        pass
+    return tid
+
+
 def make_lut_texture(rgb):
     h, w, _ = rgb.shape
     tid = GL.glGenTextures(1)
@@ -800,10 +856,11 @@ class Resources(object):
     """Programs, textures and buffers, made once in the first view's context."""
     _instance = None
 
-    def __init__(self, milkyway, stars, moon):
+    def __init__(self, milkyway, stars, moon, site):
         self.milkyway = milkyway
         self.stars = stars
         self.moon = moon
+        self.site = site                       # Site, or None
         self.starsEpoch = None
         self.ready = False
 
@@ -835,12 +892,18 @@ class Resources(object):
         self.earthProg = compile_program(FULLSCREEN_VS, EARTH_FS)
         self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
                                "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit",
-                               "uMoonEF")
+                               "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
+                               "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
         self.earthNightTex = make_earth_texture(load_rgb(NIGHTLIGHTS))
         self.waterTex = make_mask_texture(load_gray(WATERMASK))
+        self.ringTex = []
+        if self.site is not None:
+            for k, img in enumerate(self.site.images):
+                self.ringTex.append(make_ring_texture(img, compress=k > 0))
+            self.site.images = None
         self.earthDayTex = None
         self.earthMonth = None
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
@@ -1230,6 +1293,17 @@ uniform vec2 uTan;
 uniform sampler2D uDay, uNight, uTrans, uWater;
 uniform float uSunE, uNightGain, uLit;
 uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses)
+uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
+// A landing site's imagery: four nested rings, finest first.  Rings 0 and 1
+// are placed from the eye's offset from the site (east, north, up; metres,
+// from the CPU in double precision), exact to centimetres near the ground;
+// rings 2 and 3, hundreds of kilometres across, by latitude and longitude.
+uniform int uSiteOn;
+uniform vec3 uCamEnu;
+uniform mat3 uEfToEnu;
+uniform vec4 uRingNear[2];      // u, v at the site; du/dEast, dv/dNorth (per m)
+uniform vec4 uRingFar[2];       // lon0, lat0, lon1, lat1 (radians)
+uniform sampler2D uRing0, uRing1, uRing2, uRing3;
 const float PI = 3.14159265358979;
 const float R_SUN = 6.957e8, R_MOON = 1.7374e6, AU = 1.495978707e11;
 // The fraction of a disk of angular radius a uncovered by a disk of radius b,
@@ -1274,6 +1348,11 @@ vec3 bicubic(sampler2D t, vec2 uv) {
     return mix(mix(e, d, tx), mix(b, a, tx), ty);
 }
 
+float ringWeight(vec2 uv) {     // 1 inside, fading to 0 over the outer 4% to the edge
+    vec2 e = min(uv, 1.0 - uv);
+    return smoothstep(0.0, 0.04, min(e.x, e.y));
+}
+
 // A map of the Earth: mipmapped as usual, but bicubic where it is magnified
 // (a texel wider than a pixel, low over the ground), so it blurs softly
 // instead of showing its texels.
@@ -1283,6 +1362,28 @@ vec3 earthSample(sampler2D t, vec2 uv, vec2 gx, vec2 gy) {
     vec3 m = textureGrad(t, uv, gx, gy).rgb;
     if (texelsPerPixel >= 1.0) return m;
     return mix(bicubic(t, uv), m, smoothstep(0.5, 1.0, texelsPerPixel));
+}
+
+vec3 ringSample(sampler2D t, vec2 uv, float w, vec3 under) {
+    vec2 gx = dFdx(uv), gy = dFdy(uv);
+    if (w <= 0.0) return under;
+    return mix(under, earthSample(t, uv, gx, gy), w);
+}
+
+vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu) {
+    if (uSiteOn == 0) return albedo;
+    vec2 uv3 = vec2((lon - uRingFar[1].x) / (uRingFar[1].z - uRingFar[1].x),
+                    (uRingFar[1].w - lat) / (uRingFar[1].w - uRingFar[1].y));
+    vec2 uv2 = vec2((lon - uRingFar[0].x) / (uRingFar[0].z - uRingFar[0].x),
+                    (uRingFar[0].w - lat) / (uRingFar[0].w - uRingFar[0].y));
+    vec2 uv1 = uRingNear[1].xy + vec2(enu.x * uRingNear[1].z, -enu.y * uRingNear[1].w);
+    vec2 uv0 = uRingNear[0].xy + vec2(enu.x * uRingNear[0].z, -enu.y * uRingNear[0].w);
+    vec3 c = albedo;
+    c = ringSample(uRing3, uv3, ringWeight(uv3), c);
+    c = ringSample(uRing2, uv2, ringWeight(uv2), c);
+    c = ringSample(uRing1, uv1, ringWeight(uv1), c);
+    c = ringSample(uRing0, uv0, ringWeight(uv0), c);
+    return c;
 }
 
 vec3 transmittance(float r, float mu) {     // to the top of the atmosphere
@@ -1309,14 +1410,17 @@ void main() {
     vec3 d = normalize(dirEF * vec3(1.0, 1.0, K));
     vec3 sun = normalize(uSun * vec3(1.0, 1.0, K));
     float b = dot(o, d);
-    float c = dot(o, o) - RT * RT;
+    float c = uCTop;                 // |o|^2 - RT^2, from the CPU in double precision
     float disc = b * b - c;
     // The ground point, wanted outside any branch for the texture gradients.
-    float cg = dot(o, o) - RG * RG;
-    float discG = b * b - cg;
-    float tg = -b - sqrt(max(discG, 0.0));
-    bool ground = discG >= 0.0 && tg > 0.0;
-    vec3 pg = (o + max(tg, 0.0) * d) * vec3(1.0, 1.0, 1.0 / K);   // Earth-fixed
+    // The near root as c / (-b + sqrt(disc)), with c = |o|^2 - RG^2 from the
+    // CPU in double precision: exact to millimetres at a few metres' height,
+    // where -b - sqrt(disc) loses everything to cancellation in float.
+    float discG = b * b - uCGround;
+    float tg = uCGround / max(-b + sqrt(max(discG, 0.0)), 1e-6);
+    bool ground = discG >= 0.0 && b < 0.0 && uCGround > 0.0;
+    vec3 rel = max(tg, 0.0) * d * vec3(1.0, 1.0, 1.0 / K);     // eye to ground, Earth-fixed
+    vec3 pg = uOrigin + rel;                                     // Earth-fixed
     float lon = atan(pg.y, pg.x);
     float lat = atan(pg.z, (1.0 - E2) * length(pg.xy));
     vec2 uv = vec2((lon + PI) / (2.0 * PI), (0.5 * PI - lat) / PI);
@@ -1325,6 +1429,7 @@ void main() {
     gy.x -= round(gy.x);
     vec3 albedo = earthSample(uDay, uv, gx, gy);
     vec3 lights = earthSample(uNight, uv, gx, gy);
+    albedo = siteImagery(albedo, lon, lat, uCamEnu + uEfToEnu * rel);
     if (disc < 0.0) discard;                       // misses the atmosphere
     float t0 = max(0.0, -b - sqrt(disc)), t1 = -b + sqrt(disc);
     if (t1 <= 0.0) discard;
@@ -1360,14 +1465,15 @@ void main() {
         float dm = length(toMoon);
         float sep = acos(clamp(dot(toMoon / dm, uSun), -1.0, 1.0));
         ts *= uncovered(R_SUN / AU, R_MOON / dm, sep);
-        vec3 direct = albedo * max(mus, 0.0) * ts;
-        vec3 sky = albedo * vec3(0.05, 0.065, 0.09) * smoothstep(-0.12, 0.25, mus);
+        // Lambertian ground (albedo / pi), in the same units as the air's light.
+        vec3 direct = albedo / PI * max(mus, 0.0) * ts;
+        vec3 sky = albedo / PI * vec3(0.05, 0.065, 0.09) * smoothstep(-0.12, 0.25, mus);
         // Sun glint on water: the GEBCO mask, bilinear, so coastlines stay smooth.
         float water = textureGrad(uWater, uv, gx, gy).r;
         vec3 hv = normalize(uSun - dirEF);
         float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hv), 0.0), 5.0);
         // Wave slopes ~0.1 rad (Blinn exponent ~200): a peak about as bright as land.
-        float spec = water * fres * pow(max(dot(n, hv), 0.0), 200.0) * 8.0 * step(0.0, mus);
+        float spec = water * fres * pow(max(dot(n, hv), 0.0), 200.0) * 8.0 / PI * step(0.0, mus);
         vec3 night = lights * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
         vec3 surf = (direct + sky + spec * ts) * uSunE * uLit + night;
         color += surf * trans;
@@ -1412,9 +1518,42 @@ def gmst_matrix(unix):
     return R @ J2000_TO_M50.T
 
 
+class Site(object):
+    """A landing site's ring imagery (portview/fetch_assets.py) and its place:
+    the centre on PASS's ellipsoid at the runway's height, the east-north-up
+    frame there, and the rings' mappings."""
+
+    def __init__(self, path):
+        import json
+        with open(os.path.join(path, "ring.json")) as f:
+            meta = json.load(f)
+        if len(meta['rings']) != 4:
+            raise ValueError("expected four rings in %s" % path)
+        self.name = meta['name']
+        self.height = meta['alt_ft'] * 0.3048
+        lat, lon = math.radians(meta['lat']), math.radians(meta['lon'])
+        e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
+        sl, cl, so, co = math.sin(lat), math.cos(lat), math.sin(lon), math.cos(lon)
+        Nr = EARTH_A / math.sqrt(1.0 - e2 * sl * sl)          # prime vertical radius
+        Mr = EARTH_A * (1.0 - e2) / (1.0 - e2 * sl * sl) ** 1.5   # meridian radius
+        h = self.height
+        self.ef = np.array([(Nr + h) * cl * co, (Nr + h) * cl * so, (Nr * (1.0 - e2) + h) * sl])
+        self.ef_to_enu = np.array([[-so, co, 0.0], [-sl * co, -sl * so, cl], [cl * co, cl * so, sl]])
+        near, far = [], []
+        for k, r in enumerate(meta['rings']):
+            lon0, lat0, lon1, lat1 = (math.radians(v) for v in r['bounds'])
+            if k < 2:
+                near.append([(lon - lon0) / (lon1 - lon0), (lat1 - lat) / (lat1 - lat0),
+                             1.0 / ((Nr + h) * cl * (lon1 - lon0)), 1.0 / ((Mr + h) * (lat1 - lat0))])
+            else:
+                far.append([lon0, lat0, lon1, lat1])
+        self.near, self.far = np.array(near), np.array(far)
+        self.images = [load_rgb(os.path.join(path, r['file'])) for r in meta['rings']]
+
+
 class EarthLayer(object):
     target = 'earth'                    # draws into the view's Earth buffers
-    SUN_E = 2.0                         # sunlit ground, display-referred
+    SUN_E = 2.0 * math.pi               # sunlight: a sunlit albedo-0.3 ground shows ~0.6
     NIGHT_GAIN = 0.3                    # city lights, display-referred
 
     def draw(self, res, view, fs):
@@ -1440,6 +1579,26 @@ class EarthLayer(object):
         sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
         GL.glUniform3fv(U["uSun"], 1, sun.astype(f32))
         GL.glUniform3fv(U["uMoonEF"], 1, (m @ J2000_TO_M50 @ fs.sky.pos['moon']).astype(f32))
+        # In double precision here, so the shader never subtracts big numbers.
+        o_ef = m @ fs.r
+        o_s = o_ef * np.array([1.0, 1.0, EARTH_A / EARTH_B])
+        site = res.site
+        ground_r = EARTH_A + (site.height if site is not None else 0.0)
+        GL.glUniform1f(U["uCTop"], float(o_s @ o_s - (EARTH_A + ATMOS_TOP) ** 2))
+        GL.glUniform1f(U["uCGround"], float(o_s @ o_s - ground_r ** 2))
+        GL.glUniform1i(U["uSiteOn"], 1 if site is not None else 0)
+        if site is not None:
+            GL.glUniform3fv(U["uCamEnu"], 1, (site.ef_to_enu @ (o_ef - site.ef)).astype(f32))
+            GL.glUniformMatrix3fv(U["uEfToEnu"], 1, GL.GL_TRUE, site.ef_to_enu.astype(f32))
+            GL.glUniform4fv(U["uRingNear"], 2, site.near.astype(f32))
+            GL.glUniform4fv(U["uRingFar"], 2, site.far.astype(f32))
+            for k in range(4):
+                GL.glActiveTexture(GL.GL_TEXTURE4 + k)
+                GL.glBindTexture(GL.GL_TEXTURE_2D, res.ringTex[k])
+                GL.glUniform1i(U["uRing%d" % k], 4 + k)
+        else:
+            for k in range(4):                 # samplers must name a unit even if unused
+                GL.glUniform1i(U["uRing%d" % k], 3)
         GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
@@ -1679,13 +1838,16 @@ def main(argv=None):
                          "(overrides --size for that window); repeatable")
     ap.add_argument("--port-base", type=int,
                     default=int(os.environ.get("NSTS_BUS_PORT_BASE", "6900")))
+    ap.add_argument("--site", default="ksc", metavar="SITE",
+                    help="the landing site whose close-up imagery to load (default ksc; "
+                         "none for none)")
     ap.add_argument("--exposure", type=float, default=-1.0, metavar="EV",
                     help="exposure, stops above (+) or below (-) the design one "
                          "(default -1)")
     ap.add_argument("--milkyway", type=float, default=0.5, metavar="X",
                     help="the Milky Way's brightness relative to the stars "
                          "(default 0.5)")
-    ap.add_argument("--test", nargs='?', const='lvlh', metavar="lvlh|baydown|RA,DEC|BODY",
+    ap.add_argument("--test", nargs='?', const='lvlh', metavar="lvlh|baydown|hover|RA,DEC|BODY",
                     help="no yaGPC2: a synthetic orbit, holding LVLH (default), LVLH "
                          "with the payload bay to the Earth (baydown), or "
                          "inertial with the nose at J2000 RA,DEC (deg) or at a body "
@@ -1694,6 +1856,8 @@ def main(argv=None):
                     help="with --test, the start, YYYY-MM-DD[THH:MM[:SS]] UTC (default now)")
     ap.add_argument("--test-alt", type=float, default=400.0, metavar="KM",
                     help="with --test, the orbit's altitude (default 400 km)")
+    ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
+                    help="with --test hover: where, how high, heading and pitch (deg, m)")
     ap.add_argument("--test-lon", type=float, metavar="DEG",
                     help="with --test, start over this longitude (east +) on the equator")
     ap.add_argument("--test-rate", type=float, default=1.0, metavar="X",
@@ -1712,6 +1876,12 @@ def main(argv=None):
     if args.test:
         if args.test in ('lvlh', 'baydown') or args.test in bodies:
             test = args.test
+        elif args.test == 'hover':
+            try:
+                test = ('hover',) + tuple(float(x) for x in args.test_at.split(','))
+                assert len(test) == 6
+            except (AttributeError, ValueError, AssertionError):
+                sys.exit("portview: --test hover needs --test-at LAT,LON,ALT_M,HDG,PITCH")
         else:
             try:
                 ra, dec = (float(x) for x in args.test.split(','))
@@ -1732,6 +1902,14 @@ def main(argv=None):
     milkyway = np.load(MILKYWAY)
     stars = np.load(HIPPARCOS)
     moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
+    site = None
+    if args.site != 'none':
+        path = os.path.join(SITES_DIR, args.site)
+        if os.path.exists(os.path.join(path, "ring.json")):
+            site = Site(path)
+        else:
+            print("portview: no imagery for site %r (python3 portview/fetch_assets.py "
+                  "--sites %s); the Earth near it is Blue Marble only" % (args.site, args.site))
 
     QtCore.QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     fmt = QtGui.QSurfaceFormat()
@@ -1740,7 +1918,7 @@ def main(argv=None):
     fmt.setSwapInterval(0)
     QtGui.QSurfaceFormat.setDefaultFormat(fmt)
     qapp = QtWidgets.QApplication(sys.argv[:1])
-    Resources._instance = Resources(milkyway, stars, moon)
+    Resources._instance = Resources(milkyway, stars, moon, site)
 
     unix0 = None
     if args.test_date:
