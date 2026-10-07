@@ -291,6 +291,27 @@ int main(void) {
         check(fabs(sf[1]) < 0.01 * fabs(sf[2]), "no side force at zero sideslip", sf[1], 0.0);
     }
 
+    /* A CAPTURE CARRIES THE AEROSURFACES: commanded, moved part way, saved,
+     * disturbed, restored -- positions and the body flap come back. */
+    {
+        vehdyn_reset(0.0);
+        double cmd[6] = { 5.0, 6.0, -4.0, -3.0, 60.0, 8.0 };
+        vehdyn_set_aerosurf(cmd, +1);
+        vehdyn_advance(0.3e6);
+        double before[7], after[7];
+        vehdyn_aerosurf_pos(before);
+        static double rec[4096];
+        int n = vehdyn_save(rec, 4096);
+        double zero[6] = { 0 };
+        vehdyn_set_aerosurf(zero, -1);
+        vehdyn_advance(2.0e6);
+        vehdyn_load(rec, n);
+        vehdyn_aerosurf_pos(after);
+        for (int k = 0; k < 7; k++)
+            check(fabs(after[k] - before[k]) < 1e-9, "a capture restores the surfaces", after[k], before[k]);
+        check(before[0] > 0.5 && before[6] != 0.0, "the surfaces had moved before the capture", before[0], 1.0);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

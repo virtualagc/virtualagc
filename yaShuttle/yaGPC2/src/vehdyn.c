@@ -1846,6 +1846,11 @@ int vehdyn_save(double *b, int max) {
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) PUT(padCbe[i][j]);
     for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { PUT(tvcCmd[a][x]); PUT(tvcPos[a][x]); }
     PUT(dryKg);
+    /* the aerosurfaces: commands, positions, the body flap and its drive.
+     * Without them a resumed entry restarted every surface at zero and the
+     * body flap's drive stale -- a jolt PASS then had to fly out of. */
+    for (int k = 0; k < SURF_N; k++) { PUT(surfCmd[k]); PUT(surfPos[k]); }
+    PUT(bfPos); PUT(bfDrive);
 #undef PUT
     return n;
 }
@@ -1882,6 +1887,11 @@ double vehdyn_load(const double *b, int n) {
         for (int k = 0; k < 3; k++) for (int j = 0; j < 3; j++) padCbe[k][j] = GET();
         for (int a = 0; a < 5; a++) for (int x = 0; x < 2; x++) { tvcCmd[a][x] = GET(); tvcPos[a][x] = GET(); }
         if (i < n) dryKg = GET();
+        if (i + 2 * SURF_N + 2 <= n) {             /* absent in older captures */
+            for (int k = 0; k < SURF_N; k++) { surfCmd[k] = GET(); surfPos[k] = GET(); }
+            bfPos = GET();
+            bfDrive = (int)GET();
+        }
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }
 #undef GET
