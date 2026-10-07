@@ -1,0 +1,13 @@
+{
+ "flight": "STS-134",
+ "notes": "CGYS_KCD1..6 (GYDNAV, NAVDAD's drag-coefficient fit C_D = KCD1 + KCD2 exp(-V/KCD4) + alpha (KCD5 + KCD6 alpha), GYDNAV.hal:112-117): the flown G3's values (DASS mafgen/pure-G3.fcm) instead of the source INITIALs.  Above 2,500 ft/s PASS takes qbar from NAVDAD, not air data (GYAADT.hal:110-114); with the INITIALs its C_D fell to a quarter of the vehicle's as entry brought alpha from 19 to 15 deg, qbar read 2.2-5.7x high from Mach 4 to 2.7, and the lateral DAP's qbar-scheduled gains (GCBAER.hal:1044-1073: aileron 190/(q+10), rudder 750/(q+10)) sank to their floors -- the vehicle departed laterally at Mach 2.8 (lateral-departure-findings.md, 2026-10-07).  The flown fit matches our aero's C_D to 2-4%.",
+ "cells": [
+  {
+   "name": "CGYS_KCD1..6",
+   "config": "G3",
+   "addr": "0416e",
+   "H": "401067934053EBE700000000436D980CBEF9C6013E26AA55",
+   "was": "3F3237893F57C6FB00000000437A0000BF1E689F3E2AC321"
+  }
+ ]
+}
