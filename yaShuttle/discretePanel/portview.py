@@ -111,9 +111,17 @@ from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 # context and find none.  And under WSL, Mesa falls back to software unless
 # told to use the GPU through Direct3D 12.  (Both before OpenGL or Qt load.)
 if sys.platform.startswith('linux'):
+    # Unset, Qt 6 picks Wayland wherever WAYLAND_DISPLAY is set (WSLg sets
+    # it): choose X11 when there is a display, as simulatePASS does (and the
+    # window layouts need X11 windows anyway); then PyOpenGL must use GLX.
+    # A Wayland choice made on purpose gets EGL to match.
+    if not os.environ.get('QT_QPA_PLATFORM') and os.environ.get('DISPLAY'):
+        os.environ['QT_QPA_PLATFORM'] = 'xcb'
     qpa = os.environ.get('QT_QPA_PLATFORM', '')
-    if os.environ.get('DISPLAY') and not qpa.startswith('wayland'):
+    if qpa.startswith('xcb'):
         os.environ.setdefault('PYOPENGL_PLATFORM', 'glx')
+    elif qpa.startswith('wayland'):
+        os.environ.setdefault('PYOPENGL_PLATFORM', 'egl')
     try:
         with open('/proc/version') as _f:
             if 'microsoft' in _f.read().lower():
