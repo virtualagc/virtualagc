@@ -165,7 +165,7 @@ int main(void) {
             snprintf(what, sizeof what, "ADTA alpha back at M %.1f", M);
             check(fabs(al - aa) < 0.1, what, al, aa);
             snprintf(what, sizeof what, "ADTA static pressure back at M %.1f", M);
-            check(fabs(psc - ap / 144.0) < 0.005 * ap / 144.0 + 0.002, what, psc, ap / 144.0);
+            check(fabs(psc - ap * 29.921 / 2116.2) < 0.005 * ap * 29.921 / 2116.2 + 0.002, what, psc, ap * 29.921 / 2116.2);
         }
     }
 
