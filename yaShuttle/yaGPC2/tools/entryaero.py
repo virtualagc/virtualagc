@@ -161,14 +161,89 @@ def _calibration():
 
 CAL = _calibration()
 
-def coeffs(M, a, de, dbf, dsb):
-    """CN, CA, CM (about the MRP) at Mach M, alpha a, deflections in degrees."""
+def _calibrated(M, a, de, dbf, dsb):
     cn, ca, cm = shape(M, a, de, dbf, dsb)
     lm = math.log(max(M, 0.05))
     xs = [c[0] for c in CAL]
     return (cn + _interp_clamped(xs, [c[1] for c in CAL], lm),
             ca + _interp_clamped(xs, [c[2] for c in CAL], lm),
             cm + _interp_clamped(xs, [c[3] for c in CAL], lm))
+
+# ---------- the pitch derivatives, corrected to measurements below Mach 5 ----------
+# Between LA66 (M 0.29) and OA98 (M 5.25) the shapes are a log-Mach BLEND, and
+# the blend's pitching-moment slopes are wrong where it matters: it made the
+# vehicle statically UNSTABLE at Mach 1.3-2 (dCm/dalpha +0.0022..+0.0028/deg
+# about Xcg 1098.6), and PASS's pitch loop lost the vehicle at Mach 1.3 on the
+# first TAEM flight (2026-10-06).  The orbiter is stable there.  So the SLOPES
+# are set to measured values and the level is left alone: the correction is
+#   dCM = Ka (alpha - alpha_ref) + Kd (de - de_ref) + Kb (dbf - dbf_ref)
+# with K = (measured slope - the blend's own, both about Xcg 1098.6 / Zcg 374)
+# and the references the STS-1 OFP trim condition at that Mach -- so at every
+# OFP point the correction is ZERO and the calibration (level and trim) holds.
+# Faded out from Mach 4 to 5.25, where OA98 is data.  Sources, digitized with
+# pages and uncertainties in aero-docs/transonic-findings.md:
+#   Cm_alpha  NASA TM X-72661 Vols II (Langley 8-ft, M .35-1.2) and IX (UPWT,
+#             M 1.5-2.5); Young & Underwood 1985 fig 36 (the data book's
+#             subsonic neutral point, ~Xo 1077); flight: Iliff & Shafer
+#             TM-4500 fig 19 (-0.0035 M 1.4, -0.0027 M 1.7, -0.0016 M 2-4).
+#             M 1.5-1.7 here are between the tunnel and flight values.
+#   Cm_de     the same tunnel volumes (trailing edge up), TP-1779 at M .35,
+#             TM-4500 (-0.0022..-0.0027 at M 3-5).
+#   Cm_dbf    TM X-72661 Vol II, M .35-1.2 only; above that blended to OA98's.
+STAB_XCG, STAB_ZCG = 1098.6, 374.0
+CMA_TARGET = [(0.29, 0.0024), (0.35, 0.0024), (0.6, 0.0012), (0.8, 0.0), (0.95, -0.004),
+              (1.2, -0.006), (1.5, -0.0045), (1.7, -0.003), (2.0, -0.002), (2.5, -0.0016),
+              (4.0, -0.0016)]
+CMDE_TARGET = [(0.29, -0.0085), (0.35, -0.0085), (0.8, -0.0078), (1.0, -0.007), (1.2, -0.007),
+               (1.5, -0.0043), (2.0, -0.0034), (2.5, -0.0025), (4.0, -0.0023)]
+CMBF_TARGET = [(0.29, -0.0018), (0.8, -0.0018), (0.9, -0.0014), (1.2, -0.0014)]
+STAB_FADE = (4.0, 5.25)
+
+def _lin_logm(pts, M):
+    return _interp_clamped([math.log(m) for m, v in pts], [v for m, v in pts], math.log(M))
+
+def _ofp_ref(M):
+    """The STS-1 trim condition at Mach M: alpha, elevon, body flap, speedbrake."""
+    pts = OFP
+    xs = [math.log(p['M']) for p in pts]
+    g = lambda k: _interp_clamped(xs, [p[k] for p in pts], math.log(M))
+    return g('a'), g('de'), g('dbf'), g('dsb')
+
+def _cm_cg(M, a, de, dbf, dsb):
+    cn, ca, cm = _calibrated(M, a, de, dbf, dsb)
+    return moment_about(cn, ca, cm, STAB_XCG, STAB_ZCG)
+
+_STAB_CACHE = {}
+def _stab_gains(M):
+    """(weight, Ka, Kd, Kb): measured minus the blend's slopes at Mach M."""
+    key = round(M, 4)
+    if key in _STAB_CACHE:
+        return _STAB_CACHE[key]
+    if M >= STAB_FADE[1]:
+        out = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    else:
+        w = 1.0 if M <= STAB_FADE[0] else \
+            (math.log(STAB_FADE[1]) - math.log(M)) / (math.log(STAB_FADE[1]) - math.log(STAB_FADE[0]))
+        a0, de0, bf0, sb0 = _ofp_ref(M)
+        base = _cm_cg(M, a0, de0, bf0, sb0)
+        ka_m = (_cm_cg(M, a0 + 1, de0, bf0, sb0) - base)
+        kd_m = (_cm_cg(M, a0, de0 - 1, bf0, sb0) - base) * -1.0      # trailing edge up, as measured
+        kb_m = (_cm_cg(M, a0, de0, bf0 + 1, sb0) - base)
+        kb_hyp = (_cm_cg(STAB_FADE[1], *(lambda r: (r[0], r[1], r[2] + 1, r[3]))(_ofp_ref(STAB_FADE[1])))
+                  - _cm_cg(STAB_FADE[1], *_ofp_ref(STAB_FADE[1])))
+        kb_t = _lin_logm(CMBF_TARGET + [(STAB_FADE[1], kb_hyp)], M)
+        out = (w, _lin_logm(CMA_TARGET, M) - ka_m, _lin_logm(CMDE_TARGET, M) - kd_m, kb_t - kb_m,
+               a0, de0, bf0)
+    _STAB_CACHE[key] = out
+    return out
+
+def coeffs(M, a, de, dbf, dsb):
+    """CN, CA, CM (about the MRP) at Mach M, alpha a, deflections in degrees."""
+    cn, ca, cm = _calibrated(M, a, de, dbf, dsb)
+    w, ka, kd, kb, a0, de0, bf0 = _stab_gains(M)
+    if w:
+        cm += w * (ka * (a - a0) + kd * (de - de0) + kb * (dbf - bf0))
+    return cn, ca, cm
 
 def _interp_clamped(xs, ys, x):
     if x <= xs[0]: return ys[0]
