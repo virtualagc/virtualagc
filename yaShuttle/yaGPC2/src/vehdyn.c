@@ -1243,20 +1243,20 @@ static void ground_forces_body(double f[3], double tau[3]) {
         for (int i = 0; i < 3; i++) { vl += vr[i] * xh[i]; vs += vr[i] * yh[i]; }
         double sat = fabs(vl) < SLIP_MS ? vl / SLIP_MS : (vl > 0 ? 1.0 : -1.0);
         double mu = (down ? MU_ROLL : 0.5) + ((brakesOn && g < 2 && down) ? MU_BRAKE : 0.0);
-        double fl = -mu * fn * sat;
+        double fRoll = -mu * fn * sat;
         double ss = vs / SLIP_MS;
         if (ss > 1.0) ss = 1.0;
         if (ss < -1.0) ss = -1.0;
         double fs = -MU_SIDE * fn * ss;
         double F[3], Fb[3];
-        for (int i = 0; i < 3; i++) F[i] = fn * n[i] + fl * xh[i] + fs * yh[i];
+        for (int i = 0; i < 3; i++) F[i] = fn * n[i] + fRoll * xh[i] + fs * yh[i];
         {
             static int tr = -1;
             static double next = 0.0;
             if (tr < 0) tr = getenv("YAGPC_GROUND_TRACE") != NULL;
             if (tr && st.t >= next) {
                 fprintf(stderr, "ground: t=%.3f gear %d pen %.3f m vn %+.2f fn %.0f fl %.0f fs %.0f vl %+.2f vs %+.2f\n",
-                        st.t, g, pen, vn, fn, fl, fs, vl, vs);
+                        st.t, g, pen, vn, fn, fRoll, fs, vl, vs);
                 if (g == GEAR_N - 1) next = st.t + 0.25;
             }
         }
@@ -1372,14 +1372,14 @@ static bool entry_aero(double f[3], double tau[3]) {
     double qs = q * ASC_SREF_M2;
     /* lateral-directional, per degree, at this Mach (log interpolation):
      * aileron (left - right)/2, elevon pairs; rudder + trailing edge left */
-    double lat[9], fl;
+    double lat[9], frac;
     {
         static double logL[sizeof EA_LAT_MACH / sizeof EA_LAT_MACH[0]];
         static int ready;
         const int nl = (int)(sizeof EA_LAT_MACH / sizeof EA_LAT_MACH[0]);
         if (!ready) { for (int i = 0; i < nl; i++) logL[i] = log(EA_LAT_MACH[i]); ready = 1; }
-        int i = ea_brk(logL, nl, log(mach > 0.05 ? mach : 0.05), &fl);
-        for (int k = 0; k < 9; k++) lat[k] = EA_LAT[i][k] + fl * (EA_LAT[i + 1][k] - EA_LAT[i][k]);
+        int i = ea_brk(logL, nl, log(mach > 0.05 ? mach : 0.05), &frac);
+        for (int k = 0; k < 9; k++) lat[k] = EA_LAT[i][k] + frac * (EA_LAT[i + 1][k] - EA_LAT[i][k]);
     }
     double da = 0.25 * ((surfPos[SURF_LIB] + surfPos[SURF_LOB]) - (surfPos[SURF_RIB] + surfPos[SURF_ROB]));
     double dr = surfPos[SURF_RUD];

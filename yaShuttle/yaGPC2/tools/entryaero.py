@@ -315,7 +315,7 @@ def write_header(path):
         for M in H_MACH:
             out += '  { /* M %.3f */\n' % M
             for a in H_ALPHA:
-                out += '    { ' + ', '.join('{ %.5f, %.5f, %.5f }' % tuple(c) for c in rows[i]) + ' },\n'
+                out += '    { ' + ', '.join('{ %.5ff, %.5ff, %.5ff }' % tuple(c) for c in rows[i]) + ' },\n'   # f: float literals, or MSVC warns C4305 on every one
                 i += 1
             out += '  },\n'
         return out + '};\n'

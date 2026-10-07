@@ -120,7 +120,7 @@ static void load(void) {
             slot >= 1 && slot <= NAV_MAX) {
             Runway *r = &rws[slot - 1];
             r->lat = v[0]; r->lon = v[1]; r->alt = v[2]; r->az = v[3];
-            snprintf(r->id, sizeof r->id, "%s", id);
+            snprintf(r->id, sizeof r->id, "%.7s", id);   /* PASS ids are six characters */
             if (slot > nRw) nRw = slot;
         } else if (strncmp(line, "mls ", 4) == 0 &&
                    sscanf(line + 4, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf", &slot, &rw,
