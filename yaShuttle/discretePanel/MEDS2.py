@@ -9697,7 +9697,11 @@ class Screen_AE_PFD(MDUScreen):
                                      {'id': 'avvi-hdot', 'signed': True,
                                       'border': True, 'lblScale': HD_F,
                                       'center': True, 'advF': 0.75, 'rdScale': 1.3,
-                                      'rdAdv': 1.0, 'rdLeadUp': PXY, 'rjust': True,
+                                      # no rdLeadUp: the owner's AVVI line drawings
+                                      # (CRT era) show the readout's digits on one
+                                      # baseline; the offset copied an image of
+                                      # unknown origin (2026-10-06)
+                                      'rdAdv': 1.0, 'rjust': True,
                                       'boxDy': -2 * PXY, 'map': hd['map'],
                                       'marks': hd['marks']}))
         else:
