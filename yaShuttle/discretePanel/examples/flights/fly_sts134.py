@@ -26,6 +26,16 @@ It starts simulatePASS.py and then, phase by phase:
            OPS 2 for a single G2: GPC MEMORY configuration 2 per its table,
            and OPS 201 PRO
   ORBIT    one orbit coasting, the truth's osculating orbit logged
+  DEORBIT  the ground's targets for the first KSC 15 opportunity within 550
+           n.mi. crossrange (deorbit_target.py, from the ORBIT capture);
+           the Entry Checklist (ENT/ALL/GEN H): single-G3 GPC MEMORY and
+           OPS 301 at TIG-75, the DEORB MNVR targets (TIG, C1, C2, HT,
+           THETA T, PRPLT), LOAD, TIMER and the two-engine trims at TIG-45,
+           OPS 302 at TIG-25, MNVR to burn attitude at TIG-20, EXEC at
+           TIG-15 s; after the burn OPS 303 and MNVR to the EI attitude
+  ENTRY    OPS 304 PRO at EI-5 (ENTRY MANEUVERS cue card) and PASS flying;
+           ends at EI+25 min, about TAEM -- the vehicle has no ground or
+           landing gear yet
 
 with a capture at the end of each phase (sts134-<phase> in DIR), --from
 STAGE to resume from one, and --to STAGE to stop after one.  The vehicle's
@@ -42,6 +52,7 @@ sts134-reconfig.json): make it once with
 """
 import argparse
 import json
+import math
 import os
 import re
 import subprocess
@@ -76,7 +87,7 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       # soundings interpolated in time.  PASS's table is from 12Z alone, the
       # last balloon before launch (none earlier is archived for 74794).
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
-PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT"]
+PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY"]
 
 IPL_SCRIPT = """
 +0     gpc 1
@@ -147,6 +158,36 @@ OPS201 = ("+1     keys SPEC 0 PRO\n"
           "wait crt 1 title 2011/ timeout 600\n"
           "+5     subtitle\n")
 
+# THE OPS 3 TRANSITION for a single G3: the OPS 201 single-G2 GPC MEMORY
+# table with memory configuration 3 (Entry Checklist ENT/ALL/GEN H deorbit
+# prep; the bus items are the same strings).
+OPS301 = ("+1     keys SPEC 0 PRO\n"
+          "+5     keys ITEM 1 + 3 EXEC\n"
+          + "".join("+8     keys ITEM %s EXEC\n" % i for i in OPS201_ITEMS)
+          + "+10    keys OPS 3 0 1 PRO\n"
+          "wait crt 1 title 3011/ timeout 900\n"
+          "+5     subtitle\n")
+# ENT/ALL/GEN H 3-9..3-10: TIG-25 "GNC, OPS 302 PRO"; TIG-20 "MNVR - ITEM 27
+# EXEC"; 3-25 "TIG-:15 EXEC".  The two-engine trims are 3-8's "L,R - ITEM 6
+# +0.0 -5.7 +5.7 EXEC".
+# --g3-from-mm ONLY: DPS UTILITY ITEM 49 turns the G3 archive retrieve off,
+# so OPS 3 loads G3 from mass memory.  A WORKAROUND for captures made before
+# yaGPC2 c87bce8b6 (ledger #283), whose archive was "stored" empty at launch
+# and would be retrieved over G3.  Never the default: a flight launched on a
+# fixed emulator retrieves G3 from upper memory, as the real one did.
+G3_FROM_MM = ("+1     keys SPEC 1 PRO\n"
+              "+8     keys ITEM 4 9 EXEC\n"
+              "+8     keys RESUME\n")
+OPS302 = "+1     keys OPS 3 0 2 PRO\n"
+DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
+ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\n"
+
+
+def keys_signed(x, fmt):
+    """A number as DEORB MNVR keystrokes: its sign, then digit by digit."""
+    t = fmt % abs(x)
+    return ("- " if x < 0 else "+ ") + " ".join(t)
+
 
 class Flight:
     def __init__(self, a):
@@ -170,6 +211,8 @@ class Flight:
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", "20000"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
+        if self.a.rate != 1.0:                   # simulated seconds per wall second
+            cmd += ["--rt-factor", "%g" % self.a.rate]
         if os.environ.get("FLY_YAGPC"):          # another build, for bisecting
             cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         os.makedirs(self.a.logs, exist_ok=True)
@@ -184,34 +227,49 @@ class Flight:
         self.wait_file(outp, "session commands on port", 180)
         time.sleep(5)
 
-    def wait_file(self, path, text, timeout):
+    def wait_file(self, path, text, timeout, after=0):
+        """text in path, looking only past byte offset after."""
         end = time.time() + timeout
         while time.time() < end:
             if getattr(self, "proc", None) is not None and self.proc.poll() is not None:
                 raise SystemExit("fly_sts134: simulatePASS.py has exited (see simulatePASS.out)")
             try:
-                if text in open(path, errors="replace").read():
-                    return True
+                with open(path, "rb") as fh:
+                    fh.seek(after)
+                    if text in fh.read().decode("utf-8", "replace"):
+                        return True
             except OSError:
                 pass
             time.sleep(2)
         raise SystemExit("fly_sts134: '%s' never appeared in %s" % (text, path))
 
+    def panel_size(self):
+        try:
+            return os.path.getsize(os.path.join(self.a.logs, "logs", "panel.log"))
+        except OSError:
+            return 0
+
     def play(self, text, name):
+        # WHERE THE PANEL LOG STOOD when this script was sent: its steps are
+        # looked for only after it.  A script's last line can repeat an
+        # earlier script's ("+5 subtitle" ends both OPS 201 and OPS 301), and
+        # searching the whole log matched OPS 201's at once (2026-10-06).
+        self.played_at = self.panel_size()
         path = os.path.join(self.a.logs, name + ".script")
         with open(path, "w") as fh:
             fh.write(text.lstrip())
         crewscript.send_control("play %s" % path, self.base)
         self.say("crew: %s" % name)
         self.wait_file(os.path.join(self.a.logs, "logs", "panel.log"),
-                       "script command: play %s" % path, 60)
+                       "script command: play %s" % path, 60, after=self.played_at)
 
     def script_done(self, name, timeout):
         path = os.path.join(self.a.logs, name + ".script")
         n = sum(1 for l in open(path) if l.strip() and not l.lstrip().startswith("#"))
         # the panel logs every step; done when its last line has been logged
         last = [l for l in open(path) if l.strip() and not l.lstrip().startswith("#")][-1].strip()
-        self.wait_file(os.path.join(self.a.logs, "logs", "panel.log"), last, timeout)
+        self.wait_file(os.path.join(self.a.logs, "logs", "panel.log"), last, timeout,
+                       after=getattr(self, "played_at", 0))
         return n
 
     def truth(self):
@@ -379,11 +437,119 @@ class Flight:
         orb = [l for l in self.log_text().splitlines() if l.startswith("vehdyn-orbit")]
         self.say("%d orbit samples; last: %s" % (len(orb), orb[-1] if orb else "none"))
 
+    # --- deorbit and entry -------------------------------------------------
+    def deorbit_targets(self):
+        """THE GROUND'S DEORBIT TARGETS from the truth at the ORBIT capture:
+        deorbit_target.py, standing in for Mission Control's tracking."""
+        cap = os.path.join(self.a.logs, FL["name"] + "-orbit")
+        site = os.path.join(PANEL, "..", "yaGPC2", "tools", "sites", "ksc.json")
+        out = subprocess.run([sys.executable, os.path.join(PANEL, "deorbit_target.py"), cap, site],
+                             check=True, capture_output=True, text=True).stdout
+        for line in out.strip().splitlines():
+            self.say("ground: " + line.strip())
+        g = lambda pat: re.search(pat, out)
+        def gmt(s):
+            d, h, m, sec = re.match(r"(\d+)/(\d+):(\d+):([\d.]+)", s).groups()
+            return int(d) * 86400 + int(h) * 3600 + int(m) * 60 + float(sec)
+        tig = gmt(g(r"TIG GMT (\S+)").group(1))
+        ei = gmt(g(r"EI GMT (\S+)").group(1))
+        theta = float(g(r"THETA T ([\d.]+)").group(1))
+        dv = float(g(r"impulsive dV ([\d.]+)").group(1))
+        c1 = float(g(r"C1 (-?[\d.]+)").group(1))
+        c2 = float(g(r"C2 ([-+][\d.]+)").group(1))
+        ht = float(g(r"HT ([\d.]+)").group(1))
+        # PRPLT: the propellant the burn needs (no out-of-plane waste), from
+        # the truth's mass: 2 OMS, Isp 316 s (VEX 10136.8 ft/s, FSSR K-loads)
+        vd = json.load(open(os.path.join(cap, "vehdyn.json")))["vehdyn"]
+        kg = vd[-1] + sum(vd[16:21])
+        prplt = kg / 0.45359237 * (1.0 - math.exp(-dv / 10136.8))
+        return dict(tig=tig, ei=ei, theta=theta, c1=c1, c2=c2, ht=ht, prplt=prplt)
+
+    def deorbit(self):
+        t = self.deorbit_targets()
+        self.tgt = t
+        json.dump(t, open(os.path.join(self.a.logs, "deorbit-targets.json"), "w"), indent=1)
+        tig = t["tig"]
+        self.wait_gmt(tig - 75 * 60.0)
+        if self.a.attach:
+            # --attach: the running vehicle's OPS 301 script was sent by the
+            # driver that stopped; wait for that one, from where it was played.
+            with open(os.path.join(self.a.logs, "logs", "panel.log"), "rb") as fh:
+                at = fh.read().rfind(b"script command: play %s"
+                                     % os.path.join(self.a.logs, "ops301.script").encode())
+            if at < 0:
+                raise SystemExit("fly_sts134: --attach, but no OPS 301 script was played")
+            self.played_at = at
+        elif self.a.g3_from_mm:
+            self.say("WORKAROUND --g3-from-mm: ITEM 49 off, G3 from mass memory, not the archive")
+            self.play(G3_FROM_MM + OPS301, "ops301")
+        else:
+            self.play(OPS301, "ops301")
+        self.script_done("ops301", 1200)
+        # THE TRANSITION MUST HAVE HAPPENED before anything else is keyed:
+        # the next steps are ITEM entries, and on the GPC MEMORY page that a
+        # failed transition leaves up, ITEMs 10-19 are the string and CRT
+        # assignments (2026-10-06: OPS 301 accepted, G3 never loaded).
+        with open(os.path.join(self.a.logs, "logs", "panel.log"), "rb") as fh:
+            fh.seek(self.played_at)
+            met = [l for l in fh.read().decode("utf-8", "replace").splitlines()
+                   if "wait met after" in l and "title 3011/" in l]
+        if not met:
+            raise SystemExit("fly_sts134: OPS 301 did not complete (no DEORB MNVR COAST on CRT 1) "
+                             "-- stopping before the deorbit targets are keyed")
+        self.say("crew: OPS 301 (single G3)")
+        # TIG-45: the DEL PAD read up, the targets keyed on DEORB MNVR COAST
+        self.wait_gmt(tig - 45 * 60.0)
+        met = tig - T0
+        d, rem = divmod(met, 86400.0)
+        hh, rem = divmod(rem, 3600.0)
+        mm, ss = divmod(rem, 60.0)
+        script = ("+1     keys ITEM 1 0 + %s + %s + %s + %s EXEC\n"
+                  % (" ".join("%d" % d), " ".join("%d" % hh), " ".join("%d" % mm), " ".join("%.1f" % ss)))
+        # ONE ITEM AT A TIME, C1 first.  The five-field entry "ITEM 14 C1 C2
+        # HT THETA PRPLT EXEC" was refused as a whole on 2026-10-06 (PEG 4
+        # left at its defaults, PEG 7 still loaded, LOAD solved a 370 ft/s
+        # burn).  C1 alone was taken and cleared PEG 7, and the other four
+        # then went in one by one; why the combined entry was refused is not
+        # established (the message line is not logged).
+        for item, v, fmt in ((14, t["c1"], "%.0f"), (15, t["c2"], "%.4f"), (16, t["ht"], "%.3f"),
+                             (17, t["theta"], "%.3f"), (18, t["prplt"], "%.0f")):
+            script += "+4     keys ITEM %s %s EXEC\n" % (" ".join(str(item)), keys_signed(v, fmt))
+        script += ("+5     keys ITEM 6 + 0 . 0 - 5 . 7 + 5 . 7 EXEC\n"
+                   "+5     keys ITEM 2 2 EXEC\n"
+                   "+5     keys ITEM 2 3 EXEC\n")
+        open(os.path.join(self.a.logs, "deorb-targets.script"), "w").write(script)
+        self.play(script, "deorb-targets")
+        self.script_done("deorb-targets", 300)
+        self.say("crew: DEORB MNVR targets loaded (MET TIG %d/%02d:%02d:%04.1f)" % (d, hh, mm, ss))
+        self.wait_gmt(tig - 25 * 60.0)
+        self.play(OPS302, "ops302")
+        self.wait_gmt(tig - 20 * 60.0)
+        self.play(DEORB_MNVR, "deorb-mnvr")
+        self.wait_gmt(tig - 15.0)
+        self.play("+0     keys EXEC\n", "deorb-exec")
+        self.say("crew: EXEC at TIG-15 s (TIG GMT %.1f)" % tig)
+        # the burn (about 2.5 min), the trim of the residuals, then MM 303 and
+        # the maneuver to the EI-5 attitude
+        self.wait_gmt(tig + 6 * 60.0)
+        self.play("+1     keys OPS 3 0 3 PRO\n+10    keys ITEM 2 7 EXEC\n", "ops303")
+        self.say("crew: OPS 303, MNVR to EI attitude")
+
+    def entry(self):
+        t = getattr(self, "tgt", None) or json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
+        self.wait_gmt(t["ei"] - 5 * 60.0)
+        self.play(ENTRY_OPS304, "ops304")
+        self.say("crew: OPS 304 at EI-5")
+        self.wait_gmt(t["ei"] + 25 * 60.0)
+
     def run(self):
         start = PHASES.index(self.a.from_) if self.a.from_ else 0
         resume = (os.path.join(self.a.logs, FL["name"] + "-" + PHASES[start - 1].lower())
                   if start else None)
-        self.start(resume)
+        if self.a.attach:
+            self.say("attached to the vehicle already running on port base %d" % self.base)
+        else:
+            self.start(resume)
         stop = PHASES.index(self.a.to) + 1 if self.a.to else len(PHASES)
         for ph in PHASES[start:stop]:
             self.say("== %s" % ph)
@@ -399,6 +565,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--logs", required=True, help="directory for the logs, scripts and captures")
     ap.add_argument("--port-base", type=int, default=38000)
+    ap.add_argument("--rate", type=float, default=1.0,
+                    help="simulated seconds per wall second (simulatePASS --rt-factor); 2 is "
+                         "measured clean for one GPC on orbit")
     ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
     ap.add_argument("--reuplink", action="store_true",
                     help="with --from COUNT: send the DOLILU again before OPS 101")
@@ -406,6 +575,13 @@ def main():
                     help="stop after this phase (an ascent test needs no OPS 2 or orbit: --to OMS2)")
     ap.add_argument("--from", dest="from_", choices=PHASES[1:],
                     help="resume from the capture the previous phase left")
+    ap.add_argument("--g3-from-mm", action="store_true",
+                    help="WORKAROUND, not for new flights: disable the G3 archive retrieve "
+                         "(DPS UTILITY ITEM 49) before OPS 301, for captures made before "
+                         "yaGPC2 c87bce8b6 whose archive is empty (ledger #283)")
+    ap.add_argument("--attach", action="store_true",
+                    help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
+                         "(a driver that stopped after sending OPS 301) instead of starting one")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
     a = ap.parse_args()
     if a.flight:
