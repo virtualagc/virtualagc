@@ -125,6 +125,7 @@ TRUTH_DOUBLES_MIN = 15
 TRUTH_DOUBLES_MAX = 27
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
 MU_EARTH = 3.986004418e14          # m^3/s^2, only for extrapolating ~0.05 s
+OMEGA_EARTH = 7.2921159e-5         # rad/s, the same
 
 D2R = math.pi / 180.0
 
@@ -352,7 +353,16 @@ def extrapolate(s, t):
     fs.v = s.v + g * dt
     fs.r_j2k = J2000_TO_M50.T @ fs.r
     fs.C = quat_to_matrix(unit(quat_advance(s.q, s.w, dt)))     # body -> M50
-    fs.m50_to_ef = s.m50_to_ef
+    # The Earth turns too: carrying the position forward but not the Earth
+    # would slide the ground under the Orbiter by up to ~20 m (0.05 s at
+    # 408 m/s at KSC) and snap it back at each datagram.
+    if s.m50_to_ef is None:
+        fs.m50_to_ef = None
+    else:
+        th = OMEGA_EARTH * dt
+        fs.m50_to_ef = np.array([[math.cos(th), math.sin(th), 0.0],
+                                 [-math.sin(th), math.cos(th), 0.0],
+                                 [0.0, 0.0, 1.0]]) @ s.m50_to_ef
     return fs
 
 
