@@ -92,6 +92,32 @@ double vehdyn_unix(double t);
 int vehdyn_save(double *b, int max);
 double vehdyn_load(const double *b, int n);
 
+/* THE ASCENT THRUST-VECTOR COMMANDS, degrees: [0..2] the SSMEs' pitch and
+ * yaw bell deflections, [3] the left and [4] the right SRB's rock and tilt.
+ * The actuators follow at their own rate. */
+void vehdyn_set_tvc(const double cmd[5][2]);
+
+/* THE AEROSURFACE COMMANDS, degrees, as PASS writes them (mdmdev, FA AOD):
+ * left inboard, left outboard, right inboard, right outboard elevon
+ * (+ trailing edge down), speedbrake (0..98.6), rudder; and the body flap's
+ * drive from its discretes, +1 down, -1 up, 0 stopped. */
+void vehdyn_set_aerosurf(const double cmd[6], int bodyFlapDrive);
+/* Where the surfaces are, degrees: the six above, then the body flap. */
+void vehdyn_aerosurf_pos(double pos[7]);
+/* For tests: the entry tables' CN, CA and CM (about the MRP) at Mach,
+ * alpha and elevon, body flap, speedbrake deflection (degrees). */
+void vehdyn_aero_coeffs(double mach, double alpha, double de, double dbf, double dsb, double c[3]);
+
+/* The ascent: 0 not (on orbit), 1 on the pad, 2 the stack in flight, 3 the
+ * orbiter and tank after SRB separation (YAGPC_VEHDYN_PAD). */
+int vehdyn_ascent_phase(void);
+
+/* What the accelerometers feel now: the specific force in body axes, m/s^2
+ * (set on the pad and in powered flight). */
+void vehdyn_specific_force(double out[3]);
+/* An SRB's chamber pressure, psia (< 0: the boosters have gone). */
+double vehdyn_srb_pc_psia(void);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);
@@ -99,5 +125,26 @@ void vehdyn_reset(double t);
 /* For tests: set the attitude (body -> inertial, [w x y z], normalised here)
  * and body rates directly. */
 void vehdyn_set_attitude(const double q[4], const double w[3]);
+/* The navigation base (the IMUs' place, PASS's navigation point), Earth-fixed
+ * in PASS's frame: position m, velocity m/s relative to the Earth, and the
+ * body -> Earth-fixed matrix -- for the landing aids. */
+void vehdyn_navbase_ef(double rEf[3], double vEf[3], double Cbe[3][3]);
+/* THE HARDWIRED FUNCTIONS, from the crew's pushbuttons: 0x8000 LANDING GEAR
+ * ARM, 0x4000 DN, 0x2000 DRAG CHUTE ARM, 0x1000 DPY, 0x0800 JETT (latched
+ * here).  And the gear: travel 0 stowed .. 1 down and locked; weight on the
+ * left and right main gear and the nose gear (1 = weight). */
+void vehdyn_hardwired(unsigned w);
+void vehdyn_gear(double *pos, int wow[3]);
+/* The lower main wheel's height above the runway (ft) and the ground speed
+ * (kt) -- the crew's cues for the gear, the chute and the brakes. */
+void vehdyn_ground_state(double *wheelFt, double *gsKt);
+/* The air data probes, left and right: 0 stowed .. 1 deployed (the crew's
+ * AIR DATA PROBE switches, hardwired 0x0100/0x0080 DEPLOY, 0x0040/0x0020
+ * STOW).  And the air they meet: free-stream pressure (psf), Mach, alpha,
+ * beta (deg), dynamic pressure (psf); false above the aero tables. */
+void vehdyn_probes(double pos[2]);
+bool vehdyn_air_data(double *pPsf, double *mach, double *alphaDeg, double *betaDeg, double *qPsf);
+/* For tests: set the position and velocity directly (M50, m and m/s). */
+void vehdyn_set_rv(const double r[3], const double v[3]);
 
 #endif

@@ -1,0 +1,14 @@
+{
+ "flight": "STS-134",
+ "notes": "CGCV_GDQ_SLOPE (CGYMC3, the aero DAP's pitch inner-loop gain against Mach, GCBAER.hal:999-1010): the slopes as the flown G3 has them (DASS mafgen/pure-G3.fcm: 0, 0, 37.5, 0, -20) -- GCCAER.hal's AUTO table pattern -- instead of the source INITIAL (37.5, SLOPE_2_CSS, -20, SLOPE_4_CSS, 37.5, CGYMC3.hal:215-217), whose slopes sit two places off their intercepts (20, 20, -25, 65, 155): segment 3 (Mach 1.2-3) gave -20 M - 25 < 0 and pinned GDQ at its floor 0.2 through TAEM, so the elevator moved only on the trim integrator and the vehicle departed (taem-pitch-findings.md, 2026-10-06). Position: the volume's data halfwords (raw offset less the 5,346-halfword header).",
+ "cells": [
+  {
+   "name": "CGCV_GDQ_SLOPE",
+   "config": "G3",
+   "addr": "0",
+   "flat": 1196118,
+   "H": "00000000000000004225800000000000C2140000",
+   "was": "4225800000000000C21400000000000042258000"
+  }
+ ]
+}

@@ -1,0 +1,404 @@
+# NASA TP-1779 (Freeman & Spencer 1980): Orbiter 101 low-speed static stability and control, 0.02-scale wind tunnel (Langley 8-ft TPT) vs ALT flights 4-5 (refs 1 AFFTC-TR-78-14, 2 Cooke AIAA-80-1604) vs Aerodynamic Design Data Book (ref.3 = NASA CR-160386, corrected for aeroelasticity; wind tunnel is NOT).
+# BODY AXES. Moment reference 0.652 L (figure 2 prints x = 21.03 m; 0.652*32.77 = 21.37 m -- see notes). S = 250 m2, cbar = 12.06 m, b = 23.79 m, L = 32.77 m.
+# Cl, Cn referenced to S*b; Cm to S*cbar; CN normal force, CY side force referenced to S. delta_e = (L+R)/2, delta_a = (L-R)/2, trailing-edge-down positive. delta_BF = -0.5 deg throughout the wind-tunnel tests.
+# Derivatives (figs 4-7) are PER DEGREE; Clbeta etc. from beta = 0 and 1 deg differences. Figs 8-9 are absolute coefficients.
+# Mach/delta_SB/delta_e attached to flight & wind-tunnel points come from TABLE I (they share the test condition); data-book lines are at M 0.4 / 0.6 with no configuration stated.
+# NOT IN THIS PAPER: CL, CD (or CA), speedbrake or body-flap DERIVATIVES, landing gear, ground effect. The only speedbrake information is the configuration difference between fig 8a/9a (delta_SB 43, M0.51) and 8b-d/9b-d (delta_SB 3.5).
+# Wind-tunnel accuracy (Table II): CN +-0.0060, Cm +-0.0012, Cl +-0.0025, Cn +-0.0025, CY +-0.0022.
+# Summary figures 4-7 are on dense grid paper with heavily overlapping symbols: values were read from 4x zooms; where symbols overlap the identity (flight ref.1 / backup accelerometer / ref.2 / wind tunnel) is a best guess and is stated in source/note.
+figure,pdf_page,parameter,source,Mach,delta_SB_deg,delta_e_deg,alpha_deg,value,units,note
+4,14,Cm_alpha,data book (ref.3),0.4,,,0,0.0,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,1,-0.0003,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,2,-0.0004,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,3,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,4,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,5,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,6,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,7,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,8,-0.0003,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,9,-0.0003,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,10,-0.0005,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.4,,,11.9,-0.0011,per deg,M0.4 and M0.6 lines coincide below ~11 deg; +-0.0001
+4,14,Cm_alpha,data book (ref.3),0.6,,,11.9,-0.0008,per deg,line end; +-0.0001
+4,14,Cm_alpha,flight+wind tunnel cluster,0.51,43.0,4.4,2.4,-0.00104,per deg,all symbols overlap; band ~-0.0002..-0.0018
+4,14,Cm_alpha,flight+wind tunnel cluster,0.51,43.0,4.4,2.4,-0.0003,per deg,small triangle (flight ref.2?) near data-book line; identity uncertain
+4,14,Cm_alpha,flight+wind tunnel cluster,0.52,3.5,2.2,4.2,-0.0013,per deg,all symbols overlap +-0.0002
+4,14,Cm_alpha,flight+wind tunnel cluster,0.56,3.5,1.8,6.0,-0.00143,per deg,all symbols overlap +-0.0002
+4,14,Cm_alpha,flight+wind tunnel cluster,0.41,3.5,2.9,10.1,0.00016,per deg,triangle (flight ref.2)
+4,14,Cm_alpha,flight+wind tunnel cluster,0.41,3.5,2.9,10.1,-0.00067,per deg,circle cluster; band to -0.0012
+4,14,CN_alpha,data book (ref.3),0.4,,,0,0.0435,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,1,0.0449,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,2,0.046,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,3,0.0471,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,4,0.0477,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,5,0.0486,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,6,0.049,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,7,0.05,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,8,0.05,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,9,0.0503,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,10,0.0505,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,11,0.0506,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.4,,,11.9,0.0506,per deg,+-0.0005
+4,14,CN_alpha,data book (ref.3),0.6,,,6,0.049,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,data book (ref.3),0.6,,,8,0.051,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,data book (ref.3),0.6,,,9,0.0521,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,data book (ref.3),0.6,,,10,0.0526,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,data book (ref.3),0.6,,,11,0.053,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,data book (ref.3),0.6,,,11.9,0.0531,per deg,dashed line visible only from ~6 deg (coincides with M0.4 below); +-0.0007
+4,14,CN_alpha,flight ref.2 (triangle)/ref.1 circle,0.51,43.0,4.4,2.4,0.0554,per deg,upper pair; symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight ref.1 backup (square)/wind tunnel,0.51,43.0,4.4,2.4,0.0493,per deg,lower pair; symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight ref.1 (circle),0.52,3.5,2.2,4.2,0.0544,per deg,symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight backup (square)/wind tunnel,0.52,3.5,2.2,4.2,0.0494,per deg,symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,wind tunnel (tailed circle),0.56,3.5,1.8,6.0,0.0518,per deg,symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight backup (square),0.56,3.5,1.8,6.0,0.0496,per deg,symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight ref.2 (triangle),0.56,3.5,1.8,6.0,0.047,per deg,+-0.001; symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight ref.1 (circle),0.41,3.5,2.9,10.1,0.0584,per deg,symbol identity from shapes in overlapping cluster
+4,14,CN_alpha,flight backup/wind tunnel/ref.2 stack,0.41,3.5,2.9,10.1,0.05,per deg,+-0.001; symbol identity from shapes in overlapping cluster
+5,15,Cm_delta_e,data book (ref.3),0.4,,,0,-0.009,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,2,-0.009,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,4,-0.009,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,6,-0.009,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,8,-0.009,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,10,-0.0091,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.4,,,12,-0.0093,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,0,-0.00855,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,2,-0.00855,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,4,-0.00855,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,6,-0.00855,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,8,-0.00855,per deg,+-0.0001
+5,15,Cm_delta_e,data book (ref.3),0.6,,,10,-0.0089,per deg,+-0.0001; lines merge at 12
+5,15,Cm_delta_e,data book (ref.3),0.6,,,12,-0.0093,per deg,+-0.0001; lines merge at 12
+5,15,Cm_delta_e,flight+wind tunnel cluster,0.51,43.0,4.4,2.4,-0.00887,per deg,band -0.0082..-0.0095
+5,15,Cm_delta_e,flight+wind tunnel cluster,0.52,3.5,2.2,4.2,-0.00871,per deg,upper cap -0.0082
+5,15,Cm_delta_e,flight (triangle/circle),0.56,3.5,1.8,6.0,-0.0086,per deg,
+5,15,Cm_delta_e,wind tunnel (tailed circle),0.56,3.5,1.8,6.0,-0.00981,per deg,
+5,15,Cm_delta_e,flight ref.2 (triangle),0.41,3.5,2.9,10.1,-0.0082,per deg,
+5,15,Cm_delta_e,flight ref.1/wind tunnel cluster,0.41,3.5,2.9,10.1,-0.00915,per deg,
+5,15,CN_delta_e,data book (ref.3),0.4,,,0,0.0183,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,2,0.0183,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,4,0.0183,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,6,0.0183,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,8,0.0183,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,10,0.0186,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.4,,,12,0.0193,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.6,,,0,0.0166,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.6,,,2,0.0166,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.6,,,4,0.0166,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.6,,,6,0.0166,per deg,+-0.0002
+5,15,CN_delta_e,data book (ref.3),0.6,,,8,0.0172,per deg,+-0.0003; rises to merge with M0.4
+5,15,CN_delta_e,data book (ref.3),0.6,,,10,0.0185,per deg,+-0.0003; rises to merge with M0.4
+5,15,CN_delta_e,data book (ref.3),0.6,,,12,0.0193,per deg,+-0.0003; rises to merge with M0.4
+5,15,CN_delta_e,wind tunnel (tailed circle),0.51,43.0,4.4,2.4,0.0183,per deg,symbol identity uncertain in clusters
+5,15,CN_delta_e,flight backup (square),0.51,43.0,4.4,2.4,0.0169,per deg,symbol identity uncertain in clusters
+5,15,CN_delta_e,flight ref.1/ref.2 (circle+triangle),0.51,43.0,4.4,2.4,0.0138,per deg,lower cap 0.0124; symbol identity uncertain in clusters
+5,15,CN_delta_e,flight backup (square),0.52,3.5,2.2,4.2,0.0186,per deg,band 0.0176..0.0193; symbol identity uncertain in clusters
+5,15,CN_delta_e,flight ref.1/ref.2/wind tunnel cluster,0.52,3.5,2.2,4.2,0.0153,per deg,lower cap 0.0134; symbol identity uncertain in clusters
+5,15,CN_delta_e,flight ref.1/wind tunnel,0.56,3.5,1.8,6.0,0.0168,per deg,symbol identity uncertain in clusters
+5,15,CN_delta_e,flight ref.2 (triangle),0.56,3.5,1.8,6.0,0.0153,per deg,lower cap 0.0144; symbol identity uncertain in clusters
+5,15,CN_delta_e,wind tunnel/flight backup,0.41,3.5,2.9,10.1,0.0172,per deg,symbol identity uncertain in clusters
+5,15,CN_delta_e,flight ref.1 (circle),0.41,3.5,2.9,10.1,0.0144,per deg,lower cap 0.0133; symbol identity uncertain in clusters
+6,16,Cl_beta,data book (ref.3),0.4,,,0,-0.00083,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,1,-0.00098,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,2,-0.00113,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,3,-0.00129,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,4,-0.0014,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,5,-0.00156,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,6,-0.00172,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,7,-0.00189,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,8,-0.00212,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,9,-0.00223,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,10,-0.00232,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,11,-0.00235,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.4,,,11.8,-0.00237,per deg,+-0.00003; M0.6 coincides below ~6.5 deg
+6,16,Cl_beta,data book (ref.3),0.6,,,7,-0.00184,per deg,+-0.00003
+6,16,Cl_beta,data book (ref.3),0.6,,,8,-0.002,per deg,+-0.00003
+6,16,Cl_beta,data book (ref.3),0.6,,,9,-0.00208,per deg,+-0.00003
+6,16,Cl_beta,data book (ref.3),0.6,,,10,-0.00216,per deg,+-0.00003
+6,16,Cl_beta,data book (ref.3),0.6,,,11,-0.00215,per deg,+-0.00003
+6,16,Cl_beta,data book (ref.3),0.6,,,11.8,-0.00217,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,0,0.0015,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,2,0.0015,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,4,0.0015,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,6,0.00151,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,8,0.0015,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,9,0.00147,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,10,0.00143,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,11,0.00138,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.4,,,11.8,0.00132,per deg,+-0.00003
+6,16,Cn_beta,data book (ref.3),0.6,,,0,0.00155,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,1,0.00161,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,2,0.00165,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,3,0.00167,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,4,0.00168,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,5,0.00165,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,6,0.00163,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,7,0.0016,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,8,0.00156,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,9,0.0015,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,10,0.00144,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,11,0.00138,per deg,+-0.00004
+6,16,Cn_beta,data book (ref.3),0.6,,,11.8,0.00131,per deg,+-0.00004
+6,16,CY_beta,data book (ref.3),0.4,,,0,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,2,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,4,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,6,-0.0179,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,8,-0.0178,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,9,-0.01763,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,10,-0.01763,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,11,-0.01755,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.4,,,11.8,-0.01755,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,0,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,2,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,4,-0.018,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,6,-0.0179,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,8,-0.0178,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,9,-0.01763,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,10,-0.01763,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,11,-0.01755,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,CY_beta,data book (ref.3),0.6,,,11.8,-0.01755,per deg,only one line visible: M0.4 and M0.6 coincide; +-0.0002
+6,16,Cl_beta,flight ref.2 (triangle),0.53,43.0,4.4,2.9,-0.00079,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,wind tunnel (tailed circle),0.53,43.0,4.4,2.9,-0.00091,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,flight ref.1 (circle),0.53,43.0,4.4,2.9,-0.00106,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,wind tunnel? (circle with tail),0.56,3.5,1.4,3.6,-0.0012,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,flight ref.2 (triangle),0.53,3.5,2.2,3.8,-0.00129,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,wind tunnel (tailed circle),0.53,3.5,2.2,3.8,-0.00133,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,flight ref.1 (circle),0.53,3.5,2.2,3.8,-0.00138,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,all symbols overlap,0.49,3.5,2.2,6.9,-0.00152,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cl_beta,all symbols overlap,0.41,3.5,2.9,10.1,-0.0022,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,wind tunnel (tailed circle),0.53,43.0,4.4,2.9,0.00178,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.1 (circle),0.53,43.0,4.4,2.9,0.00149,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.2 (triangle),0.53,43.0,4.4,2.9,0.00134,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,wind tunnel (tailed circle),0.56,3.5,1.4,3.6,0.00181,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.2 (triangle),0.56,3.5,1.4,3.6,0.00138,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,wind tunnel (tailed circle),0.53,3.5,2.2,3.8,0.00184,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.1 (circle),0.53,3.5,2.2,3.8,0.00162,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,wind tunnel (tailed circle),0.49,3.5,2.2,6.9,0.00182,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.1+ref.2 overlap,0.49,3.5,2.2,6.9,0.00166,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,wind tunnel (tailed circle),0.41,3.5,2.9,10.1,0.0018,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.2 (triangle),0.41,3.5,2.9,10.1,0.00159,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,Cn_beta,flight ref.1 (circle),0.41,3.5,2.9,10.1,0.00146,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle (upper),0.53,43.0,4.4,2.9,-0.0153,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,flight ref.2 (triangle),0.53,43.0,4.4,2.9,-0.0172,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle (lower),0.53,43.0,4.4,2.9,-0.0191,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle,0.56,3.5,1.4,3.6,-0.0167,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle,0.56,3.5,1.4,3.6,-0.0191,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,symbol,0.53,3.5,2.2,3.8,-0.0169,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle,0.53,3.5,2.2,3.8,-0.0191,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,flight ref.1 (circle),0.49,3.5,2.2,6.9,-0.0159,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,wind tunnel (tailed circle),0.49,3.5,2.2,6.9,-0.0173,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle (upper),0.41,3.5,2.9,10.1,-0.0142,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,flight ref.2 (triangle),0.41,3.5,2.9,10.1,-0.0171,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+6,16,CY_beta,circle (lower),0.41,3.5,2.9,10.1,-0.0191,per deg,"read from 4x zoom; +-0.00003 (Cl,Cn) / +-0.0003 (CY); wind-tunnel vs flight identity from symbol tails, uncertain where symbols overlap"
+7,17,Cl_delta_a,data book (ref.3),0.4,,,0,0.00375,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,1,0.0038,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,2,0.00383,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,4,0.00388,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,5,0.00395,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,6,0.00398,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,8,0.00406,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,9,0.00409,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,10,0.0041,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.4,,,11.8,0.0041,per deg,+-0.00005
+7,17,Cl_delta_a,data book (ref.3),0.6,,,0,0.00359,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,1,0.00363,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,5,0.00383,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,6,0.00388,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,8,0.00396,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,9,0.00399,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,10,0.004,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cl_delta_a,data book (ref.3),0.6,,,11.8,0.00402,per deg,+-0.00005; 2-4 deg hidden by symbols/coincident
+7,17,Cn_delta_a,data book (ref.3),0.4,,,0,0.00063,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,1,0.00065,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,2,0.00066,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,5,0.00074,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,6,0.00076,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,7,0.00077,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,8,0.00081,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,9,0.00083,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,10,0.00087,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,11,0.00087,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.4,,,11.8,0.00089,per deg,+-0.00003; coincident with M0.6 below 7 deg
+7,17,Cn_delta_a,data book (ref.3),0.6,,,8,0.00076,per deg,+-0.00003
+7,17,Cn_delta_a,data book (ref.3),0.6,,,9,0.00077,per deg,+-0.00003
+7,17,Cn_delta_a,data book (ref.3),0.6,,,10,0.00079,per deg,+-0.00003
+7,17,Cn_delta_a,data book (ref.3),0.6,,,11,0.00084,per deg,+-0.00003
+7,17,Cn_delta_a,data book (ref.3),0.6,,,11.8,0.00083,per deg,+-0.00003
+7,17,CY_delta_a,data book (ref.3),0.4,,,0,-0.00295,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,1,-0.00308,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,2,-0.0033,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,5,-0.00378,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,6,-0.00396,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,7,-0.00411,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,8,-0.00436,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,9,-0.00447,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,10,-0.00458,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,11,-0.00465,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.4,,,11.8,-0.00462,per deg,+-0.0001; coincident with M0.6 below ~7.5 deg
+7,17,CY_delta_a,data book (ref.3),0.6,,,8,-0.00417,per deg,+-0.0001
+7,17,CY_delta_a,data book (ref.3),0.6,,,9,-0.00414,per deg,+-0.0001
+7,17,CY_delta_a,data book (ref.3),0.6,,,10,-0.00423,per deg,+-0.0001
+7,17,CY_delta_a,data book (ref.3),0.6,,,11,-0.00425,per deg,+-0.0001
+7,17,CY_delta_a,data book (ref.3),0.6,,,11.8,-0.00429,per deg,+-0.0001
+7,17,Cl_delta_a,circle (upper),0.53,43.0,4.4,2.9,0.00389,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,circle (lower),0.53,43.0,4.4,2.9,0.00352,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,flight ref.1 (circle),0.56,3.5,1.4,3.6,0.00416,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,flight ref.2 (triangle),0.56,3.5,1.4,3.6,0.00328,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,wind tunnel (tailed circle),0.53,3.5,2.2,3.8,0.00414,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,triangle/circle,0.53,3.5,2.2,3.8,0.00367,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,wind tunnel (tailed circle),0.49,3.5,2.2,6.9,0.00418,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,flight cluster,0.49,3.5,2.2,6.9,0.00387,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cl_delta_a,all symbols overlap,0.41,3.5,2.9,10.1,0.00395,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,circle (upper),0.53,43.0,4.4,2.9,0.0007,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,circle (lower),0.53,43.0,4.4,2.9,0.00054,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,flight ref.2 (triangle),0.53,43.0,4.4,2.9,0.0004,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,flight ref.1 (circle),0.56,3.5,1.4,3.6,0.00077,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,flight ref.2 (triangle),0.56,3.5,1.4,3.6,0.00048,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,wind tunnel (tailed circle),0.53,3.5,2.2,3.8,0.0008,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,flight circle,0.53,3.5,2.2,3.8,0.0006,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,circle cluster,0.49,3.5,2.2,6.9,0.00086,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,flight ref.2 (triangle),0.49,3.5,2.2,6.9,0.00076,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,cluster,0.41,3.5,2.9,10.1,0.00082,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,Cn_delta_a,cluster lower member,0.41,3.5,2.9,10.1,0.00072,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,circle,0.53,43.0,4.4,2.9,-0.00238,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,triangle/circle,0.53,43.0,4.4,2.9,-0.00293,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,circle,0.53,43.0,4.4,2.9,-0.00365,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,circle,0.56,3.5,1.4,3.6,-0.00349,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,circle (lowest),0.56,3.5,1.4,3.6,-0.0052,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,flight ref.1 (circle),0.53,3.5,2.2,3.8,-0.00142,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,flight ref.2 (triangle),0.53,3.5,2.2,3.8,-0.0023,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,wind tunnel (tailed circle),0.53,3.5,2.2,3.8,-0.00349,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,flight (circle),0.49,3.5,2.2,6.9,-0.00317,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,wind tunnel (tailed circle),0.49,3.5,2.2,6.9,-0.00396,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,flight ref.1 (circle),0.41,3.5,2.9,10.1,-0.0019,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,flight ref.2 (triangle),0.41,3.5,2.9,10.1,-0.0027,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+7,17,CY_delta_a,circle (lower; wind tunnel?),0.41,3.5,2.9,10.1,-0.00372,per deg,read from 4x zoom; +-0.00005 (Cl) / +-0.00003 (Cn) / +-0.0002 (CY); identity uncertain where symbols overlap
+8,18,CN,wind tunnel,0.51,43.0,4.4,-1.99,-0.098,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,-0.03,0.0043,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,1.96,0.0972,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,3.94,0.1986,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,5.92,0.2992,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,7.89,0.4041,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,9.9,0.5056,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,CN,wind tunnel,0.51,43.0,4.4,11.86,0.6156,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,-1.99,0.0112,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,0.02,0.0084,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,2.0,0.0067,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,4.04,0.005,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,6.04,0.0026,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,8.05,-0.0005,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,10.04,0.0009,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,18,Cm,wind tunnel,0.51,43.0,4.4,12.03,0.0015,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,-2.1,-0.1176,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,-0.1,-0.0215,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,1.88,0.0738,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,3.87,0.1734,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,5.83,0.2721,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,7.82,0.3768,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,9.82,0.485,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,CN,wind tunnel,0.52,3.5,2.2,11.8,0.5888,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,-2.05,0.009,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,-0.03,0.0072,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,1.99,0.0055,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,3.95,0.0028,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,5.92,0.0017,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,7.94,-0.0014,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,9.94,-0.0003,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,19,Cm,wind tunnel,0.52,3.5,2.2,11.94,-0.0003,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,-1.99,-0.1208,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,-0.0,-0.0217,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,1.97,0.0726,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,3.9,0.1679,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,7.95,0.3774,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,9.97,0.4868,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,12.02,0.5972,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,-1.99,0.0147,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,-0.0,0.0117,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,2.0,0.0113,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,3.97,0.0075,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,6.02,0.0049,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,7.99,0.0023,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,10.03,0.0023,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,Cm,wind tunnel,0.56,3.5,1.8,11.96,0.0023,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,-2.0,-0.1023,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,0.0,-0.0069,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,1.99,0.0834,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,4.01,0.1771,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,6.02,0.2786,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,7.99,0.3775,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,10.01,0.4764,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,CN,wind tunnel,0.41,3.5,2.9,12.03,0.577,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,-2.0,0.0053,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,0.0,0.0033,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,2.03,0.0016,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,3.98,-0.0012,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,6.04,-0.0029,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,8.04,-0.006,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,10.0,-0.0053,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,21,Cm,wind tunnel,0.41,3.5,2.9,11.98,-0.0033,coefficient,basic data; ring-detected symbol centre; +-0.003 (CN) / +-0.0008 (Cm)
+8,20,CN,wind tunnel,0.56,3.5,1.8,5.94,0.2726,coefficient,basic data; located by local search; +-0.003
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,-0.18,2.4,0.0311,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,0.81,2.4,0.0515,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,1.8,2.4,0.0682,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,2.9,2.4,0.0879,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,4.05,2.4,0.1159,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,4.95,2.4,0.1288,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,6.05,2.4,0.1394,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,CN vs delta_e,wind tunnel,0.51,43.0,7.13,2.4,0.1644,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,-0.16,2.4,0.05,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,0.84,2.4,0.0403,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,1.84,2.4,0.0312,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,2.91,2.4,0.0215,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,4.09,2.4,0.0109,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,5.02,2.4,0.003,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,6.08,2.4,-0.0048,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,22,Cm vs delta_e,wind tunnel,0.51,43.0,7.19,2.4,-0.0158,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,-0.09,4.2,0.1342,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,0.88,4.2,0.1534,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,2.03,4.2,0.1758,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,2.29,4.2,0.1826,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,2.97,4.2,0.1957,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,4.1,4.2,0.2106,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,CN vs delta_e,wind tunnel,0.52,3.5,5.09,4.2,0.2329,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,-0.11,4.2,0.0271,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,0.86,4.2,0.0169,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,1.99,4.2,0.0065,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,2.27,4.2,0.003,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,2.95,4.2,-0.003,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,4.07,4.2,-0.0139,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,23,Cm vs delta_e,wind tunnel,0.52,3.5,5.11,4.2,-0.0239,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,-1.34,5.9,0.2055,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,-0.22,5.9,0.2265,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,0.81,5.9,0.2526,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,1.76,5.9,0.2695,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,2.37,5.9,0.2796,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,2.95,5.9,0.2964,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,3.87,5.9,0.3133,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,5.04,5.9,0.3385,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,CN vs delta_e,wind tunnel,0.56,3.5,6.06,5.9,0.3554,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,-1.3,5.9,0.0354,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,-0.16,5.9,0.028,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,0.96,5.9,0.0155,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,1.83,5.9,0.0078,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,2.44,5.9,0.0024,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,3.04,5.9,-0.0034,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,3.96,5.9,-0.0132,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,5.11,5.9,-0.0233,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,24,Cm vs delta_e,wind tunnel,0.56,3.5,6.14,5.9,-0.0307,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,0,10.1,0.4249,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,0.98,10.1,0.4385,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,2.14,10.1,0.4611,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,2.52,10.1,0.4657,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,3.12,10.1,0.48,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,3.49,10.1,0.4853,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,4.09,10.1,0.4951,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,5.17,10.1,0.517,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,CN vs delta_e,wind tunnel,0.41,3.5,6.21,10.1,0.523,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,-0.07,10.1,0.0205,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,0.92,10.1,0.0106,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,1.89,10.1,0.0015,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,2.46,10.1,-0.0024,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,3.03,10.1,-0.0088,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,3.42,10.1,-0.0118,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,4.02,10.1,-0.0181,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,5.11,10.1,-0.0281,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"
+9,25,Cm vs delta_e,wind tunnel,0.41,3.5,6.11,10.1,-0.0362,coefficient,"basic data; column delta_e_deg holds the elevon deflection of the point, alpha fixed; +-0.003 (CN) / +-0.0008 (Cm)"

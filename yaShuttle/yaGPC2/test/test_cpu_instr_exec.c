@@ -51,14 +51,16 @@
  *   exception, leaving the destination register holding whatever it held
  *   before -- see exec_CVFX.  136 fixtures.
  *
- *   g_EA, B2 == 11: AP-101S PoO 2.2.8 on the extended RS form -- "When B2
- *   equals 11, base addressing is not performed.  In this case, the
- *   displacement is instead used DIRECTLY AS THE EFFECTIVE ADDRESS" -- so
- *   there is no 16-bit address left for 2.9 to expand.  cpu_g_ea carries
- *   the same rule with its evidence (every such operand in FCMSSYNC equals
- *   its symbol's address exactly, bit-15 ones included) and the note that
- *   gpc expands here, an inherited defect.  Branches are excluded.  About
- *   460 fixtures across two dozen instructions.
+ *   g_EA, B2 == 11 -- WITHDRAWN 2026-10-06, and the reference is right.
+ *   This patch made an extended-RS data operand with B2 == 11 skip sector
+ *   expansion, on PoO 2.2.8's "the displacement is instead used directly
+ *   as the effective address".  That 16-bit EA is still expanded (Figure
+ *   2-18 exempts nothing), and FCMG3RTV/FCMG3STR prove it: they set DSR
+ *   to 15 and read their sector-15 DAT with B2 == 11 operands X'FFF8',
+ *   X'FFF5', X'FFFE'.  See cpu_g_ea.  Dropping the patch changed 64
+ *   generated fixtures; the 63 of them present in this header were
+ *   carried over by (instruction, hw1, hw2), each first checked to match
+ *   the patched generation exactly.
  *
  *   g_EA, FULLWORD-INDIRECT POST-INDEXING (ia=1, ii=1): the pointer's own
  *   high bit decides whether a sector is applied AT ALL -- Sec. 2.9, and
@@ -86,7 +88,9 @@
  *   R1+1 < storage -- GMDRES's resolver fold, ledger #264.  109 fixtures.
  *   mvs_directed() below adds the flight-code case and every ordering.
  *
- * All 111363 fixtures pass.
+ * All 111441 checks pass.  (Not byte-for-byte regenerable since the
+ * reference moved its tree under src/ on 2026-09-11: its 7946bc1 tree
+ * takes the patches, but its fixture set from CH onward differs.)
  */
 #include <stdio.h>
 #include <string.h>

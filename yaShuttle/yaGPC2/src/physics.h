@@ -80,6 +80,8 @@ void phys_set_drag(double cd, double areaX, double areaY, double areaZ);
 void phys_set_earth(const double P[3][3], double theta0, double t0, double rate);
 double phys_earth_angle(double t);
 double phys_earth_rate(void);
+/* The Earth's pole of date, a unit vector in the inertial frame. */
+void phys_earth_pole(double p[3]);
 void phys_inertial_to_earth(double t, double M[3][3]);
 
 /* The field and the air, for tests and sensors: gravitational acceleration

@@ -1,6 +1,6 @@
---- /home/rburkey/donschmidt/nsts-sim-gpc/gpc/cpu.coffee	2026-08-22 18:15:51.794924080 -0500
-+++ /tmp/claude-1000/-mnt-STORAGE-home-rburkey-git-virtualagc-yaShuttle-yaGPC2/8cd63a77-3409-4931-9bc0-d9c0953b865d/scratchpad/refpatched/gpc/cpu.coffee	2026-09-22 17:37:49.576496357 -0500
-@@ -532,56 +532,41 @@
+--- /home/rburkey/donschmidt/nsts-sim-gpc/gpc/cpu.coffee	(nsts-sim-gpc 7946bc1)
++++ refpatched/gpc/cpu.coffee
+@@ -532,51 +532,24 @@
  
                        regx = (@r(v.i).get32() >>> 16) << (v.indexWidth - 1)  # aligned index register value
  
@@ -66,21 +66,3 @@
                    
                #ea = pea + index & 0xffff
            else
-               ea = pea
--              ea = @g_EXPAND(ea,v.opType,dseVal)
-+              # PATCHED FOR FIXTURE GENERATION ONLY.  AP-101S PoO 2.2.8, on
-+              # the EXTENDED RS form: "When B2 equals 11, base addressing is
-+              # not performed.  In this case, the displacement is instead
-+              # used DIRECTLY AS THE EFFECTIVE ADDRESS."  There is then no
-+              # 16-bit address left for 2.9 to expand.  Confirmed against
-+              # the linked flight image -- every such operand in FCMSSYNC
-+              # equals its symbol's address exactly, including the three
-+              # whose bit 15 is set.  Branches are excluded: a branch target
-+              # still has to reach sector 3.  See cpu_g_ea in yaGPC2.
-+              if v.b == 3 and v.opType != OPTYPE_BRCH
-+                  ea = ea & 0xffff
-+              else
-+                  ea = @g_EXPAND(ea,v.opType,dseVal)
- 
-       else
-           # SRS or SI addressing

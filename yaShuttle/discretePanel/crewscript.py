@@ -39,6 +39,7 @@ PROGRESS_OFFSET = 96            # how far panelO6.py's script has got: base + 96
 HC_OFFSET = 86                  # crew scripts to handcontrollers.py: base + 86
 HC_ACK_OFFSET = 87              # handcontrollers.py's acknowledgements: base + 87
 RECORD_OFFSET = 89              # a person's actions, as script lines: base + 89
+LPS_OFFSET = 108                # yaGPC2's ground Launch Processing System: base + 108
 
 
 def idp_snapshot_files(n):
@@ -62,6 +63,10 @@ MAX_SCRIPT_DEPTH = 8            # a script calling a script calling a script...
 WAIT_TIMEOUT_S = 600
 KEY_GAP_S = 0.35
 WAIT_POLL_MS = 100
+# AUTOCIRCLE'S LEAD: a control's circle appears this long BEFORE the control
+# moves, so the eye gets there first.  Circled after the move, the circle only
+# ever pointed at something that had already happened (owner, 2026-10-05).
+AUTOCIRCLE_LEAD_S = 1.0
 # HOW LONG A 'snapshot' LINE WAITS for simulatePASS.py to say it is written.
 # A capture stops every computer, writes each one's memory and each display's,
 # and starts them again; seconds, not minutes, but a loaded host and five
@@ -97,7 +102,7 @@ _DAP_KEYS = (r"(a|b|auto|inrtl|lvlh|free|pri|alt|vern|roll_disc|roll_pulse|pitch
              r"|low_z|z_norm|z_pulse|high_z)")
 import panelcontrols as PC
 
-PANEL_FEATURE = (r"(power|output|mode|ipl)[1-5]|iplsource|bfcdisplay|bfcselect|disengage"
+PANEL_FEATURE = (r"(power|output|mode|ipl|modetb|outputtb)[1-5]|activity-mm[12]|iplsource|bfcdisplay|bfcselect|disengage"
                  r"|rhcengage-(cdr|plt)|kybdsel-(left|right)|(idppower|majfunc|idpload)[1-4]"
                  r"|adi-(l|r|a)-(att|err|rate)|attref-(l|r|a)|sense"
                  r"|dap-(c3|a6u)-" + _DAP_KEYS +
@@ -135,10 +140,17 @@ PANEL_ARGS = {
     "press": r"\S+",
     "circle": r"(" + PANEL_FEATURE + r")(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?",
     "nocircle": r"",
+    # autocircle [SECONDS] [COLOR] [DIAMETER]: a leading number is SECONDS.
+    "autocircle": r"((\d+\.?\d*|\.\d+)(\s+(#[0-9a-f]{6}|[a-z]+[0-9]*))?(\s+(\d+\.?\d*|\.\d+))?"
+                  r"|(#[0-9a-f]{6}|[a-z]+[0-9]*)(\s+(\d+\.?\d*|\.\d+))?|)",
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
     "edgekey": r"crt[1-4]\s+[1-6]",
+    # The GROUND: a launch-sequence command from the Launch Processing System
+    # over the launch data bus (yaGPC2's lpsmodel.c).
+    "lps": r"(hold|resume|recycle|go_auto|go_engine|bypass_a|bypass_b|pogo"
+           r"|gmtlo\s+[+=]\d+(\.\d+)?|code\s+\d+(\s+[0-9a-fA-F]{1,4})*)",
     # The hand controllers, through handcontrollers.py's window for that
     # station: a THC direction held for SECONDS, or an RHC axis deflected by
     # a FRACTION of full throw (-1 to 1) for SECONDS.
@@ -163,7 +175,10 @@ PANEL_USAGE = {
     "press": "press NAME -- a pushbutton from panelcontrols.py, held 0.5 s",
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
+    "autocircle": "autocircle [SECONDS] [COLOR] [DIAMETER] -- SECONDS 1 unless given; 0 turns it off",
     "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
+    "lps": "lps hold|resume|recycle|go_auto|go_engine|gmtlo +S|gmtlo =S|bypass_a|bypass_b|pogo"
+           "|code N [hex ...]",
     "thc": "thc fwd|aft +x|-x|+y|-y|+z|-z SECONDS",
     "rhc": "rhc lh|rh|aft roll|pitch|yaw FRACTION SECONDS -- FRACTION of full throw, -1 to 1",
 }
@@ -295,6 +310,13 @@ HELP = """\
                         a leading <left>, <center> or <right> aligns that
                         caption.
 
+  speeding through quiet stretches:
+    rate X              simulated seconds per wall second from here on (1 is
+                        real time; about 4 is the most one GPC manages).  The
+                        '+N' times stay wall seconds.  MEDS2 keeps up: one GPC
+                        on orbit at 3.8x took every display fill, and was back
+                        to normal at once at 1x.
+
   capturing the vehicle as it goes:
     snapshot DIR        capture the whole vehicle into DIR -- every computer's
                         memory, every display's, the panel -- exactly as the
@@ -363,6 +385,19 @@ HELP = """\
    The MDUs (MEDS2), not a crew panel:
     edgekey crtN K      press edgekey K (1-6, left to right) under CRT N; the
                         MDU runs it itself, as a click would
+   The ground, not the crew -- the Launch Processing System's launch-sequence
+   commands over the launch data bus (yaGPC2's lpsmodel.c; polling must be on:
+   DPS UTILITY SPEC 1 ITEM 50 in OPS 9):
+    lps gmtlo +S        GMT OF PREDICTED LIFTOFF, S seconds from now (only
+                        accepted while the count is holding)
+    lps gmtlo =S        the same, as absolute GPC GMT seconds
+    lps resume          RESUME the count (needs a GMTLO since the last start)
+    lps hold            COUNTDOWN HOLD; after engine start, a pad abort
+    lps recycle         RECYCLE (while holding)
+    lps go_auto         GO FOR AUTO SEQUENCE (by T-31 s)
+    lps go_engine       GO FOR ENGINE START (by about T-10 s)
+    lps bypass_a|bypass_b|pogo   the LO2 bleed and POGO recirculation bypasses
+    lps code N [hex..]  any launch-sequence code, with data words
    The hand controllers (handcontrollers.py's window for that station must be
    running -- the manager's HAND CONTROLLERS buttons, or simulatePASS --rhc):
     thc fwd|aft DIR S   hold THC direction DIR (+x -x +y -y +z -z) for S s
@@ -404,7 +439,24 @@ HELP = """\
                         until the next circle or nocircle; COLOR a colour name
                         or #RRGGBB (yellow), DIAMETER in pushbutton sizes (2)
     nocircle            take it away
+    autocircle [SECONDS] [COLOR] [DIAMETER]
+                        from now on circle every control the script moves,
+                        from 1 s before each move to SECONDS (1) after it, and
+                        the MODE talkback a 'wait gpc N mode-tb' is waiting
+                        on, until it is met.  A move due sooner than 1 s
+                        away (just after a wait, typing or the start) waits
+                        for its circle, and the lines after it keep their
+                        spacing;
+                        COLOR and DIAMETER as for circle.  Independent of
+                        circle and nocircle, and of each other: a control
+                        can carry both.  Panel O6's windows only -- not
+                        keys, edgekeys or hand controllers.  autocircle 0
+                        turns it off and takes its circles away.
                         FEATURE names: power1-5 output1-5 mode1-5 ipl1-5
+                        modetb1-5 outputtb1-5 (the MODE and OUTPUT
+                        talkbacks) activity-mm1|mm2 (the ACTIVITY lamps);
+                        and every panelcontrols.py name, its lamps,
+                        talkbacks and annunciators included
                         iplsource bfcdisplay bfcselect disengage
                         rhcengage-cdr|plt idppower1-4 majfunc1-4 idpload1-4
                         kybdsel-left|right adi-l|r|a-att|err|rate
@@ -722,6 +774,17 @@ def parse(text, path=None, _depth=0, _seen=None):
                     else:
                         entry["audio"] = snd
 
+            elif verb == "rate":
+                # SIMULATED SECONDS PER WALL SECOND from here on (simulatePASS
+                # session `rate X`).  The script's own '+N' times stay WALL
+                # seconds, so a quiet stretch at 'rate 4' covers four times
+                # the simulated time per '+N'.
+                try:
+                    entry["rate"] = float(arg)
+                except ValueError:
+                    raise ScriptError("rate takes a number, got %r" % arg)
+                if not entry["rate"] > 0.0:
+                    raise ScriptError("rate must be more than 0, got %r" % arg)
             elif verb == "snapshot":
                 # WHERE, CHECKED NOW.  A capture is the one step in a script
                 # whose whole value is the file it leaves behind, so a name
@@ -1032,6 +1095,19 @@ def send_meds(text, port_base=None):
         sock.close()
 
 
+def send_lps(text, port_base=None):
+    """A launch-sequence command for yaGPC2's ground model: "LPS1 " and the
+    command line, one datagram on port base + 108."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(D.IFACE))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+    try:
+        base = D.PORT_BASE if port_base is None else port_base
+        sock.sendto(("LPS1 " + text).encode("utf-8"), (D.GROUP, base + LPS_OFFSET))
+    finally:
+        sock.close()
+
+
 def send_hc(text, port_base=None):
     """A crew-script command for handcontrollers.py, on port base + 86.  Each
     running instance takes the ones for its own station and acknowledges on
@@ -1211,12 +1287,23 @@ class Player(object):
                         once, in this script and every one it calls
     screens             optional: a ScreenWatch; without it a 'wait crt'
                         stops the script
+    marks(e, on)        optional: told when a wait on a panel control (a
+                        'wait gpc N mode-tb') begins (on) and when it ends,
+                        met, timed out or stopped (off) -- autocircle
+    plan(steps)         optional, with circle: [(verb, arg), ...] -> for each,
+                        what autocircle will circle when it runs ([] for
+                        nothing); circle(that) shows it AUTOCIRCLE_LEAD_S
+                        ahead of the step.  See _plan.
     """
 
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
-                 source=None, gap=None, snaps=None, unattended=False):
+                 source=None, gap=None, snaps=None, unattended=False, marks=None,
+                 plan=None, circle=None):
         self.entries, self.after, self.panel = entries, after, panel
+        self.marks = marks
+        self.plan, self.circle = plan, circle
+        self._plan_end = 0          # entries before this are planned (_plan)
         self.talkback, self.log = talkback, log
         self.wait_user = wait_user
         self.unattended = unattended
@@ -1285,6 +1372,8 @@ class Player(object):
     def _run(self, k):
         while k < len(self.entries) and not self.stopped:
             e = self.entries[k]
+            if k >= self._plan_end:
+                self._plan(k)
             self._note(k, e)
             if e["kind"] == "wait_user" and self.unattended:
                 # --no-wait-user means NO waiting for a person, whoever asked
@@ -1313,6 +1402,7 @@ class Player(object):
                 return
             if e["kind"] == "wait":
                 self.log(e["text"])
+                self._mark(e, True)
                 self._poll(k, e, time.monotonic())
                 return
             if e["kind"] == "step" and e["verb"] == "script":
@@ -1365,6 +1455,14 @@ class Player(object):
                 self.log(e["text"])
                 self._snapshot(k, e)
                 return
+            if e["verb"] == "rate":
+                self.log(e["text"])
+                try:
+                    send_session("rate %g" % e["rate"])
+                except OSError as err:
+                    self.log("rate: cannot reach simulatePASS: %s" % err)
+                k += 1
+                continue
             if e["verb"] == "keygap":
                 # Not a panel control: it changes how the NEXT keys are
                 # typed, and the list is shared with any nested script.
@@ -1425,17 +1523,72 @@ class Player(object):
         else:
             self._run(k + 1)
 
+    # The lines that can hold the script for a time nobody knows in advance:
+    # the run of timed lines a plan covers ends at the first of them.
+    _BLOCKING = ("keys", "script", "snapshot")
+
+    def _plan(self, k):
+        """AUTOCIRCLE'S CIRCLES, A SECOND EARLY.  The timed lines from k up
+        to the next wait, typing, called script or snapshot all have known
+        times, so each control among them can be circled AUTOCIRCLE_LEAD_S
+        before it moves.  When the first of them is due sooner than that --
+        straight after a wait, at the start, after typing -- the whole run
+        moves later by the shortfall, keeping its spacing: every line after
+        the first is then at least as far off, so all of them get the lead."""
+        steps = []
+        for e in self.entries[k:]:
+            if e["kind"] != "step" or e["verb"] in self._BLOCKING:
+                break
+            steps.append(e)
+        self._plan_end = k + max(1, len(steps))
+        if self.plan is None or self.circle is None or not steps:
+            return
+        try:
+            names = self.plan([(e["verb"], e["arg"]) for e in steps])
+        except Exception as err:         # never worth stopping a script for
+            self.log("autocircle: %s" % err)
+            return
+        firsts = [e for e, n in zip(steps, names) if n]
+        if not firsts:
+            return
+        now = time.monotonic()
+        short = AUTOCIRCLE_LEAD_S - (self.origin + firsts[0]["ms"] / 1000.0 - now)
+        if short > 0.0005:
+            # Reported as how much LATER it now happens than it otherwise
+            # would -- an overdue line would have gone at once, not when due.
+            due = max(now, self.origin + firsts[0]["ms"] / 1000.0)
+            self.origin += short
+            held = self.origin + firsts[0]["ms"] / 1000.0 - due
+            if held >= 0.01:
+                self.log("autocircle: '%s' held %.2f s so that its circle shows first"
+                         % (firsts[0]["text"], held))
+        for e, n in zip(steps, names):
+            if n:
+                at = self.origin + e["ms"] / 1000.0 - AUTOCIRCLE_LEAD_S - now
+                self.after(max(0, int(at * 1000)),
+                           lambda n=n: None if self.stopped else self.circle(n))
+
+    def _mark(self, e, on):
+        if self.marks is not None:
+            try:
+                self.marks(e, on)
+            except Exception as err:    # a circle is never worth stopping a script for
+                self.log("autocircle: %s" % err)
+
     def _poll(self, k, e, begun):
         if self.stopped:
+            self._mark(e, False)
             return
         waited = time.monotonic() - begun
         if self.talkback(e["gpc"]) == e["state"]:
             self.log("wait met after %.1f s: %s" % (waited, e["text"]))
+            self._mark(e, False)
             self.origin = time.monotonic()
             self._run(k + 1)
         elif waited > e["timeout"]:
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
                      % (e["timeout"], e["text"]))
+            self._mark(e, False)
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll(k, e, begun))
@@ -1501,7 +1654,9 @@ class Player(object):
             # read as this capture succeeding.
             word, _, rest = text.partition(" ")
             what, _, why = rest.partition(" ")
-            if what != "save":
+            # 'progress save N M' is the file count the manager's wait modal
+            # shows while the capture is written -- not the verdict.
+            if what != "save" or word == "progress":
                 continue
             sock.close()
             self.origin = time.monotonic()
@@ -1546,7 +1701,8 @@ class Player(object):
                        bus=self.bus, wait_user=self.wait_user, screens=self.screens,
                        on_done=done, progress=self.progress, counter=self.counter,
                        source=os.path.basename(e["path"]), gap=self.gap,
-                       snaps=self.snaps, unattended=self.unattended)
+                       snaps=self.snaps, unattended=self.unattended, marks=self.marks,
+                       plan=self.plan, circle=self.circle)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):

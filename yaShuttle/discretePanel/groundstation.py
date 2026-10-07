@@ -12,6 +12,11 @@
                              and feet per second
     rnp YEAR DAY             the RNP epoch (message 59: CGNS_LAUNCH_YEAR and
                              CGNS_RNP_DAY; accepted only in MM 201)
+    dolilu FILE [--only OP,...] [--dry-run]
+                             the DAY-OF-LAUNCH I-LOAD UPDATE: each message in
+                             FILE (JSON, see below) as a two-stage load and
+                             its execute, in order, in GNC OPS 9 (GMESTA.hal
+                             takes 11-15, 24, 25, 37, 39, 40, 96, 98, 99)
     clear                    two-stage buffer clear
     hello                    power the NSP without sending a command
     raw H H H [H H H ...]    command words as hex halfword triples
@@ -66,6 +71,13 @@ then predicts it to its own current navigation time and installs it as its
 state (GELORB, GL1ORB, GL2AUT, GV6STA): it must be within 54,000 s.  The
 frame is M50, the frame of PASS's orbit navigation (inferred: the words go
 straight into that state).
+
+DOLILU FILES.  {"messages": [{"op": 15, "name": "...", "fields": [...]}]};
+a field is {"D": x} an IBM long float (HAL DOUBLE), {"E": x} an IBM short
+(SINGLE), {"I": n} a signed halfword (INTEGER), {"H": "ABCD"} a raw
+halfword, each value or a list of them, laid out in the order GMESTA's
+%COPY takes them from CDUV_2STAGE_IN$(2:) (GMESTA.hal, the uplink cases;
+STS 83-0002-34 4.2.3 and Tables 4.12-1/2).  Other keys are comments.
 
 The truth state comes from yaGPC2's truth feed (port base + 98, "TRU1"),
 which needs YAGPC_MDM_DEVICES=1 YAGPC_VEHDYN=1 and a panel.
@@ -203,6 +215,23 @@ def state_vector_words(gmt, r_ft, v_fts, vehicle=VEHICLE):
     return two_stage(OP_STATE_VECTOR, hw, vehicle=vehicle)
 
 
+def dolilu_halfwords(fields):
+    """A DOLILU message's buffer after its header, from its fields."""
+    hw = []
+    for f in fields:
+        (kind, val), = [(k, v) for k, v in f.items() if k in ("D", "E", "I", "H")]
+        for x in (val if isinstance(val, list) else [val]):
+            if kind == "D":
+                hw += ibm_long(float(x))
+            elif kind == "E":
+                hw += ibm_short(float(x))
+            elif kind == "I":
+                hw.append(int(x) & 0xffff)
+            else:
+                hw.append(int(x, 16) & 0xffff)
+    return hw
+
+
 # --- the link -------------------------------------------------------------
 
 class Link(object):
@@ -253,7 +282,10 @@ def truth_state(base, timeout=5.0):
             break
         if len(d) >= 4 + 8 * 15 and d[:4] == b"TRU1":
             v = struct.unpack(">15d", d[4:4 + 8 * 15])
-            return {'t': v[0], 'gmt': v[1], 'r': v[9:12], 'v': v[12:15]}
+            out = {'t': v[0], 'gmt': v[1], 'r': v[9:12], 'v': v[12:15]}
+            if len(d) >= 4 + 8 * 17:                    # wheel height (ft), ground speed (kt)
+                out['wheel_ft'], out['gs_kt'] = struct.unpack(">2d", d[4 + 8 * 15:4 + 8 * 17])
+            return out
     return None
 
 
@@ -471,6 +503,11 @@ def main():
     dn.add_argument("--changes", action="store_true",
                     help="with --decode: a line per value as it changes, not a refreshing listing")
     dn.add_argument("--csv", metavar="FILE", help="with --decode: append every decoded value")
+    dl = sub.add_parser("dolilu", help="uplink day-of-launch I-loads from a JSON file")
+    dl.add_argument("file")
+    dl.add_argument("--only", metavar="OP,...", help="send only these opcodes")
+    dl.add_argument("--dry-run", action="store_true", help="print the command words, send nothing")
+    dl.add_argument("--gap", type=float, default=0.5, help="seconds between buffers (default 0.5)")
     raw = sub.add_parser("raw", help="command words as hex halfword triples")
     raw.add_argument("halfwords", nargs="+")
     args = ap.parse_args()
@@ -507,6 +544,27 @@ def main():
     elif args.cmd == "rnp":
         words = two_stage(OP_RNP, [args.year & 0xffff, args.day & 0xffff], vehicle=args.vehicle)
         link.send_message(words)
+    elif args.cmd == "dolilu":
+        import json
+        with open(args.file) as fh:
+            msgs = json.load(fh)["messages"]
+        only = {int(x) for x in args.only.split(",")} if args.only else None
+        for m in msgs:
+            if only is not None and m["op"] not in only:
+                continue
+            hw = dolilu_halfwords(m["fields"])
+            if len(hw) > 66:
+                sys.exit("groundstation: message %d is %d halfwords; CDUV_2STAGE_IN holds 66"
+                         % (m["op"], len(hw)))
+            words = two_stage(m["op"], hw, vehicle=args.vehicle)
+            print("message %d (%s): %d halfwords, %d command words"
+                  % (m["op"], m.get("name", ""), len(hw), len(words)))
+            if args.dry_run:
+                for w in words:
+                    print("  %04X %04X %04X" % tuple(w))
+                continue
+            link.send_message(words, gap=args.gap)
+            time.sleep(2.0)            # GMESTA takes it on its next pass
     elif args.cmd == "clear":
         link.send_buffer([])
         time.sleep(0.5)

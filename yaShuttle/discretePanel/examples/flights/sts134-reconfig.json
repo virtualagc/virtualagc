@@ -1,0 +1,114 @@
+{
+ "flight": "STS-134, Endeavour",
+ "notes": [
+  "The nominal MECO target lives in the OPS 1 overlay (CGGC01), where no uplink reaches: the DOLILU's VDMAG (message 96) is only the pseudo-target second-stage guidance starts from. With the tape's 25,668 ft/s PASS cut off at 25,605 truth.",
+  "VD_NOM: 25,819 ft/s, the STS-134 Ascent Checklist's MECO VI (ASC/134/FIN). The radius and flight-path angle stay the tape's (60 nmi, 0.5 deg): no STS-134 values found.",
+  "K_CMD_NOM: second stage's throttle (GG42ND step 5601, 'the rated power level setting'), 100 on the tape; STS-134 flew 104.5% to the 3-g throttling (JSC 37461 Appendix A) -- 104, the command's resolution being 1%. With 100 the simulated stack ran the second stage at 100%.",
+  "RD_NOM: STS-134 flew a '52 nautical mile MECO' as a performance enhancement (Space Shuttle Missions Summary, NASA 20110001406, STS-134 page 2-240). PASS's convention is altitude above its equatorial radius a = 20,925,646.3 ft (the tape's own RD_NOM is a + 60.02 nmi), so RD_NOM = a + 52 nmi = 21,241,604 ft. (Previously 21,250,656 ft, 53.5 nmi: 107 km above the ellipsoid at MECO latitude, an unsourced figure.)  FPA_NOM 0.65 deg: no STS-134 value found; with VI 25,819 ft/s it gives a post-MECO apogee near the MOD FRR's 'insertion altitude 122 nm'. The tape's (60 nmi, 0.5 deg) left a 137 x 43 nmi orbit and an OMS-2 of 292 ft/s.",
+  "CGGV_RAD_MECO (RDMAG, the pseudo MECO radius second stage flies to until the guidance parameter reset) must equal RD_NOM: CGGC01 initializes both to 21,290,308. The other two pseudo targets, VDMAG and GAMD, come from DOLILU message 96."
+ ],
+ "cells": [
+  {
+   "name": "CGGS_V_MAG_MECO_NOM",
+   "config": "G16",
+   "addr": "0f102",
+   "E": 25819.0,
+   "was": 25668.0
+  },
+  {
+   "name": "CGGS_K_CMD_NOM",
+   "config": "G16",
+   "addr": "0fba6",
+   "E": 104.0,
+   "was": 100.0
+  },
+  {
+   "name": "CGGS_RAD_MECO_NOM",
+   "config": "G16",
+   "addr": "0f13c",
+   "H": "471441F040000000",
+   "was": "47144DD440000000",
+   "value": "21,241,604 ft = a + 52 nmi (tape 21,290,308 = a + 60.02 nmi)"
+  },
+  {
+   "name": "CGGV_RAD_MECO",
+   "config": "G16",
+   "addr": "0f140",
+   "H": "471441F040000000",
+   "was": "47144DD440000000",
+   "value": "21,241,604 ft, the same as RD_NOM: this is the radius PEG flies to until CGGV_GUID_PARM_RESET_GMT (GG42ND step 54), and the flight source initializes it to RD_NOM's value (CGGC01). Left at the tape's 60 nmi, it lofted second stage ~25,000 ft and dove at the switch."
+  },
+  {
+   "name": "CGGS_FPA_MECO_NOM",
+   "config": "G16",
+   "addr": "0f0da",
+   "H": "3F2E77B8",
+   "was": "3F23BE8E",
+   "value": "0.65 deg (tape 0.5)"
+  },
+  {
+   "name": "CGGS_ASSUMED_SSME_FAIL_MET",
+   "config": "G16",
+   "addr": "0f434",
+   "E": 0.0,
+   "was": 218.0,
+   "value": "0: no second-stage trajectory lofting (TFAIL, FSSR STS 83-0002-34 4.8: 'If trajectory lofting is desired (TFAIL is not zero)...'). No STS-134 value is published; with the tape's 218 s (lofting on until the RTLS/AOA boundary, also 218) PEG lofted second stage ~30,000 ft above the ASCENT ADI - NOMINAL card and dove at the boundary; with 0 its Hdot follows the card (flight p5) and the reserve at MECO is about STS-134's."
+  },
+  {
+   "name": "CGGS_ROLL_CMD_CHANGE_V",
+   "config": "G16",
+   "addr": "0f0f2",
+   "E": 12000.0,
+   "was": 12500.0,
+   "value": "V_RHO_PHI (FSSR STS 83-0002-34 4.8; a second-stage I-load, not in the DOLILU or the 4.12 uplink groups): the Earth-relative velocity at which second-stage guidance commands PHI_2STG, the roll to heads-up.  The STS-134 Ascent Checklist's cue is 'VI = 13.2K Roll Heads Up'; on the simulated trajectory Vi - Vrel is about 1,207 ft/s there (flight p10: the tape's 12,500 started the roll at Vi ~13,700), so 12,000."
+  },
+  {
+   "name": "GSE_SEP_CMD_DELAY",
+   "config": "G16",
+   "addr": "39a1c",
+   "H": "4146B851EB851EB8",
+   "was": "4160000000000000",
+   "value": "V97U9753C SRB SEP command time delay, nominal: 4.42 s (release 6). GSESRB declares these as locals with the generic release's INITIAL values; the flight's I-loads replace them. With the release's 6 s command delay PASS separated ~6.1 s after the later SRM reached 50 psia, where STS-118 to STS-135 (nine mission reports, Appendix A) separated 4.32-4.80 s after it, mean 4.51 = 4.42 plus half of GSESRB's 0.16 s cycle (the code's -0.48 cancels its four-pass confirmation). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  },
+  {
+   "name": "GSE_SEP_MOD_DELAY",
+   "config": "G16",
+   "addr": "39a14",
+   "H": "412B5C28F5C28F5C",
+   "was": "4144CCCCCCCCCCCB",
+   "value": "V97U9752C SRB sep moding time delay: 2.71 s (release 4.3). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  },
+  {
+   "name": "GSE_BU_CUE_TIME",
+   "config": "G16",
+   "addr": "39a0c",
+   "H": "428347AE147AE148",
+   "was": "4282999999999999",
+   "value": "V97U9751C SRB sep backup cue time: 131.28 s MET (release 130.6). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  },
+  {
+   "name": "GSE_SEP_CMD_ABORT_DELAY",
+   "config": "G16",
+   "addr": "39a24",
+   "H": "41A0000000000000",
+   "was": "41828F5C28F5C28F",
+   "value": "V99U7589C SRB sep command time delay, abort (1 SSME out): 10 s (release 8.16). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  },
+  {
+   "name": "GSE_SEP_CMD_CONT_ABORT_DELAY",
+   "config": "G16",
+   "addr": "39a34",
+   "H": "41E0000000000000",
+   "was": "41A0000000000000",
+   "value": "V99U7676C SRB sep command time delay, contingency abort (2 SSMEs out): 14 s (release 10). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  },
+  {
+   "name": "GSE_MAX_SEP_CUE",
+   "config": "G16",
+   "addr": "39a30",
+   "H": "4150000000000000",
+   "was": "415E666666666665",
+   "value": "V97U9761C maximum SRB sep cue differential time: 5 s (release 5.9). Source: Booster Console Handbook (JSC-17239 Rev G, SCP 2.2.1, Table 2.2.1-I, SRB SEPARATION I LOAD SUMMARY), typical value."
+  }
+ ]
+}

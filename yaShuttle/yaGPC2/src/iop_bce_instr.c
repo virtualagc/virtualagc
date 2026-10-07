@@ -541,8 +541,17 @@ static void exec_MIN_at(IOP *t, DInstr *v) {
     uint32_t entry = iop_g_eaf(t, addr);
     uint32_t disp = (entry >> 16) & 0x7ffu;
     uint32_t count = (entry & 0xffffu) + 1;
-    if (iop_bce_receive_starting(t))
+    if (iop_bce_receive_starting(t)) {
+        /* THE ARMED COUNT, before the command goes out, exactly as the direct
+         * #MIN does: a device model is handed the command and has no other
+         * way to learn how many words this transfer wants.  Missing here, so
+         * the first real #MIN@ -- the launch data bus's GO-AHEAD read
+         * (FIOLDBRD), whose length is the ground's message length -- would
+         * have been answered at whatever count the last #MIN left. */
+        BCE *bce = iop_cur_bce(t);
+        if (bce != NULL) bce->armingWords = (int)count;
         bce_process_mio_command_at(t, df_get(v, 'a') + 48u + 2u * (uint32_t)t->curPE);
+    }
     uint32_t base = register_get32(iopls_BASE(&t->ls));
     if (iop_bce_receive(t, base + disp, count)) iop_incr_nia(t, 2);
 }

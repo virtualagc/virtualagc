@@ -85,6 +85,7 @@ import subprocess
 import sys
 import textwrap
 import threading
+import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -394,7 +395,7 @@ def session_listener(port_base, stop_event):
         return
     sock.settimeout(0.5)
     log("session commands on port %d ('save DIR', 'save-and-quit DIR', "
-        "'resume DIR', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
+        "'resume DIR', 'rate X', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
     while not stop_event.is_set():
         try:
             data, _ = sock.recvfrom(4096)
@@ -412,6 +413,21 @@ def session_listener(port_base, stop_event):
             # place entirely.  The wait polls this instead.
             SESSION["cancel"] = True
             log("session command: cancel")
+            continue
+        if word == "rate":
+            # SIMULATED SECONDS PER WALL SECOND, changed while the vehicle
+            # runs: yaGPC2's pacer reads YAGPC_RATE_FILE twice a second and
+            # re-origins its clocks on a change (rtpacer.c rate_poll).  Fast
+            # through quiet stretches, 1 where there is something to watch.
+            try:
+                v = float(rest)
+                if not v > 0.0:
+                    raise ValueError
+                with open(SESSION["ratefile"], "w") as fh:
+                    fh.write("%g\n" % v)
+                log("session command: rate %g" % v)
+            except (ValueError, KeyError, OSError) as e:
+                log("session command rate %r not taken: %s" % (rest, e))
             continue
         if word not in ("save", "save-and-quit", "resume", "quit"):
             log("session command not understood: %r" % text)
@@ -1391,6 +1407,12 @@ def main():
     ap.add_argument("--yagpc-extra", metavar="ARGS", default="",
                     help="extra yaGPC2 options, quoted as one string, e.g. "
                          "\"--barrier-spin-us 50 --rt-idle-poll-ms 2\"")
+    ap.add_argument("--rt-factor", type=float, default=1.0, metavar="X",
+                    help="simulated time per wall second (default 1). 2 was measured "
+                         "clean on a one-GPC orbital coast: rate 1.92 over a minute, no bus "
+                         "time-outs, no I/O errors, MEDS2 taking fills throughout. The "
+                         "display bus is the limit to watch: MEDS2 answers in wall time "
+                         "against a 5 ms SIMULATED receive time-out")
     ap.add_argument("--yagpc", metavar="PATH",
                     help="the yaGPC2 executable (default ../yaGPC2/yaGPC2)")
     ap.add_argument("--logs", metavar="DIR", default="simulatePASS-logs",
@@ -1728,6 +1750,11 @@ def main():
         kb_geom, o6_geom, cam_geom = to_x(kb_geom), to_x(o6_geom), to_x(cam_geom)
 
     env = dict(os.environ)
+    # the run-time rate control (session command `rate X`)
+    SESSION["ratefile"] = os.path.join(tempfile.gettempdir(), "simulatePASS-rate-%d" % args.port_base)
+    with open(SESSION["ratefile"], "w") as fh:
+        fh.write("%g\n" % args.rt_factor)
+    env["YAGPC_RATE_FILE"] = SESSION["ratefile"]
     if args.orbit:
         env["YAGPC_VEHDYN_ORBIT"] = args.orbit
     if tk_font_scale != 1:
@@ -1839,13 +1866,17 @@ def main():
             # carries GMT across, and it needs no C at all -- the MEDS header
             # clock is anchored to it, so handing back the epoch recorded at
             # capture makes the display continue rather than restart.
+            global EPOCH_SHIFT
             if resume:
                 gpc_argv += ["--resume", os.path.abspath(resume)]
                 epoch = saved_epoch(resume)
                 if epoch is not None:
                     gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
+                    # and the captures this run takes record the vehicle's
+                    # epoch too, not the wall clock's (a restored 2011 flight
+                    # wrote 2026 into vehicle.json)
+                    EPOCH_SHIFT = epoch - time.time()
             elif args.date_time_epoch:
-                global EPOCH_SHIFT
                 start = parse_epoch(args.date_time_epoch)
                 EPOCH_SHIFT = start - time.time()
                 gpc_argv += ["--date-time-epoch", "%.3f" % start]
@@ -1891,7 +1922,7 @@ def main():
             # asked for at start-up.  It costs nothing until SIGUSR1 arrives.
             gpc_argv += ["--snapshot", snapshot_staging]
             gpc_argv += ["--mtu-model", "--discretes", "--bce-network", "--real-time",
-                         "--rt-factor", "1", "--port-base", str(args.port_base),
+                         "--rt-factor", "%g" % args.rt_factor, "--port-base", str(args.port_base),
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
                          "--verbose"] + shlex.split(args.yagpc_extra)
             gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,

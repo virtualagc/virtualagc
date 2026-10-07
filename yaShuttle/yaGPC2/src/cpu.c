@@ -977,8 +977,41 @@ uint32_t cpu_g_ea(CPU *cpu, DInstr *v) {
              * target still has to reach sector 3: 16 bits cannot express
              * 0x197ab, so the branch address is expanded with BSR per Sec.
              * 2.9 even though no base was added.  For data operands the
-             * linked image says the opposite, and it wins. */
-            ea = pea & 0xffff;
+             * linked image says the opposite, and it wins.
+             *
+             * SUPERSEDED 2026-10-06: THE DIRECT EA IS STILL EXPANDED.  The
+             * displacement is the 16-bit effective address, and Figure
+             * 2-18 expands every 16-bit data address the same way -- X=1
+             * takes the PSW's DSR, X=0 with no base register an implied
+             * 0000 -- with no exception for this form.  FCMG3RTV and
+             * FCMG3STR (the G3 archive, OI2003) depend on it: they set DSR
+             * to 15 through a ZCON and then read their sector-15 DAT with
+             *     L$   R3,FCG3DTAD(R3)    1BF3 FFF8
+             *     LH$  R7,FCG3DTSZ(R3)    9FF3 FFF5
+             *     L$   R0,FCG3DTPO(R3)    18F3 FFFE
+             * -- B2=11 operands that can reach 0x7fff8 only by expansion.
+             * Without it they read the C6C6 fill at 0x0fff8, the DAT walk
+             * ran zero times, the archive store moved nothing at OPS 1 and
+             * the retrieve moved nothing at OPS 3, and OPS 3 hung.
+             *
+             * FCMSSYNC's case above does not contradict this.  It was
+             * measured on 2026-08-29, the day before BAL was fixed to save
+             * the CALLER's DSR (0972da541): with DSR=1, which FCOS runs in,
+             * X'8252' expands to 0x08252 either way, and the "DSR=0 at the
+             * L" was that defect's doing.  The linker argument holds for
+             * the same reason -- an EXTRN above 0x8000 is a sector-1 datum
+             * addressed under DSR=1.  YAGPC_B3TRACE reports every operand
+             * here whose expansion moves it (DSR other than 1), so a
+             * regression of the FCMSSYNC kind names its own address. */
+            ea = cpu_g_expand(cpu, pea, v->opType);
+            if ((pea & 0x8000) && ea != (pea & 0xffff)) {
+                static int b3 = -1;
+                if (b3 < 0) b3 = yagpc_getenv("YAGPC_B3TRACE") != NULL;
+                if (b3)
+                    fprintf(stderr, "B3 nia=%05x disp=%04x dsr=%u ea=%05x\n",
+                            (unsigned)psw_get_nia(&cpu->psw), (unsigned)(pea & 0xffff),
+                            (unsigned)psw_get_dsr(&cpu->psw), (unsigned)ea);
+            }
         } else {
             ea = ea_expand(cpu, pea, v->opType, hasDse, dseVal);
         }

@@ -1,0 +1,117 @@
+{
+  "site": "KSC Shuttle Landing Facility (FAA KTTS)",
+  "notes": [
+    "THE ONE DEFINITION of the landing site: tools/landing_sites.py turns it into PASS's G3 I-loads (CGN13R) and the simulated navaids read the same file, so the vehicle and its beacons agree by construction.",
+    "Coordinates are taken as geodetic on PASS's own ellipsoid (GNKGEO). They are survey values on NAD83/WGS-84; the datum difference (~100 m) moves the whole site, not its geometry, and both sides use the same numbers.",
+    "Heights: DELH (mean sea level above the ellipsoid) is set to 0, so MSL and the ellipsoid coincide here -- a self-consistent choice, since there is no real geoid to agree with.",
+    "Runway ends and elevation: FAA KTTS airport record (runway 15 end 28-37.965150N 080-42.363693W, runway 33 end 28-35.821563N 080-40.960818W, 15,001 x 300 ft, true 150 / magnetic 155 so variation 5 W).",
+    "LENGTH 15,000 ft (each, plus 1,000 ft overrun) and MLS channels 8 (KSC 15) / 6 (KSC 33): the STS-134 LANDING SITE TABLE, Entry Checklist ENT/134/FIN FS 3-2 (local mirror, Shuttle/Entry Checklist) -- the flight's own figure, preferred to the FAA's 15,001. MLS slots 1 (KSC 15) and 2 (KSC 33).",
+    "TACAN channels: STS-115 Navaids Chart (local mirror, Shuttle/Charts): KSC 15 TTS 59Y (dual string), COF 97 (single string); KSC 33 LAL 107.",
+    "COF: FAA NAVAID record via airnav.com: 28-14-15.660N 080-36-42.330W, 5 ft, channel 97X, variation 07W (2020).",
+    "TTS: FAA NAVAID record (pilotnav.com/navaid/faa-571, supplied by Ron Burkey 2026-10-06): 28-37-34.200N 080-41-45.000W, elevation 57 ft MSL, magnetic variation 00E as listed.",
+    "MSBLS (for the MLS table, not loaded yet): station near the runway 15 (NW) end 28-37-51N 080-42-05W, near the runway 33 (SE) end 28-36-01N 080-41-17W -- supplied by Ron Burkey 2026-10-06 (+/-50 ft); MSBLS-GS siting: az/DME 1,300 ft beyond the rollout end (newer: 1,500 ft short of it), elevation 3,360 ft from the threshold (newer: 1,500 ft), both 300 ft off the centreline (Holloway & Hale, 'Space Shuttle Landing System Certification', IFIS 2004, local mirror Shuttle/Space_Shuttle_Landing_System.pdf p.224).",
+    "MLS SITES (2026-10-06): the two MSBLS coordinates above, read in the runway 15 frame, sit 1,354 ft past the 15 threshold (949 ft left) and 13,114 ft along (1,887 ft short of the rollout end, 903 ft right) -- the NEWER siting of Holloway & Hale (elevation ~1,500 ft from the threshold, az/DME ~1,500 ft short of the rollout end). So for KSC 15 the elevation station is the NW site and the range/azimuth (DME) station the SE site; KSC 33 the reverse. Antennas at runway height; both scanners boresighted up the approach (the landing azimuth + 180 deg); biases zero. The X/Y_DMEAZ_RW and X_EL_RW fields are unused in GN&C and given in kft along/right of the threshold."
+  ],
+  "runways": [
+    {
+      "slot": 1,
+      "id": "KSC15",
+      "lat_dms": "28-37-57.9090N",
+      "lon_dms": "080-42-21.8216W",
+      "other_end_lat_dms": "28-35-49.2938N",
+      "other_end_lon_dms": "080-40-57.6491W",
+      "alt_ft": 8.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": -5.0,
+      "msbls_index": 1,
+      "mls_channel": 8
+    },
+    {
+      "slot": 2,
+      "id": "KSC33",
+      "lat_dms": "28-35-49.2938N",
+      "lon_dms": "080-40-57.6491W",
+      "other_end_lat_dms": "28-37-57.9090N",
+      "other_end_lon_dms": "080-42-21.8216W",
+      "alt_ft": 8.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": -5.0,
+      "msbls_index": 2,
+      "mls_channel": 6
+    }
+  ],
+  "tacans": [
+    {
+      "slot": 1,
+      "id": "TTS",
+      "channel": 59,
+      "mode": "Y",
+      "lat_dms": "28-37-34.200N",
+      "lon_dms": "080-41-45.000W",
+      "alt_ft": 57.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": 0.0
+    },
+    {
+      "slot": 2,
+      "id": "COF",
+      "channel": 97,
+      "mode": "X",
+      "lat_dms": "28-14-15.660N",
+      "lon_dms": "080-36-42.330W",
+      "alt_ft": 5.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": -7.0
+    }
+  ],
+  "msbls_stations": [
+    {
+      "near_end": "KSC15 (NW)",
+      "lat_dms": "28-37-51N",
+      "lon_dms": "080-42-05W",
+      "accuracy_ft": 50
+    },
+    {
+      "near_end": "KSC33 (SE)",
+      "lat_dms": "28-36-01N",
+      "lon_dms": "080-41-17W",
+      "accuracy_ft": 50
+    }
+  ],
+  "mls": [
+    {
+      "slot": 1,
+      "for_runway_slot": 1,
+      "raz": {
+        "lat_dms": "28-36-01N",
+        "lon_dms": "080-41-17W"
+      },
+      "el": {
+        "lat_dms": "28-37-51N",
+        "lon_dms": "080-42-05W"
+      },
+      "alt_ft": 8.3,
+      "x_dmeaz_kft": 13.114,
+      "x_el_kft": 1.354,
+      "y_dmeaz_kft": 0.903
+    },
+    {
+      "slot": 2,
+      "for_runway_slot": 2,
+      "raz": {
+        "lat_dms": "28-37-51N",
+        "lon_dms": "080-42-05W"
+      },
+      "el": {
+        "lat_dms": "28-36-01N",
+        "lon_dms": "080-41-17W"
+      },
+      "alt_ft": 8.3,
+      "x_dmeaz_kft": 13.646,
+      "x_el_kft": 1.887,
+      "y_dmeaz_kft": 0.949
+    }
+  ]
+}

@@ -211,6 +211,156 @@ int main(void) {
               0.729211514646E-4 * 3600.0);
     }
 
+    /* THE ENTRY TABLES AGAINST THE STS-1 DESCENT OFP (JSC-14483 Vol. 5):
+     * at its points -- t from entry interface (min), Mach, alpha, the flown
+     * elevon, body flap and speedbrake (deg; speedbrake % x 0.986), and the
+     * trimmed CL and CD worked from its load factors (fig 6.2-35, W 191,902
+     * lb, S 2690 ft^2) -- the tables give that CL and CD, and pitching
+     * moment zero about the OFP's entry c.g., Xo 1098.6 / Zo 374.0 in
+     * (Table 5.0-I).  tools/entryaero.py builds them to do exactly this;
+     * the check is that the generated header and vehdyn's interpolation
+     * still do. */
+    {
+        static const double OFP[][8] = {
+            { 29.00,  0.611,  6.99,  4.61,  3.80,  41.02, 0.357, 0.106 },
+            { 25.00,  2.589, 13.99,  1.22, -0.93,  68.34, 0.385, 0.214 },
+            { 22.00,  5.872, 24.47,  3.08,  8.59,  98.74, 0.567, 0.342 },
+            { 19.00, 10.342, 37.02,  0.38,  7.80,   0.00, 0.843, 0.726 },
+            { 14.00, 19.494, 39.48, -0.21,  6.62,   0.00, 0.891, 0.829 },
+            {  7.00, 25.186, 39.98, -0.58,  6.60,   0.00, 0.884, 0.846 },
+        };
+        for (size_t i = 0; i < sizeof OFP / sizeof OFP[0]; i++) {
+            const double *o = OFP[i];
+            double c[3], r = o[2] * 3.14159265358979323846 / 180.0;
+            vehdyn_aero_coeffs(o[1], o[2], o[3], o[4], o[5] * 0.986, c);
+            double cl = c[0] * cos(r) - c[1] * sin(r), cd = c[0] * sin(r) + c[1] * cos(r);
+            double cmcg = c[2] + c[0] * (1098.6 - 1076.7) / 474.8 - c[1] * (375.0 - 374.0) / 474.8;
+            char w[96];
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: CL", o[0], o[1]);
+            check(fabs(cl - o[6]) < 0.01, w, cl, o[6]);
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: CD", o[0], o[1]);
+            check(fabs(cd - o[7]) < 0.01, w, cd, o[7]);
+            snprintf(w, sizeof w, "OFP t=%.0f min M %.2f: trimmed, CM about the c.g.", o[0], o[1]);
+            check(fabs(cmcg) < 0.003, w, cmcg, 0.0);
+        }
+        /* and the surfaces push the right way: trailing edge up pitches the
+         * nose up, the body flap down pitches it down (OA98, M 10.27) */
+        double up[3], dn[3], bf[3];
+        vehdyn_aero_coeffs(10.27, 40.0, -10.0, 0.0, 0.0, up);
+        vehdyn_aero_coeffs(10.27, 40.0, 10.0, 0.0, 0.0, dn);
+        vehdyn_aero_coeffs(10.27, 40.0, 0.0, 16.3, 0.0, bf);
+        check(up[2] > dn[2], "elevon TE up is nose up", up[2] - dn[2], 0.02);
+        double b0[3];
+        vehdyn_aero_coeffs(10.27, 40.0, 0.0, 0.0, 0.0, b0);
+        check(bf[2] < b0[2], "body flap down is nose down", bf[2] - b0[2], -0.05);
+    }
+
+    /* THE AIR ON THE VEHICLE: at 60 km, 6 km/s through the air, nose 40 deg
+     * above the air-relative velocity, wings level, surfaces at zero.  The
+     * accelerometers feel the air alone: axial (-X) and normal (-Z) in the
+     * tables' ratio CA : CN, both pushing back and up -- which proves the
+     * axes, alpha's sign and the force path together. */
+    {
+        vehdyn_reset(0.0);
+        const double Re = 6378137.0, h = 60000.0, A = 40.0 * 3.14159265358979323846 / 180.0;
+        double r[3] = { Re + h, 0.0, 0.0 };
+        double we = 7.2921158553e-5;              /* the air turns with the Earth */
+        double vair = 6000.0;
+        double v[3] = { 0.0, vair + we * (Re + h), 0.0 };
+        vehdyn_set_rv(r, v);
+        /* velocity frame: x along the air velocity (+Y), z down (-X) */
+        double xv[3] = { 0, 1, 0 }, zv[3] = { -1, 0, 0 }, yv[3] = { 0, 0, -1 };   /* y = z x x */
+        double xb[3], zb[3], R[3][3];
+        for (int i = 0; i < 3; i++) {
+            xb[i] = cos(A) * xv[i] - sin(A) * zv[i];
+            zb[i] = sin(A) * xv[i] + cos(A) * zv[i];
+            R[i][0] = xb[i]; R[i][1] = yv[i]; R[i][2] = zb[i];
+        }
+        double qw = 0.5 * sqrt(1.0 + R[0][0] + R[1][1] + R[2][2]);
+        double q[4] = { qw, (R[2][1] - R[1][2]) / (4 * qw), (R[0][2] - R[2][0]) / (4 * qw),
+                        (R[1][0] - R[0][1]) / (4 * qw) };
+        double w0[3] = { 0, 0, 0 };
+        vehdyn_set_attitude(q, w0);
+        vehdyn_advance(0.05e6);
+        double sf[3], c[3];
+        vehdyn_specific_force(sf);
+        double mach = 6000.0 / sqrt(1.4 * 287.05 * 247.0);    /* ~247 K at 60 km */
+        vehdyn_aero_coeffs(mach, 40.0, 0.0, 0.0, 0.0, c);
+        check(sf[0] < 0.0 && sf[2] < 0.0, "the air pushes back and up", sf[2], -1.0);
+        check(fabs(sf[0] / sf[2] - c[1] / c[0]) < 0.01, "felt axial : normal = CA : CN", sf[0] / sf[2], c[1] / c[0]);
+        check(fabs(sf[1]) < 0.01 * fabs(sf[2]), "no side force at zero sideslip", sf[1], 0.0);
+    }
+
+    /* A CAPTURE CARRIES THE AEROSURFACES: commanded, moved part way, saved,
+     * disturbed, restored -- positions and the body flap come back. */
+    {
+        vehdyn_reset(0.0);
+        double cmd[6] = { 5.0, 6.0, -4.0, -3.0, 60.0, 8.0 };
+        vehdyn_set_aerosurf(cmd, +1);
+        vehdyn_advance(0.3e6);
+        double before[7], after[7];
+        vehdyn_aerosurf_pos(before);
+        static double rec[4096];
+        int n = vehdyn_save(rec, 4096);
+        double zero[6] = { 0 };
+        vehdyn_set_aerosurf(zero, -1);
+        vehdyn_advance(2.0e6);
+        vehdyn_load(rec, n);
+        vehdyn_aerosurf_pos(after);
+        for (int k = 0; k < 7; k++)
+            check(fabs(after[k] - before[k]) < 1e-9, "a capture restores the surfaces", after[k], before[k]);
+        check(before[0] > 0.5 && before[6] != 0.0, "the surfaces had moved before the capture", before[0], 1.0);
+    }
+
+    /* ON THE RUNWAY: dropped level from a foot and a half with the gear
+     * down, at rest on the turning Earth at KSC, the vehicle settles on all
+     * three wheels, a little nose down, and stays put. */
+    {
+        vehdyn_reset(0.0);
+        vehdyn_hardwired(0x8000u);                       /* ARM */
+        vehdyn_hardwired(0x4000u);                       /* DN */
+        vehdyn_advance(12e6);                            /* down and locked */
+        double lat = 28.6 * 3.14159265358979323846 / 180, lon = -80.7 * 3.14159265358979323846 / 180, aft = 20925646.3255;
+        double f = 1.0 / 298.3, dd = (1 - f) * (1 - f), c = cos(lat), sn = sin(lat);
+        double nN = aft / sqrt(c * c + sn * sn * dd), hft = 8.3 + 18.4 + 1.5;
+        double rEf0[3] = { (nN + hft) * c * cos(lon) * 0.3048, (nN + hft) * c * sin(lon) * 0.3048,
+                           (dd * nN + hft) * sn * 0.3048 };
+        /* Earth-fixed -> inertial with the model's own Earth (PASS's RNP, not
+         * the identity), and the ground's velocity omega x r about its pole */
+        double Me[3][3], r[3], pole[3], we = phys_earth_rate(), v[3];
+        phys_inertial_to_earth(12.0, Me);
+        phys_earth_pole(pole);
+        for (int i = 0; i < 3; i++) r[i] = Me[0][i] * rEf0[0] + Me[1][i] * rEf0[1] + Me[2][i] * rEf0[2];
+        v[0] = we * (pole[1] * r[2] - pole[2] * r[1]);
+        v[1] = we * (pole[2] * r[0] - pole[0] * r[2]);
+        v[2] = we * (pole[0] * r[1] - pole[1] * r[0]);
+        vehdyn_set_rv(r, v);
+        /* body X north, Y east, Z down (geodetic), taken to inertial */
+        double Nf[3] = { -sn * cos(lon), -sn * sin(lon), c }, Ef[3] = { -sin(lon), cos(lon), 0 },
+               Df[3] = { -c * cos(lon), -c * sin(lon), -sn }, Rm[3][3];
+        for (int i = 0; i < 3; i++) {
+            Rm[i][0] = Me[0][i] * Nf[0] + Me[1][i] * Nf[1] + Me[2][i] * Nf[2];
+            Rm[i][1] = Me[0][i] * Ef[0] + Me[1][i] * Ef[1] + Me[2][i] * Ef[2];
+            Rm[i][2] = Me[0][i] * Df[0] + Me[1][i] * Df[1] + Me[2][i] * Df[2];
+        }
+        double qw = 0.5 * sqrt(1.0 + Rm[0][0] + Rm[1][1] + Rm[2][2]);
+        double q[4] = { qw, (Rm[2][1] - Rm[1][2]) / (4 * qw), (Rm[0][2] - Rm[2][0]) / (4 * qw),
+                        (Rm[1][0] - Rm[0][1]) / (4 * qw) };
+        double w0[3] = { 0, 0, 0 };
+        vehdyn_set_attitude(q, w0);
+        vehdyn_advance(12e6 + 10e6);
+        double pos, rE[3], vE[3], C[3][3];
+        int wow[3];
+        vehdyn_gear(&pos, wow);
+        vehdyn_navbase_ef(rE, vE, C);
+        double speed = sqrt(vE[0] * vE[0] + vE[1] * vE[1] + vE[2] * vE[2]);
+        double up[3] = { c * cos(lon), c * sin(lon), sn };
+        double pitch = asin(C[0][0] * up[0] + C[1][0] * up[1] + C[2][0] * up[2]) * 180 / 3.14159265358979323846;
+        check(wow[0] && wow[1] && wow[2], "all three gear carry weight", wow[0] + wow[1] + wow[2], 3);
+        check(speed < 0.05, "and the vehicle stands still on the runway", speed, 0.0);
+        check(pitch < -0.5 && pitch > -4.0, "a little nose down on its wheels", pitch, -2.0);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

@@ -30,10 +30,30 @@ are not controls (`wait`, `keygap`, `script`, `audio`, `snapshot`).
   has moved, not when PASS has reacted.  To wait for PASS, use a `wait` line:
   `wait gpc N mode-tb RUN`, `wait crt N title TEXT` or
   `wait crt N new-screen`.
-* **`circle FEATURE` / `nocircle`** draw attention to a control during a
-  demonstration.  They move nothing.  The FEATURE names are listed in
+* **`circle FEATURE [COLOR] [DIAMETER]` / `nocircle`** draw attention to a
+  control or an indicator during a demonstration.  They move nothing, and
+  only one `circle` is up at a time.  The FEATURE names are listed in
   `crewscript.py --help`; for example `circle mode2` circles GPC 2's MODE
-  switch.
+  switch.  Indicators can be circled too, though they cannot be moved:
+  the GPC MODE and OUTPUT talkbacks, the ACTIVITY lamps, the caution and
+  warning matrix and the rest, every one listed under "Indicators (for
+  `circle` only)" below.
+* **`autocircle [SECONDS] [COLOR] [DIAMETER]`** circles, from that line on,
+  every O6-program control a script moves: from 1 s **before** the move, so
+  the eye is there when it happens, until SECONDS (default 1) after it.  A
+  move due sooner than 1 s away (at the start, just after a `wait` or typing)
+  is held until its circle has been up for 1 s, and the lines after it keep
+  their spacing; the log says so ("held 1.00 s so that its circle shows
+  first").  While a `wait gpc N mode-tb ...` waits, GPC N's MODE talkback is
+  circled until the wait ends.  COLOR and DIAMETER are as for `circle`.  It
+  is independent of `circle` and `nocircle`, and a control may carry both;
+  `autocircle 0` turns it off and takes its circles away.  Keys, MDU
+  edgekeys, the hand controllers and `lps` are not panel O6 controls and are
+  not circled.
+
+      +0  autocircle
+      +0  autocircle red 2.5
+      +0  autocircle 3 #00ff00
 
 ---
 
@@ -98,6 +118,17 @@ wait gpc 1 mode-tb RUN timeout 900
 * With several GPCs, the `wait crt N new-screen` matters: a later computer's
   `title GPCIPL` wait would otherwise be met at once by the previous
   computer's menu still on the screen.
+
+### STAR TRACKER pane
+
+| Control | Command | Example | Notes |
+|---|---|---|---|
+| POWER -Y / -Z | `switch strk_pwr_y\|strk_pwr_z ON\|OFF` | `+0  switch strk_pwr_z ON` | Off makes the tracker show BITE on SPEC 22: no data. |
+| DOOR CONTROL SYS 1 / SYS 2 | `switch strk_door_sys1\|strk_door_sys2 OPEN\|OFF\|CLOSE` | `+0  switch strk_door_sys1 OPEN` | One SYS switch moves a door in 12 s, both together in 6 s. |
+| DOOR POSITION -Y / -Z | none (display only) | | Talkbacks: OP, CL, or barberpole while travelling. |
+
+* **Opening a door needs that tracker's POWER ON.** Closing does not.
+* **A door that is not fully open means no stars** for that tracker.
 
 ### Not controls, but set from O6's side
 
@@ -190,6 +221,79 @@ C3's other controls are named controls; see "Named controls" below.
 | MASTER RCS CROSSFEED | `xfeed left\|off\|right` | `+0  xfeed off` | LEFT and RIGHT are FEED FROM LEFT and FEED FROM RIGHT. |
 
 O7's other controls are named controls; see below.
+
+---
+
+## Indicators (for `circle` only)
+
+Indicators cannot be moved, and apart from the MODE talkbacks (`wait gpc N
+mode-tb`) they cannot be waited on, but `circle` takes them by these names.
+
+### Window "O6"
+
+| Name | Indicator |
+|---|---|
+| `outputtb1` ... `outputtb5` | GPC OUTPUT talkbacks, GPC 1-5 |
+| `modetb1` ... `modetb5` | GPC MODE talkbacks, GPC 1-5 |
+| `activity-mm1`, `activity-mm2` | ACTIVITY lamps, MM1 and MM2 |
+| `strk_door_tb_y`, `strk_door_tb_z` | STAR TRACKER DOOR POSITION talkbacks, -Y and -Z |
+
+### Window "F6"
+
+| Name | Indicator |
+|---|---|
+| `rcs_roll` | RCS COMMAND ROLL lamp |
+| `rcs_yaw` | RCS COMMAND YAW lamp |
+| `rcs_pitch` | RCS COMMAND PITCH lamp |
+
+### Window "F7"
+
+| Name | Indicator |
+|---|---|
+| `cw_r1c1` | O2 PRESS annunciator |
+| `cw_r1c2` | H2 PRESS annunciator |
+| `cw_r1c3` | FUEL CELL REAC annunciator |
+| `cw_r1c4` | FUEL CELL STACK TEMP annunciator |
+| `cw_r1c5` | FUEL CELL PUMP annunciator |
+| `cw_r2c1` | CABIN ATM annunciator |
+| `cw_r2c2` | O2 HEATER TEMP annunciator |
+| `cw_r2c3` | MAIN BUS UNDERVOLT annunciator |
+| `cw_r2c4` | AC VOLTAGE annunciator |
+| `cw_r2c5` | AC OVERLOAD annunciator |
+| `cw_r3c1` | FREON LOOP annunciator |
+| `cw_r3c2` | AV BAY/ CABIN AIR annunciator |
+| `cw_r3c3` | IMU annunciator |
+| `cw_r3c4` | FWD RCS annunciator |
+| `cw_r3c5` | RCS JET annunciator |
+| `cw_r4c1` | H2O LOOP annunciator |
+| `cw_r4c2` | RGA/ACCEL annunciator |
+| `cw_r4c3` | AIR DATA annunciator |
+| `cw_r4c4` | LEFT RCS annunciator |
+| `cw_r4c5` | RIGHT RCS annunciator |
+| `cw_r5c1` | (blank) annunciator |
+| `cw_r5c2` | LEFT RHC annunciator |
+| `cw_r5c3` | RIGHT/AFT RHC annunciator |
+| `cw_r5c4` | LEFT OMS annunciator |
+| `cw_r5c5` | RIGHT OMS annunciator |
+| `cw_r6c1` | PAYLOAD WARNING annunciator |
+| `cw_r6c2` | GPC annunciator |
+| `cw_r6c3` | FCS SATURATION annunciator |
+| `cw_r6c4` | OMS KIT annunciator |
+| `cw_r6c5` | OMS TVC annunciator |
+| `cw_r7c1` | PAYLOAD CAUTION annunciator |
+| `cw_r7c2` | PRIMARY C/W annunciator |
+| `cw_r7c3` | FCS CHANNEL annunciator |
+| `cw_r7c4` | MPS annunciator |
+| `cw_r7c5` | (blank) annunciator |
+| `cw_r8c1` | BACKUP C/W ALARM annunciator |
+| `cw_r8c2` | APU TEMP annunciator |
+| `cw_r8c3` | APU OVERSPEED annunciator |
+| `cw_r8c4` | APU UNDERSPEED annunciator |
+| `cw_r8c5` | HYD PRESS annunciator |
+| `mes_left` | MAIN ENGINE STATUS LEFT lamp |
+| `mes_ctr` | MAIN ENGINE STATUS CTR lamp |
+| `mes_right` | MAIN ENGINE STATUS RIGHT lamp |
+| `sm_alert` | SM ALERT annunciator |
 
 ---
 

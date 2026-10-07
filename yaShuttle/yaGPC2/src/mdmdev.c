@@ -17,7 +17,13 @@
 #include "envcache.h"
 #include "json.h"
 #include "startrk.h"
+#include "lpsmodel.h"
+#include "eiumodel.h"
+#include "mecmodel.h"
+#include "valvemodel.h"
 #include "vehdyn.h"
+#include "landaids.h"
+#include "adtaair.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
  *     mode (4) | card (4) | channel (5) | word count - 1 (5)
@@ -199,6 +205,7 @@ static const double ACC_BIAS_UG[3][3] = {
     {  14332.0,  12666.0, -39545.0 },
 };
 #define G0_FTS2 32.174
+static uint16_t sat16(double c);
 
 typedef struct { double dvFt[3]; double carry[3]; uint16_t count[3]; bool started; double t; } ImuAcc;
 static ImuAcc imuAcc[4];
@@ -247,6 +254,7 @@ static const double GYREST[3][3] = {           /* CGMS_GYREST (IMU, axis), rad/s
 
 typedef struct { double P[3][3]; double t; bool started; long pulses; double slewSec; } ImuPlat;
 static ImuPlat plat[4];
+static bool imu_in_operate(int n);
 
 /* YAGPC_IMU_DRIFT=<deg/hr>: drift beyond what PASS compensates, so that the
  * platforms wander apart and away from M50 and an alignment has something to
@@ -389,7 +397,7 @@ static void imu_read(int n, uint16_t *out, int words) {
     w[0] = (uint16_t)(IMU_BITE_GOOD | ((u->cmd2 & IMU_CMD2_HIGAIN) ? IMU_BITE_D1D8 : 0));
     if (vehdyn_enabled()) {
         w[1] = 0x8000u;                            /* redundant rate: zero, positive */
-        imu_dynamic(n, w);
+        if (imu_in_operate(n)) imu_dynamic(n, w);  /* caged: null gimbals, no counts */
     }
     /* w[1] redundant-axis rate: zero, not saturated -- a platform at rest.
      * w[2..8] the resolvers, inner roll 8X then outer roll, pitch and
@@ -408,6 +416,70 @@ static void imu_read(int n, uint16_t *out, int words) {
  * operate, pressure good, platform temperature ready and safe, CAPRI
  * temperature ready and safe.  All good. */
 #define IMU_DSCRT_ALL_GOOD 0xFC00u
+#define IMU_DSCRT_STANDBY  0x7C00u     /* powered and warm, not in operate */
+
+/* STANDBY AND OPERATE.  PASS commands an IMU to operate with FF card 13
+ * channel 0, HAL bit 10 (CGBB_OUT12_HFF_SEG3_DSCRT4, CGBOBF.hal:576-580,
+ * 2114; SPEC 104 items 13-15, GUCIMU.hal:293-315), and believes it there
+ * when the in-operate discrete comes on (GMESTA.hal:1078-1085).  The KT-70
+ * runs up for 29.4 to 45.4 s after the command (IMU SOP FSSR p. 10): 40 s
+ * here.  Until then the cluster is caged to the case -- gimbals at null,
+ * accelerometers not counting -- and it is released where it stands.
+ *
+ * This is the vehicle on the pad (YAGPC_VEHDYN_PAD), where the countdown
+ * brings the IMUs up by the book in OPS 9.  A vehicle IPL'd straight to
+ * OPS 2 keeps IMUs that are in operate from the start, as it always had;
+ * YAGPC_IMU_OPERATE=command or =always overrides either way. */
+#define IMU_OPER_CMD  0x0040u
+#define IMU_RUNUP_S   40.0
+#define IMU_NO_CMD    (-1e30)
+static double imuOpT[4] = { IMU_NO_CMD, IMU_NO_CMD, IMU_NO_CMD, IMU_NO_CMD };   /* the operate command's time */
+static bool imuOper[4];                                /* run up, in operate */
+
+static bool imu_by_command(void) {
+    if (!vehdyn_enabled()) return false;
+    static int forced = -1;
+    if (forced < 0) {
+        const char *e = yagpc_getenv("YAGPC_IMU_OPERATE");
+        forced = (e && strcmp(e, "command") == 0) ? 1 : (e && strcmp(e, "always") == 0) ? 0 : 2;
+    }
+    return forced == 2 ? vehdyn_ascent_phase() != 0 : forced == 1;
+}
+
+static void imu_uncage(int n, double t) {
+    double R[3][3];
+    qmat(vehdyn_state()->q, R);
+    for (int i = 0; i < 3; i++)          /* P = R . TNBBODY: gimbals at null */
+        for (int j = 0; j < 3; j++)
+            plat[n].P[i][j] = R[i][0] * TNBBODY[0][j] + R[i][1] * TNBBODY[1][j] + R[i][2] * TNBBODY[2][j];
+    plat[n].t = t;
+    plat[n].started = true;
+    imuAcc[n].started = false;           /* the counters start from here */
+}
+
+static bool imu_in_operate(int n) {
+    if (!imu_by_command()) return true;
+    double t = vehdyn_state()->t;
+    if (!(ffOut[n][13][0] & IMU_OPER_CMD)) {
+        if (imuOpT[n] > IMU_NO_CMD)
+            fprintf(stderr, "mdmdev: IMU%d commanded to STANDBY at t=%.2f\n", n, t);
+        imuOpT[n] = IMU_NO_CMD;
+        imuOper[n] = false;
+        return false;
+    }
+    if (imuOpT[n] <= IMU_NO_CMD) {
+        imuOpT[n] = t;
+        fprintf(stderr, "mdmdev: IMU%d commanded to OPERATE at t=%.2f -- running up\n", n, t);
+    }
+    if (!imuOper[n] && t - imuOpT[n] >= IMU_RUNUP_S) {
+        imuOper[n] = true;
+        imu_uncage(n, t);
+        fprintf(stderr, "mdmdev: IMU%d IN OPERATE at t=%.2f, the cluster released at the vehicle's attitude\n", n, t);
+    }
+    return imuOper[n];
+}
+
+static uint16_t imu_discretes(int n) { return imu_in_operate(n) ? IMU_DSCRT_ALL_GOOD : IMU_DSCRT_STANDBY; }
 
 /* ---------------------------------------------------------------------
  * THE REACTION CONTROL SYSTEM -- 44 jets, 16 manifolds, their injector
@@ -553,6 +625,10 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * VALUE, type 7, card 3 channel 2 (the tracker's serial channel), one word:
  * 0x8000 powered, 0x4000 door fully open. */
 #define CREW_TYPE_STU 7
+/* THE VEHICLE'S HARDWIRED FUNCTIONS (landing gear, drag chute), which no
+ * computer commands: op 4 VALUE, type 8, one word to FF1 -- vehdyn.c,
+ * vehdyn_hardwired, has the bits and latches them. */
+#define CREW_TYPE_HW 8
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -669,6 +745,12 @@ static bool nsp_reply(int busID, uint32_t cmd, int n, uint16_t *out) {
     return true;
 }
 
+/* The valves' view of the outputs: the net state of an output channel. */
+static uint16_t out_word(char mdm, int unit, unsigned card, unsigned ch) {
+    if (unit < 1 || unit > 4 || card >= NCARD || ch >= NCHAN) return 0;
+    return mdm == 'F' ? ffOut[unit][card][ch] : faOut[unit][card][ch];
+}
+
 void mdmdev_crew_open(int portBase) {
     if (crewOpen) return;              /* one vehicle, one set of sockets */
     crewOpen = true;
@@ -711,6 +793,7 @@ void mdmdev_crew_open(int portBase) {
         crewFd[k] = fd;
     }
     uplink_open(portBase, iface);
+    lps_open(portBase);
 }
 
 static void crew_apply(int k, const uint8_t *buf, int len) {
@@ -725,6 +808,13 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t w = (uint16_t)(((unsigned)buf[8] << 8) | buf[9]);
         startrk_hardware(st, (w & 0x8000u) != 0, (w & 0x4000u) != 0,
                          vehdyn_enabled() ? vehdyn_state()->t : 0.0);
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
+    if (type == CREW_TYPE_HW) {
+        if (op != CREW_OP_VALUE || cnt < 1 || len < 10) return;
+        vehdyn_hardwired(((unsigned)buf[8] << 8) | buf[9]);
         crewHeard = true;
         crewMsgs++;
         return;
@@ -881,6 +971,42 @@ static void crew_aid_hfe(int k, uint16_t *b, int nb) {
  *            the tail-off, and 0 otherwise.
  * ------------------------------------------------------------------- */
 static int16_t faAod[5][NCARD][NCHAN];
+static bool faAodSeen[5];
+
+/* ---------------------------------------------------------------------
+ * THE ASCENT THRUST-VECTOR COMMANDS: three SSMEs (pitch, yaw) and two SRBs
+ * (rock, tilt), as PASS writes them to the FA analog outputs, FA k driving
+ * ATVC k (STS 83-0016 Tables 4.60-3, 4.62-3).  counts = floor(deg C + K),
+ * constants volts x 6400 (CGCCOM.hal:352-363, CGCUN1.hal:396-399; the DASS
+ * load agrees); so deg = (counts + 0.5 - K) / C.  Engines 1 and 3 have the
+ * opposite pitch voltage sign to engine 2 -- the actuators are mounted so;
+ * the degrees mean the same for all three.  The four FAs carry the same
+ * values; each actuator's four servovalves force-fight, which comes out as
+ * the average.  PASS reads no position back (only port-fail discretes).
+ * ------------------------------------------------------------------- */
+static const struct { unsigned card, ch; double c, k; } TVC[5][2] = {
+    { { 0, 4, -2775.68, 929.92 }, { 4, 4, 3425.92, 627.20 } },   /* ME1 pitch, yaw */
+    { { 0, 3,  2775.68, 929.92 }, { 0, 9, 3484.16, 721.28 } },   /* ME2 */
+    { { 4, 3, -2775.68, 929.92 }, { 4, 2, 3362.56, 736.64 } },   /* ME3 */
+    { { 4, 0, 4120.3125, 0.0 },   { 0, 10, 4120.3125, 0.0 } },   /* LH SRB rock, tilt */
+    { { 0, 1, 4120.3125, 0.0 },   { 4, 1, 4120.3125, 0.0 } },    /* RH SRB rock, tilt */
+};
+
+static void push_tvc(void) {
+    double cmd[5][2];
+    for (int a = 0; a < 5; a++)
+        for (int x = 0; x < 2; x++) {
+            double sum = 0.0;
+            int n = 0;
+            for (int k = 1; k <= 4; k++) {
+                if (!faAodSeen[k]) continue;
+                sum += (faAod[k][TVC[a][x].card][TVC[a][x].ch] + 0.5 - TVC[a][x].k) / TVC[a][x].c;
+                n++;
+            }
+            cmd[a][x] = n ? sum / n : 0.0;
+        }
+    vehdyn_set_tvc(cmd);
+}
 #define PC_FA_READ 0x25A40u     /* FIOHI1C5: card 6 ch 18, 1 word */
 #define OMS_PC_BURNING 20000u
 
@@ -926,6 +1052,37 @@ static uint16_t oms_feedback(int e, int axis) {
     return (uint16_t)(int16_t)c;
 }
 
+/* THE LANDING GEAR AS PASS SEES IT (GRVLAN.hal:121-139, GP8HYD.hal 255-314;
+ * CGBIH1.hal 2731-2876), every bit 1 = NO weight / stowed:
+ *   FF1-4 DSCRT6 (word 5): 0x0001 a main wheel's no-WOW sensor (FF3, FF4
+ *     left; FF1, FF2 right), 0x0002 that sensor available (null-fail)
+ *   FF2/FF3 DSCRT11 (word 10): 0x0040 left/right main gear no-WOW
+ *     (proximity), 0x0020 that gear up-locked, 0x0010 its door NOT locked
+ *   FF2 DSCRT9 (word 8): 0x0010 nose no-WOW #2, 0x0008 nose gear up-locked
+ *   FF3 DSCRT9 (word 8): 0x0004 nose no-WOW #1, 0x0002 nose door up-locked
+ * These were all ZERO -- weight on every wheel, every sensor null-failed,
+ * no gear up-locked -- and on its first pass in MM 305 GRVLAN fails for good
+ * any main-gear sensor reading weight (:155-167), so touchdown could never
+ * have been recognised.  With the gear down the up-lock bits clear and the
+ * doors read not locked; weight clears the no-WOW bits. */
+static void gear_discretes(int k, uint16_t d[13]) {
+    if (!vehdyn_enabled()) return;
+    double pos;
+    int wow[3];
+    vehdyn_gear(&pos, wow);
+    bool down = pos > 0.0;                 /* off the uplocks as soon as it moves */
+    bool leftWheel = (k == 3 || k == 4), rightWheel = (k == 1 || k == 2);
+    d[5] |= 0x0002u;
+    if (!((leftWheel && wow[0]) || (rightWheel && wow[1]))) d[5] |= 0x0001u;
+    if (k == 2 || k == 3) {
+        int side = (k == 2) ? 0 : 1;
+        if (!wow[side]) d[10] |= 0x0040u;
+        d[10] |= down ? 0x0010u : 0x0020u;
+    }
+    if (k == 2) d[8] |= (wow[2] ? 0u : 0x0010u) | (down ? 0u : 0x0008u);
+    if (k == 3) d[8] |= (wow[2] ? 0u : 0x0004u) | (down ? 0u : 0x0002u);
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
@@ -947,10 +1104,13 @@ static void ff_discretes(int k, uint16_t d[13]) {
     d[5] = ff_jets_b(k);
     /* The IMU discretes (DIL card 15 ch 0) come in here too, for the IMU
      * behind this MDM. */
-    if (k <= 3) d[11] = IMU_DSCRT_ALL_GOOD;
+    if (k <= 3) d[11] = imu_discretes(k);
     /* The crew's contacts LAST: the words above are assigned, not ORed, so
      * contacts added first were wiped -- DSCRT4's THC and DSCRT6's DAP
      * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
+    valve_inputs('F', k, d, 13);       /* the vent doors' feedback */
+    gear_discretes(k, d);
+    if (vehdyn_enabled()) d[7] |= adta_probe_bits(k);    /* the air data probe's limit switches */
     crew_dscrt(k, d);
 }
 
@@ -963,6 +1123,21 @@ static void ff_hfe(int k, uint16_t *w, int n) {
      * (GRRRCS.hal:184-215). */
     for (int i = 13; i <= 20; i++) b[i] = INJ_WARM;
     crew_aid_hfe(k, b, 36);
+    /* Words 34-35, ACCELEROMETER ASSEMBLY k: lateral and normal specific
+     * force, 0.2/6400 and 0.8/6400 g a count (GPFORB.hal:112-113,
+     * 192-201), LATERAL along +Y body, NORMAL POSITIVE UP, along -Z: the
+     * entry displays show LOAD = AA_NORM x g0 (GDRENT.hal:107), the g's of
+     * lift; and the ascent DAP's load relief expects AA_NORM -0.1 to -0.18 g
+     * through max-q (CGCS_NZREF_TRIM_TAB), where the air pushes the stack
+     * toward the tank.  (With +Z, load relief diverged in pitch at max-q;
+     * with -Y the lateral loop diverged sooner than with +Y.)
+     * AFTER the hand controllers, which fill words 21-35. */
+    if (vehdyn_enabled()) {
+        double sf[3];
+        vehdyn_specific_force(sf);
+        b[34] = sat16(sf[1] / G0_FTS2 / 0.3048 * 32000.0);
+        b[35] = sat16(-sf[2] / G0_FTS2 / 0.3048 * 8000.0);
+    }
     for (int i = 0; i < n; i++) w[i] = (i < 36) ? b[i] : 0;
 }
 
@@ -1006,6 +1181,110 @@ static int trace_fa(void) {
     return k;
 }
 
+
+/* An analog count, rounded and saturated as an AID channel would (+/-5 V at
+ * 6400 counts a volt). */
+static uint16_t sat16(double c) {
+    c = floor(c + 0.5);
+    if (c > 32000.0) c = 32000.0;
+    if (c < -32000.0) c = -32000.0;
+    return (uint16_t)(int16_t)c;
+}
+
+
+/* ---------------------------------------------------------------------
+ * THE AEROSURFACES (GPCAER.hal; CGBOBF.hal:1697-1708, 1746-1812).
+ *   Commands, FA AOD: counts = (deg x SF + BI) x 6400, SEG2A on card 0
+ *   channels 5-8 (left inboard elevon, left outboard, speedbrake, rudder),
+ *   SEG2B on card 4 channels 5-6 (right inboard, right outboard) -- the
+ *   same segment-to-channel pattern as the TVC commands above.  Averaged
+ *   over the FAs, as the force-fighting servovalves would.
+ *   Body flap: FA discrete output card 2 channel 1, HAL bit 15 UP and 16
+ *   DOWN (0x0002, 0x0001), with the enable on card 10 channel 1 bit 3
+ *   (0x2000).
+ *   Feedback, the FA's HFE SEG8 = words 36-42 (AID card 1 ch 0-6,
+ *   CGBIH1.hal:542-544): LIB LOB RIB ROB speedbrake rudder body-flap, in
+ *   the flight software's own scaling -- elevons GPEELV.hal:117-124
+ *   (deg = counts x SF + BI), speedbrake GPABFS.hal:56-58 (deg = counts x
+ *   10.85/6400 + 44.35), rudder GPORUD.hal:61-62 (deg = counts x
+ *   5.526/6400), body flap CGZRMCSC.hal:193-197 (percent = counts x
+ *   0.12885/64 + 50; 0% full up -11.7, 100% full down +22.5, SCOM 2.7).
+ * ------------------------------------------------------------------- */
+static const struct { unsigned card, ch; double sf, bi; } SURF_CMD[6] = {
+    { 0, 5, 0.1778, 1.3585 },   /* left inboard elevon */
+    { 0, 6, 0.1776, 1.381 },    /* left outboard elevon */
+    { 4, 5, 0.1778, 1.3585 },   /* right inboard elevon */
+    { 4, 6, 0.1776, 1.381 },    /* right outboard elevon */
+    { 0, 7, 0.09217, -4.0876 }, /* speedbrake */
+    { 0, 8, 0.181, 0.0 },       /* rudder */
+};
+
+static void push_aerosurf(void) {
+    if (!vehdyn_enabled()) return;
+    double cmd[6];
+    for (int a = 0; a < 6; a++) {
+        double sum = 0.0;
+        int n = 0;
+        for (int k = 1; k <= 4; k++) {
+            if (!faAodSeen[k]) continue;
+            sum += (faAod[k][SURF_CMD[a].card][SURF_CMD[a].ch] + 0.5 - SURF_CMD[a].bi * 6400.0) /
+                   (SURF_CMD[a].sf * 6400.0);
+            n++;
+        }
+        cmd[a] = n ? sum / n : 0.0;
+    }
+    if (!faAodSeen[1] && !faAodSeen[2] && !faAodSeen[3] && !faAodSeen[4]) {
+        double pos[7];
+        vehdyn_aerosurf_pos(pos);           /* nothing commanded yet: stay put */
+        for (int a = 0; a < 6; a++) cmd[a] = pos[a];
+    }
+    /* THE BODY FLAP'S PILOT VALVES VOTE, two of three, as the hydraulics do:
+     * each FA's enabled, unambiguous UP or DOWN is one vote.  ORing them made
+     * one valve held DOWN by PASS's redundancy management (GRPBFC.hal
+     * 145-181) cancel the other two's UP, and the flap froze at +21 deg
+     * through TAEM (2026-10-06). */
+    int vUp = 0, vDn = 0;
+    for (int k = 1; k <= 4; k++) {
+        bool en = (faOut[k][10][1] & 0x2000u) != 0;
+        bool up = (faOut[k][2][1] & 0x0002u) != 0, dn = (faOut[k][2][1] & 0x0001u) != 0;
+        if (en && up && !dn) vUp++;
+        if (en && dn && !up) vDn++;
+    }
+    vehdyn_set_aerosurf(cmd, vDn >= 2 ? 1 : vUp >= 2 ? -1 : 0);
+}
+
+/* THE HYDRAULIC SYSTEMS' SUPPLY PRESSURES, the FA's HFE SEG6 = words 26-27
+ * (AIS card 6 ch 29, card 14 ch 23; CGBIH1.hal:526-531): GP8HYD.hal:94-102
+ * votes each system from three of them and fails one that reads below
+ * CGPS_HYD_LOLMT, 13,926.4 counts -- so the zeros these words used to carry
+ * failed all three.  3,000 psi nominal (SCOM 2.1); the transducer's span is
+ * NOT documented here and is taken as 0-4,000 psi across 0-5 V, which puts
+ * 3,000 psi at 24,000 counts -- above the limit whatever the span within
+ * reason; only a display could be wrong.  The APUs are taken as running
+ * (no APU model yet). */
+#define HYD_PRESS_COUNTS 24000u
+
+static void aerosurf_feedback(uint16_t *b, int nb) {
+    if (!vehdyn_enabled() || nb < 43) return;
+    static long hyd = -1;               /* YAGPC_HYD_PRESS_COUNTS overrides, for experiments */
+    if (hyd < 0) {
+        const char *e = yagpc_getenv("YAGPC_HYD_PRESS_COUNTS");
+        hyd = e ? atol(e) : (long)HYD_PRESS_COUNTS;
+    }
+    b[26] = (uint16_t)hyd;
+    b[27] = (uint16_t)hyd;
+    double p[7];
+    vehdyn_aerosurf_pos(p);
+    b[36] = sat16((p[0] + 7.641) / (5.624 / 6400.0));
+    b[37] = sat16((p[1] + 7.776) / (5.631 / 6400.0));
+    b[38] = sat16((p[2] + 7.641) / (5.624 / 6400.0));
+    b[39] = sat16((p[3] + 7.776) / (5.631 / 6400.0));
+    b[40] = sat16((p[4] - 44.35) / (10.85 / 6400.0));
+    b[41] = sat16(p[5] / (5.526 / 6400.0));
+    double pct = (p[6] + 11.7) / 34.2 * 100.0;
+    b[42] = sat16((pct - 50.0) / (0.12885 / 64.0));
+}
+
 static void fa_hfe(int k, uint16_t *w, int n) {
     uint16_t b[54];
     memset(b, 0, sizeof b);
@@ -1040,6 +1319,46 @@ static void fa_hfe(int k, uint16_t *w, int n) {
         b[0] = oms_feedback(e, 0);
         b[1] = oms_feedback(e, 1);
     }
+    /* SEGMENT 7, words 28-35 (CGBIH1.hal:528-541): the SRBs' chamber
+     * pressures (32 right, 34 left; FA1-3) and the SRB ignition PIC
+     * capacitor voltages (33 right, 35 left; FA1 cap A, FA2 cap B).
+     *   - PIC: GSRRSL checks them >= 28032 counts (35.7 V, "438 x 64") from
+     *     T-12 s, after it has armed SRM ignition at T-15 s; charged here
+     *     once a MEC has that ARM, and not before.
+     *   - SRB Pc: psia = counts x 0.0313211 + K, K about -9.5 to -15.5
+     *     (CGCCOM.hal:279-290); zero counts read -15 psia, which the SRB
+     *     separation cue takes for burn-out.  On the pad, ambient. */
+    if (k <= 2) {
+        uint16_t pic = (mec_armed(MEC_SRM_IGN) && mec_fired_at(MEC_SRM_IGN) < 0.0) ? 30000u : 0u;
+        b[33] = pic;
+        b[35] = pic;
+    }
+    if (k <= 3) {
+        /* word 32 the right SRB (K5 calibration), 34 the left (K4), GPXSRB.hal:49-54 */
+        static const double K5[3] = { -14.07, -15.47, -14.99 }, K4[3] = { -15.09, -9.52, -14.09 };
+        double pc = vehdyn_enabled() ? vehdyn_srb_pc_psia() : 14.7;
+        b[32] = pc < 0.0 ? 0u : (uint16_t)lround((pc - K5[k - 1]) / 0.0313211);
+        b[34] = pc < 0.0 ? 0u : (uint16_t)lround((pc - K4[k - 1]) / 0.0313211);
+    }
+    valve_inputs('A', k, b, 54);       /* MPS valves, ET latches, aft vent doors */
+    /* SEGMENT 10, words 47-51: orbiter rate gyro k (roll, pitch, yaw: 8/6400
+     * and 4/6400 deg/s a count, GPFORB.hal:111-116 -- 800 and 1600 counts per
+     * deg/s) and SRB rate gyro k (pitch, yaw: 2/6400, CGCUN1.hal:649-652 --
+     * 3200 per deg/s) while the boosters are attached.  Body rates, inertial,
+     * right-handed about +X, +Y, +Z (TD0209A Fig 1-2, 1-3). */
+    if (vehdyn_enabled()) {
+        const PhysState *ps = vehdyn_state();
+        const double D = 180.0 / 3.14159265358979323846;
+        b[47] = sat16(ps->w[0] * D * 800.0);
+        b[48] = sat16(ps->w[1] * D * 1600.0);
+        b[49] = sat16(ps->w[2] * D * 1600.0);
+        int ph = vehdyn_ascent_phase();
+        if (ph == 1 || ph == 2) {
+            b[50] = sat16(ps->w[1] * D * 3200.0);
+            b[51] = sat16(ps->w[2] * D * 3200.0);
+        }
+    }
+    aerosurf_feedback(b, 54);
     crew_fa_hfe(k, b, 54);
     for (int i = 0; i < n; i++) w[i] = (i < 54) ? b[i] : 0;
 }
@@ -1116,6 +1435,9 @@ static void fa_mfe(int k, uint16_t *w, int n) {
  * lambda the GLWRNP/GNFEAR Earth that vehdyn.c gives the physics -- so the
  * position is phys_inertial_to_earth() applied to the truth, and the
  * velocity has the Earth's turning taken out, exactly. */
+#define ADTA_READ 0x26C05u    /* FIOHI1C2: mode 9, card 11 ch 0, 6 words (adtaair.c) */
+#define MLS_READ  0x26C22u    /* FIOFFIC6: mode 9, card 11 ch 1, 3 words (landaids.c) */
+#define TACAN_RA_READ 0x24006u /* FIOFFIC2: mode 9, card 0 ch 0, 7 words (landaids.c) */
 #define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
 #define GPS_WRITE 0x22C5Fu    /* FIOGPSWT: mode 8, card 11 ch 2, 32 words */
 #define GPS_LAG_S 0.05
@@ -1180,6 +1502,23 @@ static bool gps_words(int u, uint16_t w[32]) {
     }
     ve[0] += rate * re[1];                   /* less the Earth's turning: omega z x r */
     ve[1] -= rate * re[0];
+    /* AT THE NAVIGATION BASE, not the c.g.: PASS copies a GPS state straight
+     * into its navigation state (CGNV_R/V_FILT_LFE := CGNV_R/V_GPS_SEL,
+     * GNEENT.hal:150-260), which is the nav base's -- 57.9 ft forward of the
+     * c.g. (CGNREM.hal:58-80).  The lever arm is taken from the present
+     * attitude; the 50 ms of GPS_LAG_S turn it by nothing that matters. */
+    {
+        double rnb[3], vnb[3], C[3][3], Mn[3][3], rcg[3], vcg[3];
+        vehdyn_navbase_ef(rnb, vnb, C);
+        phys_inertial_to_earth(s->t, Mn);
+        for (int i = 0; i < 3; i++) {
+            rcg[i] = Mn[i][0] * s->r[0] + Mn[i][1] * s->r[1] + Mn[i][2] * s->r[2];
+            vcg[i] = Mn[i][0] * s->v[0] + Mn[i][1] * s->v[1] + Mn[i][2] * s->v[2];
+        }
+        vcg[0] += rate * rcg[1];
+        vcg[1] -= rate * rcg[0];
+        for (int i = 0; i < 3; i++) { re[i] += rnb[i] - rcg[i]; ve[i] += vnb[i] - vcg[i]; }
+    }
     for (int i = 0; i < 3; i++) {
         put32(&w[7 + 2 * i], re[i] / FT_M * 16.0);
         put32(&w[13 + 2 * i], ve[i] / FT_M * 512.0);
@@ -1275,8 +1614,13 @@ static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, dou
  * really doing.  One datagram per TRUTH_PERIOD_S of vehicle time on port
  * base + TRUTH_OFFSET: "TRU1", then big-endian IEEE doubles -- vehicle time
  * (s), PASS GMT (s), the attitude quaternion body -> M50 (w x y z), body
- * rates (rad/s), M50 position (m) and velocity (m/s).  Only with the
- * dynamics on and a panel wired. */
+ * rates (rad/s), M50 position (m) and velocity (m/s); the main wheels'
+ * height (ft) and the ground speed (kt); then Unix time (s, -1 until the
+ * timing unit has set the epoch) and the M50 -> Earth-fixed rotation, nine
+ * doubles row by row (r_ef = M r_m50, PASS's own Earth: the same RNP matrix
+ * and rotation the navigation aids and GPS use), so that a picture of the
+ * Earth agrees with PASS's ground track.  27 doubles in all; readers take
+ * the first N they know.  Only with the dynamics on and a panel wired. */
 #define TRUTH_OFFSET 98
 #define TRUTH_PERIOD_S 0.05
 
@@ -1292,7 +1636,7 @@ static void truth_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[2 + 4 + 3 + 3 + 3];
+    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9];
     int n = 0;
     v[n++] = st->t;
     v[n++] = vehdyn_gmt(st->t);
@@ -1300,7 +1644,13 @@ static void truth_publish(void) {
     for (int i = 0; i < 3; i++) v[n++] = st->w[i];
     for (int i = 0; i < 3; i++) v[n++] = st->r[i];
     for (int i = 0; i < 3; i++) v[n++] = st->v[i];
-    uint8_t b[4 + 8 * 15];
+    vehdyn_ground_state(&v[n], &v[n + 1]);       /* main wheels' height (ft), ground speed (kt) */
+    n += 2;
+    v[n++] = vehdyn_unix(st->t);
+    double M[3][3];
+    phys_inertial_to_earth(st->t, M);
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) v[n++] = M[i][j];
+    uint8_t b[4 + 8 * 27];
     memcpy(b, "TRU1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};
@@ -1401,6 +1751,12 @@ bool mdmdev_fc_relay(void) {
 void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
                    double sharedUs) {
     if (n <= 0) return;
+    if (lps_owns(busID, cmd)) { lps_write(cmd, words, n); return; }
+    if (eiu_engine(busID, cmd) && eiu_is_command(cmd)) {
+        eiu_command(busID, cmd, words, n, sharedUs / 1e6);
+        return;
+    }
+    if (mec_owns(busID, cmd)) { mec_command(busID, cmd, words, n, sharedUs / 1e6); return; }
     pc_clock(sharedUs);
     if ((cmd & 0x40000u) && CMD_IUA(cmd) != IUA_FF && CMD_IUA(cmd) != IUA_FA) {
         fc_output(busID, cmd, words, n, sharedUs);       /* DDU and MEDS */
@@ -1444,11 +1800,20 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         }
     } else if (iua == IUA_FA && fa_unit(busID) > 0) {
         faWrites++;
-        if (CMD_MODE(cmd) == 8u && CMD_CARD(cmd) == 4u) {      /* AOD: values */
-            unsigned ch = CMD_CHAN(cmd) & 0x0fu;
-            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++)
-                faAod[fa_unit(busID)][4][ch + (unsigned)i] = (int16_t)words[i];
+        if (CMD_MODE(cmd) == 8u && (CMD_CARD(cmd) == 4u || CMD_CARD(cmd) == 0u)) {
+            /* AOD: values.  Card 4 carries the OMS gimbals and five of the
+             * ten ascent thrust-vector commands; card 0 the other five and
+             * the aerosurfaces (FIOHO101/108/103; CGBOBF.hal:1669-1691) --
+             * card 0 used to go to discrete_write as a "reset" word and was
+             * lost. */
+            unsigned card = CMD_CARD(cmd), ch = CMD_CHAN(cmd) & 0x0fu;
+            for (int i = 0; i < n && ch + (unsigned)i < NCHAN; i++) {
+                faAod[fa_unit(busID)][card][ch + (unsigned)i] = (int16_t)words[i];
+                faAodSeen[fa_unit(busID)] = true;
+            }
             push_oms(sharedUs);
+            push_tvc();
+            push_aerosurf();
         } else if (CMD_MODE(cmd) == 8u) {
             if (CMD_CARD(cmd) == 10u && trace_fa() == fa_unit(busID)) {
                 fprintf(stderr, "mdmtrace: t=%.4f FA%d write card 10 ch %02x:", vehdyn_state()->t,
@@ -1458,13 +1823,64 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
             }
             discrete_write(faOut, NULL, fa_unit(busID), cmd, words, n);
             if (CMD_CARD(cmd) == 10u) { pc_track(); push_fire(sharedUs); }
+            if (CMD_CARD(cmd) == 2u || CMD_CARD(cmd) == 10u) push_aerosurf();
             if (CMD_CARD(cmd) == 7u || CMD_CARD(cmd) == 15u) push_oms(sharedUs);
         }
     }
 }
 
+/* THE OUTPUT READ-BACK AT AN OPS TRANSITION ("BITE 4", FIOGNIPG.asm,
+ * OPSINIT(INITINP) in GO1ASC/GO2ORB/GO3ENT/VG9OPS9).  PASS reads every
+ * discrete output channel's latched state back into its output buffer
+ * (CGBOBF.hal), then makes each RESET word the complement of its SET word.
+ * Mode 2 executes the MDM's PROM from address card x 32 + channel; each
+ * step here returns one output channel's register (DPS Console Handbook:
+ * the raw BITE 4 data of a DOL/DOH module is its command pattern).  The
+ * per-address layout is inferred from where the BCE program lands each word
+ * (#MIN displacements against CGBOBF): only the SET positions are used, so
+ * RESET and FILL positions read zero.  Unanswered, the reads came back zero
+ * and the next RESET words switched every flight-critical discrete off --
+ * among them the IMUs' OPERATE, at the OPS 9 to OPS 1 transition. */
+static bool readback(char mdm, int k, uint32_t f, int n, uint16_t *out) {
+    const uint16_t (*o)[NCHAN] = (mdm == 'F') ? ffOut[k] : faOut[k];
+    uint16_t w[12];
+    int len;
+    memset(w, 0, sizeof w);
+#define W(...) do { const uint16_t v_[] = { __VA_ARGS__ }; len = (int)(sizeof v_ / sizeof v_[0]); memcpy(w, v_, sizeof v_); } while (0)
+    if (mdm == 'F') {
+        switch (f) {
+        case 0x08543u: W(o[5][0], 0, o[13][0], 0); break;
+        case 0x08583u: W(o[13][0], 0, o[2][0], 0); break;
+        case 0x085C3u: W(o[2][0], 0, o[10][0], 0); break;
+        case 0x08601u: W(o[10][0], 0); break;
+        case 0x083EAu: W(o[2][1], o[2][2], o[2][1], o[2][2], o[5][1], 0, o[5][1], 0,
+                         o[10][1], o[10][2], o[10][1], o[10][2]); break;
+        default: return false;
+        }
+    } else {
+        switch (f) {
+        case 0x08545u: W(o[2][0], o[2][1], 0, 0, o[7][0], o[7][1]); break;
+        case 0x085CBu: W(o[7][0], o[7][1], o[7][2], 0, 0, 0, o[10][0], o[10][1], 0, 0,
+                         o[12][0], o[12][1]); break;
+        case 0x08707u: W(o[12][0], o[12][1], o[12][2], 0, 0, 0, o[15][0], o[15][1]); break;
+        case 0x087C3u: W(o[15][0], o[15][1], o[15][2], 0); break;
+        default: return false;
+        }
+    }
+#undef W
+    for (int i = 0; i < n; i++) out[i] = (i < len) ? w[i] : 0;
+    return true;
+}
+
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
+    if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
+    if (eiu_engine(busID, cmd)) return eiu_reply(busID, cmd, n, out, sharedUs / 1e6);
+    {
+        static bool wired = false;
+        if (!wired) { wired = true; valve_set_output_source(out_word); }
+    }
+    valve_update(sharedUs / 1e6);
     pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;
@@ -1508,6 +1924,27 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
+        if (u >= 1 && u <= 4 && f == ADTA_READ) {
+            uint16_t w[6];
+            adta_words(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 6) ? w[i] : 0;
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 3 && f == MLS_READ) {
+            uint16_t w[3];
+            landaids_mls(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 3) ? w[i] : 0;
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 3 && f == TACAN_RA_READ) {
+            uint16_t w[7];
+            landaids_tacan_ra(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 7) ? w[i] : 0;
+            ffReads++;
+            return true;
+        }
         if (u >= 1 && u <= 3 && f == GPS_READ) {
             uint16_t w[32];
             gps[u].reads++;
@@ -1524,14 +1961,16 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             return true;
         }
         if (u >= 1 && u <= 3 && f == IMU_DSCRT) {
-            for (int i = 0; i < n; i++) out[i] = (i == 0) ? IMU_DSCRT_ALL_GOOD : 0;
+            for (int i = 0; i < n; i++) out[i] = (i == 0) ? imu_discretes(u) : 0;
             ffReads++;
             return true;
         }
+        if (u >= 1 && readback('F', u, f, n, out)) { ffReads++; return true; }
         if (u >= 1 && f == HFE_FF_READ) { ff_hfe(u, out, n); ffReads++; return true; }
         if (u >= 1 && f == MFE_FF_READ) { ff_mfe(u, out, n); ffReads++; return true; }
     } else if (iua == IUA_FA) {
         int u = fa_unit(busID);
+        if (u >= 1 && readback('A', u, f, n, out)) { faReads++; return true; }
         if (u >= 1 && f == HFE_FA_READ) { fa_hfe(u, out, n); faReads++; return true; }
         if (u >= 1 && f == MFE_FA_READ) { fa_mfe(u, out, n); faReads++; return true; }
         if (u >= 3 && f == PC_FA_READ) {
@@ -1592,10 +2031,24 @@ bool mdmdev_dump(const char *dir) {
         pb[np++] = plat[k].t;
     }
     put_list(f, "imuPlatform", pb, np, true);
+    double ob6[6];
+    for (int k = 1; k <= 3; k++) {
+        ob6[2 * k - 2] = imuOpT[k] <= IMU_NO_CMD ? IMU_NO_CMD : imuOpT[k];
+        ob6[2 * k - 1] = imuOper[k];
+    }
+    put_list(f, "imuOperate", ob6, 6, true);
     {
         double sb[512];
         int ns = startrk_save(sb, 512);
         put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+        ns = eiu_save(sb, 512);
+        put_list(f, "engines", sb, ns < 512 ? ns : 512, true);
+        ns = mec_save(sb, 512);
+        put_list(f, "mecs", sb, ns < 512 ? ns : 512, true);
+        ns = valve_save(sb, 512);
+        put_list(f, "valves", sb, ns < 512 ? ns : 512, true);
+        ns = lps_save(sb, 512);
+        put_list(f, "lps", sb, ns < 512 ? ns : 512, true);
     }
     double gb[9];
     for (int k = 1; k <= 3; k++) {
@@ -1678,10 +2131,26 @@ bool mdmdev_load(const char *dir) {
             plat[k].started = pb[i++] != 0.0;
             plat[k].t = pb[i++] - tCap;                 /* rebased with the vehicle */
         }
+    double ob6[6];
+    if (get_list(root, "imuOperate", ob6, 6) == 6)
+        for (int k = 1; k <= 3; k++) {
+            /* rebased with the vehicle: a command before the capture is
+             * now at a negative time, which is still a command */
+            imuOpT[k] = ob6[2 * k - 2] <= IMU_NO_CMD ? IMU_NO_CMD : ob6[2 * k - 2] - tCap;
+            imuOper[k] = ob6[2 * k - 1] != 0.0;
+        }
     {
         double sb[512];
         int ns = get_list(root, "starTrackers", sb, 512);
         if (ns > 0) startrk_load(sb, ns, tCap);
+        ns = get_list(root, "engines", sb, 512);
+        if (ns > 0) eiu_load(sb, ns, tCap);
+        ns = get_list(root, "mecs", sb, 512);
+        if (ns > 0) mec_load(sb, ns, tCap);
+        ns = get_list(root, "valves", sb, 512);
+        if (ns > 0) valve_load(sb, ns);
+        ns = get_list(root, "lps", sb, 512);
+        if (ns > 0) lps_load(sb, ns);
     }
     if (ng == 9)
         for (int k = 1; k <= 3; k++) {
@@ -1715,6 +2184,10 @@ void mdmdev_test_platform(int n, double P[3][3]) {
 
 void mdmdev_report(void) {
     startrk_report();
+    lps_report();
+    eiu_report();
+    mec_report();
+    valve_report();
     for (int k = 1; k <= 3; k++)
         if (plat[k].started)
             fprintf(stderr, "mdmdev: IMU%d platform %.4f deg from M50; %ld torque "

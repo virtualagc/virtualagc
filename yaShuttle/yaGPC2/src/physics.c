@@ -152,6 +152,8 @@ double phys_earth_angle(double t) {
 
 double phys_earth_rate(void) { return E.rate; }
 
+void phys_earth_pole(double p[3]) { p[0] = E.P[2][0]; p[1] = E.P[2][1]; p[2] = E.P[2][2]; }
+
 void phys_inertial_to_earth(double t, double M[3][3]) {
     double th = phys_earth_angle(t), c = cos(th), s = sin(th);
     for (int j = 0; j < 3; j++) {

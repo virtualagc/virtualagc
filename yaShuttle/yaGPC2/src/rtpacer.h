@@ -41,6 +41,7 @@ struct CPU;
 typedef struct {
     struct CPU *cpu;
     double factor;          /* speed multiplier; 2.0 = twice real speed */
+    double rateCheckSeconds; /* when YAGPC_RATE_FILE was last read (wall) */
     double idleTimeoutMs;   /* give up on a wait after this much wall time */
     double minSleepMs;      /* sleep off a lead only past this (--rt-min-sleep-ms) */
     double idlePollSeconds; /* sleep between wait passes (--rt-idle-poll-ms) */
