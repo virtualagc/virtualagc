@@ -2245,6 +2245,8 @@ double vehdyn_load(const double *b, int n) {
  * offset CGNS_MLSANT_NB_DIST, GNAMLS.hal:257; the radar altimeter's
  * 12.915 ft at 2.005 rad, GHEUPG.hal:457-463).  Position m, velocity m/s
  * relative to the turning Earth, and body -> Earth-fixed. */
+void vehdyn_cg_offset(double b[3]) { memcpy(b, cgB, sizeof cgB); }
+
 void vehdyn_navbase_ef(double rEf[3], double vEf[3], double Cbe[3][3]) {
     double nb[3], d[3], dI[3], wd[3], wdI[3], M[3][3];
     to_body(NB_XO, NB_YO, NB_ZO, nb);

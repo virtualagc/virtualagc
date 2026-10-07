@@ -138,6 +138,11 @@ void vehdyn_gear(double *pos, int wow[3]);
 /* The lower main wheel's height above the runway (ft) and the ground speed
  * (kt) -- the crew's cues for the gear, the chute and the brakes. */
 void vehdyn_ground_state(double *wheelFt, double *gsKt);
+/* The point the state (r, v) describes: the CURRENT centre of mass, as an
+ * offset from the orbiter's dry CG (Xo 1100, Yo 0, Zo 375) in body metres
+ * (+X forward = -Xo, +Y right, +Z down = -Zo).  It moves with propellant,
+ * and on the pad and in ascent it is the whole stack's. */
+void vehdyn_cg_offset(double b[3]);
 /* The air data probes, left and right: 0 stowed .. 1 deployed (the crew's
  * AIR DATA PROBE switches, hardwired 0x0100/0x0080 DEPLOY, 0x0040/0x0020
  * STOW).  And the air they meet: free-stream pressure (psf), Mach, alpha,

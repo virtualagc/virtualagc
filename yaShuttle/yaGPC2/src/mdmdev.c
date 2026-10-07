@@ -1619,8 +1619,11 @@ static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, dou
  * timing unit has set the epoch) and the M50 -> Earth-fixed rotation, nine
  * doubles row by row (r_ef = M r_m50, PASS's own Earth: the same RNP matrix
  * and rotation the navigation aids and GPS use), so that a picture of the
- * Earth agrees with PASS's ground track.  27 doubles in all; readers take
- * the first N they know.  Only with the dynamics on and a panel wired. */
+ * Earth agrees with PASS's ground track; then the point (r, v) describe --
+ * the current centre of mass -- as an offset from the dry CG (Xo 1100, Yo 0,
+ * Zo 375), body metres, +X forward +Y right +Z down: it moves with propellant
+ * and on the pad is the whole stack's (vehdyn_cg_offset).  30 doubles in
+ * all; readers take the first N they know.  Only with the dynamics on and a panel wired. */
 #define TRUTH_OFFSET 98
 #define TRUTH_PERIOD_S 0.05
 
@@ -1636,7 +1639,7 @@ static void truth_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9];
+    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9 + 3];
     int n = 0;
     v[n++] = st->t;
     v[n++] = vehdyn_gmt(st->t);
@@ -1650,7 +1653,9 @@ static void truth_publish(void) {
     double M[3][3];
     phys_inertial_to_earth(st->t, M);
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) v[n++] = M[i][j];
-    uint8_t b[4 + 8 * 27];
+    vehdyn_cg_offset(&v[n]);
+    n += 3;
+    uint8_t b[4 + 8 * 30];
     memcpy(b, "TRU1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};
