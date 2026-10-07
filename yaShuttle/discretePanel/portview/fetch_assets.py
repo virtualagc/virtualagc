@@ -12,6 +12,8 @@ portview.py loads, and the download deleted unless --keep-downloads.
                     Tycho-2 stars taken out, plate carree in J2000 right
                     ascension and declination, centred on 0h, RA increasing to
                     the left.  Linear radiance, kept as float16 RGB.
+  de440s.bsp        JPL planetary ephemeris DE440s (1849-2150), read by
+                    Skyfield for the Sun, Moon and planets; used as downloaded.
   hipparcos.npy     ESA Hipparcos main catalogue (CDS I/239, hip_main.dat): RA,
                     Dec (ICRS, epoch J1991.25), proper motions, V magnitude and
                     B-V of ~118,000 stars, drawn by portview as points.
@@ -29,9 +31,11 @@ CACHE = os.path.join(HERE, "cache")
 SVS = "https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/"
 MILKYWAY_URL = SVS + "milkyway_2020_8k.exr"
 HIPPARCOS_URL = "https://cdsarc.cds.unistra.fr/ftp/I/239/hip_main.dat"
+DE440S_URL = "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp"
 
 MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
+DE440S = os.path.join(CACHE, "de440s.bsp")
 
 STAR_DTYPE = np.dtype([('ra', 'f8'), ('dec', 'f8'), ('pmra', 'f4'), ('pmdec', 'f4'),
                        ('vmag', 'f4'), ('bv', 'f4')])
@@ -108,6 +112,7 @@ def main():
                     help="keep the original downloads beside the prepared files")
     args = ap.parse_args()
     os.makedirs(CACHE, exist_ok=True)
+    download(DE440S_URL, DE440S)
     prepare_hipparcos(args.keep_downloads)
     prepare_milkyway(args.keep_downloads)
     print("portview assets ready in", CACHE)

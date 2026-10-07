@@ -192,7 +192,11 @@ the hand-built renderer.
   `TRU1` receiver with extrapolation, a camera per view, stars.  `--test` flies
   a synthetic orbit without yaGPC2.  Check: put a navigation star in a view at
   the attitude the star tracker reports for it.
-- **P2 — Sun, Moon, planets.**  Check against Horizons for a few times.
+- **P2 — Sun, Moon, planets** (done).  Checked: the Moon's phase and the
+  tilt of its lit limb (2026-10-07, 10% lit), the total lunar eclipse of
+  2011-06-15 (partial and total phases), the Venus-Jupiter conjunction of
+  2023-03-02 (0.46 deg apart).  True angular sizes are used for the Sun and
+  Moon (free, and they make eclipses come out right).
 - **P3 — Earth** (tiled ellipsoid, scattering atmosphere) and `fetch_assets.py`.
 - **P4 — LEO objects** from TGT1 (a `--test` source first, until yaGPC2 sends it).
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
