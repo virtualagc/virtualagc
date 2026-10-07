@@ -5863,8 +5863,8 @@ class Screen_DPS(MDUScreen):
             return 1.0 if (st['fcw1Bright'] or st['fcw3Bright']) else 0.72
 
         def rot(dx, dy):
-            """Rotate a beam-space delta by the character angle.  `angle` runs
-            opposite to the beam's Y, so a quarter turn advances up."""
+            """Rotate a beam-space delta by the character angle: clockwise on
+            the screen (the beam's Y is up), so a quarter turn advances down."""
             if not st['angle']:
                 return [dx, dy]
             cs = math.cos(st['angle'])
@@ -6109,12 +6109,17 @@ class Screen_DPS(MDUScreen):
                 st['colorCode'] = v['color'] if v['select'] == 1 else None
                 st['fcw3Bright'] = v['intensity'] == 1
             elif nm == 'ROT':
-                st['angle'] = -2 * math.pi * v['angle'] / 4096
+                # CLOCKWISE-positive, as PASS writes it: GZVVER.hal:287-291 puts
+                # the altitude-dissipation angle in "0-360 CLOCKWISE ROTATION"
+                # (level flight = 270, nose left), and CG3041.dfg's ENTRY TRAJ
+                # shuttle sends a fixed 270 for nose-left, fin-up.  Negated, the
+                # orbiter flew upside down and backwards on ENTRY TRAJ.
+                st['angle'] = 2 * math.pi * v['angle'] / ANGLE_UNITS
             elif nm == 'MAJINC':
                 if st['incrOn']:
                     # 12 unsigned bits of 360/32768 degrees, not MAJINC's
                     # signed 11, so the field is read from the word.
-                    st['angleStep'] = -2 * math.pi * (desc['word'] & 0x0fff) / 32768
+                    st['angleStep'] = 2 * math.pi * (desc['word'] & 0x0fff) / 32768
                 else:
                     st['majorStep'] = v['step']
             elif nm in ('MININC', 'SPTYPE'):
