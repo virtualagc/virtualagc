@@ -303,7 +303,7 @@ def fetch_mosaic(source, bounds, n_tiles):
 def blank(img):
     """An image with nothing in it (a service's no-data fill)."""
     a = np.asarray(img.resize((256, 256)), dtype=np.float32)
-    return float(a.std()) < 2.0
+    return float(a.reshape(-1, 3).std(axis=0).max()) < 2.0      # per channel
 
 
 def match_colours(child, cb, parent, pb):
