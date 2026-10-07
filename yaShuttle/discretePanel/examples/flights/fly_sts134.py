@@ -186,6 +186,16 @@ G3_FROM_MM = ("+1     keys SPEC 1 PRO\n"
 GPS_INCORPORATE = ("+1     keys SPEC 5 0 PRO\n"
                    "+3     keys ITEM 4 4 EXEC\n"
                    "+3     keys RESUME\n")
+# DEVELOPMENT ONLY, with --incorporate-at-land: SPEC 55 ITEM 38, METERING
+# OVERRIDE (a toggle; legal in MM 301-603, GKAGPS.hal CASE_10).  A capture
+# resumed in TAEM can carry a nav error of 30,000 ft; incorporated, PASS meters
+# it into the guidance state at ~130 ft/s and in MM 305 keeps metering until
+# the relative velocity is below 200 ft/s -- past touchdown -- so guidance
+# flies 7-16 kft off.  A flight that incorporates at the checklist's points
+# never builds that error and never needs this.
+METERING_OVERRIDE = ("+1     keys SPEC 5 5 PRO\n"
+                     "+3     keys ITEM 3 8 EXEC\n"
+                     "+3     keys RESUME\n")
 # V = 7K, ENT/134/FIN FS 3-34: "ADTA PROBES - DEPLOY (HEAT)"; and ADTA to
 # G&C AUT (SPEC 50 ITEM 28, the checklist's "ADTA AUT 28"), so PASS takes the
 # probes' air data into guidance and control once V < 2500 ft/s ("M = 2.0
@@ -638,6 +648,9 @@ class Flight:
             self.play(GPS_INCORPORATE, "gps-incorporate-land")
             self.script_done("gps-incorporate-land", 60)
             self.say("crew: GPS INCORPORATE at the start of LAND (--incorporate-at-land)")
+            self.play(METERING_OVERRIDE, "metering-override-land")
+            self.script_done("metering-override-land", 60)
+            self.say("crew: SPEC 55 METERING OVERRIDE (--incorporate-at-land)")
         t_end = self.truth()["t"] + self.a.land_time
         last, done = None, set()
         log0 = len(self.log_text())
@@ -728,7 +741,7 @@ def main():
                     help="LAND: simulated seconds to fly before giving up (default 900)")
     ap.add_argument("--incorporate-at-land", action="store_true",
                     help="DEVELOPMENT: force a GPS incorporation as LAND starts, for a run "
-                         "resumed straight into TAEM (not in any checklist)")
+                         "resumed straight into TAEM, then SPEC 55 METERING OVERRIDE (not in any checklist)")
     ap.add_argument("--attach", action="store_true",
                     help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
                          "(a driver that stopped after sending OPS 301) instead of starting one")
