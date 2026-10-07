@@ -1614,8 +1614,13 @@ static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, dou
  * really doing.  One datagram per TRUTH_PERIOD_S of vehicle time on port
  * base + TRUTH_OFFSET: "TRU1", then big-endian IEEE doubles -- vehicle time
  * (s), PASS GMT (s), the attitude quaternion body -> M50 (w x y z), body
- * rates (rad/s), M50 position (m) and velocity (m/s).  Only with the
- * dynamics on and a panel wired. */
+ * rates (rad/s), M50 position (m) and velocity (m/s); the main wheels'
+ * height (ft) and the ground speed (kt); then Unix time (s, -1 until the
+ * timing unit has set the epoch) and the M50 -> Earth-fixed rotation, nine
+ * doubles row by row (r_ef = M r_m50, PASS's own Earth: the same RNP matrix
+ * and rotation the navigation aids and GPS use), so that a picture of the
+ * Earth agrees with PASS's ground track.  27 doubles in all; readers take
+ * the first N they know.  Only with the dynamics on and a panel wired. */
 #define TRUTH_OFFSET 98
 #define TRUTH_PERIOD_S 0.05
 
@@ -1631,7 +1636,7 @@ static void truth_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[2 + 4 + 3 + 3 + 3 + 2];
+    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9];
     int n = 0;
     v[n++] = st->t;
     v[n++] = vehdyn_gmt(st->t);
@@ -1641,7 +1646,11 @@ static void truth_publish(void) {
     for (int i = 0; i < 3; i++) v[n++] = st->v[i];
     vehdyn_ground_state(&v[n], &v[n + 1]);       /* main wheels' height (ft), ground speed (kt) */
     n += 2;
-    uint8_t b[4 + 8 * 17];
+    v[n++] = vehdyn_unix(st->t);
+    double M[3][3];
+    phys_inertial_to_earth(st->t, M);
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) v[n++] = M[i][j];
+    uint8_t b[4 + 8 * 27];
     memcpy(b, "TRU1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};
