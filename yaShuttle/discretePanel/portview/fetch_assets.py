@@ -300,6 +300,12 @@ def fetch_mosaic(source, bounds, n_tiles):
     return out
 
 
+def blank(img):
+    """An image with nothing in it (a service's no-data fill)."""
+    a = np.asarray(img.resize((256, 256)), dtype=np.float32)
+    return float(a.std()) < 2.0
+
+
 def match_colours(child, cb, parent, pb):
     """The child's channels scaled to the parent's mean and spread over the
     child's area, so a ring and the next coarser one meet without a seam."""
@@ -332,10 +338,16 @@ def prepare_site(key):
     rings = []
     for k, (half_km, source) in enumerate(RINGS):
         if source == 'naip' and not site.get('naip'):
-            continue
+            source = 's2'
         b = ring_bounds(site, half_km)
         print("site %s ring %d: +-%g km from %s" % (key, k, half_km, source))
         img = fetch_mosaic(source, b, 3 if source == 'naip' else 2)
+        if source == 'naip' and blank(img):
+            # NAIP has no imagery over some military installations (Edwards,
+            # White Sands): Sentinel-2's 10 m instead.
+            print("  NAIP is blank here; Sentinel-2 instead")
+            source = 's2'
+            img = fetch_mosaic(source, b, 2)
         img.save(os.path.join(d, "ring%d.raw.jpg" % k), quality=95)
         rings.append(dict(file="ring%d.jpg" % k, bounds=b, half_km=half_km, source=source))
     # Colours: the coarsest as fetched; each finer one matched to the next.
@@ -500,13 +512,19 @@ def prepare_site_fine(key):
         return
     with open(meta_path) as f:
         meta = json.load(f)
-    if meta.get('fine'):
+    if 'fine' in meta:
         return
     Image = _image()
     half_km, source = FINE_RING
     b = ring_bounds(site, half_km)
     print("site %s fine ring: +-%g km from %s" % (key, half_km, source))
     img = fetch_mosaic(source, b, 4)
+    if blank(img):
+        print("  NAIP is blank here; no fine ring")
+        meta['fine'] = None
+        with open(meta_path, "w") as f:
+            json.dump(meta, f, indent=1)
+        return
     ring0 = meta['rings'][0]
     img = match_colours(img, b, Image.open(os.path.join(d, ring0['file'])), ring0['bounds'])
     img.save(os.path.join(d, "ringF.jpg"), quality=92, subsampling=0)
