@@ -197,7 +197,17 @@ the hand-built renderer.
   2011-06-15 (partial and total phases), the Venus-Jupiter conjunction of
   2023-03-02 (0.46 deg apart).  True angular sizes are used for the Sun and
   Moon (free, and they make eclipses come out right).
-- **P3 — Earth** (tiled ellipsoid, scattering atmosphere) and `fetch_assets.py`.
+- **P3 — Earth** (done): ray-cast per pixel against PASS's ellipsoid rather
+  than a tiled mesh, which is exact from orbit and needs no geometry; tiles
+  remain the way to add terrain and high-resolution imagery for ascent and
+  entry (a level-of-detail texture lookup keyed by latitude/longitude, and
+  heights).  Blue Marble NG by month (16384x8192, compressed by the driver:
+  ~90 MB of GPU memory), Black Marble lights, GEBCO water mask for glint,
+  single-scattering atmosphere, the Moon's shadow, per-view eye adaptation.
+  Checked: the Americas at noon from 20,000 km; the Galapagos at nadir; the
+  2017-08-21 eclipse (total at Hopkinsville at 18:26:40, 83-85% at Chicago
+  and Atlanta).  Apple's OpenGL falls back to software for dual-source
+  blending, so the Earth goes to its own buffers (colour, transmittance).
 - **P4 — LEO objects** from TGT1 (a `--test` source first, until yaGPC2 sends it).
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed

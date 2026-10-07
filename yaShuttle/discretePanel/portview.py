@@ -47,7 +47,21 @@ Moon's parallax from LEO is up to a degree), at their true angular sizes:
     adapted to it sees it, keeping its markings at any exposure;
   - Venus, Mars, Jupiter and Saturn as points like the stars (they are under
     a pixel), by their magnitudes, in Ron's colours.
-The Moon passes in front of the Sun; the Earth (to come) in front of all.
+The Moon passes in front of the Sun; the Earth in front of all.
+
+THE EARTH.  Ray-cast per pixel against PASS's ellipsoid (a = 6378137 m,
+f = 1/298.3) in PASS's Earth-fixed frame, from TRU1 [18-26] (or, lacking it,
+sidereal time from [17], ~0.7 deg off; lacking both, a plain dark Earth):
+  - by day, NASA Blue Marble NG for the flight's month (cloud-free), lit by
+    the Sun through the atmosphere, with sun glint on water (GEBCO's
+    land/water mask) and the Moon's shadow in solar eclipses;
+  - by night, NASA Black Marble's city lights;
+  - the atmosphere (Rayleigh, Mie, ozone; single scattering through a
+    transmittance table), giving the blue limb, twilight, haze, and the
+    dimming and reddening of whatever is seen through it.
+EYE ADAPTATION.  Each view estimates how much sunlit Earth (and Sun) it holds
+and dims the stars and the Milky Way to match: the stars vanish against a
+daylit Earth and come back, more slowly, in the dark.
 Light is added up linearly in a floating-point buffer per view and only then
 clipped and encoded for the screen, so exposure is one physical factor.  How
 the sky "looks" from orbit is a matter of exposure (the eye's adaptation):
@@ -88,6 +102,12 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
+NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
+WATERMASK = os.path.join(CACHE, "watermask.png")
+
+
+def bluemarble_path(month):
+    return os.path.join(CACHE, "bluemarble_%02d.jpg" % month)
 
 FULL_SIZE = 768                    # --size units: 768 is the design (full) window
 MCAST_GROUP = "239.255.1.1"
@@ -372,20 +392,22 @@ class TruthFeed(QtCore.QObject):
 
 
 class TestFeed(TruthFeed):
-    """No yaGPC2: a synthetic 400 km, 51.6 deg circular orbit, sent through
+    """No yaGPC2: a synthetic circular orbit (400 km, 51.6 deg), sent through
     the same datagram, clock and extrapolation path as the real feed.
 
     mode 'lvlh': nose along the velocity, belly to the Earth.
+    mode 'baydown': nose along the velocity, payload bay to the Earth (the
+    overhead windows look straight down).
     mode (ra, dec): inertial hold, nose at that J2000 direction (deg) and
     the top of the forward view toward the celestial north pole.
     mode 'sun', 'moon', 'venus', ...: the same, at that body's direction from
     the Earth's centre at the start."""
     PERIOD_S = 0.05
 
-    def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None):
+    def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None):
         QtCore.QObject.__init__(self)
         self.unix0 = time.time() if unix0 is None else unix0
-        if isinstance(mode, str) and mode != 'lvlh':
+        if isinstance(mode, str) and mode not in ('lvlh', 'baydown'):
             d = unit(ephemeris.at(self.unix0).pos[mode])
             mode = (math.degrees(math.atan2(d[1], d[0])) % 360.0,
                     math.degrees(math.asin(d[2])))
@@ -394,9 +416,13 @@ class TestFeed(TruthFeed):
         self.latest = None
         self.latestAt = -1e9
         self.clock = VehicleClock()
-        self.R = 6378137.0 + 400e3
+        self.R = 6378137.0 + alt_km * 1e3
         self.n = math.sqrt(MU_EARTH / self.R ** 3)
         self.inc = 51.6 * D2R
+        self.raan = 0.0
+        if lon is not None:            # start over that longitude (on the equator)
+            x = gmst_matrix(self.unix0) @ np.array([1.0, 0.0, 0.0])
+            self.raan = lon * D2R - math.atan2(x[1], x[0])
         self.t = 0.0
         self.timer = QtCore.QTimer(self)
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
@@ -409,17 +435,20 @@ class TestFeed(TruthFeed):
 
     def _orbit(self, t):
         u = self.n * t
-        P = np.array([1.0, 0.0, 0.0])
-        Q = np.array([0.0, math.cos(self.inc), math.sin(self.inc)])
+        cO, sO, ci, si = math.cos(self.raan), math.sin(self.raan), math.cos(self.inc), math.sin(self.inc)
+        P = np.array([cO, sO, 0.0])
+        Q = np.array([-sO * ci, cO * ci, si])
         r = self.R * (math.cos(u) * P + math.sin(u) * Q)
         v = self.R * self.n * (-math.sin(u) * P + math.cos(u) * Q)
         return r, v
 
     def _attitude(self, t):
-        if self.mode == 'lvlh':
+        if self.mode in ('lvlh', 'baydown'):
             r, v = self._orbit(t)
             z = -unit(r)
             y = unit(np.cross(v, r))
+            if self.mode == 'baydown':
+                z, y = -z, -y
             return np.column_stack([np.cross(y, z), y, z])
         ra, dec = self.mode
         j = np.array([math.cos(dec * D2R) * math.cos(ra * D2R),
@@ -438,9 +467,7 @@ class TestFeed(TruthFeed):
         dC = (self._attitude(t + h) - self._attitude(t - h)) / (2 * h)
         W = C.T @ dC                                   # skew(w), body rates
         w = np.array([W[2, 1], W[0, 2], W[1, 0]])
-        th = 7.2921159e-5 * (self.unix0 + t) % (2 * math.pi)   # test only
-        m50_to_ef = np.array([[math.cos(th), math.sin(th), 0],
-                              [-math.sin(th), math.cos(th), 0], [0, 0, 1]])
+        m50_to_ef = gmst_matrix(self.unix0 + t)
         vals = ([t, t] + list(matrix_to_quat(C)) + list(w) + list(r) + list(v)
                 + [0.0, 0.0, self.unix0 + t] + list(m50_to_ef.ravel()))
         s = Truth.parse(b"TRU1" + struct.pack(">27d", *vals))
@@ -599,7 +626,7 @@ void main() {
 PRESENT_FS = """
 #version 410 core
 out vec4 fragColor;
-uniform sampler2D uHdr;
+uniform sampler2D uHdr, uEarth, uEarthTrans;
 vec3 toSrgb(vec3 c) {
     c = max(c, 0.0);
     c /= max(1.0, max(c.r, max(c.g, c.b)));    // saturate keeping the hue
@@ -607,7 +634,10 @@ vec3 toSrgb(vec3 c) {
                step(0.0031308, c));
 }
 void main() {
-    fragColor = vec4(toSrgb(texelFetch(uHdr, ivec2(gl_FragCoord.xy), 0).rgb), 1.0);
+    ivec2 p = ivec2(gl_FragCoord.xy);
+    vec3 c = texelFetch(uHdr, p, 0).rgb * texelFetch(uEarthTrans, p, 0).rgb
+           + texelFetch(uEarth, p, 0).rgb;
+    fragColor = vec4(toSrgb(c), 1.0);
 }
 """
 
@@ -674,6 +704,70 @@ def make_srgb_texture(rgb):
     return tid
 
 
+def load_rgb(path):
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    return np.asarray(Image.open(path).convert('RGB'))
+
+
+def make_dxt1_texture(rgb):
+    """A large sRGB image, compressed by the driver (DXT1: 1/6 the memory)."""
+    h, w, _ = rgb.shape
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C,          # COMPRESSED_SRGB_S3TC_DXT1
+                    w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+    GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+    try:
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, 0x84FE, min(8.0, GL.glGetFloatv(0x84FF)))
+    except GL.GLError:
+        pass
+    return tid
+
+
+def load_gray(path):
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    return np.asarray(Image.open(path).convert('L'))
+
+
+def make_mask_texture(a):
+    """A one-channel 0-255 map, mipmapped, filtered."""
+    h, w = a.shape
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_R8, w, h, 0, GL.GL_RED, GL.GL_UNSIGNED_BYTE,
+                    np.ascontiguousarray(a))
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+    GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT)
+    GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+    return tid
+
+
+def make_lut_texture(rgb):
+    h, w, _ = rgb.shape
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB32F, w, h, 0, GL.GL_RGB, GL.GL_FLOAT,
+                    np.ascontiguousarray(rgb))
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+    for p, v in ((GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR), (GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR),
+                 (GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE), (GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)):
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, p, v)
+    return tid
+
+
 def bv_to_rgb(bv):
     """Linear RGB of stars of colour index B-V, luminance ~1, softened toward
     white as the eye sees star colours.  Temperature by Ballesteros (2012),
@@ -723,10 +817,39 @@ class Resources(object):
                               "uGain", "uEarthshine", *disk)
         self.moonTex = make_srgb_texture(self.moon)
         self.moon = None
+        self.earthProg = compile_program(FULLSCREEN_VS, EARTH_FS)
+        self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
+                               "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit",
+                               "uMoonEF")
+        self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
+        self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
+        self.transTex = make_lut_texture(transmittance_table())
+        self.earthNightTex = make_dxt1_texture(load_rgb(NIGHTLIGHTS))
+        self.waterTex = make_mask_texture(load_gray(WATERMASK))
+        self.earthDayTex = None
+        self.earthMonth = None
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
-        self.presentU = uniforms(self.presentProg, "uHdr")
+        self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans")
         self.set_star_epoch(2000.0)
         self.ready = True
+
+    def set_month(self, unix):
+        """The Blue Marble month of the flight (loaded on first need, ~1.5 s);
+        the nearest prepared month if that one isn't."""
+        month = time.gmtime(unix).tm_mon
+        if month == self.earthMonth:
+            return
+        have = [m for m in range(1, 13) if os.path.exists(bluemarble_path(m))]
+        if not have:
+            sys.exit("portview: no Blue Marble month prepared\n"
+                     "  run: python3 portview/fetch_assets.py")
+        use = min(have, key=lambda m: min(abs(m - month), 12 - abs(m - month)))
+        if use != month:
+            print("portview: Blue Marble month %d not prepared; using %d" % (month, use))
+        if self.earthDayTex is not None:
+            GL.glDeleteTextures([self.earthDayTex])
+        self.earthDayTex = make_dxt1_texture(load_rgb(bluemarble_path(use)))
+        self.earthMonth = month
 
     def set_star_epoch(self, year):
         """Carry the catalogue (epoch J1991.25) to the given year."""
@@ -780,7 +903,8 @@ class MilkyWayLayer(object):
         cam_to_j2k = J2000_TO_M50.T @ fs.C @ view.basis
         GL.glUniformMatrix3fv(u["uCamToJ2k"], 1, GL.GL_TRUE, cam_to_j2k.astype(np.float32))
         GL.glUniform2f(u["uTan"], view.tanX, view.tanY)
-        GL.glUniform1f(u["uGain"], self.GAIN * self.exposure.factor * self.exposure.milkyway)
+        GL.glUniform1f(u["uGain"], self.GAIN * self.exposure.factor * self.exposure.milkyway
+                       * view.adapt)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
 
@@ -983,7 +1107,8 @@ class PointLayer(object):
         j2k_to_cam = (J2000_TO_M50.T @ fs.C @ view.basis).T
         GL.glUniformMatrix3fv(u["uJ2kToCam"], 1, GL.GL_TRUE, j2k_to_cam.astype(np.float32))
         GL.glUniform2f(u["uTan"], view.tanX, view.tanY)
-        GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
+        GL.glUniform1f(u["uMagRef"], self.MAG_REF
+                       + 2.5 * math.log10(self.exposure.factor * view.adapt))
         GL.glUniform1f(u["uCore"], 1.0 * view.devicePixelRatioF())
         GL.glUniform1f(u["uCut"], self.CUT)
         GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)
@@ -1031,6 +1156,280 @@ class PlanetLayer(PointLayer):
 
 
 # --------------------------------------------------------------------------
+# The Earth and its atmosphere.  One full-screen pass per view: each pixel's
+# ray is intersected with PASS's ellipsoid (a = 6378137 m, f = 1/298.3) in
+# PASS's Earth-fixed frame (TRU1's M50 -> Earth-fixed matrix), and the
+# atmosphere along it is integrated: Rayleigh, Mie and ozone, single
+# scattering, the Sun's light reaching each point through a precomputed
+# transmittance table (Bruneton and Neyret's parameterization).  The result
+# goes to the view's Earth buffers, a colour and the atmosphere's own
+# transmittance; the final pass shows the sky through that transmittance and
+# adds the colour, so stars, the Sun and the Moon dim and redden toward the
+# limb.  (Dual-source blending would do it in one pass, but Apple's OpenGL on
+# Metal falls back to software for it.)
+# The same code serves later for views from inside the atmosphere.
+
+EARTH_A = 6378137.0                   # PASS's ellipsoid (vehdyn.c; GNKGEO)
+EARTH_F = 1.0 / 298.3
+EARTH_B = EARTH_A * (1.0 - EARTH_F)
+ATMOS_TOP = 100e3                     # m above the ellipsoid
+RAYLEIGH = np.array([5.802e-6, 13.558e-6, 33.1e-6])     # scattering, 1/m
+RAYLEIGH_H = 8000.0
+MIE_SCAT, MIE_EXT, MIE_H, MIE_G = 3.996e-6, 4.440e-6, 1200.0, 0.8
+OZONE = np.array([0.650e-6, 1.881e-6, 0.085e-6])        # absorption, 1/m
+TRANS_W, TRANS_H = 256, 64
+
+
+def transmittance_table():
+    """Transmittance to the top of the atmosphere, over (mu, r) in Bruneton
+    and Neyret's mapping, RGB float32, rows by r."""
+    Rg, Rt = EARTH_A, EARTH_A + ATMOS_TOP
+    H = math.sqrt(Rt * Rt - Rg * Rg)
+    xm = (np.arange(TRANS_W) + 0.5) / TRANS_W
+    xr = (np.arange(TRANS_H) + 0.5) / TRANS_H
+    rho = (H * xr)[:, None]
+    r = np.sqrt(rho * rho + Rg * Rg)
+    dmin, dmax = Rt - r, rho + H
+    d = dmin + xm[None, :] * (dmax - dmin)
+    mu = np.clip(np.where(d == 0, 1.0, (H * H - rho * rho - d * d) / (2 * r * d)), -1, 1)
+    n = 500
+    s = (np.arange(n) + 0.5) / n
+    t = d[..., None] * s                                   # (h, w, n)
+    rr = np.sqrt(r[..., None] ** 2 + t * t + 2 * r[..., None] * mu[..., None] * t)
+    h = rr - Rg
+    ds = (d / n)[..., None]
+    tr = (np.exp(-h / RAYLEIGH_H) * ds).sum(-1)
+    tm = (np.exp(-h / MIE_H) * ds).sum(-1)
+    to = (np.clip(1 - np.abs(h - 25e3) / 15e3, 0, None) * ds).sum(-1)
+    tau = (RAYLEIGH * tr[..., None] + MIE_EXT * tm[..., None] + OZONE * to[..., None])
+    return np.exp(-tau).astype(np.float32)
+
+
+EARTH_FS = """
+#version 410 core
+in vec2 vNdc;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragTrans;     // what is behind passes x this
+uniform mat3 uCamToEF;
+uniform vec3 uOrigin;           // the eye, Earth-fixed, m
+uniform vec3 uSun;              // the Sun's direction, Earth-fixed
+uniform vec2 uTan;
+uniform sampler2D uDay, uNight, uTrans, uWater;
+uniform float uSunE, uNightGain, uLit;
+uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses)
+const float PI = 3.14159265358979;
+const float R_SUN = 6.957e8, R_MOON = 1.7374e6, AU = 1.495978707e11;
+// The fraction of a disk of angular radius a uncovered by a disk of radius b,
+// their centres sep apart (small angles, flat geometry).
+float uncovered(float a, float b, float sep) {
+    if (sep >= a + b) return 1.0;
+    if (sep <= b - a) return 0.0;
+    if (sep <= a - b) return 1.0 - (b * b) / (a * a);
+    float a2 = a * a, b2 = b * b;
+    float x = (sep * sep + a2 - b2) / (2.0 * sep);
+    float y = sep - x;
+    float area = a2 * acos(clamp(x / a, -1.0, 1.0)) - x * sqrt(max(a2 - x * x, 0.0))
+               + b2 * acos(clamp(y / b, -1.0, 1.0)) - y * sqrt(max(b2 - y * y, 0.0));
+    return 1.0 - area / (PI * a2);
+}
+const float A = """ + repr(EARTH_A) + """, K = """ + repr(EARTH_A / EARTH_B) + """;
+const float E2 = """ + repr(1.0 - (EARTH_B / EARTH_A) ** 2) + """;
+const float RG = A, RT = A + """ + repr(ATMOS_TOP) + """;
+const vec3 B_R = vec3(""" + ", ".join(repr(float(x)) for x in RAYLEIGH) + """);
+const vec3 B_O = vec3(""" + ", ".join(repr(float(x)) for x in OZONE) + """);
+const float B_MS = """ + repr(MIE_SCAT) + """, B_ME = """ + repr(MIE_EXT) + """;
+const float H_R = """ + repr(RAYLEIGH_H) + """, H_M = """ + repr(MIE_H) + """, G = """ + repr(MIE_G) + """;
+
+vec3 transmittance(float r, float mu) {     // to the top of the atmosphere
+    float H = sqrt(RT * RT - RG * RG);
+    float rho = sqrt(max(r * r - RG * RG, 0.0));
+    float d = max(-r * mu + sqrt(max(r * r * (mu * mu - 1.0) + RT * RT, 0.0)), 0.0);
+    float dmin = RT - r, dmax = rho + H;
+    vec2 uv = vec2((d - dmin) / max(dmax - dmin, 1.0), rho / H);
+    uv = 0.5 / vec2(""" + "%d.0, %d.0" % (TRANS_W, TRANS_H) + """) + uv * (1.0 - 1.0 / vec2(""" + "%d.0, %d.0" % (TRANS_W, TRANS_H) + """));
+    return texture(uTrans, uv).rgb;
+}
+
+// Sunlight reaching radius r at cos(zenith angle of the Sun) mu: through the
+// air, and fading out as the Sun's disk (0.27 deg) sets behind the Earth.
+vec3 sunlight(float r, float mu) {
+    float muH = -sqrt(max(1.0 - (RG / r) * (RG / r), 0.0));
+    return transmittance(r, mu) * smoothstep(muH - 0.0047, muH + 0.0047, mu);
+}
+
+void main() {
+    vec3 dirEF = normalize(uCamToEF * vec3(vNdc * uTan, 1.0));
+    // Work where the ellipsoid is a sphere of radius A (z stretched by K).
+    vec3 o = uOrigin * vec3(1.0, 1.0, K);
+    vec3 d = normalize(dirEF * vec3(1.0, 1.0, K));
+    vec3 sun = normalize(uSun * vec3(1.0, 1.0, K));
+    float b = dot(o, d);
+    float c = dot(o, o) - RT * RT;
+    float disc = b * b - c;
+    // The ground point, wanted outside any branch for the texture gradients.
+    float cg = dot(o, o) - RG * RG;
+    float discG = b * b - cg;
+    float tg = -b - sqrt(max(discG, 0.0));
+    bool ground = discG >= 0.0 && tg > 0.0;
+    vec3 pg = (o + max(tg, 0.0) * d) * vec3(1.0, 1.0, 1.0 / K);   // Earth-fixed
+    float lon = atan(pg.y, pg.x);
+    float lat = atan(pg.z, (1.0 - E2) * length(pg.xy));
+    vec2 uv = vec2((lon + PI) / (2.0 * PI), (0.5 * PI - lat) / PI);
+    vec2 gx = dFdx(uv), gy = dFdy(uv);
+    gx.x -= round(gx.x);
+    gy.x -= round(gy.x);
+    vec3 albedo = textureGrad(uDay, uv, gx, gy).rgb;
+    vec3 lights = textureGrad(uNight, uv, gx, gy).rgb;
+    if (disc < 0.0) discard;                       // misses the atmosphere
+    float t0 = max(0.0, -b - sqrt(disc)), t1 = -b + sqrt(disc);
+    if (t1 <= 0.0) discard;
+    if (ground) t1 = tg;
+    // In-scattering along the ray.
+    float len = t1 - t0;
+    int n = int(clamp(len / 25000.0, 8.0, 40.0));
+    float ds = len / float(n);
+    float nu = dot(d, sun);
+    float pr = 3.0 / (16.0 * PI) * (1.0 + nu * nu);
+    float pm = 3.0 / (8.0 * PI) * (1.0 - G * G) * (1.0 + nu * nu)
+             / ((2.0 + G * G) * pow(1.0 + G * G - 2.0 * G * nu, 1.5));
+    vec3 tau = vec3(0.0), inscat = vec3(0.0);
+    for (int i = 0; i < n; i++) {
+        vec3 p = o + (t0 + (float(i) + 0.5) * ds) * d;
+        float r = length(p), h = r - RG;
+        float rhoR = exp(-h / H_R), rhoM = exp(-h / H_M);
+        float rhoO = max(0.0, 1.0 - abs(h - 25000.0) / 15000.0);
+        vec3 ext = B_R * rhoR + B_ME * rhoM + B_O * rhoO;
+        vec3 tv = exp(-(tau + 0.5 * ext * ds));
+        vec3 ts = sunlight(r, dot(p, sun) / r);
+        // single scattering, and a little more for the light scattered many times
+        inscat += tv * ts * (B_R * rhoR * (pr + 0.02) + B_MS * rhoM * pm) * ds;
+        tau += ext * ds;
+    }
+    vec3 trans = exp(-tau);
+    vec3 color = inscat * uSunE;
+    if (ground) {
+        vec3 n = normalize(vec3(pg.xy, pg.z * K * K));        // geodetic normal
+        float mus = dot(n, uSun);
+        vec3 ts = sunlight(RG, dot(normalize(o + tg * d), sun));
+        vec3 toMoon = uMoonEF - pg;
+        float dm = length(toMoon);
+        float sep = acos(clamp(dot(toMoon / dm, uSun), -1.0, 1.0));
+        ts *= uncovered(R_SUN / AU, R_MOON / dm, sep);
+        vec3 direct = albedo * max(mus, 0.0) * ts;
+        vec3 sky = albedo * vec3(0.05, 0.065, 0.09) * smoothstep(-0.12, 0.25, mus);
+        // Sun glint on water: the GEBCO mask, bilinear, so coastlines stay smooth.
+        float water = textureGrad(uWater, uv, gx, gy).r;
+        vec3 hv = normalize(uSun - dirEF);
+        float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hv), 0.0), 5.0);
+        // Wave slopes ~0.1 rad (Blinn exponent ~200): a peak about as bright as land.
+        float spec = water * fres * pow(max(dot(n, hv), 0.0), 200.0) * 8.0 * step(0.0, mus);
+        vec3 night = lights * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
+        vec3 surf = (direct + sky + spec * ts) * uSunE * uLit + night;
+        color += surf * trans;
+        fragColor = vec4(color, 1.0);
+        fragTrans = vec4(0.0);
+    } else {
+        fragColor = vec4(color, 1.0);
+        fragTrans = vec4(trans, 1.0);
+    }
+}
+"""
+
+# Without a date or an Earth orientation, the Earth is still in the way: a
+# plain dark ellipsoid hides what is behind it.
+EARTH_PLAIN_FS = """
+#version 410 core
+in vec2 vNdc;
+uniform mat3 uCamToEF;
+uniform vec3 uOrigin;
+uniform vec2 uTan;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragTrans;
+const float A = """ + repr(EARTH_A) + """, K = """ + repr(EARTH_A / EARTH_B) + """;
+void main() {
+    vec3 o = uOrigin * vec3(1.0, 1.0, K);
+    vec3 d = normalize((uCamToEF * vec3(vNdc * uTan, 1.0)) * vec3(1.0, 1.0, K));
+    float b = dot(o, d), c = dot(o, o) - A * A;
+    if (b * b - c < 0.0 || -b - sqrt(b * b - c) <= 0.0) discard;
+    fragColor = vec4(0.004, 0.006, 0.010, 1.0);
+    fragTrans = vec4(0.0);
+}
+"""
+
+
+def gmst_matrix(unix):
+    """A rough M50 -> Earth-fixed rotation from the time alone (the Earth's
+    rotation, no precession: ~0.7 deg off), for when TRU1 has no matrix."""
+    d = unix / 86400.0 + 2440587.5 - 2451545.0
+    th = math.radians((280.46061837 + 360.98564736629 * d) % 360.0)
+    R = np.array([[math.cos(th), math.sin(th), 0.0], [-math.sin(th), math.cos(th), 0.0],
+                  [0.0, 0.0, 1.0]])
+    return R @ J2000_TO_M50.T
+
+
+class EarthLayer(object):
+    target = 'earth'                    # draws into the view's Earth buffers
+    SUN_E = 2.0                         # sunlit ground, display-referred
+    NIGHT_GAIN = 0.3                    # city lights, display-referred
+
+    def draw(self, res, view, fs):
+        m = fs.m50_to_ef
+        if m is None and fs.unix is not None:
+            m = gmst_matrix(fs.unix)
+        f32 = np.float32
+        if m is None or fs.sky is None:
+            # No orientation: the Earth's place is known (it is the origin),
+            # but not its face or the Sun.  M50 axes stand in for Earth-fixed.
+            prog, U = res.earthPlainProg, res.earthPlainU
+            GL.glUseProgram(prog)
+            GL.glUniformMatrix3fv(U["uCamToEF"], 1, GL.GL_TRUE, (fs.C @ view.basis).astype(f32))
+            GL.glUniform3fv(U["uOrigin"], 1, fs.r.astype(f32))
+            GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
+            GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+            return
+        res.set_month(fs.unix)
+        U = res.earthU
+        GL.glUseProgram(res.earthProg)
+        GL.glUniformMatrix3fv(U["uCamToEF"], 1, GL.GL_TRUE, (m @ fs.C @ view.basis).astype(f32))
+        GL.glUniform3fv(U["uOrigin"], 1, (m @ fs.r).astype(f32))
+        sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
+        GL.glUniform3fv(U["uSun"], 1, sun.astype(f32))
+        GL.glUniform3fv(U["uMoonEF"], 1, (m @ J2000_TO_M50 @ fs.sky.pos['moon']).astype(f32))
+        GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
+        GL.glUniform1f(U["uSunE"], self.SUN_E)
+        GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
+        GL.glUniform1f(U["uLit"], 1.0)
+        for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
+                                 (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
+            GL.glActiveTexture(GL.GL_TEXTURE0 + unit_)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, tex)
+            GL.glUniform1i(U[name], unit_)
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+
+
+def sunlit_fraction(view, fs, m, sun_ef, nx=16, ny=9):
+    """How much of a view sunlit ground fills, weighted by the Sun's height
+    there (0..1), from a coarse grid of rays: what the eye adapts to."""
+    xs = (np.arange(nx) + 0.5) / nx * 2 - 1
+    ys = (np.arange(ny) + 0.5) / ny * 2 - 1
+    X, Y = np.meshgrid(xs * view.tanX, ys * view.tanY)
+    cam = np.stack([X.ravel(), Y.ravel(), np.ones(X.size)])
+    k = np.array([1.0, 1.0, EARTH_A / EARTH_B])[:, None]
+    d = (m @ fs.C @ view.basis @ cam) * k
+    d /= np.linalg.norm(d, axis=0)
+    o = (m @ fs.r) * k[:, 0]
+    b = o @ d
+    disc = b * b - (o @ o - EARTH_A * EARTH_A)
+    t = -b - np.sqrt(np.maximum(disc, 0))
+    hit = (disc > 0) & (t > 0)
+    p = o[:, None] + t * d
+    n = p / np.linalg.norm(p, axis=0)
+    mus = np.clip(sun_ef @ n, 0, 1)
+    return float(np.mean(np.where(hit, mus, 0.0)))
+
+
+# --------------------------------------------------------------------------
 # The windows.
 
 class ViewWidget(QOpenGLWidget):
@@ -1047,11 +1446,33 @@ class ViewWidget(QOpenGLWidget):
         self.tanX = self.tanY = 1.0
         self.vao = None
         self.pointVaos = {}
+        self.adapt = 1.0               # the eye's adaptation: 1 dark-adapted, less in daylight
         self.hdrFbo = self.hdrTex = None
+        self.earthFbo = self.earthTex = self.earthTransTex = None
         self.hdrSize = None
         self.setWindowTitle("Portview: %s" % spec['title'])
         self.resize(max(64, round(spec['w'] * scale)),
                     max(36, round(spec['h'] * scale)))
+
+    # Adaptation: the stars and the Milky Way fade as sunlit Earth (or the Sun)
+    # fills the view; to the light in ~0.3 s, back to the dark in ~3 s.
+    ADAPT_K = 0.003
+    ADAPT_UP_S, ADAPT_DOWN_S = 3.0, 0.3
+
+    def adapt_to(self, fs, dt):
+        target = 1.0
+        if fs.ok and fs.sky is not None:
+            self._fov()
+            m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
+            sun_ef = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
+            lum = 0.3 * sunlit_fraction(self, fs, m, sun_ef)
+            sun_cam = (J2000_TO_M50.T @ fs.C @ self.basis).T @ unit(fs.sky.pos['sun'] - fs.r_j2k)
+            if sun_cam[2] > 0 and abs(sun_cam[0] / sun_cam[2]) < self.tanX \
+                    and abs(sun_cam[1] / sun_cam[2]) < self.tanY:
+                lum += 0.1
+            target = 1.0 / (1.0 + lum / self.ADAPT_K)
+        tau = self.ADAPT_UP_S if target > self.adapt else self.ADAPT_DOWN_S
+        self.adapt += (target - self.adapt) * (1.0 - math.exp(-dt / tau))
 
     def initializeGL(self):
         Resources.get().build()
@@ -1066,22 +1487,32 @@ class ViewWidget(QOpenGLWidget):
         self.tanX, self.tanY = (w / 2.0) / f, (h / 2.0) / f
 
     def _hdr_target(self, w, h):
-        """The view's linear floating-point buffer, remade on a resize."""
+        """The view's linear floating-point buffers, remade on a resize: the
+        sky, and the Earth's colour and transmittance in front of it."""
         if self.hdrSize == (w, h):
             return
         if self.hdrFbo is not None:
-            GL.glDeleteFramebuffers(1, [self.hdrFbo])
-            GL.glDeleteTextures([self.hdrTex])
-        self.hdrTex = GL.glGenTextures(1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.hdrTex)
-        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA16F, w, h, 0,
-                        GL.GL_RGBA, GL.GL_HALF_FLOAT, None)
-        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
-        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
-        self.hdrFbo = GL.glGenFramebuffers(1)
+            GL.glDeleteFramebuffers(2, [self.hdrFbo, self.earthFbo])
+            GL.glDeleteTextures([self.hdrTex, self.earthTex, self.earthTransTex])
+
+        def tex():
+            t = GL.glGenTextures(1)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, t)
+            GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA16F, w, h, 0,
+                            GL.GL_RGBA, GL.GL_HALF_FLOAT, None)
+            GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+            GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+            return t
+        self.hdrTex, self.earthTex, self.earthTransTex = tex(), tex(), tex()
+        self.hdrFbo, self.earthFbo = GL.glGenFramebuffers(2)
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.hdrFbo)
         GL.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0,
                                   GL.GL_TEXTURE_2D, self.hdrTex, 0)
+        GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.earthFbo)
+        for i, t in enumerate((self.earthTex, self.earthTransTex)):
+            GL.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0 + i,
+                                      GL.GL_TEXTURE_2D, t, 0)
+        GL.glDrawBuffers(2, [GL.GL_COLOR_ATTACHMENT0, GL.GL_COLOR_ATTACHMENT1])
         self.hdrSize = (w, h)
 
     def paintGL(self):
@@ -1095,17 +1526,28 @@ class ViewWidget(QOpenGLWidget):
         GL.glClearColor(0.0, 0.0, 0.0, 1.0)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         GL.glBindVertexArray(self.vao)
+        sky = [l for l in self.layers if getattr(l, 'target', 'sky') == 'sky']
+        earth = [l for l in self.layers if getattr(l, 'target', 'sky') == 'earth']
         if fs.ok:
             self._fov()
-            for layer in self.layers:
+            for layer in sky:
+                layer.draw(res, self, fs)
+        GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.earthFbo)
+        GL.glClearBufferfv(GL.GL_COLOR, 0, (0.0, 0.0, 0.0, 0.0))
+        GL.glClearBufferfv(GL.GL_COLOR, 1, (1.0, 1.0, 1.0, 1.0))
+        if fs.ok:
+            for layer in earth:
                 layer.draw(res, self, fs)
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.defaultFramebufferObject())
         GL.glViewport(0, 0, w, h)
         GL.glUseProgram(res.presentProg)
-        GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.hdrTex)
-        GL.glUniform1i(res.presentU["uHdr"], 0)
+        for i, (name, t) in enumerate((("uHdr", self.hdrTex), ("uEarth", self.earthTex),
+                                       ("uEarthTrans", self.earthTransTex))):
+            GL.glActiveTexture(GL.GL_TEXTURE0 + i)
+            GL.glBindTexture(GL.GL_TEXTURE_2D, t)
+            GL.glUniform1i(res.presentU[name], i)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+        GL.glActiveTexture(GL.GL_TEXTURE0)
         GL.glBindVertexArray(0)
         GL.glUseProgram(0)
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)       # leave Qt's painter a clean state
@@ -1151,6 +1593,7 @@ class Portview(object):
         self.frame = FrameState()
         self.hud = False
         self.ticks = 0
+        self.lastTick = time.monotonic()
         self.timer = QtCore.QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.tick)
@@ -1177,6 +1620,10 @@ class Portview(object):
         if fs.ok and fs.unix is not None:
             fs.sky = self.ephemeris.at(fs.unix)
         self.frame = fs
+        wall = time.monotonic()
+        dt, self.lastTick = wall - self.lastTick, wall
+        for v in self.views:
+            v.adapt_to(fs, min(dt, 0.5))
         for v in self.views:
             if v.isVisible():
                 v.update()
@@ -1229,12 +1676,17 @@ def main(argv=None):
     ap.add_argument("--milkyway", type=float, default=0.5, metavar="X",
                     help="the Milky Way's brightness relative to the stars "
                          "(default 0.5)")
-    ap.add_argument("--test", nargs='?', const='lvlh', metavar="lvlh|RA,DEC|BODY",
-                    help="no yaGPC2: a synthetic orbit, holding LVLH (default) or "
+    ap.add_argument("--test", nargs='?', const='lvlh', metavar="lvlh|baydown|RA,DEC|BODY",
+                    help="no yaGPC2: a synthetic orbit, holding LVLH (default), LVLH "
+                         "with the payload bay to the Earth (baydown), or "
                          "inertial with the nose at J2000 RA,DEC (deg) or at a body "
                          "(sun, moon, venus, mars, jupiter, saturn)")
     ap.add_argument("--test-date", metavar="UTC",
                     help="with --test, the start, YYYY-MM-DD[THH:MM[:SS]] UTC (default now)")
+    ap.add_argument("--test-alt", type=float, default=400.0, metavar="KM",
+                    help="with --test, the orbit's altitude (default 400 km)")
+    ap.add_argument("--test-lon", type=float, metavar="DEG",
+                    help="with --test, start over this longitude (east +) on the equator")
     ap.add_argument("--test-rate", type=float, default=1.0, metavar="X",
                     help="with --test, vehicle time per wall second")
     ap.add_argument("--snapshot", metavar="PREFIX",
@@ -1249,16 +1701,17 @@ def main(argv=None):
     test = None
     bodies = ['sun', 'moon'] + [n for n, _, _ in PLANETS]
     if args.test:
-        if args.test == 'lvlh' or args.test in bodies:
+        if args.test in ('lvlh', 'baydown') or args.test in bodies:
             test = args.test
         else:
             try:
                 ra, dec = (float(x) for x in args.test.split(','))
             except ValueError:
-                sys.exit("portview: --test lvlh, --test RA,DEC or --test %s" % "|".join(bodies))
+                sys.exit("portview: --test lvlh|baydown, --test RA,DEC or --test %s"
+                         % "|".join(bodies))
             test = (ra, dec)
 
-    for path in (MILKYWAY, HIPPARCOS, DE440S):
+    for path in (MILKYWAY, HIPPARCOS, DE440S, NIGHTLIGHTS, WATERMASK):
         if not os.path.exists(path):
             sys.exit("portview: missing %s\n  run: python3 portview/fetch_assets.py" % path)
     try:
@@ -1288,12 +1741,12 @@ def main(argv=None):
                 tzinfo=datetime.timezone.utc).timestamp()
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
-    feed = (TestFeed(test, args.test_rate, unix0, ephemeris) if test
+    feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
-              SunLayer(), MoonLayer()]
+              SunLayer(), MoonLayer(), EarthLayer()]
     views = []
     app = Portview(args, feed, views, exposure, ephemeris)
     for i, n in enumerate(names):
