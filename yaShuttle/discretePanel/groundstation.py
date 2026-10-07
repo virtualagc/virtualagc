@@ -282,7 +282,10 @@ def truth_state(base, timeout=5.0):
             break
         if len(d) >= 4 + 8 * 15 and d[:4] == b"TRU1":
             v = struct.unpack(">15d", d[4:4 + 8 * 15])
-            return {'t': v[0], 'gmt': v[1], 'r': v[9:12], 'v': v[12:15]}
+            out = {'t': v[0], 'gmt': v[1], 'r': v[9:12], 'v': v[12:15]}
+            if len(d) >= 4 + 8 * 17:                    # wheel height (ft), ground speed (kt)
+                out['wheel_ft'], out['gs_kt'] = struct.unpack(">2d", d[4 + 8 * 15:4 + 8 * 17])
+            return out
     return None
 
 

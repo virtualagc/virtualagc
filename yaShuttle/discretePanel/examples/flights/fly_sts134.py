@@ -87,7 +87,7 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       # soundings interpolated in time.  PASS's table is from 12Z alone, the
       # last balloon before launch (none earlier is archived for 74794).
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
-PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY"]
+PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY", "LAND"]
 
 IPL_SCRIPT = """
 +0     gpc 1
@@ -178,9 +178,17 @@ OPS301 = ("+1     keys SPEC 0 PRO\n"
 G3_FROM_MM = ("+1     keys SPEC 1 PRO\n"
               "+8     keys ITEM 4 9 EXEC\n"
               "+8     keys RESUME\n")
+# GPS INCORPORATE: SPEC 50, NAV GPS item 44 (FORCE), back to the display it
+# came from -- Deorbit Prep at the targets ("G50,B50 GPS, INCORPORATE") and
+# the Entry Checklist at V = 7K (ENT/134/FIN FS 3-34).  Legal only with the
+# mission I-load CGNS_GPS_LOCKOUT >= 3 (tools/sites/sts134-gps-lockout.json,
+# on the ksc4 volume); a generic tape rejects it as an ILLEGAL ENTRY.
+GPS_INCORPORATE = ("+1     keys SPEC 5 0 PRO\n"
+                   "+3     keys ITEM 4 4 EXEC\n"
+                   "+3     keys RESUME\n")
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
-ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\n"
+ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
 
 
 def keys_signed(x, fmt):
@@ -207,7 +215,7 @@ class Flight:
                    YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG="5",
                    PYTHONUNBUFFERED="1", **fenv)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
-               "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
+               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", "20000"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
@@ -522,6 +530,9 @@ class Flight:
         self.play(script, "deorb-targets")
         self.script_done("deorb-targets", 300)
         self.say("crew: DEORB MNVR targets loaded (MET TIG %d/%02d:%02d:%04.1f)" % (d, hh, mm, ss))
+        self.play(GPS_INCORPORATE, "gps-incorporate-deorbit")
+        self.script_done("gps-incorporate-deorbit", 60)
+        self.say("crew: GPS INCORPORATE (SPEC 50 ITEM 44)")
         self.wait_gmt(tig - 25 * 60.0)
         self.play(OPS302, "ops302")
         self.wait_gmt(tig - 20 * 60.0)
@@ -532,15 +543,128 @@ class Flight:
         # the burn (about 2.5 min), the trim of the residuals, then MM 303 and
         # the maneuver to the EI-5 attitude
         self.wait_gmt(tig + 6 * 60.0)
-        self.play("+1     keys OPS 3 0 3 PRO\n+10    keys ITEM 2 7 EXEC\n", "ops303")
+        # THE TRANSITION BEFORE ANYTHING ELSE: the DEORBIT capture follows this,
+        # and one taken before PASS had reached MM 303 (2026-10-06) restored a
+        # vehicle still in MM 302, where OPS 304 is illegal -- it entered
+        # tail-first and skipped out.
+        self.play("+1     keys OPS 3 0 3 PRO\n"
+                  "wait crt 1 title 3031/ timeout 120\n"
+                  "+3     keys ITEM 2 7 EXEC\n", "ops303")
+        self.script_done("ops303", 180)
         self.say("crew: OPS 303, MNVR to EI attitude")
+
+    PFD_ON_CRT2 = ("+1     idppower 2 on\n"
+                   # PASS loads IDP 2 itself once it is powered (IPL_REQUIRED,
+                   # then the format fills) -- measured 2026-10-06, about 5 s
+                   "+10    edgekey crt2 1\n"          # UP: the main menu
+                   "+2     edgekey crt2 2\n"          # FLT INST
+                   "+2     edgekey crt2 2\n")         # A/E PFD
+
+    def pfd_on_crt2(self):
+        """THE OWNER'S PFD: CRT 2 powered and showing the A/E PFD, as a pilot's
+        MDU would through entry and landing.  CRT 1 stays the crew's DPS
+        display, where the driver keys."""
+        if self.a.crts < 2 or getattr(self, "pfd_up", False):
+            return
+        self.play(self.PFD_ON_CRT2, "pfd-crt2")
+        self.script_done("pfd-crt2", 120)
+        self.pfd_up = True
+        self.say("crew: A/E PFD on CRT 2")
 
     def entry(self):
         t = getattr(self, "tgt", None) or json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
         self.wait_gmt(t["ei"] - 5 * 60.0)
         self.play(ENTRY_OPS304, "ops304")
+        self.script_done("ops304", 180)
         self.say("crew: OPS 304 at EI-5")
+        self.pfd_on_crt2()
+        # V = 7K: GPS INCORPORATE (Entry Checklist FS 3-34)
+        while True:
+            tr = self.truth()
+            if tr.get("gs_kt", 1e9) * 0.514444 / 0.3048 < 7000.0 or tr["gmt"] > t["ei"] + 25 * 60.0:
+                break
+            time.sleep(2.0)
+        self.play(GPS_INCORPORATE, "gps-incorporate-entry")
+        self.script_done("gps-incorporate-entry", 60)
+        self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
         self.wait_gmt(t["ei"] + 25 * 60.0)
+
+    def last_entry_state(self):
+        """The newest vehdyn-entry line's numbers: h (ft), M, and t."""
+        for l in reversed(self.log_text().splitlines()):
+            if l.startswith("vehdyn-entry:"):
+                f = dict(re.findall(r"(\w+)=([-0-9.]+)", l))
+                return {k: float(v) for k, v in f.items() if k in ("t", "h", "M", "alpha", "q")}
+        return None
+
+    # THE LANDING'S CREW ACTIONS (STS-134 Entry cue cards; gear-rollout
+    # findings): gear ARM at 2000 ft and DN at 300 ft wheel height; the drag
+    # chute at main-gear touchdown; brakes once the nose is down and below
+    # 120 KGS; the chute off at 60 KGS; wheels stop.  The landing gear and the
+    # chute are hardwired (panel F6, F2) -- PASS commands neither.
+    GEAR_ARM_FT, GEAR_DN_FT = 2000.0, 300.0
+    BRAKES_KGS, CHUTE_JETT_KGS = 120.0, 60.0
+
+    def wheels_and_speed(self, tr):
+        """Main-wheel height above the runway (ft) and ground speed (kt): the
+        crew's eyes and their airspeed / ground-speed cues, from the truth
+        feed (vehdyn_ground_state)."""
+        return tr.get("wheel_ft", 1e9), tr.get("gs_kt", 0.0)
+
+    def land(self):
+        """TAEM, approach and landing: PASS flies (MM 305 follows MM 304 by
+        itself, autoland in A/L); the crew deploys the gear and the drag
+        chute and brakes; until the wheels stop or the time runs out."""
+        self.pfd_on_crt2()
+        if self.a.incorporate_at_land:
+            self.play(GPS_INCORPORATE, "gps-incorporate-land")
+            self.script_done("gps-incorporate-land", 60)
+            self.say("crew: GPS INCORPORATE at the start of LAND (--incorporate-at-land)")
+        t_end = self.truth()["t"] + self.a.land_time
+        last, done = None, set()
+        log0 = len(self.log_text())
+        stopped_since = None
+        while True:
+            tr = self.truth()
+            if tr["t"] >= t_end:
+                self.say("land: time is up")
+                return
+            wh, kgs = self.wheels_and_speed(tr)
+            text = self.log_text()[log0:]
+            st = self.last_entry_state()
+            if st and st != last:
+                last = st
+                self.say("land: t=%.0f h=%.0f ft (wheels %.0f) M=%.3f alpha=%.1f q=%.0f GS %.0f kt"
+                         % (st["t"], st["h"], wh, st["M"], st.get("alpha", 0), st.get("q", 0), kgs))
+            if "arm" not in done and wh < self.GEAR_ARM_FT:
+                self.play("+0     press gear_arm\n", "gear-arm"); done.add("arm")
+                self.say("crew: LANDING GEAR ARM at %.0f ft" % wh)
+            if "dn" not in done and "arm" in done and wh < self.GEAR_DN_FT:
+                self.play("+0     press gear_dn\n", "gear-dn"); done.add("dn")
+                self.say("crew: LANDING GEAR DN at %.0f ft, %.0f KGS" % (wh, kgs))
+            if "chute" not in done and "MAIN gear TOUCHDOWN" in text:
+                self.play("+0     press chute_arm\n+1     press chute_dpy\n", "chute"); done.add("chute")
+                self.say("crew: DRAG CHUTE ARM, DPY at main-gear touchdown, %.0f KGS" % kgs)
+            if "brakes" not in done and "NOSE gear TOUCHDOWN" in text and kgs < self.BRAKES_KGS:
+                self.play("+0     press brakes_on\n", "brakes"); done.add("brakes")
+                self.say("crew: BRAKES at %.0f KGS" % kgs)
+            if "jett" not in done and "chute" in done and kgs < self.CHUTE_JETT_KGS:
+                self.play("+0     press chute_jett\n", "chute-jett"); done.add("jett")
+                self.say("crew: DRAG CHUTE JETT at %.0f KGS" % kgs)
+            if "WITHOUT THE GEAR DOWN" in text:
+                self.say("land: ON THE GROUND WITHOUT THE GEAR -- stopping")
+                return
+            if "dn" in done and "MAIN gear TOUCHDOWN" in text and kgs < 0.5:
+                stopped_since = stopped_since or time.time()
+                if time.time() - stopped_since > 5.0:
+                    for l in text.splitlines():
+                        if "TOUCHDOWN" in l:
+                            self.say(l.strip())
+                    self.say("land: WHEELS STOP")
+                    return
+            else:
+                stopped_since = None
+            time.sleep(0.5)
 
     def run(self):
         start = PHASES.index(self.a.from_) if self.a.from_ else 0
@@ -579,6 +703,14 @@ def main():
                     help="WORKAROUND, not for new flights: disable the G3 archive retrieve "
                          "(DPS UTILITY ITEM 49) before OPS 301, for captures made before "
                          "yaGPC2 c87bce8b6 whose archive is empty (ledger #283)")
+    ap.add_argument("--crts", type=int, default=2,
+                    help="display units: CRT 1 for the crew's DPS pages (the driver keys there), "
+                         "CRT 2 (and 3) for the owner -- the A/E PFD in entry (default 2)")
+    ap.add_argument("--land-time", type=float, default=900.0,
+                    help="LAND: simulated seconds to fly before giving up (default 900)")
+    ap.add_argument("--incorporate-at-land", action="store_true",
+                    help="DEVELOPMENT: force a GPS incorporation as LAND starts, for a run "
+                         "resumed straight into TAEM (not in any checklist)")
     ap.add_argument("--attach", action="store_true",
                     help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
                          "(a driver that stopped after sending OPS 301) instead of starting one")

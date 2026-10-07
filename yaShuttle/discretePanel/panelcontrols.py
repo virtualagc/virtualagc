@@ -50,6 +50,10 @@ A CONTROL is CONTROLS[key] = dict:
     while_held for switches: the key of a pushbutton; the contacts close only
                while that button is held too (ABORT MODE with ABORT)
     guarded    for pb: drawn with a guard (appearance only)
+    hardwired  for pb: a bit of the vehicle's HARDWIRED word -- functions no
+               computer commands or reads (landing gear, drag chute), sent
+               to yaGPC2 (mdmdev.c crew type 8, vehdyn.c vehdyn_hardwired)
+               while the button is held; the vehicle latches them
     sources    where this came from (flight source, SCOM page), as text
 
 A PANE is a titled group of controls in rows: PANES[panel] is a list of
@@ -317,6 +321,33 @@ PANES.update({
     "O7": [("TACAN", [["tacan1", "tacan2", "tacan3"]])],
     "R2": [("MPS PROPELLANT DUMP", [["mps_dump_seq", "mps_dump_lh2"]])],
 })
+
+# THE LANDING GEAR AND THE DRAG CHUTE: hardwired, with no GPC contacts at all
+# (PASS commands them only in remote-control mode, GGAAUT.hal 287-312, and
+# learns of the gear through its uplock and WOW discretes).  ARM, then DN /
+# DPY; the vehicle latches each.  The bits are vehdyn.c's HW_*.
+CONTROLS.update({
+    "gear_arm": dict(panel="F6", kind="pb", caption="", legend="ARM",
+                     guarded=True, contacts=[], hardwired=0x8000),
+    "gear_dn": dict(panel="F6", kind="pb", caption="", legend="DN",
+                    guarded=True, contacts=[], hardwired=0x4000),
+    "chute_arm": dict(panel="F2", kind="pb", caption="", legend="ARM",
+                      guarded=True, contacts=[], hardwired=0x2000),
+    "chute_dpy": dict(panel="F2", kind="pb", caption="", legend="DPY",
+                      guarded=True, contacts=[], hardwired=0x1000),
+    "chute_jett": dict(panel="F2", kind="pb", caption="", legend="JETT",
+                       guarded=True, contacts=[], hardwired=0x0800),
+    # The toe brakes on the rudder pedals, as a simulator's latch (no pedals
+    # here): ON holds about 8 ft/s^2 on the main gear until OFF.
+    "brakes_on": dict(panel="F6", kind="pb", caption="", legend="ON",
+                      contacts=[], hardwired=0x0400,
+                      sources="simulator: the pedals' toe brakes, latched"),
+    "brakes_off": dict(panel="F6", kind="pb", caption="", legend="OFF",
+                       contacts=[], hardwired=0x0200),
+})
+PANES["F6"].append(("LANDING GEAR", [["gear_arm", "gear_dn"]]))
+PANES["F6"].append(("BRAKES", [["brakes_on", "brakes_off"]]))
+PANES["F2"].append(("DRAG CHUTE", [["chute_arm", "chute_dpy", "chute_jett"]]))
 check()
 
 
