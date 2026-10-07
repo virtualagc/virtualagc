@@ -110,6 +110,8 @@ def bluemarble_path(month):
     return os.path.join(CACHE, "bluemarble_%02d.jpg" % month)
 
 FULL_SIZE = 768                    # --size units: 768 is the design (full) window
+FRAME_PX = 4                       # the frame drawn around each view, logical px, any --size
+FRAME_SRGB = (0.62, 0.62, 0.62)
 MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
 TRUTH_DOUBLES_MIN = 15
@@ -135,6 +137,10 @@ def _dir(az, el):
     return (math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), -math.sin(e))
 
 
+# Ron's shapes: the front view 2:1, the others square at its height, all at
+# the front view's angle per pixel (so 20.6 deg square).
+SIDE_HFOV = 2.0 * math.degrees(math.atan(math.tan(math.radians(20.0)) * 768.0 / 1536.0))
+
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
 # its horizontal field of view (deg) at that size.
@@ -146,13 +152,13 @@ def _dir(az, el):
 #          taken from Orbiter drawings.
 VIEWS = {
     'front': dict(title="Forward windows", fwd=(1, 0, 0), up=(0, 0, -1),
-                  w=1536, h=864, hfov=40.0),
+                  w=1536, h=768, hfov=40.0),
     'up': dict(title="Overhead windows", fwd=(0, 0, -1), up=(1, 0, 0),
-               w=1152, h=864, hfov=40.0),
+               w=768, h=768, hfov=SIDE_HFOV),
     'left': dict(title="Left side window", fwd=_dir(-75, -10), up=(0, 0, -1),
-                 w=1152, h=864, hfov=40.0),
+                 w=768, h=768, hfov=SIDE_HFOV),
     'right': dict(title="Right side window", fwd=_dir(75, -10), up=(0, 0, -1),
-                  w=1152, h=864, hfov=40.0),
+                  w=768, h=768, hfov=SIDE_HFOV),
 }
 
 
@@ -627,6 +633,7 @@ PRESENT_FS = """
 #version 410 core
 out vec4 fragColor;
 uniform sampler2D uHdr, uEarth, uEarthTrans;
+uniform ivec2 uOffset;              // the view's corner in the window (inside its frame)
 vec3 toSrgb(vec3 c) {
     c = max(c, 0.0);
     c /= max(1.0, max(c.r, max(c.g, c.b)));    // saturate keeping the hue
@@ -634,7 +641,7 @@ vec3 toSrgb(vec3 c) {
                step(0.0031308, c));
 }
 void main() {
-    ivec2 p = ivec2(gl_FragCoord.xy);
+    ivec2 p = ivec2(gl_FragCoord.xy) - uOffset;
     vec3 c = texelFetch(uHdr, p, 0).rgb * texelFetch(uEarthTrans, p, 0).rgb
            + texelFetch(uEarth, p, 0).rgb;
     fragColor = vec4(toSrgb(c), 1.0);
@@ -829,7 +836,7 @@ class Resources(object):
         self.earthDayTex = None
         self.earthMonth = None
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
-        self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans")
+        self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset")
         self.set_star_epoch(2000.0)
         self.ready = True
 
@@ -1451,8 +1458,8 @@ class ViewWidget(QOpenGLWidget):
         self.earthFbo = self.earthTex = self.earthTransTex = None
         self.hdrSize = None
         self.setWindowTitle("Portview: %s" % spec['title'])
-        self.resize(max(64, round(spec['w'] * scale)),
-                    max(36, round(spec['h'] * scale)))
+        self.resize(max(64, round(spec['w'] * scale)) + 2 * FRAME_PX,
+                    max(36, round(spec['h'] * scale)) + 2 * FRAME_PX)
 
     # Adaptation: the stars and the Milky Way fade as sunlit Earth (or the Sun)
     # fills the view; to the light in ~0.3 s, back to the dark in ~3 s.
@@ -1478,8 +1485,12 @@ class ViewWidget(QOpenGLWidget):
         Resources.get().build()
         self.vao = GL.glGenVertexArrays(1)
 
+    def view_size(self):
+        """The viewing area, logical px: the window less its frame."""
+        return (max(1, self.width() - 2 * FRAME_PX), max(1, self.height() - 2 * FRAME_PX))
+
     def _fov(self):
-        w, h = max(1, self.width()), max(1, self.height())
+        w, h = self.view_size()
         if self.crop:
             f = self.focal768
         else:
@@ -1517,7 +1528,9 @@ class ViewWidget(QOpenGLWidget):
 
     def paintGL(self):
         dpr = self.devicePixelRatioF()
-        w, h = round(self.width() * dpr), round(self.height() * dpr)
+        vw, vh = self.view_size()
+        w, h = round(vw * dpr), round(vh * dpr)
+        frame = round(FRAME_PX * dpr)
         fs = self.app.frame
         res = Resources.get()
         self._hdr_target(w, h)
@@ -1539,8 +1552,12 @@ class ViewWidget(QOpenGLWidget):
             for layer in earth:
                 layer.draw(res, self, fs)
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.defaultFramebufferObject())
-        GL.glViewport(0, 0, w, h)
+        GL.glViewport(0, 0, round(self.width() * dpr), round(self.height() * dpr))
+        GL.glClearColor(*FRAME_SRGB, 1.0)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        GL.glViewport(frame, frame, w, h)
         GL.glUseProgram(res.presentProg)
+        GL.glUniform2i(res.presentU["uOffset"], frame, frame)
         for i, (name, t) in enumerate((("uHdr", self.hdrTex), ("uEarth", self.earthTex),
                                        ("uEarthTrans", self.earthTransTex))):
             GL.glActiveTexture(GL.GL_TEXTURE0 + i)
@@ -1560,7 +1577,8 @@ class ViewWidget(QOpenGLWidget):
             f = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.SystemFont.FixedFont)
             f.setPointSizeF(max(9.0, self.height() / 60.0))
             p.setFont(f)
-            p.drawText(QtCore.QRectF(8, 4, self.width() - 16, self.height() / 10),
+            p.drawText(QtCore.QRectF(FRAME_PX + 8, FRAME_PX + 4, self.width() - 2 * FRAME_PX - 16,
+                                     self.height() / 10),
                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, line)
             p.end()
 
