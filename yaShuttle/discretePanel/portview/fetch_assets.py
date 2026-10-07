@@ -56,6 +56,12 @@ portview.py loads, and the download deleted unless --keep-downloads.
                     Bishop, Nauka, Prichal, the IDAs, iROSAs, later payloads)
                     and STS-134's own cargo (AMS-02, ELC-3) are left out.
                     Needs DracoPy and pygltflib to prepare.
+  models/gantry/    Launch Complex 39's pad structures in the Shuttle era (the
+                    Fixed and Rotating Service Structures, lightning mast, pad
+                    deck), NASA 3D Resources "Gantry": in metres in the pad's
+                    east-north-up frame, the origin on the ground under the
+                    flame trench's opening (where the stack stands), the Fixed
+                    Service Structure to the north.  Untextured.
 """
 import argparse
 import os
@@ -372,7 +378,6 @@ def prepare_site(key):
 ISS_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
            "International%20Space%20Station%20(ISS)%20(D)%20(IGOAL)/"
            "International%20Space%20Station%20(ISS).glb")
-ISS_DIR = os.path.join(CACHE, "models", "iss")
 
 # Not on the station at STS-134's docking (May 2011): added later, or STS-134's
 # own cargo.  Node names in the IGOAL model; a node drops its whole subtree.
@@ -396,18 +401,47 @@ INCH = 0.0254
 ISS_ROOT = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]]) * INCH
 
 
+GANTRY_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+              "Gantry/Gantry.glb")
+# The gantry model is ~5.89 m a unit (the Fixed Service Structure's 40 ft
+# square footprint is 2.07 units; its 106 m to the mast's tip, 18.2), y up,
+# the FSS at +z from the flame trench's opening (0.73, 1.32, -1.84) on the pad
+# deck, whose foot (the ground) is at y = -1.39.  Pad 39A's imagery has the
+# FSS north of the trench: model (x, y, z) -> east-north-up (-x, z, y).
+GANTRY_SCALE = 5.89
+GANTRY_ROOT = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]) * GANTRY_SCALE
+GANTRY_ORIGIN = np.array([0.73, -1.39, -1.84])          # model units: ground under the trench
+
+MODELS = {
+    'iss': dict(url=ISS_URL, glb="iss-igoal.glb", root=ISS_ROOT, origin=np.zeros(3),
+                exclude=ISS_NOT_2011, name="ISS, STS-134 (May 2011)",
+                frame="ISS analysis: +X fwd, +Y stbd, +Z nadir; m",
+                source="NASA 3D Resources, ISS (D) (IGOAL)"),
+    'gantry': dict(url=GANTRY_URL, glb="gantry.glb", root=GANTRY_ROOT, origin=GANTRY_ORIGIN,
+                   exclude=set(), name="LC-39 pad structures (Shuttle era)",
+                   frame="pad east-north-up; m; origin on the ground under the stack",
+                   source="NASA 3D Resources, Gantry"),
+}
+
+
 def prepare_iss(keep):
+    prepare_model('iss', keep)
+
+
+def prepare_model(key, keep):
     import io
     import json
-    if os.path.exists(os.path.join(ISS_DIR, "iss.json")):
+    spec = MODELS[key]
+    out_dir = os.path.join(CACHE, "models", key)
+    if os.path.exists(os.path.join(out_dir, "model.json")):
         return
     try:
         import DracoPy
         import pygltflib
     except ImportError:
-        sys.exit("fetch_assets: pip install DracoPy pygltflib (needed once, to convert the ISS)")
+        sys.exit("fetch_assets: pip install DracoPy pygltflib (needed once, to convert models)")
     Image = _image()
-    src = download(ISS_URL, os.path.join(CACHE, "models", "iss-igoal.glb"))
+    src = download(spec['url'], os.path.join(CACHE, "models", spec['glb']))
     print("converting", os.path.basename(src))
     g = pygltflib.GLTF2().load(src)
     blob = g.binary_blob()
@@ -430,11 +464,12 @@ def prepare_iss(keep):
     groups = {}                                  # material -> lists of arrays
     root = g.scenes[g.scene or 0].nodes[0]
     top = np.eye(4)
-    top[:3, :3] = ISS_ROOT
+    top[:3, :3] = spec['root']
+    top[:3, 3] = -spec['root'] @ spec['origin']
 
     def walk(i, parent):
         n = g.nodes[i]
-        if n.name in ISS_NOT_2011:
+        if n.name in spec['exclude']:
             return
         w = parent @ local(n)
         if n.mesh is not None:
@@ -462,7 +497,7 @@ def prepare_iss(keep):
 
     for c in g.nodes[root].children or []:
         walk(c, top)
-    os.makedirs(ISS_DIR, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
     arrays, mats = {}, []
     for k, (mi, parts) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or 0))):
         base, n = 0, []
@@ -493,14 +528,13 @@ def prepare_iss(keep):
                 img = img.resize((max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f))),
                                  Image.LANCZOS)
             entry['texture'] = "tex%d.jpg" % k
-            img.save(os.path.join(ISS_DIR, entry['texture']), quality=90)
+            img.save(os.path.join(out_dir, entry['texture']), quality=90)
         mats.append(entry)
-    np.savez_compressed(os.path.join(ISS_DIR, "iss.npz"), **arrays)
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
     tris = sum(len(arrays['idx%d' % k]) // 3 for k in range(len(mats)))
-    with open(os.path.join(ISS_DIR, "iss.json"), "w") as f:
-        json.dump(dict(name="ISS, STS-134 (May 2011)", frame="ISS analysis: +X fwd, +Y stbd, +Z nadir; m",
-                       source="NASA 3D Resources, ISS (D) (IGOAL)", triangles=tris,
-                       materials=mats), f, indent=1)
+    with open(os.path.join(out_dir, "model.json"), "w") as f:
+        json.dump(dict(name=spec['name'], frame=spec['frame'], source=spec['source'],
+                       triangles=tris, materials=mats), f, indent=1)
     print("  %d triangles in %d materials" % (tris, len(mats)))
     if not keep:
         os.remove(src)
@@ -591,7 +625,8 @@ def main():
     prepare_watermask(args.keep_downloads)
     for m in months:
         prepare_bluemarble(m, args.keep_downloads)
-    prepare_iss(args.keep_downloads)
+    for key in MODELS:
+        prepare_model(key, args.keep_downloads)
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))

@@ -119,6 +119,10 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
+GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
+# Launch pads: the stack's place (lat, lon, deg) and the gantry model's
+# heading; approximate until vehdyn's pad geometry is in hand.
+PADS = {'lc39a': (28.60839, -80.60433, 0.0), 'lc39b': (28.62722, -80.62083, 0.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
 NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
@@ -1830,11 +1834,12 @@ class Model(object):
     """A prepared model (portview/fetch_assets.py): per material, vertices in
     the vehicle's body frame (m), triangles, colour and texture."""
 
-    def __init__(self, path):
+    def __init__(self, path, point=True):
         import json
-        with open(os.path.join(path, "iss.json")) as f:
+        with open(os.path.join(path, "model.json")) as f:
             self.meta = json.load(f)
-        z = np.load(os.path.join(path, "iss.npz"))
+        z = np.load(os.path.join(path, "model.npz"))
+        self.point = point              # far away, a point by magnitude (vehicles only)
         self.parts = []
         for k, m in enumerate(self.meta['materials']):
             data = np.hstack([z['pos%d' % k], z['nrm%d' % k], z['uv%d' % k]]).astype(np.float32)
@@ -1862,6 +1867,32 @@ class Model(object):
             p['data'] = p['idx'] = p['img'] = None
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
         self.ready = True
+
+
+class GroundObject(object):
+    """A model fixed to the ground (the launch pad's structures): its frame
+    east-north-up at a geodetic point on PASS's ellipsoid, turned by heading
+    (deg, clockwise from north) -- placed each frame through the Earth's
+    orientation, so it turns with the Earth like everything on the ground."""
+
+    def __init__(self, key, lat, lon, height, heading=0.0):
+        self.key = key
+        e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
+        la, lo = math.radians(lat), math.radians(lon)
+        Nr = EARTH_A / math.sqrt(1.0 - e2 * math.sin(la) ** 2)
+        self.ef = np.array([(Nr + height) * math.cos(la) * math.cos(lo),
+                            (Nr + height) * math.cos(la) * math.sin(lo),
+                            (Nr * (1.0 - e2) + height) * math.sin(la)])
+        east = np.array([-math.sin(lo), math.cos(lo), 0.0])
+        north = np.array([-math.sin(la) * math.cos(lo), -math.sin(la) * math.sin(lo), math.cos(la)])
+        up = np.cross(east, north)
+        h = math.radians(heading)
+        e2_, n2_ = math.cos(h) * east - math.sin(h) * north, math.sin(h) * east + math.cos(h) * north
+        self.axes = np.column_stack([e2_, n2_, up])          # model -> Earth-fixed
+
+    def state(self, fs):
+        m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
+        return m.T @ self.ef, m.T @ self.axes
 
 
 class VehicleLayer(object):
@@ -1902,7 +1933,7 @@ class VehicleLayer(object):
             sep = math.acos(max(-1.0, min(1.0, float(np.dot(to_sun / dsun, -r / np.linalg.norm(r))))))
             vis = uncovered_disk(R_SUN / dsun, EARTH_A / float(np.linalg.norm(r)), sep)
             px = model.radius / dist * (view.view_size()[0] / 2.0) / view.tanX
-            if px < self.FADE_PX and vis > 0.01 and rel[2] > 0:
+            if model.point and px < self.FADE_PX and vis > 0.01 and rel[2] > 0:
                 # Phase: lit fraction seen from the eye, as a Lambert sphere.
                 phase = 0.5 * (1.0 + float(np.dot(to_sun / dsun, -d / dist)))
                 fade = min(1.0, (self.FADE_PX - px) / (self.FADE_PX - self.MODEL_PX))
@@ -2162,6 +2193,7 @@ class Portview(object):
         self.frame = FrameState()
         self.hud = False
         self.ticks = 0
+        self.ground = []
         self.timer = QtCore.QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self.tick)
@@ -2187,6 +2219,8 @@ class Portview(object):
         fs = self.feed.state()
         if fs.ok and fs.unix is not None:
             fs.sky = self.ephemeris.at(fs.unix)
+            for g in self.ground:
+                fs.targets[g.key] = g.state(fs)
         self.frame = fs
         for v in self.views:
             if v.isVisible():
@@ -2234,6 +2268,8 @@ def main(argv=None):
                          "(overrides --size for that window); repeatable")
     ap.add_argument("--port-base", type=int,
                     default=int(os.environ.get("NSTS_BUS_PORT_BASE", "6900")))
+    ap.add_argument("--pad", default="lc39a", choices=list(PADS) + ['none'],
+                    help="the launch pad whose structures to draw (default lc39a, STS-134's)")
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none)")
@@ -2333,12 +2369,19 @@ def main(argv=None):
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
     models = {}
-    if os.path.exists(os.path.join(ISS_MODEL, "iss.json")):
+    if os.path.exists(os.path.join(ISS_MODEL, "model.json")):
         models[ISS_NORAD] = Model(ISS_MODEL)
+    ground = []
+    if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
+        lat, lon, heading = PADS[args.pad]
+        models[args.pad] = Model(GANTRY_MODEL, point=False)
+        ground.append(GroundObject(args.pad, lat, lon, site.height if site is not None else 0.0,
+                                   heading))
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
               SunLayer(), MoonLayer(), EarthLayer(), VehicleLayer(models, exposure)]
     views = []
     app = Portview(args, feed, views, exposure, ephemeris)
+    app.ground = ground
     for i, n in enumerate(names):
         v = ViewWidget(app, n, VIEWS[n], scale, args.crop, layers)
         w, h, x, y = geoms.get(n, (None,) * 4)

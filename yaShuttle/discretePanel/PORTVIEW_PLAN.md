@@ -210,6 +210,23 @@ navaids agree to a few metres.  KSC only so far; Edwards and White Sands
 are entries in fetch_assets.py's SITES table.  Later: terrain heights
 (Copernicus GLO-30), and a finer ring (NAIP's native 0.3-0.6 m) for rollout.
 
+## Ascent (started 2026-10-07; Ron: higher priority than the rest)
+
+Like the landing in reverse, plus the pad's structures, and the roll to
+heads-down after the tower (the overhead windows then look at the ground),
+which portview follows from TRU1's attitude with no special handling.
+
+- Done: KSC's site rings already cover the ascent's ground track to ~2000 km;
+  fine patches (+-1.2 km NAIP, ~0.3 m) at pads 39A and 39B; the Shuttle-era
+  LC-39 structures (NASA 3D Resources "Gantry": FSS with lightning mast, RSS,
+  pad deck; 5.89 m a model unit, from the FSS's 40 ft footprint) drawn as a
+  ground-fixed model at the pad (`--pad lc39a|lc39b|none`).
+- To do: place and orient the gantry exactly from vehdyn's on-pad geometry
+  (asked of PASS-IDLE: the stack's position, attitude and height), so the
+  crew access arm meets the Orbiter's side hatch; then fly an ascent and
+  check the views on the pad, through the roll, and downrange.  The current
+  imagery shows today's pads (SpaceX's hangars and launch mount at 39A).
+
 ## Phases
 
 - **P0 — coordinate with PASS-IDLE:** done 2026-10-07 (see "Data in").
