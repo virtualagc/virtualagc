@@ -110,8 +110,10 @@ double mec_fired_at(enum MecEvent e) { return e < MEC_NEVENTS ? fired[e] : -1.0;
 int mec_save(double *b, int max) {
     int n = 0;
     for (int e = 0; e < MEC_NEVENTS; e++) {
-        if (n < max) b[n] = armed[e]; n++;
-        if (n < max) b[n] = fired[e]; n++;
+        if (n < max) b[n] = armed[e];
+        n++;                        /* counted past max: the size a caller needs */
+        if (n < max) b[n] = fired[e];
+        n++;
     }
     return n;
 }
