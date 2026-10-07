@@ -64,6 +64,17 @@ sidereal time from [17], ~0.7 deg off; lacking both, a plain dark Earth):
     portview/fetch_assets.py, four nested rings from +-2000 km at ~500 m
     down to +-4 km at ~1 m (NAIP), so the approach and the runway are real
     photographs; the ground there at the runway's height from the navaids.
+OTHER VEHICLES.  yaGPC2 will send TGT1 datagrams (port base + 96; planned):
+"TGT1" and big-endian doubles -- vehicle t, NORAD id, M50 position (m) and
+velocity (m/s) of the centre of mass, quaternion body -> M50 (w x y z).  The
+ISS (25544) is drawn from NASA JSC IGOAL's model as at STS-134 (May 2011),
+prepared by portview/fetch_assets.py, in the ISS analysis frame (+X forward
+through PMA-2, +Y starboard, +Z nadir): real 3-D with its own depth, lit by
+the Sun less the Earth's shadow, with earthshine; not drawn when the Earth is
+between; and, shrinking below ~10 pixels, a brilliant point that takes over
+by its magnitude.  The views see from the crew's eye points (forward or aft
+station), which matters at docking ranges.
+
 NO SIMULATED GLARE OR ADAPTATION.  Every view shows the sky at the same
 exposure, whatever bright object is in it: the viewer's own eyes already dim
 the stars next to a Sun, Moon or daylit Earth on the screen, and a view that
@@ -107,6 +118,7 @@ CACHE = os.path.join(HERE, "portview", "cache")
 MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
+ISS_MODEL = os.path.join(CACHE, "models", "iss")
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
 NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
@@ -121,6 +133,8 @@ FRAME_PX = 4                       # the frame drawn around each view, logical p
 FRAME_SRGB = (0.62, 0.62, 0.62)
 MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
+TARGET_OFFSET = 96                 # TGT1: other vehicles (the ISS), from yaGPC2 (planned)
+ISS_NORAD = 25544
 TRUTH_DOUBLES_MIN = 15
 TRUTH_DOUBLES_MAX = 27
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
@@ -152,6 +166,14 @@ VIEW_VFOV = 29.0
 SIDE_HFOV = VIEW_VFOV
 FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV / 2.0))))
 
+# The crew's eyes, body axes (m) from the point TRU1 describes (taken as the
+# centre of mass, Orbiter X_o ~1080 in, Z_o ~375 in): the forward station's
+# design eye ~X_o 520, Z_o 470, and the aft station's, at the overhead windows
+# (X_o 542.5, SFOM vol. 12 fig. 2.1-3), ~X_o 580, Z_o 480.  Approximate; they
+# matter only near another vehicle.
+EYE_FWD = ((1080 - 520) * 0.0254, 0.0, -(470 - 375) * 0.0254)
+EYE_AFT = ((1080 - 580) * 0.0254, 0.0, -(480 - 375) * 0.0254)
+
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
 # its horizontal field of view (deg) at that size.  The lines of sight are the
@@ -166,13 +188,13 @@ FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV 
 #          18-28 deg down: 88 deg out, 8 deg down.
 VIEWS = {
     'front': dict(title="Forward windows", fwd=_dir(0, -4.5), up=(0, 0, -1),
-                  w=1536, h=768, hfov=FRONT_HFOV),
+                  w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
     'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(1, 0, 0),
-               w=768, h=768, hfov=SIDE_HFOV),
+               w=768, h=768, hfov=SIDE_HFOV, eye=EYE_AFT),
     'left': dict(title="Left side window", fwd=_dir(-88, -8), up=(0, 0, -1),
-                 w=768, h=768, hfov=SIDE_HFOV),
+                 w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
     'right': dict(title="Right side window", fwd=_dir(88, -8), up=(0, 0, -1),
-                  w=768, h=768, hfov=SIDE_HFOV),
+                  w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
 }
 
 
@@ -331,12 +353,38 @@ class VehicleClock(object):
 class FrameState(object):
     """Everything a frame is drawn from, once per tick for all the views."""
     __slots__ = ('ok', 'stale', 't', 'gmt', 'unix', 'C', 'r', 'v', 'r_j2k',
-                 'm50_to_ef', 'sky')
+                 'm50_to_ef', 'sky', 'targets')
 
     def __init__(self):
         self.ok = False
         self.stale = False
         self.sky = None                # SkyBodies, when the date is known
+        self.targets = {}              # NORAD id -> (M50 position, body -> M50)
+
+
+class Target(object):
+    """One TGT1 datagram: another vehicle (the ISS), from yaGPC2's vehicle
+    dynamics: vehicle t, NORAD id, M50 position (m) and velocity (m/s) of its
+    centre of mass, and its attitude, quaternion body -> M50 (w x y z)."""
+    __slots__ = ('t', 'id', 'r', 'v', 'q')
+
+    @classmethod
+    def parse(cls, d):
+        if len(d) < 4 + 8 * 12 or d[:4] != b"TGT1":
+            return None
+        v = struct.unpack(">12d", d[4:4 + 8 * 12])
+        s = cls()
+        s.t, s.id = v[0], int(v[1])
+        s.r, s.v, s.q = np.array(v[2:5]), np.array(v[5:8]), np.array(v[8:12])
+        return s
+
+    def at(self, t):
+        """Position and attitude at vehicle time t (the attitude turns too
+        slowly, ~0.07 deg/s in LVLH, to matter between datagrams)."""
+        dt = t - self.t
+        rn = np.linalg.norm(self.r)
+        g = -MU_EARTH * self.r / rn ** 3
+        return self.r + self.v * dt + 0.5 * g * dt * dt, quat_to_matrix(unit(self.q))
 
 
 def extrapolate(s, t):
@@ -394,6 +442,28 @@ class TruthFeed(QtCore.QObject):
         self.notifier = QtCore.QSocketNotifier(
             self.sock.fileno(), QtCore.QSocketNotifier.Type.Read, self)
         self.notifier.activated.connect(self._read)
+        self.targets = {}                 # id -> (Target, wall time received)
+        self.tsock = mcast_socket(port_base + TARGET_OFFSET)
+        self.tnotifier = QtCore.QSocketNotifier(
+            self.tsock.fileno(), QtCore.QSocketNotifier.Type.Read, self)
+        self.tnotifier.activated.connect(self._read_targets)
+
+    def _read_targets(self, *_):
+        while True:
+            try:
+                d = self.tsock.recv(1024)
+            except (BlockingIOError, OSError):
+                break
+            g = Target.parse(d)
+            if g is not None:
+                self.targets[g.id] = (g, time.monotonic())
+
+    def _target_states(self, fs, wall):
+        for k, (g, at) in list(self.targets.items()):
+            if wall - at > STALE_S:
+                del self.targets[k]
+            else:
+                fs.targets[k] = g.at(fs.t)
 
     def _read(self, *_):
         while True:
@@ -417,6 +487,7 @@ class TruthFeed(QtCore.QObject):
             return FrameState()
         fs = extrapolate(self.latest, t)
         fs.stale = wall - self.latestAt > STALE_S
+        self._target_states(fs, wall)
         return fs
 
 
@@ -433,13 +504,21 @@ class TestFeed(TruthFeed):
     the Earth's centre at the start.
     mode ('hover', lat, lon, alt_m, heading, pitch): fixed over the ground (on
     PASS's ellipsoid, degrees and metres), nose at that heading and pitch, wings
-    level: for looking at a landing site."""
+    level: for looking at a landing site.
+    mode 'vbar': the final approach to the ISS on the +V-bar, as STS-134
+    docked: the ISS (TGT1, synthetic) target_range metres behind along the
+    velocity, in its +XVV Z-nadir attitude; the Orbiter ahead of it with its
+    payload bay (-Z) toward it and its nose up, so the overhead windows look
+    at PMA-2."""
     PERIOD_S = 0.05
 
-    def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None):
+    def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None,
+                 target_range=100.0):
         QtCore.QObject.__init__(self)
+        self.targets = {}
+        self.target_range = target_range
         self.unix0 = time.time() if unix0 is None else unix0
-        if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover'):
+        if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover', 'vbar'):
             d = unit(ephemeris.at(self.unix0).pos[mode])
             mode = (math.degrees(math.atan2(d[1], d[0])) % 360.0,
                     math.degrees(math.asin(d[2])))
@@ -499,12 +578,15 @@ class TestFeed(TruthFeed):
         if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
             r, axes, m = self._hover(t)
             return m.T @ axes
-        if self.mode in ('lvlh', 'baydown'):
+        if self.mode in ('lvlh', 'baydown', 'vbar'):
             r, v = self._orbit(t)
             z = -unit(r)
             y = unit(np.cross(v, r))
             if self.mode == 'baydown':
                 z, y = -z, -y
+            if self.mode == 'vbar':          # -Z (bay) aft along -V, nose up
+                x_l = np.cross(y, z)
+                return np.column_stack([-z, y, x_l])
             return np.column_stack([np.cross(y, z), y, z])
         ra, dec = self.mode
         j = np.array([math.cos(dec * D2R) * math.cos(ra * D2R),
@@ -530,6 +612,14 @@ class TestFeed(TruthFeed):
         wall = time.monotonic()
         self.clock.datagram(s.t, wall)
         self.latest, self.latestAt = s, wall
+        if self.mode == 'vbar':
+            z = -unit(r)
+            y = unit(np.cross(v, r))
+            x = np.cross(y, z)
+            lvlh = np.column_stack([x, y, z])          # the ISS: +XVV, Z nadir
+            g = Target.parse(b"TGT1" + struct.pack(
+                ">12d", t, ISS_NORAD, *(r - self.target_range * x), *v, *matrix_to_quat(lvlh)))
+            self.targets[g.id] = (g, wall)
         self.t += self.PERIOD_S
 
 
@@ -916,6 +1006,10 @@ class Resources(object):
             self.site.images = None
         self.earthDayTex = None
         self.earthMonth = None
+        self.modelProg = compile_program(MODEL_VS, MODEL_FS)
+        self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
+                               "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
+                               "uSunVis", "uEarthLit")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset")
         self.set_star_epoch(2000.0)
@@ -1623,6 +1717,243 @@ class EarthLayer(object):
 
 
 # --------------------------------------------------------------------------
+# Other vehicles (the ISS): real 3-D models, in front of the Earth (drawn into
+# the Earth's buffers, opaque), lit by the Sun -- less the part of its disk the
+# Earth hides, so they go dark in the Earth's shadow -- with a little
+# earthshine.  A vehicle beyond the Earth's limb (the Earth between) isn't
+# drawn; at such ranges it would be well under a pixel anyway.
+
+MODEL_VS = """
+#version 410 core
+in vec3 aPos;
+in vec3 aNrm;
+in vec2 aUv;
+uniform mat3 uRot;              // vehicle body -> camera
+uniform vec3 uTrans;            // the vehicle's origin in the camera frame, m
+uniform vec2 uTan;
+uniform float uNear, uFar;
+out vec3 vNrm;                  // body frame
+out vec3 vPos;                  // body frame
+out vec2 vUv;
+void main() {
+    vec3 c = uRot * aPos + uTrans;
+    // Depth linear in distance over just this vehicle's span: exact to well
+    // under a millimetre in 24 bits.
+    float z = ((c.z - uNear) / (uFar - uNear)) * 2.0 - 1.0;
+    gl_Position = vec4(c.x / uTan.x, c.y / uTan.y, z * c.z, c.z);
+    vNrm = aNrm;
+    vPos = aPos;
+    vUv = aUv;
+}
+"""
+
+MODEL_FS = """
+#version 410 core
+in vec3 vNrm;
+in vec3 vPos;
+in vec2 vUv;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragTrans;
+uniform sampler2D uTex;
+uniform int uHasTex;
+uniform vec4 uColor;
+uniform vec3 uSunB;             // the Sun's direction, body frame
+uniform vec3 uEyeB;             // the eye, body frame, m
+uniform vec3 uEarthB;           // the Earth's direction (nadir), body frame
+uniform float uSunE, uSunVis, uEarthLit;
+const float PI = 3.14159265358979;
+void main() {
+    vec3 alb = uColor.rgb;
+    if (uHasTex != 0) alb *= texture(uTex, vUv).rgb;
+    vec3 n = normalize(vNrm);
+    vec3 toEye = normalize(uEyeB - vPos);
+    if (dot(n, toEye) < 0.0) n = -n;                 // two-sided
+    float sun = max(dot(n, uSunB), 0.0) * uSunVis;
+    // Earthshine: the sunlit Earth below, broad (the Earth fills ~140 deg).
+    float earth = 0.3 * uEarthLit * (0.5 + 0.5 * dot(n, uEarthB));
+    vec3 h = normalize(uSunB + toEye);
+    float spec = 0.04 * pow(max(dot(n, h), 0.0), 40.0) * uSunVis * step(0.0, dot(n, uSunB));
+    vec3 c = (alb / PI * (sun + earth + 0.01) + spec) * uSunE;
+    fragColor = vec4(c, 1.0);
+    fragTrans = vec4(0.0);
+}
+"""
+
+
+class Model(object):
+    """A prepared model (portview/fetch_assets.py): per material, vertices in
+    the vehicle's body frame (m), triangles, colour and texture."""
+
+    def __init__(self, path):
+        import json
+        with open(os.path.join(path, "iss.json")) as f:
+            self.meta = json.load(f)
+        z = np.load(os.path.join(path, "iss.npz"))
+        self.parts = []
+        for k, m in enumerate(self.meta['materials']):
+            data = np.hstack([z['pos%d' % k], z['nrm%d' % k], z['uv%d' % k]]).astype(np.float32)
+            img = load_rgb(os.path.join(path, m['texture'])) if m['texture'] else None
+            self.parts.append(dict(data=data, idx=np.ascontiguousarray(z['idx%d' % k], np.uint32),
+                                   color=m['color'], img=img))
+        pos = np.vstack([z['pos%d' % k] for k in range(len(self.meta['materials']))])
+        self.radius = float(np.max(np.linalg.norm(pos, axis=1)))
+        self.ready = False
+
+    def build(self):
+        """Buffers and textures, in the first view's (shared) context."""
+        for p in self.parts:
+            p['vbo'] = GL.glGenBuffers(1)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, p['vbo'])
+            GL.glBufferData(GL.GL_ARRAY_BUFFER, p['data'].nbytes, p['data'], GL.GL_STATIC_DRAW)
+            p['ebo'] = GL.glGenBuffers(1)
+            GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, p['ebo'])
+            GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, p['idx'].nbytes, p['idx'], GL.GL_STATIC_DRAW)
+            p['count'] = len(p['idx'])
+            p['tex'] = make_srgb_texture(p['img']) if p['img'] is not None else None
+            for wrap in (GL.GL_TEXTURE_WRAP_S, GL.GL_TEXTURE_WRAP_T):
+                if p['tex'] is not None:
+                    GL.glTexParameteri(GL.GL_TEXTURE_2D, wrap, GL.GL_REPEAT)
+            p['data'] = p['idx'] = p['img'] = None
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+        self.ready = True
+
+
+class VehicleLayer(object):
+    """The vehicles in TGT1 (by NORAD id), each with its model.  Far away
+    its parts are thinner than a pixel and vanish, so a point like a star, by
+    its magnitude when sunlit (the ISS: about -1.8 at 1000 km, full phase),
+    fades in as it shrinks below FADE_PX pixels in radius; under MODEL_PX
+    the model isn't drawn at all."""
+    target = 'earth'
+    SUN_E = 2.0 * math.pi               # as the Earth's ground
+    MODEL_PX = 1.5
+    FADE_PX = 10.0
+    MAG_1000KM = -1.8
+
+    def __init__(self, models, exposure):
+        self.models = models            # NORAD id -> Model
+        self.points = PointLayer(exposure, 'vehicles')
+
+    def draw(self, res, view, fs):
+        if not fs.targets or fs.sky is None:
+            return
+        cam = fs.C @ view.basis                                  # camera -> M50
+        eye = fs.r + fs.C @ np.asarray(view.spec['eye'], float)  # M50
+        sun_m50 = J2000_TO_M50 @ fs.sky.pos['sun']
+        for vid, (r, Cv) in fs.targets.items():
+            model = self.models.get(vid)
+            if model is None:
+                continue
+            d = r - eye
+            dist = float(np.linalg.norm(d))
+            if dist < 1e-3 or behind_earth(eye, r):
+                continue
+            rel = cam.T @ d                                      # camera frame, double
+            if rel[2] < -model.radius:
+                continue
+            to_sun = sun_m50 - r
+            dsun = float(np.linalg.norm(to_sun))
+            sep = math.acos(max(-1.0, min(1.0, float(np.dot(to_sun / dsun, -r / np.linalg.norm(r))))))
+            vis = uncovered_disk(R_SUN / dsun, EARTH_A / float(np.linalg.norm(r)), sep)
+            px = model.radius / dist * (view.view_size()[0] / 2.0) / view.tanX
+            if px < self.FADE_PX and vis > 0.01 and rel[2] > 0:
+                # Phase: lit fraction seen from the eye, as a Lambert sphere.
+                phase = 0.5 * (1.0 + float(np.dot(to_sun / dsun, -d / dist)))
+                fade = min(1.0, (self.FADE_PX - px) / (self.FADE_PX - self.MODEL_PX))
+                mag = (self.MAG_1000KM + 5.0 * math.log10(dist / 1.0e6)
+                       - 2.5 * math.log10(max(vis * phase * fade, 1e-6)))
+                self._point(res, view, fs, J2000_TO_M50.T @ (d / dist), mag)
+            if px < self.MODEL_PX:
+                continue
+            if not model.ready:
+                model.build()
+            sun_b = Cv.T @ (to_sun / dsun)
+            earth_b = Cv.T @ (-r / np.linalg.norm(r))
+            # The Earth below lit: the Sun's height over the sub-vehicle point.
+            earth_lit = max(0.0, float(np.dot(r / np.linalg.norm(r), to_sun / dsun)))
+            U = res.modelU
+            f32 = np.float32
+            GL.glUseProgram(res.modelProg)
+            GL.glUniformMatrix3fv(U["uRot"], 1, GL.GL_TRUE, (cam.T @ Cv).astype(f32))
+            GL.glUniform3fv(U["uTrans"], 1, rel.astype(f32))
+            GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
+            GL.glUniform1f(U["uNear"], max(0.05, dist - model.radius))
+            GL.glUniform1f(U["uFar"], dist + model.radius)
+            GL.glUniform3fv(U["uSunB"], 1, sun_b.astype(f32))
+            GL.glUniform3fv(U["uEyeB"], 1, (Cv.T @ (-d)).astype(f32))
+            GL.glUniform3fv(U["uEarthB"], 1, earth_b.astype(f32))
+            GL.glUniform1f(U["uSunE"], self.SUN_E)
+            GL.glUniform1f(U["uSunVis"], vis)
+            GL.glUniform1f(U["uEarthLit"], earth_lit)
+            GL.glUniform1i(U["uTex"], 0)
+            GL.glEnable(GL.GL_DEPTH_TEST)
+            GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
+            for p in model.parts:
+                vao = view.modelVaos.get((vid, id(p)))
+                if vao is None:
+                    vao = view.modelVaos[(vid, id(p))] = GL.glGenVertexArrays(1)
+                    GL.glBindVertexArray(vao)
+                    GL.glBindBuffer(GL.GL_ARRAY_BUFFER, p['vbo'])
+                    GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, p['ebo'])
+                    for name, size, off in (("aPos", 3, 0), ("aNrm", 3, 3), ("aUv", 2, 6)):
+                        loc = GL.glGetAttribLocation(res.modelProg, name)
+                        GL.glEnableVertexAttribArray(loc)
+                        GL.glVertexAttribPointer(loc, size, GL.GL_FLOAT, GL.GL_FALSE, 32,
+                                                 GL.ctypes.c_void_p(4 * off))
+                GL.glBindVertexArray(vao)
+                GL.glUniform4fv(U["uColor"], 1, np.asarray(p['color'], f32))
+                GL.glUniform1i(U["uHasTex"], 1 if p['tex'] is not None else 0)
+                if p['tex'] is not None:
+                    GL.glActiveTexture(GL.GL_TEXTURE0)
+                    GL.glBindTexture(GL.GL_TEXTURE_2D, p['tex'])
+                GL.glDrawElements(GL.GL_TRIANGLES, p['count'], GL.GL_UNSIGNED_INT, None)
+            GL.glBindVertexArray(view.vao)
+            GL.glDisable(GL.GL_DEPTH_TEST)
+
+    def _point(self, res, view, fs, dir_j2k, mag):
+        """A vehicle as a point (the eye's offset from TRU1's point is
+        negligible at such ranges; the star program uses the latter)."""
+        if not hasattr(res, 'vehicleVbo'):
+            res.vehicleVbo = GL.glGenBuffers(1)
+        data = np.array([[*dir_j2k, mag, 1.0, 1.0, 1.0]], np.float32)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, res.vehicleVbo)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, data.nbytes, data, GL.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+        self.points.draw_points(res, view, fs, res.vehicleVbo, 1)
+
+
+def behind_earth(eye, r):
+    """Whether the Earth (PASS's ellipsoid) is between eye and r (M50; the
+    flattening ignored here, a few km at most)."""
+    d = r - eye
+    L = float(np.linalg.norm(d))
+    u = d / L
+    b = float(np.dot(eye, u))
+    c = float(np.dot(eye, eye)) - EARTH_B ** 2
+    disc = b * b - c
+    if disc < 0:
+        return False
+    t = -b - math.sqrt(disc)
+    return 0 < t < L
+
+
+def uncovered_disk(a, b, sep):
+    """The fraction of a disk of angular radius a uncovered by one of radius b,
+    their centres sep apart (as the shaders' uncovered())."""
+    if sep >= a + b:
+        return 1.0
+    if sep <= b - a:
+        return 0.0
+    if sep <= a - b:
+        return 1.0 - (b * b) / (a * a)
+    x = (sep * sep + a * a - b * b) / (2 * sep)
+    y = sep - x
+    area = (a * a * math.acos(max(-1.0, min(1.0, x / a))) - x * math.sqrt(max(a * a - x * x, 0.0))
+            + b * b * math.acos(max(-1.0, min(1.0, y / b))) - y * math.sqrt(max(b * b - y * y, 0.0)))
+    return 1.0 - area / (math.pi * a * a)
+
+
+# --------------------------------------------------------------------------
 # The windows.
 
 class ViewWidget(QOpenGLWidget):
@@ -1639,8 +1970,10 @@ class ViewWidget(QOpenGLWidget):
         self.tanX = self.tanY = 1.0
         self.vao = None
         self.pointVaos = {}
+        self.modelVaos = {}
         self.hdrFbo = self.hdrTex = None
         self.earthFbo = self.earthTex = self.earthTransTex = None
+        self.depthRb = None
         self.hdrSize = None
         self.setWindowTitle("Portview: %s" % spec['title'])
         self.resize(max(64, round(spec['w'] * scale)) + 2 * FRAME_PX,
@@ -1670,6 +2003,7 @@ class ViewWidget(QOpenGLWidget):
         if self.hdrFbo is not None:
             GL.glDeleteFramebuffers(2, [self.hdrFbo, self.earthFbo])
             GL.glDeleteTextures([self.hdrTex, self.earthTex, self.earthTransTex])
+            GL.glDeleteRenderbuffers(1, [self.depthRb])
 
         def tex():
             t = GL.glGenTextures(1)
@@ -1689,6 +2023,11 @@ class ViewWidget(QOpenGLWidget):
             GL.glFramebufferTexture2D(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0 + i,
                                       GL.GL_TEXTURE_2D, t, 0)
         GL.glDrawBuffers(2, [GL.GL_COLOR_ATTACHMENT0, GL.GL_COLOR_ATTACHMENT1])
+        self.depthRb = GL.glGenRenderbuffers(1)              # for vehicles' own surfaces
+        GL.glBindRenderbuffer(GL.GL_RENDERBUFFER, self.depthRb)
+        GL.glRenderbufferStorage(GL.GL_RENDERBUFFER, GL.GL_DEPTH_COMPONENT24, w, h)
+        GL.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT,
+                                     GL.GL_RENDERBUFFER, self.depthRb)
         self.hdrSize = (w, h)
 
     def paintGL(self):
@@ -1713,6 +2052,7 @@ class ViewWidget(QOpenGLWidget):
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.earthFbo)
         GL.glClearBufferfv(GL.GL_COLOR, 0, (0.0, 0.0, 0.0, 0.0))
         GL.glClearBufferfv(GL.GL_COLOR, 1, (1.0, 1.0, 1.0, 1.0))
+        GL.glClearBufferfv(GL.GL_DEPTH, 0, (1.0,))
         if fs.ok:
             for layer in earth:
                 layer.draw(res, self, fs)
@@ -1857,7 +2197,8 @@ def main(argv=None):
     ap.add_argument("--milkyway", type=float, default=0.5, metavar="X",
                     help="the Milky Way's brightness relative to the stars "
                          "(default 0.5)")
-    ap.add_argument("--test", nargs='?', const='lvlh', metavar="lvlh|baydown|hover|RA,DEC|BODY",
+    ap.add_argument("--test", nargs='?', const='lvlh',
+                    metavar="lvlh|baydown|vbar|hover|RA,DEC|BODY",
                     help="no yaGPC2: a synthetic orbit, holding LVLH (default), LVLH "
                          "with the payload bay to the Earth (baydown), or "
                          "inertial with the nose at J2000 RA,DEC (deg) or at a body "
@@ -1868,6 +2209,8 @@ def main(argv=None):
                     help="with --test, the orbit's altitude (default 400 km)")
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
+    ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
+                    help="with --test vbar, the ISS's distance (default 100 m)")
     ap.add_argument("--test-lon", type=float, metavar="DEG",
                     help="with --test, start over this longitude (east +) on the equator")
     ap.add_argument("--test-rate", type=float, default=1.0, metavar="X",
@@ -1884,7 +2227,7 @@ def main(argv=None):
     test = None
     bodies = ['sun', 'moon'] + [n for n, _, _ in PLANETS]
     if args.test:
-        if args.test in ('lvlh', 'baydown') or args.test in bodies:
+        if args.test in ('lvlh', 'baydown', 'vbar') or args.test in bodies:
             test = args.test
         elif args.test == 'hover':
             try:
@@ -1938,12 +2281,16 @@ def main(argv=None):
                 tzinfo=datetime.timezone.utc).timestamp()
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
-    feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon) if test
+    feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
+                     args.test_range) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
+    models = {}
+    if os.path.exists(os.path.join(ISS_MODEL, "iss.json")):
+        models[ISS_NORAD] = Model(ISS_MODEL)
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
-              SunLayer(), MoonLayer(), EarthLayer()]
+              SunLayer(), MoonLayer(), EarthLayer(), VehicleLayer(models, exposure)]
     views = []
     app = Portview(args, feed, views, exposure, ephemeris)
     for i, n in enumerate(names):

@@ -120,7 +120,7 @@ longer used.  No Git LFS.
 
 PyQt6 and numpy (already required), PyOpenGL, OpenEXR (only for
 `fetch_assets.py`), Pillow (later, for images), Skyfield (with jplephem),
-and a glTF loader (pygltflib or trimesh), plus the 32 MB DE440s file.  portview
+and, only to prepare the ISS model, DracoPy and pygltflib; plus the 32 MB DE440s file.  portview
 is optional: nothing else (simulatePASS, manager, panels, MEDS2) imports or
 requires these, and portview exits with a clear message naming whatever is
 missing.  Whether the other platforms install them is Ron's call.
@@ -235,7 +235,20 @@ are entries in fetch_assets.py's SITES table.  Later: terrain heights
   2017-08-21 eclipse (total at Hopkinsville at 18:26:40, 83-85% at Chicago
   and Atlanta).  Apple's OpenGL falls back to software for dual-source
   blending, so the Earth goes to its own buffers (colour, transmittance).
-- **P4 — LEO objects** from TGT1 (a `--test` source first, until yaGPC2 sends it).
+- **P4 — LEO objects** (ISS done 2026-10-07): TGT1 reader on base + 96 per
+  PASS-IDLE's proposal (axes and origin confirmed with PASS-IDLE); the ISS
+  from NASA JSC IGOAL's model (NASA 3D Resources "ISS (D) (IGOAL)", 96 MB
+  glb, Draco-compressed; fetch_assets.py decodes it once, needing DracoPy and
+  pygltflib) as at STS-134: later parts (BEAM, Bishop, Nauka, Prichal, IDAs,
+  iROSAs, later payloads) and STS-134's own AMS-02 and ELC-3 left out; 1.94
+  million triangles, 35 MB prepared.  The model's root is a mirroring
+  negative scale in inches; corrected to metres in the ISS analysis frame
+  (checked: Kibo port, Columbus starboard, Cupola nadir, PMA-2 forward).
+  Missing from the model for 2011: Pirs, the docked Soyuz/Progress, ATV-2.
+  Eye points per view (forward and aft stations, approximate Orbiter
+  structural coordinates).  Far away: a point by magnitude.  `--test vbar
+  --test-range M` flies the final V-bar approach with a synthetic ISS.
+  Other vehicles (HST, Mir, ...) are more models keyed by NORAD id.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed
   `*.layout` files are never overwritten).

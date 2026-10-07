@@ -42,6 +42,16 @@ portview.py loads, and the download deleted unless --keep-downloads.
                     GmbH (Contains modified Copernicus Sentinel data 2016),
                     CC BY 4.0.  Each ring's colours are matched to the next
                     coarser one's, so the seams between them don't show.
+  models/iss/       The International Space Station as at STS-134 (May 2011),
+                    from NASA JSC IGOAL's model (NASA 3D Resources, "ISS (D)
+                    (IGOAL)"): the meshes decoded (Draco), in metres in the ISS
+                    analysis frame (+X forward through Node 2 and PMA-2, +Y
+                    starboard along the truss, +Z nadir), the origin at the S0
+                    truss (near the centre of mass), grouped by material, with
+                    the base-colour textures as JPEG.  Parts added later (BEAM,
+                    Bishop, Nauka, Prichal, the IDAs, iROSAs, later payloads)
+                    and STS-134's own cargo (AMS-02, ELC-3) are left out.
+                    Needs DracoPy and pygltflib to prepare.
 """
 import argparse
 import os
@@ -335,6 +345,143 @@ def prepare_site(key):
                        alt_ft=site['alt_ft'], rings=rings), f, indent=1)
 
 
+ISS_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+           "International%20Space%20Station%20(ISS)%20(D)%20(IGOAL)/"
+           "International%20Space%20Station%20(ISS).glb")
+ISS_DIR = os.path.join(CACHE, "models", "iss")
+
+# Not on the station at STS-134's docking (May 2011): added later, or STS-134's
+# own cargo.  Node names in the IGOAL model; a node drops its whole subtree.
+ISS_NOT_2011 = {
+    'BEAM', 'Bishop_Airlock', 'MLM', 'Russian_RSNode_DockingModule',     # 2016-2021
+    'AMS', 'ELC_3',                                                       # STS-134's cargo
+    'IDA2', 'IDA3', 'PMA3',                  # docking adapters 2016-19; PMA-3 moved 2017
+    'IROSA_Deployed_P44A', 'IROSA_Deployed_P62B', 'IROSA_Deployed_P64B',
+    'IROSA_Deployed_S41A', 'IROSA_Deployed_S43A', 'IROSA_Deployed_S61B',    # 2021-
+    'Columbus_BARTOLOMEO', 'Payload_ASIM', 'Payload_STP_H7', 'ColKa',
+    'JEM_EF_CALET', 'JEM_EF_ECOSTRESS', 'JEM_EF_GEDI', 'JEM_EF_HISUI', 'JEM_EF_OCO3',
+    'JEM_EF_NREP', 'JEM_EF_EFU_Adapter_iSEEP', 'JEM_EF_EFU_Adapter2_iSEEP2',
+    'JEM_EF_SFA_Base', 'STP-H8_Body', 'STP-H9',
+    'Payload_NICER', 'Payload_MISSE_FF', 'Payload_TUS-RA', 'SAGE_NVP', 'Payload_MUSES',
+    'Payload_HRSRadiator', 'Payload_EMIT', 'Payload_AWE',
+}
+INCH = 0.0254
+# The model's root scales by -0.00258 (a point reflection: a mirrored
+# station) in inches.  In its own axes, positively scaled: +x forward, +y
+# nadir, -z starboard.  This takes inches there to metres in the ISS frame.
+ISS_ROOT = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]]) * INCH
+
+
+def prepare_iss(keep):
+    import io
+    import json
+    if os.path.exists(os.path.join(ISS_DIR, "iss.json")):
+        return
+    try:
+        import DracoPy
+        import pygltflib
+    except ImportError:
+        sys.exit("fetch_assets: pip install DracoPy pygltflib (needed once, to convert the ISS)")
+    Image = _image()
+    src = download(ISS_URL, os.path.join(CACHE, "models", "iss-igoal.glb"))
+    print("converting", os.path.basename(src))
+    g = pygltflib.GLTF2().load(src)
+    blob = g.binary_blob()
+
+    def qmat(q):
+        x, y, z, w = q
+        return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+                         [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+                         [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)]])
+
+    def local(n):
+        if n.matrix:
+            return np.array(n.matrix).reshape(4, 4).T
+        m = np.eye(4)
+        m[:3, :3] = (qmat(n.rotation) if n.rotation else np.eye(3)) @ np.diag(n.scale or [1, 1, 1])
+        if n.translation:
+            m[:3, 3] = n.translation
+        return m
+
+    groups = {}                                  # material -> lists of arrays
+    root = g.scenes[g.scene or 0].nodes[0]
+    top = np.eye(4)
+    top[:3, :3] = ISS_ROOT
+
+    def walk(i, parent):
+        n = g.nodes[i]
+        if n.name in ISS_NOT_2011:
+            return
+        w = parent @ local(n)
+        if n.mesh is not None:
+            nrm_m = np.linalg.inv(w[:3, :3]).T
+            for p in g.meshes[n.mesh].primitives:
+                ext = (p.extensions or {}).get('KHR_draco_mesh_compression')
+                if not ext:
+                    continue                     # (every primitive in this model is Draco)
+                bv = g.bufferViews[ext['bufferView']]
+                o = bv.byteOffset or 0
+                d = DracoPy.decode(blob[o:o + bv.byteLength])
+                pts = np.asarray(d.points, np.float64).reshape(-1, 3)
+                nrm = (np.asarray(d.normals, np.float64).reshape(-1, 3) if d.normals is not None
+                       else np.zeros_like(pts))
+                uv = (np.asarray(d.tex_coord, np.float32).reshape(-1, 2) if d.tex_coord is not None
+                      else np.zeros((len(pts), 2), np.float32))
+                pos = pts @ w[:3, :3].T + w[:3, 3]
+                nrm = nrm @ nrm_m.T
+                nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-12)
+                groups.setdefault(p.material, []).append(
+                    (pos.astype(np.float32), nrm.astype(np.float32), uv,
+                     np.asarray(d.faces, np.uint32).reshape(-1, 3)))
+        for c in n.children or []:
+            walk(c, w)
+
+    for c in g.nodes[root].children or []:
+        walk(c, top)
+    os.makedirs(ISS_DIR, exist_ok=True)
+    arrays, mats = {}, []
+    for k, (mi, parts) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or 0))):
+        base, n = 0, []
+        for pos, nrm, uv, faces in parts:
+            n.append(faces + base)
+            base += len(pos)
+        arrays['pos%d' % k] = np.vstack([p[0] for p in parts])
+        arrays['nrm%d' % k] = np.vstack([p[1] for p in parts])
+        arrays['uv%d' % k] = np.vstack([p[2] for p in parts])
+        arrays['idx%d' % k] = np.vstack(n).ravel()
+        if mi is None:                           # no material: plain light grey
+            mats.append(dict(name="(none)", color=[0.7, 0.7, 0.7, 1.0], metallic=0.0, texture=None))
+            continue
+        mat = g.materials[mi]
+        pbr = mat.pbrMetallicRoughness
+        entry = dict(name=mat.name, color=list(pbr.baseColorFactor or [1, 1, 1, 1]),
+                     metallic=pbr.metallicFactor if pbr.metallicFactor is not None else 1.0,
+                     texture=None)
+        if pbr.baseColorTexture is not None:
+            t = g.textures[pbr.baseColorTexture.index]
+            srcimg = ((t.extensions or {}).get('EXT_texture_webp') or {}).get('source', t.source)
+            im = g.images[srcimg]
+            bv = g.bufferViews[im.bufferView]
+            o = bv.byteOffset or 0
+            img = Image.open(io.BytesIO(blob[o:o + bv.byteLength])).convert("RGB")
+            if max(img.size) > 2048:
+                f = 2048.0 / max(img.size)
+                img = img.resize((max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f))),
+                                 Image.LANCZOS)
+            entry['texture'] = "tex%d.jpg" % k
+            img.save(os.path.join(ISS_DIR, entry['texture']), quality=90)
+        mats.append(entry)
+    np.savez_compressed(os.path.join(ISS_DIR, "iss.npz"), **arrays)
+    tris = sum(len(arrays['idx%d' % k]) // 3 for k in range(len(mats)))
+    with open(os.path.join(ISS_DIR, "iss.json"), "w") as f:
+        json.dump(dict(name="ISS, STS-134 (May 2011)", frame="ISS analysis: +X fwd, +Y stbd, +Z nadir; m",
+                       source="NASA 3D Resources, ISS (D) (IGOAL)", triangles=tris,
+                       materials=mats), f, indent=1)
+    print("  %d triangles in %d materials" % (tris, len(mats)))
+    if not keep:
+        os.remove(src)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep-downloads", action="store_true",
@@ -355,6 +502,7 @@ def main():
     prepare_watermask(args.keep_downloads)
     for m in months:
         prepare_bluemarble(m, args.keep_downloads)
+    prepare_iss(args.keep_downloads)
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))
