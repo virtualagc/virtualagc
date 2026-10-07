@@ -138,8 +138,11 @@ def _dir(az, el):
 
 
 # Ron's shapes: the front view 2:1, the others square at its height, all at
-# the front view's angle per pixel (so 20.6 deg square).
-SIDE_HFOV = 2.0 * math.degrees(math.atan(math.tan(math.radians(20.0)) * 768.0 / 1536.0))
+# the same angle per pixel; that height the forward window's own, 29 deg (10 up
+# to 19 down, below), so 29 deg square and 54.7 deg across the front.
+VIEW_VFOV = 29.0
+SIDE_HFOV = VIEW_VFOV
+FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV / 2.0))))
 
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
@@ -155,7 +158,7 @@ SIDE_HFOV = 2.0 * math.degrees(math.atan(math.tan(math.radians(20.0)) * 768.0 / 
 #          18-28 deg down: 88 deg out, 8 deg down.
 VIEWS = {
     'front': dict(title="Forward windows", fwd=_dir(0, -4.5), up=(0, 0, -1),
-                  w=1536, h=768, hfov=40.0),
+                  w=1536, h=768, hfov=FRONT_HFOV),
     'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(1, 0, 0),
                w=768, h=768, hfov=SIDE_HFOV),
     'left': dict(title="Left side window", fwd=_dir(-88, -8), up=(0, 0, -1),
