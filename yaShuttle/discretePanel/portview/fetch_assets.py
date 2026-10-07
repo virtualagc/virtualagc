@@ -40,6 +40,8 @@ portview.py loads, and the download deleted unless --keep-downloads.
                       ring3.jpg  +-2000 km, ~500 m: the same
                       ringF.jpg  +-1.5 km,  ~0.37 m: NAIP again, for the runway
                                  itself at rollout (US sites)
+                      patch_NAME.jpg  more fine patches where needed, e.g.
+                                 KSC's launch pads 39A and 39B (+-1.2 km, ~0.3 m)
                     Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services
                     GmbH (Contains modified Copernicus Sentinel data 2016),
                     CC BY 4.0.  Each ring's colours are matched to the next
@@ -95,7 +97,9 @@ NIGHT_SIZE = (8192, 4096)
 # ellipsoid), and the ground's height there (ft, the runway threshold's).
 SITES = {
     'ksc': dict(name="KSC Shuttle Landing Facility", lat=28.61489, lon=-80.69437,
-                alt_ft=8.3, naip=True),
+                alt_ft=8.3, naip=True,
+                # The launch pads' centres (approximate; vehdyn's pad to come).
+                patches={'lc39a': (28.60839, -80.60433, 1.2), 'lc39b': (28.62722, -80.62083, 1.2)}),
     # No navaids file yet: the airfield reference points and elevations
     # (approximate; to be taken from tools/sites/*.json when yaGPC2 has them).
     'edw': dict(name="Edwards AFB", lat=34.9056, lon=-117.8836, alt_ft=2302.0, naip=True),
@@ -533,6 +537,40 @@ def prepare_site_fine(key):
         json.dump(meta, f, indent=1)
 
 
+def prepare_site_patches(key):
+    """More fine patches for a site already prepared: (lat, lon, half km) each,
+    from NAIP, colour-matched to ring 0 or ring 1 (whichever covers them)."""
+    import json
+    site = SITES[key]
+    d = os.path.join(CACHE, "sites", key)
+    meta_path = os.path.join(d, "ring.json")
+    if not site.get('patches') or not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    have = meta.setdefault('patches', {})
+    Image = _image()
+    for name, (lat, lon, half_km) in site['patches'].items():
+        if name in have:
+            continue
+        b = ring_bounds(dict(lat=lat, lon=lon), half_km)
+        print("site %s patch %s: +-%g km from naip" % (key, name, half_km))
+        img = fetch_mosaic('naip', b, 4)
+        if blank(img):
+            print("  NAIP is blank here; no patch")
+            continue
+        r0 = meta['rings'][0]
+        inside0 = (r0['bounds'][0] <= b[0] and b[2] <= r0['bounds'][2] and
+                   r0['bounds'][1] <= b[1] and b[3] <= r0['bounds'][3])
+        parent = r0 if inside0 else meta['rings'][1]
+        img = match_colours(img, b, Image.open(os.path.join(d, parent['file'])), parent['bounds'])
+        f = "patch_%s.jpg" % name
+        img.save(os.path.join(d, f), quality=92, subsampling=0)
+        have[name] = dict(file=f, bounds=b, half_km=half_km, source='naip')
+        with open(meta_path, "w") as fp:
+            json.dump(meta, fp, indent=1)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep-downloads", action="store_true",
@@ -559,6 +597,7 @@ def main():
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))
         prepare_site(key)
         prepare_site_fine(key)
+        prepare_site_patches(key)
     print("portview assets ready in", CACHE)
 
 

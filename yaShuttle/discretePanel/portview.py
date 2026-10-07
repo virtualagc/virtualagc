@@ -999,7 +999,7 @@ class Resources(object):
                                "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit",
                                "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
-                               "uFineOn", "uRingFine", "uRingF")
+                               "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -1009,9 +1009,9 @@ class Resources(object):
         if self.site is not None:
             for k, img in enumerate(self.site.images):
                 self.ringTex.append(make_ring_texture(img, compress=k > 0))
-            if self.site.fine_image is not None:
-                self.fineTex = make_ring_texture(self.site.fine_image, compress=False)
-            self.site.images = self.site.fine_image = None
+            self.patchTex = [make_ring_texture(img, compress=False)
+                             for img in self.site.patch_images]
+            self.site.images = self.site.patch_images = None
         self.earthDayTex = None
         self.earthMonth = None
         self.modelProg = compile_program(MODEL_VS, MODEL_FS)
@@ -1416,9 +1416,10 @@ uniform mat3 uEfToEnu;
 uniform vec4 uRingNear[2];      // u, v at the site; du/dEast, dv/dNorth (per m)
 uniform vec4 uRingFar[2];       // lon0, lat0, lon1, lat1 (radians)
 uniform sampler2D uRing0, uRing1, uRing2, uRing3;
-uniform int uFineOn;            // the fine ring (the runway at rollout), if the site has one
-uniform vec4 uRingFine;         // as uRingNear
-uniform sampler2D uRingF;
+// Fine patches (the runway at rollout, the launch pads): up to three, placed as rings 0-1.
+uniform int uPatchCount;
+uniform vec4 uPatch[3];         // as uRingNear
+uniform sampler2D uPatch0, uPatch1, uPatch2;
 const float PI = 3.14159265358979;
 const float R_SUN = 6.957e8, R_MOON = 1.7374e6, AU = 1.495978707e11;
 // The fraction of a disk of angular radius a uncovered by a disk of radius b,
@@ -1498,9 +1499,17 @@ vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu) {
     c = ringSample(uRing2, uv2, ringWeight(uv2), c);
     c = ringSample(uRing1, uv1, ringWeight(uv1), c);
     c = ringSample(uRing0, uv0, ringWeight(uv0), c);
-    if (uFineOn != 0) {
-        vec2 uvF = uRingFine.xy + vec2(enu.x * uRingFine.z, -enu.y * uRingFine.w);
-        c = ringSample(uRingF, uvF, ringWeight(uvF), c);
+    if (uPatchCount > 0) {
+        vec2 uvP = uPatch[0].xy + vec2(enu.x * uPatch[0].z, -enu.y * uPatch[0].w);
+        c = ringSample(uPatch0, uvP, ringWeight(uvP), c);
+    }
+    if (uPatchCount > 1) {
+        vec2 uvP = uPatch[1].xy + vec2(enu.x * uPatch[1].z, -enu.y * uPatch[1].w);
+        c = ringSample(uPatch1, uvP, ringWeight(uvP), c);
+    }
+    if (uPatchCount > 2) {
+        vec2 uvP = uPatch[2].xy + vec2(enu.x * uPatch[2].z, -enu.y * uPatch[2].w);
+        c = ringSample(uPatch2, uvP, ringWeight(uvP), c);
     }
     return c;
 }
@@ -1670,9 +1679,12 @@ class Site(object):
                 far.append([math.radians(v) for v in r['bounds']])
         self.near, self.far = np.array(near), np.array(far)
         self.images = [load_rgb(os.path.join(path, r['file'])) for r in meta['rings']]
-        fine = meta.get('fine')
-        self.fine = np.array(near_map(fine['bounds'])) if fine else None
-        self.fine_image = load_rgb(os.path.join(path, fine['file'])) if fine else None
+        # Fine patches: the runway's (ringF), then any others (the launch
+        # pads); at most three.
+        patches = ([meta['fine']] if meta.get('fine') else []) + list(meta.get('patches', {}).values())
+        patches = patches[:3]
+        self.patches = np.array([near_map(p['bounds']) for p in patches]).reshape(-1, 4)
+        self.patch_images = [load_rgb(os.path.join(path, p['file'])) for p in patches]
 
 
 class EarthLayer(object):
@@ -1720,19 +1732,23 @@ class EarthLayer(object):
                 GL.glActiveTexture(GL.GL_TEXTURE4 + k)
                 GL.glBindTexture(GL.GL_TEXTURE_2D, res.ringTex[k])
                 GL.glUniform1i(U["uRing%d" % k], 4 + k)
-            GL.glUniform1i(U["uFineOn"], 1 if site.fine is not None else 0)
-            if site.fine is not None:
-                GL.glUniform4fv(U["uRingFine"], 1, site.fine.astype(f32))
-                GL.glActiveTexture(GL.GL_TEXTURE8)
-                GL.glBindTexture(GL.GL_TEXTURE_2D, res.fineTex)
-                GL.glUniform1i(U["uRingF"], 8)
-            else:
-                GL.glUniform1i(U["uRingF"], 3)
+            n = len(site.patches)
+            GL.glUniform1i(U["uPatchCount"], n)
+            if n:
+                GL.glUniform4fv(U["uPatch"], n, site.patches.astype(f32))
+            for k in range(3):
+                if k < n:
+                    GL.glActiveTexture(GL.GL_TEXTURE8 + k)
+                    GL.glBindTexture(GL.GL_TEXTURE_2D, res.patchTex[k])
+                    GL.glUniform1i(U["uPatch%d" % k], 8 + k)
+                else:
+                    GL.glUniform1i(U["uPatch%d" % k], 3)
         else:
             for k in range(4):                 # samplers must name a unit even if unused
                 GL.glUniform1i(U["uRing%d" % k], 3)
-            GL.glUniform1i(U["uRingF"], 3)
-            GL.glUniform1i(U["uFineOn"], 0)
+            for k in range(3):
+                GL.glUniform1i(U["uPatch%d" % k], 3)
+            GL.glUniform1i(U["uPatchCount"], 0)
         GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
