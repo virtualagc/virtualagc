@@ -106,6 +106,21 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 
+# Linux desktops under Wayland (WSLg among them): Qt draws through XWayland
+# with GLX, but PyOpenGL, seeing WAYLAND_DISPLAY, would look for an EGL
+# context and find none.  And under WSL, Mesa falls back to software unless
+# told to use the GPU through Direct3D 12.  (Both before OpenGL or Qt load.)
+if sys.platform.startswith('linux'):
+    qpa = os.environ.get('QT_QPA_PLATFORM', '')
+    if os.environ.get('DISPLAY') and not qpa.startswith('wayland'):
+        os.environ.setdefault('PYOPENGL_PLATFORM', 'glx')
+    try:
+        with open('/proc/version') as _f:
+            if 'microsoft' in _f.read().lower():
+                os.environ.setdefault('GALLIUM_DRIVER', 'd3d12')
+    except OSError:
+        pass
+
 try:
     from OpenGL import GL
 except ImportError as e:
@@ -120,9 +135,19 @@ HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
 GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
-# Launch pads: the stack's place (lat, lon, deg) and the gantry model's
-# heading; approximate until vehdyn's pad geometry is in hand.
-PADS = {'lc39a': (28.60839, -80.60433, 0.0), 'lc39b': (28.62722, -80.62083, 0.0)}
+# Launch pads.  vehdyn (PASS's nav-base I-loads, CGNCOM.hal) stands the
+# stack nose up with the belly (+Z, the ET's side) north, so the port side and
+# its crew hatch face west -- toward the Fixed Service Structure, which is on
+# the pad's west side (NASA KSC, "Launch Complexes 39-A and 39-B"), its access
+# arm reaching east to the hatch; the RSS swings round to the payload bay on
+# the south.  The gantry model has its FSS on its +N side, so it is turned
+# -90 deg (its north to the west); GANTRY_STACK is where, in its own frame,
+# the ET's axis stands (estimated: FSS centre +26 m to the hatch, the hatch
+# 2.2 m west of the Orbiter's line, that line 9.1 m south of the ET's axis).
+# Each pad: the ET axis's place (lat, lon, deg), from the nav base (28.608423 N,
+# 80.604086 W for 39A) plus 9.12 m north; and the model's heading.
+GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
+PADS = {'lc39a': (28.608505, -80.604086, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
 NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
@@ -140,7 +165,7 @@ TRUTH_OFFSET = 98
 TARGET_OFFSET = 96                 # TGT1: other vehicles (the ISS), from yaGPC2 (planned)
 ISS_NORAD = 25544
 TRUTH_DOUBLES_MIN = 15
-TRUTH_DOUBLES_MAX = 27
+TRUTH_DOUBLES_MAX = 30
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
 MU_EARTH = 3.986004418e14          # m^3/s^2, only for extrapolating ~0.05 s
 OMEGA_EARTH = 7.2921159e-5         # rad/s, the same
@@ -170,9 +195,11 @@ VIEW_VFOV = 29.0
 SIDE_HFOV = VIEW_VFOV
 FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV / 2.0))))
 
-# The crew's eyes, body axes (m) from the point TRU1 describes: vehdyn's body
-# origin, the Orbiter's dry CG, fixed at X_o 1100, Y_o 0, Z_o 375 in
-# (vehdyn.c DRY_CG_XO/ZO; body = (-(X_o - 1100), Y_o, -(Z_o - 375)) * 0.0254).
+# The crew's eyes, body axes (m) from vehdyn's body origin, the Orbiter's dry
+# CG at X_o 1100, Y_o 0, Z_o 375 in (vehdyn.c DRY_CG_XO/ZO; body =
+# (-(X_o - 1100), Y_o, -(Z_o - 375)) * 0.0254).  TRU1's r is the current
+# centre of mass, offset from it by TRU1 [27-29] (the whole stack's on the
+# pad: ~12.7 m), which the views subtract.
 # Eyes, approximately: the forward station's design eye ~X_o 520, Z_o 470;
 # the aft station's, at the overhead windows (X_o 542.5, SFOM vol. 12 fig.
 # 2.1-3), ~X_o 580, Z_o 480.  They matter only near another vehicle.
@@ -275,7 +302,7 @@ def quat_advance(q, w_body, dt):
 
 class Truth(object):
     """One TRU1 datagram."""
-    __slots__ = ('t', 'gmt', 'q', 'w', 'r', 'v', 'unix', 'm50_to_ef')
+    __slots__ = ('t', 'gmt', 'q', 'w', 'r', 'v', 'unix', 'm50_to_ef', 'cg')
 
     @classmethod
     def parse(cls, d):
@@ -291,6 +318,9 @@ class Truth(object):
         s.v = np.array(v[12:15])
         s.unix = v[17] if n > 17 and v[17] >= 0 else None
         s.m50_to_ef = np.array(v[18:27]).reshape(3, 3) if n >= 27 else None
+        # The centre of mass r and v describe, from the dry CG, body axes (m):
+        # the whole stack's on the pad and in ascent; moves with propellant.
+        s.cg = np.array(v[27:30]) if n >= 30 else np.zeros(3)
         return s
 
 
@@ -362,7 +392,7 @@ class VehicleClock(object):
 class FrameState(object):
     """Everything a frame is drawn from, once per tick for all the views."""
     __slots__ = ('ok', 'stale', 't', 'gmt', 'unix', 'C', 'r', 'v', 'r_j2k',
-                 'm50_to_ef', 'sky', 'targets')
+                 'm50_to_ef', 'sky', 'targets', 'cg')
 
     def __init__(self):
         self.ok = False
@@ -409,6 +439,7 @@ def extrapolate(s, t):
     fs.r = s.r + s.v * dt + 0.5 * g * dt * dt
     fs.v = s.v + g * dt
     fs.r_j2k = J2000_TO_M50.T @ fs.r
+    fs.cg = s.cg
     fs.C = quat_to_matrix(unit(quat_advance(s.q, s.w, dt)))     # body -> M50
     # The Earth turns too: carrying the position forward but not the Earth
     # would slide the ground under the Orbiter by up to ~20 m (0.05 s at
@@ -865,15 +896,50 @@ def load_rgb(path):
     return np.asarray(Image.open(path).convert('RGB'))
 
 
+# Texture memory.  'full': the Earth's maps uncompressed at full size (about
+# 1.2 GB of textures in all).  'reduced', for GPUs with under REDUCED_BELOW of
+# their own memory (a 2 GB card thrashes with four views): the large maps at
+# half size and DXT1-compressed, the Milky Way at half size (about 0.5 GB).
+# Unified-memory GPUs (Apple, Intel) report nothing and get 'full'.
+TEXTURES = {'mode': 'full'}
+REDUCED_BELOW_KB = 3 * 1024 * 1024
+
+
+def gpu_memory_kb():
+    """The GPU's own memory, kB, where the driver says (NVIDIA, AMD); else None."""
+    try:
+        exts = {GL.glGetStringi(GL.GL_EXTENSIONS, i).decode()
+                for i in range(GL.glGetIntegerv(GL.GL_NUM_EXTENSIONS))}
+        if 'GL_NVX_gpu_memory_info' in exts:
+            return int(GL.glGetIntegerv(0x9048))      # TOTAL_AVAILABLE_MEMORY_NVX
+        if 'GL_ATI_meminfo' in exts:
+            return int(np.asarray(GL.glGetIntegerv(0x87FC)).ravel()[0])   # TEXTURE_FREE_MEMORY
+    except GL.GLError:
+        pass
+    return None
+
+
+def halve(a):
+    """An image at half size (2 x 2 box average), any channels and type."""
+    h, w = a.shape[0] // 2 * 2, a.shape[1] // 2 * 2
+    a = a[:h, :w].astype(np.float32)
+    b = 0.25 * (a[0::2, 0::2] + a[1::2, 0::2] + a[0::2, 1::2] + a[1::2, 1::2])
+    return b
+
+
 def make_earth_texture(rgb):
     """A large sRGB map of the Earth, mipmapped, wrapping east-west.  Not
     compressed: DXT1's 4x4 blocks show as squares when the map is magnified
-    (low over the ground), and the memory (530 MB for 16384 x 8192) is there."""
+    (low over the ground), and the memory (530 MB for 16384 x 8192) is there --
+    unless TEXTURES says 'reduced'."""
+    reduced = TEXTURES['mode'] == 'reduced'
+    if reduced:
+        rgb = np.clip(halve(rgb) + 0.5, 0, 255).astype(np.uint8)
     h, w, _ = rgb.shape
     tid = GL.glGenTextures(1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_SRGB8,
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if reduced else GL.GL_SRGB8,   # DXT1 sRGB
                     w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
     GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
@@ -919,6 +985,7 @@ def make_ring_texture(rgb, compress):
     tid = GL.glGenTextures(1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+    compress = compress or TEXTURES['mode'] == 'reduced'
     GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if compress else GL.GL_SRGB8,
                     w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
@@ -982,6 +1049,14 @@ class Resources(object):
             return
         self.mwProg = compile_program(FULLSCREEN_VS, MILKYWAY_FS)
         self.mwU = uniforms(self.mwProg, "uMap", "uCamToJ2k", "uTan", "uGain")
+        if TEXTURES['mode'] == 'auto':
+            kb = gpu_memory_kb()
+            TEXTURES['mode'] = 'reduced' if kb is not None and kb < REDUCED_BELOW_KB else 'full'
+            print("portview: GPU memory %s; textures %s" % (
+                "%.1f GB" % (kb / 1048576.0) if kb is not None else "unreported (shared)",
+                TEXTURES['mode']))
+        if TEXTURES['mode'] == 'reduced':
+            self.milkyway = halve(self.milkyway).astype(np.float16)
         self.mwTex = make_float_texture(self.milkyway)
         self.milkyway = None                   # on the GPU now
         self.starProg = compile_program(STARS_VS, STARS_FS)
@@ -1707,7 +1782,7 @@ class EarthLayer(object):
             prog, U = res.earthPlainProg, res.earthPlainU
             GL.glUseProgram(prog)
             GL.glUniformMatrix3fv(U["uCamToEF"], 1, GL.GL_TRUE, (fs.C @ view.basis).astype(f32))
-            GL.glUniform3fv(U["uOrigin"], 1, fs.r.astype(f32))
+            GL.glUniform3fv(U["uOrigin"], 1, view_eye(view, fs).astype(f32))
             GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
             GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
             return
@@ -1715,12 +1790,13 @@ class EarthLayer(object):
         U = res.earthU
         GL.glUseProgram(res.earthProg)
         GL.glUniformMatrix3fv(U["uCamToEF"], 1, GL.GL_TRUE, (m @ fs.C @ view.basis).astype(f32))
-        GL.glUniform3fv(U["uOrigin"], 1, (m @ fs.r).astype(f32))
+        eye = view_eye(view, fs)                     # M50, the crew's eye
+        GL.glUniform3fv(U["uOrigin"], 1, (m @ eye).astype(f32))
         sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
         GL.glUniform3fv(U["uSun"], 1, sun.astype(f32))
         GL.glUniform3fv(U["uMoonEF"], 1, (m @ J2000_TO_M50 @ fs.sky.pos['moon']).astype(f32))
         # In double precision here, so the shader never subtracts big numbers.
-        o_ef = m @ fs.r
+        o_ef = m @ eye
         o_s = o_ef * np.array([1.0, 1.0, EARTH_A / EARTH_B])
         site = res.site
         ground_r = EARTH_A + (site.height if site is not None else 0.0)
@@ -1875,8 +1951,9 @@ class GroundObject(object):
     (deg, clockwise from north) -- placed each frame through the Earth's
     orientation, so it turns with the Earth like everything on the ground."""
 
-    def __init__(self, key, lat, lon, height, heading=0.0):
+    def __init__(self, key, lat, lon, height, heading=0.0, offset=(0.0, 0.0)):
         self.key = key
+        self.offset = offset            # the model point (east, north, m) placed at lat, lon
         e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
         la, lo = math.radians(lat), math.radians(lon)
         Nr = EARTH_A / math.sqrt(1.0 - e2 * math.sin(la) ** 2)
@@ -1889,6 +1966,7 @@ class GroundObject(object):
         h = math.radians(heading)
         e2_, n2_ = math.cos(h) * east - math.sin(h) * north, math.sin(h) * east + math.cos(h) * north
         self.axes = np.column_stack([e2_, n2_, up])          # model -> Earth-fixed
+        self.ef = self.ef - self.axes @ np.array([offset[0], offset[1], 0.0])
 
     def state(self, fs):
         m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
@@ -1915,7 +1993,7 @@ class VehicleLayer(object):
         if not fs.targets or fs.sky is None:
             return
         cam = fs.C @ view.basis                                  # camera -> M50
-        eye = fs.r + fs.C @ np.asarray(view.spec['eye'], float)  # M50
+        eye = view_eye(view, fs)                                 # M50
         sun_m50 = J2000_TO_M50 @ fs.sky.pos['sun']
         for vid, (r, Cv) in fs.targets.items():
             model = self.models.get(vid)
@@ -1999,6 +2077,12 @@ class VehicleLayer(object):
         self.points.draw_points(res, view, fs, res.vehicleVbo, 1)
 
 
+def view_eye(view, fs):
+    """The crew's eye for a view, M50 (m): TRU1's centre of mass, plus the eye's
+    offset from the dry CG, less the centre of mass's (TRU1 [27-29])."""
+    return fs.r + fs.C @ (np.asarray(view.spec['eye'], float) - fs.cg)
+
+
 def behind_earth(eye, r):
     """Whether the Earth (PASS's ellipsoid) is between eye and r (M50; the
     flattening ignored here, a few km at most)."""
@@ -2048,6 +2132,7 @@ class ViewWidget(QOpenGLWidget):
         self.vao = None
         self.pointVaos = {}
         self.modelVaos = {}
+        self.frames = 0
         self.hdrFbo = self.hdrTex = None
         self.earthFbo = self.earthTex = self.earthTransTex = None
         self.depthRb = None
@@ -2108,6 +2193,7 @@ class ViewWidget(QOpenGLWidget):
         self.hdrSize = (w, h)
 
     def paintGL(self):
+        self.frames += 1
         dpr = self.devicePixelRatioF()
         vw, vh = self.view_size()
         w, h = round(vw * dpr), round(vh * dpr)
@@ -2226,6 +2312,16 @@ class Portview(object):
             if v.isVisible():
                 v.update()
         self.ticks += 1
+        if self.args.stats:
+            now = time.monotonic()
+            if not hasattr(self, 'statsAt'):
+                self.statsAt, self.statsN = now, {v.name: v.frames for v in self.views}
+            elif now - self.statsAt >= 5.0:
+                dt = now - self.statsAt
+                print("portview: frames/s " + "  ".join(
+                    "%s %.1f" % (v.name, (v.frames - self.statsN[v.name]) / dt) for v in self.views),
+                    flush=True)
+                self.statsAt, self.statsN = now, {v.name: v.frames for v in self.views}
         if self.args.snapshot and self.ticks == 60:
             for v in self.views:
                 path = "%s-%s.png" % (self.args.snapshot, v.name)
@@ -2273,6 +2369,12 @@ def main(argv=None):
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none)")
+    ap.add_argument("--textures", choices=('auto', 'full', 'reduced'), default='auto',
+                    help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
+                         "compressed), or auto: reduced on a GPU with under 3 GB of its own "
+                         "(default)")
+    ap.add_argument("--stats", action="store_true",
+                    help="print each view's frames per second to stdout, every 5 s")
     ap.add_argument("--exposure", type=float, default=-1.0, metavar="EV",
                     help="exposure, stops above (+) or below (-) the design one "
                          "(default -1)")
@@ -2353,6 +2455,7 @@ def main(argv=None):
     fmt.setSwapInterval(0)
     QtGui.QSurfaceFormat.setDefaultFormat(fmt)
     qapp = QtWidgets.QApplication(sys.argv[:1])
+    TEXTURES['mode'] = args.textures
     Resources._instance = Resources(milkyway, stars, moon, site)
 
     unix0 = None
@@ -2376,7 +2479,7 @@ def main(argv=None):
         lat, lon, heading = PADS[args.pad]
         models[args.pad] = Model(GANTRY_MODEL, point=False)
         ground.append(GroundObject(args.pad, lat, lon, site.height if site is not None else 0.0,
-                                   heading))
+                                   heading, offset=GANTRY_STACK))
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
               SunLayer(), MoonLayer(), EarthLayer(), VehicleLayer(models, exposure)]
     views = []
