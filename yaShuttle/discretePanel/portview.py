@@ -143,21 +143,24 @@ SIDE_HFOV = 2.0 * math.degrees(math.atan(math.tan(math.radians(20.0)) * 768.0 / 
 
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
-# its horizontal field of view (deg) at that size.
-#   front: the forward windows.
-#   up:    the overhead windows W7/W8, as seen from the aft station facing aft
-#          (top of the picture toward the nose).
-#   left, right: the commander's and pilot's side windows W1/W6, looking
-#          outward, a little forward and down.  PROVISIONAL angles, to be
-#          taken from Orbiter drawings.
+# its horizontal field of view (deg) at that size.  The lines of sight are the
+# centres of the windows' fields of view from the crew's design eye points,
+# SFOM vol. 12, Crew Systems (JSC-12770), fig. 3.28-5:
+#   front: the forward windows W3/W4, 18 deg outboard to 14 deg inboard,
+#          10 deg up to 19 deg down: straight ahead, 4.5 deg down.
+#   up:    the overhead windows W7/W8, 35 deg forward to 45 deg aft of the
+#          zenith: 5 deg aft of straight up, seen from the aft station facing
+#          aft (top of the picture toward the nose).
+#   left, right: the side windows W1/W6, 71-103 deg outboard, 6 deg up to
+#          18-28 deg down: 88 deg out, 8 deg down.
 VIEWS = {
-    'front': dict(title="Forward windows", fwd=(1, 0, 0), up=(0, 0, -1),
+    'front': dict(title="Forward windows", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=40.0),
-    'up': dict(title="Overhead windows", fwd=(0, 0, -1), up=(1, 0, 0),
+    'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(1, 0, 0),
                w=768, h=768, hfov=SIDE_HFOV),
-    'left': dict(title="Left side window", fwd=_dir(-75, -10), up=(0, 0, -1),
+    'left': dict(title="Left side window", fwd=_dir(-88, -8), up=(0, 0, -1),
                  w=768, h=768, hfov=SIDE_HFOV),
-    'right': dict(title="Right side window", fwd=_dir(75, -10), up=(0, 0, -1),
+    'right': dict(title="Right side window", fwd=_dir(88, -8), up=(0, 0, -1),
                   w=768, h=768, hfov=SIDE_HFOV),
 }
 
