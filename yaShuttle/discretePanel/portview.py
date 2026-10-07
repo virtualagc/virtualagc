@@ -147,6 +147,13 @@ GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Each pad: the ET axis's place (lat, lon, deg), from the nav base (28.608423 N,
 # 80.604086 W for 39A) plus 9.12 m north; and the model's heading.
 GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
+# The model's base is the pad's surface, 48 ft above sea level (the pads are
+# raised 15 m on their hardstands; its MLP deck, on 22 ft pedestals and 25 ft
+# deep, 16 m above that).  Heights here are sea-level heights, as PASS's site
+# heights are (the SLF's 8.3 ft), not true ellipsoidal ones (KSC's geoid is
+# ~29 m below the ellipsoid).  Over the flat ground drawn at the site's height
+# the pad's mound isn't modelled, so the gantry stands on a 12 m step.
+PAD_SURFACE_M = 48 * 0.3048
 PADS = {'lc39a': (28.608505, -80.604086, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
@@ -2478,8 +2485,7 @@ def main(argv=None):
     if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
         lat, lon, heading = PADS[args.pad]
         models[args.pad] = Model(GANTRY_MODEL, point=False)
-        ground.append(GroundObject(args.pad, lat, lon, site.height if site is not None else 0.0,
-                                   heading, offset=GANTRY_STACK))
+        ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_M, heading, offset=GANTRY_STACK))
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
               SunLayer(), MoonLayer(), EarthLayer(), VehicleLayer(models, exposure)]
     views = []
