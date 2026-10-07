@@ -50,7 +50,8 @@ A CONTROL is CONTROLS[key] = dict:
     while_held for switches: the key of a pushbutton; the contacts close only
                while that button is held too (ABORT MODE with ABORT)
     guarded    for pb: drawn with a guard (appearance only)
-    hardwired  for pb: a bit of the vehicle's HARDWIRED word -- functions no
+    hardwired  for pb: a bit of the vehicle's HARDWIRED word (for a switch, a
+               dict {position: bits}, set while it is in that position) -- functions no
                computer commands or reads (landing gear, drag chute), sent
                to yaGPC2 (mdmdev.c crew type 8, vehdyn.c vehdyn_hardwired)
                while the button is held; the vehicle latches them
@@ -345,6 +346,18 @@ CONTROLS.update({
     "brakes_off": dict(panel="F6", kind="pb", caption="", legend="OFF",
                        contacts=[], hardwired=0x0200),
 })
+# THE AIR DATA PROBES (panel C3): each switch drives its probe's motors --
+# STOW in, DEPLOY out (and heat), ENABLE holds -- and PASS reads only the
+# probes' limit switches (FF DSCRT8 0x0020 deployed / 0x0010 stowed).
+CONTROLS.update({
+    "adp_l": dict(panel="C3", kind="t3", caption="AIR DATA PROBE\nLEFT",
+                  positions=("STOW", "ENABLE", "DEPLOY"), default="STOW", contacts={},
+                  hardwired={"DEPLOY": 0x0100, "STOW": 0x0040}),
+    "adp_r": dict(panel="C3", kind="t3", caption="AIR DATA PROBE\nRIGHT",
+                  positions=("STOW", "ENABLE", "DEPLOY"), default="STOW", contacts={},
+                  hardwired={"DEPLOY": 0x0080, "STOW": 0x0020}),
+})
+PANES["C3"].append(("AIR DATA PROBE", [["adp_l", "adp_r"]]))
 PANES["F6"].append(("LANDING GEAR", [["gear_arm", "gear_dn"]]))
 PANES["F6"].append(("BRAKES", [["brakes_on", "brakes_off"]]))
 PANES["F2"].append(("DRAG CHUTE", [["chute_arm", "chute_dpy", "chute_jett"]]))

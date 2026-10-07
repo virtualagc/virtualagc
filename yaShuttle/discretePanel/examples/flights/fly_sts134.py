@@ -186,6 +186,15 @@ G3_FROM_MM = ("+1     keys SPEC 1 PRO\n"
 GPS_INCORPORATE = ("+1     keys SPEC 5 0 PRO\n"
                    "+3     keys ITEM 4 4 EXEC\n"
                    "+3     keys RESUME\n")
+# V = 7K, ENT/134/FIN FS 3-34: "ADTA PROBES - DEPLOY (HEAT)"; and ADTA to
+# G&C AUT (SPEC 50 ITEM 28, the checklist's "ADTA AUT 28"), so PASS takes the
+# probes' air data into guidance and control once V < 2500 ft/s ("M = 2.0
+# Ensure ADTA to G&C") instead of its drag-derived estimate.
+AIR_DATA = ("+1     switch adp_l DEPLOY\n"
+            "+1     switch adp_r DEPLOY\n"
+            "+1     keys SPEC 5 0 PRO\n"
+            "+3     keys ITEM 2 8 EXEC\n"
+            "+3     keys RESUME\n")
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
@@ -587,6 +596,10 @@ class Flight:
         self.play(GPS_INCORPORATE, "gps-incorporate-entry")
         self.script_done("gps-incorporate-entry", 60)
         self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
+        self.play(AIR_DATA, "air-data")
+        self.script_done("air-data", 60)
+        self.air_data_done = True
+        self.say("crew: V = 7K, ADTA PROBES DEPLOY; ADTA to G&C AUT (SPEC 50 ITEM 28)")
         self.wait_gmt(t["ei"] + 25 * 60.0)
 
     def last_entry_state(self):
@@ -616,6 +629,11 @@ class Flight:
         itself, autoland in A/L); the crew deploys the gear and the drag
         chute and brakes; until the wheels stop or the time runs out."""
         self.pfd_on_crt2()
+        if not getattr(self, "air_data_done", False):    # resumed past V = 7K
+            self.play(AIR_DATA, "air-data")
+            self.script_done("air-data", 60)
+            self.air_data_done = True
+            self.say("crew: ADTA PROBES DEPLOY; ADTA to G&C AUT (at the start of LAND)")
         if self.a.incorporate_at_land:
             self.play(GPS_INCORPORATE, "gps-incorporate-land")
             self.script_done("gps-incorporate-land", 60)

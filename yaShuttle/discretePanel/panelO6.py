@@ -1202,8 +1202,13 @@ class PanelO6:
         """The hardwired word: every held button's 'hardwired' bit."""
         w = 0
         for key, c in PC.CONTROLS.items():
-            if c.get("hardwired") and self.ctl_held.get(key):
-                w |= c["hardwired"]
+            hw = c.get("hardwired")
+            if not hw:
+                continue
+            if isinstance(hw, dict):                     # a switch: its position's bits
+                w |= hw.get(self.ctl.get(key), 0)
+            elif self.ctl_held.get(key):                 # a button: while held
+                w |= hw
         return w
 
     def stu_words(self):
@@ -1393,8 +1398,7 @@ class PanelO6:
         stu = self.stu_words()
         hw = self.hw_word()
         if hw != getattr(self, "_hw_published", 0):
-            log("hardwired  %04x  %s" % (hw, " ".join(k for k, c in PC.CONTROLS.items()
-                                                    if c.get("hardwired", 0) & hw)))
+            log("hardwired  %04x" % hw)
             self._hw_published = hw
         with self._pub_lock:
             self._pub_columns = columns
