@@ -166,13 +166,18 @@ VIEW_VFOV = 29.0
 SIDE_HFOV = VIEW_VFOV
 FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV / 2.0))))
 
-# The crew's eyes, body axes (m) from the point TRU1 describes (taken as the
-# centre of mass, Orbiter X_o ~1080 in, Z_o ~375 in): the forward station's
-# design eye ~X_o 520, Z_o 470, and the aft station's, at the overhead windows
-# (X_o 542.5, SFOM vol. 12 fig. 2.1-3), ~X_o 580, Z_o 480.  Approximate; they
-# matter only near another vehicle.
-EYE_FWD = ((1080 - 520) * 0.0254, 0.0, -(470 - 375) * 0.0254)
-EYE_AFT = ((1080 - 580) * 0.0254, 0.0, -(480 - 375) * 0.0254)
+# The crew's eyes, body axes (m) from the point TRU1 describes: vehdyn's body
+# origin, the Orbiter's dry CG, fixed at X_o 1100, Y_o 0, Z_o 375 in
+# (vehdyn.c DRY_CG_XO/ZO; body = (-(X_o - 1100), Y_o, -(Z_o - 375)) * 0.0254).
+# Eyes, approximately: the forward station's design eye ~X_o 520, Z_o 470;
+# the aft station's, at the overhead windows (X_o 542.5, SFOM vol. 12 fig.
+# 2.1-3), ~X_o 580, Z_o 480.  They matter only near another vehicle.
+def _structural(xo, yo, zo):
+    return (-(xo - 1100.0) * 0.0254, yo * 0.0254, -(zo - 375.0) * 0.0254)
+
+
+EYE_FWD = _structural(520.0, 0.0, 470.0)
+EYE_AFT = _structural(580.0, 0.0, 480.0)
 
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
