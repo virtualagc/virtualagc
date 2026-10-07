@@ -723,13 +723,15 @@ def load_rgb(path):
     return np.asarray(Image.open(path).convert('RGB'))
 
 
-def make_dxt1_texture(rgb):
-    """A large sRGB image, compressed by the driver (DXT1: 1/6 the memory)."""
+def make_earth_texture(rgb):
+    """A large sRGB map of the Earth, mipmapped, wrapping east-west.  Not
+    compressed: DXT1's 4x4 blocks show as squares when the map is magnified
+    (low over the ground), and the memory (530 MB for 16384 x 8192) is there."""
     h, w, _ = rgb.shape
     tid = GL.glGenTextures(1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C,          # COMPRESSED_SRGB_S3TC_DXT1
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_SRGB8,
                     w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
     GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
@@ -837,7 +839,7 @@ class Resources(object):
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
-        self.earthNightTex = make_dxt1_texture(load_rgb(NIGHTLIGHTS))
+        self.earthNightTex = make_earth_texture(load_rgb(NIGHTLIGHTS))
         self.waterTex = make_mask_texture(load_gray(WATERMASK))
         self.earthDayTex = None
         self.earthMonth = None
@@ -861,7 +863,7 @@ class Resources(object):
             print("portview: Blue Marble month %d not prepared; using %d" % (month, use))
         if self.earthDayTex is not None:
             GL.glDeleteTextures([self.earthDayTex])
-        self.earthDayTex = make_dxt1_texture(load_rgb(bluemarble_path(use)))
+        self.earthDayTex = make_earth_texture(load_rgb(bluemarble_path(use)))
         self.earthMonth = month
 
     def set_star_epoch(self, year):
@@ -1251,6 +1253,38 @@ const vec3 B_O = vec3(""" + ", ".join(repr(float(x)) for x in OZONE) + """);
 const float B_MS = """ + repr(MIE_SCAT) + """, B_ME = """ + repr(MIE_EXT) + """;
 const float H_R = """ + repr(RAYLEIGH_H) + """, H_M = """ + repr(MIE_H) + """, G = """ + repr(MIE_G) + """;
 
+// Bicubic B-spline in four bilinear taps (Sigg and Hadwiger, GPU Gems 2 ch. 20).
+vec3 bicubic(sampler2D t, vec2 uv) {
+    vec2 size = vec2(textureSize(t, 0));
+    vec2 p = uv * size - 0.5;
+    vec2 f = fract(p);
+    p -= f;
+    vec4 nx = vec4(1.0, 2.0, 3.0, 4.0) - f.x, ny = vec4(1.0, 2.0, 3.0, 4.0) - f.y;
+    vec4 sx = nx * nx * nx, sy = ny * ny * ny;
+    vec4 wx = vec4(sx.x, sx.y - 4.0 * sx.x, sx.z - 4.0 * sx.y + 6.0 * sx.x, 0.0);
+    wx.w = 6.0 - wx.x - wx.y - wx.z;
+    vec4 wy = vec4(sy.x, sy.y - 4.0 * sy.x, sy.z - 4.0 * sy.y + 6.0 * sy.x, 0.0);
+    wy.w = 6.0 - wy.x - wy.y - wy.z;
+    vec4 c = p.xxyy + vec2(-0.5, 1.5).xyxy;
+    vec4 s = vec4(wx.xz + wx.yw, wy.xz + wy.yw);
+    vec4 o = (c + vec4(wx.yw, wy.yw) / s) / size.xxyy;
+    vec3 a = textureLod(t, o.xz, 0.0).rgb, b = textureLod(t, o.yz, 0.0).rgb;
+    vec3 d = textureLod(t, o.xw, 0.0).rgb, e = textureLod(t, o.yw, 0.0).rgb;
+    float tx = s.x / (s.x + s.y), ty = s.z / (s.z + s.w);
+    return mix(mix(e, d, tx), mix(b, a, tx), ty);
+}
+
+// A map of the Earth: mipmapped as usual, but bicubic where it is magnified
+// (a texel wider than a pixel, low over the ground), so it blurs softly
+// instead of showing its texels.
+vec3 earthSample(sampler2D t, vec2 uv, vec2 gx, vec2 gy) {
+    vec2 size = vec2(textureSize(t, 0));
+    float texelsPerPixel = max(length(gx * size), length(gy * size));
+    vec3 m = textureGrad(t, uv, gx, gy).rgb;
+    if (texelsPerPixel >= 1.0) return m;
+    return mix(bicubic(t, uv), m, smoothstep(0.5, 1.0, texelsPerPixel));
+}
+
 vec3 transmittance(float r, float mu) {     // to the top of the atmosphere
     float H = sqrt(RT * RT - RG * RG);
     float rho = sqrt(max(r * r - RG * RG, 0.0));
@@ -1289,8 +1323,8 @@ void main() {
     vec2 gx = dFdx(uv), gy = dFdy(uv);
     gx.x -= round(gx.x);
     gy.x -= round(gy.x);
-    vec3 albedo = textureGrad(uDay, uv, gx, gy).rgb;
-    vec3 lights = textureGrad(uNight, uv, gx, gy).rgb;
+    vec3 albedo = earthSample(uDay, uv, gx, gy);
+    vec3 lights = earthSample(uNight, uv, gx, gy);
     if (disc < 0.0) discard;                       // misses the atmosphere
     float t0 = max(0.0, -b - sqrt(disc)), t1 = -b + sqrt(disc);
     if (t1 <= 0.0) discard;
