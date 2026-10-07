@@ -991,14 +991,31 @@ void vehdyn_aerosurf_pos(double pos[7]) {
 #define HW_CHUTE_JETT 0x0800u
 #define HW_BRAKES_ON  0x0400u  /* the brake pedals, latched on (the crew's 8-10 ft/s^2) */
 #define HW_BRAKES_OFF 0x0200u
+/* The AIR DATA PROBE switches (panel C3), levels rather than latches: DEPLOY
+ * drives a probe out, STOW drives it in, ENABLE leaves it where it is. */
+#define HW_ADP_L_DEPLOY 0x0100u
+#define HW_ADP_R_DEPLOY 0x0080u
+#define HW_ADP_L_STOW   0x0040u
+#define HW_ADP_R_STOW   0x0020u
+#define PROBE_TRAVEL_S  10.0   /* PROVISIONAL: stowed to deployed */
 #define GEAR_DEPLOY_S 10.0     /* PROVISIONAL: DN to down-and-locked */
 static bool gearArmed, gearDeploying, chuteArmed, chuteOut, chuteGone;
 static double gearPos;         /* 0 stowed .. 1 down and locked */
 static double chuteOutT = -1.0;
 static int wowMain[2], wowNose; /* weight on the left/right main gear, the nose gear */
 static bool brakesOn;
+static double probePos[2];     /* left, right: 0 stowed .. 1 deployed */
+static int probeDrive[2];      /* +1 out, -1 in, 0 held */
 
 void vehdyn_hardwired(unsigned w) {
+    for (int sd = 0; sd < 2; sd++) {
+        unsigned dep = sd ? HW_ADP_R_DEPLOY : HW_ADP_L_DEPLOY, sto = sd ? HW_ADP_R_STOW : HW_ADP_L_STOW;
+        int drv = (w & dep) ? 1 : (w & sto) ? -1 : 0;
+        if (drv != probeDrive[sd] && drv != 0)
+            fprintf(stderr, "vehdyn: %s air data probe %s at t=%.1f\n", sd ? "right" : "left",
+                    drv > 0 ? "DEPLOYING" : "STOWING", st.t);
+        probeDrive[sd] = drv;
+    }
     if (w & HW_GEAR_ARM) gearArmed = true;
     if ((w & HW_GEAR_DN) && gearArmed && !gearDeploying) {
         gearDeploying = true;
@@ -1029,7 +1046,17 @@ void vehdyn_gear(double *pos, int wow[3]) {
     if (wow) { wow[0] = wowMain[0]; wow[1] = wowMain[1]; wow[2] = wowNose; }
 }
 
+void vehdyn_probes(double pos[2]) {
+    pos[0] = probePos[0];
+    pos[1] = probePos[1];
+}
+
 static void gear_slew(double dt) {
+    for (int sd = 0; sd < 2; sd++) {
+        probePos[sd] += probeDrive[sd] * dt / PROBE_TRAVEL_S;
+        if (probePos[sd] > 1.0) probePos[sd] = 1.0;
+        if (probePos[sd] < 0.0) probePos[sd] = 0.0;
+    }
     if (gearDeploying && gearPos < 1.0) {
         gearPos += dt / GEAR_DEPLOY_S;
         if (gearPos >= 1.0) {
@@ -1101,6 +1128,28 @@ static void wow_log(const int was[3]) {
         fprintf(stderr, "vehdyn: %s gear %s at t=%.2f: ground speed %.1f kt, sink %.1f ft/s\n",
                 NAME[g], now[g] ? "TOUCHDOWN" : "lift-off", st.t, sqrt(vh) / 0.514444, -vu / 0.3048);
     }
+}
+
+/* THE AIR AS THE PROBES MEET IT: free-stream static pressure (psf), Mach,
+ * alpha and beta (deg) and dynamic pressure (psf), relative to the air --
+ * entry_aero's own quantities.  False above the tables' altitude. */
+bool vehdyn_air_data(double *pPsf, double *mach, double *alphaDeg, double *betaDeg, double *qPsf) {
+    double h = height_m(st.r);
+    if (h > EA_ALT_M) return false;
+    double rho, T, va[3], R[3][3], vb[3];
+    us1976(h, &rho, &T);
+    air_velocity(va);
+    double sp = sqrt(va[0] * va[0] + va[1] * va[1] + va[2] * va[2]);
+    if (sp < 1.0) sp = 1.0;
+    qmat_body(st.q, R);
+    for (int i = 0; i < 3; i++) vb[i] = R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2];
+    const double D2 = 180.0 / VD_PI, PA_PSF = 0.0208854342;
+    if (pPsf) *pPsf = rho * 287.05 * T * PA_PSF;
+    if (mach) *mach = sp / sqrt(1.4 * 287.05 * T);
+    if (alphaDeg) *alphaDeg = atan2(vb[2], vb[0]) * D2;
+    if (betaDeg) *betaDeg = asin(vb[1] / sp) * D2;
+    if (qPsf) *qPsf = 0.5 * rho * sp * sp * PA_PSF;
+    return true;
 }
 
 /* For the crew and the log: the lower main wheel's height above the runway
@@ -2124,6 +2173,7 @@ int vehdyn_save(double *b, int max) {
     PUT(gearArmed); PUT(gearDeploying); PUT(gearPos);
     PUT(chuteArmed); PUT(chuteOut); PUT(chuteGone); PUT(chuteOutT < 0.0 ? -1.0 : st.t - chuteOutT);
     PUT(wowMain[0]); PUT(wowMain[1]); PUT(wowNose);
+    PUT(brakesOn); PUT(probePos[0]); PUT(probePos[1]);
 #undef PUT
     return n;
 }
@@ -2171,6 +2221,9 @@ double vehdyn_load(const double *b, int n) {
             double ago = GET();
             chuteOutT = ago < 0.0 ? -1.0 : -ago;      /* the restored clock starts at 0 */
             wowMain[0] = (int)GET(); wowMain[1] = (int)GET(); wowNose = (int)GET();
+        }
+        if (i + 3 <= n) {
+            brakesOn = GET() != 0.0; probePos[0] = GET(); probePos[1] = GET();
         }
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }

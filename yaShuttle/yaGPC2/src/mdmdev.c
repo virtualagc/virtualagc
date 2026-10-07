@@ -23,6 +23,7 @@
 #include "valvemodel.h"
 #include "vehdyn.h"
 #include "landaids.h"
+#include "adtaair.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
  *     mode (4) | card (4) | channel (5) | word count - 1 (5)
@@ -1109,6 +1110,7 @@ static void ff_discretes(int k, uint16_t d[13]) {
      * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
     valve_inputs('F', k, d, 13);       /* the vent doors' feedback */
     gear_discretes(k, d);
+    if (vehdyn_enabled()) d[7] |= adta_probe_bits(k);    /* the air data probe's limit switches */
     crew_dscrt(k, d);
 }
 
@@ -1236,13 +1238,19 @@ static void push_aerosurf(void) {
         vehdyn_aerosurf_pos(pos);           /* nothing commanded yet: stay put */
         for (int a = 0; a < 6; a++) cmd[a] = pos[a];
     }
-    bool en = false, up = false, dn = false;
+    /* THE BODY FLAP'S PILOT VALVES VOTE, two of three, as the hydraulics do:
+     * each FA's enabled, unambiguous UP or DOWN is one vote.  ORing them made
+     * one valve held DOWN by PASS's redundancy management (GRPBFC.hal
+     * 145-181) cancel the other two's UP, and the flap froze at +21 deg
+     * through TAEM (2026-10-06). */
+    int vUp = 0, vDn = 0;
     for (int k = 1; k <= 4; k++) {
-        en = en || (faOut[k][10][1] & 0x2000u);
-        up = up || (faOut[k][2][1] & 0x0002u);
-        dn = dn || (faOut[k][2][1] & 0x0001u);
+        bool en = (faOut[k][10][1] & 0x2000u) != 0;
+        bool up = (faOut[k][2][1] & 0x0002u) != 0, dn = (faOut[k][2][1] & 0x0001u) != 0;
+        if (en && up && !dn) vUp++;
+        if (en && dn && !up) vDn++;
     }
-    vehdyn_set_aerosurf(cmd, (en && dn && !up) ? 1 : (en && up && !dn) ? -1 : 0);
+    vehdyn_set_aerosurf(cmd, vDn >= 2 ? 1 : vUp >= 2 ? -1 : 0);
 }
 
 /* THE HYDRAULIC SYSTEMS' SUPPLY PRESSURES, the FA's HFE SEG6 = words 26-27
@@ -1427,6 +1435,7 @@ static void fa_mfe(int k, uint16_t *w, int n) {
  * lambda the GLWRNP/GNFEAR Earth that vehdyn.c gives the physics -- so the
  * position is phys_inertial_to_earth() applied to the truth, and the
  * velocity has the Earth's turning taken out, exactly. */
+#define ADTA_READ 0x26C05u    /* FIOHI1C2: mode 9, card 11 ch 0, 6 words (adtaair.c) */
 #define MLS_READ  0x26C22u    /* FIOFFIC6: mode 9, card 11 ch 1, 3 words (landaids.c) */
 #define TACAN_RA_READ 0x24006u /* FIOFFIC2: mode 9, card 0 ch 0, 7 words (landaids.c) */
 #define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
@@ -1903,6 +1912,13 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         int u = ff_unit(busID);
         if (u >= 1 && u <= 3 && f == IMU_READ) {
             imu_read(u, out, n);
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 4 && f == ADTA_READ) {
+            uint16_t w[6];
+            adta_words(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 6) ? w[i] : 0;
             ffReads++;
             return true;
         }

@@ -138,6 +138,12 @@ void vehdyn_gear(double *pos, int wow[3]);
 /* The lower main wheel's height above the runway (ft) and the ground speed
  * (kt) -- the crew's cues for the gear, the chute and the brakes. */
 void vehdyn_ground_state(double *wheelFt, double *gsKt);
+/* The air data probes, left and right: 0 stowed .. 1 deployed (the crew's
+ * AIR DATA PROBE switches, hardwired 0x0100/0x0080 DEPLOY, 0x0040/0x0020
+ * STOW).  And the air they meet: free-stream pressure (psf), Mach, alpha,
+ * beta (deg), dynamic pressure (psf); false above the aero tables. */
+void vehdyn_probes(double pos[2]);
+bool vehdyn_air_data(double *pPsf, double *mach, double *alphaDeg, double *betaDeg, double *qPsf);
 /* For tests: set the position and velocity directly (M50, m and m/s). */
 void vehdyn_set_rv(const double r[3], const double v[3]);
 

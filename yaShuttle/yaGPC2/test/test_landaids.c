@@ -9,6 +9,8 @@
 #include <stdlib.h>
 
 #include "../src/landaids.h"
+#include "../src/adtaair.h"
+#include "../src/adtatables.h"
 #include "../src/vehdyn.h"
 
 #define PI 3.14159265358979323846
@@ -107,6 +109,65 @@ int main(void) {
     vehdyn_set_rv(far, v);
     landaids_mls(1, w);
     check(w[0] == 1 && w[1] == 1 && w[2] == 1, "out of coverage the words read invalid", w[0], 1);
+
+    /* THE ADTAs: PASS's own arithmetic (GYEADT.hal, written out again here
+     * from the HAL, not from adtaair.c) turns the words back into the
+     * vehicle's Mach, alpha and pressure -- at a few points through TAEM and
+     * approach, flown at them by setting the state. */
+    {
+        static const double pts[][3] = { { 2.4, 14.0, 60000.0 }, { 1.3, 9.0, 45000.0 },
+                                         { 0.9, 6.0, 30000.0 }, { 0.5, 8.0, 8000.0 } };
+        for (int k = 0; k < 4; k++) {
+            double M = pts[k][0], A = pts[k][1], H = pts[k][2];
+            /* climb straight up the local vertical at speed M, alpha A in pitch */
+            double up[3], rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+            for (int i = 0; i < 3; i++) up[i] = r[i] / rn;
+            double rr[3];
+            for (int i = 0; i < 3; i++) rr[i] = r[i] + up[i] * (H - hgt) * FT;
+            /* air velocity along the body X axis rotated by alpha: nose X,
+             * down Z; velocity = cosA X + sinA Z, at the speed of sound there */
+            double ap, am, aa, ab, aq;
+            vehdyn_set_rv(rr, v);
+            vehdyn_air_data(&ap, &am, &aa, &ab, &aq);
+            double a0 = 0.0;                                      /* speed of sound */
+            { double vv[3] = { v[0] + R[0][0] * 300, v[1] + R[1][0] * 300, v[2] + R[2][0] * 300 };
+              vehdyn_set_rv(rr, vv); vehdyn_air_data(NULL, &am, NULL, NULL, NULL); a0 = 300.0 / am; }
+            double sp = M * a0, ca = cos(A * PI / 180), sa = sin(A * PI / 180), vv[3];
+            for (int i = 0; i < 3; i++) vv[i] = v[i] + sp * (ca * R[i][0] + sa * R[i][2]);
+            vehdyn_set_rv(rr, vv);
+            vehdyn_air_data(&ap, &am, &aa, &ab, &aq);
+            uint16_t aw[6];
+            adta_words(1, aw);
+            double ps = (int16_t)aw[1] * 1.0987e-3, pac = (int16_t)aw[2] * 1.5870e-3;
+            double pal = (int16_t)aw[4] * 1.5870e-3, pau = (int16_t)aw[5] * 1.5870e-3;
+            /* PASS, forward: alpha first (Mach from the last cycle: the true one) */
+            double dr = pac - 0.5 * (pal + pau), Rr = (pal - pau) / dr;
+            int i = 0;
+            while (i < 9 && am > ADT_MB_AOA[i + 1]) i++;
+            double rt = (am - ADT_MB_AOA[i]) / (ADT_MB_AOA[i + 1] - ADT_MB_AOA[i]);
+            const double *ka = ADT_KA[i], *kb = ADT_KA[i + 1];
+            double al = ka[0] + Rr * (ka[1] + Rr * (ka[2] + Rr * ka[3]));
+            al += rt * (kb[0] + Rr * (kb[1] + Rr * (kb[2] + Rr * kb[3])) - al);
+            int j = 0;
+            while (j < 16 && am > ADT_MB_SP[j + 1]) j++;
+            double rs = (am - ADT_MB_SP[j]) / (ADT_MB_SP[j + 1] - ADT_MB_SP[j]);
+            #define Q4(K, x) ((K)[0] + (x) * ((K)[1] + (x) * ((K)[2] + (x) * ((K)[3] + (x) * (K)[4]))))
+            double cps = Q4(ADT_KS[j], al) + rs * (Q4(ADT_KS[j + 1], al) - Q4(ADT_KS[j], al));
+            int m = 0;
+            while (m < 13 && am > ADT_MB_PT[m + 1]) m++;
+            double rp = (am - ADT_MB_PT[m]) / (ADT_MB_PT[m + 1] - ADT_MB_PT[m]);
+            double cpt = Q4(ADT_KP[m], al) + rp * (Q4(ADT_KP[m + 1], al) - Q4(ADT_KP[m], al));
+            double psc = ps - cps * (pac - ps), ptc = pac - cpt * (pac - ps);
+            double mach = sqrt(5.0 * (pow(ptc / psc, 2.0 / 7.0) - 1.0));
+            char what[80];
+            snprintf(what, sizeof what, "ADTA Mach back at M %.1f", M);
+            check(fabs(mach - am) < 0.01, what, mach, am);
+            snprintf(what, sizeof what, "ADTA alpha back at M %.1f", M);
+            check(fabs(al - aa) < 0.1, what, al, aa);
+            snprintf(what, sizeof what, "ADTA static pressure back at M %.1f", M);
+            check(fabs(psc - ap / 144.0) < 0.005 * ap / 144.0 + 0.002, what, psc, ap / 144.0);
+        }
+    }
 
     printf("landaids: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
