@@ -312,6 +312,55 @@ int main(void) {
         check(before[0] > 0.5 && before[6] != 0.0, "the surfaces had moved before the capture", before[0], 1.0);
     }
 
+    /* ON THE RUNWAY: dropped level from a foot and a half with the gear
+     * down, at rest on the turning Earth at KSC, the vehicle settles on all
+     * three wheels, a little nose down, and stays put. */
+    {
+        vehdyn_reset(0.0);
+        vehdyn_hardwired(0x8000u);                       /* ARM */
+        vehdyn_hardwired(0x4000u);                       /* DN */
+        vehdyn_advance(12e6);                            /* down and locked */
+        double lat = 28.6 * 3.14159265358979323846 / 180, lon = -80.7 * 3.14159265358979323846 / 180, aft = 20925646.3255;
+        double f = 1.0 / 298.3, dd = (1 - f) * (1 - f), c = cos(lat), sn = sin(lat);
+        double nN = aft / sqrt(c * c + sn * sn * dd), hft = 8.3 + 18.4 + 1.5;
+        double rEf0[3] = { (nN + hft) * c * cos(lon) * 0.3048, (nN + hft) * c * sin(lon) * 0.3048,
+                           (dd * nN + hft) * sn * 0.3048 };
+        /* Earth-fixed -> inertial with the model's own Earth (PASS's RNP, not
+         * the identity), and the ground's velocity omega x r about its pole */
+        double Me[3][3], r[3], pole[3], we = phys_earth_rate(), v[3];
+        phys_inertial_to_earth(12.0, Me);
+        phys_earth_pole(pole);
+        for (int i = 0; i < 3; i++) r[i] = Me[0][i] * rEf0[0] + Me[1][i] * rEf0[1] + Me[2][i] * rEf0[2];
+        v[0] = we * (pole[1] * r[2] - pole[2] * r[1]);
+        v[1] = we * (pole[2] * r[0] - pole[0] * r[2]);
+        v[2] = we * (pole[0] * r[1] - pole[1] * r[0]);
+        vehdyn_set_rv(r, v);
+        /* body X north, Y east, Z down (geodetic), taken to inertial */
+        double Nf[3] = { -sn * cos(lon), -sn * sin(lon), c }, Ef[3] = { -sin(lon), cos(lon), 0 },
+               Df[3] = { -c * cos(lon), -c * sin(lon), -sn }, Rm[3][3];
+        for (int i = 0; i < 3; i++) {
+            Rm[i][0] = Me[0][i] * Nf[0] + Me[1][i] * Nf[1] + Me[2][i] * Nf[2];
+            Rm[i][1] = Me[0][i] * Ef[0] + Me[1][i] * Ef[1] + Me[2][i] * Ef[2];
+            Rm[i][2] = Me[0][i] * Df[0] + Me[1][i] * Df[1] + Me[2][i] * Df[2];
+        }
+        double qw = 0.5 * sqrt(1.0 + Rm[0][0] + Rm[1][1] + Rm[2][2]);
+        double q[4] = { qw, (Rm[2][1] - Rm[1][2]) / (4 * qw), (Rm[0][2] - Rm[2][0]) / (4 * qw),
+                        (Rm[1][0] - Rm[0][1]) / (4 * qw) };
+        double w0[3] = { 0, 0, 0 };
+        vehdyn_set_attitude(q, w0);
+        vehdyn_advance(12e6 + 10e6);
+        double pos, rE[3], vE[3], C[3][3];
+        int wow[3];
+        vehdyn_gear(&pos, wow);
+        vehdyn_navbase_ef(rE, vE, C);
+        double speed = sqrt(vE[0] * vE[0] + vE[1] * vE[1] + vE[2] * vE[2]);
+        double up[3] = { c * cos(lon), c * sin(lon), sn };
+        double pitch = asin(C[0][0] * up[0] + C[1][0] * up[1] + C[2][0] * up[2]) * 180 / 3.14159265358979323846;
+        check(wow[0] && wow[1] && wow[2], "all three gear carry weight", wow[0] + wow[1] + wow[2], 3);
+        check(speed < 0.05, "and the vehicle stands still on the runway", speed, 0.0);
+        check(pitch < -0.5 && pitch > -4.0, "a little nose down on its wheels", pitch, -2.0);
+    }
+
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);
     return failures ? 1 : 0;
 }

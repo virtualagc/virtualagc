@@ -22,6 +22,7 @@
 #include "mecmodel.h"
 #include "valvemodel.h"
 #include "vehdyn.h"
+#include "landaids.h"
 
 /* THE COMMAND WORD, below the interface unit address (BCEEQU.asm:36-57):
  *     mode (4) | card (4) | channel (5) | word count - 1 (5)
@@ -623,6 +624,10 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * VALUE, type 7, card 3 channel 2 (the tracker's serial channel), one word:
  * 0x8000 powered, 0x4000 door fully open. */
 #define CREW_TYPE_STU 7
+/* THE VEHICLE'S HARDWIRED FUNCTIONS (landing gear, drag chute), which no
+ * computer commands: op 4 VALUE, type 8, one word to FF1 -- vehdyn.c,
+ * vehdyn_hardwired, has the bits and latches them. */
+#define CREW_TYPE_HW 8
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -802,6 +807,13 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t w = (uint16_t)(((unsigned)buf[8] << 8) | buf[9]);
         startrk_hardware(st, (w & 0x8000u) != 0, (w & 0x4000u) != 0,
                          vehdyn_enabled() ? vehdyn_state()->t : 0.0);
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
+    if (type == CREW_TYPE_HW) {
+        if (op != CREW_OP_VALUE || cnt < 1 || len < 10) return;
+        vehdyn_hardwired(((unsigned)buf[8] << 8) | buf[9]);
         crewHeard = true;
         crewMsgs++;
         return;
@@ -1039,6 +1051,37 @@ static uint16_t oms_feedback(int e, int axis) {
     return (uint16_t)(int16_t)c;
 }
 
+/* THE LANDING GEAR AS PASS SEES IT (GRVLAN.hal:121-139, GP8HYD.hal 255-314;
+ * CGBIH1.hal 2731-2876), every bit 1 = NO weight / stowed:
+ *   FF1-4 DSCRT6 (word 5): 0x0001 a main wheel's no-WOW sensor (FF3, FF4
+ *     left; FF1, FF2 right), 0x0002 that sensor available (null-fail)
+ *   FF2/FF3 DSCRT11 (word 10): 0x0040 left/right main gear no-WOW
+ *     (proximity), 0x0020 that gear up-locked, 0x0010 its door NOT locked
+ *   FF2 DSCRT9 (word 8): 0x0010 nose no-WOW #2, 0x0008 nose gear up-locked
+ *   FF3 DSCRT9 (word 8): 0x0004 nose no-WOW #1, 0x0002 nose door up-locked
+ * These were all ZERO -- weight on every wheel, every sensor null-failed,
+ * no gear up-locked -- and on its first pass in MM 305 GRVLAN fails for good
+ * any main-gear sensor reading weight (:155-167), so touchdown could never
+ * have been recognised.  With the gear down the up-lock bits clear and the
+ * doors read not locked; weight clears the no-WOW bits. */
+static void gear_discretes(int k, uint16_t d[13]) {
+    if (!vehdyn_enabled()) return;
+    double pos;
+    int wow[3];
+    vehdyn_gear(&pos, wow);
+    bool down = pos > 0.0;                 /* off the uplocks as soon as it moves */
+    bool leftWheel = (k == 3 || k == 4), rightWheel = (k == 1 || k == 2);
+    d[5] |= 0x0002u;
+    if (!((leftWheel && wow[0]) || (rightWheel && wow[1]))) d[5] |= 0x0001u;
+    if (k == 2 || k == 3) {
+        int side = (k == 2) ? 0 : 1;
+        if (!wow[side]) d[10] |= 0x0040u;
+        d[10] |= down ? 0x0010u : 0x0020u;
+    }
+    if (k == 2) d[8] |= (wow[2] ? 0u : 0x0010u) | (down ? 0u : 0x0008u);
+    if (k == 3) d[8] |= (wow[2] ? 0u : 0x0004u) | (down ? 0u : 0x0002u);
+}
+
 /* The FF discretes that the HFE and MFE reads share (DIH card 4, DIL card 6,
  * DIH card 9, DIH card 12, DIL card 15): HFE words 0-12 and MFE words 8-20. */
 static void ff_discretes(int k, uint16_t d[13]) {
@@ -1065,6 +1108,7 @@ static void ff_discretes(int k, uint16_t d[13]) {
      * contacts added first were wiped -- DSCRT4's THC and DSCRT6's DAP
      * SELECT / AUTO / INRTL among them -- whenever the device model ran. */
     valve_inputs('F', k, d, 13);       /* the vent doors' feedback */
+    gear_discretes(k, d);
     crew_dscrt(k, d);
 }
 
@@ -1383,6 +1427,8 @@ static void fa_mfe(int k, uint16_t *w, int n) {
  * lambda the GLWRNP/GNFEAR Earth that vehdyn.c gives the physics -- so the
  * position is phys_inertial_to_earth() applied to the truth, and the
  * velocity has the Earth's turning taken out, exactly. */
+#define MLS_READ  0x26C22u    /* FIOFFIC6: mode 9, card 11 ch 1, 3 words (landaids.c) */
+#define TACAN_RA_READ 0x24006u /* FIOFFIC2: mode 9, card 0 ch 0, 7 words (landaids.c) */
 #define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
 #define GPS_WRITE 0x22C5Fu    /* FIOGPSWT: mode 8, card 11 ch 2, 32 words */
 #define GPS_LAG_S 0.05
@@ -1447,6 +1493,23 @@ static bool gps_words(int u, uint16_t w[32]) {
     }
     ve[0] += rate * re[1];                   /* less the Earth's turning: omega z x r */
     ve[1] -= rate * re[0];
+    /* AT THE NAVIGATION BASE, not the c.g.: PASS copies a GPS state straight
+     * into its navigation state (CGNV_R/V_FILT_LFE := CGNV_R/V_GPS_SEL,
+     * GNEENT.hal:150-260), which is the nav base's -- 57.9 ft forward of the
+     * c.g. (CGNREM.hal:58-80).  The lever arm is taken from the present
+     * attitude; the 50 ms of GPS_LAG_S turn it by nothing that matters. */
+    {
+        double rnb[3], vnb[3], C[3][3], Mn[3][3], rcg[3], vcg[3];
+        vehdyn_navbase_ef(rnb, vnb, C);
+        phys_inertial_to_earth(s->t, Mn);
+        for (int i = 0; i < 3; i++) {
+            rcg[i] = Mn[i][0] * s->r[0] + Mn[i][1] * s->r[1] + Mn[i][2] * s->r[2];
+            vcg[i] = Mn[i][0] * s->v[0] + Mn[i][1] * s->v[1] + Mn[i][2] * s->v[2];
+        }
+        vcg[0] += rate * rcg[1];
+        vcg[1] -= rate * rcg[0];
+        for (int i = 0; i < 3; i++) { re[i] += rnb[i] - rcg[i]; ve[i] += vnb[i] - vcg[i]; }
+    }
     for (int i = 0; i < 3; i++) {
         put32(&w[7 + 2 * i], re[i] / FT_M * 16.0);
         put32(&w[13 + 2 * i], ve[i] / FT_M * 512.0);
@@ -1559,7 +1622,7 @@ static void truth_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[2 + 4 + 3 + 3 + 3];
+    double v[2 + 4 + 3 + 3 + 3 + 2];
     int n = 0;
     v[n++] = st->t;
     v[n++] = vehdyn_gmt(st->t);
@@ -1567,7 +1630,9 @@ static void truth_publish(void) {
     for (int i = 0; i < 3; i++) v[n++] = st->w[i];
     for (int i = 0; i < 3; i++) v[n++] = st->r[i];
     for (int i = 0; i < 3; i++) v[n++] = st->v[i];
-    uint8_t b[4 + 8 * 15];
+    vehdyn_ground_state(&v[n], &v[n + 1]);       /* main wheels' height (ft), ground speed (kt) */
+    n += 2;
+    uint8_t b[4 + 8 * 17];
     memcpy(b, "TRU1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};
@@ -1838,6 +1903,20 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         int u = ff_unit(busID);
         if (u >= 1 && u <= 3 && f == IMU_READ) {
             imu_read(u, out, n);
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 3 && f == MLS_READ) {
+            uint16_t w[3];
+            landaids_mls(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 3) ? w[i] : 0;
+            ffReads++;
+            return true;
+        }
+        if (u >= 1 && u <= 3 && f == TACAN_RA_READ) {
+            uint16_t w[7];
+            landaids_tacan_ra(u, w);
+            for (int i = 0; i < n; i++) out[i] = (i < 7) ? w[i] : 0;
             ffReads++;
             return true;
         }

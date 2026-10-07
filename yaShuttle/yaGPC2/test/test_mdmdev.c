@@ -196,7 +196,9 @@ int main(void) {
 
     /* FORWARD, AT REST: FF3 (bus 22) carries manifold 5 and IMU 3. */
     check(read_words(22, FF(0x082E8u), 36, w) == 36, "ff3 hfe length");
-    check(w[0] == 0x0110u && w[8] == 0x0110u, "ff3 manifolds 3 and 5 open");
+    /* (and in DSCRT9, 0x0006: the nose gear's no-WOW #1 and its door up-locked
+     * -- the gear stowed, gear_discretes) */
+    check(w[0] == 0x0110u && w[8] == (0x0110u | 0x0006u), "ff3 manifolds 3 and 5 open");
     check(w[11] == 0xFC00u, "ff3 imu discretes good");
     check(w[13] == 16000 && w[20] == 16000, "ff3 injector temperatures warm");
     check(read_words(23, FF(0x082E8u), 36, w) == 36 && w[11] == 0,
@@ -214,7 +216,9 @@ int main(void) {
         write_words(20, FF(0x23600u), &set, 1);
         mdmdev_test_clock_us(200000.0 + 30000.0);
         read_words(20, FF(0x082E8u), 36, w);
-        check(w[3] == 0x8000u && w[5] == 0x8000u,
+        /* DSCRT6 also carries main wheel 3's no-WOW sensor and its
+         * null-fail (0x0003, the gear stowed and airborne) */
+        check(w[3] == 0x8000u && w[5] == (0x8000u | 0x0003u),
               "ff1 chamber pressure and driver follow F1F only");
     }
     
@@ -611,6 +615,15 @@ int main(void) {
         V[0] += om[1] * R[2] - om[2] * R[1];
         V[1] += om[2] * R[0] - om[0] * R[2];
         V[2] += om[0] * R[1] - om[1] * R[0];
+        /* THE NAVIGATION BASE, not the c.g.: the vehicle is at rest, so the
+         * lever arm is the same at the read and at the solution time */
+        {
+            double rnb[3], vnb[3], C[3][3], M1[3][3];
+            vehdyn_navbase_ef(rnb, vnb, C);
+            phys_inertial_to_earth(vehdyn_state()->t, M1);
+            for (int i = 0; i < 3; i++)
+                rTrue[i] += M1[0][i] * rnb[0] + M1[1][i] * rnb[1] + M1[2][i] * rnb[2] - vehdyn_state()->r[i];
+        }
         dr = dv = 0;
         for (int i = 0; i < 3; i++) { dr += (R[i] - rTrue[i]) * (R[i] - rTrue[i]); dv += (V[i] - vTrue[i]) * (V[i] - vTrue[i]); }
         if (sqrt(dr) > 0.02 || sqrt(dv) > 0.001) printf("gps decoded: %.4g m, %.4g m/s off\n", sqrt(dr), sqrt(dv));

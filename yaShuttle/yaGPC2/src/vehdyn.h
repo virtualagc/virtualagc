@@ -125,6 +125,19 @@ void vehdyn_reset(double t);
 /* For tests: set the attitude (body -> inertial, [w x y z], normalised here)
  * and body rates directly. */
 void vehdyn_set_attitude(const double q[4], const double w[3]);
+/* The navigation base (the IMUs' place, PASS's navigation point), Earth-fixed
+ * in PASS's frame: position m, velocity m/s relative to the Earth, and the
+ * body -> Earth-fixed matrix -- for the landing aids. */
+void vehdyn_navbase_ef(double rEf[3], double vEf[3], double Cbe[3][3]);
+/* THE HARDWIRED FUNCTIONS, from the crew's pushbuttons: 0x8000 LANDING GEAR
+ * ARM, 0x4000 DN, 0x2000 DRAG CHUTE ARM, 0x1000 DPY, 0x0800 JETT (latched
+ * here).  And the gear: travel 0 stowed .. 1 down and locked; weight on the
+ * left and right main gear and the nose gear (1 = weight). */
+void vehdyn_hardwired(unsigned w);
+void vehdyn_gear(double *pos, int wow[3]);
+/* The lower main wheel's height above the runway (ft) and the ground speed
+ * (kt) -- the crew's cues for the gear, the chute and the brakes. */
+void vehdyn_ground_state(double *wheelFt, double *gsKt);
 /* For tests: set the position and velocity directly (M50, m and m/s). */
 void vehdyn_set_rv(const double r[3], const double v[3]);
 

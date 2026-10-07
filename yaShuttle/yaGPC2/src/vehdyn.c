@@ -976,6 +976,274 @@ void vehdyn_aerosurf_pos(double pos[7]) {
     pos[6] = bfPos;
 }
 
+/* THE LANDING GEAR AND THE DRAG CHUTE: hardwired, not the computers'.  The
+ * crew's pushbuttons (F6/F8 LANDING GEAR ARM and DN, F2/F4 DRAG CHUTE ARM,
+ * DPY, JETT) reach this module as one word from the panel (mdmdev.c, crew
+ * type 8); the hardware latches them -- ARM then DN puts the gear down, ARM
+ * then DPY puts the chute out -- and PASS learns of the gear only through
+ * its uplock, door and weight-on-wheels discretes (mdmdev.c ff_discretes).
+ * PASS commands none of this outside remote-control mode (GGAAUT.hal
+ * 287-312). */
+#define HW_GEAR_ARM   0x8000u
+#define HW_GEAR_DN    0x4000u
+#define HW_CHUTE_ARM  0x2000u
+#define HW_CHUTE_DPY  0x1000u
+#define HW_CHUTE_JETT 0x0800u
+#define HW_BRAKES_ON  0x0400u  /* the brake pedals, latched on (the crew's 8-10 ft/s^2) */
+#define HW_BRAKES_OFF 0x0200u
+#define GEAR_DEPLOY_S 10.0     /* PROVISIONAL: DN to down-and-locked */
+static bool gearArmed, gearDeploying, chuteArmed, chuteOut, chuteGone;
+static double gearPos;         /* 0 stowed .. 1 down and locked */
+static double chuteOutT = -1.0;
+static int wowMain[2], wowNose; /* weight on the left/right main gear, the nose gear */
+static bool brakesOn;
+
+void vehdyn_hardwired(unsigned w) {
+    if (w & HW_GEAR_ARM) gearArmed = true;
+    if ((w & HW_GEAR_DN) && gearArmed && !gearDeploying) {
+        gearDeploying = true;
+        fprintf(stderr, "vehdyn: landing gear DOWN commanded at t=%.1f\n", st.t);
+    }
+    if (w & HW_CHUTE_ARM) chuteArmed = true;
+    if ((w & HW_CHUTE_DPY) && chuteArmed && !chuteOut && !chuteGone) {
+        chuteOut = true;
+        chuteOutT = st.t;
+        fprintf(stderr, "vehdyn: drag chute DEPLOYED at t=%.1f\n", st.t);
+    }
+    if ((w & HW_BRAKES_ON) && !brakesOn) {
+        brakesOn = true;
+        fprintf(stderr, "vehdyn: BRAKES on at t=%.1f\n", st.t);
+    }
+    if ((w & HW_BRAKES_OFF) && brakesOn) {
+        brakesOn = false;
+        fprintf(stderr, "vehdyn: brakes off at t=%.1f\n", st.t);
+    }
+    if ((w & HW_CHUTE_JETT) && chuteOut && !chuteGone) {
+        chuteGone = true;
+        fprintf(stderr, "vehdyn: drag chute JETTISONED at t=%.1f\n", st.t);
+    }
+}
+
+void vehdyn_gear(double *pos, int wow[3]) {
+    if (pos) *pos = gearPos;
+    if (wow) { wow[0] = wowMain[0]; wow[1] = wowMain[1]; wow[2] = wowNose; }
+}
+
+static void gear_slew(double dt) {
+    if (gearDeploying && gearPos < 1.0) {
+        gearPos += dt / GEAR_DEPLOY_S;
+        if (gearPos >= 1.0) {
+            gearPos = 1.0;
+            fprintf(stderr, "vehdyn: landing gear DOWN AND LOCKED at t=%.1f\n", st.t);
+        }
+    }
+}
+
+/* =====================================================================
+ * THE GROUND: the gear on the runway, the drag chute.  Sources and
+ * confidence in ~/workspace/pass-run/entry/gear-rollout-findings.md.
+ *
+ * Contact points, gear down (orbiter structural inches):
+ *   main  Xo 1157.9, Zo 153.7 -- PASS's own wheel point, 62.784 ft aft of
+ *         and 22.405 ft below the navigation base (CGGC13.hal 486-489, used
+ *         for "altitude of rear wheels", GHEUPG.hal:505); Yo -/+135, a 22.5 ft
+ *         track (ESTIMATED, fits the 63 deg turnover limit)
+ *   nose  Xo 410, Yo 0 (ESTIMATED from a sketch), Zo 180 -- chosen to sit the
+ *         orbiter about 2 deg nose down on its wheels (the sources say -1 to
+ *         -4 deg; PASS needs only theta < 0 for nose-wheel steering)
+ * Struts and tyres together are one spring and damper per gear: strokes 16 in
+ * main, 22 in nose (SCOM 2.14-3); springs that carry the STS-134 landing
+ * weight's static share (204,462 lb, c.g. Xo 1082) in about half the stroke,
+ * damped near critically -- no published constants (RP-1056 gives only the
+ * form), so these are ENGINEERING ESTIMATES.  Rolling friction 0.025 on
+ * concrete; brakes about 8 ft/s^2 on the mains (mu 0.25); tyres' side force
+ * proportional to slip velocity up to mu 0.5.  The runway is the local
+ * geodetic plane at YAGPC_GROUND_ALT_FT (default 8.3, KSC SLF).
+ * Drag chute: reefed (about 90 ft^2 of drag area) for 3.5 s after the mortar,
+ * fully open (about 550 ft^2) by 6.3 s (Drag Chute Summary, NTRS
+ * 20130010383; the areas are ESTIMATED from STS-134's decelerations), pulling
+ * from the base of the fin.
+ * ===================================================================== */
+#define GEAR_N 3
+static const struct { double xo, yo, zo, k, c, stroke; } GEAR[GEAR_N] = {
+    { 1157.9, -135.0, 153.7, 11000.0 * LBF_N / IN_M, 20000.0 * LBF_N / 0.3048, 16.0 * IN_M },
+    { 1157.9,  135.0, 153.7, 11000.0 * LBF_N / IN_M, 20000.0 * LBF_N / 0.3048, 16.0 * IN_M },
+    {  410.0,    0.0, 180.0,  3750.0 * LBF_N / IN_M,  6500.0 * LBF_N / 0.3048, 22.0 * IN_M },
+};
+#define MU_ROLL  0.025
+#define MU_BRAKE 0.25
+#define MU_SIDE  0.5
+#define SLIP_MS  0.5                   /* slip speed at which the tyre force saturates */
+#define CHUTE_REEF_FT2 90.0
+#define CHUTE_FULL_FT2 550.0
+#define CHUTE_XO 1600.0
+#define CHUTE_ZO 550.0
+static double groundFt = -1e9;
+static void ground_forces_body(double f[3], double tau[3]);
+static bool bellyWarned;
+
+/* Touchdowns and lift-offs, as the log's record of the landing: ground speed
+ * (kt) and sink rate (ft/s) of the c.g. relative to the turning Earth. */
+static void wow_log(const int was[3]) {
+    static const char *NAME[3] = { "LEFT MAIN", "RIGHT MAIN", "NOSE" };
+    const int now[3] = { wowMain[0], wowMain[1], wowNose };
+    for (int g = 0; g < 3; g++) {
+        if (now[g] == was[g]) continue;
+        double p[3], wE = phys_earth_rate(), vr[3], up[3], rn = 0.0, vu = 0.0, vh = 0.0;
+        phys_earth_pole(p);
+        vr[0] = st.v[0] - wE * (p[1] * st.r[2] - p[2] * st.r[1]);
+        vr[1] = st.v[1] - wE * (p[2] * st.r[0] - p[0] * st.r[2]);
+        vr[2] = st.v[2] - wE * (p[0] * st.r[1] - p[1] * st.r[0]);
+        for (int i = 0; i < 3; i++) rn += st.r[i] * st.r[i];
+        rn = sqrt(rn);
+        for (int i = 0; i < 3; i++) { up[i] = st.r[i] / rn; vu += vr[i] * up[i]; }
+        for (int i = 0; i < 3; i++) vh += (vr[i] - vu * up[i]) * (vr[i] - vu * up[i]);
+        fprintf(stderr, "vehdyn: %s gear %s at t=%.2f: ground speed %.1f kt, sink %.1f ft/s\n",
+                NAME[g], now[g] ? "TOUCHDOWN" : "lift-off", st.t, sqrt(vh) / 0.514444, -vu / 0.3048);
+    }
+}
+
+/* For the crew and the log: the lower main wheel's height above the runway
+ * (ft; the gear's down position whether or not it is) and the c.g.'s ground
+ * speed (kt). */
+void vehdyn_ground_state(double *wheelFt, double *gsKt) {
+    if (groundFt < -1e8) {
+        const char *e = getenv("YAGPC_GROUND_ALT_FT");
+        groundFt = (e && *e) ? atof(e) : 8.3;
+    }
+    double R[3][3], low = 1e30;
+    qmat_body(st.q, R);
+    for (int g = 0; g < 2; g++) {
+        double bb[3], d[3], rp[3];
+        to_body(GEAR[g].xo, GEAR[g].yo, GEAR[g].zo, bb);
+        for (int i = 0; i < 3; i++) d[i] = bb[i] - cgB[i];
+        for (int i = 0; i < 3; i++) rp[i] = st.r[i] + R[i][0] * d[0] + R[i][1] * d[1] + R[i][2] * d[2];
+        double h = geodetic_h_ft(rp) - groundFt;
+        if (h < low) low = h;
+    }
+    double p[3], wE = phys_earth_rate(), vr[3], rn = 0.0, vu = 0.0, vv = 0.0;
+    phys_earth_pole(p);
+    vr[0] = st.v[0] - wE * (p[1] * st.r[2] - p[2] * st.r[1]);
+    vr[1] = st.v[1] - wE * (p[2] * st.r[0] - p[0] * st.r[2]);
+    vr[2] = st.v[2] - wE * (p[0] * st.r[1] - p[1] * st.r[0]);
+    for (int i = 0; i < 3; i++) rn += st.r[i] * st.r[i];
+    rn = sqrt(rn);
+    for (int i = 0; i < 3; i++) { vu += vr[i] * st.r[i] / rn; vv += vr[i] * vr[i]; }
+    if (wheelFt) *wheelFt = low;
+    if (gsKt) *gsKt = sqrt(vv > vu * vu ? vv - vu * vu : 0.0) / 0.514444;
+}
+
+static void ground_forces(double f[3], double tau[3]) {
+    const int was[3] = { wowMain[0], wowMain[1], wowNose };
+    ground_forces_body(f, tau);
+    wow_log(was);
+}
+
+static void ground_forces_body(double f[3], double tau[3]) {
+    if (groundFt < -1e8) {
+        const char *e = getenv("YAGPC_GROUND_ALT_FT");
+        groundFt = (e && *e) ? atof(e) : 8.3;
+    }
+    wowMain[0] = wowMain[1] = wowNose = 0;
+    double h0 = geodetic_h_ft(st.r);
+    if (h0 > groundFt + 200.0 && !chuteOut) return;          /* nowhere near the ground */
+    double R[3][3], p[3], wE = phys_earth_rate();
+    qmat_body(st.q, R);
+    phys_earth_pole(p);
+    double a = 20925646.3255 * 0.3048, b = a * (1.0 - 1.0 / 298.3), k2 = a * a / (b * b) - 1.0;
+    bool down = gearPos >= 1.0;
+    if (!down && h0 < groundFt + 30.0 && !bellyWarned) {
+        fprintf(stderr, "vehdyn: on the ground WITHOUT THE GEAR DOWN at t=%.1f\n", st.t);
+        bellyWarned = true;
+    }
+    for (int g = 0; g < GEAR_N; g++) {
+        double bb[3], d[3], wd[3], dI[3], wdI[3], rp[3], vp[3];
+        to_body(GEAR[g].xo, GEAR[g].yo, GEAR[g].zo + (down ? 0.0 : 60.0), bb);
+        for (int i = 0; i < 3; i++) d[i] = bb[i] - cgB[i];
+        wd[0] = st.w[1] * d[2] - st.w[2] * d[1];
+        wd[1] = st.w[2] * d[0] - st.w[0] * d[2];
+        wd[2] = st.w[0] * d[1] - st.w[1] * d[0];
+        for (int i = 0; i < 3; i++) {
+            dI[i] = R[i][0] * d[0] + R[i][1] * d[1] + R[i][2] * d[2];
+            wdI[i] = R[i][0] * wd[0] + R[i][1] * wd[1] + R[i][2] * wd[2];
+        }
+        for (int i = 0; i < 3; i++) { rp[i] = st.r[i] + dI[i]; vp[i] = st.v[i] + wdI[i]; }
+        double pen = (groundFt - geodetic_h_ft(rp)) * 0.3048;
+        if (pen <= 0.0) continue;
+        if (g < 2) wowMain[g] = 1; else wowNose = 1;
+        /* the ground's normal (geodetic) and its own velocity, inertial */
+        double zp = rp[0] * p[0] + rp[1] * p[1] + rp[2] * p[2], n[3], nn = 0.0;
+        for (int i = 0; i < 3; i++) { n[i] = rp[i] + k2 * zp * p[i]; nn += n[i] * n[i]; }
+        nn = sqrt(nn);
+        for (int i = 0; i < 3; i++) n[i] /= nn;
+        double vg[3] = { wE * (p[1] * rp[2] - p[2] * rp[1]), wE * (p[2] * rp[0] - p[0] * rp[2]),
+                         wE * (p[0] * rp[1] - p[1] * rp[0]) };
+        double vr[3], vn = 0.0;
+        for (int i = 0; i < 3; i++) { vr[i] = vp[i] - vg[i]; vn += vr[i] * n[i]; }
+        double fn = GEAR[g].k * pen - GEAR[g].c * vn;
+        if (pen > GEAR[g].stroke) fn += 20.0 * GEAR[g].k * (pen - GEAR[g].stroke);   /* bottomed */
+        if (fn < 0.0) fn = 0.0;
+        /* rolling along the body's X axis in the ground plane, slipping across it */
+        double xh[3] = { R[0][0], R[1][0], R[2][0] }, xn = 0.0;
+        double xd = xh[0] * n[0] + xh[1] * n[1] + xh[2] * n[2];
+        for (int i = 0; i < 3; i++) { xh[i] -= xd * n[i]; xn += xh[i] * xh[i]; }
+        xn = sqrt(xn);
+        for (int i = 0; i < 3; i++) xh[i] /= xn;
+        double yh[3] = { n[1] * xh[2] - n[2] * xh[1], n[2] * xh[0] - n[0] * xh[2], n[0] * xh[1] - n[1] * xh[0] };
+        double vl = 0.0, vs = 0.0;
+        for (int i = 0; i < 3; i++) { vl += vr[i] * xh[i]; vs += vr[i] * yh[i]; }
+        double sat = fabs(vl) < SLIP_MS ? vl / SLIP_MS : (vl > 0 ? 1.0 : -1.0);
+        double mu = (down ? MU_ROLL : 0.5) + ((brakesOn && g < 2 && down) ? MU_BRAKE : 0.0);
+        double fl = -mu * fn * sat;
+        double ss = vs / SLIP_MS;
+        if (ss > 1.0) ss = 1.0;
+        if (ss < -1.0) ss = -1.0;
+        double fs = -MU_SIDE * fn * ss;
+        double F[3], Fb[3];
+        for (int i = 0; i < 3; i++) F[i] = fn * n[i] + fl * xh[i] + fs * yh[i];
+        {
+            static int tr = -1;
+            static double next = 0.0;
+            if (tr < 0) tr = getenv("YAGPC_GROUND_TRACE") != NULL;
+            if (tr && st.t >= next) {
+                fprintf(stderr, "ground: t=%.3f gear %d pen %.3f m vn %+.2f fn %.0f fl %.0f fs %.0f vl %+.2f vs %+.2f\n",
+                        st.t, g, pen, vn, fn, fl, fs, vl, vs);
+                if (g == GEAR_N - 1) next = st.t + 0.25;
+            }
+        }
+        for (int i = 0; i < 3; i++) Fb[i] = R[0][i] * F[0] + R[1][i] * F[1] + R[2][i] * F[2];
+        for (int i = 0; i < 3; i++) f[i] += Fb[i];
+        tau[0] += d[1] * Fb[2] - d[2] * Fb[1];
+        tau[1] += d[2] * Fb[0] - d[0] * Fb[2];
+        tau[2] += d[0] * Fb[1] - d[1] * Fb[0];
+    }
+    /* the drag chute */
+    if (chuteOut && !chuteGone) {
+        double since = st.t - chuteOutT, area;
+        if (since < 0.0) since = 0.0;
+        if (since < 1.0) area = CHUTE_REEF_FT2 * since;              /* the mortar and the canopy */
+        else if (since < 3.5) area = CHUTE_REEF_FT2;
+        else if (since < 6.3) area = CHUTE_REEF_FT2 + (CHUTE_FULL_FT2 - CHUTE_REEF_FT2) * (since - 3.5) / 2.8;
+        else area = CHUTE_FULL_FT2;
+        double va[3], rho, T;
+        air_velocity(va);
+        us1976(height_m(st.r), &rho, &T);
+        double sp = sqrt(va[0] * va[0] + va[1] * va[1] + va[2] * va[2]);
+        if (sp > 1.0) {
+            double q = 0.5 * rho * sp * sp, F = q * area * 0.092903, Fb[3], bb[3], d[3];
+            double vb[3];
+            for (int i = 0; i < 3; i++) vb[i] = R[0][i] * va[0] + R[1][i] * va[1] + R[2][i] * va[2];
+            for (int i = 0; i < 3; i++) Fb[i] = -F * vb[i] / sp;
+            to_body(CHUTE_XO, 0.0, CHUTE_ZO, bb);
+            for (int i = 0; i < 3; i++) d[i] = bb[i] - cgB[i];
+            for (int i = 0; i < 3; i++) f[i] += Fb[i];
+            tau[0] += d[1] * Fb[2] - d[2] * Fb[1];
+            tau[1] += d[2] * Fb[0] - d[0] * Fb[2];
+            tau[2] += d[0] * Fb[1] - d[1] * Fb[0];
+        }
+    }
+}
+
 static void surf_slew(double dt) {
     for (int i = 0; i < SURF_N; i++) {
         double want = surfCmd[i];
@@ -1520,6 +1788,7 @@ void vehdyn_advance(double sharedUs) {
         if (asc == ASC_NONE) {          /* the orbiter alone: the tables, or the cannonball */
             bool was = aeroOn;
             aeroOn = entry_aero(f, tau);
+            ground_forces(f, tau);
             if (aeroOn != was) phys_set_drag(aeroOn ? 0.0 : 2.2, 40.0, 220.0, 360.0);
         }
         bool firing = (mdot[0] + mdot[1] + mdot[2] + mdot[3] + mdot[4]) > 0.0 ||
@@ -1531,6 +1800,7 @@ void vehdyn_advance(double sharedUs) {
         oms_slew(dt);
         tvc_slew(dt);
         surf_slew(dt);
+        gear_slew(dt);
         /* What the accelerometers feel: everything but gravity -- the jets
          * and the air, the drag taken at the middle of the step. */
         double ad0[3], ad1[3];
@@ -1851,6 +2121,9 @@ int vehdyn_save(double *b, int max) {
      * body flap's drive stale -- a jolt PASS then had to fly out of. */
     for (int k = 0; k < SURF_N; k++) { PUT(surfCmd[k]); PUT(surfPos[k]); }
     PUT(bfPos); PUT(bfDrive);
+    PUT(gearArmed); PUT(gearDeploying); PUT(gearPos);
+    PUT(chuteArmed); PUT(chuteOut); PUT(chuteGone); PUT(chuteOutT < 0.0 ? -1.0 : st.t - chuteOutT);
+    PUT(wowMain[0]); PUT(wowMain[1]); PUT(wowNose);
 #undef PUT
     return n;
 }
@@ -1892,6 +2165,13 @@ double vehdyn_load(const double *b, int n) {
             bfPos = GET();
             bfDrive = (int)GET();
         }
+        if (i + 10 <= n) {
+            gearArmed = GET() != 0.0; gearDeploying = GET() != 0.0; gearPos = GET();
+            chuteArmed = GET() != 0.0; chuteOut = GET() != 0.0; chuteGone = GET() != 0.0;
+            double ago = GET();
+            chuteOutT = ago < 0.0 ? -1.0 : -ago;      /* the restored clock starts at 0 */
+            wowMain[0] = (int)GET(); wowMain[1] = (int)GET(); wowNose = (int)GET();
+        }
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }
 #undef GET
@@ -1905,6 +2185,39 @@ double vehdyn_load(const double *b, int n) {
     if (unixZero >= 0.0) unixZero += t;
     restoredGmt = gmtCap;
     return t;
+}
+
+/* THE NAVIGATION BASE, Earth-fixed: where PASS's navigation state is -- the
+ * IMUs' location, which its landing aids are measured from (the MLS antenna
+ * offset CGNS_MLSANT_NB_DIST, GNAMLS.hal:257; the radar altimeter's
+ * 12.915 ft at 2.005 rad, GHEUPG.hal:457-463).  Position m, velocity m/s
+ * relative to the turning Earth, and body -> Earth-fixed. */
+void vehdyn_navbase_ef(double rEf[3], double vEf[3], double Cbe[3][3]) {
+    double nb[3], d[3], dI[3], wd[3], wdI[3], M[3][3];
+    to_body(NB_XO, NB_YO, NB_ZO, nb);
+    for (int i = 0; i < 3; i++) d[i] = nb[i] - cgB[i];
+    phys_body_to_inertial(&st, d, dI);
+    wd[0] = st.w[1] * d[2] - st.w[2] * d[1];
+    wd[1] = st.w[2] * d[0] - st.w[0] * d[2];
+    wd[2] = st.w[0] * d[1] - st.w[1] * d[0];
+    phys_body_to_inertial(&st, wd, wdI);
+    double rI[3], vI[3];
+    for (int i = 0; i < 3; i++) { rI[i] = st.r[i] + dI[i]; vI[i] = st.v[i] + wdI[i]; }
+    phys_inertial_to_earth(st.t, M);
+    double rate = phys_earth_rate();
+    for (int i = 0; i < 3; i++) {
+        rEf[i] = M[i][0] * rI[0] + M[i][1] * rI[1] + M[i][2] * rI[2];
+        vEf[i] = M[i][0] * vI[0] + M[i][1] * vI[1] + M[i][2] * vI[2];
+    }
+    vEf[0] += rate * rEf[1];
+    vEf[1] -= rate * rEf[0];
+    for (int j = 0; j < 3; j++) {
+        double e[3] = { 0, 0, 0 }, eI[3];
+        e[j] = 1.0;
+        phys_body_to_inertial(&st, e, eI);
+        for (int i = 0; i < 3; i++)
+            Cbe[i][j] = M[i][0] * eI[0] + M[i][1] * eI[1] + M[i][2] * eI[2];
+    }
 }
 
 void vehdyn_set_rv(const double r[3], const double v[3]) {
