@@ -998,7 +998,8 @@ class Resources(object):
         self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
                                "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit",
                                "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
-                               "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3")
+                               "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
+                               "uFineOn", "uRingFine", "uRingF")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -1008,7 +1009,9 @@ class Resources(object):
         if self.site is not None:
             for k, img in enumerate(self.site.images):
                 self.ringTex.append(make_ring_texture(img, compress=k > 0))
-            self.site.images = None
+            if self.site.fine_image is not None:
+                self.fineTex = make_ring_texture(self.site.fine_image, compress=False)
+            self.site.images = self.site.fine_image = None
         self.earthDayTex = None
         self.earthMonth = None
         self.modelProg = compile_program(MODEL_VS, MODEL_FS)
@@ -1413,6 +1416,9 @@ uniform mat3 uEfToEnu;
 uniform vec4 uRingNear[2];      // u, v at the site; du/dEast, dv/dNorth (per m)
 uniform vec4 uRingFar[2];       // lon0, lat0, lon1, lat1 (radians)
 uniform sampler2D uRing0, uRing1, uRing2, uRing3;
+uniform int uFineOn;            // the fine ring (the runway at rollout), if the site has one
+uniform vec4 uRingFine;         // as uRingNear
+uniform sampler2D uRingF;
 const float PI = 3.14159265358979;
 const float R_SUN = 6.957e8, R_MOON = 1.7374e6, AU = 1.495978707e11;
 // The fraction of a disk of angular radius a uncovered by a disk of radius b,
@@ -1492,6 +1498,10 @@ vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu) {
     c = ringSample(uRing2, uv2, ringWeight(uv2), c);
     c = ringSample(uRing1, uv1, ringWeight(uv1), c);
     c = ringSample(uRing0, uv0, ringWeight(uv0), c);
+    if (uFineOn != 0) {
+        vec2 uvF = uRingFine.xy + vec2(enu.x * uRingFine.z, -enu.y * uRingFine.w);
+        c = ringSample(uRingF, uvF, ringWeight(uvF), c);
+    }
     return c;
 }
 
@@ -1648,16 +1658,21 @@ class Site(object):
         h = self.height
         self.ef = np.array([(Nr + h) * cl * co, (Nr + h) * cl * so, (Nr * (1.0 - e2) + h) * sl])
         self.ef_to_enu = np.array([[-so, co, 0.0], [-sl * co, -sl * so, cl], [cl * co, cl * so, sl]])
+        def near_map(bounds):           # u, v at the site; du/dEast, dv/dNorth
+            lon0, lat0, lon1, lat1 = (math.radians(v) for v in bounds)
+            return [(lon - lon0) / (lon1 - lon0), (lat1 - lat) / (lat1 - lat0),
+                    1.0 / ((Nr + h) * cl * (lon1 - lon0)), 1.0 / ((Mr + h) * (lat1 - lat0))]
         near, far = [], []
         for k, r in enumerate(meta['rings']):
-            lon0, lat0, lon1, lat1 = (math.radians(v) for v in r['bounds'])
             if k < 2:
-                near.append([(lon - lon0) / (lon1 - lon0), (lat1 - lat) / (lat1 - lat0),
-                             1.0 / ((Nr + h) * cl * (lon1 - lon0)), 1.0 / ((Mr + h) * (lat1 - lat0))])
+                near.append(near_map(r['bounds']))
             else:
-                far.append([lon0, lat0, lon1, lat1])
+                far.append([math.radians(v) for v in r['bounds']])
         self.near, self.far = np.array(near), np.array(far)
         self.images = [load_rgb(os.path.join(path, r['file'])) for r in meta['rings']]
+        fine = meta.get('fine')
+        self.fine = np.array(near_map(fine['bounds'])) if fine else None
+        self.fine_image = load_rgb(os.path.join(path, fine['file'])) if fine else None
 
 
 class EarthLayer(object):
@@ -1705,9 +1720,19 @@ class EarthLayer(object):
                 GL.glActiveTexture(GL.GL_TEXTURE4 + k)
                 GL.glBindTexture(GL.GL_TEXTURE_2D, res.ringTex[k])
                 GL.glUniform1i(U["uRing%d" % k], 4 + k)
+            GL.glUniform1i(U["uFineOn"], 1 if site.fine is not None else 0)
+            if site.fine is not None:
+                GL.glUniform4fv(U["uRingFine"], 1, site.fine.astype(f32))
+                GL.glActiveTexture(GL.GL_TEXTURE8)
+                GL.glBindTexture(GL.GL_TEXTURE_2D, res.fineTex)
+                GL.glUniform1i(U["uRingF"], 8)
+            else:
+                GL.glUniform1i(U["uRingF"], 3)
         else:
             for k in range(4):                 # samplers must name a unit even if unused
                 GL.glUniform1i(U["uRing%d" % k], 3)
+            GL.glUniform1i(U["uRingF"], 3)
+            GL.glUniform1i(U["uFineOn"], 0)
         GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)

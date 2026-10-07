@@ -38,6 +38,8 @@ portview.py loads, and the download deleted unless --keep-downloads.
                       ring1.jpg  +-40 km,   ~10 m:  Sentinel-2 cloudless 2016
                       ring2.jpg  +-400 km,  ~100 m: the same
                       ring3.jpg  +-2000 km, ~500 m: the same
+                      ringF.jpg  +-1.5 km,  ~0.37 m: NAIP again, for the runway
+                                 itself at rollout (US sites)
                     Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services
                     GmbH (Contains modified Copernicus Sentinel data 2016),
                     CC BY 4.0.  Each ring's colours are matched to the next
@@ -94,9 +96,15 @@ NIGHT_SIZE = (8192, 4096)
 SITES = {
     'ksc': dict(name="KSC Shuttle Landing Facility", lat=28.61489, lon=-80.69437,
                 alt_ft=8.3, naip=True),
+    # No navaids file yet: the airfield reference points and elevations
+    # (approximate; to be taken from tools/sites/*.json when yaGPC2 has them).
+    'edw': dict(name="Edwards AFB", lat=34.9056, lon=-117.8836, alt_ft=2302.0, naip=True),
+    'nor': dict(name="White Sands Space Harbor (Northrup Strip)", lat=32.9433, lon=-106.4194,
+                alt_ft=3880.0, naip=True),
 }
 RINGS = ((4.0, 'naip'), (40.0, 's2'), (400.0, 's2'), (2000.0, 's2'))   # half-size, km
 RING_PX = 8192
+FINE_RING = (1.5, 'naip')                     # half-size km: the runway at rollout
 
 NAIP_URL = ("https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/"
             "exportImage?bbox=%.7f,%.7f,%.7f,%.7f&bboxSR=4326&imageSR=4326&size=%d,%d"
@@ -482,6 +490,31 @@ def prepare_iss(keep):
         os.remove(src)
 
 
+def prepare_site_fine(key):
+    """The fine ring (+-1.5 km, ~0.37 m) for a site already prepared."""
+    import json
+    site = SITES[key]
+    d = os.path.join(CACHE, "sites", key)
+    meta_path = os.path.join(d, "ring.json")
+    if not site.get('naip') or not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if meta.get('fine'):
+        return
+    Image = _image()
+    half_km, source = FINE_RING
+    b = ring_bounds(site, half_km)
+    print("site %s fine ring: +-%g km from %s" % (key, half_km, source))
+    img = fetch_mosaic(source, b, 4)
+    ring0 = meta['rings'][0]
+    img = match_colours(img, b, Image.open(os.path.join(d, ring0['file'])), ring0['bounds'])
+    img.save(os.path.join(d, "ringF.jpg"), quality=92, subsampling=0)
+    meta['fine'] = dict(file="ringF.jpg", bounds=b, half_km=half_km, source=source)
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=1)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep-downloads", action="store_true",
@@ -507,6 +540,7 @@ def main():
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))
         prepare_site(key)
+        prepare_site_fine(key)
     print("portview assets ready in", CACHE)
 
 
