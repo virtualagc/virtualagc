@@ -33,8 +33,11 @@ portview.py loads, and the download deleted unless --keep-downloads.
                     come close to the ground (entry, approach, landing, and the
                     pad at launch), each 8192 x 8192 in geodetic latitude and
                     longitude, with ring.json giving their bounds:
-                      ring0.jpg  +-4 km,    ~1 m:   USDA NAIP (USGS National Map;
-                                 US sites only), public domain
+                      ring0.jpg  +-4 km,    ~1 m:   USDA NAIP (US sites only), public
+                                 domain: the latest flight (USGS National Map), or
+                                 a site's naip_year (Microsoft Planetary Computer,
+                                 2010 onward) for its era -- KSC's 2010-05-02
+                                 flight, the pads as they were for STS-134
                       ring1.jpg  +-40 km,   ~10 m:  Sentinel-2 cloudless 2016
                       ring2.jpg  +-400 km,  ~100 m: the same
                       ring3.jpg  +-2000 km, ~500 m: the same
@@ -103,7 +106,7 @@ NIGHT_SIZE = (8192, 4096)
 # ellipsoid), and the ground's height there (ft, the runway threshold's).
 SITES = {
     'ksc': dict(name="KSC Shuttle Landing Facility", lat=28.61489, lon=-80.69437,
-                alt_ft=8.3, naip=True,
+                alt_ft=8.3, naip=True, naip_year=2010,
                 # The launch pads' centres (approximate; vehdyn's pad to come).
                 patches={'lc39a': (28.60839, -80.60433, 1.2), 'lc39b': (28.62722, -80.62083, 1.2)}),
     # No navaids file yet: the airfield reference points and elevations
@@ -285,8 +288,51 @@ def fetch_image(url):
     sys.exit("fetch_assets: could not fetch %s" % url)
 
 
-def fetch_mosaic(source, bounds, n_tiles):
-    """The bounds as one RING_PX-square image, from n_tiles x n_tiles requests."""
+PC_STAC = "https://planetarycomputer.microsoft.com/api/stac/v1/search"
+PC_RENDER = ("https://planetarycomputer.microsoft.com/api/data/v1/item/bbox/%.7f,%.7f,%.7f,%.7f/"
+             "%dx%d.png?collection=naip&item=%s&assets=image&asset_bidx=image%%7C1%%2C2%%2C3")
+
+
+def naip_items(bounds, year):
+    """The NAIP photographs of a year over a box (Planetary Computer's catalogue):
+    (id, bbox) each."""
+    import json
+    import certifi
+    body = json.dumps(dict(collections=["naip"], bbox=list(bounds),
+                           datetime="%d-01-01/%d-12-31" % (year, year), limit=200)).encode()
+    req = urllib.request.Request(PC_STAC, data=body, headers={"Content-Type": "application/json"})
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    with urllib.request.urlopen(req, context=ctx, timeout=120) as r:
+        return [(f['id'], f['bbox']) for f in json.load(r)['features']]
+
+
+def fetch_naip_year(b, w, h, year):
+    """One tile, b = (lon0, lat0, lon1, lat1), from a year's NAIP photographs,
+    each rendered by the Planetary Computer for the box and laid together by
+    their transparency (outside a photograph is transparent)."""
+    import io
+    import certifi
+    Image = _image()
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    out = Image.new("RGBA", (w, h))
+    for item, _ in naip_items(b, year):
+        for attempt in range(4):
+            try:
+                with urllib.request.urlopen(PC_RENDER % (b + (w, h, item)), context=ctx,
+                                            timeout=300) as r:
+                    img = Image.open(io.BytesIO(r.read())).convert("RGBA")
+                break
+            except Exception as e:              # noqa: BLE001 -- the service is flaky
+                print("  retrying (%s)" % e)
+        else:
+            sys.exit("fetch_assets: could not fetch NAIP %s" % item)
+        out.alpha_composite(img)
+    return out.convert("RGB")
+
+
+def fetch_mosaic(source, bounds, n_tiles, year=None):
+    """The bounds as one RING_PX-square image, from n_tiles x n_tiles requests.
+    source 'naip' with a year: that year's NAIP, else the latest."""
     Image = _image()
     lon0, lat0, lon1, lat1 = bounds
     tile = -(-RING_PX // n_tiles)
@@ -298,6 +344,10 @@ def fetch_mosaic(source, bounds, n_tiles):
             b = (lon0 + (lon1 - lon0) * x0 / RING_PX, lat1 - (lat1 - lat0) * y1 / RING_PX,
                  lon0 + (lon1 - lon0) * x1 / RING_PX, lat1 - (lat1 - lat0) * y0 / RING_PX)
             w, h = x1 - x0, y1 - y0
+            if source == 'naip' and year:
+                print("  tile %d,%d (NAIP %d)" % (i, j, year), flush=True)
+                out.paste(fetch_naip_year(b, w, h, year), (x0, y0))
+                continue
             if source == 'naip':
                 # The ImageServer keeps its pixels square in degrees, widening
                 # the box otherwise: ask for that shape, then resample.
@@ -351,7 +401,7 @@ def prepare_site(key):
             source = 's2'
         b = ring_bounds(site, half_km)
         print("site %s ring %d: +-%g km from %s" % (key, k, half_km, source))
-        img = fetch_mosaic(source, b, 3 if source == 'naip' else 2)
+        img = fetch_mosaic(source, b, 3 if source == 'naip' else 2, site.get('naip_year'))
         if source == 'naip' and blank(img):
             # NAIP has no imagery over some military installations (Edwards,
             # White Sands): Sentinel-2's 10 m instead.
@@ -556,7 +606,7 @@ def prepare_site_fine(key):
     half_km, source = FINE_RING
     b = ring_bounds(site, half_km)
     print("site %s fine ring: +-%g km from %s" % (key, half_km, source))
-    img = fetch_mosaic(source, b, 4)
+    img = fetch_mosaic(source, b, 4, site.get('naip_year'))
     if blank(img):
         print("  NAIP is blank here; no fine ring")
         meta['fine'] = None
@@ -589,7 +639,7 @@ def prepare_site_patches(key):
             continue
         b = ring_bounds(dict(lat=lat, lon=lon), half_km)
         print("site %s patch %s: +-%g km from naip" % (key, name, half_km))
-        img = fetch_mosaic('naip', b, 4)
+        img = fetch_mosaic('naip', b, 4, site.get('naip_year'))
         if blank(img):
             print("  NAIP is blank here; no patch")
             continue
