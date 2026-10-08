@@ -2955,6 +2955,11 @@ def main(argv=None):
     fmt.setProfile(QtGui.QSurfaceFormat.OpenGLContextProfile.CoreProfile)
     fmt.setSwapInterval(0)
     QtGui.QSurfaceFormat.setDefaultFormat(fmt)
+    try:                                    # its name in the Dock, and no App Nap (macdock.py)
+        import macdock
+        macdock.set_app_name("portview")
+    except Exception:
+        pass
     qapp = QtWidgets.QApplication(sys.argv[:1])
     TEXTURES['mode'] = args.textures
     Resources._instance = Resources(milkyway, stars, moon, site)
