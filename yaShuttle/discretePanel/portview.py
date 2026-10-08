@@ -177,6 +177,7 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
+HST_MODEL = os.path.join(CACHE, "models", "hst")
 GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Launch pads.  vehdyn (PASS's nav-base I-loads, CGNCOM.hal) stands the
 # stack nose up with the belly (+Z, the ET's side) north, so the port side and
@@ -216,6 +217,7 @@ MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
 TARGET_OFFSET = 96                 # TGT1: other vehicles (the ISS), from yaGPC2 (planned)
 ISS_NORAD = 25544
+HST_NORAD = 20580
 TRUTH_DOUBLES_MIN = 15
 TRUTH_DOUBLES_MAX = 30
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
@@ -625,10 +627,11 @@ class TestFeed(TruthFeed):
     PERIOD_S = 0.05
 
     def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None,
-                 target_range=100.0):
+                 target_range=100.0, target_id=ISS_NORAD):
         QtCore.QObject.__init__(self)
         self.targets = {}
         self.target_range = target_range
+        self.target_id = target_id
         self.unix0 = time.time() if unix0 is None else unix0
         if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover', 'vbar'):
             d = unit(ephemeris.at(self.unix0).pos[mode])
@@ -730,7 +733,7 @@ class TestFeed(TruthFeed):
             x = np.cross(y, z)
             lvlh = np.column_stack([x, y, z])          # the ISS: +XVV, Z nadir
             g = Target.parse(b"TGT1" + struct.pack(
-                ">12d", t, ISS_NORAD, *(r - self.target_range * x), *v, *matrix_to_quat(lvlh)))
+                ">12d", t, self.target_id, *(r - self.target_range * x), *v, *matrix_to_quat(lvlh)))
             self.targets[g.id] = (g, wall)
         self.t += self.PERIOD_S
 
@@ -2286,7 +2289,7 @@ class VehicleLayer(object):
                 # Phase: lit fraction seen from the eye, as a Lambert sphere.
                 phase = 0.5 * (1.0 + float(np.dot(to_sun / dsun, -d / dist)))
                 fade = min(1.0, (self.FADE_PX - px) / (self.FADE_PX - self.MODEL_PX))
-                mag = (self.MAG_1000KM + 5.0 * math.log10(dist / 1.0e6)
+                mag = (model.meta.get('mag_1000km', self.MAG_1000KM) + 5.0 * math.log10(dist / 1.0e6)
                        - 2.5 * math.log10(max(vis * phase * fade, 1e-6)))
                 self._point(res, view, fs, J2000_TO_M50.T @ (d / dist), mag)
             if px < self.MODEL_PX:
@@ -2682,6 +2685,8 @@ def main(argv=None):
                     help="with --test, the orbit's altitude (default 400 km)")
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
+    ap.add_argument("--test-target", choices=('iss', 'hst'), default='iss',
+                    help="with --test vbar, the vehicle approached (default iss)")
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
                     help="with --test vbar, the ISS's distance (default 100 m)")
     ap.add_argument("--test-lon", type=float, metavar="DEG",
@@ -2757,13 +2762,15 @@ def main(argv=None):
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
     feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
-                     args.test_range) if test
+                     args.test_range, HST_NORAD if args.test_target == 'hst' else ISS_NORAD) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
     models = {}
     if os.path.exists(os.path.join(ISS_MODEL, "model.json")):
         models[ISS_NORAD] = Model(ISS_MODEL)
+    if os.path.exists(os.path.join(HST_MODEL, "model.json")):
+        models[HST_NORAD] = Model(HST_MODEL)
     ground = []
     if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
         lat, lon, heading = PADS[args.pad]

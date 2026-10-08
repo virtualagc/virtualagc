@@ -479,6 +479,15 @@ GANTRY_SCALE = 5.89
 GANTRY_ROOT = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]) * GANTRY_SCALE
 GANTRY_ORIGIN = np.array([0.73, -1.39, -1.84])          # model units: ground under the trench
 
+HST_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+           "Hubble%20Space%20Telescope%20(A)/Hubble%20Space%20Telescope%20(A).glb")
+# Hubble, in inches: the aperture at +z (the 3.0 m light shield; the 4.3 m
+# aft shroud, with WFC3's bay, at z 0-200), the solar arrays along x.  This
+# takes it to its V1 (toward the aperture), V2 (along the arrays), V3, in
+# metres, about the middle of its length.
+HST_ROOT = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]) * INCH
+HST_ORIGIN = np.array([0.0, 0.0, 256.0])
+
 MODELS = {
     'iss': dict(url=ISS_URL, glb="iss-igoal.glb", root=ISS_ROOT, origin=np.zeros(3),
                 exclude=ISS_NOT_2011, name="ISS, STS-134 (May 2011)",
@@ -488,6 +497,11 @@ MODELS = {
                    exclude=set(), name="LC-39 pad structures (Shuttle era)",
                    frame="pad east-north-up; m; origin on the ground under the stack",
                    source="NASA 3D Resources, Gantry"),
+    'hst': dict(url=HST_URL, glb="hst.glb", root=HST_ROOT, origin=HST_ORIGIN, exclude=set(),
+                name="Hubble Space Telescope (after SM4, 2009)",
+                frame="HST V1 (toward the aperture), V2 (along the arrays), V3; m; mid-length",
+                source="NASA 3D Resources, Hubble Space Telescope (A)",
+                mag_1000km=1.5),            # ~2.2 half lit (the satellite catalogues' standard)
 }
 
 
@@ -600,8 +614,9 @@ def prepare_model(key, keep):
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
     tris = sum(len(arrays['idx%d' % k]) // 3 for k in range(len(mats)))
     with open(os.path.join(out_dir, "model.json"), "w") as f:
+        extra = {'mag_1000km': spec['mag_1000km']} if 'mag_1000km' in spec else {}
         json.dump(dict(name=spec['name'], frame=spec['frame'], source=spec['source'],
-                       triangles=tris, materials=mats), f, indent=1)
+                       triangles=tris, materials=mats, **extra), f, indent=1)
     print("  %d triangles in %d materials" % (tris, len(mats)))
     if not keep:
         os.remove(src)
