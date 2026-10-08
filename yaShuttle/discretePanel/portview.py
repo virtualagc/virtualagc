@@ -215,15 +215,15 @@ FRONT_HFOV = 2.0 * math.degrees(math.atan(2.0 * math.tan(math.radians(VIEW_VFOV 
 # (-(X_o - 1100), Y_o, -(Z_o - 375)) * 0.0254).  TRU1's r is the current
 # centre of mass, offset from it by TRU1 [27-29] (the whole stack's on the
 # pad: ~12.7 m), which the views subtract.
-# Eyes, approximately: the forward station's design eye ~X_o 520, Z_o 470;
-# the aft station's, at the overhead windows (X_o 542.5, SFOM vol. 12 fig.
-# 2.1-3), ~X_o 580, Z_o 480.  They matter only near another vehicle.
+# The eye, approximately: the pilots' design eye ~X_o 520, Z_o 470, for every
+# view (the overhead windows, X_o 542.5 per SFOM vol. 12 fig. 2.1-3, are just
+# behind and above their heads).  It matters most on the pad and near another
+# vehicle.
 def _structural(xo, yo, zo):
     return (-(xo - 1100.0) * 0.0254, yo * 0.0254, -(zo - 375.0) * 0.0254)
 
 
 EYE_FWD = _structural(520.0, 0.0, 470.0)
-EYE_AFT = _structural(580.0, 0.0, 480.0)
 
 # The views.  'fwd' is the line of sight and 'up' the top of the picture, in
 # body axes; 'w' x 'h' the window in logical pixels at --size 768, and 'hfov'
@@ -233,15 +233,17 @@ EYE_AFT = _structural(580.0, 0.0, 480.0)
 #   front: the forward windows W3/W4, 18 deg outboard to 14 deg inboard,
 #          10 deg up to 19 deg down: straight ahead, 4.5 deg down.
 #   up:    the overhead windows W7/W8, 35 deg forward to 45 deg aft of the
-#          zenith: 5 deg aft of straight up, seen from the aft station facing
-#          aft (top of the picture toward the nose).
+#          zenith: 5 deg aft of straight up, seen as the pilots see them, from
+#          their seats facing forward with heads tipped back (top of the
+#          picture toward the tail; right is right, as in the other views):
+#          for the Earth below while the Orbiter flies upside down (Ron).
 #   left, right: the side windows W1/W6, 71-103 deg outboard, 6 deg up to
 #          18-28 deg down: 88 deg out, 8 deg down.
 VIEWS = {
     'front': dict(title="Forward windows", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
-    'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(1, 0, 0),
-               w=768, h=768, hfov=SIDE_HFOV, eye=EYE_AFT),
+    'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(-1, 0, 0),
+               w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
     'left': dict(title="Left side window", fwd=_dir(-88, -8), up=(0, 0, -1),
                  w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
     'right': dict(title="Right side window", fwd=_dir(88, -8), up=(0, 0, -1),
