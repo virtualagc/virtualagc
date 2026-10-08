@@ -392,7 +392,10 @@ class VehicleClock(object):
     down by at most SLEW of it to close any gap, so the picture never jerks.
     A jump (restore, a new run, time going backward) resets it, and it never
     runs more than HOLD_S of vehicle time past the newest datagram, so a
-    paused vehicle holds still."""
+    paused vehicle holds still.  Both limits are for a vehicle running at real
+    time and scale with the rate: at --rate 10, 0.12 s of vehicle time is
+    12 ms of wall time, and every late datagram stopped the clock and then
+    snapped it on -- a picture that jerked."""
     FIT_S = 3.0
     RESET_S = 0.5
     HOLD_S = 0.12
@@ -405,14 +408,20 @@ class VehicleClock(object):
         self.shown = self.shownAt = None
 
     def _reset(self):
+        # The rate is kept: a run at --rate 10 measured as 1 (the first
+        # guess) fell 0.5 s behind within 50 ms and reset again, before
+        # ever fitting -- so it ran at 1x, snapping on about once a second.
         self.pts = []
-        self.a = self.rate = None
+        self.a = None
         self.shown = None
 
+    def _scale(self):
+        return max(1.0, self.rate or 1.0)
+
     def datagram(self, t, wall):
-        if self.last_t is not None and (t < self.last_t or t - self.last_t > 5.0
+        if self.last_t is not None and (t < self.last_t or t - self.last_t > 5.0 * self._scale()
                                         or (self.rate is not None and
-                                            abs(t - self.a - self.rate * wall) > self.RESET_S)):
+                                            abs(t - self.a - self.rate * wall) > self.RESET_S * self._scale())):
             self._reset()
         self.last_t = t
         self.pts.append((wall, t))
@@ -420,22 +429,24 @@ class VehicleClock(object):
             self.pts.pop(0)
         n = len(self.pts)
         if n < 2:
-            self.a, self.rate = t - wall, (self.rate or 1.0)
+            self.rate = self.rate or 1.0
+            self.a = t - self.rate * wall
             return
         w0 = self.pts[0][0]
         sw = sum(p[0] - w0 for p in self.pts) / n
         st = sum(p[1] for p in self.pts) / n
         cov = sum((p[0] - w0 - sw) * (p[1] - st) for p in self.pts)
         var = sum((p[0] - w0 - sw) ** 2 for p in self.pts)
-        if var > 1e-6 and wall - w0 > 0.2:
+        if var > 1e-8 and wall - w0 > 0.05:
             self.rate = max(0.0, cov / var)
         self.a = st - self.rate * (sw + w0)
 
     def now(self, wall):
         if self.a is None:
             return None
-        target = min(self.a + self.rate * wall, self.last_t + self.HOLD_S)
-        if self.shown is None or abs(target - self.shown) > self.RESET_S:
+        k = self._scale()
+        target = min(self.a + self.rate * wall, self.last_t + self.HOLD_S * k)
+        if self.shown is None or abs(target - self.shown) > self.RESET_S * k:
             self.shown, self.shownAt = target, wall
             return target
         dw = wall - self.shownAt
@@ -443,7 +454,7 @@ class VehicleClock(object):
         gap = target - (self.shown + step)
         lim = self.SLEW * step
         step += max(-lim, min(lim, gap))
-        hold = max(self.shown, self.last_t + self.HOLD_S)
+        hold = max(self.shown, self.last_t + self.HOLD_S * k)
         self.shown, self.shownAt = min(self.shown + max(0.0, step), hold), wall
         return self.shown
 
@@ -624,17 +635,29 @@ class TestFeed(TruthFeed):
     docked: the ISS (TGT1, synthetic) target_range metres behind along the
     velocity, in its +XVV Z-nadir attitude; the Orbiter ahead of it with its
     payload bay (-Z) toward it and its nose up, so the overhead windows look
-    at PMA-2."""
+    at PMA-2.  With approach_from, it starts that far off and closes as the
+    Shuttle's approaches did, range rate = range / 1000 per second (the
+    corridor's rule of thumb; 1 m/s at 1 km), to target_range, and holds
+    there: station-keeping.  A demonstration, not the flight software's
+    rendezvous.
+    mode 'flyaround': the Orbiter circling the ISS in the orbit's plane at
+    target_range metres, from the +V-bar up over the top and round, one lap
+    in lap_s seconds, its payload bay (-Z) toward the station all the way,
+    as the Shuttle's fly-arounds after undocking were flown.  Scripted, as
+    'vbar' is."""
     PERIOD_S = 0.05
+    APPROACH_TAU_S = 1000.0
 
     def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None,
-                 target_range=100.0, target_id=ISS_NORAD):
+                 target_range=100.0, target_id=ISS_NORAD, approach_from=None, lap_s=5400.0):
         QtCore.QObject.__init__(self)
         self.targets = {}
         self.target_range = target_range
+        self.approach_from = approach_from
+        self.lap_s = lap_s
         self.target_id = target_id
         self.unix0 = time.time() if unix0 is None else unix0
-        if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover', 'vbar'):
+        if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover', 'vbar', 'flyaround'):
             d = unit(ephemeris.at(self.unix0).pos[mode])
             mode = (math.degrees(math.atan2(d[1], d[0])) % 360.0,
                     math.degrees(math.asin(d[2])))
@@ -651,14 +674,39 @@ class TestFeed(TruthFeed):
             x = gmst_matrix(self.unix0) @ np.array([1.0, 0.0, 0.0])
             self.raan = lon * D2R - math.atan2(x[1], x[0])
         self.t = 0.0
+        # The test's time runs with the wall clock (times the rate), not a
+        # step per timer firing: at --test-rate 10 the timer is due every
+        # 5 ms, and drawing delays it, so stepping made the time run at 1x to
+        # 60x by turns -- a fly-around that jerked.
+        self.wall0 = time.monotonic()
         self.timer = QtCore.QTimer(self)
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self._send)
-        self.timer.start(int(round(1000 * self.PERIOD_S / rate)))
+        self.timer.start(max(10, int(round(1000 * self.PERIOD_S / rate))))
         self._send()
 
     def describe(self):
         return "test orbit"
+
+    def _flyaround(self, t, r, v):
+        """The station's offset from the Orbiter (m) and its rate (m/s): the
+        Orbiter on a circle round it in the orbit's plane, starting ahead on
+        the +V-bar and going up over the top."""
+        z = -unit(r)
+        x = np.cross(unit(np.cross(v, r)), z)
+        w = 2.0 * math.pi / self.lap_s
+        th = w * t
+        R = self.target_range
+        off = -R * (math.cos(th) * x + math.sin(th) * z)
+        return off, -R * w * (-math.sin(th) * x + math.cos(th) * z)
+
+    def _range(self, t):
+        """The target's distance (m) and its rate (m/s) at test time t."""
+        hold = self.target_range
+        if not self.approach_from or self.approach_from <= hold:
+            return hold, 0.0
+        r = self.approach_from * math.exp(-t / self.APPROACH_TAU_S)
+        return (r, -r / self.APPROACH_TAU_S) if r > hold else (hold, 0.0)
 
     def _orbit(self, t):
         if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
@@ -694,6 +742,12 @@ class TestFeed(TruthFeed):
         if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
             r, axes, m = self._hover(t)
             return m.T @ axes
+        if self.mode == 'flyaround':        # -Z (bay) at the station, nose out of the plane
+            r, v = self._orbit(t)
+            y = unit(np.cross(v, r))
+            off, _ = self._flyaround(t, r, v)
+            z = -unit(off)
+            return np.column_stack([y, np.cross(z, y), z])
         if self.mode in ('lvlh', 'baydown', 'vbar'):
             r, v = self._orbit(t)
             z = -unit(r)
@@ -714,7 +768,7 @@ class TestFeed(TruthFeed):
         return np.column_stack([x, np.cross(z, x), z])
 
     def _send(self):
-        t = self.t
+        t = self.t = (time.monotonic() - self.wall0) * self.rate
         r, v = self._orbit(t)
         C = self._attitude(t)
         h = 1e-3
@@ -728,15 +782,19 @@ class TestFeed(TruthFeed):
         wall = time.monotonic()
         self.clock.datagram(s.t, wall)
         self.latest, self.latestAt = s, wall
-        if self.mode == 'vbar':
+        if self.mode in ('vbar', 'flyaround'):
             z = -unit(r)
             y = unit(np.cross(v, r))
             x = np.cross(y, z)
             lvlh = np.column_stack([x, y, z])          # the ISS: +XVV, Z nadir
+            if self.mode == 'vbar':
+                rng, rdot = self._range(t)
+                off, offdot = -rng * x, -rdot * x
+            else:
+                off, offdot = self._flyaround(t, r, v)
             g = Target.parse(b"TGT1" + struct.pack(
-                ">12d", t, self.target_id, *(r - self.target_range * x), *v, *matrix_to_quat(lvlh)))
+                ">12d", t, self.target_id, *(r + off), *(v + offdot), *matrix_to_quat(lvlh)))
             self.targets[g.id] = (g, wall)
-        self.t += self.PERIOD_S
 
 
 # --------------------------------------------------------------------------
@@ -897,7 +955,8 @@ vec3 toSrgb(vec3 c) {
 }
 void main() {
     ivec2 p = ivec2(gl_FragCoord.xy) - uOffset;
-    vec3 front = texelFetch(uEarth, p, 0).rgb;
+    vec4 fr = texelFetch(uEarth, p, 0);
+    vec3 front = fr.rgb;
     // A star or the Milky Way can't show through a daylit sky: the air's own
     // light, many thousands of times brighter, masks it.  Fade what lies
     // behind as that pixel's sky brightens (twilight about half way); the
@@ -914,7 +973,10 @@ void main() {
     h ^= h >> 22u;
     float n1 = float(h & 0xffffu) / 65535.0, n2 = float(h >> 16u) / 65535.0;
     vec3 o = toSrgb(c);
-    o += (n1 + n2 - 1.0) / 255.0 * step(0.5 / 255.0, max(o.r, max(o.g, o.b)));   // black stays black
+    // Only on the sky and the Earth: not on a vehicle (alpha is the part of
+    // the pixel no vehicle covers), whose fine detail needs no help.
+    o += (n1 + n2 - 1.0) / 255.0 * step(0.5 / 255.0, max(o.r, max(o.g, o.b)))   // black stays black
+       * clamp(fr.a, 0.0, 1.0);
     fragColor = vec4(o, 1.0);
 }
 """
@@ -995,6 +1057,7 @@ def load_rgb(path):
 # Unified-memory GPUs (Apple, Intel) report nothing and get 'full'.
 TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
+MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 
 
@@ -2133,9 +2196,14 @@ uniform mat3 uRot;              // vehicle body -> camera
 uniform vec3 uTrans;            // the vehicle's origin in the camera frame, m
 uniform vec2 uTan;
 uniform float uNear, uFar;
-out vec3 vNrm;                  // body frame
-out vec3 vPos;                  // body frame
-out vec2 vUv;
+// CENTROID: multisampled, an edge pixel's colour is computed once for its
+// covered samples -- by default at the pixel's centre, which may lie off the
+// triangle, where the texture coordinates and normal are extrapolated past
+// its edge: a line of wrong, often bright, pixels crawling along every
+// outline against black space.  At the covered samples' centroid instead.
+centroid out vec3 vNrm;         // body frame
+centroid out vec3 vPos;         // body frame
+centroid out vec2 vUv;
 void main() {
     vec3 c = uRot * aPos + uTrans;
     // Depth linear in distance over just this vehicle's span: exact to well
@@ -2150,9 +2218,9 @@ void main() {
 
 MODEL_FS = """
 #version 410 core
-in vec3 vNrm;
-in vec3 vPos;
-in vec2 vUv;
+centroid in vec3 vNrm;
+centroid in vec3 vPos;
+centroid in vec2 vUv;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragTrans;
 uniform sampler2D uTex;
@@ -2175,7 +2243,7 @@ void main() {
     vec3 h = normalize(uSunB + toEye);
     float spec = 0.04 * pow(max(dot(n, h), 0.0), 40.0) * uSunVis * step(0.0, dot(n, uSunB));
     vec3 c = (alb / PI * (sun + earth + 0.01) + spec) * uSunE;
-    fragColor = vec4(c, 1.0);
+    fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
     fragTrans = vec4(0.0);
 }
 """
@@ -2422,6 +2490,7 @@ class ViewWidget(QOpenGLWidget):
         self.hdrFbo = self.hdrTex = None
         self.earthFbo = self.earthTex = self.earthTransTex = None
         self.depthRb = None
+        self.earthMs = None                 # (fbo, [renderbuffers]) when multisampled
         self.hdrSize = None
         self.setWindowTitle(spec['title'])
         self.resize(max(64, round(spec['w'] * scale)) + 2 * FRAME_PX,
@@ -2452,6 +2521,10 @@ class ViewWidget(QOpenGLWidget):
             GL.glDeleteFramebuffers(2, [self.hdrFbo, self.earthFbo])
             GL.glDeleteTextures([self.hdrTex, self.earthTex, self.earthTransTex])
             GL.glDeleteRenderbuffers(1, [self.depthRb])
+        if self.earthMs is not None:
+            GL.glDeleteFramebuffers(1, [self.earthMs[0]])
+            GL.glDeleteRenderbuffers(3, self.earthMs[1])
+            self.earthMs = None
 
         def tex():
             t = GL.glGenTextures(1)
@@ -2476,6 +2549,40 @@ class ViewWidget(QOpenGLWidget):
         GL.glRenderbufferStorage(GL.GL_RENDERBUFFER, GL.GL_DEPTH_COMPONENT24, w, h)
         GL.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT,
                                      GL.GL_RENDERBUFFER, self.depthRb)
+        # ANTI-ALIASED VEHICLES.  The ISS's 1.9 million triangles are mostly
+        # handrails and struts finer than a pixel: drawn once a pixel, each
+        # pixel caught one or missed it, and as the station moved its detail
+        # swarmed.  So the Earth-and-vehicles pass is multisampled and
+        # averaged down into the textures above: an edge pixel is then the
+        # vehicle by its coverage, over whatever is behind (the
+        # transmittance averages too).  The Earth's ray-cast still runs once
+        # a pixel.  Fewer samples if the driver can't, none in 'reduced'.
+        n = MSAA['samples'] if TEXTURES['mode'] != 'reduced' else 0
+        try:
+            n = min(n, int(GL.glGetIntegerv(GL.GL_MAX_SAMPLES)))
+        except (GL.GLError, TypeError, ValueError):
+            pass
+        while n > 1:
+            fbo = GL.glGenFramebuffers(1)
+            rbs = list(GL.glGenRenderbuffers(3))
+            GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, fbo)
+            try:
+                for i, (rb, fmt) in enumerate(zip(rbs, (GL.GL_RGBA16F, GL.GL_RGBA16F,
+                                                        GL.GL_DEPTH_COMPONENT24))):
+                    GL.glBindRenderbuffer(GL.GL_RENDERBUFFER, rb)
+                    GL.glRenderbufferStorageMultisample(GL.GL_RENDERBUFFER, n, fmt, w, h)
+                    GL.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT if i == 2
+                                                 else GL.GL_COLOR_ATTACHMENT0 + i, GL.GL_RENDERBUFFER, rb)
+                GL.glDrawBuffers(2, [GL.GL_COLOR_ATTACHMENT0, GL.GL_COLOR_ATTACHMENT1])
+                ok = GL.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER) == GL.GL_FRAMEBUFFER_COMPLETE
+            except GL.GLError:              # more samples than this format allows
+                ok = False
+            if ok:
+                self.earthMs = (fbo, rbs)
+                break
+            GL.glDeleteFramebuffers(1, [fbo])
+            GL.glDeleteRenderbuffers(3, rbs)
+            n //= 2
         self.hdrSize = (w, h)
 
     def paintGL(self):
@@ -2498,13 +2605,23 @@ class ViewWidget(QOpenGLWidget):
             self._fov()
             for layer in sky:
                 layer.draw(res, self, fs)
-        GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.earthFbo)
-        GL.glClearBufferfv(GL.GL_COLOR, 0, (0.0, 0.0, 0.0, 0.0))
+        GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.earthMs[0] if self.earthMs else self.earthFbo)
+        if self.earthMs:
+            GL.glEnable(GL.GL_MULTISAMPLE)  # on by default, but Qt's context may not leave it so
+        GL.glClearBufferfv(GL.GL_COLOR, 0, (0.0, 0.0, 0.0, 1.0))     # alpha 1: no vehicle
         GL.glClearBufferfv(GL.GL_COLOR, 1, (1.0, 1.0, 1.0, 1.0))
         GL.glClearBufferfv(GL.GL_DEPTH, 0, (1.0,))
         if fs.ok:
             for layer in earth:
                 layer.draw(res, self, fs)
+        if self.earthMs:                    # average the samples into the textures
+            GL.glBindFramebuffer(GL.GL_READ_FRAMEBUFFER, self.earthMs[0])
+            GL.glBindFramebuffer(GL.GL_DRAW_FRAMEBUFFER, self.earthFbo)
+            for i in (0, 1):
+                GL.glReadBuffer(GL.GL_COLOR_ATTACHMENT0 + i)
+                GL.glDrawBuffers(1, [GL.GL_COLOR_ATTACHMENT0 + i])
+                GL.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL.GL_COLOR_BUFFER_BIT, GL.GL_NEAREST)
+            GL.glDrawBuffers(2, [GL.GL_COLOR_ATTACHMENT0, GL.GL_COLOR_ATTACHMENT1])
         GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.defaultFramebufferObject())
         GL.glViewport(0, 0, round(self.width() * dpr), round(self.height() * dpr))
         GL.glClearColor(*FRAME_SRGB, 1.0)
@@ -2586,6 +2703,11 @@ class Portview(object):
             s += "  NO DATE (Sun, Moon, planets hidden)"
         s += "  alt %7.1f km" % (height_above_ellipsoid(
             fs.r if fs.m50_to_ef is None else fs.m50_to_ef @ fs.r) / 1000.0)
+        ranges = [float(np.linalg.norm(rt - fs.r)) for k, (rt, _) in fs.targets.items()
+                  if isinstance(k, int)]       # vehicles by NORAD id; not the pad's structures
+        if ranges:                          # the nearest other vehicle's
+            d = min(ranges)
+            s += ("  target %5.0f m" % d) if d < 1e5 else ("  target %5.0f km" % (d / 1000.0))
         s += "  EV %+.2f  Milky Way x%.2f" % (self.exposure.ev, self.exposure.milkyway)
         if fs.stale:
             s += "  STALE"
@@ -2669,6 +2791,9 @@ def main(argv=None):
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none)")
+    ap.add_argument("--msaa", type=int, default=4, metavar="N",
+                    help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
+                         "none with reduced textures)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--textures", choices=('auto', 'full', 'reduced'), default='auto',
@@ -2686,7 +2811,7 @@ def main(argv=None):
                     help="the Milky Way's brightness relative to the stars "
                          "(default 0.5)")
     ap.add_argument("--test", nargs='?', const='lvlh',
-                    metavar="lvlh|baydown|vbar|hover|RA,DEC|BODY",
+                    metavar="lvlh|baydown|vbar|flyaround|hover|RA,DEC|BODY",
                     help="no yaGPC2: a synthetic orbit, holding LVLH (default), LVLH "
                          "with the payload bay to the Earth (baydown), or "
                          "inertial with the nose at J2000 RA,DEC (deg) or at a body "
@@ -2698,9 +2823,15 @@ def main(argv=None):
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
     ap.add_argument("--test-target", choices=['iss'] + sorted(OTHER_VEHICLES.values()), default='iss',
-                    help="with --test vbar, the vehicle approached (default iss)")
+                    help="with --test vbar or flyaround, the vehicle (default iss)")
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
-                    help="with --test vbar, the ISS's distance (default 100 m)")
+                    help="with --test vbar or flyaround, the vehicle's distance (default 100 m); with "
+                         "--test-approach, where the approach stops and station-keeping begins")
+    ap.add_argument("--test-lap", type=float, default=5400.0, metavar="S",
+                    help="with --test flyaround, the seconds a lap (default 5400)")
+    ap.add_argument("--test-approach", type=float, metavar="M",
+                    help="with --test vbar, start this far off and close at range/1000 per "
+                         "second (the Shuttle's rule of thumb) to --test-range, then hold")
     ap.add_argument("--test-lon", type=float, metavar="DEG",
                     help="with --test, start over this longitude (east +) on the equator")
     ap.add_argument("--test-rate", type=float, default=1.0, metavar="X",
@@ -2717,7 +2848,7 @@ def main(argv=None):
     test = None
     bodies = ['sun', 'moon'] + [n for n, _, _ in PLANETS]
     if args.test:
-        if args.test in ('lvlh', 'baydown', 'vbar') or args.test in bodies:
+        if args.test in ('lvlh', 'baydown', 'vbar', 'flyaround') or args.test in bodies:
             test = args.test
         elif args.test == 'hover':
             try:
@@ -2747,6 +2878,7 @@ def main(argv=None):
     moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
     site = None
     TERRAIN['on'] = args.terrain == 'on'
+    MSAA['samples'] = args.msaa
     if args.site != 'none':
         path = os.path.join(SITES_DIR, args.site)
         if os.path.exists(os.path.join(path, "ring.json")):
@@ -2775,7 +2907,7 @@ def main(argv=None):
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
     target_id = {v: k for k, v in OTHER_VEHICLES.items()}.get(args.test_target, ISS_NORAD)
     feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
-                     args.test_range, target_id) if test
+                     args.test_range, target_id, args.test_approach, args.test_lap) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
