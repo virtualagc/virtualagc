@@ -59,7 +59,7 @@ import windowLayout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROGRAMS = ("yaGPC2", "MEDS2.py", "panelO6.py", "stsKeyboard.py", "cam.py",
-            "subtitles.py", "discretePanel.py", "handcontrollers.py")
+            "subtitles.py", "discretePanel.py", "handcontrollers.py", "portview.py")
 POLL_MS = 3000
 C_BG = "#2b2b2b"
 C_FG = "#e8e8e8"
@@ -218,6 +218,7 @@ class Manager(object):
         self.root, self.args = root, args
         self.subtitles = None              # the caption box this window started
         self.hands = None                  # the hand controllers it started
+        self.views = None                  # the window views (portview.py) it started
         # SHORT ENOUGH TO READ.  This window is narrow, and a title bar it
         # cannot fit says nothing at all: "Simulation manager" came back as
         # something unreadable, let alone with the run appended.  The run is
@@ -322,6 +323,14 @@ class Manager(object):
         self._button(row, "PLT", lambda: self.start_hands("rh"))
         self._button(row, "Aft", lambda: self.start_hands("aft"))
         self._button(row, "Stop", self.stop_hands)
+
+        # THE VIEWS OUT OF THE WINDOWS (portview.py), which simulatePASS starts
+        # with the vehicle dynamics; here to bring them back after closing
+        # them, or to start them on a run begun without.
+        self._section("WINDOW VIEWS", bold)
+        row = self._row()
+        self._button(row, "Start", self.start_views, wide=True)
+        self._button(row, "Stop", self.stop_views)
 
         # SIMULATED TIME PER WALL SECOND, changed while the vehicle runs
         # (simulatePASS session `rate X`, rtpacer.c rate_poll): fast through
@@ -1324,6 +1333,56 @@ class Manager(object):
             self.root.after(2500, lambda: self.restore_layout(
                 only_roles={windowLayout._hc_role(rhc)}))
 
+    def start_views(self):
+        if any(n == "portview.py" for n, _ in running(self.args.port_base)):
+            self.say("The window views are already running on this port base; Stop them first")
+            return
+        script = os.path.join(HERE, "portview.py")
+        try:
+            chk = subprocess.run([sys.executable, script, "--check"], cwd=HERE,
+                                 capture_output=True, text=True, timeout=30)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            self.say("Cannot start the window views: %s" % e)
+            return
+        if chk.returncode != 0:
+            self.say((chk.stdout.strip() or "portview: not started").splitlines()[-1])
+            return
+        argv = [sys.executable, script, "--port-base", str(self.args.port_base),
+                "--size", str(self.args.portview_size)]
+        try:
+            self.views = subprocess.Popen(argv, cwd=HERE, stdout=subprocess.DEVNULL,
+                                          stderr=subprocess.STDOUT,
+                                          stdin=subprocess.DEVNULL)
+        except OSError as e:
+            self.say("Cannot start the window views: %s" % e)
+            return
+        self.say("Window views started")
+        # PLACE THEM, AND ONLY THEM, where the layout says (as the hand
+        # controllers): restoring the whole layout would undo what was
+        # arranged by hand.  They take a few seconds to load their textures.
+        path = self.layout.get().strip()
+        if os.path.isfile(path):
+            self.root.after(8000, lambda: self.restore_layout(
+                only_roles=set(windowLayout.PORTVIEW_ROLES.values())))
+
+    def stop_views(self):
+        if self.views is not None and self.views.poll() is None:
+            self.views.terminate()
+            self.views = None
+            self.say("Window views stopped")
+            return
+        pids = [pid for n, pid in running(self.args.port_base) if n == "portview.py"]
+        if not pids:
+            self.say("No window views on this port base")
+            return
+        for pid in pids:
+            try:
+                os.kill(pid, 15)
+            except OSError as e:
+                self.say("Cannot stop %d: %s" % (pid, e))
+                return
+        self.say("Window views stopped (pid %s)" % ", ".join(map(str, pids)))
+
     def stop_hands(self):
         if self.hands is not None and self.hands.poll() is None:
             self.hands.terminate()
@@ -1392,7 +1451,7 @@ class Manager(object):
             pretty = {"yaGPC2": "GPC", "MEDS2.py": "MEDS", "panelO6.py": "Panel",
                       "discretePanel.py": "Panel", "cam.py": "O1",
                       "stsKeyboard.py": "Keyboard", "subtitles.py": "Captions",
-                      "handcontrollers.py": "Hand controllers"}
+                      "handcontrollers.py": "Hand controllers", "portview.py": "Views"}
             shown = []
             for n, c in sorted(counts.items()):
                 shown.append("%s%s" % (pretty.get(n, n),
@@ -1430,6 +1489,8 @@ def main(argv=None):
     ap.add_argument("--gpcs", metavar="LIST", default="",
                     help="which GPCs this run has, for the status line")
     ap.add_argument("--crts", type=int, metavar="N", default=0)
+    ap.add_argument("--portview-size", type=int, metavar="N", default=368,
+                    help="portview.py's --size for Start under WINDOW VIEWS (default 368)")
     ap.add_argument("--hc-size", type=int, metavar="N", default=384,
                     help="--size for hand controllers started from here "
                          "(simulatePASS passes the keyboards')")
