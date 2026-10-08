@@ -285,17 +285,17 @@ which portview follows from TRU1's attitude with no special handling.
   Eye points per view (forward and aft stations, approximate Orbiter
   structural coordinates).  Far away: a point by magnitude.  `--test vbar
   --test-range M` flies the final V-bar approach with a synthetic ISS.
-  Other vehicles are more models keyed by NORAD id (OTHER_VEHICLES), each
-  model.json giving its frame and brightness (mag_1000km):
-  - the Hubble Space Telescope (20580): NASA 3D Resources' Hubble (A), in
-    its V1-V2-V3 axes, metres from mid-length;
-  - Mir (16609): NASA 3D Resources' simple Mir, ~0.0221 m a unit, +X along
-    the core toward the node, origin in the middle of the complex;
-  - Solar Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3
-    (15643): no published models, so simple shapes to their published
-    dimensions (fetch_assets.py's PROCEDURAL), +X along the spin axis
-    (Solar Max: toward the Sun), approximate.
-  `--test vbar --test-target hst|mir|smm|westar6|palapab2|leasat3` flies up
+  Other vehicles are modules in portview/vehicles/ (2026-10-08), one each:
+  KEY.py's build(kit) returns its parts and meta (name, frame, NORAD id,
+  brightness mag_1000km), built with kit.py's shapes or from a NASA 3D
+  Resources glTF (kit.nasa_glb); `fetch_assets.py --vehicles LIST
+  [--rebuild]` prepares them, and portview draws every prepared model whose
+  model.json names a NORAD id.  Each body frame is in its meta; the origin
+  is the centre of mass, as a vehicle's state is.  preview.py renders one
+  from six points round a fly-around.  Hubble (20580), Mir (16609), Solar
+  Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3 (15643), and
+  the survey of the rest in vehicles/SURVEY.md.
+  `--test vbar|flyaround --test-target KEY` flies up
   to one.  Live (2026-10-08): vehdyn flies whatever YAGPC_VEHDYN_TARGETS
   lists, as point masses under its own gravity and each one's drag, from a
   J2000 state at a Unix epoch (tools/tle_target.py makes one from a TLE) or
