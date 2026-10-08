@@ -64,7 +64,11 @@
 #define RA_MAX_FT 5000.0
 #define RA_ANT_FT 12.915
 #define RA_ANT_RAD 2.005
-#define NAV_MAX 8
+/* PASS's own tables' sizes: CGNS_RW_AREA_TABLE(90), CGNS_MLS_AREA_TABLE(15)
+ * (tools/landing_sites.py).  A site file uses the slots its flight's area
+ * table did -- Edwards's are 79-90 -- so 8 dropped them all. */
+#define RW_MAX 90
+#define MLS_MAX 15
 #define LA_PI 3.14159265358979323846
 
 typedef struct { double lat, lon, alt, az; char id[8]; } Runway;
@@ -74,8 +78,8 @@ typedef struct {
     double Mraz[3][3], Mel[3][3];    /* Earth-fixed -> scanner */
 } Mls;
 
-static Runway rws[NAV_MAX];
-static Mls mls[NAV_MAX];
+static Runway rws[RW_MAX];                   /* by slot - 1; id[0] 0: no runway there */
+static Mls mls[MLS_MAX];
 static int nRw, nMls, loaded;
 static unsigned dither;
 
@@ -117,7 +121,7 @@ static void load(void) {
         double v[8];
         if (strncmp(line, "runway ", 7) == 0 &&
             sscanf(line + 7, "%d %15s %lf %lf %lf %lf", &slot, id, &v[0], &v[1], &v[2], &v[3]) == 6 &&
-            slot >= 1 && slot <= NAV_MAX) {
+            slot >= 1 && slot <= RW_MAX) {
             Runway *r = &rws[slot - 1];
             r->lat = v[0]; r->lon = v[1]; r->alt = v[2]; r->az = v[3];
             snprintf(r->id, sizeof r->id, "%.7s", id);   /* PASS ids are six characters */
@@ -125,7 +129,7 @@ static void load(void) {
         } else if (strncmp(line, "mls ", 4) == 0 &&
                    sscanf(line + 4, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf", &slot, &rw,
                           &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7]) == 10 &&
-                   slot >= 1 && slot <= NAV_MAX) {
+                   slot >= 1 && slot <= MLS_MAX) {
             Mls *m = &mls[slot - 1];
             m->rw = rw;
             geodetic_to_ef(v[0], v[1], v[2], m->raz);
@@ -201,6 +205,7 @@ void landaids_tacan_ra(int unit, uint16_t w[7]) {
     for (int i = 0; i < 3; i++) r[i] = rM[i] / FT_M;
     double ground = 0.0, near = 1e30;
     for (int k = 0; k < nRw; k++) {                       /* the nearest runway's height */
+        if (rws[k].id[0] == '\0') continue;              /* a slot the file left empty */
         double p[3];
         geodetic_to_ef(rws[k].lat, rws[k].lon, rws[k].alt, p);
         double d = sqrt((r[0] - p[0]) * (r[0] - p[0]) + (r[1] - p[1]) * (r[1] - p[1]) +
