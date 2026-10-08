@@ -115,7 +115,7 @@ size and finish.
 | `intelsat603` | 20523 | shapes; STS-49 photos | stowed, as captured (no capture bar, no new motor) | 12,492 |
 | `eureca` | 22065 | shapes; eoPortal; STS-46/57 photos | arrays folded, antennas up (STS-57); `ARRAYS_DEPLOYED = True` gives STS-46's | 9,896 |
 | `sfu` | 23521 | shapes; STS-72 photos | arrays jettisoned (STS-72) | 6,204 |
-| `cgro` | 21225 | NASA 3D Resources "Gamma Ray Observatory", scaled x6.9, recoloured | deployed | 4,244 |
+| `cgro` | 21225 | shapes; GRO Prelaunch Mission Operations Report (NTRS 20050229325) drawings, STS-37 and KSC photos (Ron's collection) | deployed, as released | 26,520 |
 | `uars` | 21701 | shapes; STS-48 photos | array and HGA deployed | 12,932 |
 | `spas01` | 14142 | shapes; 41B press kit dimensions | layout representative (few photos of it exist) | 2,676 |
 | `orfeus_spas`, `orfeus_spas2` | 22798, 24661 | shapes; STS-51/80 photos | free-flying | 4,464 |
@@ -126,7 +126,7 @@ size and finish.
 | `iae` | 23872 | shapes; STS-77 photos | jettisoned antenna | 3,912 |
 | `ibss` | 21244 | shapes; STS-39 photos | free-flying | 3,260 |
 | `pdp` | 15929 | shapes; 51F photos | free-flying, booms out | 2,096 |
-| `erbs` | 15354 | shapes; KSC photos, NSSDC | panels deployed, as released | 13,016 |
+| `erbs` | 15354 | shapes; STS-41G and KSC photos (s84-41265/41266), NASA Langley, eoPortal (Ron's collection) | panels deployed, as released | 6,632 |
 | `spartan204` | 23470 | Spartan carrier + shapes; STS-63 photo | free-flying | 7,284 |
 | `oast_flyer` | 23763 | Spartan carrier + shapes; STS-72 photos | free-flying | 7,732 |
 | `spartan101` | 15831 | Spartan carrier + shapes | instruments representative | 7,240 |
