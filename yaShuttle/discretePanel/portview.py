@@ -1588,7 +1588,11 @@ vec3 ringSample(sampler2D t, vec2 uv, float w, vec3 under) {
     return mix(under, earthSample(t, uv, gx, gy), w);
 }
 
-vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu) {
+// Rings 1-3 are Sentinel-2's 2016 mosaic, whose open sea is blotched by its
+// cloud masking: over water they give way to Blue Marble's plain ocean (the
+// NAIP of ring 0 and the patches is kept; its shore water is good).
+vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu, float water) {
+    float land = 1.0 - water;
     if (uSiteOn == 0) return albedo;
     vec2 uv3 = vec2((lon - uRingFar[1].x) / (uRingFar[1].z - uRingFar[1].x),
                     (uRingFar[1].w - lat) / (uRingFar[1].w - uRingFar[1].y));
@@ -1597,9 +1601,9 @@ vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu) {
     vec2 uv1 = uRingNear[1].xy + vec2(enu.x * uRingNear[1].z, -enu.y * uRingNear[1].w);
     vec2 uv0 = uRingNear[0].xy + vec2(enu.x * uRingNear[0].z, -enu.y * uRingNear[0].w);
     vec3 c = albedo;
-    c = ringSample(uRing3, uv3, ringWeight(uv3), c);
-    c = ringSample(uRing2, uv2, ringWeight(uv2), c);
-    c = ringSample(uRing1, uv1, ringWeight(uv1), c);
+    c = ringSample(uRing3, uv3, ringWeight(uv3) * land, c);
+    c = ringSample(uRing2, uv2, ringWeight(uv2) * land, c);
+    c = ringSample(uRing1, uv1, ringWeight(uv1) * land, c);
     c = ringSample(uRing0, uv0, ringWeight(uv0), c);
     if (uPatchCount > 0) {
         vec2 uvP = uPatch[0].xy + vec2(enu.x * uPatch[0].z, -enu.y * uPatch[0].w);
@@ -1659,7 +1663,8 @@ void main() {
     gy.x -= round(gy.x);
     vec3 albedo = earthSample(uDay, uv, gx, gy);
     vec3 lights = earthSample(uNight, uv, gx, gy);
-    albedo = siteImagery(albedo, lon, lat, uCamEnu + uEfToEnu * rel);
+    float water = textureGrad(uWater, uv, gx, gy).r;
+    albedo = siteImagery(albedo, lon, lat, uCamEnu + uEfToEnu * rel, water);
     if (disc < 0.0) discard;                       // misses the atmosphere
     float t0 = max(0.0, -b - sqrt(disc)), t1 = -b + sqrt(disc);
     if (t1 <= 0.0) discard;
@@ -1699,7 +1704,6 @@ void main() {
         vec3 direct = albedo / PI * max(mus, 0.0) * ts;
         vec3 sky = albedo / PI * vec3(0.05, 0.065, 0.09) * smoothstep(-0.12, 0.25, mus);
         // Sun glint on water: the GEBCO mask, bilinear, so coastlines stay smooth.
-        float water = textureGrad(uWater, uv, gx, gy).r;
         vec3 hv = normalize(uSun - dirEF);
         float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hv), 0.0), 5.0);
         // Wave slopes ~0.1 rad (Blinn exponent ~200): a peak about as bright as land.

@@ -366,9 +366,22 @@ def blank(img):
     return float(a.reshape(-1, 3).std(axis=0).max()) < 2.0      # per channel
 
 
+def _blur(a, sigma):
+    """A Gaussian blur of an (h, w, c) float array, by FFT (wraps; fine away
+    from the edges, and the edges are faded out anyway)."""
+    ky = np.fft.fftfreq(a.shape[0])[:, None]
+    kx = np.fft.rfftfreq(a.shape[1])[None, :]
+    g = np.exp(-2.0 * (np.pi * sigma) ** 2 * (kx ** 2 + ky ** 2))
+    return np.stack([np.fft.irfft2(np.fft.rfft2(a[..., k]) * g, s=a.shape[:2])
+                     for k in range(a.shape[2])], axis=-1)
+
+
 def match_colours(child, cb, parent, pb):
-    """The child's channels scaled to the parent's mean and spread over the
-    child's area, so a ring and the next coarser one meet without a seam."""
+    """The child matched to the parent, first in each channel's mean and
+    spread over its area, then in its large-scale colour everywhere (a smooth
+    gain, ~1/30 of the ring across): a ring and the next coarser one then meet
+    without a step (it read as a cloud shadow over land, a line over the sea),
+    while the child keeps all its fine detail."""
     Image = _image()
     lon0, lat0, lon1, lat1 = cb
     plon0, plat0, plon1, plat1 = pb
@@ -383,7 +396,11 @@ def match_colours(child, cb, parent, pb):
         ms, ss = small[..., k].mean(), small[..., k].std() + 1e-3
         mp, sp = p[..., k].mean(), p[..., k].std() + 1e-3
         c[..., k] = (c[..., k] - ms) * (sp / ss) + mp
-    return Image.fromarray(np.clip(c, 0, 255).astype(np.uint8))
+        small[..., k] = (small[..., k] - ms) * (sp / ss) + mp
+    gain = np.clip((_blur(p, 16.0) + 8.0) / (_blur(small, 16.0) + 8.0), 0.5, 2.0)
+    gain = np.stack([np.asarray(Image.fromarray(gain[..., k].astype(np.float32)).resize(
+        child.size, Image.BILINEAR)) for k in range(3)], axis=-1)
+    return Image.fromarray(np.clip(c * gain, 0, 255).astype(np.uint8))
 
 
 def prepare_site(key):
@@ -655,6 +672,36 @@ def prepare_site_patches(key):
             json.dump(meta, fp, indent=1)
 
 
+def rematch_site(key):
+    """Match a prepared site's rings' colours again (as match_colours now
+    does), from the coarsest inward, then its fine patches; no downloads."""
+    import json
+    d = os.path.join(CACHE, "sites", key)
+    meta_path = os.path.join(d, "ring.json")
+    if not os.path.exists(meta_path):
+        return
+    Image = _image()
+    with open(meta_path) as f:
+        meta = json.load(f)
+    rings = meta['rings']
+    print("site %s: matching colours again" % key)
+    for k in range(len(rings) - 2, -1, -1):
+        r, parent = rings[k], rings[k + 1]
+        img = match_colours(Image.open(os.path.join(d, r['file'])), r['bounds'],
+                            Image.open(os.path.join(d, parent['file'])), parent['bounds'])
+        img.save(os.path.join(d, r['file']), quality=92, subsampling=0)
+    patches = ([meta['fine']] if meta.get('fine') else []) + list(meta.get('patches', {}).values())
+    r0 = rings[0]
+    for pa in patches:
+        b = pa['bounds']
+        inside0 = (r0['bounds'][0] <= b[0] and b[2] <= r0['bounds'][2] and
+                   r0['bounds'][1] <= b[1] and b[3] <= r0['bounds'][3])
+        parent = r0 if inside0 else rings[1]
+        img = match_colours(Image.open(os.path.join(d, pa['file'])), b,
+                            Image.open(os.path.join(d, parent['file'])), parent['bounds'])
+        img.save(os.path.join(d, pa['file']), quality=92, subsampling=0)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--keep-downloads", action="store_true",
@@ -663,7 +710,13 @@ def main():
                     help="the Blue Marble months to prepare (default all twelve)")
     ap.add_argument("--sites", default=",".join(SITES), metavar="LIST",
                     help="the landing sites to prepare imagery for (default %s)" % ",".join(SITES))
+    ap.add_argument("--rematch", action="store_true",
+                    help="only match the prepared sites' ring colours again (no downloads)")
     args = ap.parse_args()
+    if args.rematch:
+        for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
+            rematch_site(key)
+        return
     months = [int(m) for m in args.months.split(",") if m.strip()]
     if any(m < 1 or m > 12 for m in months):
         sys.exit("fetch_assets: months are 1-12")
