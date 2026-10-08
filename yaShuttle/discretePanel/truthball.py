@@ -328,6 +328,11 @@ def main():
                     help="save the first frame (after a second of data, with a feed) and exit")
     args = ap.parse_args()
 
+    try:                                    # its Dock name, and no App Nap (macdock.py)
+        import macdock
+        macdock.set_app_name("Truth Ball")
+    except Exception:
+        pass
     pygame.init()
     W = H = args.size
     pygame.display.set_mode((W, H), DOUBLEBUF | OPENGL)
