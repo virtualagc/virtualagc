@@ -838,8 +838,14 @@ vec3 toSrgb(vec3 c) {
 }
 void main() {
     ivec2 p = ivec2(gl_FragCoord.xy) - uOffset;
+    vec3 front = texelFetch(uEarth, p, 0).rgb;
+    // A star or the Milky Way can't show through a daylit sky: the air's own
+    // light, many thousands of times brighter, masks it.  Fade what lies
+    // behind as that pixel's sky brightens (twilight about half way); the
+    // same in every view, and nothing at all in space or a night sky.
+    float sky = dot(front, vec3(0.2126, 0.7152, 0.0722));
     vec3 c = texelFetch(uHdr, p, 0).rgb * texelFetch(uEarthTrans, p, 0).rgb
-           + texelFetch(uEarth, p, 0).rgb;
+           * exp(-sky / 0.002) + front;
     fragColor = vec4(toSrgb(c), 1.0);
 }
 """
