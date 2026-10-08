@@ -1,12 +1,15 @@
-"""Westar 6 (NORAD 14688), an HS-376, as retrieved by STS-51A."""
+"""Westar 6 (NORAD 14688), a Hughes HS-376, as STS-51A retrieved it on
+14 November 1984: still stowed, as its failed PAM-D left it in February
+(antenna folded, outer solar panel not dropped).  The geometry is
+_hs376.py's; this is its Westar dimensions: stowed height 9 ft (2.74 m),
+the outer solar panel 1.95 m long.  Body frame and origin: see _hs376.py
+(+X along the spin axis toward the folded antenna; origin the estimated
+centre of mass)."""
 from . import _hs376
 
 KEY = 'westar6'
 
 
 def build(kit):
-    return dict(meta=dict(name="Westar 6 (HS-376; approximate)",
-                          frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum",
-                          source="simple shapes to published dimensions (portview/vehicles)",
-                          norad=14688, mag_1000km=3.0),
-                parts=_hs376.parts(kit))
+    return dict(meta=_hs376.meta("Westar 6 (HS-376, stowed, as retrieved by STS-51A)", 14688),
+                parts=_hs376.parts(kit, skirt=1.95, seed=6))
