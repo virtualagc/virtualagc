@@ -2392,6 +2392,17 @@ def uncovered_disk(a, b, sep):
 # --------------------------------------------------------------------------
 # The windows.
 
+def confirm_quit(parent):
+    """Quit every view, once asked: a slip of the fingers shouldn't end a
+    flight's views (closing one window still closes just that view)."""
+    ans = QtWidgets.QMessageBox.question(
+        parent, "Quit portview", "Close all of portview's views?",
+        QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+        QtWidgets.QMessageBox.StandardButton.No)
+    if ans == QtWidgets.QMessageBox.StandardButton.Yes:
+        QtWidgets.QApplication.quit()
+
+
 class ViewWidget(QOpenGLWidget):
     def __init__(self, app, name, spec, scale, crop, layers):
         super().__init__()
@@ -2529,7 +2540,7 @@ class ViewWidget(QOpenGLWidget):
         k = ev.key()
         x = self.app.exposure
         if k == Qt.Key.Key_Q and ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            QtWidgets.QApplication.quit()     # Ctrl+Q; Qt maps the Mac's Cmd to Control
+            confirm_quit(self)                # Ctrl+Q; Qt maps the Mac's Cmd to Control
         elif k == Qt.Key.Key_H:
             self.app.hud = not self.app.hud
         elif k in (Qt.Key.Key_Plus, Qt.Key.Key_Equal):
