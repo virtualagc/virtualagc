@@ -177,9 +177,21 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
-# The other vehicles the Shuttle met, by NORAD id: their models' directories.
-OTHER_VEHICLES = {20580: "hst", 16609: "mir", 11703: "smm", 14688: "westar6", 14692: "palapab2",
-                  15643: "leasat3"}
+def vehicle_models():
+    """{key: NORAD id} for every prepared vehicle model (portview/vehicles/,
+    by fetch_assets.py) whose model.json names one."""
+    import json
+    out = {}
+    d = os.path.join(CACHE, "models")
+    for key in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        try:
+            with open(os.path.join(d, key, "model.json")) as f:
+                n = json.load(f).get('norad')
+        except (OSError, ValueError):
+            continue
+        if n:
+            out[key] = int(n)
+    return out
 GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Launch pads.  vehdyn (PASS's nav-base I-loads, CGNCOM.hal) stands the
 # stack nose up with the belly (+Z, the ET's side) north, so the port side and
@@ -2841,7 +2853,7 @@ def main(argv=None):
                     help="with --test, the orbit's altitude (default 400 km)")
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
-    ap.add_argument("--test-target", choices=['iss'] + sorted(OTHER_VEHICLES.values()), default='iss',
+    ap.add_argument("--test-target", default='iss', metavar="KEY",
                     help="with --test vbar or flyaround, the vehicle (default iss)")
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
                     help="with --test vbar or flyaround, the vehicle's distance (default 100 m); with "
@@ -2924,7 +2936,10 @@ def main(argv=None):
                 tzinfo=datetime.timezone.utc).timestamp()
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
-    target_id = {v: k for k, v in OTHER_VEHICLES.items()}.get(args.test_target, ISS_NORAD)
+    vehicles = vehicle_models()
+    if args.test_target != 'iss' and args.test_target not in vehicles:
+        sys.exit("portview: no vehicle %r (prepared: iss, %s)" % (args.test_target, ", ".join(vehicles)))
+    target_id = vehicles.get(args.test_target, ISS_NORAD)
     feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
                      args.test_range, target_id, args.test_approach, args.test_lap) if test
             else TruthFeed(args.port_base))
@@ -2933,9 +2948,8 @@ def main(argv=None):
     models = {}
     if os.path.exists(os.path.join(ISS_MODEL, "model.json")):
         models[ISS_NORAD] = Model(ISS_MODEL)
-    for norad, d in OTHER_VEHICLES.items():
-        if os.path.exists(os.path.join(CACHE, "models", d, "model.json")):
-            models[norad] = Model(os.path.join(CACHE, "models", d))
+    for key, norad in vehicles.items():
+        models[norad] = Model(os.path.join(CACHE, "models", key))
     ground = []
     if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
         lat, lon, heading = PADS[args.pad]
