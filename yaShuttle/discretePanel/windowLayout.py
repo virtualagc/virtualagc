@@ -426,6 +426,9 @@ def claim(root, delay_ms=300):
 # share one process (owner, 2026-10-02).
 PANEL_TITLE = re.compile(r"^([ACFLOR]\d{1,2}[ULR]?)$")
 PANEL_BASE_ROLES = {"panel_o6", "panel_c2", "panel_r11"}   # up from the start
+# portview.py's windows (the views out of the Orbiter's windows), by title.
+PORTVIEW_ROLES = {"CDR/PLT Forward View": "pv_front", "CDR/PLT Overhead View": "pv_up",
+                  "CDR Side View": "pv_left", "PLT Side View": "pv_right"}
 
 
 def role_of(pid, title):
@@ -433,6 +436,9 @@ def role_of(pid, title):
     m = PANEL_TITLE.match(title.strip())
     if m and (not cmd or "panelO6.py" in cmd):
         return "panel_" + m.group(1).lower(), cmd
+    # portview.py's four windows, one process: told apart by title.
+    if title.strip() in PORTVIEW_ROLES and (not cmd or "portview.py" in cmd):
+        return PORTVIEW_ROLES[title.strip()], cmd
     for pattern, name in ROLE_PATTERNS:
         m = pattern.search(cmd)
         if m:

@@ -920,7 +920,8 @@ def running_programs(port_base):
     panel.json comes up with its DEFAULTS -- POWER OFF and MODE HALT -- and
     halts the vehicle it was restored beside.
     """
-    names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py")
+    names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py",
+             "portview.py")
     found = []
     for entry, argv in _argvs():
         if not argv:
@@ -1371,6 +1372,14 @@ def main():
                          "HA,HP,INCL,NODE,ARGP,TRUEANOM for any -- km and degrees, altitudes "
                          "above the equatorial radius, node in M50.  Default 400,51.6,0,0.  "
                          "groundstation.py sv then gives PASS the same state")
+    ap.add_argument("--no-portview", dest="portview", action="store_false",
+                    help="don't start portview.py, the views out of the Orbiter's windows (by "
+                         "default it starts with the vehicle dynamics, YAGPC_VEHDYN=1, when "
+                         "it can run here: for a machine too weak to render it, or unattended "
+                         "runs)")
+    ap.add_argument("--portview-size", type=int, default=368, metavar="N",
+                    help="portview.py's --size (768 is full size; default 368, four views "
+                         "across one 1920-wide screen)")
     ap.add_argument("--truth-ball", action="store_true",
                     help="start truthball.py, a debugging attitude indicator driven "
                          "by the vehicle dynamics' truth state (needs YAGPC_MDM_DEVICES=1 "
@@ -1805,6 +1814,20 @@ def main():
         #
         # The manager is deliberately NOT in here: it is the window the
         # person is clicking, and it stays up across a resume.
+        # PORTVIEW, the views out of the windows: with the vehicle dynamics (it
+        # draws their truth) and only where it can run -- `portview.py --check`
+        # names a missing module or its missing assets in one line, cheaply.
+        start_portview = False
+        if args.portview and env.get("YAGPC_VEHDYN") == "1":
+            try:
+                chk = subprocess.run([py, os.path.join(HERE, "portview.py"), "--check"], cwd=HERE,
+                                     env=env, capture_output=True, text=True, timeout=30)
+                start_portview = chk.returncode == 0
+                if not start_portview:
+                    log((chk.stdout.strip() or "portview: not started").splitlines()[-1])
+            except (OSError, subprocess.TimeoutExpired) as e:
+                log("portview: not started -- %s" % e)
+
         def bring_up(resume=None):
             # NO PREFIX UNLESS ONE WAS ASKED FOR.  It used to name the GPCs,
             # which made every display's task-bar button read "GPCs 1,2,3,4,..."
@@ -1859,6 +1882,9 @@ def main():
             if args.truth_ball:
                 L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
                                       "--size", str(tk_px(size))], HERE, env)
+            if start_portview:
+                L.start("portview", [py, "portview.py", "--port-base", str(args.port_base),
+                                     "--size", str(args.portview_size)], HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
             # instead of the tape: --resume makes each computer load its own
@@ -2021,6 +2047,7 @@ def main():
                             "--gpcs", ",".join(map(str, gpcs)),
                             "--crts", str(args.crts),
                             "--hc-size", str(tk_px(size)),
+                            "--portview-size", str(args.portview_size),
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.
