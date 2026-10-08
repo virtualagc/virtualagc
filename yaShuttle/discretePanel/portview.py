@@ -899,7 +899,17 @@ void main() {
     float sky = dot(front, vec3(0.2126, 0.7152, 0.0722));
     vec3 c = texelFetch(uHdr, p, 0).rgb * texelFetch(uEarthTrans, p, 0).rgb
            * exp(-sky / 0.002) + front;
-    fragColor = vec4(toSrgb(c), 1.0);
+    // The screen has 8 bits a channel: a sky whose colour changes a level
+    // every few degrees shows rings at each step.  Dither it away with about
+    // a level of triangular noise, fixed to the pixel so it doesn't crawl.
+    uint h = uint(p.x) * 1973u + uint(p.y) * 9277u + 26699u;     // PCG hash
+    h = h * 747796405u + 2891336453u;
+    h = ((h >> ((h >> 28u) + 4u)) ^ h) * 277803737u;
+    h ^= h >> 22u;
+    float n1 = float(h & 0xffffu) / 65535.0, n2 = float(h >> 16u) / 65535.0;
+    vec3 o = toSrgb(c);
+    o += (n1 + n2 - 1.0) / 255.0 * step(0.5 / 255.0, max(o.r, max(o.g, o.b)));   // black stays black
+    fragColor = vec4(o, 1.0);
 }
 """
 
