@@ -240,13 +240,13 @@ EYE_FWD = _structural(520.0, 0.0, 470.0)
 #   left, right: the side windows W1/W6, 71-103 deg outboard, 6 deg up to
 #          18-28 deg down: 88 deg out, 8 deg down.
 VIEWS = {
-    'front': dict(title="Forward windows", fwd=_dir(0, -4.5), up=(0, 0, -1),
+    'front': dict(title="CDR/PLT Forward View", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
-    'up': dict(title="Overhead windows", fwd=_dir(180, 85), up=(-1, 0, 0),
+    'up': dict(title="CDR/PLT Overhead View", fwd=_dir(180, 85), up=(-1, 0, 0),
                w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
-    'left': dict(title="Left side window", fwd=_dir(-88, -8), up=(0, 0, -1),
+    'left': dict(title="CDR Side View", fwd=_dir(-88, -8), up=(0, 0, -1),
                  w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
-    'right': dict(title="Right side window", fwd=_dir(88, -8), up=(0, 0, -1),
+    'right': dict(title="PLT Side View", fwd=_dir(88, -8), up=(0, 0, -1),
                   w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
 }
 
@@ -2154,7 +2154,7 @@ class ViewWidget(QOpenGLWidget):
         self.earthFbo = self.earthTex = self.earthTransTex = None
         self.depthRb = None
         self.hdrSize = None
-        self.setWindowTitle("Portview: %s" % spec['title'])
+        self.setWindowTitle(spec['title'])
         self.resize(max(64, round(spec['w'] * scale)) + 2 * FRAME_PX,
                     max(36, round(spec['h'] * scale)) + 2 * FRAME_PX)
 
