@@ -292,9 +292,18 @@ which portview follows from TRU1's attitude with no special handling.
   [--rebuild]` prepares them, and portview draws every prepared model whose
   model.json names a NORAD id.  Each body frame is in its meta; the origin
   is the centre of mass, as a vehicle's state is.  preview.py renders one
-  from six points round a fly-around.  Hubble (20580), Mir (16609), Solar
-  Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3 (15643), and
-  the survey of the rest in vehicles/SURVEY.md.
+  from six points round a fly-around; gallery.py makes a page of them all,
+  showcase.py plays a fly-around of each.  A model may be a variant_of a
+  NORAD id instead (a vehicle met in different eras), drawn in place of
+  the usual one with --vehicle KEY (hst1990: Hubble as STS-31 deployed it).
+  Built 2026-10-08 (sub-agents, from press kits, NASA documents and the
+  flight photographs; sources in each module): Hubble after SM4, Mir as at
+  STS-91, Solar Max (STS-41C), Westar 6 and Palapa B2 (STS-51A), Leasat 3
+  (STS-51I), and the 28 others of vehicles/SURVEY.md -- every catalogued
+  LEO object the Shuttle met: LDEF, Intelsat 603, EURECA, SFU, Compton GRO,
+  UARS, the SPAS, Spartan and Wake Shield free-flyers, and the rest.
+  A vehicle's fragments write their own depth (perspective-correct), so a
+  long surface no longer lets one just behind it show through.
   `--test vbar|flyaround --test-target KEY` flies up
   to one.  Live (2026-10-08): vehdyn flies whatever YAGPC_VEHDYN_TARGETS
   lists, as point masses under its own gravity and each one's drag, from a
