@@ -21,5 +21,5 @@ def build(kit):
                                 "4.65 m forward of the aft bulkhead",
                           source="portview/vehicles/_hst_model.py: published dimensions (HST Media "
                                  "Reference Guides), procedural textures, STS-31 photographs",
-                          mag_1000km=1.5),
+                          mag_1000km=1.5, variant_of=20580),   # portview --vehicle hst1990
                 parts=parts)

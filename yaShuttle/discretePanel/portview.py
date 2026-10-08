@@ -177,20 +177,31 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
-def vehicle_models():
-    """{key: NORAD id} for every prepared vehicle model (portview/vehicles/,
-    by fetch_assets.py) whose model.json names one."""
+def vehicle_models(chosen=()):
+    """{key: NORAD id} for the prepared vehicle models (portview/vehicles/,
+    by fetch_assets.py): each whose model.json names a NORAD id, unless one
+    of chosen is a variant of the same vehicle (its model.json's
+    'variant_of', e.g. Hubble as deployed in 1990), which then stands in
+    for it."""
     import json
-    out = {}
+    out, variants = {}, {}
     d = os.path.join(CACHE, "models")
     for key in sorted(os.listdir(d)) if os.path.isdir(d) else []:
         try:
             with open(os.path.join(d, key, "model.json")) as f:
-                n = json.load(f).get('norad')
+                meta = json.load(f)
         except (OSError, ValueError):
             continue
-        if n:
-            out[key] = int(n)
+        if meta.get('norad'):
+            out[key] = int(meta['norad'])
+        elif meta.get('variant_of'):
+            variants[key] = int(meta['variant_of'])
+    for key in chosen:
+        if key not in variants:
+            sys.exit("portview: no vehicle variant %r (variants: %s)" % (key, ", ".join(sorted(variants))
+                                                                        or "none"))
+        out = {k: n for k, n in out.items() if n != variants[key]}
+        out[key] = variants[key]
     return out
 GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Launch pads.  vehdyn (PASS's nav-base I-loads, CGNCOM.hal) stands the
@@ -2855,6 +2866,9 @@ def main(argv=None):
                     help="with --test, the orbit's altitude (default 400 km)")
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
+    ap.add_argument("--vehicle", action="append", default=[], metavar="KEY",
+                    help="draw this variant of a vehicle instead of its usual model (e.g. hst1990: "
+                         "Hubble as deployed); repeatable")
     ap.add_argument("--test-target", default='iss', metavar="KEY",
                     help="with --test vbar or flyaround, the vehicle (default iss)")
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
@@ -2941,7 +2955,7 @@ def main(argv=None):
                 tzinfo=datetime.timezone.utc).timestamp()
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
-    vehicles = vehicle_models()
+    vehicles = vehicle_models(args.vehicle)
     if args.test_target != 'iss' and args.test_target not in vehicles:
         sys.exit("portview: no vehicle %r (prepared: iss, %s)" % (args.test_target, ", ".join(vehicles)))
     target_id = vehicles.get(args.test_target, ISS_NORAD)
