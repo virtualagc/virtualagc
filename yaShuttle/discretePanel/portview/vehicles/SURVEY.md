@@ -113,17 +113,17 @@ size and finish.
 |---|---|---|---|---|
 | `ldef` | 14898 | shapes; 41C/STS-32 photos | 1984 look; tray finishes a representative pattern | 38,712 |
 | `intelsat603` | 20523 | shapes; STS-49 photos | stowed, as captured (no capture bar, no new motor) | 12,492 |
-| `eureca` | 22065 | shapes; eoPortal; STS-46/57 photos | arrays folded, antennas up (STS-57); `ARRAYS_DEPLOYED = True` gives STS-46's | 9,896 |
+| `eureca` | 22065 | shapes; eoPortal; STS-46/57 photos | arrays folded, antennas up (STS-57); `ARRAYS_DEPLOYED = True` gives STS-46's | 26,896 |
 | `sfu` | 23521 | shapes; STS-72 photos | arrays jettisoned (STS-72) | 6,204 |
 | `cgro` | 21225 | shapes; GRO Prelaunch Mission Operations Report (NTRS 20050229325) drawings, STS-37 and KSC photos (Ron's collection) | deployed, as released | 26,520 |
 | `uars` | 21701 | shapes; STS-48 photos | array and HGA deployed | 12,932 |
 | `spas01` | 14142 | shapes; 41B press kit dimensions | layout representative (few photos of it exist) | 2,676 |
-| `orfeus_spas`, `orfeus_spas2` | 22798, 24661 | shapes; STS-51/80 photos | free-flying | 4,464 |
-| `crista_spas`, `crista_spas2` | 23341, 24890 | shapes; STS-66/85 photos | free-flying | 3,628 |
+| `orfeus_spas`, `orfeus_spas2` | 22798, 24661 | shapes; STS-51/80 photos, the ASTRO-SPAS carrier from Ron's collection | free-flying | 8,540 |
+| `crista_spas`, `crista_spas2` | 23341, 24890 | shapes; STS-66/85 and KSC photos (Ron's collection) | free-flying (II with IPEX-II) | 8,448 / 11,252 |
 | `wsf2`, `wsf3` | 23669, 24662 | shapes; STS-60/69 photos | free-flying | 5,800 |
 | `spartan201` ... `spartan201_5` | 22623, 23253, 23668, 25062, 25521 | NASA 3D Resources "Spartan 201", recoloured | free-flying | 30,672 |
-| `spartan207` | 23871 | Spartan carrier + shapes; STS-77 photos | IAE inflated; `IAE_ATTACHED = False` gives the bare Spartan retrieved | 11,080 |
-| `iae` | 23872 | shapes; STS-77 photos | jettisoned antenna | 3,912 |
+| `spartan207` | 23871 | Spartan carrier + shapes; STS-77 photos | IAE inflated; `IAE_ATTACHED = False` gives the bare Spartan retrieved | 13,875 |
+| `iae` | 23872 | shapes; STS-77 photos | jettisoned antenna | 5,940 |
 | `ibss` | 21244 | shapes; STS-39 photos | free-flying | 3,260 |
 | `pdp` | 15929 | shapes; 51F photos | free-flying, booms out | 2,096 |
 | `erbs` | 15354 | shapes; STS-41G and KSC photos (s84-41265/41266), NASA Langley, eoPortal (Ron's collection) | panels deployed, as released | 6,632 |
