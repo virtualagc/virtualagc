@@ -16,8 +16,10 @@ It starts simulatePASS.py and then, phase by phase:
   IMU      SPEC 104: the three IMUs to OPERATE, selected, ATT DET, selected
            again (ATT DET deselects them), GYROCOMP; about 50 minutes
   COUNT    OPS 101; the ground's GMT of liftoff 136/12:56:25 (SRB ignition
-           follows 2.8 s later) and RESUME; GO FOR AUTO SEQUENCE at T-31 s and
-           GO FOR ENGINE START at T-10 s, by the vehicle's own clock
+           follows 2.8 s later) and RESUME; ends, and is captured, at T minus
+           --count-to s (default 5 min) with the stack on the pad
+  TERMINAL GO FOR AUTO SEQUENCE at T-31 s and GO FOR ENGINE START at T-10 s,
+           by the vehicle's own clock; captured at T-8 s
   ASCENT   PASS's: RSLS, liftoff, SRB and ET separation
   OMS 2    the STS-134 Ascent Checklist's OMS 2 cards: DAP AUTO, OPS 105,
            TRIM LOAD, LOAD, TIMER, MNVR, and EXEC at TIG
@@ -87,7 +89,7 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       # soundings interpolated in time.  PASS's table is from 12Z alone, the
       # last balloon before launch (none earlier is archived for 74794).
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
-PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY", "LAND"]
+PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "TERMINAL", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY", "LAND"]
 
 IPL_SCRIPT = """
 +0     gpc 1
@@ -376,15 +378,30 @@ class Flight:
         g = int(GMTLO)
         self.say("ground: GMT of liftoff %03d/%02d:%02d:%02d (T-0 2.8 s later), count resumed"
                  % (g // 86400, g % 86400 // 3600, g % 3600 // 60, g % 60))
+        # the phase ends -- and its capture is taken -- at T - --count-to s, so
+        # that --from TERMINAL restores a stack sitting on the pad with the
+        # count running, for as long as a viewer wants to watch it there
+        self.wait_gmt(T0 - self.a.count_to)
+        self.say("count: T-%.0f s" % self.a.count_to)
+
+    def terminal(self):
+        """The ground's last two calls, by the vehicle's own clock; a call
+        whose time has already passed (a capture restored later) is skipped."""
+        if self.truth()["gmt"] > T0 - 31.0:
+            self.say("terminal: restored after T-31 s; GO FOR AUTO SEQUENCE not sent")
+        else:
         # the GLS's own times (KLO-82-0071 App A): GO FOR AUTO SEQUENCE at
         # T-31 s -- PASS acts on it from GMTLO - 25 s, CGSV_LPS_GO_AUTO_SEQ_TIME
         # -- and GO FOR ENGINE START at about T-10 s
-        self.wait_gmt(T0 - 31.0)
-        crewscript.send_lps("go_auto", self.base)
-        self.say("ground: GO FOR AUTO SEQUENCE (T-31 s)")
-        self.wait_gmt(T0 - 10.0)
-        crewscript.send_lps("go_engine", self.base)
-        self.say("ground: GO FOR ENGINE START (T-10 s)")
+            self.wait_gmt(T0 - 31.0)
+            crewscript.send_lps("go_auto", self.base)
+            self.say("ground: GO FOR AUTO SEQUENCE (T-31 s)")
+        if self.truth()["gmt"] > T0 - 10.0:
+            self.say("terminal: restored after T-10 s; GO FOR ENGINE START not sent")
+        else:
+            self.wait_gmt(T0 - 10.0)
+            crewscript.send_lps("go_engine", self.base)
+            self.say("ground: GO FOR ENGINE START (T-10 s)")
         self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
@@ -701,6 +718,9 @@ class Flight:
         start = PHASES.index(self.a.from_) if self.a.from_ else 0
         resume = (os.path.join(self.a.logs, FL["name"] + "-" + PHASES[start - 1].lower())
                   if start else None)
+        if resume and not os.path.isdir(resume) and PHASES[start - 1] == "TERMINAL":
+            # a run made before TERMINAL existed: its COUNT capture is at T-7 s
+            resume = os.path.join(self.a.logs, FL["name"] + "-count")
         if self.a.attach:
             self.say("attached to the vehicle already running on port base %d" % self.base)
         else:
@@ -724,6 +744,9 @@ def main():
                     help="simulated seconds per wall second (simulatePASS --rt-factor); 2 is "
                          "measured clean for one GPC on orbit")
     ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
+    ap.add_argument("--count-to", type=float, default=300.0,
+                    help="COUNT ends, and is captured, this many seconds before T-0 (default 300); "
+                         "--from TERMINAL then restores the stack on the pad with the count running")
     ap.add_argument("--reuplink", action="store_true",
                     help="with --from COUNT: send the DOLILU again before OPS 101")
     ap.add_argument("--to", choices=PHASES,
