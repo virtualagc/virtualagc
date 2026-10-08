@@ -187,8 +187,10 @@ GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # -90 deg (its north to the west); GANTRY_STACK is where, in its own frame,
 # the ET's axis stands (estimated: FSS centre +26 m to the hatch, the hatch
 # 2.2 m west of the Orbiter's line, that line 9.1 m south of the ET's axis).
-# Each pad: the ET axis's place (lat, lon, deg), from the nav base (28.608423 N,
-# 80.604086 W for 39A) plus 9.12 m north; and the model's heading.
+# Each pad: the ET axis's place (lat, lon, deg) and the model's heading.  For
+# 39A, vehdyn's nav base (PAD_LAT_RAD 0.49931150, PAD_LON_RAD -1.4068068:
+# 28.6084416 N, 80.6040922 W, on PASS's ellipsoid) plus 9.12 m north, the
+# Orbiter's line to the ET's axis.  vehdyn has no 39B; that one is approximate.
 GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
 # The model's base is the pad's surface, 48 ft above sea level (the pads are
 # raised 15 m on their hardstands; its MLP deck, on 22 ft pedestals and 25 ft
@@ -197,7 +199,7 @@ GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
 # ~29 m below the ellipsoid).  Over the flat ground drawn at the site's height
 # the pad's mound isn't modelled, so the gantry stands on a 12 m step.
 PAD_SURFACE_M = 48 * 0.3048
-PADS = {'lc39a': (28.608505, -80.604086, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
+PADS = {'lc39a': (28.608524, -80.604092, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
 NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
@@ -1533,6 +1535,20 @@ OZONE = np.array([0.650e-6, 1.881e-6, 0.085e-6])        # absorption, 1/m
 TRANS_W, TRANS_H = 256, 64
 
 
+def height_above_ellipsoid(r):
+    """Height (m) of Earth-fixed r above PASS's ellipsoid (Bowring, one step:
+    good to millimetres from the ground to orbit)."""
+    e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
+    ep2 = (EARTH_A / EARTH_B) ** 2 - 1.0
+    p = math.hypot(r[0], r[1])
+    th = math.atan2(r[2] * EARTH_A, p * EARTH_B)
+    lat = math.atan2(r[2] + ep2 * EARTH_B * math.sin(th) ** 3, p - e2 * EARTH_A * math.cos(th) ** 3)
+    N = EARTH_A / math.sqrt(1.0 - e2 * math.sin(lat) ** 2)
+    if abs(lat) < 1.0:
+        return p / math.cos(lat) - N
+    return r[2] / math.sin(lat) - N * (1.0 - e2)
+
+
 def transmittance_table():
     """Transmittance to the top of the atmosphere, over (mu, r) in Bruneton
     and Neyret's mapping, RGB float32, rows by r."""
@@ -2404,7 +2420,8 @@ class Portview(object):
             s += "  " + time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(fs.unix))
         else:
             s += "  NO DATE (Sun, Moon, planets hidden)"
-        s += "  alt %7.1f km" % ((np.linalg.norm(fs.r) - 6378137.0) / 1000.0)
+        s += "  alt %7.1f km" % (height_above_ellipsoid(
+            fs.r if fs.m50_to_ef is None else fs.m50_to_ef @ fs.r) / 1000.0)
         s += "  EV %+.2f  Milky Way x%.2f" % (self.exposure.ev, self.exposure.milkyway)
         if fs.stale:
             s += "  STALE"
