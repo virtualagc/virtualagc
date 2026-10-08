@@ -344,12 +344,22 @@ static void qmat_body(const double q[4], double R[3][3]);
  * estimates, said so.
  * ===================================================================== */
 
-/* -- the pad: the flight software's own nav-base I-loads (CGGS_NAVBASE_LAT,
- * _LONG, _ALT in memory, CGNCOM.hal:208-213), so that its navigation, which
- * starts from them, starts from the truth.  Geodetic, WGS-84 here. */
+/* -- the pad: the flight software's own nav-base I-loads for latitude and
+ * longitude (CGGS_NAVBASE_LAT, _LONG, CGNCOM.hal:208-213; CGNS_NAV_PAD_DATA(1),
+ * LC-39A), so that its navigation starts there.  THE HEIGHT IS NOT PASS'S:
+ * NAVBASE_ALT_ZERO, "altitude of vehicle navigation base at reference point
+ * on pad" (STS 83-0005-34 Table 4.1.1-2, ft above PASS's ellipsoid), is -2.4 ft
+ * in the flown load (all three DASS G9 dumps) -- ground level -- while the nav
+ * base really stood about 62 m up: 113 ft above the MLP deck (a photograph of
+ * Endeavour scaled by its SRB), plus the 47 ft MLP and the 48 ft pad, in the
+ * sea-level convention PASS's other site heights use (the SLF 8.3 ft).  The
+ * truth stands where the vehicle stood; PASS keeps its flown I-load and so
+ * starts with the 62 m altitude error the real one did (ledger: pad nav-base
+ * height).  YAGPC_VEHDYN_PAD_ALT (m) overrides; -0.73152 is PASS's own. */
 #define PAD_LAT_RAD      0.49931150
 #define PAD_LON_RAD      (-1.4068068)
-#define PAD_ALT_M        (-2.4 * 0.3048)
+#define PAD_ALT_M_DEFAULT 62.0
+static double padAltM = PAD_ALT_M_DEFAULT;
 /* The orbiter's heading on the pad: the azimuth (deg from north, toward
  * east) of body +Z, the belly, which faces the tank.  "-Z body points
  * south" (JSC-14483 Vol 3, STS-1 Ascent OFP, 4.2.1.21): belly north, 0.
@@ -1507,16 +1517,18 @@ static void pad_init(double t) {
     flight_params();
     const char *az = yagpc_getenv("YAGPC_VEHDYN_PAD_AZ");
     if (az != NULL) padAz = atof(az);
+    const char *alt = yagpc_getenv("YAGPC_VEHDYN_PAD_ALT");
+    if (alt != NULL) padAltM = atof(alt);
     /* ON PASS'S OWN ELLIPSOID, as GNKGEO.hal converts the same I-loads: the
      * equatorial radius 20,925,646.3255 ft (CGNS_EARTH_EQU_RADIUS_D) and
-     * flattening 1/298.3 -- so that the truth's nav base is exactly where
-     * PASS's navigation starts it (WGS-84 put it 9 ft away). */
+     * flattening 1/298.3 -- so that the truth's nav base is exactly above
+     * where PASS's navigation starts it (WGS-84 put it 9 ft away). */
     double a = 20925646.3255 * 0.3048, f = 1.0 / 298.3, e2 = f * (2.0 - f);
     double sl = sin(PAD_LAT_RAD), cl = cos(PAD_LAT_RAD), so = sin(PAD_LON_RAD), co = cos(PAD_LON_RAD);
     double N = a / sqrt(1.0 - e2 * sl * sl);
-    padR[0] = (N + PAD_ALT_M) * cl * co;
-    padR[1] = (N + PAD_ALT_M) * cl * so;
-    padR[2] = (N * (1.0 - e2) + PAD_ALT_M) * sl;
+    padR[0] = (N + padAltM) * cl * co;
+    padR[1] = (N + padAltM) * cl * so;
+    padR[2] = (N * (1.0 - e2) + padAltM) * sl;
     double up[3] = { cl * co, cl * so, sl }, east[3] = { -so, co, 0.0 },
            north[3] = { -sl * co, -sl * so, cl };
     double A = padAz * VD_PI / 180.0, zb[3], yb[3];
@@ -1533,8 +1545,9 @@ static void pad_init(double t) {
     phys_set_drag(0.0, 0.0, 0.0, 0.0);           /* the stack's air is ascent_loads' */
     mass_properties();
     pad_state(t);
-    fprintf(stderr, "vehdyn: the stack is on the pad at %.5f N %.5f E, belly toward %.0f deg; "
-                    "%.0f kg\n", PAD_LAT_RAD * 180 / VD_PI, PAD_LON_RAD * 180 / VD_PI, padAz, st.mass);
+    fprintf(stderr, "vehdyn: the stack is on the pad at %.5f N %.5f E, nav base %.2f m up, belly toward "
+                    "%.0f deg; %.0f kg\n", PAD_LAT_RAD * 180 / VD_PI, PAD_LON_RAD * 180 / VD_PI, padAltM,
+                    padAz, st.mass);
 }
 
 /* The events that change what the vehicle is, as the MECs fire them. */
