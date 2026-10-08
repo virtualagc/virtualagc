@@ -672,6 +672,79 @@ def prepare_site_patches(key):
             json.dump(meta, fp, indent=1)
 
 
+DEM_URL = ("https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/"
+           "exportImage?bbox=%.7f,%.7f,%.7f,%.7f&bboxSR=4326&imageSR=4326&size=%d,%d"
+           "&format=tiff&pixelType=F32&noData=-9999&interpolation=RSP_BilinearInterpolation&f=image")
+DEM_PX = 2048
+
+
+def fetch_heights(bounds, n):
+    """USGS 3DEP's bare-earth heights (m, NAVD88: sea level, as PASS's site
+    heights are) over a box, n x n, rows north first; 0 where it has none
+    (the sea, other countries)."""
+    import io
+    import certifi
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    Image = _image()
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(DEM_URL % (tuple(bounds) + (n, n)), context=ctx, timeout=300) as r:
+                data = r.read()
+            break
+        except Exception as e:                  # noqa: BLE001 -- the service is flaky
+            print("  retrying (%s)" % e)
+    else:
+        sys.exit("fetch_assets: could not fetch 3DEP heights")
+    # A tiled, uncompressed float TIFF, which Pillow's float decoder mangles:
+    # assembled here from its tiles.
+    im = Image.open(io.BytesIO(data))
+    order = '<f4' if data[:2] == b'II' else '>f4'
+    w, h = im.size
+    out = np.zeros((h + 512, w + 512), np.float32)
+    for t in im.tile:
+        if t.codec_name != 'raw':
+            sys.exit("fetch_assets: 3DEP sent %s-compressed tiles" % t.codec_name)
+        x0, y0, x1, y1 = t.extents
+        tw, th = x1 - x0, y1 - y0
+        if t.offset == 0:                       # a tile with no data at all: left out
+            continue
+        out[y0:y0 + th, x0:x0 + tw] = np.frombuffer(data[t.offset:t.offset + tw * th * 4], order).reshape(th, tw)
+    out = out[:h, :w]
+    out[~np.isfinite(out) | (out < -100.0) | (out > 9000.0)] = 0.0     # its no-data, -9999
+    return out
+
+
+def prepare_site_heights(key):
+    """The ground's heights under a site's rings 0-2 (3DEP), for portview's
+    terrain: the launch pads' mounds, and the mountains round Edwards and
+    White Sands."""
+    import json
+    d = os.path.join(CACHE, "sites", key)
+    meta_path = os.path.join(d, "ring.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if not meta.get('heights'):
+        files = []
+        for k in range(3):
+            b = meta['rings'][k]['bounds']
+            print("site %s heights %d: +-%g km from 3DEP" % (key, k, meta['rings'][k]['half_km']))
+            f = "height%d.npy" % k
+            np.save(os.path.join(d, f), fetch_heights(b, DEM_PX))
+            files.append(f)
+        meta['heights'] = files
+    # And finer under the launch pads (their mounds, ~2 m).
+    for name, pa in meta.get('patches', {}).items():
+        if 'height' not in pa:
+            print("site %s heights under %s: +-%g km from 3DEP" % (key, name, pa['half_km']))
+            f = "height_%s.npy" % name
+            np.save(os.path.join(d, f), fetch_heights(pa['bounds'], 1024))
+            pa['height'] = f
+    with open(meta_path, "w") as fp:
+        json.dump(meta, fp, indent=1)
+
+
 def rematch_site(key):
     """Match a prepared site's rings' colours again (as match_colours now
     does), from the coarsest inward, then its fine patches; no downloads."""
@@ -736,6 +809,7 @@ def main():
         prepare_site(key)
         prepare_site_fine(key)
         prepare_site_patches(key)
+        prepare_site_heights(key)
     print("portview assets ready in", CACHE)
 
 

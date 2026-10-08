@@ -990,6 +990,7 @@ def load_rgb(path):
 # half size and DXT1-compressed, the Milky Way at half size (about 0.5 GB).
 # Unified-memory GPUs (Apple, Intel) report nothing and get 'full'.
 TEXTURES = {'mode': 'full'}
+TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 
 
@@ -1062,6 +1063,20 @@ def make_mask_texture(a):
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT)
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)
+    return tid
+
+
+def make_height_array(layers):
+    """Heights (n, h, w float32) as an R32F texture array, linear, clamped."""
+    n, h, w = layers.shape
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D_ARRAY, tid)
+    GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+    GL.glTexImage3D(GL.GL_TEXTURE_2D_ARRAY, 0, GL.GL_R32F, w, h, n, 0, GL.GL_RED, GL.GL_FLOAT,
+                    np.ascontiguousarray(layers, dtype=np.float32))
+    for p, v in ((GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR), (GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR),
+                 (GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE), (GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)):
+        GL.glTexParameteri(GL.GL_TEXTURE_2D_ARRAY, p, v)
     return tid
 
 
@@ -1166,7 +1181,9 @@ class Resources(object):
                                "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit", "uMoonGain",
                                "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
-                               "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2")
+                               "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2",
+                               "uHgtOn", "uHgt", "uHgtP", "uPatchHgt", "uSiteEF", "uSiteH",
+                               "uInvR", "uHgtMax")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -1179,6 +1196,24 @@ class Resources(object):
             self.patchTex = [make_ring_texture(img, compress=False)
                              for img in self.site.patch_images]
             self.site.images = self.site.patch_images = None
+        # The ground's heights; a 1-texel array stands in where there are none
+        # (each sampler must still name a unit of its own type).
+        empty = np.zeros((1, 1, 1), np.float32)
+        site = self.site
+        self.hgtTex = make_height_array(site.heights if site is not None and site.heights is not None
+                                        else empty)
+        self.hgtMax = float(site.heights.max()) + 1.0 if site is not None and site.heights is not None else 0.0
+        self.patchHgtLayer = [-1, -1, -1]
+        ph = [] if site is None else [a for a in site.patch_heights if a is not None]
+        if site is not None:
+            k = 0
+            for i, a in enumerate(site.patch_heights):
+                if a is not None:
+                    self.patchHgtLayer[i] = k
+                    self.hgtMax = max(self.hgtMax, float(a.max()) + 1.0)
+                    k += 1
+            site.heights = site.patch_heights = None
+        self.hgtPTex = make_height_array(np.stack(ph) if ph else empty)
         self.earthDayTex = None
         self.earthMonth = None
         self.modelProg = compile_program(MODEL_VS, MODEL_FS)
@@ -1601,6 +1636,15 @@ uniform sampler2D uRing0, uRing1, uRing2, uRing3;
 uniform int uPatchCount;
 uniform vec4 uPatch[3];         // as uRingNear
 uniform sampler2D uPatch0, uPatch1, uPatch2;
+// The ground's heights (m from the site's height), on rings 0-2's footprints
+// (layers 0-2) and under some patches (uPatchHgt: a layer of uHgtP, or -1).
+uniform int uHgtOn;
+uniform sampler2DArray uHgt, uHgtP;
+uniform int uPatchHgt[3];
+uniform vec3 uSiteEF;           // the site, Earth-fixed (float: ring 2's placing only)
+uniform float uSiteH;           // the site's height above sea level, m
+uniform vec2 uInvR;             // 1 / (2 x the radii of curvature east and north), at the site
+uniform float uHgtMax;          // the highest ground, m from the site's height
 const float PI = 3.14159265358979;
 const float R_SUN = 6.957e8, R_MOON = 1.7374e6, AU = 1.495978707e11;
 // The fraction of a disk of angular radius a uncovered by a disk of radius b,
@@ -1699,6 +1743,69 @@ vec3 siteImagery(vec3 albedo, float lon, float lat, vec3 enu, float water) {
     return c;
 }
 
+// The ground's height at a point (east, north, up from the site; m from the
+// site's height): the finest map there, blended at the rings' edges as the
+// imagery is; sea level beyond ring 2.
+float terrain(vec3 enu) {
+    vec3 ef = uSiteEF + transpose(uEfToEnu) * enu;
+    float lon = atan(ef.y, ef.x), lat = atan(ef.z, (1.0 - E2) * length(ef.xy));
+    vec2 uv2 = vec2((lon - uRingFar[0].x) / (uRingFar[0].z - uRingFar[0].x),
+                    (uRingFar[0].w - lat) / (uRingFar[0].w - uRingFar[0].y));
+    vec2 uv1 = uRingNear[1].xy + vec2(enu.x * uRingNear[1].z, -enu.y * uRingNear[1].w);
+    vec2 uv0 = uRingNear[0].xy + vec2(enu.x * uRingNear[0].z, -enu.y * uRingNear[0].w);
+    float h = -uSiteH;
+    h = mix(h, textureLod(uHgt, vec3(uv2, 2.0), 0.0).r, ringWeight(uv2));
+    h = mix(h, textureLod(uHgt, vec3(uv1, 1.0), 0.0).r, ringWeight(uv1));
+    h = mix(h, textureLod(uHgt, vec3(uv0, 0.0), 0.0).r, ringWeight(uv0));
+    for (int i = 0; i < 3; i++) {
+        if (i >= uPatchCount || uPatchHgt[i] < 0) continue;
+        vec2 uvP = uPatch[i].xy + vec2(enu.x * uPatch[i].z, -enu.y * uPatch[i].w);
+        h = mix(h, textureLod(uHgtP, vec3(uvP, float(uPatchHgt[i])), 0.0).r, ringWeight(uvP));
+    }
+    return h;
+}
+
+// The ray's height over the site's level: up, plus the ground's fall away
+// from the tangent plane with distance.
+float rayHeight(vec3 p) {
+    return p.z + p.x * p.x * uInvR.x + p.y * p.y * uInvR.y;
+}
+
+// Where the ray from the eye (uCamEnu) along dE (east, north, up) meets the
+// ground, no farther than tFar (m): a march, its steps no longer than the gap
+// to the ground could close in (ground slopes to 1:2.5, or ~2% of the range),
+// then bisection.  The slope there (dh/dEast, dh/dNorth) for the shading.
+bool terrainHit(vec3 dE, float tFar, out float tHit, out vec2 slope) {
+    float t = 0.0, tPrev = 0.0;
+    tHit = 0.0;
+    slope = vec2(0.0);
+    vec3 p = uCamEnu;
+    if (rayHeight(p) - terrain(p) < 0.0) return false;   // below it (map error): ignore it
+    bool hit = false;
+    for (int i = 0; i < 200; i++) {
+        p = uCamEnu + t * dE;
+        float hr = rayHeight(p), gap = hr - terrain(p);
+        if (gap < 0.0) { hit = true; break; }
+        float dU = dE.z + 2.0 * (p.x * dE.x * uInvR.x + p.y * dE.y * uInvR.y);
+        if ((hr > uHgtMax && dU >= 0.0) || t > tFar) return false;
+        tPrev = t;
+        t += max(gap / (0.4 + max(-dU, 0.0)), max(0.5, 0.02 * t));
+    }
+    if (!hit) return false;
+    float lo = tPrev, hi = t;
+    for (int i = 0; i < 8; i++) {
+        float mid = 0.5 * (lo + hi);
+        vec3 q = uCamEnu + mid * dE;
+        if (rayHeight(q) - terrain(q) < 0.0) hi = mid; else lo = mid;
+    }
+    tHit = 0.5 * (lo + hi);
+    vec3 q = uCamEnu + tHit * dE;
+    float e = clamp(0.002 * tHit, 2.0, 300.0);
+    slope = vec2(terrain(q + vec3(e, 0.0, 0.0)) - terrain(q - vec3(e, 0.0, 0.0)),
+                 terrain(q + vec3(0.0, e, 0.0)) - terrain(q - vec3(0.0, e, 0.0))) / (2.0 * e);
+    return true;
+}
+
 vec3 transmittance(float r, float mu) {     // to the top of the atmosphere
     float H = sqrt(RT * RT - RG * RG);
     float rho = sqrt(max(r * r - RG * RG, 0.0));
@@ -1732,6 +1839,19 @@ void main() {
     float discG = b * b - uCGround;
     float tg = uCGround / max(-b + sqrt(max(discG, 0.0)), 1e-6);
     bool ground = discG >= 0.0 && b < 0.0 && uCGround > 0.0;
+    // Near a site with its ground's heights, the ground is that (uCGround is
+    // then sea level's, beyond them); scaled-space distance = true x kd.
+    vec2 slope = vec2(0.0);
+    if (uHgtOn == 1) {
+        float kd = length(dirEF * vec3(1.0, 1.0, K));
+        float tHit;
+        vec2 sl;
+        if (terrainHit(uEfToEnu * dirEF, ground ? tg / kd : 6.0e5, tHit, sl)) {
+            tg = tHit * kd;
+            ground = true;
+            slope = sl;
+        }
+    }
     vec3 rel = max(tg, 0.0) * d * vec3(1.0, 1.0, 1.0 / K);     // eye to ground, Earth-fixed
     vec3 pg = uOrigin + rel;                                     // Earth-fixed
     float lon = atan(pg.y, pg.x);
@@ -1773,6 +1893,8 @@ void main() {
     vec3 color = inscat * uSunE;
     if (ground) {
         vec3 n = normalize(vec3(pg.xy, pg.z * K * K));        // geodetic normal
+        mat3 enuToEf = transpose(uEfToEnu);                    // tilted by the ground's slope
+        n = normalize(n - slope.x * enuToEf[0] - slope.y * enuToEf[1]);
         float mus = dot(n, uSun);
         vec3 ts = sunlight(RG, dot(normalize(o + tg * d), sun));
         vec3 toMoon = uMoonEF - pg;
@@ -1882,6 +2004,14 @@ class Site(object):
         patches = patches[:3]
         self.patches = np.array([near_map(p['bounds']) for p in patches]).reshape(-1, 4)
         self.patch_images = [load_rgb(os.path.join(path, p['file'])) for p in patches]
+        # The ground's heights (3DEP, sea level) under rings 0-2 and some
+        # patches, as metres from the site's height; None without them.
+        self.inv_r = (0.5 / (Nr + h), 0.5 / (Mr + h))
+        self.heights = None
+        if meta.get('heights') and TERRAIN['on']:
+            self.heights = np.stack([np.load(os.path.join(path, f)) for f in meta['heights']]) - h
+        self.patch_heights = [np.load(os.path.join(path, p['height'])) - h
+                              if TERRAIN['on'] and p.get('height') else None for p in patches]
 
 
 class EarthLayer(object):
@@ -1920,7 +2050,12 @@ class EarthLayer(object):
         o_ef = m @ eye
         o_s = o_ef * np.array([1.0, 1.0, EARTH_A / EARTH_B])
         site = res.site
-        ground_r = EARTH_A + (site.height if site is not None else 0.0)
+        # The ground's heights near the site, while the eye is within ~60 km
+        # of the ground there (from higher, the relief is a few pixels).
+        terrain = (site is not None and res.hgtMax != 0.0
+                   and np.linalg.norm(site.ef_to_enu @ (m @ eye - site.ef)) < 6.5e5
+                   and (site.ef_to_enu @ (m @ eye - site.ef))[2] < 6.0e4)
+        ground_r = EARTH_A + (site.height if site is not None and not terrain else 0.0)
         GL.glUniform1f(U["uCTop"], float(o_s @ o_s - (EARTH_A + ATMOS_TOP) ** 2))
         GL.glUniform1f(U["uCGround"], float(o_s @ o_s - ground_r ** 2))
         GL.glUniform1i(U["uSiteOn"], 1 if site is not None else 0)
@@ -1929,6 +2064,12 @@ class EarthLayer(object):
             GL.glUniformMatrix3fv(U["uEfToEnu"], 1, GL.GL_TRUE, site.ef_to_enu.astype(f32))
             GL.glUniform4fv(U["uRingNear"], 2, site.near.astype(f32))
             GL.glUniform4fv(U["uRingFar"], 2, site.far.astype(f32))
+            GL.glUniform1i(U["uHgtOn"], 1 if terrain else 0)
+            GL.glUniform3fv(U["uSiteEF"], 1, site.ef.astype(f32))
+            GL.glUniform1f(U["uSiteH"], site.height)
+            GL.glUniform2f(U["uInvR"], *site.inv_r)
+            GL.glUniform1f(U["uHgtMax"], res.hgtMax)
+            GL.glUniform1iv(U["uPatchHgt"], 3, np.array(res.patchHgtLayer, np.int32))
             for k in range(4):
                 GL.glActiveTexture(GL.GL_TEXTURE4 + k)
                 GL.glBindTexture(GL.GL_TEXTURE_2D, res.ringTex[k])
@@ -1950,6 +2091,14 @@ class EarthLayer(object):
             for k in range(3):
                 GL.glUniform1i(U["uPatch%d" % k], 3)
             GL.glUniform1i(U["uPatchCount"], 0)
+        if site is None:
+            GL.glUniform1i(U["uHgtOn"], 0)
+        GL.glActiveTexture(GL.GL_TEXTURE11)
+        GL.glBindTexture(GL.GL_TEXTURE_2D_ARRAY, res.hgtTex)
+        GL.glUniform1i(U["uHgt"], 11)
+        GL.glActiveTexture(GL.GL_TEXTURE12)
+        GL.glBindTexture(GL.GL_TEXTURE_2D_ARRAY, res.hgtPTex)
+        GL.glUniform1i(U["uHgtP"], 12)
         GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
@@ -2505,6 +2654,8 @@ def main(argv=None):
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none)")
+    ap.add_argument("--terrain", choices=('on', 'off'), default='on',
+                    help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--textures", choices=('auto', 'full', 'reduced'), default='auto',
                     help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
                          "compressed), or auto: reduced on a GPU with under 3 GB of its own "
@@ -2578,6 +2729,7 @@ def main(argv=None):
     stars = np.load(HIPPARCOS)
     moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
     site = None
+    TERRAIN['on'] = args.terrain == 'on'
     if args.site != 'none':
         path = os.path.join(SITES_DIR, args.site)
         if os.path.exists(os.path.join(path, "ring.json")):
