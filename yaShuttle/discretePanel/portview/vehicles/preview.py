@@ -39,11 +39,10 @@ def main():
     tmp = tempfile.mkdtemp()
     frames = []
     for deg in (0, 60, 120, 180, 240, 300):
-        # portview snaps its first second: the lap that puts it deg round then
-        lap = 1e9 if deg == 0 else 360.0 / deg
         pre = os.path.join(tmp, "f%d" % deg)
         subprocess.run([sys.executable, os.path.join(PANEL, "portview.py"), "--test", "flyaround",
-                        "--test-target", a.key, "--test-range", "%g" % rng, "--test-lap", "%g" % lap,
+                        "--test-target", a.key, "--test-range", "%g" % rng, "--test-lap", "1e9",
+                        "--test-phase", "%g" % deg,
                         "--test-date", "2011-05-18T08:30", "--test-lon", "-30", "--views", "up",
                         "--size", str(a.size), "--snapshot", pre],
                        cwd=PANEL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)

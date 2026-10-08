@@ -662,12 +662,14 @@ class TestFeed(TruthFeed):
     APPROACH_TAU_S = 1000.0
 
     def __init__(self, mode, rate=1.0, unix0=None, ephemeris=None, alt_km=400.0, lon=None,
-                 target_range=100.0, target_id=ISS_NORAD, approach_from=None, lap_s=5400.0):
+                 target_range=100.0, target_id=ISS_NORAD, approach_from=None, lap_s=5400.0,
+                 phase_deg=0.0):
         QtCore.QObject.__init__(self)
         self.targets = {}
         self.target_range = target_range
         self.approach_from = approach_from
         self.lap_s = lap_s
+        self.phase_deg = phase_deg
         self.target_id = target_id
         self.unix0 = time.time() if unix0 is None else unix0
         if isinstance(mode, str) and mode not in ('lvlh', 'baydown', 'hover', 'vbar', 'flyaround'):
@@ -707,7 +709,7 @@ class TestFeed(TruthFeed):
         up over the top."""
         z = -unit(r)
         x = np.cross(unit(np.cross(v, r)), z)
-        th = 2.0 * math.pi / self.lap_s * t
+        th = 2.0 * math.pi / self.lap_s * t + math.radians(self.phase_deg)
         return -(math.cos(th) * x + math.sin(th) * z)
 
     def _target_at(self, t):
@@ -2858,6 +2860,9 @@ def main(argv=None):
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
                     help="with --test vbar or flyaround, the vehicle's distance (default 100 m); with "
                          "--test-approach, where the approach stops and station-keeping begins")
+    ap.add_argument("--test-phase", type=float, default=0.0, metavar="DEG",
+                    help="with --test flyaround, where round the circle to start (deg; 0 ahead "
+                         "on the +V-bar, 90 below)")
     ap.add_argument("--test-lap", type=float, default=5400.0, metavar="S",
                     help="with --test flyaround, the seconds a lap (default 5400)")
     ap.add_argument("--test-approach", type=float, metavar="M",
@@ -2941,7 +2946,8 @@ def main(argv=None):
         sys.exit("portview: no vehicle %r (prepared: iss, %s)" % (args.test_target, ", ".join(vehicles)))
     target_id = vehicles.get(args.test_target, ISS_NORAD)
     feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
-                     args.test_range, target_id, args.test_approach, args.test_lap) if test
+                     args.test_range, target_id, args.test_approach, args.test_lap,
+                     args.test_phase) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
