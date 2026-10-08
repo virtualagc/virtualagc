@@ -526,14 +526,16 @@ MODELS = {
 # STS-51I).  Approximate -- shapes and colours, not details.  Each: name,
 # NORAD id, frame, brightness, parts (material, rgb, shape, dimensions, m):
 # 'cyl' (radius, x0, x1) along +X; 'cone' (r0, r1, x0, x1); 'box' (centre,
-# size); 'disc' (radius, x) facing +X.
+# size); 'disc' (radius, x) facing +X.  A disc on a cylinder's end stands
+# 5 mm off its cap: in the cap's plane the two fought for the depth, and
+# the end flashed in wedges of both colours.
 HS376 = (('solar drum', (0.04, 0.05, 0.10), 'cyl', (1.08, -1.41, 0.40)),
          ('solar skirt', (0.04, 0.05, 0.10), 'cyl', (1.07, 0.40, 1.41)),
-         ('forward barrier', (0.75, 0.62, 0.30), 'disc', (1.08, 1.41)),
+         ('forward barrier', (0.75, 0.62, 0.30), 'disc', (1.08, 1.415)),
          ('antenna mast', (0.80, 0.80, 0.80), 'cyl', (0.25, 1.41, 2.10)),
          ('stowed reflector', (0.85, 0.85, 0.85), 'cyl', (0.85, 1.80, 1.95)),
          ('apogee motor nozzle', (0.25, 0.25, 0.25), 'cone', (0.20, 0.45, -1.41, -2.00)),
-         ('aft barrier', (0.75, 0.62, 0.30), 'disc', (1.08, -1.41)))
+         ('aft barrier', (0.75, 0.62, 0.30), 'disc', (1.08, -1.415)))
 PROCEDURAL = {
     'westar6': dict(norad=14688, name="Westar 6 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
                     frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
@@ -542,8 +544,8 @@ PROCEDURAL = {
     'leasat3': dict(norad=15643, name="Leasat 3 (Syncom IV; approximate)", mag_1000km=2.0,
                     frame="Leasat: +X along the spin axis toward the antennas; m; mid-drum",
                     parts=(('solar drum', (0.04, 0.05, 0.10), 'cyl', (2.13, -1.40, 1.40)),
-                           ('forward deck', (0.80, 0.80, 0.80), 'disc', (2.13, 1.40)),
-                           ('aft deck', (0.75, 0.62, 0.30), 'disc', (2.13, -1.40)),
+                           ('forward deck', (0.80, 0.80, 0.80), 'disc', (2.13, 1.405)),
+                           ('aft deck', (0.75, 0.62, 0.30), 'disc', (2.13, -1.405)),
                            ('UHF helix', (0.85, 0.85, 0.85), 'cyl', (0.30, 1.40, 3.30)),
                            ('UHF dish', (0.90, 0.90, 0.90), 'cone', (0.15, 0.85, 1.40, 1.80)),
                            ('omni', (0.80, 0.80, 0.80), 'cyl', (0.06, 3.30, 3.90)),
@@ -552,7 +554,7 @@ PROCEDURAL = {
                 frame="SMM: +X along the instruments' axis (toward the Sun); m; mid-length",
                 parts=(('MMS bus', (0.80, 0.80, 0.78), 'cyl', (1.15, -2.00, -0.50)),
                        ('instrument module', (0.75, 0.62, 0.30), 'cyl', (1.00, -0.50, 2.00)),
-                       ('Sun end', (0.20, 0.20, 0.20), 'disc', (1.00, 2.00)),
+                       ('Sun end', (0.20, 0.20, 0.20), 'disc', (1.00, 2.005)),
                        ('solar array +Y', (0.04, 0.05, 0.10), 'box', ((-1.2, 3.3, 0.0), (1.5, 4.2, 0.04))),
                        ('solar array -Y', (0.04, 0.05, 0.10), 'box', ((-1.2, -3.3, 0.0), (1.5, 4.2, 0.04))),
                        ('high-gain mast', (0.80, 0.80, 0.80), 'cyl', (0.05, -2.00, -3.20)),
