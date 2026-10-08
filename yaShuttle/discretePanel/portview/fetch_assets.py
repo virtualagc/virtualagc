@@ -607,6 +607,188 @@ def prepare_model(key, keep):
         os.remove(src)
 
 
+ISS2011_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res)/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res).7z")
+# What IGOAL lacks for May 2011, from JSC's VCL "ISS 2011" LightWave models
+# (inches, left-handed): each vehicle's file; the direction from its body to
+# its docking probe and a direction across it (its solar wings), in its own
+# axes made right-handed (z negated); the port, the direction from the port
+# into the station, and where the across-direction points (ISS frame, m).
+# Ports from IGOAL's own modules: Rassvet's nadir and Poisk's zenith drogues;
+# Zvezda's aft port; Zvezda's nadir port where IGOAL's Nauka (2021) has its
+# probe, Pirs's place until 2021.  The probe goes 0.35 m into a drogue.
+ISS_VISITORS = (
+    ('Pirs', 'pirs/Pirs.lwo', (0, 1, 0), (1, 0, 0), (-23.69, 0.0, 4.81), (0, 0, -1), (1, 0, 0), 0.0),
+    ('Progress M-10M, at Pirs', 'progress/prog-ani.lwo', (0, 0, -1), (0, 1, 0), 'Pirs', (0, 0, -1),
+     (1, 0, 0), 0.35),
+    ('Soyuz TMA-20, at Rassvet', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-11.14, 0.0, 11.243),
+     (0, 0, -1), (1, 0, 0), 0.35),
+    ('Soyuz TMA-21, at Poisk', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-23.69, 0.0, -1.032),
+     (0, 0, 1), (1, 0, 0), 0.35),
+    ('ATV-2 Johannes Kepler, at Zvezda aft', 'atv/ATV_temp.lwo', (1, 0, 0), (0, 1, 0),
+     (-35.676, 0.0, 4.26), (1, 0, 0), (0, 1, 0), 0.35),
+)
+# Their textured surfaces, as plain colours: the Soyuz and Progress blankets,
+# and the solar cells.
+VISITOR_COLOURS = {'soyuz-side': (0.27, 0.28, 0.25), 'progress-side': (0.27, 0.28, 0.25),
+                   'soyuz-pan': (0.05, 0.07, 0.16), 'soyuz-panR': (0.05, 0.07, 0.16),
+                   'progress-pan': (0.05, 0.07, 0.16), 'progress-panR': (0.05, 0.07, 0.16),
+                   'ATV-panels': (0.05, 0.07, 0.16)}
+
+
+def read_lwo(path):
+    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles)],
+    every polygon's corners its own points (flat shading), all layers."""
+    import struct
+    data = open(path, 'rb').read()
+    if data[:4] != b'FORM' or data[8:12] != b'LWO2':
+        sys.exit("fetch_assets: %s is not an LWO2 object" % path)
+
+    def vx(b, o):                       # LightWave's variable-length index
+        if b[o] == 0xFF:
+            return struct.unpack('>I', b[o:o + 4])[0] & 0xFFFFFF, o + 4
+        return struct.unpack('>H', b[o:o + 2])[0], o + 2
+
+    def strings(b, o):                  # NUL-terminated, padded to even
+        e = b.index(b'\0', o)
+        return b[o:e].decode('latin-1'), e + 1 + ((e + 1 - o) & 1)
+
+    pos, end = 12, 8 + struct.unpack('>I', data[4:8])[0]
+    tags, colours, layers, cur = [], {}, [], None
+    while pos < end:
+        cid, size = data[pos:pos + 4], struct.unpack('>I', data[pos + 4:pos + 8])[0]
+        b = data[pos + 8:pos + 8 + size]
+        pos += 8 + size + (size & 1)
+        if cid == b'TAGS':
+            o = 0
+            while o < len(b):
+                t, o = strings(b, o)
+                tags.append(t)
+        elif cid in (b'LAYR', b'PNTS') and (cid == b'LAYR' or cur is None):
+            cur = dict(points=np.zeros((0, 3)), polys=[], ptag={})
+            layers.append(cur)
+        if cid == b'PNTS':
+            cur['points'] = np.frombuffer(b, '>f4').reshape(-1, 3).astype(np.float64)
+        elif cid == b'POLS' and b[:4] == b'FACE':
+            o, polys = 4, []
+            while o < len(b):
+                nv = struct.unpack('>H', b[o:o + 2])[0] & 0x3FF
+                o += 2
+                idx = []
+                for _ in range(nv):
+                    v, o = vx(b, o)
+                    idx.append(v)
+                polys.append(idx)
+            cur['polys'] = polys
+        elif cid == b'PTAG' and b[:4] == b'SURF':
+            o = 4
+            while o < len(b):
+                i, o = vx(b, o)
+                cur['ptag'][i] = struct.unpack('>H', b[o:o + 2])[0]
+                o += 2
+        elif cid == b'SURF':
+            name, o = strings(b, 0)
+            _, o = strings(b, o)
+            rgb = (0.7, 0.7, 0.7)
+            while o + 6 <= len(b):
+                sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+                if sid == b'COLR':
+                    rgb = struct.unpack('>3f', b[o + 6:o + 18])
+                o += 6 + ss + (ss & 1)
+            colours[name] = rgb
+    surfaces = {}
+    for L in layers:
+        for i, poly in enumerate(L['polys']):
+            if len(poly) < 3:
+                continue
+            name = tags[L['ptag'].get(i, 0)] if tags else 'default'
+            pts, tris = surfaces.setdefault(name, ([], []))
+            base = sum(len(q) for q in pts)
+            pts.append(L['points'][poly])
+            tris.extend((base, base + k, base + k + 1) for k in range(1, len(poly) - 1))
+    return [(name, colours.get(name, (0.7, 0.7, 0.7)), np.vstack(pts), np.array(tris, np.uint32))
+            for name, (pts, tris) in surfaces.items()]
+
+
+def prepare_iss_visitors(keep):
+    """Add Pirs and the vehicles docked in May 2011 (Soyuz TMA-20 and -21,
+    Progress M-10M, ATV-2) to the prepared ISS model, which lacks them."""
+    import json
+    import shutil
+    import subprocess
+    out_dir = os.path.join(CACHE, "models", "iss")
+    meta_path = os.path.join(out_dir, "model.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if meta.get('visitors'):
+        return
+    tool = shutil.which("7z") or shutil.which("7zz")
+    if tool is None:
+        print("fetch_assets: no 7z, so the ISS has no Soyuz, Progress, ATV or Pirs")
+        return
+    src = download(ISS2011_URL, os.path.join(CACHE, "models", "iss-2011.7z"))
+    work = os.path.join(CACHE, "models", "iss-2011")
+    files = sorted({v[1] for v in ISS_VISITORS})
+    subprocess.run([tool, "x", "-y", "-o" + work, src] + ["Objects/Modules/" + f for f in files],
+                   check=True, stdout=subprocess.DEVNULL)
+    z = dict(np.load(os.path.join(out_dir, "model.npz")))
+    mats = meta['materials']
+    placed = {}
+    for name, f, probe, across, port, inward, across_iss, depth in ISS_VISITORS:
+        parts = read_lwo(os.path.join(work, "Objects", "Modules", f))
+        rh = np.diag([INCH, INCH, -INCH])                    # inches, left-handed -> m, right
+        allp = np.vstack([p[2] for p in parts]) @ rh
+        a, c = np.array(probe, float), np.array(across, float)
+        # Its axis: the middle, across the probe direction, of its body's
+        # shell (the '-side' or 'body' surface; antennas and wings make the
+        # whole lopsided); the probe's tip: the farthest point along it
+        # within 0.4 m of the axis.
+        shell = [p[2] for p in parts if p[0].endswith('-side') or p[0] == 'body']
+        sp = (np.vstack(shell) if shell else np.vstack([p[2] for p in parts])) @ rh
+        sp = sp - np.outer(sp @ a, a)
+        mid = 0.5 * (sp.min(0) + sp.max(0))
+        body = allp - np.outer(allp @ a, a)
+        near = np.linalg.norm(body - mid, axis=1) < 0.4
+        tip = mid + a * (allp[near] @ a).max()
+        # Turned so the probe points into the station and the wings across as given.
+        n_in, w = np.array(inward, float), np.array(across_iss, float)
+        R = (np.column_stack([n_in, w, np.cross(n_in, w)]) @
+             np.column_stack([a, c, np.cross(a, c)]).T)
+        p0 = placed[port] if isinstance(port, str) else np.array(port, float)
+        t = p0 + np.array(inward, float) * depth - R @ tip
+        # The far end, for whatever docks to it.
+        free = mid - a * (allp[near] @ (-a)).max()
+        placed[name.split(',')[0]] = R @ free + t
+        for surf, rgb, pts, tris in parts:
+            k = len(mats)
+            pos = (pts @ rh) @ R.T + t
+            v = pos[tris]
+            fn = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
+            fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+            nrm = np.zeros_like(pos)
+            for j in range(3):
+                nrm[tris[:, j]] = fn
+            z['pos%d' % k] = pos.astype(np.float32)
+            z['nrm%d' % k] = nrm.astype(np.float32)
+            z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
+            z['idx%d' % k] = tris.ravel()
+            mats.append(dict(name="%s: %s" % (name, surf), color=list(VISITOR_COLOURS.get(surf, rgb)) + [1.0],
+                             metallic=0.0, texture=None))
+        print("  %s: %d triangles" % (name, sum(len(p[3]) for p in parts)))
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
+    meta['visitors'] = [v[0] for v in ISS_VISITORS]
+    meta['triangles'] = sum(len(z['idx%d' % k]) // 3 for k in range(len(mats)))
+    meta['source'] += "; Pirs and the visiting vehicles: NASA 3D Resources, ISS (C) (High Res)"
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=1)
+    shutil.rmtree(work, ignore_errors=True)
+    if not keep:
+        os.remove(src)
+
+
 def prepare_site_fine(key):
     """The fine ring (+-1.5 km, ~0.37 m) for a site already prepared."""
     import json
@@ -803,6 +985,7 @@ def main():
         prepare_bluemarble(m, args.keep_downloads)
     for key in MODELS:
         prepare_model(key, args.keep_downloads)
+    prepare_iss_visitors(args.keep_downloads)
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))
