@@ -90,9 +90,11 @@ keeps its field of view; with --crop it keeps its angle per pixel instead,
 so a bigger window shows more sky.
 
 Keys: + / - exposure up / down 1/3 stop; ] / [ the Milky Way's brightness
-relative to the stars; H the status line (with the settings); Q or Esc quit.
+relative to the stars; H the status line (with the settings); Ctrl+Q (Cmd+Q
+on a Mac) quits -- nothing else does, so a stray key can't close the views.
 """
 import argparse
+import importlib.util
 import math
 import os
 import socket
@@ -100,7 +102,40 @@ import struct
 import sys
 import time
 
-import numpy as np
+
+def preflight():
+    """Why portview can't run here, in one line, or None -- cheaply, before
+    any of the large modules load.  simulatePASS runs `portview.py --check`
+    before starting it, so a machine without them just goes without views."""
+    need = (("numpy", "numpy"), ("PyQt6", "PyQt6"), ("OpenGL", "PyOpenGL"),
+            ("PIL", "Pillow"), ("skyfield", "skyfield"))
+    missing = [pip for mod, pip in need if importlib.util.find_spec(mod) is None]
+    if missing:
+        return "%s missing; pip install %s" % (", ".join(missing), " ".join(missing))
+    cache = os.path.join(os.path.dirname(os.path.abspath(__file__)), "portview", "cache")
+    files = ("milkyway_8k.npy", "hipparcos.npy", "de440s.bsp", "nightlights.jpg",
+             "watermask.png")
+    absent = [f for f in files if not os.path.exists(os.path.join(cache, f))]
+    if not any(f.startswith("bluemarble_") for f in (os.listdir(cache) if os.path.isdir(cache)
+                                                    else [])):
+        absent.append("bluemarble_MM.jpg")
+    if absent:
+        return ("its prepared assets are missing from portview/cache (%s); unpack the "
+                "portview cache tarball there, or run python3 portview/fetch_assets.py"
+                % ", ".join(absent))
+    return None
+
+
+if __name__ == "__main__":
+    _why = preflight()
+    if "--check" in sys.argv[1:]:
+        print("portview: ready" if _why is None else "portview: not started -- " + _why)
+        sys.exit(0 if _why is None else 1)
+    if _why is not None:
+        print("portview: not started -- " + _why)
+        sys.exit(1)
+
+import numpy as np                     # noqa: E402 (after the cheap check above)
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
@@ -2298,8 +2333,8 @@ class ViewWidget(QOpenGLWidget):
     def keyPressEvent(self, ev):
         k = ev.key()
         x = self.app.exposure
-        if k in (Qt.Key.Key_Q, Qt.Key.Key_Escape):
-            QtWidgets.QApplication.quit()
+        if k == Qt.Key.Key_Q and ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            QtWidgets.QApplication.quit()     # Ctrl+Q; Qt maps the Mac's Cmd to Control
         elif k == Qt.Key.Key_H:
             self.app.hud = not self.app.hud
         elif k in (Qt.Key.Key_Plus, Qt.Key.Key_Equal):
@@ -2325,10 +2360,13 @@ class Portview(object):
         self.hud = False
         self.ticks = 0
         self.ground = []
+        # Frames at FRAME_HZ: a fine tick that draws whenever a frame is due,
+        # not a 16 ms timer, which Windows' timer granularity held to ~55/s.
+        self.frameDue = time.monotonic()
         self.timer = QtCore.QTimer()
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
-        self.timer.timeout.connect(self.tick)
-        self.timer.start(16)
+        self.timer.timeout.connect(self._maybe_tick)
+        self.timer.start(4)
 
     def status_line(self, fs):
         if not fs.ok:
@@ -2345,6 +2383,16 @@ class Portview(object):
         if fs.stale:
             s += "  STALE"
         return s
+
+    FRAME_HZ = 60.0
+
+    def _maybe_tick(self):
+        now = time.monotonic()
+        if now < self.frameDue:
+            return
+        # The next frame a period after this one was due, unless far behind.
+        self.frameDue = max(self.frameDue + 1.0 / self.FRAME_HZ, now - 0.5 / self.FRAME_HZ)
+        self.tick()
 
     def tick(self):
         fs = self.feed.state()
@@ -2418,6 +2466,8 @@ def main(argv=None):
                     help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
                          "compressed), or auto: reduced on a GPU with under 3 GB of its own "
                          "(default)")
+    ap.add_argument("--check", action="store_true",
+                    help="only say whether portview can run here (modules, assets), and exit")
     ap.add_argument("--stats", action="store_true",
                     help="print each view's frames per second to stdout, every 5 s")
     ap.add_argument("--exposure", type=float, default=-1.0, metavar="EV",
