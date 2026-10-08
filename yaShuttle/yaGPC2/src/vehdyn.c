@@ -829,7 +829,11 @@ static void add_force(double f[3], double tau[3], const double fk[3], const doub
 /* The velocity relative to the air, inertial, m/s: the air turns with the
  * Earth, and below the sounding's top it moves with the day's wind. */
 static void air_velocity(double va[3]) {
-    double we[3] = { 0, 0, phys_earth_rate() };
+    /* about the Earth's pole OF DATE, not M50's z (the B1950 pole, 0.6 deg
+     * away: ~1.5 m/s of false wind at the surface) */
+    double we[3];
+    phys_earth_pole(we);
+    for (int i = 0; i < 3; i++) we[i] *= phys_earth_rate();
     va[0] = st.v[0] - (we[1] * st.r[2] - we[2] * st.r[1]);
     va[1] = st.v[1] - (we[2] * st.r[0] - we[0] * st.r[2]);
     va[2] = st.v[2] - (we[0] * st.r[1] - we[1] * st.r[0]);
@@ -1484,10 +1488,15 @@ static void pad_state(double t) {
         dEf[i] = padCbe[i][0] * d[0] + padCbe[i][1] * d[1] + padCbe[i][2] * d[2];
     double rEf[3] = { padR[0] - dEf[0], padR[1] - dEf[1], padR[2] - dEf[2] };
     for (int i = 0; i < 3; i++) st.r[i] = M[0][i] * rEf[0] + M[1][i] * rEf[1] + M[2][i] * rEf[2];
-    double w = phys_earth_rate();
-    st.v[0] = -w * st.r[1];
-    st.v[1] = w * st.r[0];
-    st.v[2] = 0.0;
+    /* turning with the Earth about its pole of date (not M50's z, the B1950
+     * pole 0.6 deg away -- which left the stack 1.5 m/s off rest on the pad,
+     * found by the Mac portview session from TRU1's positions) */
+    double w = phys_earth_rate(), pole[3], wv[3];
+    phys_earth_pole(pole);
+    for (int i = 0; i < 3; i++) wv[i] = w * pole[i];
+    st.v[0] = wv[1] * st.r[2] - wv[2] * st.r[1];
+    st.v[1] = wv[2] * st.r[0] - wv[0] * st.r[2];
+    st.v[2] = wv[0] * st.r[1] - wv[1] * st.r[0];
     /* the attitude, as a quaternion, and the Earth's rate in body axes */
     double tr = Rbi[0][0] + Rbi[1][1] + Rbi[2][2], q[4];
     if (tr > 0.0) {
@@ -1508,7 +1517,8 @@ static void pad_state(double t) {
         q[2] = (Rbi[1][2] + Rbi[2][1]) / s4; q[3] = 0.25 * s4;
     }
     memcpy(st.q, q, sizeof q);
-    for (int i = 0; i < 3; i++) st.w[i] = Rbi[2][i] * w;   /* R^T (0,0,w) */
+    for (int i = 0; i < 3; i++)                      /* R^T (w pole) */
+        st.w[i] = Rbi[0][i] * wv[0] + Rbi[1][i] * wv[1] + Rbi[2][i] * wv[2];
     st.t = t;
 }
 
