@@ -222,6 +222,20 @@ The savings available are code, not settings: gate that per-instruction receive
 often (a BCE samples its MIA at most every 16.5 µs). `perf` is not available on
 the host that measured this (`kernel.perf_event_paranoid=4`).
 
+**Environment lookups are memoised** (`src/envcache.c`, since 2026-09-17).
+Many traces and tuning values are gated on an environment variable in
+per-instruction or per-datagram paths, and glibc's `getenv` scans the whole
+environment for every lookup -- a profile of a saturated four-GPC run put it
+at 3.2% of cycles. `yagpc_getenv` keys a small per-thread table on the call
+site's string-literal *address*, so a repeat costs one pointer compare and the
+GPC threads share nothing. 257 call sites in `src/*.c` use it (2026-10-07);
+three cold-path `getenv` calls remain in `vehdyn.c`'s ground model. It is
+correct only because the environment does not change once the emulator is
+running: nothing in `src/` calls `setenv` or `putenv`, and the tests that do
+(`test_landaids.c`, `test_vehdyn.c` and others) set their variables before the
+first lookup. `Makefile` lists `src/envcache.c` in `IOP_DEPS`, `IOP_TEST_DEPS`
+and the standalone test recipes that link `src/*.c` directly.
+
 #### When the crew panel goes quiet
 
 A running computer does not halt because the crew panel stops talking. If its

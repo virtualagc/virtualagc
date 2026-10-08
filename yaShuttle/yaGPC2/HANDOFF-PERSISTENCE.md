@@ -1,8 +1,20 @@
 # HANDOFF: persistent simulation state (save and resume without re-IPL)
 
-STATUS: PLAN ONLY, NOT STARTED.  The project owner wants to think it over
-before any implementation begins (2026-09-14).  Do not start building from this
-file without their go-ahead; raise changes to the plan with them first.
+STATUS: SUPERSEDED (2026-09-18).  This was the first plan (2026-09-14).  It
+was replaced by a rewritten one: capture is manual only, a mid-run save can be
+requested from manager.py, and simulatePASS owns the mechanism.  That is what
+was built (`simulatePASS --snapshot-dir` / `--snapshot-resume`, the session
+`save DIR` command).  Keep this file for its decisions and its survey, but read
+it against these corrections (line numbers re-measured 2026-10-07):
+- `vehicle_barrier_wait` is now at `vehicle.c:305`.  It is called from
+  `run.c:3242` (per instruction) and `run.c:3406` (the idle loop), not
+  `run.c:2021`/`2150`.  Treat every other line number below as drifted too.
+- `cfailLatched` no longer exists (deleted in c35af840c).
+- `simulatePASS.py` lives in `discretePanel/`, not at the yaShuttle top level.
+- `--no-halucp-svc` is already passed to yaGPC2 (`simulatePASS.py:1952`), so
+  HalUCP and the scheduler are out of scope.
+- `--date-time-epoch` already exists (`opts.c:457`), so GMT continuity needed
+  no C.
 
 ## Why
 
