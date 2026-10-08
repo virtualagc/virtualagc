@@ -285,12 +285,18 @@ which portview follows from TRU1's attitude with no special handling.
   Eye points per view (forward and aft stations, approximate Orbiter
   structural coordinates).  Far away: a point by magnitude.  `--test vbar
   --test-range M` flies the final V-bar approach with a synthetic ISS.
-  Other vehicles are more models keyed by NORAD id: the Hubble Space
-  Telescope (20580; NASA 3D Resources' Hubble (A), in its V1-V2-V3 axes,
-  metres from mid-length; `--test vbar --test-target hst`) so far.  Each
-  model's model.json may give its brightness (mag_1000km).  Mir, Solar Max,
-  Palapa B2, Westar 6 and Leasat 3 have no usable model there (Mir's is a
-  20 KB sketch).  None is live until vehdyn sends TGT1.
+  Other vehicles are more models keyed by NORAD id (OTHER_VEHICLES), each
+  model.json giving its frame and brightness (mag_1000km):
+  - the Hubble Space Telescope (20580): NASA 3D Resources' Hubble (A), in
+    its V1-V2-V3 axes, metres from mid-length;
+  - Mir (16609): NASA 3D Resources' simple Mir, ~0.0221 m a unit, +X along
+    the core toward the node, origin at the node;
+  - Solar Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3
+    (15643): no published models, so simple shapes to their published
+    dimensions (fetch_assets.py's PROCEDURAL), +X along the spin axis
+    (Solar Max: toward the Sun), approximate.
+  `--test vbar --test-target hst|mir|smm|westar6|palapab2|leasat3` flies up
+  to one.  None is live until vehdyn sends TGT1 for it.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed
   `*.layout` files are never overwritten).

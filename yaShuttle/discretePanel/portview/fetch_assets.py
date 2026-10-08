@@ -485,6 +485,15 @@ HST_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%2
 # aft shroud, with WFC3's bay, at z 0-200), the solar arrays along x.  This
 # takes it to its V1 (toward the aperture), V2 (along the arrays), V3, in
 # metres, about the middle of its length.
+MIR_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+           "Mir/Mir.glb")
+# Mir: ~0.0221 m a unit (its core module's 4.15 m across is ~188 units),
+# the core along y (+y toward the docking node, at y ~520), the axis at
+# x 461, z -940.  To +X along the core toward the node, +Y = model x,
+# +Z = -model z; origin at the node.
+MIR_SCALE = 0.0221
+MIR_ROOT = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]) * MIR_SCALE
+MIR_ORIGIN = np.array([461.0, 520.0, -940.0])
 HST_ROOT = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]) * INCH
 HST_ORIGIN = np.array([0.0, 0.0, 256.0])
 
@@ -502,7 +511,104 @@ MODELS = {
                 frame="HST V1 (toward the aperture), V2 (along the arrays), V3; m; mid-length",
                 source="NASA 3D Resources, Hubble Space Telescope (A)",
                 mag_1000km=1.5),            # ~2.2 half lit (the satellite catalogues' standard)
+    'mir': dict(url=MIR_URL, glb="mir.glb", root=MIR_ROOT, origin=MIR_ORIGIN, exclude=set(),
+                name="Mir (a simple model: core, node, Kvant, Kristall, Spektr, Priroda, Soyuz)",
+                frame="Mir: +X along the core toward the node, +Y, +Z; m; origin at the node",
+                source="NASA 3D Resources, Mir", mag_1000km=-0.8),
 }
+
+
+# Satellites the Shuttle visited that have no published model: simple
+# shapes to their published dimensions, as each was met (antennas stowed on
+# the HS-376s, retrieved by STS-51A; Leasat 3's deployed, repaired on
+# STS-51I).  Approximate -- shapes and colours, not details.  Each: name,
+# NORAD id, frame, brightness, parts (material, rgb, shape, dimensions, m):
+# 'cyl' (radius, x0, x1) along +X; 'cone' (r0, r1, x0, x1); 'box' (centre,
+# size); 'disc' (radius, x) facing +X.
+HS376 = (('solar drum', (0.04, 0.05, 0.10), 'cyl', (1.08, -1.41, 0.40)),
+         ('solar skirt', (0.04, 0.05, 0.10), 'cyl', (1.07, 0.40, 1.41)),
+         ('forward barrier', (0.75, 0.62, 0.30), 'disc', (1.08, 1.41)),
+         ('antenna mast', (0.80, 0.80, 0.80), 'cyl', (0.25, 1.41, 2.10)),
+         ('stowed reflector', (0.85, 0.85, 0.85), 'cyl', (0.85, 1.80, 1.95)),
+         ('apogee motor nozzle', (0.25, 0.25, 0.25), 'cone', (0.20, 0.45, -1.41, -2.00)),
+         ('aft barrier', (0.75, 0.62, 0.30), 'disc', (1.08, -1.41)))
+PROCEDURAL = {
+    'westar6': dict(norad=14688, name="Westar 6 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
+                    frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
+    'palapab2': dict(norad=14692, name="Palapa B2 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
+                     frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
+    'leasat3': dict(norad=15643, name="Leasat 3 (Syncom IV; approximate)", mag_1000km=2.0,
+                    frame="Leasat: +X along the spin axis toward the antennas; m; mid-drum",
+                    parts=(('solar drum', (0.04, 0.05, 0.10), 'cyl', (2.13, -1.40, 1.40)),
+                           ('forward deck', (0.80, 0.80, 0.80), 'disc', (2.13, 1.40)),
+                           ('aft deck', (0.75, 0.62, 0.30), 'disc', (2.13, -1.40)),
+                           ('UHF helix', (0.85, 0.85, 0.85), 'cyl', (0.30, 1.40, 3.30)),
+                           ('UHF dish', (0.90, 0.90, 0.90), 'cone', (0.15, 0.85, 1.40, 1.80)),
+                           ('omni', (0.80, 0.80, 0.80), 'cyl', (0.06, 3.30, 3.90)),
+                           ('liquid motor', (0.30, 0.30, 0.30), 'cone', (0.30, 0.60, -1.40, -2.20)))),
+    'smm': dict(norad=11703, name="Solar Maximum Mission (approximate)", mag_1000km=2.0,
+                frame="SMM: +X along the instruments' axis (toward the Sun); m; mid-length",
+                parts=(('MMS bus', (0.80, 0.80, 0.78), 'cyl', (1.15, -2.00, -0.50)),
+                       ('instrument module', (0.75, 0.62, 0.30), 'cyl', (1.00, -0.50, 2.00)),
+                       ('Sun end', (0.20, 0.20, 0.20), 'disc', (1.00, 2.00)),
+                       ('solar array +Y', (0.04, 0.05, 0.10), 'box', ((-1.2, 3.3, 0.0), (1.5, 4.2, 0.04))),
+                       ('solar array -Y', (0.04, 0.05, 0.10), 'box', ((-1.2, -3.3, 0.0), (1.5, 4.2, 0.04))),
+                       ('high-gain mast', (0.80, 0.80, 0.80), 'cyl', (0.05, -2.00, -3.20)),
+                       ('grapple pin', (0.80, 0.80, 0.80), 'box', ((-1.25, 0.0, 1.20), (0.10, 0.10, 0.25))))),
+}
+
+
+def shape_mesh(kind, dims, n=48):
+    """Corner points (k, 3) and triangles of a simple shape (see PROCEDURAL)."""
+    a = np.linspace(0.0, 2.0 * np.pi, n, endpoint=False)
+    c, s = np.cos(a), np.sin(a)
+    if kind in ('cyl', 'cone'):
+        r0, r1, x0, x1 = (dims[0], dims[0], dims[1], dims[2]) if kind == 'cyl' else dims
+        ring0 = np.column_stack([np.full(n, x0), r0 * c, r0 * s])
+        ring1 = np.column_stack([np.full(n, x1), r1 * c, r1 * s])
+        pts = np.vstack([ring0, ring1, [[x0, 0, 0]], [[x1, 0, 0]]])
+        tris = []
+        for i in range(n):
+            j = (i + 1) % n
+            tris += [(i, j, n + j), (i, n + j, n + i), (2 * n, j, i), (2 * n + 1, n + i, n + j)]
+        return pts, np.array(tris)
+    if kind == 'disc':
+        r, x = dims
+        pts = np.vstack([np.column_stack([np.full(n, x), r * c, r * s]), [[x, 0, 0]]])
+        return pts, np.array([(n, i, (i + 1) % n) for i in range(n)])
+    centre, size = (np.array(v, float) for v in dims)
+    corners = np.array([[i, j, k] for i in (-0.5, 0.5) for j in (-0.5, 0.5) for k in (-0.5, 0.5)])
+    pts = centre + corners * size
+    quads = ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3))
+    return pts, np.array([t for q in quads for t in ((q[0], q[1], q[2]), (q[0], q[2], q[3]))])
+
+
+def prepare_procedural(key):
+    import json
+    spec = PROCEDURAL[key]
+    out_dir = os.path.join(CACHE, "models", key)
+    if os.path.exists(os.path.join(out_dir, "model.json")):
+        return
+    os.makedirs(out_dir, exist_ok=True)
+    arrays, mats = {}, []
+    for k, (name, rgb, kind, dims) in enumerate(spec['parts']):
+        pts, tris = shape_mesh(kind, dims)
+        v = pts[tris].reshape(-1, 3)                  # each triangle its own corners: flat shading
+        fn = np.cross(pts[tris[:, 1]] - pts[tris[:, 0]], pts[tris[:, 2]] - pts[tris[:, 0]])
+        fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+        arrays['pos%d' % k] = v.astype(np.float32)
+        arrays['nrm%d' % k] = np.repeat(fn, 3, axis=0).astype(np.float32)
+        arrays['uv%d' % k] = np.zeros((len(v), 2), np.float32)
+        arrays['idx%d' % k] = np.arange(len(v), dtype=np.uint32)
+        mats.append(dict(name=name, color=list(rgb) + [1.0], metallic=0.0, texture=None))
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
+    with open(os.path.join(out_dir, "model.json"), "w") as f:
+        json.dump(dict(name=spec['name'], frame=spec['frame'], norad=spec['norad'],
+                       source="simple shapes to published dimensions (fetch_assets.py)",
+                       mag_1000km=spec['mag_1000km'], materials=mats,
+                       triangles=sum(len(a) // 3 for n_, a in arrays.items() if n_.startswith('idx'))),
+                  f, indent=1)
+    print("model %s: %s" % (key, spec['name']))
 
 
 def prepare_iss(keep):
@@ -1001,6 +1107,8 @@ def main():
     for key in MODELS:
         prepare_model(key, args.keep_downloads)
     prepare_iss_visitors(args.keep_downloads)
+    for key in PROCEDURAL:
+        prepare_procedural(key)
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))

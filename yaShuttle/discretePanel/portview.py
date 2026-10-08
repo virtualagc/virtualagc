@@ -177,7 +177,9 @@ MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
 SITES_DIR = os.path.join(CACHE, "sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
-HST_MODEL = os.path.join(CACHE, "models", "hst")
+# The other vehicles the Shuttle met, by NORAD id: their models' directories.
+OTHER_VEHICLES = {20580: "hst", 16609: "mir", 11703: "smm", 14688: "westar6", 14692: "palapab2",
+                  15643: "leasat3"}
 GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Launch pads.  vehdyn (PASS's nav-base I-loads, CGNCOM.hal) stands the
 # stack nose up with the belly (+Z, the ET's side) north, so the port side and
@@ -217,7 +219,6 @@ MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
 TARGET_OFFSET = 96                 # TGT1: other vehicles (the ISS), from yaGPC2 (planned)
 ISS_NORAD = 25544
-HST_NORAD = 20580
 TRUTH_DOUBLES_MIN = 15
 TRUTH_DOUBLES_MAX = 30
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
@@ -2685,7 +2686,7 @@ def main(argv=None):
                     help="with --test, the orbit's altitude (default 400 km)")
     ap.add_argument("--test-at", metavar="LAT,LON,ALT_M,HDG,PITCH",
                     help="with --test hover: where, how high, heading and pitch (deg, m)")
-    ap.add_argument("--test-target", choices=('iss', 'hst'), default='iss',
+    ap.add_argument("--test-target", choices=['iss'] + sorted(OTHER_VEHICLES.values()), default='iss',
                     help="with --test vbar, the vehicle approached (default iss)")
     ap.add_argument("--test-range", type=float, default=100.0, metavar="M",
                     help="with --test vbar, the ISS's distance (default 100 m)")
@@ -2761,16 +2762,18 @@ def main(argv=None):
                 tzinfo=datetime.timezone.utc).timestamp()
         except ValueError:
             sys.exit("portview: --test-date wants YYYY-MM-DD[THH:MM[:SS]] (UTC)")
+    target_id = {v: k for k, v in OTHER_VEHICLES.items()}.get(args.test_target, ISS_NORAD)
     feed = (TestFeed(test, args.test_rate, unix0, ephemeris, args.test_alt, args.test_lon,
-                     args.test_range, HST_NORAD if args.test_target == 'hst' else ISS_NORAD) if test
+                     args.test_range, target_id) if test
             else TruthFeed(args.port_base))
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
     models = {}
     if os.path.exists(os.path.join(ISS_MODEL, "model.json")):
         models[ISS_NORAD] = Model(ISS_MODEL)
-    if os.path.exists(os.path.join(HST_MODEL, "model.json")):
-        models[HST_NORAD] = Model(HST_MODEL)
+    for norad, d in OTHER_VEHICLES.items():
+        if os.path.exists(os.path.join(CACHE, "models", d, "model.json")):
+            models[norad] = Model(os.path.join(CACHE, "models", d))
     ground = []
     if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
         lat, lon, heading = PADS[args.pad]
