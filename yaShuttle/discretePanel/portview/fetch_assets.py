@@ -689,13 +689,142 @@ def prepare_model(key, keep):
     if not keep:
         os.remove(src)
 
-def read_lwo(path):
-    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles)],
-    every polygon's corners its own points (flat shading), all layers."""
+
+ISS2011_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res)/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res).7z")
+# What IGOAL lacks for May 2011, from JSC's VCL "ISS 2011" LightWave models
+# (inches, left-handed): each vehicle's file; the direction from its body to
+# its docking probe and a direction across it (its solar wings), in its own
+# axes made right-handed (z negated); the port, the direction from the port
+# into the station, and where the across-direction points (ISS frame, m).
+# Ports from IGOAL's own modules: Rassvet's nadir and Poisk's zenith drogues;
+# Zvezda's aft port; Zvezda's nadir port where IGOAL's Nauka (2021) has its
+# probe, Pirs's place until 2021.  The probe goes 0.35 m into a drogue.
+ISS_VISITORS = (
+    ('Pirs', 'pirs/Pirs.lwo', (0, 1, 0), (1, 0, 0), (-23.69, 0.0, 4.81), (0, 0, -1), (1, 0, 0), 0.0),
+    ('Progress M-10M, at Pirs', 'progress/prog-ani.lwo', (0, 0, -1), (0, 1, 0), 'Pirs', (0, 0, -1),
+     (1, 0, 0), 0.35),
+    ('Soyuz TMA-20, at Rassvet', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-11.14, 0.0, 11.243),
+     (0, 0, -1), (1, 0, 0), 0.35),
+    ('Soyuz TMA-21, at Poisk', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-23.69, 0.0, -1.032),
+     (0, 0, 1), (1, 0, 0), 0.35),
+    ('ATV-2 Johannes Kepler, at Zvezda aft', 'atv/ATV_temp.lwo', (1, 0, 0), (0, 1, 0),
+     (-35.676, 0.0, 4.26), (1, 0, 0), (0, 1, 0), 0.35),
+)
+# A surface whose colour layer has an image is drawn with it, the image's
+# values taken for albedo (as LightWave takes them, and as these models'
+# plain colours are taken); one with only a bump image (Pirs's blankets'
+# wrinkles), with that image's variation about its colour, the shading it
+# gave in LightWave, which portview does not do.  Here, surfaces' colours
+# (albedo; with an image, its mean, the image scaled to it): the solar
+# cells, whose image is a pale grey-violet (0.21, 0.19, 0.29), the dark blue
+# they are; the arrays' backs, which the files make a peach brighter than
+# white, tan.
+VISITOR_COLOURS = {'soyuz-pan': (0.05, 0.07, 0.16), 'progress-pan': (0.05, 0.07, 0.16),
+                   'ATV-panels': (0.05, 0.07, 0.16),
+                   'soyuz-panR': (0.55, 0.46, 0.38), 'progress-panR': (0.55, 0.46, 0.38)}
+
+
+def _lwo_albedo_image(img):
+    """An image whose sRGB-decoded values (as portview samples it) are img's
+    own values: LightWave works on its images' values as they are, and the
+    plain colours of these models are taken so too."""
+    lut = [int(round(255 * (1.055 * (i / 255) ** (1 / 2.4) - 0.055 if i / 255 > 0.0031308
+                            else 12.92 * i / 255))) for i in range(256)]
+    return img.point(lut * 3)
+
+
+def _lwo_rotation(hpb):
+    """A texture's TMAP rotation, heading, pitch, bank (rad), as the matrix
+    taking a point (relative to its centre) to the texture's own axes:
+    heading about +y (+z toward +x), pitch about +x (+z toward -y), bank
+    about +z (+y toward -x), applied bank, pitch, heading.  (The SDK's
+    sample ignores rotation; this sense of heading is the one that lays
+    Pirs's name, planar along a turned z, flat on its plate and reading
+    left to right from outside.  Pitch and bank are unused here.)"""
+    h, p, b = hpb
+    ch, sh, cp, sp, cb, sb = np.cos(h), np.sin(h), np.cos(p), np.sin(p), np.cos(b), np.sin(b)
+    H = np.array([[ch, 0, sh], [0, 1, 0], [-sh, 0, ch]])
+    P = np.array([[1, 0, 0], [0, cp, -sp], [0, sp, cp]])
+    B = np.array([[cb, -sb, 0], [sb, cb, 0], [0, 0, 1]])
+    return H @ P @ B
+
+
+def _lwo_heading(x, z):
+    """The LightWave SDK's xyztoh: the heading of (x, z), 0 <= h < 2 pi."""
+    return np.mod(-np.arctan2(x, z), 2 * np.pi)
+
+
+def _lwo_uv(m, pts, nrm, firsts):
+    """Texture coordinates (v down the image from its top) of a surface's
+    corners pts (n, 3), by its colour layer's projection m (dict: proj, axis,
+    cntr, size, rota, wrpw, wrph), as the LightWave SDK's sample objacces.c
+    computes them; nrm (n, 3) each corner's polygon's normal (for cubic).
+    Cylindrical and spherical u is made continuous across each polygon (whose
+    first corners are at firsts), so that the seam's polygons do not run
+    the whole image backwards: the renderer wraps."""
+    s = (pts - m['cntr']) @ _lwo_rotation(m['rota']).T      # the texture's own axes
+    x, y, z = s[:, 0], s[:, 1], s[:, 2]
+    sx, sy, sz = [v if abs(v) > 1e-9 else 1.0 for v in m['size']]
+    proj, axis = m['proj'], m['axis']
+    if proj in (1, 2):
+        # objacces: xyztoh(z, x, -y) about x, (-x, y, z) about y, (-x, z, -y) about z.
+        a, b, c = {0: (z, x, -y), 1: (-x, y, z), 2: (-x, z, -y)}[axis]
+        u = (1.0 - _lwo_heading(a, c) / (2 * np.pi)) * m['wrpw']
+        if proj == 1:
+            v = 0.5 - (x / sx, y / sy, z / sz)[axis]
+        else:
+            v = (0.5 - np.arctan2(b, np.hypot(a, c)) / np.pi) * m['wrph']
+        # Each polygon's u within half a turn of its first corner's.
+        turn = m['wrpw']
+        first = np.repeat(u[firsts], np.diff(np.append(firsts, len(u))))
+        u = u - turn * np.round((u - first) / turn)
+    else:                                                    # planar, cubic
+        if proj == 3:
+            an = np.abs(nrm @ _lwo_rotation(m['rota']).T)
+            ax = np.where((an[:, 0] >= an[:, 1]) & (an[:, 0] > an[:, 2]), 0,
+                          np.where(an[:, 1] > an[:, 2], 1, 2))
+        else:
+            ax = np.full(len(s), axis)
+        u = np.where(ax == 0, z / sz, x / sx) + 0.5
+        v = 0.5 - np.where(ax == 1, z / sz, y / sy)
+    return np.column_stack([u, v]).astype(np.float32)
+
+
+def _lwo_image(root, path, cache):
+    """A CLIP's still image (PIL, RGB), path relative to the content
+    directory root; None if it is not there."""
+    if path not in cache:
+        Image = _image()
+        cache[path] = None
+        rel = path.replace('\\', '/').split(':')[-1].lstrip('/')
+        for p in (os.path.join(root, rel), os.path.join(root, "Textures", os.path.basename(rel))):
+            if os.path.exists(p):
+                try:
+                    cache[path] = Image.open(p).convert("RGB")
+                    break
+                except OSError:
+                    pass
+    return cache[path]
+
+
+def read_lwo(path, root=None):
+    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles,
+    texture, uv, bump)], every polygon's corners its own points (flat
+    shading), all layers.  texture: the image (PIL, RGB) of the surface's
+    colour layer, or None; uv (n, 2) then its coordinates at the points, by
+    the layer's projection (planar, cylindrical, spherical or cubic; image v
+    from the top).  bump: (image, uv) of its bump layer likewise, or None.
+    root: the content directory the object's image paths are relative to
+    (default: the one holding its Objects directory)."""
     import struct
     data = open(path, 'rb').read()
     if data[:4] != b'FORM' or data[8:12] != b'LWO2':
         sys.exit("fetch_assets: %s is not an LWO2 object" % path)
+    if root is None:
+        parts = os.path.abspath(path).split(os.sep)
+        root = os.sep.join(parts[:parts.index('Objects')]) if 'Objects' in parts else os.path.dirname(path)
 
     def vx(b, o):                       # LightWave's variable-length index
         if b[o] == 0xFF:
@@ -706,8 +835,40 @@ def read_lwo(path):
         e = b.index(b'\0', o)
         return b[o:e].decode('latin-1'), e + 1 + ((e + 1 - o) & 1)
 
+    def subchunks(b, o=0):              # (id, body) of a chunk's subchunks
+        while o + 6 <= len(b):
+            sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+            yield sid, b[o + 6:o + 6 + ss]
+            o += 6 + ss + (ss & 1)
+
+    def block(b):
+        """A SURF's BLOK: its image layer as a dict, or None."""
+        hid, hb = next(subchunks(b))
+        if hid != b'IMAP':
+            return None
+        ordinal, o = strings(hb, 0)
+        m = dict(ordinal=ordinal, chan=None, enab=1, proj=0, axis=0, clip=None,
+                 cntr=np.zeros(3), size=np.ones(3), rota=np.zeros(3), wrpw=1.0, wrph=1.0)
+        for sid, sb in subchunks(hb, o):
+            if sid == b'CHAN':
+                m['chan'] = sb[:4]
+            elif sid == b'ENAB':
+                m['enab'] = struct.unpack('>H', sb[:2])[0]
+        for sid, sb in subchunks(b):
+            if sid == b'TMAP':
+                for tid, tb in subchunks(sb):
+                    if tid in (b'CNTR', b'SIZE', b'ROTA'):
+                        m[tid.decode().lower()] = np.array(struct.unpack('>3f', tb[:12]), np.float64)
+            elif sid in (b'PROJ', b'AXIS'):
+                m[sid.decode().lower()] = struct.unpack('>H', sb[:2])[0]
+            elif sid == b'IMAG':
+                m['clip'] = vx(sb, 0)[0]
+            elif sid in (b'WRPW', b'WRPH'):
+                m[sid.decode().lower()] = struct.unpack('>f', sb[:4])[0]
+        return m
+
     pos, end = 12, 8 + struct.unpack('>I', data[4:8])[0]
-    tags, colours, layers, cur = [], {}, [], None
+    tags, colours, maps, clips, layers, cur = [], {}, {}, {}, [], None
     while pos < end:
         cid, size = data[pos:pos + 4], struct.unpack('>I', data[pos + 4:pos + 8])[0]
         b = data[pos + 8:pos + 8 + size]
@@ -739,16 +900,25 @@ def read_lwo(path):
                 i, o = vx(b, o)
                 cur['ptag'][i] = struct.unpack('>H', b[o:o + 2])[0]
                 o += 2
+        elif cid == b'CLIP':
+            for sid, sb in subchunks(b, 4):
+                if sid == b'STIL':
+                    clips[struct.unpack('>I', b[:4])[0]] = strings(sb, 0)[0]
         elif cid == b'SURF':
             name, o = strings(b, 0)
             _, o = strings(b, o)
-            rgb = (0.7, 0.7, 0.7)
-            while o + 6 <= len(b):
-                sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+            rgb, layer = (0.7, 0.7, 0.7), {}
+            for sid, sb in subchunks(b, o):
                 if sid == b'COLR':
-                    rgb = struct.unpack('>3f', b[o + 6:o + 18])
-                o += 6 + ss + (ss & 1)
+                    rgb = struct.unpack('>3f', sb[:12])
+                elif sid == b'BLOK':
+                    m = block(sb)
+                    if (m and m['chan'] in (b'COLR', b'BUMP') and m['enab'] and m['clip'] is not None
+                            and m['proj'] in (0, 1, 2, 3)):
+                        layer.setdefault(m['chan'], []).append(m)
             colours[name] = rgb
+            for chan, ms in layer.items():  # each channel's top layer (they sort by ordinal)
+                maps[name, chan] = max(ms, key=lambda m: m['ordinal'].encode('latin-1'))
     surfaces = {}
     for L in layers:
         for i, poly in enumerate(L['polys']):
@@ -759,13 +929,28 @@ def read_lwo(path):
             base = sum(len(q) for q in pts)
             pts.append(L['points'][poly])
             tris.extend((base, base + k, base + k + 1) for k in range(1, len(poly) - 1))
-    return [(name, colours.get(name, (0.7, 0.7, 0.7)), np.vstack(pts), np.array(tris, np.uint32))
-            for name, (pts, tris) in surfaces.items()]
+    images, out = {}, []
+    for name, (pts, tris) in surfaces.items():
+        p, t = np.vstack(pts), np.array(tris, np.uint32)
+        firsts = np.cumsum([0] + [len(q) for q in pts[:-1]])
+        # Each polygon's normal (Newell's), at its corners.
+        nrm = np.vstack([np.tile(np.cross(q - q.mean(0), np.roll(q, -1, 0) - q.mean(0)).sum(0),
+                                 (len(q), 1)) for q in pts])
+        got = {}
+        for chan in (b'COLR', b'BUMP'):
+            m = maps.get((name, chan))
+            img = _lwo_image(root, clips.get(m['clip'], ''), images) if m is not None else None
+            if img is not None:
+                got[chan] = (img, _lwo_uv(m, p, nrm, firsts))
+        img, uv = got.get(b'COLR', (None, None))
+        out.append((name, colours.get(name, (0.7, 0.7, 0.7)), p, t, img, uv, got.get(b'BUMP')))
+    return out
 
 
 def prepare_iss_visitors(keep):
     """Add Pirs and the vehicles docked in May 2011 (Soyuz TMA-20 and -21,
     Progress M-10M, ATV-2) to the prepared ISS model, which lacks them."""
+    import hashlib
     import json
     import shutil
     import subprocess
@@ -783,14 +968,16 @@ def prepare_iss_visitors(keep):
         return
     src = download(ISS2011_URL, os.path.join(CACHE, "models", "iss-2011.7z"))
     work = os.path.join(CACHE, "models", "iss-2011")
-    files = sorted({v[1] for v in ISS_VISITORS})
-    subprocess.run([tool, "x", "-y", "-o" + work, src] + ["Objects/Modules/" + f for f in files],
+    # The objects and their images (beside them, in other modules' folders
+    # and in Textures/).
+    subprocess.run([tool, "x", "-y", "-o" + work, src, "Objects/Modules/*", "Textures/*"],
                    check=True, stdout=subprocess.DEVNULL)
+    Image = _image()
     z = dict(np.load(os.path.join(out_dir, "model.npz")))
     mats = meta['materials']
-    placed = {}
+    placed, saved = {}, {}
     for name, f, probe, across, port, inward, across_iss, depth in ISS_VISITORS:
-        parts = read_lwo(os.path.join(work, "Objects", "Modules", f))
+        parts = read_lwo(os.path.join(work, "Objects", "Modules", f), work)
         rh = np.diag([INCH, INCH, -INCH])                    # inches, left-handed -> m, right
         allp = np.vstack([p[2] for p in parts]) @ rh
         a, c = np.array(probe, float), np.array(across, float)
@@ -814,7 +1001,7 @@ def prepare_iss_visitors(keep):
         # The far end, for whatever docks to it.
         free = mid - a * (allp[near] @ (-a)).max()
         placed[name.split(',')[0]] = R @ free + t
-        for surf, rgb, pts, tris in parts:
+        for surf, rgb, pts, tris, img, uv, bump in parts:
             k = len(mats)
             pos = (pts @ rh) @ R.T + t
             v = pos[tris]
@@ -825,10 +1012,28 @@ def prepare_iss_visitors(keep):
                 nrm[tris[:, j]] = fn
             z['pos%d' % k] = pos.astype(np.float32)
             z['nrm%d' % k] = nrm.astype(np.float32)
-            z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
+            colour = np.asarray(VISITOR_COLOURS.get(surf, rgb), np.float64)
+            if img is not None:         # (see VISITOR_COLOURS)
+                mean = np.asarray(img, np.float64).reshape(-1, 3).mean(0) / 255
+                colour = colour / mean if surf in VISITOR_COLOURS else np.ones(3)
+            elif bump is not None:
+                img, uv = bump
+                colour = colour / (np.asarray(img.convert('L'), np.float64).mean() / 255)
+            z['uv%d' % k] = uv if uv is not None else np.zeros((len(pos), 2), np.float32)
             z['idx%d' % k] = tris.ravel()
-            mats.append(dict(name="%s: %s" % (name, surf), color=list(VISITOR_COLOURS.get(surf, rgb)) + [1.0],
-                             metallic=0.0, texture=None))
+            mat = dict(name="%s: %s" % (name, surf), color=[float(c) for c in colour] + [1.0],
+                       metallic=0.0, texture=None)
+            if img is not None:
+                key = hashlib.sha1(img.tobytes() + repr(img.size).encode()).hexdigest()
+                if key not in saved:    # one file an image
+                    saved[key] = tex = "tex%d.jpg" % k
+                    if max(img.size) > 2048:
+                        g = 2048.0 / max(img.size)
+                        img = img.resize((max(1, int(img.size[0] * g)), max(1, int(img.size[1] * g))),
+                                         Image.LANCZOS)
+                    _lwo_albedo_image(img).save(os.path.join(out_dir, tex), quality=95)
+                mat['texture'] = saved[key]
+            mats.append(mat)
         print("  %s: %d triangles" % (name, sum(len(p[3]) for p in parts)))
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
     meta['visitors'] = [v[0] for v in ISS_VISITORS]
