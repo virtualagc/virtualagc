@@ -319,7 +319,7 @@ def quat_advance(q, w_body, dt):
 
 class Truth(object):
     """One TRU1 datagram."""
-    __slots__ = ('t', 'gmt', 'q', 'w', 'r', 'v', 'unix', 'm50_to_ef', 'cg')
+    __slots__ = ('t', 'gmt', 'q', 'w', 'r', 'v', 'unix', 'm50_to_ef', 'cg', 'a', 'v_seen')
 
     @classmethod
     def parse(cls, d):
@@ -338,6 +338,8 @@ class Truth(object):
         # The centre of mass r and v describe, from the dry CG, body axes (m):
         # the whole stack's on the pad and in ascent; moves with propellant.
         s.cg = np.array(v[27:30]) if n >= 30 else np.zeros(3)
+        s.a = None                     # acceleration, from successive datagrams
+        s.v_seen = None                # velocity, as the positions show it
         return s
 
 
@@ -451,10 +453,21 @@ def extrapolate(s, t):
     fs.t = t
     fs.gmt = s.gmt + dt
     fs.unix = None if s.unix is None else s.unix + dt
-    rn = np.linalg.norm(s.r)
-    g = -MU_EARTH * s.r / rn ** 3 if rn > 1e6 else np.zeros(3)
-    fs.r = s.r + s.v * dt + 0.5 * g * dt * dt
-    fs.v = s.v + g * dt
+    # The acceleration seen between the last two datagrams: right on the pad
+    # (held up, not falling), under thrust and in orbit alike.  Free fall would
+    # sag the stack ~7 cm between datagrams and snap it back, a jitter of the
+    # gantry 22 m outside the commander's window.
+    if s.a is not None:
+        g = s.a
+    else:
+        rn = np.linalg.norm(s.r)
+        g = -MU_EARTH * s.r / rn ** 3 if rn > 1e6 else np.zeros(3)
+    # And the velocity the positions themselves show, where there is one: on
+    # the pad vehdyn's v (omega x r about M50's pole) differs from how r moves
+    # (about the true pole, 0.6 deg away) by 1.5 m/s -- 8 cm between datagrams.
+    v = s.v_seen if s.v_seen is not None else s.v
+    fs.r = s.r + v * dt + 0.5 * g * dt * dt
+    fs.v = v + g * dt
     fs.r_j2k = J2000_TO_M50.T @ fs.r
     fs.cg = s.cg
     fs.C = quat_to_matrix(unit(quat_advance(s.q, s.w, dt)))     # body -> M50
@@ -531,6 +544,11 @@ class TruthFeed(QtCore.QObject):
             s = Truth.parse(d)
             if s is not None:
                 wall = time.monotonic()
+                prev = self.latest
+                if prev is not None and 0.0 < s.t - prev.t < 1.0:
+                    h = s.t - prev.t
+                    s.a = (s.v - prev.v) / h
+                    s.v_seen = (s.r - prev.r) / h + 0.5 * s.a * h     # at s.t
                 self.clock.datagram(s.t, wall)
                 self.latest, self.latestAt = s, wall
 
