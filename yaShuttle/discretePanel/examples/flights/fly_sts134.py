@@ -242,6 +242,8 @@ class Flight:
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:                   # simulated seconds per wall second
             cmd += ["--rt-factor", "%g" % self.a.rate]
+        if not self.a.portview:                  # the out-the-window views: opt in
+            cmd += ["--no-portview"]
         if os.environ.get("FLY_YAGPC"):          # another build, for bisecting
             cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         os.makedirs(self.a.logs, exist_ok=True)
@@ -744,6 +746,10 @@ def main():
                     help="simulated seconds per wall second (simulatePASS --rt-factor); 2 is "
                          "measured clean for one GPC on orbit")
     ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
+    ap.add_argument("--portview", action="store_true",
+                    help="start portview's out-the-window views (simulatePASS does by default; "
+                         "this driver passes --no-portview unless asked, so automated and "
+                         "headless runs never render four views in software)")
     ap.add_argument("--count-to", type=float, default=300.0,
                     help="COUNT ends, and is captured, this many seconds before T-0 (default 300); "
                          "--from TERMINAL then restores the stack on the pad with the count running")
