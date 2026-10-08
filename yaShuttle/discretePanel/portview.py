@@ -1161,7 +1161,7 @@ class Resources(object):
         self.moon = None
         self.earthProg = compile_program(FULLSCREEN_VS, EARTH_FS)
         self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
-                               "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit",
+                               "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit", "uMoonGain",
                                "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
                                "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2")
@@ -1568,8 +1568,8 @@ uniform vec3 uOrigin;           // the eye, Earth-fixed, m
 uniform vec3 uSun;              // the Sun's direction, Earth-fixed
 uniform vec2 uTan;
 uniform sampler2D uDay, uNight, uTrans, uWater;
-uniform float uSunE, uNightGain, uLit;
-uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses)
+uniform float uSunE, uNightGain, uLit, uMoonGain;
+uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses; moonlight)
 uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
 // A landing site's imagery: four nested rings, finest first.  Rings 0 and 1
 // are placed from the eye's offset from the site (east, north, up; metres,
@@ -1771,7 +1771,19 @@ void main() {
         float fres = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hv), 0.0), 5.0);
         // Wave slopes ~0.1 rad (Blinn exponent ~200): a peak about as bright as land.
         float spec = water * fres * pow(max(dot(n, hv), 0.0), 200.0) * 8.0 / PI * step(0.0, mus);
-        vec3 night = lights * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
+        // Moonlight, on the night side's scale with the city lights: the
+        // ground lit by the Moon (its brightness by phase, Allen's lunar
+        // magnitudes), and the Moon's glint on the sea.
+        vec3 md = toMoon / dm;
+        float mum = dot(n, md);
+        float alpha = degrees(acos(clamp(-dot(md, uSun), -1.0, 1.0)));
+        float phase = pow(10.0, -0.4 * (0.026 * alpha + 4.0e-9 * pow(alpha, 4.0)));
+        vec3 tm = sunlight(RG, dot(normalize(o + tg * d), normalize(md * vec3(1.0, 1.0, K))));
+        vec3 hm = normalize(md - dirEF);
+        float fresm = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hm), 0.0), 5.0);
+        float specm = water * fresm * pow(max(dot(n, hm), 0.0), 200.0) * 8.0 / PI * step(0.0, mum);
+        vec3 moonlit = (albedo / PI * max(mum, 0.0) + specm) * tm * phase * uMoonGain;
+        vec3 night = (lights + moonlit) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
         vec3 surf = (direct + sky + spec * ts) * uSunE * uLit + night;
         color += surf * trans;
         fragColor = vec4(color, 1.0);
@@ -1860,6 +1872,9 @@ class EarthLayer(object):
     target = 'earth'                    # draws into the view's Earth buffers
     SUN_E = 2.0 * math.pi               # sunlight: a sunlit albedo-0.3 ground shows ~0.6
     NIGHT_GAIN = 0.3                    # city lights, display-referred
+    # Full-moonlit ground against the city lights, as in VIIRS night images:
+    # albedo-0.3 ground under a full Moon overhead shows ~0.04, a town ~0.1.
+    MOON_GAIN = 1.4
 
     def draw(self, res, view, fs):
         m = fs.m50_to_ef
@@ -1922,6 +1937,7 @@ class EarthLayer(object):
         GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
+        GL.glUniform1f(U["uMoonGain"], self.MOON_GAIN)
         GL.glUniform1f(U["uLit"], 1.0)
         for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
                                  (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
