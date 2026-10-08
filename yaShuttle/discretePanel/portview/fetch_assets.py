@@ -490,12 +490,14 @@ MIR_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%2
 # Mir: ~0.0221 m a unit (its core module's 4.15 m across is ~188 units),
 # the core along y (+y toward the docking node, at y ~520), the axis at
 # x 461, z -940.  To +X along the core toward the node, +Y = model x,
-# +Z = -model z; origin at the node.
+# +Z = -model z; origin in the middle of the complex (its extent's centre,
+# 4.9 m aft of the node -- standing in for the centre of mass, which a
+# vehicle's state is of).
 MIR_SCALE = 0.0221
 MIR_ROOT = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]) * MIR_SCALE
-MIR_ORIGIN = np.array([461.0, 520.0, -940.0])
+MIR_ORIGIN = np.array([449.0, 298.0, -940.0])
 HST_ROOT = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]) * INCH
-HST_ORIGIN = np.array([0.0, 0.0, 256.0])
+HST_ORIGIN = np.zeros(3)                  # its file already centres it
 
 MODELS = {
     'iss': dict(url=ISS_URL, glb="iss-igoal.glb", root=ISS_ROOT, origin=np.zeros(3),
@@ -513,7 +515,7 @@ MODELS = {
                 mag_1000km=1.5),            # ~2.2 half lit (the satellite catalogues' standard)
     'mir': dict(url=MIR_URL, glb="mir.glb", root=MIR_ROOT, origin=MIR_ORIGIN, exclude=set(),
                 name="Mir (a simple model: core, node, Kvant, Kristall, Spektr, Priroda, Soyuz)",
-                frame="Mir: +X along the core toward the node, +Y, +Z; m; origin at the node",
+                frame="Mir: +X along the core toward the node, +Y, +Z; m; origin mid-complex",
                 source="NASA 3D Resources, Mir", mag_1000km=-0.8),
 }
 

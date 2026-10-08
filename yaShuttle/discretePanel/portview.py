@@ -219,6 +219,7 @@ MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
 TARGET_OFFSET = 85                 # TGT1: other vehicles, from yaGPC2 (base + 96 is the crew scripts' progress)
 ISS_NORAD = 25544
+ISS_PMA2 = (15.66, 0.0, 5.48)            # its docking face, the ISS frame (m): --test vbar aims there
 TRUTH_DOUBLES_MIN = 15
 TRUTH_DOUBLES_MAX = 30
 STALE_S = 2.0                      # wall seconds without truth before "STALE"
@@ -688,17 +689,33 @@ class TestFeed(TruthFeed):
     def describe(self):
         return "test orbit"
 
-    def _flyaround(self, t, r, v):
-        """The station's offset from the Orbiter (m) and its rate (m/s): the
-        Orbiter on a circle round it in the orbit's plane, starting ahead on
-        the +V-bar and going up over the top."""
+    def _flyaround_dir(self, t, r, v):
+        """The direction from the crew to the vehicle: the Orbiter on a circle
+        round it in the orbit's plane, starting ahead on the +V-bar and going
+        up over the top."""
         z = -unit(r)
         x = np.cross(unit(np.cross(v, r)), z)
-        w = 2.0 * math.pi / self.lap_s
-        th = w * t
-        R = self.target_range
-        off = -R * (math.cos(th) * x + math.sin(th) * z)
-        return off, -R * w * (-math.sin(th) * x + math.cos(th) * z)
+        th = 2.0 * math.pi / self.lap_s * t
+        return -(math.cos(th) * x + math.sin(th) * z)
+
+    def _target_at(self, t):
+        """The vehicle's place (M50, m) at test time t: on the overhead
+        view's sight line from the forward crew station (14.7 m ahead of the
+        centre of mass and 2.4 m above it -- from which aiming at it missed
+        a vehicle 25 m off by 30 deg), at the approach's range or the
+        fly-around's."""
+        r, v = self._orbit(t)
+        C = self._attitude(t)
+        eye = r + C @ np.asarray(VIEWS['up']['eye'], float)
+        if self.mode == 'flyaround':
+            return eye + self.target_range * self._flyaround_dir(t, r, v)
+        los = unit(C @ np.asarray(VIEWS['up']['fwd'], float))
+        aim = np.zeros(3)
+        if self.target_id == ISS_NORAD:     # the docking port, not the middle
+            z = -unit(r)
+            y = unit(np.cross(v, r))
+            aim = np.column_stack([np.cross(y, z), y, z]) @ np.asarray(ISS_PMA2)
+        return eye + self._range(t)[0] * los - aim
 
     def _range(self, t):
         """The target's distance (m) and its rate (m/s) at test time t."""
@@ -742,12 +759,17 @@ class TestFeed(TruthFeed):
         if isinstance(self.mode, tuple) and self.mode[0] == 'hover':
             r, axes, m = self._hover(t)
             return m.T @ axes
-        if self.mode == 'flyaround':        # -Z (bay) at the station, nose out of the plane
+        if self.mode == 'flyaround':        # the overhead view's sight line at it, nose out of plane
             r, v = self._orbit(t)
             y = unit(np.cross(v, r))
-            off, _ = self._flyaround(t, r, v)
-            z = -unit(off)
-            return np.column_stack([y, np.cross(z, y), z])
+            d = self._flyaround_dir(t, r, v)
+            los = np.asarray(VIEWS['up']['fwd'], float)
+            los = los / np.linalg.norm(los)
+            e2b = unit(np.array([1.0, 0.0, 0.0]) - los[0] * los)
+            e2i = unit(y - np.dot(y, d) * d)
+            B = np.column_stack([los, e2b, np.cross(los, e2b)])
+            I = np.column_stack([d, e2i, np.cross(d, e2i)])
+            return I @ B.T
         if self.mode in ('lvlh', 'baydown', 'vbar'):
             r, v = self._orbit(t)
             z = -unit(r)
@@ -787,13 +809,10 @@ class TestFeed(TruthFeed):
             y = unit(np.cross(v, r))
             x = np.cross(y, z)
             lvlh = np.column_stack([x, y, z])          # the ISS: +XVV, Z nadir
-            if self.mode == 'vbar':
-                rng, rdot = self._range(t)
-                off, offdot = -rng * x, -rdot * x
-            else:
-                off, offdot = self._flyaround(t, r, v)
+            p = self._target_at(t)
+            pv_ = (self._target_at(t + h) - self._target_at(t - h)) / (2 * h)
             g = Target.parse(b"TGT1" + struct.pack(
-                ">12d", t, self.target_id, *(r + off), *(v + offdot), *matrix_to_quat(lvlh)))
+                ">12d", t, self.target_id, *p, *pv_, *matrix_to_quat(lvlh)))
             self.targets[g.id] = (g, wall)
 
 

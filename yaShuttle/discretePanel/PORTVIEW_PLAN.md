@@ -290,7 +290,7 @@ which portview follows from TRU1's attitude with no special handling.
   - the Hubble Space Telescope (20580): NASA 3D Resources' Hubble (A), in
     its V1-V2-V3 axes, metres from mid-length;
   - Mir (16609): NASA 3D Resources' simple Mir, ~0.0221 m a unit, +X along
-    the core toward the node, origin at the node;
+    the core toward the node, origin in the middle of the complex;
   - Solar Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3
     (15643): no published models, so simple shapes to their published
     dimensions (fetch_assets.py's PROCEDURAL), +X along the spin axis
