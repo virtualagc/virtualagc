@@ -1,8 +1,9 @@
 # STS-134 rendezvous with the ISS: plan
 
-Written 2026-10-08. **Status: PLAN ONLY.** Nothing here has been built. It
-was written read-only from the repository, the flight source, and the
-documents listed under Sources.
+Written 2026-10-08. **Status:** the first milestone (M1, and a first try
+at M1b) is built and has flown; see section 5a.  Everything after it is
+still a plan.  The plan was written read-only from the repository, the
+flight source, and the documents listed under Sources.
 
 The goal is to fly STS-134's rendezvous and docking (FD1-FD3) the way the
 ascent, OMS 2 and entry are flown already:
@@ -209,6 +210,129 @@ the real ISS also gives the real lighting for the later sensor work.
   not flown yet. A capture (`sts134-ti`) is left for the later stages.
 
 **Effort: 3-5 days** (M1b +1-2).
+
+## 5a. M1 as built and flown (2026-10-08, macOS)
+
+**How to run it** (one line; about 75 min at rate 1 to TI, 2.6 h to the
+end of COAST):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48600 --rate 1 --to TI
+
+from `discretePanel`, with the STS-134 volume
+(`--tape`, default `~/dropbox-copy/sts134-ksc6-entry/OI340700-v44boot-sts134-ksc6.mmv`)
+and the ISS targets file (`--targets`, default
+`~/sts134-runs/rendezvous/sts134-targets.txt`).  Without `--to TI` it goes on
+to TIBURN (the Ti burn, M1b) and COAST (to T2).  `rndz-check.log` in DIR is
+the record: PASS's relative state against the truth every `--check-every`
+s, the Orbiter's navigation error in LVLH, the -Z axis's angle to the ISS,
+and each Ti solution beside the independent Lambert.
+
+**What was built.**
+- `vehdyn.c`: `YAGPC_VEHDYN_START_REL=NORAD,X,Y,Z,XD,YD,ZD[,UNIX]`, the
+  Orbiter placed off a target in PASS's own target-centred curvilinear LVLH
+  (GWJ_ORB_TGT_REL_COMP's inverse, GWJORB.hal), at the time UNIX, coasted to
+  the moment the calendar becomes known (the IPL's HALT puts that a minute
+  or two after `--date-time-epoch`); attitude +XVV -ZLV at the orbital rate.
+  Unit test `test/test_vehdyn_rel.c`.
+- `vehdyn.c`, **a bug fix**: the forward verniers F5L/F5R fire DOWN (they
+  are named for their side, not their plume).  Read as a left- and a
+  right-firing jet they gave no pitch, and VERN attitude hold fired them
+  without end (0.09 kg/s).  Test in `test_vehdyn.c`.
+- `mtumodel.c`: `YAGPC_MTU_MET_EPOCH=<Unix time>`, the timing unit's MET
+  accumulator counting from liftoff, so a run started on orbit has the
+  flight's MET (PASS takes its MET reference as GMT less the unit's MET,
+  FPMMTURM) and the crew keys the burn pad's MET times.  Default unchanged.
+- `tools/rndz_start.py`: `start` (the starting state) and `lambert` (the
+  acceptance check: conic and precision J2-J4 Lambert, PASS's LVLH).
+- `groundstation.py tsv`: message 10 from TGT1 (and `--state`).
+- `examples/flights/fly_rndz134.py`: the driver.  It reads PASS's own
+  variables out of capture memory images at the DASS addresses of the
+  OI-34 GNC2 map (`PFS/mafgen/DASS_G2.ASC`), checked on each image against
+  the Lambert flags' INITIAL.
+
+**Corrections to the plan above.**
+1. **The Ti point is not reached co-elliptically.**  The checklist's ORBT
+   RENDEZVOUS PROFILE (p. 1-5) has NC at PET -1:32, 246 kft behind and about
+   1.2 kft below, starting a one-revolution loop that dips some 40 kft below
+   the station and comes up to the Ti point, arriving with XD about
+   -9 ft/s.  From there Ti is a posigrade burn of about 9 ft/s (STS-134 flew
+   8.4); from a co-elliptic arrival (XD = 1.5 n DZ, item 2 of section 5) it
+   would be a 2.7 ft/s retrograde one.  `rndz_start.py start` puts the
+   Orbiter on the nominal NC arc (a J2-J4 shooting solution from the NC
+   point to the Ti point, coplanar at NC); at 06:30 that is 237.5 kft behind
+   and 20.8 kft below, closing at 35 ft/s.
+2. **This tape's orbit-targeting I-loads are zero** (all 40 sets; read from
+   the IPL capture), the generic source's INITIAL(0); the Lambert flags are
+   the source's (10 ON).  The crew keys TGT 10 (ITEM 6, 17, 18-20) and
+   LOADs it, as the checklist's "check TGT set data" allows.  The target
+   drag I-loads are mass 1, CD 2, area 1; no K-factor (message 42) was sent.
+3. **Run at rate 1.**  At `--rate 2`, with SPEC 33 up, the IDP's transfers
+   broke ("transfer abandoned", the bus pump not answering) and every key
+   after SPEC 33 was lost.  At rate 1 nothing was lost.
+
+**Results** (run DIRs `~/sts134-runs/rendezvous/m1-run2`, `-run3`, `-run4`).
+- **The uplinks land.**  A minute after messages 9 and 10 (run m1-run2),
+  PASS's range and rate (from its own states in the downlist, format 22)
+  agreed with the truth to **+0.5 ft and +0.003 ft/s**; ten minutes later
+  +2.3 ft and +0.005 ft/s.  SPEC 33 showed RNG 208.324 kft, RDOT -61.86.
+- **Target track.**  UNIV PTG TGT ID 1, BODY VECT 3: the maneuver took about
+  4 min; in B/AUTO/ALT the -Z axis held 2.6-2.9 deg off the ISS, in
+  A/AUTO/VERN **0.2-1.0 deg** (PASS's own attitude errors agree: the DAP's
+  deadband).  In portview's overhead view the ISS (sunlit, ~51 kft out) is
+  the disc 7.3 deg from the view's centre toward the nose -- the view looks
+  5 deg aft of -Z.
+- **Ti, TGT 10, COMPUTE T1** (BASE TIME = T1 TIG = MET 001/18:41:32, GMT
+  138/07:38:00; DT 76.9 min; T2 offset -0.9, 0, +1.8 kft):
+
+  | | DVX | DVY | DVZ | DVT ft/s |
+  |---|---|---|---|---|
+  | PASS, preliminary (Ti -50 min, MM 201) | +9.03 | -0.68 | +2.46 | 9.39 |
+  | Lambert from PASS's own states, preliminary | +8.90 | -0.88 | +2.63 | 9.33 |
+  | PASS, final (Ti -17 min, MM 202) | +9.02 | -0.68 | +2.44 | 9.37 |
+  | Lambert from PASS's own states, final | +8.89 | -0.88 | +2.60 | 9.31 |
+  | Lambert from the truth, final ("ground") | +8.62 | -0.68 | +1.98 | 8.87 |
+  | STS-134 as flown | | | | ~8.4 |
+
+  PASS's solution is within 0.2 ft/s per axis of the independent one from
+  the same states, and within the final-ground limits of the truth's.  A
+  second, clean run of the one-line command (`m1-run4`, `--to TI`, final in
+  MM 201) gave PASS +9.07 -0.68 +2.52 (9.44) against +8.94 -0.89 +2.69
+  (9.38) from its own states and +8.56 -0.68 +1.85 (8.79) from the truth.
+  In that run the first comparison after the uplinks, with the target-track
+  maneuver already under way, was -0.8 ft and -0.039 ft/s: the 0.01 ft/s
+  holds only until the jets start (see the drift below).
+- **The Orbiter's PROP navigation drifts** once the vehicle is maneuvering:
+  1 ft at the uplink, 2 kft and 2.1 ft/s (mostly LVLH Z) by Ti - 23 min.
+  The truth's non-gravitational delta-V over the 33 min before final
+  targeting was only 0.044 ft/s; PASS's selected IMU velocity
+  (CGMV_VEL_SEL, downlist) meanwhile drifts about 0.0006 ft/s^2 (19 micro-g),
+  and PASS integrates it whenever a jet has fired in the nav cycle
+  (GL5NAV steps 7B-7E) -- in target track, nearly always.  Whether those
+  19 micro-g are an IMU-model residual (most likely: the model's
+  compensation is meant to be exact) or acceptable realism is open.  The
+  target's state stays within ~160 ft.
+- **M1b (first try).**  PROP was within the limits of the ground solution,
+  so PROP was burned (p. 1-3 rules).  Both OMS engines fired, 6.96 s each,
+  not the left alone: the engine select keyed before COMPUTE T1 did not
+  survive it (the driver now keys "Eng sel" again after it, as RNDZ OMS
+  BURN step 2 checks it).  With the navigation 2 kft and 2 ft/s off, the
+  truth was predicted to arrive at T2 some 28.8 kft behind the aim point --
+  the miss that sensor navigation and MC1-MC4 exist to remove.  Flown on
+  to T2 (Ti + 76.9 min, the coast in -Z target track) it arrived **25.3 kft
+  behind, 0.7 kft right and 1.0 kft below** the station, closing at
+  0.6 ft/s, instead of TGT 10's 0.9 kft behind and 1.8 kft below.  The
+  truth-based ("ground") solution would have reached the aim point; under
+  the checklist's rules PROP was nonetheless the one to burn, being within
+  the limits, so with no sensor pass the miss is the honest outcome.
+  M1b is therefore not passed: it needs the navigation drift above
+  understood, or Stage 1's sensors, or both.
+
+**Deviations, recorded.**  One GNC GPC where the rules want two; no SM, so
+no SM 2 TIME, SM ANTENNA or SM timer; DAP A7/B7 not configured (SPEC 20
+not keyed: this tape's configurations are unchecked); TGT sets keyed, not
+I-loaded; the burn pad's TV ROLL and trims left at PASS's own; no drag
+K-factor uplink; the orbiter's mass is the liftoff figure with full OMS
+tanks (`YAGPC_VEHDYN_ORBITER_KG` has no FD3 form).
 
 ## 6. The stages
 

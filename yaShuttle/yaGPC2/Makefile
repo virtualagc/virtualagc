@@ -121,7 +121,7 @@ $(BUILD_DIR):
 
 TEST_BIN_DIR := $(BUILD_DIR)/test
 
-UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_bce_status test_volsource test_bcenet_txthread test_mtumodel test_mdmdev test_physics test_vehdyn test_landaids
+UNIT_TESTS := test_packedbits test_strfmt test_ebcdic test_q31 test_regmem test_mcm_membus test_floatIBM test_cpu_ea test_cpu_instr_decode test_cpu_instr_exec test_iop_bce_exec test_iop_msc_exec test_instr_tostr test_iop_exec_processors test_iop_discretes test_discrete_rotation test_gpcops test_schedule test_icc_queue test_iop_dkbuses test_bce_status test_volsource test_bcenet_txthread test_mtumodel test_mdmdev test_physics test_vehdyn test_vehdyn_rel test_landaids
 
 TEST_SCRIPTS := test/test_debugger.sh test/test_scheduler.sh \
                 test/test_io_read.sh test/test_random.sh test/test_rtl.sh
@@ -232,6 +232,9 @@ $(TEST_BIN_DIR)/test_landaids: test/test_landaids.c src/landaids.c src/landaids.
 
 $(TEST_BIN_DIR)/test_vehdyn: test/test_vehdyn.c src/vehdyn.c src/vehdyn.h src/physics.c src/physics.h src/envcache.c src/eiumodel.c src/mecmodel.c | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_vehdyn.c src/vehdyn.c src/physics.c src/envcache.c src/eiumodel.c src/mecmodel.c $(LDLIBS)
+
+$(TEST_BIN_DIR)/test_vehdyn_rel: test/test_vehdyn_rel.c src/vehdyn.c src/vehdyn.h src/physics.c src/physics.h src/envcache.c src/eiumodel.c src/mecmodel.c | $(TEST_BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ test/test_vehdyn_rel.c src/vehdyn.c src/physics.c src/envcache.c src/eiumodel.c src/mecmodel.c $(LDLIBS)
 
 $(TEST_BIN_DIR)/test_iop_dkbuses: test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c src/iop.h | $(TEST_BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ test/test_iop_dkbuses.c $(IOP_TEST_DEPS) src/cpu_instr.c src/strfmt.c $(LDLIBS)

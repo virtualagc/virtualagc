@@ -1041,6 +1041,28 @@ static unsigned bcd_pack(unsigned value, unsigned tensBits, unsigned onesBits,
     return out;
 }
 
+/* A time as the unit's three words: days/hours, minutes/seconds, and
+ * eighths of a millisecond (see mtu_fill_time for the layouts). */
+static void mtu_time_words(unsigned days, unsigned hr, unsigned min, unsigned sec,
+                           unsigned eighths, uint16_t w[3]) {
+    /* DAYS/HOURS: 2 bits day-hundreds, 4 day-tens, 4 day-units,
+     * 2 hour-tens, 4 hour-units. */
+    unsigned shift = 16, dyhr = 0;
+    shift -= 2; dyhr |= ((days / 100u) & 0x3u) << shift;
+    shift -= 4; dyhr |= (((days / 10u) % 10u) & 0xfu) << shift;
+    shift -= 4; dyhr |= ((days % 10u) & 0xfu) << shift;
+    shift -= 2; dyhr |= ((hr / 10u) & 0x3u) << shift;
+    shift -= 4; dyhr |= ((hr % 10u) & 0xfu) << shift;
+    /* MIN/SEC: 3 bits minute-tens, 4 minute-units, 3 second-tens,
+     * 4 second-units, then two spare in the low bits. */
+    unsigned s2 = 16, mnsc = 0;
+    mnsc |= bcd_pack(min, 3, 4, &s2);
+    mnsc |= bcd_pack(sec, 3, 4, &s2);
+    w[0] = (uint16_t)dyhr;
+    w[1] = (uint16_t)mnsc;
+    w[2] = (uint16_t)(eighths & 0x1fffu);
+}
+
 /* YAGPC_MTU_SKEW=<seconds>: report a time deliberately WRONG by that much.
  *
  * It answers a question the display cannot: whether PASS is really taking the
@@ -1266,6 +1288,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
     epochUs += skewUs;
     if (us < 0.0) us = 0.0;
     unsigned eighths, sec, min, hr, days;   /* eighths: 0.125 ms units */
+    double unixNow = -1.0;                  /* the unit's time as Unix time, if it has a calendar */
     if (m->epochSec != NULL && *m->epochSec > 0.0) {
         /* THE TIME OF DAY, not seconds since start-up.  The unit is a clock:
          * PASS initialises GMT from it (FPMMTURM) and shows it on every
@@ -1283,6 +1306,7 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
          * while the crew set up the IPL, most of all.  Without it PASS's
          * GMT ran behind the real time of day by exactly that long. */
         double t = *m->epochSec + epochUs / 1e6;
+        unixNow = t;
         time_t whole = (time_t)floor(t);
         struct tm lt;
         gmtime_r(&whole, &lt);
@@ -1303,21 +1327,6 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
         days = (unsigned)((totalHr / 24ull) % 400ull);
     }
 
-    /* DAYS/HOURS: 2 bits day-hundreds, 4 day-tens, 4 day-units,
-     * 2 hour-tens, 4 hour-units. */
-    unsigned shift = 16, dyhr = 0;
-    shift -= 2; dyhr |= ((days / 100u) & 0x3u) << shift;
-    shift -= 4; dyhr |= (((days / 10u) % 10u) & 0xfu) << shift;
-    shift -= 4; dyhr |= ((days % 10u) & 0xfu) << shift;
-    shift -= 2; dyhr |= ((hr / 10u) & 0x3u) << shift;
-    shift -= 4; dyhr |= ((hr % 10u) & 0xfu) << shift;
-
-    /* MIN/SEC: 3 bits minute-tens, 4 minute-units, 3 second-tens,
-     * 4 second-units, then two spare in the low bits. */
-    unsigned s2 = 16, mnsc = 0;
-    mnsc |= bcd_pack(min, 3, 4, &s2);
-    mnsc |= bcd_pack(sec, 3, 4, &s2);
-
     /* MILLISECONDS in 0.125 ms units, thirteen bits -- and all thirteen are
      * used.  FPMMTUFX multiplies the whole field by 125 us ('MH R4,FPM125'),
      * so the unit's resolution is an eighth of a millisecond.  This used to
@@ -1330,7 +1339,8 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
      * ahead of a boundary (AIBGPCLO '.31767 - RUNTIME'); a step of that size
      * inside the join put the SCHEDULE AT on the wrong side of the boundary,
      * and the new member took one SIP too many (ledger #259). */
-    unsigned msec = eighths & 0x1fffu;
+    uint16_t gmtW[3], metW[3] = { 0, 0, 0 };
+    mtu_time_words(days, hr, min, sec, eighths, gmtW);
 
     /* The six transferred halfwords are GMT at 0,1,2 and MET at 3,4,5 --
      * the buffer's very start, not offset 2.  FIOPRMPG's commander points
@@ -1346,15 +1356,43 @@ static void mtu_fill_time(struct MtuModel *m, int b) {
      * detect the PCMMU clock ticking -- not a header offset, and not the
      * MTU's own layout.
      *
-     * MET is left zero: this simulator has no launch to count from, and
-     * FPMLIMCK's MET tests have no lower bound (days < X'365', hours
-     * <= X'23', min <= X'59', sec <= X'164'), so all-zero passes. */
+     * MET is left zero unless the run says when MET began: by default this
+     * simulator has no launch to count from, and FPMLIMCK's MET tests have
+     * no lower bound (days < X'365', hours <= X'23', min <= X'59', sec <=
+     * X'164'), so all-zero passes.  PASS takes its MET reference as GMT less
+     * the unit's MET when it initialises its clock (FPMMTURM: "COMPUTE MET
+     * REFERENCE TIME BY SUBTRACTING MET FROM GMT"), so with MET zero a
+     * vehicle IPL'd straight into OPS 2 counts MET from its IPL.
+     *
+     * YAGPC_MTU_MET_EPOCH=<Unix time>: the unit's MET accumulator counts from
+     * then -- liftoff -- as the real one does after the launch reset, so
+     * that a run started on orbit has the flight's MET and the crew's
+     * MET-tagged entries (the rendezvous burn pads' TIGs, SPEC 34's BASE
+     * TIME) are the flight's own numbers.  Days from 0. */
+    {
+        static int inited = 0;
+        static double metEpoch = -1.0;
+        if (!inited) {
+            inited = 1;
+            const char *e = yagpc_getenv("YAGPC_MTU_MET_EPOCH");
+            if (e != NULL && *e != '\0') metEpoch = atof(e);
+        }
+        if (metEpoch > 0.0 && unixNow >= metEpoch) {
+            double met = unixNow - metEpoch;
+            unsigned long long totalEighths = (unsigned long long)(met * 8000.0);
+            unsigned long long totalSec = totalEighths / 8000ull;
+            mtu_time_words((unsigned)(totalSec / 86400ull), (unsigned)(totalSec / 3600ull % 24ull),
+                           (unsigned)(totalSec / 60ull % 60ull), (unsigned)(totalSec % 60ull),
+                           (unsigned)(totalEighths % 8000ull), metW);
+        }
+    }
     memset(m->reply[b], 0, sizeof m->reply[b]);
     for (int r = 0; r < MTU_READERS; r++) mtu_carry_take(m, b, r);
     for (int r = 0; r < MTU_READERS; r++) {
-        m->reply[b][r][0] = (uint16_t)dyhr;
-        m->reply[b][r][1] = (uint16_t)mnsc;
-        m->reply[b][r][2] = (uint16_t)msec;
+        for (int k = 0; k < 3; k++) {
+            m->reply[b][r][k] = gmtW[k];
+            m->reply[b][r][3 + k] = metW[k];
+        }
         m->head[b][r] = 0;
         m->sent[b][r] = 0;
         m->count[b][r] = MTU_WORDS;

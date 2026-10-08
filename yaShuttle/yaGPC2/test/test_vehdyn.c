@@ -75,6 +75,24 @@ int main(void) {
     vehdyn_advance(21e6);
     check(fabs(s->w[1] - q1) < 0.01 * fabs(q1), "rate held while coasting", s->w[1], q1);
 
+    /* THE FORWARD VERNIERS FIRE DOWN.  F5L and F5R are named for their side
+     * of the nose, not for their plume (vehdyn.c, jet_axis): together, for
+     * ten seconds, they pitch the nose UP -- 2 x 106.8 N about 19 m forward
+     * of the CG, some 4,060 N m on Iyy 1.05e7: 3.9e-3 rad/s after ten s, with no
+     * roll or yaw to speak of.  Read as a left- and a right-firing jet, they
+     * gave no pitch at all, and PASS's VERN attitude hold fired them for
+     * ever. */
+    reset_rcs_only(0.0);
+    memset(ff, 0, sizeof ff); memset(fa, 0, sizeof fa);
+    ff[3] = 0x2000 | 0x1000;                          /* F5L + F5R */
+    vehdyn_set_fire_words(ff, fa, 0.0);
+    memset(ff, 0, sizeof ff);
+    vehdyn_set_fire_words(ff, fa, 10e6);
+    s = vehdyn_state();
+    check(s->w[1] > 3.4e-3 && s->w[1] < 4.4e-3, "forward verniers pitch the nose up (rad/s)", s->w[1], 3.9e-3);
+    check(fabs(s->w[0]) < 1e-6 && fabs(s->w[2]) < 1e-6, "and neither roll nor yaw",
+          fabs(s->w[0]) + fabs(s->w[2]), 0.0);
+
     /* A PURE TRANSLATION: L1A and R1A together push +X with no net yaw (they
      * are mirror images) -- delta-v = 2F t / m, and the sensed delta-v the
      * accelerometers would count is the same. */
