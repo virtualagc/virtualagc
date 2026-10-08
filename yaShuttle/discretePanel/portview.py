@@ -2248,12 +2248,15 @@ uniform float uNear, uFar;
 centroid out vec3 vNrm;         // body frame
 centroid out vec3 vPos;         // body frame
 centroid out vec2 vUv;
+centroid out float vDist;       // the camera-frame depth, for the fragment's own
 void main() {
     vec3 c = uRot * aPos + uTrans;
     // Depth linear in distance over just this vehicle's span: exact to well
-    // under a millimetre in 24 bits.
+    // under a millimetre in 24 bits.  (Clipping only: the depth tested is the
+    // fragment's own, below.)
     float z = ((c.z - uNear) / (uFar - uNear)) * 2.0 - 1.0;
     gl_Position = vec4(c.x / uTan.x, c.y / uTan.y, z * c.z, c.z);
+    vDist = c.z;
     vNrm = aNrm;
     vPos = aPos;
     vUv = aUv;
@@ -2265,6 +2268,8 @@ MODEL_FS = """
 centroid in vec3 vNrm;
 centroid in vec3 vPos;
 centroid in vec2 vUv;
+centroid in float vDist;
+uniform float uNear, uFar;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragTrans;
 uniform sampler2D uTex;
@@ -2289,6 +2294,13 @@ void main() {
     vec3 c = (alb / PI * (sun + earth + 0.01) + spec) * uSunE;
     fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
     fragTrans = vec4(0.0);
+    // ITS OWN DEPTH, from its interpolated distance.  The depth the vertex
+    // stage gives is linear in distance at the corners, but the rasterizer
+    // interpolates it linearly across the screen, which is right only for
+    // 1/z: along a long triangle seen obliquely it was off by ~L*L/(8d)
+    // (14 cm on a 4.3 m drum at 17 m), and a lining 5 cm behind a surface
+    // showed through it.  vDist is interpolated perspective-correctly.
+    gl_FragDepth = clamp((vDist - uNear) / (uFar - uNear), 0.0, 1.0);
 }
 """
 
