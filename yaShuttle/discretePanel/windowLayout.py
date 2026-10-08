@@ -196,6 +196,9 @@ def _win():
                                    ctypes.c_int, ctypes.c_int, wintypes.UINT]
         d.DwmGetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD,
                                             ctypes.c_void_p, wintypes.DWORD]
+        u.MonitorFromPoint.argtypes = [wintypes.POINT, wintypes.DWORD]
+        u.MonitorFromPoint.restype = wintypes.HMONITOR
+        u.GetMonitorInfoW.argtypes = [wintypes.HMONITOR, ctypes.c_void_p]
         _WIN = (ctypes, wintypes, u, d, proc)
     return _WIN
 
@@ -269,6 +272,45 @@ def _win_geometry(wid):
     return x + dx, y + dy, w, h
 
 
+def _win_reachable(hwnd, wx, wy, outer):
+    """How far to move a window whose outer rectangle will have its top-left
+    at (wx, wy) so that its title bar can be grabbed: the visible frame's top
+    no higher than the top of the work area of the monitor it lands on, and
+    some of the bar's width on that monitor.  A layout made on Linux places
+    the INSIDE of a window where Marco put it, and Marco's 80-pixel offset
+    includes the desktop's top panel; Windows' title bar must then fit above
+    an inside at the top of the screen, and went off it (Win11-native,
+    2026-10-07: frames at y = -45 at 144 dpi, impossible to drag)."""
+    ctypes, wintypes, u, d, _proc = _win()
+
+    class MONITORINFO(ctypes.Structure):
+        _fields_ = [("cbSize", wintypes.DWORD), ("rcMonitor", wintypes.RECT),
+                    ("rcWork", wintypes.RECT), ("dwFlags", wintypes.DWORD)]
+    vis = wintypes.RECT()
+    # DWMWA_EXTENDED_FRAME_BOUNDS: the frame as drawn, without the invisible
+    # resize borders that GetWindowRect counts
+    if d.DwmGetWindowAttribute(hwnd, 9, ctypes.byref(vis), ctypes.sizeof(vis)) != 0:
+        vis = outer
+    top_off, left_off = vis.top - outer.top, vis.left - outer.left
+    vis_w = vis.right - vis.left
+    mi = MONITORINFO()
+    mi.cbSize = ctypes.sizeof(MONITORINFO)
+    mon = u.MonitorFromPoint(wintypes.POINT(int(wx + left_off + vis_w // 2), int(wy + top_off)), 2)
+    if not mon or not u.GetMonitorInfoW(mon, ctypes.byref(mi)):
+        return 0, 0
+    work = mi.rcWork
+    sx = sy = 0
+    if wy + top_off < work.top:
+        sy = work.top - (wy + top_off)
+    grip = min(100, vis_w)                      # enough of the bar to take hold of
+    vl = wx + left_off
+    if vl + vis_w < work.left + grip:
+        sx = work.left + grip - (vl + vis_w)
+    elif vl > work.right - grip:
+        sx = work.right - grip - vl
+    return sx, sy
+
+
 def _win_place(wid, x, y, w=None, h=None, verbose=False):
     """As place(): True when it is where it was asked to be, None if it has
     gone, else how far out it finished.  Windows will not let a window's
@@ -300,8 +342,12 @@ def _win_place(wid, x, y, w=None, h=None, verbose=False):
             size = (int(w) + extra_w, int(h) + extra_h)
         else:
             size, flags = (0, 0), flags | SWP_NOSIZE
-        u.SetWindowPos(hwnd, None, int(x) - dx - left, int(y) - dy - top,
-                       size[0], size[1], flags)
+        wx, wy = int(x) - dx - left, int(y) - dy - top
+        sx, sy = _win_reachable(hwnd, wx, wy, outer)
+        if (sx or sy) and verbose:
+            print("    moved %+d,%+d to keep the title bar on the screen" % (sx, sy))
+        x, y = x + sx, y + sy                   # where it can be: judged against that
+        u.SetWindowPos(hwnd, None, wx + sx, wy + sy, size[0], size[1], flags)
         time.sleep(0.2)
         now = _win_geometry(wid)
         if now is None:
