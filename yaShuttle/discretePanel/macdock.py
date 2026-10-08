@@ -18,6 +18,10 @@ was: this is a convenience, never a reason to fail.  A no-op on Linux.
 
 Windows has the same trouble with its taskbar, and the same call cures it
 there by another means; see set_app_name.
+
+The same call also keeps the program from being treated as background work
+when nobody can see its windows -- Windows' power throttling, macOS's App
+Nap -- since a display or a panel that answers late holds the GPC up.
 """
 
 import sys
@@ -93,5 +97,48 @@ def set_app_name(name):
         if info:
             send(info, b"setObject:forKey:", nsstring(name), nsstring("CFBundleName"),
                  argtypes=(ctypes.c_void_p, ctypes.c_void_p))
+        # AND NOT A BACKGROUND PROCESS -- macOS's App Nap, the counterpart of
+        # the Windows power throttling above, and with the same trigger: a
+        # program none of whose windows can be seen, as when a KVM switch
+        # takes the monitors away, or they are hidden or covered.  Some tens
+        # of seconds later macOS "naps" it: its threads drop to background
+        # QoS (scheduling priority 46 -> 4, `ps -o pri`), which on Apple
+        # silicon confines them to the efficiency cores -- two of them on an
+        # M1 Max, shared with whatever else the machine is doing in the
+        # background -- and its timers are coalesced.
+        #
+        # For a display that is not an inconvenience, it is the GPC's I/O.
+        # MEDS2 redraws a whole display for every fill, and measured with
+        # CRT 1's window hidden, SPEC 34 up and --rate 2, a redraw went from
+        # 25 ms to 150 ms the moment the priority fell.  The IDP answering
+        # the GPC shares the process (and Python's one lock) with those
+        # redraws, so it answered later and later: with the efficiency cores
+        # also busy, 1037 of 1901 polls timed out at the GPC, keystrokes
+        # were lost and the IDP sat in one read of the DK bus for 108 s
+        # while nothing else -- the keyboard among it -- was heard.  That is
+        # the "every key after SPEC 33 lost at --rate 2" of RENDEZVOUS_PLAN
+        # 5a.  At --rate 1 there is half as much redrawing in a wall second,
+        # which is why it went on working there.
+        #
+        # So every program opts out, here, before it has a window, for the
+        # life of the process: NSActivityUserInitiatedAllowingIdleSystemSleep
+        # (no App Nap -- but the Mac may still sleep when idle, as before)
+        # and NSActivityLatencyCritical (no timer coalescing).  The token is
+        # retained and never ended; the activity ends with the process.
+        try:
+            info_ = send(objc.objc_getClass(b"NSProcessInfo"), b"processInfo")
+            activity = send(info_, b"beginActivityWithOptions:reason:",
+                            ctypes.c_uint64(0x00EFFFFF | 0xFF00000000),
+                            nsstring("real-time simulation (%s)" % name),
+                            argtypes=(ctypes.c_uint64, ctypes.c_void_p))
+            if activity:
+                send(activity, b"retain")
+                _ACTIVITY.append(activity)
+        except Exception:
+            pass
     except Exception:
         pass
+
+
+# The App Nap opt-out's token (see set_app_name), held for the process's life.
+_ACTIVITY = []

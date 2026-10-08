@@ -418,9 +418,12 @@ class Bus(object):
         self._notifier = QSocketNotifier(s.fileno(), QSocketNotifier.Type.Read)
         self._notifier.activated.connect(self._readable)
 
-    def _readable(self, _fd):
-        # Drain the socket: one activation may cover many datagrams.
-        while True:
+    def _readable(self, _fd, limit=None):
+        # Drain the socket: one activation may cover many datagrams -- all of
+        # them, or on the BusPump no more than `limit` (BusPump.DRAIN_MAX).
+        n = 0
+        while limit is None or n < limit:
+            n += 1
             try:
                 message, remote = self.server.recvfrom(65536)
             except (BlockingIOError, InterruptedError):
@@ -533,6 +536,33 @@ class BusPump(object):
 
     _instance = None
     _instanceLock = threading.Lock()
+
+    # AT MOST THIS MANY DATAGRAMS FROM ONE BUS BEFORE THE OTHERS GET A TURN.
+    #
+    # The pump used to read a ready socket until it was empty.  A bus whose
+    # datagrams come in as fast as the pump can take them is never empty, and
+    # then the pump never came back out of it.  That was measured with MEDS2
+    # at background priority (macOS's App Nap; see macdock.set_app_name),
+    # --rate 2 and SPEC 34 up: a single read of the DK bus lasted 108 s and
+    # 62,360 datagrams.  For all that time nothing else on this thread ran.
+    # The keyboard's socket went unread, so keystrokes never reached the IDP.
+    # call() never ran, so a snapshot failed with "the bus pump did not answer
+    # within 5.0 s".  The heartbeat to the MDUs stopped.  That is the "every
+    # key after SPEC 33 was lost" of RENDEZVOUS_PLAN.md 5a.
+    #
+    # Now each pass reads at most this many datagrams from each ready bus,
+    # then runs the calls and timers and selects again.  The selector is
+    # level-triggered (kqueue, epoll and select as `selectors` uses them), so
+    # a bus with more waiting is reported again at once.  Nothing is lost,
+    # and nothing waits longer than one pass.  Measured under the same
+    # overload: every keystroke reached the IDP, no snapshot timed out, and
+    # the longest single read was 3.9 s instead of 38 s.
+    #
+    # This does not make an overloaded IDP answer the GPC in time; not
+    # overloading it is the App Nap opt-out's job.  It keeps an overloaded
+    # IDP from going deaf.  64 is about a millisecond of reading normally
+    # (12 us a datagram, measured), an eighth of a display fill.
+    DRAIN_MAX = 64
 
     @classmethod
     def get(cls):
@@ -671,7 +701,7 @@ class BusPump(object):
                     except (BlockingIOError, InterruptedError):
                         pass
                 elif key.data.server is not None:
-                    self._guard(key.data._readable, None)
+                    self._guard(key.data._readable, None, BusPump.DRAIN_MAX)
             with self._lock:
                 calls, self._calls = self._calls, []
             for fn in calls:
