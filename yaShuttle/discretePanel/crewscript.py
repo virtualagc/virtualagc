@@ -40,6 +40,10 @@ HC_OFFSET = 86                  # crew scripts to handcontrollers.py: base + 86
 HC_ACK_OFFSET = 87              # handcontrollers.py's acknowledgements: base + 87
 RECORD_OFFSET = 89              # a person's actions, as script lines: base + 89
 LPS_OFFSET = 108                # yaGPC2's ground Launch Processing System: base + 108
+# Taken elsewhere, listed so that nothing new lands on them: base + 80-81
+# (discretes), 85 (yaGPC2's TGT1, other vehicles, read by portview.py), 88
+# (downlist), 97 (FC instruments), 98 (TRU1, the truth), 99 (uplink), 100 on
+# (the MDMs' I/O).
 
 
 def idp_snapshot_files(n):

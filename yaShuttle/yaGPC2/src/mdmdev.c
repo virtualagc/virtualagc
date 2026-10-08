@@ -1665,6 +1665,40 @@ static void truth_publish(void) {
     sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
 }
 
+/* THE OTHER VEHICLES, for portview: one TGT1 datagram per vehicle per
+ * TRUTH_PERIOD_S of vehicle time on port base + TARGET_OFFSET: "TGT1", then
+ * big-endian IEEE doubles -- vehicle time (s), the NORAD id, M50 position (m)
+ * and velocity (m/s) of its centre of mass, and its attitude, quaternion
+ * body -> M50 (w x y z), in the body frame its model is drawn in (the ISS's:
+ * +X forward, +Y starboard, +Z nadir).  12 doubles; readers take the first
+ * N they know.  Only with the dynamics on, a panel wired and a target placed
+ * (YAGPC_VEHDYN_TARGETS, vehdyn.c). */
+#define TARGET_OFFSET 85
+
+static void targets_publish(void) {
+    static double next = -1.0;
+    if (!crewOpen || crewFd[1] < 0 || !vehdyn_enabled() || vehdyn_target_count() <= 0) return;
+    const PhysState *st = vehdyn_state();
+    if (st->t < next && st->t > next - 10.0) return;
+    next = st->t + TRUTH_PERIOD_S;
+    for (int k = 0; k < vehdyn_target_count(); k++) {
+        int id;
+        double r[3], v[3], q[4], d[12];
+        if (!vehdyn_target(k, &id, r, v, q)) continue;
+        d[0] = st->t; d[1] = id;
+        for (int i = 0; i < 3; i++) { d[2 + i] = r[i]; d[5 + i] = v[i]; }
+        for (int i = 0; i < 4; i++) d[8 + i] = q[i];
+        uint8_t b[4 + 8 * 12];
+        memcpy(b, "TGT1", 4);
+        for (int i = 0; i < 12; i++) put_be_double(b + 4 + 8 * i, d[i]);
+        struct sockaddr_in to = {0};
+        to.sin_family = AF_INET;
+        to.sin_addr.s_addr = inet_addr("239.255.1.1");
+        to.sin_port = htons((uint16_t)(crewPortBase + TARGET_OFFSET));
+        sendto(crewFd[1], (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
+    }
+}
+
 /* ---------------------------------------------------------------------
  * THE DOWNLIST, to the ground.  Every 40 ms each GPC writes its downlist
  * frame to the PCM master unit on its own IP bus (BCE 24): 32-word "write
@@ -1919,6 +1953,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
     if (vehdyn_enabled()) {
         vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
         truth_publish();
+        targets_publish();
     }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
@@ -2046,6 +2081,8 @@ bool mdmdev_dump(const char *dir) {
         double sb[512];
         int ns = startrk_save(sb, 512);
         put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+        ns = vehdyn_targets_save(sb, 512);
+        put_list(f, "targets", sb, ns < 512 ? ns : 512, true);
         ns = eiu_save(sb, 512);
         put_list(f, "engines", sb, ns < 512 ? ns : 512, true);
         ns = mec_save(sb, 512);
@@ -2148,6 +2185,8 @@ bool mdmdev_load(const char *dir) {
         double sb[512];
         int ns = get_list(root, "starTrackers", sb, 512);
         if (ns > 0) startrk_load(sb, ns, tCap);
+        ns = get_list(root, "targets", sb, 512);
+        vehdyn_targets_load(sb, ns);
         ns = get_list(root, "engines", sb, 512);
         if (ns > 0) eiu_load(sb, ns, tCap);
         ns = get_list(root, "mecs", sb, 512);
