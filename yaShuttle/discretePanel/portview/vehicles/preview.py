@@ -28,6 +28,8 @@ def main():
     ap.add_argument("--range", type=float)
     ap.add_argument("--out")
     ap.add_argument("--size", type=int, default=360)
+    ap.add_argument("--vehicle", action="append", default=[],
+                    help="portview's --vehicle: a variant to draw (e.g. hst1990)")
     a = ap.parse_args()
     from PIL import Image, ImageDraw
     d = os.path.join(PANEL, "portview", "cache", "models", a.key)
@@ -44,7 +46,8 @@ def main():
                         "--test-target", a.key, "--test-range", "%g" % rng, "--test-lap", "1e9",
                         "--test-phase", "%g" % deg,
                         "--test-date", "2011-05-18T08:30", "--test-lon", "-30", "--views", "up",
-                        "--size", str(a.size), "--snapshot", pre],
+                        "--size", str(a.size), "--snapshot", pre]
+                       + [x for v in a.vehicle for x in ("--vehicle", v)],
                        cwd=PANEL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
         f = pre + "-up.png"
         im = Image.open(f).convert("RGB") if os.path.exists(f) else Image.new("RGB", (a.size * 2, a.size * 2))
