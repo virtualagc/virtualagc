@@ -64,7 +64,7 @@ sidereal time from [17], ~0.7 deg off; lacking both, a plain dark Earth):
     portview/fetch_assets.py, four nested rings from +-2000 km at ~500 m
     down to +-4 km at ~1 m (NAIP), so the approach and the runway are real
     photographs; the ground there at the runway's height from the navaids.
-OTHER VEHICLES.  yaGPC2 sends TGT1 datagrams (port base + 85) for YAGPC_VEHDYN_TARGETS:
+OTHER VEHICLES.  yaGPC2 sends TGT1 datagrams (port base + 109) for YAGPC_VEHDYN_TARGETS:
 "TGT1" and big-endian doubles -- vehicle t, NORAD id, M50 position (m) and
 velocity (m/s) of the centre of mass, quaternion body -> M50 (w x y z).  The
 ISS (25544) is drawn from NASA JSC IGOAL's model as at STS-134 (May 2011),
@@ -240,7 +240,7 @@ FRAME_PX = 4                       # the frame drawn around each view, logical p
 FRAME_SRGB = (0.62, 0.62, 0.62)
 MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
-TARGET_OFFSET = 85                 # TGT1: other vehicles, from yaGPC2 (base + 96 is the crew scripts' progress)
+TARGET_OFFSET = 109                # TGT1: other vehicles, from yaGPC2 (not 81-85, the GPCs' discretes; not 96, the crew scripts' progress)
 ISS_NORAD = 25544
 ISS_PMA2 = (15.66, 0.0, 5.48)            # its docking face, the ISS frame (m): --test vbar aims there
 TRUTH_DOUBLES_MIN = 15

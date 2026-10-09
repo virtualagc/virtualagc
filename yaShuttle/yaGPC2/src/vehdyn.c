@@ -1,5 +1,6 @@
 #include "vehdyn.h"
 
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1916,6 +1917,7 @@ void vehdyn_reset(double t) {
  * halt gap included. */
 #define TGT_MAX 8
 #define TGT_STEP_S 10.0
+#define TGT_EPOCH_SPAN_S (30.0 * 86400.0)   /* a "target" state at most this far from the run's date */
 static struct Tgt {
     int norad;
     bool rel;                 /* "near": not placed yet */
@@ -1935,6 +1937,18 @@ static const double J2000_TO_M50[3][3] = {        /* as startrk.c */
     { -0.0111820611,  0.9999374784, -0.0000271474 },
     { -0.0048579477, -0.0000271765,  0.9999881997 },
 };
+
+/* A number from the targets file, or false (and a message) if it is not one. */
+static bool tgt_num(const char *path, int lineNo, const char *tok, double *x) {
+    char *end;
+    errno = 0;
+    *x = strtod(tok, &end);
+    if (end == tok || *end != '\0' || errno != 0 || !isfinite(*x)) {
+        fprintf(stderr, "vehdyn: %s:%d: \"%s\" is not a number; line skipped\n", path, lineNo, tok);
+        return false;
+    }
+    return true;
+}
 
 static void targets_read(void) {
     tgtN = 0;
@@ -1958,19 +1972,31 @@ static void targets_read(void) {
         g.lvlh = true; g.q[0] = 1.0; g.bc = 130.0; g.epoch = -1.0;
         int k;
         if (strcmp(tok[0], "target") == 0 && nt >= 9) {
-            g.norad = atoi(tok[1]);
-            g.epoch = atof(tok[2]);
-            double rj[3], vj[3];
-            for (int i = 0; i < 3; i++) { rj[i] = atof(tok[3 + i]); vj[i] = atof(tok[6 + i]); }
+            double id, rj[3], vj[3];
+            bool ok = tgt_num(path, lineNo, tok[1], &id) && tgt_num(path, lineNo, tok[2], &g.epoch);
+            for (int i = 0; ok && i < 3; i++)
+                ok = tgt_num(path, lineNo, tok[3 + i], &rj[i]) && tgt_num(path, lineNo, tok[6 + i], &vj[i]);
+            if (!ok) continue;
+            g.norad = (int)id;
+            double rn = sqrt(rj[0] * rj[0] + rj[1] * rj[1] + rj[2] * rj[2]);
+            if (rn < 6.3e6 || rn > 1e8 || g.epoch <= 0.0) {
+                fprintf(stderr, "vehdyn: %s:%d: vehicle %d at |r| %.0f m, epoch %.0f: not an orbit "
+                                "(r is metres, J2000; epoch Unix seconds); line skipped\n",
+                        path, lineNo, g.norad, rn, g.epoch);
+                continue;
+            }
             for (int i = 0; i < 3; i++) {
                 g.r[i] = J2000_TO_M50[i][0] * rj[0] + J2000_TO_M50[i][1] * rj[1] + J2000_TO_M50[i][2] * rj[2];
                 g.v[i] = J2000_TO_M50[i][0] * vj[0] + J2000_TO_M50[i][1] * vj[1] + J2000_TO_M50[i][2] * vj[2];
             }
             k = 9;
         } else if (strcmp(tok[0], "near") == 0 && nt >= 5) {
-            g.norad = atoi(tok[1]);
+            double id;
+            bool ok = tgt_num(path, lineNo, tok[1], &id);
+            for (int i = 0; ok && i < 3; i++) ok = tgt_num(path, lineNo, tok[2 + i], &g.off[i]);
+            if (!ok) continue;
+            g.norad = (int)id;
             g.rel = true;
-            for (int i = 0; i < 3; i++) g.off[i] = atof(tok[2 + i]);
             k = 5;
         } else {
             fprintf(stderr, "vehdyn: %s:%d: not a target line\n", path, lineNo);
@@ -1981,11 +2007,18 @@ static void targets_read(void) {
             else if (strcmp(tok[k], "inertial") == 0 && k + 4 < nt) {
                 g.lvlh = false;
                 double n = 0.0;
-                for (int i = 0; i < 4; i++) { g.q[i] = atof(tok[k + 1 + i]); n += g.q[i] * g.q[i]; }
+                for (int i = 0; i < 4; i++) {
+                    if (!tgt_num(path, lineNo, tok[k + 1 + i], &g.q[i])) g.q[i] = (i == 0);
+                    n += g.q[i] * g.q[i];
+                }
                 n = sqrt(n);
                 for (int i = 0; i < 4; i++) g.q[i] = n > 0.0 ? g.q[i] / n : (i == 0);
                 k += 5;
-            } else if (strcmp(tok[k], "bc") == 0 && k + 1 < nt) { g.bc = atof(tok[k + 1]); k += 2; }
+            } else if (strcmp(tok[k], "bc") == 0 && k + 1 < nt) {
+                double bc;
+                if (tgt_num(path, lineNo, tok[k + 1], &bc) && bc >= 0.0) g.bc = bc;
+                k += 2;
+            }
             else { fprintf(stderr, "vehdyn: %s:%d: what is %s?\n", path, lineNo, tok[k]); k++; }
         }
         tgt[tgtN++] = g;
@@ -2177,7 +2210,25 @@ static void start_rel_place(double unix) {
 static void targets_advance(void) {
     if (tgtN < 0) targets_read();
     double unix = vehdyn_unix(st.t);
+    if (tgtN == 0 && startRel.pending) {
+        startRel.pending = false;
+        fprintf(stderr, "vehdyn: YAGPC_VEHDYN_START_REL is set but YAGPC_VEHDYN_TARGETS names no "
+                        "vehicles; the orbiter stays where it was\n");
+    }
     if (tgtN == 0 || unix < 0.0) return;            /* nothing, or no calendar yet */
+    /* A "target" epoch far from the run's own date would have to be coasted
+     * through millions of steps (from 1970, if it were 0): not this one. */
+    for (int k = 0; k < tgtN; k++) {
+        struct Tgt *g = &tgt[k];
+        if (g->rel || g->placed || g->epoch < 0.0 || fabs(g->epoch - unix) <= TGT_EPOCH_SPAN_S) continue;
+        fprintf(stderr, "vehdyn: vehicle %d's state is %.1f days from the run's date; "
+                        "it is dropped (make its state nearer the date: tools/tle_target.py)\n",
+                g->norad, (g->epoch - unix) / 86400.0);
+        memmove(&tgt[k], &tgt[k + 1], (size_t)(tgtN - k - 1) * sizeof tgt[0]);
+        tgtN--;
+        k--;
+    }
+    if (tgtN == 0) return;
     /* the Orbiter first, so that a "near" vehicle is placed off where it is */
     if (startRel.pending) start_rel_place(unix);
     for (int k = 0; k < tgtN; k++) {
@@ -2224,17 +2275,23 @@ bool vehdyn_target(int k, int *norad, double r[3], double v[3], double q[4]) {
     return true;
 }
 
-/* A snapshot: each placed vehicle's id, attitude, drag, and its state with
- * the Unix time it is at -- restored as an epoch, so whatever clock the
- * restored run starts at, it is propagated there. */
+/* A snapshot: each vehicle's id, attitude, drag, and its state with the
+ * Unix time it is at -- restored as an epoch, so whatever clock the
+ * restored run starts at, it is propagated there.  ALL OR NONE: the
+ * vehicles are saved only when every one is placed, so that their order --
+ * the index startrk's lock and kuradar's target 0 keep -- survives the
+ * capture; before then (no calendar yet) none are, and the restored run
+ * reads YAGPC_VEHDYN_TARGETS afresh. */
 #define TGT_SAVED 14          /* doubles a vehicle: id, lvlh, q, bc, epoch, r, v */
 int vehdyn_targets_save(double *b, int max) {
     int n = 0;
 #define PUT(x) do { if (n < max) b[n] = (double)(x); n++; } while (0)
     double unix = vehdyn_unix(st.t);
+    if (unix < 0.0) return 0;
+    for (int k = 0; k < tgtN; k++)
+        if (!tgt[k].placed) return 0;
     for (int k = 0; k < (tgtN > 0 ? tgtN : 0); k++) {
         const struct Tgt *g = &tgt[k];
-        if (!g->placed || unix < 0.0) continue;
         PUT(g->norad); PUT(g->lvlh ? 1 : 0);
         for (int i = 0; i < 4; i++) PUT(g->q[i]);
         PUT(g->bc); PUT(unix + (g->t - st.t));

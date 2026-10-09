@@ -88,7 +88,7 @@ current navigation time first (with the I-loaded target mass, area and drag
 coefficient) and reinitialises the relative covariance.  The checklist's
 order is the first: MCC UPLINK ORB SV, TGT SV at PET -2:55, RNDZ NAV ENA at
 -2:15 (JSC-48072-134, pp. 4-5, 4-7).  The truth for it is yaGPC2's TGT1 feed
-(port base + 85: vehicle time, NORAD id, M50 r and v of the other vehicle's
+(port base + 109: vehicle time, NORAD id, M50 r and v of the other vehicle's
 centre of mass), its GMT from TRU1's GMT at the same vehicle clock.
 
 DOLILU FILES.  {"messages": [{"op": 15, "name": "...", "fields": [...]}]};
@@ -112,7 +112,7 @@ import time
 MCAST_GROUP = "239.255.1.1"
 UPLINK_OFFSET = 99
 TRUTH_OFFSET = 98
-TARGET_OFFSET = 85
+TARGET_OFFSET = 109
 DOWNLINK_OFFSET = 88
 FT_M = 0.3048
 

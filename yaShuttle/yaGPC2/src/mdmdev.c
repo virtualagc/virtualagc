@@ -1698,7 +1698,7 @@ static void truth_publish(void) {
  * +X forward, +Y starboard, +Z nadir).  12 doubles; readers take the first
  * N they know.  Only with the dynamics on, a panel wired and a target placed
  * (YAGPC_VEHDYN_TARGETS, vehdyn.c). */
-#define TARGET_OFFSET 85
+#define TARGET_OFFSET 109     /* not 81-85 (GPCs' discretes, cam.py), 96 (crew progress) */
 
 static void targets_publish(void) {
     static double next = -1.0;
@@ -2025,7 +2025,10 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
-        if (u == 3 && f == RR_READ) {
+        /* Only in a run that has something to find: otherwise FF3's read
+         * stays unanswered, as before the radar was modelled, and PASS's
+         * I/O bookkeeping in every other run is as it was. */
+        if (u == 3 && f == RR_READ && vehdyn_enabled() && vehdyn_target_count() > 0) {
             uint16_t rw[10];
             kuradar_read(rw, vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6);
             for (int i = 0; i < n; i++) out[i] = (i < 10) ? rw[i] : 0;

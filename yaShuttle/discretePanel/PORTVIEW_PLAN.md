@@ -28,7 +28,7 @@ Agreed with PASS-IDLE 2026-10-07.
 - **LEO targets:** planned in yaGPC2, not built yet.  The ISS is a second
   point-mass body in vehdyn, started from the historical TLE (epoch
   11138.51317551, for STS-134) and moved by the same gravity and drag.
-  The feed (built 2026-10-08): "TGT1" on port base + 85 (96, first planned, is the crew scripts' progress), big-endian doubles: vehicle t,
+  The feed (built 2026-10-08): "TGT1" on port base + 109 (96, first planned, is the crew scripts' progress; 85, used until 2026-10-09, is GPC 5's discretes), big-endian doubles: vehicle t,
   object id (NORAD number, 25544 for the ISS), M50 position (m), M50
   velocity (m/s), attitude quaternion body -> M50 (w x y z), already resolved
   by vehdyn.  One packet per object per 0.05 s of vehicle time.  portview maps
@@ -266,7 +266,7 @@ which portview follows from TRU1's attitude with no special handling.
   2017-08-21 eclipse (total at Hopkinsville at 18:26:40, 83-85% at Chicago
   and Atlanta).  Apple's OpenGL falls back to software for dual-source
   blending, so the Earth goes to its own buffers (colour, transmittance).
-- **P4 — LEO objects** (ISS done 2026-10-07): TGT1 reader on base + 85 per
+- **P4 — LEO objects** (ISS done 2026-10-07): TGT1 reader on base + 109 per
   PASS-IDLE's proposal (axes and origin confirmed with PASS-IDLE); the ISS
   from NASA JSC IGOAL's model (NASA 3D Resources "ISS (D) (IGOAL)", 96 MB
   glb, Draco-compressed; fetch_assets.py decodes it once, needing DracoPy and
@@ -309,7 +309,7 @@ which portview follows from TRU1's attitude with no special handling.
   lists, as point masses under its own gravity and each one's drag, from a
   J2000 state at a Unix epoch (tools/tle_target.py makes one from a TLE) or
   placed off the Orbiter ("near ID X Y Z", LVLH metres), held in LVLH or
-  inertially, and saved with snapshots; TGT1 on base + 85.  The ISS's
+  inertially, and saved with snapshots; TGT1 on base + 109.  The ISS's
   STS-134 TLE (Space-Track, epoch 11138.51317551) is on the Linux machine.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed

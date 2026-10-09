@@ -97,7 +97,16 @@ int main(void) {
     /* tools/tle_target.py from the ISS's TLE 11138.51317551 */
     fprintf(f, "# NORAD 25544, state at 2011-05-18T10:14:00Z UTC\n"
                "target 25544 1305713640.000 2109180.064 -5654207.985 -2965963.140 "
-               "5848.388583 -433.197860 4989.397766 lvlh bc 130\n");
+               "5848.388583 -433.197860 4989.397766 lvlh bc 130\n"
+               /* not to be taken: a word that is not a number, a position
+                * at the Earth's centre, an epoch of 0 (1970) -- and one
+                * that reads but is 100 days from the run's date, dropped
+                * when the calendar is known */
+               "target 99001 1305713640.000 2109180.064 -5654207.98x -2965963.140 1 2 3\n"
+               "target 99002 1305713640.000 0 0 0 7000 0 0\n"
+               "target 99003 0 2109180.064 -5654207.985 -2965963.140 5848.4 -433.2 4989.4\n"
+               "target 99004 1314353640.000 2109180.064 -5654207.985 -2965963.140 "
+               "5848.388583 -433.197860 4989.397766\n");
     fclose(f);
     const double FT = 0.3048;
     const double want[6] = { -48600 * FT, 0.0, 1200 * FT, 2.04 * FT, 0.0, 0.0 };
@@ -116,6 +125,8 @@ int main(void) {
     vehdyn_set_gmt_zero(1305700200.0);           /* t = 0 is 2011-05-18 06:30:00 UTC */
     vehdyn_advance(1.0e6);
     check(vehdyn_target(0, &id, rt, vt, qt) && id == 25544, "the ISS is placed", id, 25544);
+    check(vehdyn_target_count() == 1, "the bad lines and the far epoch are not taken",
+          vehdyn_target_count(), 1);
     const PhysState *s = vehdyn_state();
     double rel[6], now[6];
     gwj_to_lvc(rt, vt, s->r, s->v, rel);

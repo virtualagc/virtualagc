@@ -337,12 +337,13 @@ static bool star_hv(const Sky *sk, int i, double *H, double *V) {
 /* THE TARGET'S LIGHT.  A Lambert sphere seen at phase angle a: the centroid
  * of its light, from its centre toward the Sun's side, in radii -- by
  * summing the lit disc (radiance n.s, the disc's own area element), once,
- * a degree at a time. */
+ * a degree at a time.  A 60 x 60 grid keeps that first call (inside an MDM
+ * read) to a millisecond or so; finer changes the table by under 1e-3. */
 static double photo_centroid(double aDeg) {
     static double tab[181];
     static bool ready = false;
     if (!ready) {
-        const int N = 240;
+        const int N = 60;
         for (int d = 0; d <= 180; d++) {
             double a = d * D2R, sx = sin(a), sz = cos(a), sum = 0.0, sumX = 0.0;
             for (int i = 0; i < N; i++)

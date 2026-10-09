@@ -343,7 +343,7 @@ class Ears(object):
         self.cycle, self._cyc = None, {}       # PASS's two states from one downlist cycle
         self.screens = {}
         self.table = downlist.load_table(None)
-        for fn, port in ((self._truth, base + 98), (self._target, base + 85),
+        for fn, port in ((self._truth, base + 98), (self._target, base + 109),
                          (self._downlist, base + 88), (self._screen, base + 91)):
             threading.Thread(target=fn, args=(_listen(port),), daemon=True).start()
 
