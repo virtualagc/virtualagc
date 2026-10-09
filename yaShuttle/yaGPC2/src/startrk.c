@@ -548,7 +548,7 @@ static void update(int k, double t) {
             seen = canSee && star_hv(&sk, i, &H, &V);
             mag = STAR_TABLE[i].mag;
         } else {
-            TgtView tv;
+            TgtView tv = {0};   /* read only when target_view filled it; MSVC C4701 cannot see that */
             seen = canSee && target_view(&sk, LOCK_TARGET0 - s->locked, t, &tv);
             if (seen) { H = tv.H; V = tv.V; mag = tv.mag; }
         }
