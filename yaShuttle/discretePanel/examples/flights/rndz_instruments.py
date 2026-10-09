@@ -16,11 +16,18 @@ centre of mass r, v, and q, its body -> M50, ISS frame +X forward, +Z nadir).
 THE GEOMETRY.  Body axes are vehdyn's, origin at the Orbiter's dry CG
 (X_o 1100, Y_o 0, Z_o 375), +X forward, +Y right, +Z down; structural
 X_o/Z_o inches turn into them as portview's _structural does.
-  - ODS_XO, ODS_ZO: the docking interface of the Orbiter Docking System's
-    APDS ring, on the centreline of the external airlock in bay 2.  APPROXIMATE
-    (X_o 576, the airlock's station; Z_o 513, the ring's face above the sill)
-    -- the ODS/APDS ICD would fix them; the plan lists them as missing.  The
-    centerline camera looks out along the ring's axis, body -Z.
+  - ODS_XO, ODS_ZO: the APDS docking ring's axis and face (Shuttle Systems
+    Handbook Vol 3, ODS structural overview; SCOM 2.20 pp. 681-682; Flight
+    Rules A10-385; via PASS-IDLE, 2026-10-09).  The axis is at X_o 649.00,
+    Y_o 0 -- X_o 576, used before, is the airlock's bulkhead.  Along the
+    axis (+Z_o, body -Z) the ring's face is at Z_o 475.75 ready to dock (at
+    contact), 480.00 fully extended and 460.00 hard-mated (retracted);
+    ODS_ZO is the ready-to-dock face, ODS_HARDMATE_ZO the retracted one.
+  - CLCAM_XO, CLCAM_ZO: the ODS centerline camera, on the ring's axis at
+    Z_o 422.85, looking +Z_o (body -Z) (X_o 649 for STS-134; the drawing's
+    X_o 731.60 is the Mir layout).
+  - TCS_XO, TCS_YO, TCS_ZO: the TCS head, Mir layout X_o 682.28, Y_o -7.45,
+    Z_o 415.31, moved X_o -82.6 with the ODS for STS-134: X_o 599.68.
   - PMA2: PMA-2's docking face in the ISS frame, portview's ISS_PMA2 (the
     model's), its axis the ISS's +X.  The TCS reflectors sit around it; the
     TCS ranges to their centroid, taken as the face itself.
@@ -44,8 +51,21 @@ import random
 FT = 0.3048
 IN = 0.0254
 DRY_CG_XO, DRY_CG_ZO = 1100.0, 375.0
-ODS_XO, ODS_ZO = 576.0, 513.0
-ODS_BODY = (-(ODS_XO - DRY_CG_XO) * IN, 0.0, -(ODS_ZO - DRY_CG_ZO) * IN)
+ODS_XO, ODS_ZO = 649.00, 475.75           # the ring's axis; its face ready to dock
+ODS_HARDMATE_ZO = 460.00                    # the face retracted, hard-mated
+CLCAM_XO, CLCAM_ZO = 649.00, 422.85         # the centerline camera, on the ring's axis
+TCS_XO, TCS_YO, TCS_ZO = 599.68, -7.45, 415.31
+
+
+def structural(xo, yo, zo):
+    """Structural inches -> body metres from the dry CG (+X fwd, +Y right, +Z down)."""
+    return (-(xo - DRY_CG_XO) * IN, yo * IN, -(zo - DRY_CG_ZO) * IN)
+
+
+ODS_BODY = structural(ODS_XO, 0.0, ODS_ZO)
+ODS_HARDMATE_BODY = structural(ODS_XO, 0.0, ODS_HARDMATE_ZO)
+CLCAM_BODY = structural(CLCAM_XO, 0.0, CLCAM_ZO)
+TCS_BODY = structural(TCS_XO, TCS_YO, TCS_ZO)
 PMA2 = (15.66, 0.0, 5.48)                  # ISS frame, m: portview.ISS_PMA2
 HHL_SPHERE_M = 25.0
 TCS_MAX_FT, HHL_MAX_FT = 10000.0, 5000.0
@@ -85,15 +105,19 @@ def orbital_rate(r, v):
     return norm(cross(r, v)) / dot(r, r)
 
 
+def body_point(tru, Ro, b):
+    """A point fixed in the Orbiter (body m from the dry CG): M50 position
+    and velocity, from the truth's c.g. offset and body rate."""
+    arm_m = to_m50(Ro, sub(list(b), list(tru.get("cg") or (0.0, 0.0, 0.0))))
+    w_m = to_m50(Ro, list(tru.get("w") or (0.0, 0.0, 0.0)))
+    return add(list(tru["r"]), arm_m), add(list(tru["v"]), cross(w_m, arm_m))
+
+
 def points(tru, tgt):
     """The ODS ring and PMA-2's face, M50 position (m) and velocity (m/s),
     and the two bodies' rotation matrices."""
     Ro, Rt = qmat(tru["q"]), qmat(tgt["q"])
-    arm = sub(list(ODS_BODY), list(tru.get("cg") or (0.0, 0.0, 0.0)))
-    arm_m = to_m50(Ro, arm)
-    w_m = to_m50(Ro, list(tru.get("w") or (0.0, 0.0, 0.0)))
-    ods_r = add(list(tru["r"]), arm_m)
-    ods_v = add(list(tru["v"]), cross(w_m, arm_m))
+    ods_r, ods_v = body_point(tru, Ro, ODS_BODY)
     pma_arm = to_m50(Rt, list(PMA2))
     # the ISS turns at the orbital rate (LVLH hold): about its -Y in LVLH
     n = orbital_rate(tgt["r"], tgt["v"])
@@ -122,18 +146,22 @@ class Instruments(object):
         if hhl < HHL_MAX_FT:
             out["hhl_range_ft"] = hhl + self.g(0.5 + 0.001 * hhl)
             out["hhl_rdot_fps"] = rdot_cg / FT + self.g(0.02)
-        # TCS: to the reflectors at PMA-2, from the ODS
-        los = sub(pma_r, ods_r)
-        rng = norm(los)
-        rdot = dot(los, sub(pma_v, ods_v)) / rng
-        lb = to_body(Ro, los)
-        if rng / FT < TCS_MAX_FT and lb[2] < 0.0:
-            el = math.degrees(math.atan2(math.hypot(lb[0], lb[1]), -lb[2]))   # off -Z
-            out["tcs_range_ft"] = rng / FT + self.g(0.1 + 0.0005 * rng / FT)
-            out["tcs_rdot_fps"] = rdot / FT + self.g(0.005)
-            out["tcs_bearing_deg"] = (math.degrees(math.atan2(lb[1], -lb[2])) + self.g(0.03),
-                                      math.degrees(math.atan2(-lb[0], -lb[2])) + self.g(0.03))
+        # TCS: to the reflectors at PMA-2, from its own head in the bay
+        tcs_r, tcs_v = body_point(tru, Ro, TCS_BODY)
+        tl = sub(pma_r, tcs_r)
+        trng = norm(tl)
+        trdot = dot(tl, sub(pma_v, tcs_v)) / trng
+        tb = to_body(Ro, tl)
+        if trng / FT < TCS_MAX_FT and tb[2] < 0.0:
+            el = math.degrees(math.atan2(math.hypot(tb[0], tb[1]), -tb[2]))   # off -Z
+            out["tcs_range_ft"] = trng / FT + self.g(0.1 + 0.0005 * trng / FT)
+            out["tcs_rdot_fps"] = trdot / FT + self.g(0.005)
+            out["tcs_bearing_deg"] = (math.degrees(math.atan2(tb[1], -tb[2])) + self.g(0.03),
+                                      math.degrees(math.atan2(-tb[0], -tb[2])) + self.g(0.03))
             out["tcs_off_axis_deg"] = el
+        # the ring's face to PMA-2's: what "100 ft out" and the lineup are read against
+        los = sub(pma_r, ods_r)
+        lb = to_body(Ro, los)
         # COAS (-Z): the ISS's centre in the reticle, H right V up (deg)
         cb = to_body(Ro, d)
         if cb[2] < 0.0:
@@ -146,7 +174,9 @@ class Instruments(object):
             # lateral offsets of PMA-2's face from the ODS axis (ft), the
             # camera's +X (Orbiter -X) right and +Y (Orbiter +Y) ...
             out["cl_offset_ft"] = (lb[1] / FT + self.g(0.05), -lb[0] / FT + self.g(0.05))
-            out["cl_range_ft"] = -lb[2] / FT
+            out["cl_range_ft"] = -lb[2] / FT                         # ring face to PMA-2's face
+            cam_r, _ = body_point(tru, Ro, CLCAM_BODY)
+            out["cl_cam_range_ft"] = -to_body(Ro, sub(pma_r, cam_r))[2] / FT
             # misalignment: PMA-2's axis (ISS +X) against the ODS's (-Z body),
             # in the Orbiter's body: pitch about Y, yaw about X; roll about Z
             # is the ISS +Z (nadir) against the Orbiter's -X, which the

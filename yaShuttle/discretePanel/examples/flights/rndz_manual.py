@@ -380,6 +380,16 @@ class ManualPhase(object):
         self.man_start()
         self.spec20_rates("rpm-setup", RPM_RATE, RPM_RATE)
         self.say("crew: RPM SETUP -- PRI and VERN ROT RATE %.2f deg/s" % RPM_RATE)
+        # read them back: full-run1's quarter turns crawled at ~0.07 deg/s
+        try:
+            from fly_rndz134 import parse_spec20
+            sel, vals = parse_spec20(self.spec20_page("rpm-check"))
+            self.say("RPM SETUP check: SPEC 20 DAP A%s PRI ROT RATE %s, VERN ROT RATE %s; DAP B%s %s, %s"
+                     % (sel.get("A"), vals.get(10), vals.get(23), sel.get("B"), vals.get(30), vals.get(43)))
+            self.play("+1     keys RESUME\n", "rpm-check-resume")
+            self.script_done("rpm-check-resume", 60)
+        except Exception as e:                       # a check only
+            self.say("RPM SETUP check: could not read SPEC 20 (%s)" % e)
         t0 = self.ears.snap()[0]["t"]
         times, stats = [], []
         hold = lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0])

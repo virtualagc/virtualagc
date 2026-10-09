@@ -1456,6 +1456,17 @@ RPM's photo callouts; plume logging of jets fired toward the ISS inside
 RBAR from vol-run1's ARRIVAL, then RPM, TORVA, VBAR and HOLD from its own
 captures, the pilot fixed between them -- each fix is in the code).
 
+**full-run1, before the jet-geometry change** (2026-10-09; kuradar-close-range
+76f8a65 + b0bf186, volrun1 volume, old vehdyn jets): from vol-run1's MC4
+capture in one process, ARRIVAL and RBAR flew (RBAR settled in 8 min, rms
+12.6/6.9/3.9 ft); the RPM's quarter turns never got going -- the Orbiter
+turned at a steady ~0.07 deg/s instead of 0.75 -- first cut off after 1.2 min
+by the old turn-complete test (fixed in b0bf186: a turn is stopped only once
+it has been under way), then given up after 5 min each, 17-132 deg short;
+stopped in TORVA when the jet geometry landed.  FLTR ran 50-110 ft off in
+the static R-bar hold: volrun1 carries the tape's CGNS_VAR_RR_RNG_MIN 711
+(flown 6400), so range marks were weighted ~700x too heavily.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

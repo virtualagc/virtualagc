@@ -308,10 +308,11 @@ EYE_FWD = _structural(520.0, 0.0, 470.0)
 #          back: 10 deg aft of the zenith, the top of the picture toward the
 #          nose -- where the crew watched the ISS from the R-bar to the
 #          +V-bar.  APPROXIMATE.
-#   cl:    the ODS centerline camera, in the docking ring (X_o 576, Z_o 513,
-#          rndz_instruments.py's ODS_XO/ZO, APPROXIMATE), looking out along
-#          the ring's axis (body -Z), the top of the picture the nose; a 30 deg
-#          field.  The rendezvous's last legs are flown on it.
+#   cl:    the ODS centerline camera, on the docking ring's axis at X_o 649.00,
+#          Z_o 422.85 (rndz_instruments.py's CLCAM_XO/ZO: Shuttle Systems
+#          Handbook Vol 3, SCOM 2.20), looking out along the ring's axis
+#          (body -Z), the top of the picture the nose; a 30 deg field.  The
+#          rendezvous's last legs are flown on it.
 VIEWS = {
     'front': dict(title="CDR/PLT Forward View", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
@@ -324,7 +325,7 @@ VIEWS = {
     'aft': dict(title="Aft Station Overhead View", fwd=_dir(180, 80), up=(1, 0, 0),
                 w=768, h=768, hfov=SIDE_HFOV, eye=_structural(560.0, 0.0, 470.0)),
     'cl': dict(title="ODS Centerline Camera", fwd=(0, 0, -1), up=(1, 0, 0),
-               w=768, h=768, hfov=30.0, eye=_structural(576.0, 0.0, 513.0)),
+               w=768, h=768, hfov=30.0, eye=_structural(649.0, 0.0, 422.85)),
 }
 
 
