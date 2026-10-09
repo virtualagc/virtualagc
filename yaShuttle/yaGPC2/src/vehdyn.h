@@ -147,6 +147,11 @@ void vehdyn_ground_state(double *wheelFt, double *gsKt);
  * (+X forward = -Xo, +Y right, +Z down = -Zo).  It moves with propellant,
  * and on the pad and in ascent it is the whole stack's. */
 void vehdyn_cg_offset(double b[3]);
+/* The docking (vehdyn.c, THE DOCKING): 0 free, 1 captured (latched, the
+ * ring retracting), 2 hard-mated. */
+int vehdyn_docked(void);
+/* Contacts of the ODS ring with a port so far, captured or not. */
+int vehdyn_dock_contacts(void);
 /* The air data probes, left and right: 0 stowed .. 1 deployed (the crew's
  * AIR DATA PROBE switches, hardwired 0x0100/0x0080 DEPLOY, 0x0040/0x0020
  * STOW).  And the air they meet: free-stream pressure (psf), Mach, alpha,
