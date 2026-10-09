@@ -189,8 +189,30 @@ class ManualPhase(object):
         if noisy:
             g = self._inst().g
             rng = math.sqrt(sum(x * x for x in r))
-            s = 0.1 + 0.0005 * rng + rng * math.radians(0.03)
-            r = [x + g(s) for x in r]
+            # Range and bearing errors separately: the TCS ranges to 0.1 ft +
+            # 0.05 % along the line of sight, but the sideways position comes
+            # from its bearings (0.03 deg), so it is good to rng x 0.03 deg --
+            # a hundredth of an inch at a foot, not the range floor.  Close in
+            # to PMA-2 the crew flew on the centerline camera's crosshair: its
+            # picture read to about 0.05 deg from the camera, 53 in behind the
+            # ring face (rndz_instruments.CLCAM_BODY), whichever is the finer.
+            sr = 0.1 + 0.0005 * rng
+            sl = rng * math.radians(0.03)
+            if point == "ods":
+                sl = min(sl, (rng + 4.4) * math.radians(0.05))
+            sl = max(sl, 0.002)
+            if rng > 1e-6:
+                u = [x / rng for x in r]
+                # two unit vectors across the line of sight
+                a = [0.0, 0.0, 1.0] if abs(u[2]) < 0.9 else [1.0, 0.0, 0.0]
+                p1 = [u[1] * a[2] - u[2] * a[1], u[2] * a[0] - u[0] * a[2], u[0] * a[1] - u[1] * a[0]]
+                n1 = math.sqrt(sum(x * x for x in p1))
+                p1 = [x / n1 for x in p1]
+                p2 = [u[1] * p1[2] - u[2] * p1[1], u[2] * p1[0] - u[0] * p1[2], u[0] * p1[1] - u[1] * p1[0]]
+                er, e1, e2 = g(sr), g(sl), g(sl)
+                r = [r[i] + er * u[i] + e1 * p1[i] + e2 * p2[i] for i in range(3)]
+            else:
+                r = [x + g(sr) for x in r]
             v = [x + g(0.005) for x in v]
         return {"r": r, "v": v, "t": tru["t"], "gmt": tru["gmt"], "tru": tru, "tgt": tgt,
                 "axes": (ex, ey, ez)}
