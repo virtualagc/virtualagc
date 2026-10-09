@@ -331,7 +331,7 @@ VIEWS = {
                 w=768, h=768, hfov=SIDE_HFOV, eye=_structural(560.0, 0.0, 470.0)),
     'cl': dict(title="ODS Centerline Camera", fwd=(0, 0, -1), up=(1, 0, 0),
                w=768, h=768, hfov=30.0, eye=_structural(649.0, 0.0, 422.85)),
-    'cctv': dict(title="A3 MON 1", fwd=(0, 0, -1), up=(1, 0, 0),
+    'cctv': dict(title="MON1", fwd=(0, 0, -1), up=(1, 0, 0),
                  w=768, h=576, hfov=40.0, eye=_structural(649.0, 0.0, 422.85), cctv=True),
 }
 
