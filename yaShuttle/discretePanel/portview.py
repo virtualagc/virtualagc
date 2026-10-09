@@ -2789,9 +2789,13 @@ class ViewWidget(QOpenGLWidget):
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)       # leave Qt's painter a clean state
         if self.spec.get('cctv'):
             self._cctv_overlay()
+        # The status line is the operator's, shown only when asked for (H):
+        # nothing like it was ever on a window or a CCTV monitor, so a view
+        # with no truth is simply dark (the CCTV keeps its monitor-generated
+        # crosshair and data) and the state goes to stderr when it changes.
         line = self.app.status_line(fs)
         warn = not fs.ok or fs.stale or fs.unix is None
-        if line and (self.app.hud or warn):
+        if line and self.app.hud:
             p = QtGui.QPainter(self)
             p.setPen(QtGui.QColor(255, 80, 80) if warn else QtGui.QColor(200, 200, 200))
             # Fixed-width, so the digits changing every frame don't shift the line.
@@ -2950,6 +2954,20 @@ class Portview(object):
             for g in self.ground:
                 fs.targets[g.key] = g.state(fs)
         self.frame = fs
+        state = "no truth" if not fs.ok else "stale" if fs.stale else "no date" if fs.unix is None else "ok"
+        if state != getattr(self, "_feedState", None):
+            if state == "ok":
+                if getattr(self, "_feedState", None) is not None:
+                    print("portview: truth data back", file=sys.stderr, flush=True)
+            elif state == "no truth":
+                print("portview: NO TRUTH DATA (yaGPC2 with YAGPC_VEHDYN=1, %s); views dark"
+                      % self.feed.describe(), file=sys.stderr, flush=True)
+            elif state == "stale":
+                print("portview: truth data STALE", file=sys.stderr, flush=True)
+            else:
+                print("portview: truth data has no date (Sun, Moon, planets hidden)",
+                      file=sys.stderr, flush=True)
+            self._feedState = state
         for v in self.views:
             if v.isVisible():
                 v.update()
