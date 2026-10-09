@@ -135,6 +135,10 @@ void vehdyn_navbase_ef(double rEf[3], double vEf[3], double Cbe[3][3]);
  * left and right main gear and the nose gear (1 = weight). */
 void vehdyn_hardwired(unsigned w);
 void vehdyn_gear(double *pos, int wow[3]);
+/* The crew's landing indications: w[0] the gear and drag chute command relays
+ * (ARM, DN; ARM, DPY, JETT), w[1] the gear position talkbacks (uplocked, down
+ * and locked, per gear).  Bits in vehdyn.c. */
+void vehdyn_landing_status(uint16_t w[2]);
 /* The lower main wheel's height above the runway (ft) and the ground speed
  * (kt) -- the crew's cues for the gear, the chute and the brakes. */
 void vehdyn_ground_state(double *wheelFt, double *gsKt);

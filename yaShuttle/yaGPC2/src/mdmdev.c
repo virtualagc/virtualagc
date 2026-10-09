@@ -908,6 +908,35 @@ static void crew_send_out(int k, unsigned card, unsigned ch, uint16_t w) {
     sendto(crewFd[k], (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
 }
 
+/* THE VEHICLE'S OWN INDICATIONS, not PASS's: the landing gear and drag chute
+ * lights and talkbacks are hardwired to their relays and proximity switches
+ * (landing-indicators-findings.md), so the panel lights them from the
+ * vehicle's state, never from its own button press.  Type 10 (VEH) VALUE
+ * records on FF1's hardware-side bus, card 0, channels 0-1 (vehdyn.c
+ * vehdyn_landing_status), on change and every VEH_REFRESH calls; panelO6
+ * files them as unit 0. */
+#define CREW_TYPE_VEH 10
+#define VEH_REFRESH 200
+static void veh_status_publish(void) {
+    static uint16_t sent[2];
+    static long calls;
+    if (!crewOpen || crewFd[1] < 0 || crewPortBase <= 0) return;
+    uint16_t w[2];
+    vehdyn_landing_status(w);
+    bool due = (++calls % VEH_REFRESH) == 0;
+    for (unsigned ch = 0; ch < 2; ch++) {
+        if (w[ch] == sent[ch] && !due && calls > 1) continue;
+        sent[ch] = w[ch];
+        uint8_t b[10] = { 0, CREW_OP_VALUE_OUT, 0, CREW_TYPE_VEH, 0, (uint8_t)ch,
+                          0, 1, (uint8_t)(w[ch] >> 8), (uint8_t)w[ch] };
+        struct sockaddr_in to = {0};
+        to.sin_family = AF_INET;
+        to.sin_addr.s_addr = inet_addr("239.255.1.1");
+        to.sin_port = htons((uint16_t)(crewPortBase + CREW_PORT_OFFSET));
+        sendto(crewFd[1], (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
+    }
+}
+
 static void crew_publish_out(int k, uint32_t cmd, int n) {
     if (!crewOpen || k < 1 || k > CREW_NUNIT) return;
     unsigned card = CMD_CARD(cmd), ch0 = CMD_CHAN(cmd) & 0x0fu;
@@ -1979,6 +2008,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
         truth_publish();
         targets_publish();
+        veh_status_publish();
     }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;

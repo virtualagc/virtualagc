@@ -69,6 +69,10 @@ PANES = {}
 
 KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank", "ann")
 FF_UNITS = (1, 2, 3, 4)
+# Lamps lit from the VEHICLE's own state rather than a PASS output word: the
+# hardwired landing gear and drag chute indications (yaGPC2 mdmdev.c
+# veh_status_publish, crew type 10).  panelO6 files those records as unit 0.
+VEH_UNIT = 0
 FA_UNITS = (5, 6, 7, 8)
 
 
@@ -102,7 +106,7 @@ def check():
             for h in c.get("halves") or ():
                 lamps += h[1]
             for lamp in lamps:
-                if len(lamp) != 4 or lamp[0] not in FF_UNITS:
+                if len(lamp) != 4 or (lamp[0] not in FF_UNITS and lamp[0] != VEH_UNIT):
                     raise ValueError("%s: lamp %r" % (where, lamp))
     for panel, panes in PANES.items():
         for title, rows, *_opts in panes:
@@ -327,19 +331,60 @@ PANES.update({
 # (PASS commands them only in remote-control mode, GGAAUT.hal 287-312, and
 # learns of the gear through its uplock and WOW discretes).  ARM, then DN /
 # DPY; the vehicle latches each.  The bits are vehdyn.c's HW_*.
+#
+# THEIR LIGHTS are the vehicle's, not the button's (landing-indicators-
+# findings.md, SCOM OI-28 2.14-10/11, the Entry Checklist's "ARM lt on", "DN lt
+# on", "All lts on", "JETT1, JETT2 lt on"): each lights when its relay
+# latches and stays lit; the gear's DN light shows the command, not where the
+# gear is -- the LEFT/NOSE/RIGHT talkbacks show that, from the proximity
+# switches (UP uplocked, DN down and locked, barberpole between).  Both seats
+# have a set: the gear on F6 and F8; the drag chute's ARM and DPY on F2
+# (commander) and F3 right (pilot), its JETT on F3 left (commander) and F4
+# (pilot); the chute's legends are split, ARM 1/ARM 2 and so on.  The lights
+# come from yaGPC2 as unit 0 (mdmdev.c veh_status_publish, vehdyn.c
+# vehdyn_landing_status): card 0 channel 0 the relays, channel 1 the gear.
+_VEH_RELAY, _VEH_GEAR = (VEH_UNIT, 0, 0), (VEH_UNIT, 0, 1)
+
+
+def _veh(chan, mask):
+    return [chan + (mask,)]
+
+
+def _chute(panel, leg, hw, mask):
+    return dict(panel=panel, kind="pbi", caption="", legend=leg, guarded=True, contacts=[],
+                hardwired=hw, split="v",
+                halves=[(leg + " 1", _veh(_VEH_RELAY, mask), "white"),
+                        (leg + " 2", _veh(_VEH_RELAY, mask), "white")],
+                sources="SCOM OI-28 Part 4 PDF 108 (split legends); ECL 'All lts on'")
+
+
+for _sfx, _pan in (("", "F6"), ("_p", "F8")):
+    CONTROLS.update({
+        "gear_arm" + _sfx: dict(panel=_pan, kind="pbi", caption="", legend="ARM", guarded=True,
+                                contacts=[], hardwired=0x8000, color="amber",
+                                lamps=_veh(_VEH_RELAY, 0x8000),
+                                sources="SCOM OI-28 2.14-10: yellow, lit when ARM latches"),
+        "gear_dn" + _sfx: dict(panel=_pan, kind="pbi", caption="", legend="DN", guarded=True,
+                               contacts=[], hardwired=0x4000, color="green",
+                               lamps=_veh(_VEH_RELAY, 0x4000),
+                               sources="SCOM OI-28 2.14-11: green, lit when DN latches"),
+    })
+    for _g, _up, _dn in (("left", 0x8000, 0x4000), ("nose", 0x2000, 0x1000),
+                         ("right", 0x0800, 0x0400)):
+        CONTROLS["gear_tb_%s%s" % (_g, _sfx)] = dict(
+            panel=_pan, kind="tb", caption=_g.upper(), positions=("UP", "DN", "BP"),
+            states=[("UP", _veh(_VEH_GEAR, _up)), ("DN", _veh(_VEH_GEAR, _dn))],
+            sources="SCOM OI-28 2.14: gear proximity switches; barberpole in transit")
 CONTROLS.update({
-    "gear_arm": dict(panel="F6", kind="pb", caption="", legend="ARM",
-                     guarded=True, contacts=[], hardwired=0x8000),
-    "gear_dn": dict(panel="F6", kind="pb", caption="", legend="DN",
-                    guarded=True, contacts=[], hardwired=0x4000),
-    "chute_arm": dict(panel="F2", kind="pb", caption="", legend="ARM",
-                      guarded=True, contacts=[], hardwired=0x2000),
-    "chute_dpy": dict(panel="F2", kind="pb", caption="", legend="DPY",
-                      guarded=True, contacts=[], hardwired=0x1000),
-    "chute_jett": dict(panel="F2", kind="pb", caption="", legend="JETT",
-                       guarded=True, contacts=[], hardwired=0x0800),
+    "chute_arm": _chute("F2", "ARM", 0x2000, 0x2000),
+    "chute_dpy": _chute("F2", "DPY", 0x1000, 0x1000),
+    "chute_jett": _chute("F3", "JETT", 0x0800, 0x0800),
+    "chute_arm_p": _chute("F3", "ARM", 0x2000, 0x2000),
+    "chute_dpy_p": _chute("F3", "DPY", 0x1000, 0x1000),
+    "chute_jett_p": _chute("F4", "JETT", 0x0800, 0x0800),
     # The toe brakes on the rudder pedals, as a simulator's latch (no pedals
-    # here): ON holds about 8 ft/s^2 on the main gear until OFF.
+    # here): ON holds about 8 ft/s^2 on the main gear until OFF.  No lamps:
+    # the real brakes had none.
     "brakes_on": dict(panel="F6", kind="pb", caption="", legend="ON",
                       contacts=[], hardwired=0x0400,
                       sources="simulator: the pedals' toe brakes, latched"),
@@ -358,9 +403,16 @@ CONTROLS.update({
                   hardwired={"DEPLOY": 0x0080, "STOW": 0x0020}),
 })
 PANES["C3"].append(("AIR DATA PROBE", [["adp_l", "adp_r"]]))
-PANES["F6"].append(("LANDING GEAR", [["gear_arm", "gear_dn"]]))
+PANES["F6"].append(("LANDING GEAR", [["gear_arm", "gear_dn"],
+                                     ["gear_tb_left", "gear_tb_nose", "gear_tb_right"]]))
+PANES["F8"].append(("LANDING GEAR", [["gear_arm_p", "gear_dn_p"],
+                                     ["gear_tb_left_p", "gear_tb_nose_p", "gear_tb_right_p"]]))
 PANES["F6"].append(("BRAKES", [["brakes_on", "brakes_off"]]))
-PANES["F2"].append(("DRAG CHUTE", [["chute_arm", "chute_dpy", "chute_jett"]]))
+PANES["F2"].append(("DRAG CHUTE", [["chute_arm", "chute_dpy"]]))
+CONTROLS["f3_chute_gap"] = dict(panel="F3", kind="blank")
+PANES.setdefault("F3", []).append(("DRAG CHUTE", [["chute_jett", "f3_chute_gap", "chute_arm_p",
+                                                   "chute_dpy_p"]]))
+PANES["F4"].append(("DRAG CHUTE", [["chute_jett_p"]]))
 check()
 
 

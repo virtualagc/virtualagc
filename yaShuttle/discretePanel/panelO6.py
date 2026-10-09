@@ -216,6 +216,9 @@ MDM_TYPE_HW = 8
 # THE KU-BAND RADAR'S PANEL (A1U; panelcontrols.py, the controls' 'ku'
 # bits), to yaGPC2's kuradar.c: op 4 VALUE, type 9, one word, to FF3.
 MDM_TYPE_KU = 9
+# The vehicle's own indications (landing gear, drag chute), from yaGPC2's
+# mdmdev.c veh_status_publish: filed as unit PC.VEH_UNIT.
+MDM_TYPE_VEH = 10
 KU_UNIT = 3
 STU_UNIT = {"z": 1, "y": 3}                    # -Z on FF1, -Y on FF3
 STU_POWERED, STU_DOOR_OPEN = 0x8000, 0x4000
@@ -889,6 +892,10 @@ class PanelO6:
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.ctl_lamp.update((k, (False,) * len(c["halves"]))
                              for k, c in PC.CONTROLS.items() if c.get("halves"))
+        # Talkbacks driven by output bits ('states'), not by a switch: the
+        # first state whose bits are set, else barberpole.
+        self.tb_state = dict((k, "BP") for k, c in PC.CONTROLS.items()
+                             if c["kind"] == "tb" and c.get("states"))
         unconnected = collections.Counter(c["via"] for c in PC.CONTROLS.values()
                                           if c.get("via"))
         for via, n in sorted(unconnected.items()):
@@ -1588,6 +1595,13 @@ class PanelO6:
             units.update(l[0] for l in c.get("lamps") or ())
             for h in c.get("halves") or ():
                 units.update(l[0] for l in h[1])
+            for _w, ls in c.get("states") or ():
+                units.update(l[0] for l in ls)
+        # The vehicle's records (unit 0) come on FF1's bus: no socket of
+        # their own -- mdm_receiver(0) would be base + 99, the uplink's.
+        if PC.VEH_UNIT in units:
+            units.discard(PC.VEH_UNIT)
+            units.add(1)
         for k in sorted(units):
             try:
                 socks[mdm_receiver(k)] = k
@@ -1608,14 +1622,15 @@ class PanelO6:
                 if len(data) < 8:
                     continue
                 op, typ, addr, cnt = struct.unpack(">HHHH", data[:8])
-                if op != MDM_OP_VALUE or typ != MDM_TYPE_DOH:
+                if op != MDM_OP_VALUE or typ not in (MDM_TYPE_DOH, MDM_TYPE_VEH):
                     continue           # our own contacts, or not an output
                 card, ch = addr >> 8, addr & 0xff
                 n = min(cnt, (len(data) - 8) // 2)
                 words = struct.unpack(">%dH" % n, data[8:8 + 2 * n])
+                unit = PC.VEH_UNIT if typ == MDM_TYPE_VEH else socks[sk]
                 with self._rx_lock:
                     for i, w in enumerate(words):
-                        self._mdm_out[(socks[sk], card, ch + i)] = w
+                        self._mdm_out[(unit, card, ch + i)] = w
 
     def _lamps_follow(self):
         """Light the DAP buttons from the output words heard."""
@@ -1661,6 +1676,16 @@ class PanelO6:
                 am_changed = True
                 log("lamp %s %s" % (key, lit if isinstance(lit, tuple) else
                                     ("lit" if lit else "out")))
+        for key in self.tb_state:
+            st = "BP"
+            for word, lamps in PC.CONTROLS[key]["states"]:
+                if any(out.get((u, card, ch), 0) & m for u, card, ch, m in lamps):
+                    st = word
+                    break
+            if st != self.tb_state[key]:
+                self.tb_state[key] = st
+                am_changed = True
+                log("talkback %s %s" % (key, st))
         if changed or am_changed:
             self.redraw()
 
@@ -2043,7 +2068,7 @@ class PanelO6:
                     + [self.circle, sorted(self.auto_circles.items()),
                        sorted(self.wait_circles.items())]
                     + [(self.ctl.get(k), self.ctl_held.get(k), self.ctl_lamp.get(k),
-                        self.tb_on.get(k)) for k in own])
+                        self.tb_on.get(k), self.tb_state.get(k)) for k in own])
 
     def redraw(self):
         """The panel windows whose state has changed, each drawn by its own
@@ -2936,6 +2961,7 @@ class PanelO6:
         elif k == "tb":
             pos = c["positions"]
             state = (self.door_tb(c["door"]) if c.get("door")
+                     else self.tb_state.get(key, "BP") if c.get("states")
                      else pos[0] if self.tb_on.get(key) else pos[-1])
             self._talkback(cx - self.TB_W / 2.0, y, cx + self.TB_W / 2.0, y + self.TB_H,
                            state.upper() if state.upper() in ("GRAY", "BP") else state)
@@ -2994,8 +3020,16 @@ class PanelO6:
             b = self.pb
             held = self.ctl_held[key]
             if k == "pbi":
-                self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
-                          self.ctl_lamp.get(key, False))
+                if c.get("guarded"):
+                    g = 5
+                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                               outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
+                if c.get("halves"):
+                    self._pbi_halves(cx - b / 2, y, cx + b / 2, y + b, c, held,
+                                     self.ctl_lamp.get(key) or (False,) * len(c["halves"]))
+                else:
+                    self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
+                              self.ctl_lamp.get(key, False), c.get("color"))
             else:
                 if c.get("guarded"):
                     g = 5
@@ -3943,7 +3977,25 @@ class PanelO6:
             y = y1 + PANE_GAP
         return y1
 
-    def _pbi(self, x1, y1, x2, y2, legend, down, lit):
+    def _pbi_halves(self, x1, y1, x2, y2, c, down, lit):
+        """A lighted pushbutton whose face is split into legends lit on their
+        own -- the drag chute's ARM 1/ARM 2: one over the other ('split' v)
+        or side by side."""
+        self._pushbutton(x1, y1, x2, y2, "", down=down)
+        dx = 2 if down else 0
+        fx1, fy1, fx2, fy2 = x1 + 6 + dx, y1 + 6 + dx, x2 - 6 + dx, y2 - 6 + dx
+        if c.get("split", "v") == "v":
+            mid = (fy1 + fy2) / 2.0
+            parts = ((fx1, fy1, fx2, mid), (fx1, mid, fx2, fy2))
+        else:
+            mid = (fx1 + fx2) / 2.0
+            parts = ((fx1, fy1, mid, fy2), (mid, fy1, fx2, fy2))
+        for (a1, b1, a2, b2), half, on in zip(parts, c["halves"], lit):
+            fill = (C_ANN[half[2]] if len(half) > 2 else C_PBI_LIT) if on else C_PBI_DARK
+            self._rect(a1, b1, a2, b2, fill=fill, outline=C_PADDLE_LO, width=1)
+            self._text((a1 + a2) / 2.0, (b1 + b2) / 2.0, half[0], size=SETTING_SIZE)
+
+    def _pbi(self, x1, y1, x2, y2, legend, down, lit, color=None):
         """A lighted pushbutton indicator, the DAP's: the panel's pushbutton
         with its legend centred in the face above a lamp strip, which PASS
         lights.  The button is sized (_pb_size) so the legend fits at
@@ -3956,7 +4008,8 @@ class PanelO6:
         ly2 = fy2 - 3
         ly1 = ly2 - PBI_LAMP_H
         lx1, lx2 = x1 + 6 + dx + 5, x2 - 6 + dx - 5
-        self._rect(lx1, ly1, lx2, ly2, fill=C_PBI_LIT if lit else C_PBI_DARK,
+        on = C_ANN[color] if color else C_PBI_LIT
+        self._rect(lx1, ly1, lx2, ly2, fill=on if lit else C_PBI_DARK,
                    outline=C_PADDLE_LO, width=1)
         lines = [l for l in legend.split("\n") if l]
         if not lines:

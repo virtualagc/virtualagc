@@ -1042,6 +1042,10 @@ static double gearPos;         /* 0 stowed .. 1 down and locked */
 static double chuteOutT = -1.0;
 static int wowMain[2], wowNose; /* weight on the left/right main gear, the nose gear */
 static bool brakesOn;
+/* JETT pressed while ARM was latched but before the chute was out: its relay
+ * latches (its lamps light, landing-indicators-findings.md) though there is
+ * nothing to release.  Not saved in captures -- the rare case only. */
+static bool chuteJettEarly;
 static double probePos[2];     /* left, right: 0 stowed .. 1 deployed */
 static int probeDrive[2];      /* +1 out, -1 in, 0 held */
 
@@ -1073,10 +1077,32 @@ void vehdyn_hardwired(unsigned w) {
         brakesOn = false;
         fprintf(stderr, "vehdyn: brakes off at t=%.1f\n", st.t);
     }
-    if ((w & HW_CHUTE_JETT) && chuteOut && !chuteGone) {
-        chuteGone = true;
-        fprintf(stderr, "vehdyn: drag chute JETTISONED at t=%.1f\n", st.t);
+    /* JETT works once ARM is latched (SCOM OI-28 2.14; the ECL's "JETT1,
+     * JETT2 lt on"), releasing the chute if it is out. */
+    if ((w & HW_CHUTE_JETT) && chuteArmed) {
+        if (chuteOut && !chuteGone) {
+            chuteGone = true;
+            fprintf(stderr, "vehdyn: drag chute JETTISONED at t=%.1f\n", st.t);
+        } else if (!chuteOut && !chuteGone) {
+            chuteJettEarly = true;
+        }
     }
+}
+
+/* THE CREW'S LANDING INDICATIONS (landing-indicators-findings.md, from
+ * SCOM OI-28 2.14 and the Entry Checklist).  w[0], the relays: the gear's ARM
+ * (0x8000, yellow) and DN (0x4000, green) pushbutton lights, which show the
+ * command latched, not where the gear is; the drag chute's ARM (0x2000), DPY
+ * (0x1000) and JETT (0x0800).  w[1], the gear position talkbacks from the
+ * proximity switches, per gear left/nose/right: uplocked 0x8000/0x2000/0x0800,
+ * down and locked 0x4000/0x1000/0x0400 -- neither is barberpole, in transit.
+ * The three gears move together here (their separate timing is undocumented). */
+void vehdyn_landing_status(uint16_t w[2]) {
+    w[0] = (uint16_t)((gearArmed ? 0x8000u : 0) | (gearDeploying ? 0x4000u : 0) |
+                      (chuteArmed ? 0x2000u : 0) | ((chuteOut || chuteGone) ? 0x1000u : 0) |
+                      ((chuteGone || chuteJettEarly) ? 0x0800u : 0));
+    unsigned up = gearPos <= 0.0 ? 1u : 0u, dn = gearPos >= 1.0 ? 1u : 0u;
+    w[1] = (uint16_t)((up ? 0x8000u | 0x2000u | 0x0800u : 0) | (dn ? 0x4000u | 0x1000u | 0x0400u : 0));
 }
 
 void vehdyn_gear(double *pos, int wow[3]) {
