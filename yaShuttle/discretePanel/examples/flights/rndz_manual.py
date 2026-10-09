@@ -71,7 +71,8 @@ DAP_DOCK = {
           38: 0.10, 39: "TAIL", 40: 2, 41: 0.08, 42: 0.0,
           43: 0.050, 44: 0.50, 45: 0.020, 46: 0.020, 47: 0.0, 48: 0},
 }
-DAP_OPTIONS = ("ALL", "NOSE", "TAIL")     # an option item cycles in this order
+DAP_OPTIONS = ("ALL", "NOSE", "TAIL")     # PRI P and Y OPTION cycle in this order;
+# ALT JET OPT (row 9) only toggles ALL <-> TAIL (GKKORB.hal 688-697: option 1 <-> 3)
 
 
 def turn_stopped(t, rate, peak):
@@ -632,7 +633,8 @@ class ManualPhase(object):
         EDIT: DAP A - ITEM 3 +10, the edit column's item 50 + row, LOAD -
         ITEM 5; the same with DAP B - ITEM 4), A7/B7 left selected; every
         item read back off SPEC 20's edit column.  An option item is pressed
-        once per step ALL -> NOSE -> TAIL.  Returns the items still wrong."""
+        once per step ALL -> NOSE -> TAIL, ALT JET OPT once (it toggles ALL
+        <-> TAIL).  Returns the items still wrong."""
         from fly_rndz134 import parse_spec20, keys_short, DAP_FMT
         left = {}
         for side, edit in (("A", 3), ("B", 4)):
@@ -655,8 +657,11 @@ class ManualPhase(object):
                     if isinstance(w, str):
                         if got != w:
                             bad[item] = (got, w)
-                            n = ((DAP_OPTIONS.index(w) - DAP_OPTIONS.index(got)) % 3
-                                 if got in DAP_OPTIONS else 1)
+                            if row == 9:                      # ALT JET OPT: a toggle
+                                n = 1
+                            else:
+                                n = ((DAP_OPTIONS.index(w) - DAP_OPTIONS.index(got)) % 3
+                                     if got in DAP_OPTIONS else 1)
                             keys += "+3     keys ITEM %s EXEC\n" % " ".join(str(e)) * 1
                             keys += ("+3     keys ITEM %s EXEC\n" % " ".join(str(e))) * (n - 1)
                     else:
@@ -679,8 +684,16 @@ class ManualPhase(object):
             self.say("DAP %s%d: %s" % (side, config, "every item as p. 6-2's DOCKING column" if not bad
                                          else "STILL DIFFERENT: %s" % bad))
         sel, _ = parse_spec20(self.spec20_page("dap-dock-check"))
-        self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s (A7/B7 kept)" % (config, config, sel.get("A"),
-                                                                           sel.get("B")))
+        if sel != {"A": "07", "B": "07"}:
+            # "__": the active DAP edited in place (RPM SETUP's rates, then
+            # A7's put back by hand) -- A7/B7 loaded again, as stored
+            self.say("DAP DOCK: SPEC 20 shows A%s B%s -- DAP A/B - ITEM 1/2 +7 keyed"
+                     % (sel.get("A"), sel.get("B")))
+            self.play("+1     keys ITEM 1 + 7 EXEC\n+3     keys ITEM 2 + 7 EXEC\n", "dap-dock-sel7")
+            self.script_done("dap-dock-sel7", 120)
+            self.wait_sim(6)
+            sel, _ = parse_spec20(self.spec20_page("dap-dock-check2"))
+        self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s" % (config, config, sel.get("A"), sel.get("B")))
         self.play("+1     keys RESUME\n", "dap-dock-resume")
         self.script_done("dap-dock-resume", 60)
         return left
@@ -740,7 +753,12 @@ class ManualPhase(object):
         self.say("HOLD: %d THC pulses (%s) in %.0f min, about %.2f ft/s of translation; %s"
                  % (sum(dp.values()), ", ".join("%s %d" % kv for kv in dp.items() if kv[1]), mins,
                     sum(n * self.pulse_est[k[1]] for k, n in dp.items()), self.readings()))
-        self.man_record("HOLD", minutes=mins, report=rep, pulses=dp, prop_before=prop0)
+        # p. 6-2's DOCKING A10/B10 checked (and finished) in the stored configurations
+        # and A7/B7 selected, so that the capture after the hold carries them
+        dock_left = self.dap_dock_store()
+        self.dap_pulse_modes()
+        self.man_record("HOLD", minutes=mins, report=rep, pulses=dp, prop_before=prop0,
+                        dap_dock_left={k: {str(i): v for i, v in d.items()} for k, d in dock_left.items()})
         self.snapshot("hold-end")
         self.manual_summary()
 
