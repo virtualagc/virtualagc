@@ -25,12 +25,12 @@ models made before this survey by others; "--" is not modelled.
 | SPAS-01 (Shuttle Pallet Satellite) | 14142 | 1983-059F | STS-7 (Jun 1983): released, formation flight to ~300 m, photographed Challenger, recaptured | Blanketed box across the bay under an instrument deck, a round beam along its foot, a V keel truss below; cameras and 10 experiments on the deck and forward face | 4.8 m across x 3.4 m high x 1.5 m; 1,448 kg | `spas01` |
 | SPAS-01A | -- (not catalogued: never released) | -- | STS-41B (Feb 1984): stayed on the arm after an RMS wrist fault | as SPAS-01 | as SPAS-01 | -- (not free) |
 | Integrated Rendezvous Target (IRT) | 14689 | 1984-011C | STS-41B: a 2 m balloon released as a radar/optical target; it burst on inflation, so no rendezvous | Fragments | -- | -- |
-| Solar Maximum Mission | 11703 | 1980-014A | STS-41C (Apr 1984): rendezvous, MMU capture attempt, RMS capture, repair, release | MMS bus + instrument module, two arrays, HGA mast | 4 m x 2.3 m; arrays ~12 m | `smm` (others) |
+| Solar Maximum Mission | 11703 | 1980-014A | STS-41C (Apr 1984): rendezvous, MMU capture attempt, RMS capture, repair, release | MMS bus + instrument module, two arrays, HGA mast | 4 m x 2.3 m; arrays ~12 m | `smm` |
 | LDEF (Long Duration Exposure Facility) | 14898 | 1984-034B | STS-41C (Apr 1984): released; STS-32 (Jan 1990): rendezvous and retrieval after 5.7 years | 12-sided open frame, 86 experiment trays; gravity-gradient, axis vertical | 9.14 m long x 4.27 m; 9.7 t | `ldef` |
 | ERBS (Earth Radiation Budget Satellite) | 15354 | 1984-108B | STS-41G (Oct 1984): released by the arm after Ride shook its stuck solar array free; the orbiter stayed near until it boosted itself away | Box bus, two solar wings, instrument scanners | ~4.6 x 3.8 x 1.6 m; 2.45 t | `erbs` |
-| Westar 6 (HS-376) | 14688 | 1984-011B | STS-51A (Nov 1984): retrieved by MMU/stinger | Spinning drum, antenna stowed | 2.16 m x 2.8 m | `westar6` (others) |
-| Palapa B2 (HS-376) | 14692 | 1984-011D | STS-51A: retrieved | as Westar 6 | as Westar 6 | `palapab2` (others) |
-| Leasat 3 (Syncom IV-3) | 15643 | 1985-028C | STS-51D (Apr 1985): rendezvous, "flyswatter" attempt; STS-51I (Aug 1985): captured, repaired, re-released | Spinning drum, UHF helix and dish stowed | 4.26 m x 4.3 m (6.2 m with antennas) | `leasat3` (others) |
+| Westar 6 (HS-376) | 14688 | 1984-011B | STS-51A (Nov 1984): retrieved by MMU/stinger | Spinning drum, antenna stowed | 2.16 m x 2.8 m | `westar6` |
+| Palapa B2 (HS-376) | 14692 | 1984-011D | STS-51A: retrieved | as Westar 6 | as Westar 6 | `palapab2` |
+| Leasat 3 (Syncom IV-3) | 15643 | 1985-028C | STS-51D (Apr 1985): rendezvous, "flyswatter" attempt; STS-51I (Aug 1985): captured, repaired, re-released | Spinning drum, UHF helix and dish stowed | 4.26 m x 4.3 m (6.2 m with antennas) | `leasat3` |
 | Spartan 101 (Spartan-1) | 15831 | 1985-048E | STS-51G (Jun 1985): X-ray astronomy free-flyer, deployed and retrieved | Spartan carrier lengthened by the X-ray instrument section, white blankets | 3.20 x 1.07 x 1.22 m (126 x 42 x 48 in) | `spartan101` |
 | Plasma Diagnostics Package (PDP) | 15929 | 1985-063B | STS-51F (Jul 1985): released from the arm; Challenger flew round it (~6 h) and recaptured it | Cylindrical instrument package on its RMS fitting | 1.06 m dia. x 0.6 m; 360 kg | `pdp` |
 | Hubble Space Telescope | 20580 | 1990-037B | STS-31 deploy; STS-61, 82, 103, 109, 125 servicing | | 13.2 m x 4.2 m | `hst` (others) |
@@ -111,7 +111,7 @@ size and finish.
 
 | Key | NORAD | Built from | Configuration | Triangles |
 |---|---|---|---|---|
-| `ldef` | 14898 | shapes; NASA SP-473 fig. 2 and SP-531 (tray map, structure, finishes); 41C, STS-32 (S32-85-081, s32-541-018, STS032-85-008) and KSC (KSC-84PC-0219) photos | 1990 retrieval look, every tray its own experiment (`LOOK = "1984"` gives the deploy look) | 51,940 |
+| `ldef` | 14898 | shapes; NASA SP-473 fig. 2 and SP-531 (tray map, structure, finishes); 41C, STS-32 (S32-85-081, s32-541-018, STS032-85-008) and KSC (KSC-84PC-0219) photos | 1990 retrieval look, every tray its own experiment (`LOOK = "1984"` gives the deploy look) | 55,308 |
 | `intelsat603` | 20523 | shapes; STS-49 photos (9301572, 9257083, 9259496, 9301420, s49-91-020/026/029) | stowed, as captured (no capture bar, no new motor) | 15,268 |
 | `eureca` | 22065 | shapes; eoPortal; STS-46/57 photos | arrays folded, antennas up (STS-57); `ARRAYS_DEPLOYED = True` gives STS-46's | 26,896 |
 | `sfu` | 23521 | shapes measured off STS072-720-076, STS072-734-018/011, sts072-720-042; JAXA diameter | arrays jettisoned (STS-72) | 5,292 |
@@ -132,13 +132,15 @@ size and finish.
 | `oast_flyer` | 23763 | procedural Spartan carrier + shapes; STS-72 photos (STS072-726-051/054) | free-flying | 2,844 |
 | `spartan101` | 15831 | procedural Spartan carrier + shapes; STS-51G press kit (126 x 42 x 48 in), 51-G photos (STS51G-35-53/54/57/64, 36-77/80/82) | free-flying | 4,862 |
 | `pams_stu` | 23876 | shapes; STS-77 ESC frames S77-E-5067/5068/5069 | free-flying | 1,632 |
+| `smm` | 11703 | shapes; STS-41C photos (Ron's collection) | as met on STS-41C, HGA stowed (`HGA_DEPLOYED = True` gives the post-repair mast) | 7,770 |
+| `westar6`, `palapab2` | 14688, 14692 | shapes (`_hs376.py`); STS-51A photos (Ron's collection), JPL's 1.83 m reflector | free-flying, as approached; `CAPTURED = True` adds the MMU stinger in the nozzle | 9,696 |
+| `leasat3` | 15643 | shapes; STS-51D/51I photos (Ron's collection), STS-51I press kit (cradle points, EVA timeline) | as captured on 51-I with the crew's grapple bar (`GRAPPLE_BAR = False` for the rendezvous) | 17,352 |
 | `tss1r` | 23805 | shapes; Aeritalia exploded view (NTRS 19910009845); STS-46 9311302, STS-75 STS075-701-087, 9612176, 9606462 | the satellite (its 2.5 mm tether not drawn) | 7,296 |
 
-A note for all models: portview writes a depth linear in distance at each
-vertex, which the GPU then interpolates linearly across the screen; across
-a long triangle seen obliquely that depth is off by about L^2/(8d) (L the
-triangle's length, d the range: 0.14 m for a 4.3 m side at 17 m), so a
-surface a few centimetres behind a long one can show through it.  These
-models cut their big surfaces into pieces of 0.4-0.5 m
-(`_leo_util.refine`, `cylinder_fine`, `refine_parts`) to keep the error
-to millimetres.
+A note for all models: portview's model fragment shader writes its own
+depth, linear in the distance computed per fragment, so long triangles seen
+obliquely no longer let surfaces a few centimetres behind show through.
+Earlier, the depth was interpolated across the screen from the vertices,
+an error of about L^2/(8d).  The models made before that fix cut their big
+surfaces into 0.4-0.5 m pieces (`_leo_util.refine`, `cylinder_fine`,
+`refine_parts`); that is harmless now and need not be copied.
