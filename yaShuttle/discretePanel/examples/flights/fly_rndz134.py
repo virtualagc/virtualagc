@@ -45,8 +45,18 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            solution and the states it came from are read out of PASS's
            memory (a capture) and set beside rndz_start.py's independent
            Lambert from the same states and from the truth
+  RRNAV    the Ku-band rendezvous radar (Stage 3): AFT FLT STATION CONFIG
+           [4A]'s A1U (KU PWR STBY, MAN SLEW, RDR PASSIVE, RADAR OUTPUT HI);
+           the KU OPS cue card at NAV RNG < 150 kft (PWR ON, sel GPC, CNTL
+           CMD; SPEC 33 KU ANT ENA - ITEM 2); at RR RNG < 135 kft END S TRK
+           NAV [10B] and RR NAVIGATION [13B]: SPEC 33 FLTR TO PROP and SV SEL
+           PROP, RR - ITEM 13, AUTO RNG/RDOT/Angles - ITEM 17/20/23; SV SEL
+           FLTR when SV UPDATE POS < 1.0 kft with RNG ACPT > 9.  The radar
+           then serves every pass after it (POST Ti NAV [16A] keeps it; no
+           second star tracker pass; RADAR OUTPUT LOW at 700 ft).  --no-rr:
+           none of this, the Stage 2 star-tracker-only run
   STRKEND  END S TRK NAV [10B] (p. 4-10): INH Angles - ITEM 24; IMU DES -
-           ITEM 7 again (the IMU reselected)
+           ITEM 7 again (the IMU reselected) -- done already by RRNAV
   TIBURN   (M1b) [15A] in OPS 202 and RNDZ OMS BURN (p. 5-4): SPEC 20 A7/B7
            checked; L OMS, the OMS 2/ORBIT OMS BURNS card's one-engine trims,
            WT, COMPUTE T1, PROP or the ground (truth) solution by the
@@ -67,17 +77,18 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            RCS BURN; END S TRK NAV [18C]
   MC3      [19B] with BASE TIME = MC2 TIG keyed and LOADed; RCS BURN
   MC4      [20A] (TGT 14: T2 offset 0, 0, +0.6 kft); RCS BURN -- on the
-           star tracker's FLTR state, there being no rendezvous radar yet
+           radar's FLTR state (with --no-rr, the star tracker's)
   ARRIVAL  the truth's relative state every 30 s to MC4 + 13 min (TGT 14's
            T2: the R-bar, 600 ft below the ISS) and the burns' table, PASS's
            solutions beside the truth's Lambert and the checklist's MEAN and
            3 SIGMA (rndz-check.log, burns.json)
 
 --no-mc flies the M1b baseline instead: after Ti, OPS 201, the -Z track and
-the coast to T2 (TIG + 76.9 min).  --zero-sensor-bias is the star tracker
-bias experiment (RENDEZVOUS_PLAN.md 5b): this tape's GLQ_ST_ANGLES_BIAS_INIT
-of 1.0 rad set to 0.0 in the capture the run resumes from -- pending Ron's
-decision on the real I-load, never the tape's value.
+the coast to T2 (TIG + 76.9 min).  --zero-sensor-bias is the sensor bias
+experiment (RENDEZVOUS_PLAN.md 5b, 5d): this tape's GLQREN bias INITs --
+S TRK and RR angles 1.0 rad, RR range and range rate 1.0 ft and ft/s, COAS
+-- set to 0.0 in the capture the run resumes from, pending Ron's decision on
+the real I-loads, never the tape's value.
 
 Each step that keys an entry is checked in PASS's memory before the next
 (probe captures, sts134r-tgt10-*), since an entry can be lost.  Throughout
@@ -128,7 +139,7 @@ MET_ZERO_UNIX = calendar.timegm((2011, 5, 16, 12, 56, 27)) + 0.994
 NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
-PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "STRKEND", "TIBURN", "POSTTI",
+PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL"]
 # TGT 10 as JSC-48072-134 lists it (TARGET Ti BURN [13A], [15A]):
 TGT10 = {"T1": 0.0, "EL": 0.0, "DT": 76.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8}
@@ -196,6 +207,25 @@ OMS_1ENG_TRIMS = {"P": 0.4, "LY": 5.2, "RY": -5.2}
 # resumed -- strk-run2's experiment, made an option.
 ST_BIAS_INIT_HW = 0xB47E
 IBM_ONE = (0x4110, 0x0000)
+# ... and the three before it, in GLQREN's order (GLQREN.hal 62-65), all
+# INITIAL(1.0, 1.0) on this tape: COAS angles (rad), RR angles (rad), RR
+# range and range rate (ft, ft/s), S TRK angles (rad).  The radar's go into
+# CGNV_SENSOR_BIAS$(1-4) when RR is selected (GLARRD, GLBRRA add them to
+# the predicted measurements): a 1 rad shaft/trunnion bias is the star
+# tracker's blocker again, and 1 ft/s on the range rate is three times the
+# radar's noise.  --zero-sensor-bias zeroes all four.
+SENSOR_BIAS_INIT = (("GLQ_COAS_ANGLES_BIAS_INIT", 0xB472), ("GLQ_RR_ANGLES_BIAS_INIT", 0xB476),
+                    ("GLQ_RRDOT_BIAS_INIT", 0xB47A), ("GLQ_ST_ANGLES_BIAS_INIT", ST_BIAS_INIT_HW))
+# The range and range rate set is set up once, at the first GLQREN pass
+# after RNDZ NAV ENA (GLQREN.hal step 10: CGNB_DO_RRDOT_NAV_LAST_B6 OFF),
+# whichever sensor is selected; so a capture taken after that already holds
+# the 1.0 ft and 1.0 ft/s in CGNV_SENSOR_BIAS$(3), $(4) (CGNMC2.hal 312;
+# at X'0E7A2' on this tape, beside SENSOR_BIAS_TLM, TAU_SENS and VAR_SENS,
+# which read 1300 1300 600 600 and 1E-6 1E-6 711 0.11).  rr-run1: the 1.0
+# ft/s, with its 0.33 ft/s sigma, pulled PASS's FLTR range rate 1.0 ft/s off
+# the truth.  --zero-sensor-bias zeroes those two as well, when they hold
+# exactly 1.0, 1.0.
+CGNV_SENSOR_BIAS_HW = 0xE7A2
 # CGZB_LAMB_ILOAD ARRAY(40) BIT(1) (CGZMC2.hal:288, one halfword each): which
 # target sets GK3 solves with Lambert (GWR), the rest going to the
 # non-Lambert GWG.  This tape has the source's INITIAL(10#ON, 30#OFF), so
@@ -584,6 +614,7 @@ class StarTrackerNav(object):
         if self.a.no_strk:
             self.say("STRKNAV: --no-strk, no star tracker pass (the M1 baseline)")
             return
+        self.strk_ended = False
         w = self.strk_watch()
         w.wait_ready(60)
         self.say("STAR TRACKER NAV [10A]%s at Ti %+.1f min; before it: %s"
@@ -675,9 +706,11 @@ class StarTrackerNav(object):
         self.strk_keys("+1     keys RESUME\n", "strk-resume", 60)
 
     def strkend(self):
-        """END S TRK NAV [10B]: INH Angles; the deselected IMU back."""
-        if self.a.no_strk:
+        """END S TRK NAV [10B]: INH Angles; the deselected IMU back.  Once
+        (RRNAV does it before RR NAVIGATION [13B], when the radar is on)."""
+        if self.a.no_strk or getattr(self, "strk_ended", False):
             return
+        self.strk_ended = True
         self.strk_keys("+1     keys SPEC 3 3 PRO\n"
                        "+5     keys ITEM 2 4 EXEC\n"
                        "+3     keys SPEC 2 1 PRO\n"
@@ -716,6 +749,9 @@ class StarTrackerNav(object):
                          "PROP %+.0f %+.0f %+.0f |%.0f|; rate error ft/s FLTR %.3f PROP %.3f; truth range %.0f ft"
                          % (rel["t"], (rel["t"] - self.ti_gmt) / 60.0, w.summary(), *rel["fltr"], rel["fltr_n"],
                             *rel["prop"], rel["prop_n"], rel["fltr_vn"], rel["prop_vn"], rel["range"]))
+                if getattr(self, "rr_active", False) or w.get("CGYV_RR_RNG_LFE"):
+                    self.say("rr: %s; truth range %.0f ft" % (self.rr_summary(), rel["range"]))
+                self.rr_watch_output(rel)
             except Exception as e:     # never let the log take the flight down
                 self.say("strk monitor: %r" % e)
 
@@ -848,7 +884,156 @@ def _f(x):
     return "%.3f" % x if isinstance(x, float) else str(x)
 
 
-class Rendezvous(StarTrackerNav, fly_sts134.Flight):
+class RadarNav(object):
+    """THE KU-BAND RENDEZVOUS RADAR (RENDEZVOUS_PLAN.md Stage 3): AFT FLT
+    STATION CONFIG [4A]'s A1U, the KU OPS cue card at NAV RNG < 150 kft,
+    RR NAVIGATION [13B] at RR RNG < 135 kft, RADAR OUTPUT LOW at about 700
+    ft.  The radar is yaGPC2's kuradar.c, its panel word panelO6's A1U
+    controls; PASS reads it on FF3 card 3 channel 3 (GYNRRP) and takes its
+    range, range rate and angles (GLARRD, GLBRRA) into the same filter as
+    the star tracker's marks.  A mixin for Rendezvous.
+
+    SPEC 33 (GKVREL): KU ANT ENA - ITEM 2 (case 4: CGZB_KU_ANT_CMD, to the
+    SM computer, which is not here); S TRK / RR / COAS - ITEM 12 / 13 / 14
+    (case 8: CGZV_ST_RR_COAS); RNG AUT/INH/FOR - ITEM 17-19, RDOT 20-22,
+    Angles 23-25 (cases 10-12); FLTR TO PROP - ITEM 8; SV SEL - ITEM 4.
+    The counts: CGNV_N_ACCEPT$1-2 angles, $3 range, $4 range rate."""
+
+    RR_START_FT = 135000.0
+    KU_OPS_FT = 150000.0
+
+    def rr_on(self):
+        return not self.a.no_rr
+
+    def rr_summary(self):
+        w = self.strk_watch()
+        g = w.get
+        return ("RR RNG %s ft RDOT %s ft/s ROLL %s PITCH %s; ACPT ang %s/%s rng %s rdot %s, REJ rng %s rdot %s; "
+                "RESID rng %s rdot %s; SV UPDATE POS %s kft; sensor %s, SV SEL bit %s"
+                % (_f(g("CGYV_RR_RNG_LFE")), _f(g("CGYV_RR_RNGR_LFE")), _f(g("CGYV_RR_ROLL_LFE")),
+                   _f(g("CGYV_RR_PITCH_LFE")), g("CGNV_N_ACCEPT$1"), g("CGNV_N_ACCEPT$2"), g("CGNV_N_ACCEPT$3"),
+                   g("CGNV_N_ACCEPT$4"), g("CGNV_N_REJECT$3"), g("CGNV_N_REJECT$4"), _f(g("CGNV_DISP_DELQ$3")),
+                   _f(g("CGNV_DISP_DELQ$4")), _f(g("CGNV_R_MEAS_RSS")), g("CGZV_ST_RR_COAS_LFE"),
+                   w.sv_sel_bit()))
+
+    def ku_switches(self, name, **pos):
+        self.play("".join("+1     switch ku_%s %s\n" % (k, v) for k, v in pos.items()), name)
+        self.script_done(name, 60)
+
+    def pass_range_ft(self):
+        """NAV RNG: PASS's own range, |FLTR - target| or |PROP - target| as
+        SV SEL has it (the downlist's staged states), else None."""
+        w = self.strk_watch()
+        with w.lock:
+            st = w.rel
+        if not st:
+            return None
+        rk = "rf" if w.sv_sel_bit() == 1 else "rp"
+        return vnorm(vsub(st[rk], st["rt"]))
+
+    def rrnav(self):
+        """KU OPS and RR NAVIGATION [13B], between Ti's preliminary and final
+        targeting (the radar's 135 kft comes at about Ti - 40 min)."""
+        if not self.rr_on():
+            self.say("RRNAV: --no-rr, no rendezvous radar (the Stage 2 baseline)")
+            return
+        w = self.strk_watch()
+        # AFT FLT STATION CONFIG [4A]: A1U
+        self.ku_switches("ku-config", power="STBY", steering="MAN SLEW", mode="RDR PASSIVE",
+                         radar_output="HIGH", control="PNL")
+        self.say("[4A] A1U: KU PWR STBY, sel MAN SLEW, MODE RDR PASSIVE, RADAR OUTPUT HI, CNTL PNL")
+        # KU OPS at NAV RNG < 150 kft
+        limit = self.ti_gmt - 20 * 60.0
+        while self.truth()["gmt"] < limit:
+            r = self.pass_range_ft()
+            if r is not None and r < self.KU_OPS_FT:
+                break
+            time.sleep(2.0)
+        self.say("KU OPS at Ti %+.1f min: NAV RNG %s kft" % (self.ti_min(), _f((self.pass_range_ft() or 0) / 1e3)))
+        self.ku_switches("ku-ops", power="ON", steering="GPC", control="CMD")
+        self.play("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 2 EXEC\n+3     keys RESUME\n", "ku-ant-ena")
+        self.script_done("ku-ant-ena", 60)
+        # RR RNG < 135 kft: data on SPEC 33
+        while self.truth()["gmt"] < limit:
+            rr = w.get("CGYV_RR_RNG_LFE")
+            if isinstance(rr, float) and 1.0 < rr < self.RR_START_FT:
+                break
+            time.sleep(2.0)
+        else:
+            self.say("RRNAV: no radar range under 135 kft by Ti - 20 min; %s" % self.rr_summary())
+            return
+        self.say("RR RNG < 135 kft at Ti %+.1f min: %s" % (self.ti_min(), self.rr_summary()))
+        # END S TRK NAV [10B] first, if a star tracker pass is on
+        if not self.a.no_strk and not getattr(self, "strk_ended", False):
+            self.strkend()
+        self.rr_start_pass("rr-nav")
+        self.rr_active = True
+        self.save_state()
+        self.rr_converge("RR NAV", self.ti_gmt - 19 * 60.0)
+
+    def rr_start_pass(self, name):
+        """[13B]'s keys: FLTR TO PROP and SV SEL PROP if FLTR is selected;
+        RR; AUTO RNG, RDOT, Angles."""
+        w = self.strk_watch()
+        if w.sv_sel_bit() == 1:
+            self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                           "+5     keys ITEM 8 EXEC\n"
+                           "+4     keys ITEM 4 EXEC\n", name + "-prop")
+            self.wait_sim(8)
+        self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                       "+5     keys ITEM 1 3 EXEC\n"
+                       "+3     keys ITEM 1 7 EXEC\n"
+                       "+3     keys ITEM 2 0 EXEC\n"
+                       "+3     keys ITEM 2 3 EXEC\n", name)
+        self.wait_sim(10)
+        self.rr_acc0 = (w.get("CGNV_N_ACCEPT$3") or 0, w.get("CGNV_N_ACCEPT$4") or 0)
+        self.say("RR NAVIGATION [13B]: RR - ITEM 13, AUTO RNG/RDOT/Angles - ITEM 17/20/23 (SV SEL PROP); %s"
+                 % self.rr_summary())
+
+    def rr_converged(self):
+        w = self.strk_watch()
+        acc0 = getattr(self, "rr_acc0", (0, 0))
+        n = (w.get("CGNV_N_ACCEPT$3") or 0) - acc0[0]
+        pos = w.get("CGNV_R_MEAS_RSS")
+        return n > 9 and isinstance(pos, float) and pos < 1.0, n, pos
+
+    def rr_converge(self, what, until_gmt):
+        """SV SEL - ITEM 4 (FLTR) when SV UPDATE POS < 1.0 kft with RNG ACPT
+        > 9 -- [10A]'s rule, applied to the radar's marks."""
+        w = self.strk_watch()
+        while self.truth()["gmt"] < until_gmt:
+            ok, n, pos = self.rr_converged()
+            if ok:
+                self.strk_keys("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 4 EXEC\n+3     keys RESUME\n",
+                               "rr-sv-sel-fltr-%s" % what.replace(" ", "-").lower())
+                self.wait_sim(8)
+                self.say("%s: converged (RNG ACPT %d this pass, SV UPDATE POS %.3f kft) at Ti %+.1f min -- SV SEL "
+                         "- ITEM 4 (FLTR): bit %s; %s" % (what, n, pos, self.ti_min(), w.sv_sel_bit(),
+                                                          self.rr_summary()))
+                return True
+            time.sleep(3.0)
+        self.say("%s: not converged by its deadline; SV SEL left %s; %s"
+                 % (what, w.sv_sel_bit(), self.rr_summary()))
+        return False
+
+    def rr_again(self, until_gmt):
+        """POST Ti NAV [16A] with the radar: FLTR TO PROP, SV SEL PROP; the
+        radar stays selected and AUTO; FLTR again when converged."""
+        self.say("POST Ti NAV [16A] (radar) at Ti %+.1f min" % self.ti_min())
+        self.rr_start_pass("rr-post-ti")
+        self.rr_converge("POST Ti RR NAV", until_gmt)
+
+    def rr_watch_output(self, rel):
+        """RADAR OUTPUT LOW at about 700 ft."""
+        if (self.rr_on() and getattr(self, "rr_active", False) and not getattr(self, "ku_low", False)
+                and rel and rel.get("range", 9e9) < 700.0):
+            self.ku_low = True
+            self.ku_switches("ku-output-low", radar_output="LOW")
+            self.say("RADAR OUTPUT LOW at %.0f ft" % rel["range"])
+
+
+
+class Rendezvous(RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
         self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a")
@@ -866,12 +1051,17 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
                 self.thc_acc = st["thc_acc"]
             if st.get("pass_acc0"):
                 self.pass_acc0 = tuple(st["pass_acc0"])
+            self.rr_active = bool(st.get("rr_active"))
+            self.strk_ended = bool(st.get("strk_ended"))
+            if st.get("rr_acc0"):
+                self.rr_acc0 = tuple(st["rr_acc0"])
         except (OSError, ValueError):
             pass
 
     def save_state(self):
         json.dump({"burns": self.burns, "mc_tig": self.mc_tig, "thc_acc": getattr(self, "thc_acc", None),
-                   "pass_acc0": getattr(self, "pass_acc0", None)},
+                   "pass_acc0": getattr(self, "pass_acc0", None), "rr_active": getattr(self, "rr_active", False),
+                   "strk_ended": getattr(self, "strk_ended", False), "rr_acc0": getattr(self, "rr_acc0", None)},
                   open(os.path.join(self.a.logs, "mc-state.json"), "w"), indent=1)
 
     def say(self, text):
@@ -931,26 +1121,40 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
         threading.Thread(target=self.monitor, daemon=True).start()
 
     def zero_sensor_bias(self, capdir):
-        """--zero-sensor-bias: GLQ_ST_ANGLES_BIAS_INIT set to 0.0 in a
-        capture's memory image -- AN EXPERIMENT, pending Ron's decision on
-        the real I-load (RENDEZVOUS_PLAN.md 5b); the tape is not touched.
-        Only the INIT cells: a capture whose angle set has already come in
-        holds the 1.0 in CGNV_SENSOR_BIAS too, which this does not reach."""
+        """--zero-sensor-bias: GLQREN's four sensor bias INITs -- COAS, RR
+        angles, RR range/range rate, S TRK -- set to 0.0 in a capture's
+        memory image -- AN EXPERIMENT, pending Ron's decision on the real
+        I-loads (RENDEZVOUS_PLAN.md 5b, 5d); the tape is not touched.  Only
+        the INIT cells: a sensor whose set has already come in holds the 1.0
+        in CGNV_SENSOR_BIAS too, which this does not reach."""
         p = os.path.join(capdir, "gpc1.mem.bin")
         m = bytearray(open(p, "rb").read())
-        a = 2 * ST_BIAS_INIT_HW
-        was = struct.unpack(">4H", bytes(m[a:a + 8]))
-        if was == (0, 0, 0, 0):
-            self.say("zero-sensor-bias: %s already holds 0.0, 0.0 at X'%05X'" % (capdir, ST_BIAS_INIT_HW))
+        done, already, odd = [], [], []
+        for name, hw in SENSOR_BIAS_INIT:
+            a = 2 * hw
+            was = struct.unpack(">4H", bytes(m[a:a + 8]))
+            if was == (0, 0, 0, 0):
+                already.append(name)
+            elif was == IBM_ONE * 2:
+                m[a:a + 8] = bytes(8)
+                done.append(name)
+            else:
+                odd.append("%s %s" % (name, " ".join("%04X" % x for x in was)))
+        if odd:
+            self.say("zero-sensor-bias: %s holds %s, not this tape's 1.0, 1.0 -- NOT patched (another tape's map?)"
+                     % (capdir, "; ".join(odd)))
             return
-        if was != IBM_ONE * 2:
-            self.say("zero-sensor-bias: %s holds %s at X'%05X', not this tape's 1.0, 1.0 -- NOT patched (another "
-                     "tape's map?)" % (capdir, " ".join("%04X" % x for x in was), ST_BIAS_INIT_HW))
-            return
-        m[a:a + 8] = bytes(8)
-        open(p, "wb").write(m)
-        self.say("zero-sensor-bias: GLQ_ST_ANGLES_BIAS_INIT 1.0, 1.0 rad -> 0.0, 0.0 at X'%05X' in %s -- an "
-                 "EXPERIMENT pending the I-load decision, not the tape's value" % (ST_BIAS_INIT_HW, capdir))
+        a = 2 * (CGNV_SENSOR_BIAS_HW + 4)
+        if struct.unpack(">4H", bytes(m[a:a + 8])) == IBM_ONE * 2:
+            m[a:a + 8] = bytes(8)
+            done.append("CGNV_SENSOR_BIAS$(3,4) (the range set already in)")
+        if done:
+            open(p, "wb").write(m)
+            self.say("zero-sensor-bias: %s 1.0, 1.0 -> 0.0, 0.0 in %s -- an EXPERIMENT pending the I-load "
+                     "decision, not the tape's value%s" % (", ".join(done), capdir,
+                                                          "; already 0: " + ", ".join(already) if already else ""))
+        else:
+            self.say("zero-sensor-bias: %s already holds 0.0 in all four (%s)" % (capdir, ", ".join(already)))
         self.bias_zeroed = True
 
     def lambert_mc(self, capdir):
@@ -1852,7 +2056,10 @@ wait crt 1 title 2011/ timeout 600
         self.mc_tig[11] = self.ti_gmt + TGT_SETS[11]["T1"] * 60.0
         self.say("== TARGET MC1 BURN [17A] (preliminary), Ti %+.1f min" % self.ti_min())
         self.burns["MC1 preliminary"] = self.target(11, "preliminary")
-        self.strknav(again=True, until_gmt=self.mc_tig[11] - 9 * 60.0)
+        if getattr(self, "rr_active", False):
+            self.rr_again(self.mc_tig[11] - 9 * 60.0)
+        else:
+            self.strknav(again=True, until_gmt=self.mc_tig[11] - 9 * 60.0)
         if self.truth()["gmt"] < self.mc_tig[11] - 9 * 60.0:
             self.say("== TARGET MC1 BURN [17A] (intermediate), Ti %+.1f min" % self.ti_min())
             self.burns["MC1 intermediate"] = self.target(11, "intermediate")
@@ -1864,6 +2071,17 @@ wait crt 1 title 2011/ timeout 600
         targeting coming soon after Ti, is usually reached between TARGET
         blocks rather than while [10A] waits; so each block checks it."""
         w = self.strk_watch()
+        if getattr(self, "rr_active", False):
+            if w.sv_sel_bit() != 0:
+                return
+            ok, n, pos = self.rr_converged()
+            if ok:
+                self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                               "+5     keys ITEM 4 EXEC\n", "sv-sel-fltr-%s" % what)
+                self.wait_sim(8)
+            self.say("SV SEL check (%s, radar): RNG ACPT %d this pass, SV UPDATE POS %s kft -- %s"
+                     % (what, n, _f(pos), "SV SEL - ITEM 4 (FLTR): bit %s" % w.sv_sel_bit() if ok else "PROP"))
+            return
         acc0 = getattr(self, "pass_acc0", None)
         if acc0 is None or w.sv_sel_bit() != 0:
             return
@@ -1959,8 +2177,11 @@ wait crt 1 title 2011/ timeout 600
         else:
             sol = self.rcs_burn(12, "MC2", tig, after_final=after_final, before_burn=before_burn)
         self.mc_tig[12] = sol["T1_TIG_GMT"] if sol else tig
-        self.say("== END S TRK NAV [18C], Ti %+.1f min" % self.ti_min())
-        self.strkend()
+        if getattr(self, "rr_active", False):
+            self.say("[18C] END S TRK NAV: the star tracker pass ended at RR NAV [13B]; the radar goes on")
+        else:
+            self.say("== END S TRK NAV [18C], Ti %+.1f min" % self.ti_min())
+            self.strkend()
 
     def mc_base_met(self):
         """"BASETIME = MC2 TIG" (TGT 13, 14), as MET to the whole second."""
@@ -1992,8 +2213,9 @@ wait crt 1 title 2011/ timeout 600
         if self.a.no_mc:
             return
         self.mc_tig[14] = self.mc_base_met() + gmt_of_unix(MET_ZERO_UNIX) + TGT_SETS[14]["T1"] * 60.0
-        self.say("== TARGET MC4 [20A], Ti %+.1f min (no rendezvous radar: FLTR state without radar marks "
-                 "-- a deviation)" % self.ti_min())
+        self.say("== TARGET MC4 [20A], Ti %+.1f min (%s)"
+                 % (self.ti_min(), "on the radar's FLTR state" if getattr(self, "rr_active", False)
+                    else "no rendezvous radar: FLTR state without radar marks -- a deviation"))
         if self.truth()["gmt"] < self.mc_tig[14] - 12 * 60.0:
             self.burns["MC4 preliminary"] = self.target(14, "preliminary")
         else:
@@ -2287,10 +2509,14 @@ def main():
                          "final-ground limits of the ground's (the truth's Lambert, for MCC), else the "
                          "ground's EXT DVs; 'onboard' always the onboard one (p. 1-3)")
     ap.add_argument("--zero-sensor-bias", action="store_true",
-                    help="AN EXPERIMENT, pending Ron's decision on the real I-load: GLQ_ST_ANGLES_BIAS_INIT "
-                         "(this tape's 1.0, 1.0 RADIAN, RENDEZVOUS_PLAN.md 5b) set to 0.0 in the capture the "
+                    help="AN EXPERIMENT, pending Ron's decision on the real I-loads: GLQREN's sensor bias INITs "
+                         "-- S TRK and RR angles (this tape's 1.0, 1.0 RADIAN, RENDEZVOUS_PLAN.md 5b, 5d), RR "
+                         "range and range rate (1.0 ft, 1.0 ft/s), COAS -- set to 0.0 in the capture the "
                          "run resumes from, or, on a fresh run, in the UPLINK capture, which the run then "
                          "restarts from before RNDZ NAV ENA.  The tape and volume are untouched")
+    ap.add_argument("--no-rr", action="store_true",
+                    help="no Ku-band rendezvous radar (RRNAV does nothing; the star tracker pass goes on "
+                         "after Ti, as in Stage 2)")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()

@@ -5,7 +5,11 @@ at M1b) is built and has flown; see section 5a.  Stage 1's star tracker
 target track is built and has flown to Ti; see section 5b -- with one
 blocker in this tape's I-loads.  Stage 2's midcourses MC1-MC4 are built and
 have flown; see section 5c -- with a second I-load question (the Lambert
-flags) and a navigation finding (PASS drops burns under 0.9 ft/s).
+flags) and a navigation finding (PASS drops burns under 0.9 ft/s).  Stage
+3's Ku-band rendezvous radar is built and has flown from Ti - 44 min to the
+arrival; see section 5d -- PASS's FLTR now holds tens of feet, the RR bias
+I-loads bite like the star tracker's, and PASS's MC2-MC4 ALARM KILL turns
+out not to be navigation's.
 Everything else is still a plan.  The plan was written read-only from the repository, the
 flight source, and the documents listed under Sources.
 
@@ -648,6 +652,203 @@ Earth's shadow from Ti + 36 min, 08:14 UTC: the last S PRES).  The MCC covarianc
 REINIT ([16A]).  +X and OMS midcourses (p. 1-3, > 4 ft/s): every MC is flown
 multi-axis.  The burn pad and "Record solution in PAD" beyond the log.  The
 two I-load questions (sensor bias, Lambert flags) are Ron's.
+
+## 5d. Stage 3 as built: the Ku-band rendezvous radar (2026-10-09, macOS)
+
+**How to run it** (one line, from a STRKNAV capture; about 80 min at rate 2
+from Ti - 65 min to the arrival):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --from TI --zero-sensor-bias --lambert-mc
+
+with DIR holding `sts134r-ipl` and `sts134r-strknav` from a Stage 1 run.
+The new phase is RRNAV, between TI and STRKEND.  `--no-rr` gives Stage 2's
+star-tracker-only run.
+
+**Where PASS reads the radar.**  The Ku-band signal processor's ten words
+come in on **FF3, card 3, channel 3**:
+- FIOMFBCE.asm 537-549 reads them in FF3's MFE sequence, as FIOFFIC3
+  X'24C69'.
+- They land in CGBV_RNDZ_RDR; CGBIM1.hal's "CD 5 CH 5" comment is stale.
+- GYNRRP decodes them (FSSR Part E 4.229).
+- GELORB passes them on at LFE rate, range times 1000 into feet.
+- GLARRD and GLBRRA incorporate them (Part C 4.2.8).
+
+The words:
+
+| Word | Bits | Meaning |
+|---|---|---|
+| 1 | 1 | RADAR ON (else 'COMM') |
+| 1 | 2 | AUTO TRACK ('ATRK') |
+| 1 | 3 | GPC DESIG ('GDSG') |
+| 1 | 4 | GPC ACQ ('GPC') |
+| 1 | 8-9 | angle data-good code |
+| 1 | 10 | SELF-TEST ('STST') |
+| 2 | 3 | TRACK |
+| 2 | 15-16 | range data-good code |
+| 3 | sign + 12 bits | roll, 0.0878906 deg |
+| 4 | sign + 11 bits | pitch, 0.0878906 deg |
+| 5 | sign + 15 bits | range rate, 0.05 ft/s |
+| 7-8 | 23 bits | range, 0.005/16 kft |
+| 9-10 | sign + 14 bits | roll and pitch rates, shown on SPEC 33 as mrad/s |
+
+GLBRRA turns roll and pitch into shaft and trunnion through CGNS_K_ANG
+(67 deg).  It predicts them from the line of sight in CGNS_M_BODY_TO_RR
+axes, a 67 deg turn about body Z; the tape holds the source's INITIAL, at
+X'0E96A'.  The line of sight runs from GLRREN's antenna offset, (-12.2211,
+11.1971, -1.82292) ft from the c.g.  The two 67 deg turns undo each other,
+so pitch is the line of sight's tilt along body X and roll is minus its
+tilt along body Y.
+
+**yaGPC2: `src/kuradar.c`.**
+- **The device.** FF3's card 3 channel 3 read (mdmdev.c, RR_READ), driven
+  by vehdyn's first target.
+- **The angles.** It inverts GLBRRA's transform exactly: with w = (-u1,
+  u2, -u3), sin P = -(c w1 + s w2) and tan R = (s w1 - c w2) / w3.
+- **What it stands in for.** The SM computer and the Ku signal processor
+  are not here, so the radar steers itself:
+  - powered ON in RDR PASSIVE or RDR COOP (COOP skin-tracks too; the ISS
+    has no transponder) and steered GPC, GPC DESIG or AUTO TRACK, it
+    searches for 8-20 s and locks;
+  - MAN SLEW never locks;
+  - the reach is YAGPC_KU_ACQ_KFT, default 150 kft, and lock is lost
+    beyond 1.1 times that;
+  - lock is also lost with the station more than 30 deg below the body's
+    X-Y plane.
+- **Noise.**
+  - Range: sqrt(15^2 + (0.0015 R)^2) ft.
+  - Range rate: 0.3 ft/s.
+  - Angles: 0.08 deg each, plus a close-range wander inside 3 kft.  The
+    wander is Gauss-Markov, atan(3 m / R) with a 30 s time constant.
+- **Saturation.** RADAR OUTPUT HIGH saturates inside 300 ft.
+- **The panel.** One word from panelO6 (op 4 VALUE, type 9, to FF3; the
+  bits are in kuradar.h).
+- **Captures.** Kept in vehdyn.json's `kuRadar`.
+- **Tests.** `test/test_kuradar.c`, 44 checks:
+  - GYNRRP's decode of the words returns the truth's range and range rate
+    to their LSBs;
+  - GLBRRA's shaft and trunnion match PASS's own prediction, worked out
+    from scratch, within the angle LSB, on and 20 deg off the boresight;
+  - the noise is near its sigmas;
+  - the steering bits and messages, MAN SLEW, the reach, the body
+    blockage, SELF-TEST, and a capture.
+- **Build.** Added to Makefile and NMakefile; `make test` passes.
+
+**The panel: A1U** (panelcontrols.py: `ku_power` ON/STBY/OFF, `ku_mode`
+COMM/RDR PASSIVE/RDR COOP, `ku_steering`, `ku_radar_output` HIGH/MED/LOW,
+`ku_control` PNL/CMD; crew scripts set them with `switch ku_power ON`).
+Their `ku` bits make the word panelO6 sends.
+
+**The driver** (`RadarNav` in fly_rndz134.py):
+- **[4A]'s A1U:** STBY, MAN SLEW, RDR PASSIVE, HI, PNL.
+- **KU OPS** at PASS's NAV RNG < 150 kft: PWR ON, GPC, CMD, and SPEC 33 KU
+  ANT ENA - ITEM 2.
+- **At RR RNG < 135 kft:**
+  - END S TRK NAV [10B];
+  - RR NAVIGATION [13B]: FLTR TO PROP and SV SEL PROP if FLTR, RR - ITEM
+    13, AUTO RNG/RDOT/Angles - ITEM 17/20/23;
+  - SV SEL FLTR when SV UPDATE POS < 1.0 kft with RNG ACPT > 9.
+- **POST Ti NAV [16A]:** the same pass again on the radar.
+- **No second star tracker pass**, and no [18C].
+- **RADAR OUTPUT LOW** at 700 ft.
+- **Logging.** An `rr:` line every check in `rndz-check.log`: RR range,
+  range rate and angles; ACPT and REJ; residuals; sensor; SV SEL.
+
+**THE RR BIAS I-LOADS BITE TOO.**  GLQREN's GLQ_RR_ANGLES_BIAS_INIT is 1.0,
+1.0 RADIAN on this tape, like the star tracker's.  GLQ_RRDOT_BIAS_INIT is
+1.0 ft and 1.0 ft/s, against bias sigmas of 26.7 ft and 0.33 ft/s
+(GLQ_BIAS_VAR_RRDOT 711, 0.11).
+- **When they load.** The range set is set up once, at RNDZ NAV ENA, so a
+  capture taken after that already holds the 1.0, 1.0 in
+  CGNV_SENSOR_BIAS$(3,4), at X'0E7A2' + 4.
+- **`rr-run1`** zeroed only the INITs:
+  - PASS's FLTR range rate went 1.0 ft/s off the truth within a minute of
+    [13B];
+  - its relative state went 900 ft off (radial);
+  - it estimated a 0.8 ft/s "bias".
+- **`--zero-sensor-bias` now covers it.** It zeroes all four INITs (COAS,
+  RR angles, RR range and range rate, S TRK) and, when they hold exactly
+  1.0, 1.0, the live CGNV_SENSOR_BIAS$(3,4).  It is still only an
+  EXPERIMENT pending Ron's I-load decision; the tape is not touched.
+
+**Results** (`~/sts134-runs/rendezvous/rr-run2`, from strk-run2's
+STRKNAV capture, `--zero-sensor-bias --lambert-mc`; `rr-run3` MC4 and the
+arrival again with the wander at 3 m / 30 s).
+- **The radar's timeline.** It locked at 147.5 kft, at Ti - 44 min.  RR RNG
+  < 135 kft came at Ti - 40.7.  [13B] followed, and FLTR was selected at
+  Ti - 37.2 (10 range marks, SV UPDATE POS 23 ft).
+- **Marks.** About 490 range, range rate and angle marks were accepted to
+  260 ft, and one rejected.
+- **PASS's FLTR against the truth** (ft; PROP is the same pass without
+  marks):
+
+  | Ti + min | range ft | FLTR error (x y z) | abs | FLTR rate err ft/s | PROP abs |
+  |---|---|---|---|---|---|
+  | -37 | 120 500 | +57 +113 +24 | 129 | 0.13 | 223 |
+  | -17.6 | 50 900 | +15 +90 +64 | 111 | 0.16 | 483 |
+  | -1 | 42 300 | +58 -122 +110 | 174 | 0.23 | 675 |
+  | +24 | 33 200 | +16 +30 +28 | 44 | 0.22 | 755 |
+  | +46.8 | 16 900 | +3 +13 +11 | 17 | 0.04 | 794 |
+  | +61.4 | 8 600 | +4 +14 +13 | 20 | 0.06 | 130 |
+  | +76 | 3 360 | -8 +7 +9 | 14 | 0.37 | -- |
+  | +86.2 | 1 470 | -3 +3 -7 | 9 | 0.21 | -- |
+  | +94.5 | 590 | +12 +12 -33 | 37 | 0.36 | -- |
+  | +98.7 | 290 | +5 -4 -22 | 22 | 0.15 | -- |
+
+  Stage 2's star tracker FLTR walked 4-11 kft off after the midcourses.
+  The radar holds it to tens of feet all the way in.
+- **Ti on the radar's FLTR.** +9.92 -0.66 +4.23 against the truth's
+  Lambert +9.80 -0.71 +4.31.
+- **MC1.** -0.23 -0.17 +0.58 against -0.29 +0.02 +1.12, inside the
+  checklist's 3 sigma; burned onboard.
+- **The first close-range wander** (15 m, 10 s; `rr-run2`'s end) was too
+  much:
+  - PASS read it as 5 ft/s of lateral motion inside 1.5 kft;
+  - the -Z track chased PASS's state to 112 deg of roll;
+  - the radar lost the station behind the body at 430 ft.
+  At 3 m and 30 s (`rr-run3`) FLTR stays inside 80 ft to the arrival.
+
+**WHAT THE RADAR SETTLES ABOUT STAGE 2.**  PASS's MC2-MC4 Lambert still ends
+in ALARM KILL (PRED MATCH 999999) with the radar, on a FLTR state 14-20 ft
+and 0.1-0.4 ft/s from the truth (MC3 and MC4 in `rr-run2` and `rr-run3`).
+So 5c's reading, that the drifted state made GWR give up, is wrong.
+- **What fails.** From MC2's preliminary on, every COMPUTE T1 ends in ALARM
+  KILL. MC2's elevation search lands revolutions away (+417, +833 min),
+  and SPEC 34 shows EL 178.92 for an EL 29.07 set.
+- **What still works.** MC1 and Ti, before it, solve.
+- **What to look at next.** Something MC2's search leaves behind -- 5c
+  notes the search re-seeding from the BASE TIME it moved (GWRORB step
+  140) -- or the elevation angle's sign or reference.  That is GWR's
+  side, not navigation's.
+
+So MC2-MC4 were again flown on the ground's (truth Lambert) solutions:
+
+| Burn | Lambert from the truth | Checklist mean (3 sigma) | Burned (truth sensed) |
+|---|---|---|---|
+| MC2 final (TGT 19, nominal + 7) | +0.50 -0.11 +1.72 | 0.0 (0.4), 0.0 (0.2), +0.9 (2.5) | +0.63 -0.02 +1.66 |
+| MC3 final | +0.19 -0.13 +1.02 | +0.9 (1.3), 0.0 (0.5), +1.1 (2.6) | +0.33 -0.01 +0.90 |
+| MC4 final | +0.01 -0.10 -0.29 | +1.3 (1.3), -0.1 (0.6), +0.9 (2.2) | +0.14 -0.01 -0.27 |
+
+**Arrival** (`rr-run3`, MC4 + 13.5 min): the truth 27 ft ahead, 60 ft out
+of plane and **372 ft below** the ISS, ZD -1.14 ft/s, against 0, 0, +600.
+- **The miss is the burn's.** MC4's ground solution, from the truth at
+  TIG, predicts arrival at 600 ft with ZD -0.63.  The burn as flown added
+  +0.13 ft/s in X, and the truth's ZD was already -2.1 ft/s three minutes
+  after it.  That is how the burn was flown (Stage 2's VGO loop and the
+  -Z track's jets), not navigation.
+- **`rr-run2`'s arrival** (48 ft below, 365 ft out of plane) came from
+  the wander's chase above.
+
+**Not done.**
+- **SM pointing.** The SM computer's antenna management: the radar points
+  itself, and SPEC 33's KU ANT ENA reaches nothing.
+- **Panel A2.** The DIGI-DIS range/rdot and the cross-pointers.
+- **SM ANTENNA self-test.** The panel bit exists; nothing sends it.
+- **The radar's own errors.** Bias, scale factor and the close-range range
+  noise are estimates; there are no figures from a document.
+- **Blockage.** The Ku deployed assembly's zones are a single 30 deg cut.
+- **Prox ops.** The rendezvous radar's role inside 200 ft (Stage 5).
+- **One-line run.** Not flown end to end in one run: `rr-run2` and
+  `rr-run3` are the result.
 
 ## 6. The stages
 

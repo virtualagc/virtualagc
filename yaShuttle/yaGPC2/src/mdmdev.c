@@ -17,6 +17,7 @@
 #include "envcache.h"
 #include "json.h"
 #include "startrk.h"
+#include "kuradar.h"
 #include "lpsmodel.h"
 #include "eiumodel.h"
 #include "mecmodel.h"
@@ -94,6 +95,7 @@ static void discrete_write(uint16_t (*out)[NCARD][NCHAN], bool (*seen)[NCARD][NC
 #define IMU_WRITE  0x20C01u   /* FIOIMUC3: card 3 ch 0, command words 1, 2  */
 #define STU_READ   0x24C42u   /* FIOFFIC5: card 3 ch 2, a star tracker's 3 words */
 #define STU_WRITE  0x20C40u   /* FIOHO203: card 3 ch 2, its command word     */
+#define RR_READ    0x24C69u   /* FIOFFIC3: FF3 card 3 ch 3, the Ku-band radar's 10 words */
 
 typedef struct {
     uint16_t cmd1, cmd2;      /* the last two command words, echoed back */
@@ -640,6 +642,10 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * computer commands: op 4 VALUE, type 8, one word to FF1 -- vehdyn.c,
  * vehdyn_hardwired, has the bits and latches them. */
 #define CREW_TYPE_HW 8
+/* THE KU-BAND RADAR'S PANEL (A1U; kuradar.h has the bits), to FF3: op 4
+ * VALUE, type 9, one word.  The SM computer and the Ku signal processor
+ * that the switches really reach are not here; kuradar.c stands in. */
+#define CREW_TYPE_KU 9
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -819,6 +825,14 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t w = (uint16_t)(((unsigned)buf[8] << 8) | buf[9]);
         startrk_hardware(st, (w & 0x8000u) != 0, (w & 0x4000u) != 0,
                          vehdyn_enabled() ? vehdyn_state()->t : 0.0);
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
+    if (type == CREW_TYPE_KU) {
+        if (op != CREW_OP_VALUE || k != 3 || cnt < 1 || len < 10) return;
+        kuradar_panel((uint16_t)(((unsigned)buf[8] << 8) | buf[9]),
+                      vehdyn_enabled() ? vehdyn_state()->t : 0.0);
         crewHeard = true;
         crewMsgs++;
         return;
@@ -2011,6 +2025,13 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             ffReads++;
             return true;
         }
+        if (u == 3 && f == RR_READ) {
+            uint16_t rw[10];
+            kuradar_read(rw, vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6);
+            for (int i = 0; i < n; i++) out[i] = (i < 10) ? rw[i] : 0;
+            ffReads++;
+            return true;
+        }
         if (u >= 1 && u <= 3 && f == IMU_DSCRT) {
             for (int i = 0; i < n; i++) out[i] = (i == 0) ? imu_discretes(u) : 0;
             ffReads++;
@@ -2092,6 +2113,8 @@ bool mdmdev_dump(const char *dir) {
         double sb[512];
         int ns = startrk_save(sb, 512);
         put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+        ns = kuradar_save(sb, 512);
+        put_list(f, "kuRadar", sb, ns < 512 ? ns : 512, true);
         ns = vehdyn_targets_save(sb, 512);
         put_list(f, "targets", sb, ns < 512 ? ns : 512, true);
         ns = eiu_save(sb, 512);
@@ -2196,6 +2219,8 @@ bool mdmdev_load(const char *dir) {
         double sb[512];
         int ns = get_list(root, "starTrackers", sb, 512);
         if (ns > 0) startrk_load(sb, ns, tCap);
+        ns = get_list(root, "kuRadar", sb, 512);
+        if (ns > 0) kuradar_load(sb, ns, tCap);
         ns = get_list(root, "targets", sb, 512);
         vehdyn_targets_load(sb, ns);
         ns = get_list(root, "engines", sb, 512);
@@ -2239,6 +2264,7 @@ void mdmdev_test_platform(int n, double P[3][3]) {
 
 void mdmdev_report(void) {
     startrk_report();
+    kuradar_report();
     lps_report();
     eiu_report();
     mec_report();
