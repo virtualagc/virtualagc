@@ -274,6 +274,29 @@ int main(void) {
     check(lit(0, 0x2000), "POWER ON (dampers off): RING ALIGNED", 0, 0);
     press(&t, 0x0800);                                   /* RING IN */
     double t0 = t;
+    run(&t, t0 + 60.0);
+    {
+        /* the ring drawing the Orbiter in: its velocity relative to the ISS
+         * is how its position relative to the ISS moves (portview carries
+         * the vehicles between datagrams by v) */
+        double r1[3], v1[3], r2[3], v2[3], q[4], rt1[3], vt1[3], rt2[3], vt2[3], d[3], dv[3], err = 0.0;
+        int id;
+        const PhysState *s = vehdyn_state();
+        vehdyn_target(0, &id, rt1, vt1, q);
+        memcpy(r1, s->r, sizeof r1); memcpy(v1, s->v, sizeof v1);
+        run(&t, t + 1.0);
+        vehdyn_target(0, &id, rt2, vt2, q);
+        memcpy(r2, s->r, sizeof r2); memcpy(v2, s->v, sizeof v2);
+        for (int i = 0; i < 3; i++) {
+            d[i] = ((r2[i] - rt2[i]) - (r1[i] - rt1[i])) / 1.0;
+            dv[i] = 0.5 * ((v1[i] - vt1[i]) + (v2[i] - vt2[i]));
+            err += (d[i] - dv[i]) * (d[i] - dv[i]);
+        }
+        err = sqrt(err);
+        check(err < 2e-4, "retracting: v relative to the ISS is how r moves (m/s)", err, 0.0);
+        check(sqrt(dot(d, d)) > 1.5e-3, "retracting: the Orbiter is drawn in, ~0.076 in/s (m/s)",
+              sqrt(dot(d, d)), 0.0019);
+    }
     run(&t, t0 + 190.0);
     check(!lit(0, 0x0008), "no READY TO HOOK before 3:15", 0, 0);
     run(&t, t0 + 200.0);

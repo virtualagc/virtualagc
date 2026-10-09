@@ -2473,6 +2473,8 @@ static struct {
     double qHm[4];                /* the aligned attitude in the vehicle's body (the hard mate's) */
     bool touching;                /* in an uncaptured contact: logged once */
     bool mated;                   /* hard mate reached: logged once */
+    double pPrev[3], qPrev[4];    /* the pose in the vehicle's body at tPrev, for its rate */
+    double tPrev;                 /* < 0: none yet */
     int contacts;                 /* contacts made, captured or not, since the reset or restore */
 } dock;
 
@@ -2842,9 +2844,36 @@ static void dock_hold(void) {
         for (int j = 0; j < 3; j++) Ro[i][j] = Rt[i][0] * Rr[0][j] + Rt[i][1] * Rr[1][j] + Rt[i][2] * Rr[2][j];
     mv(Rt, p, pm);
     cross3(wt, pm, om);
-    for (int i = 0; i < 3; i++) { st.r[i] = rt[i] + pm[i]; st.v[i] = vt[i] + om[i]; }
+    /* AND THE POSE'S OWN RATE -- the ring's stroke, the misalignment damping
+     * out -- in v and w, so that the state's velocity is how its position
+     * moves (portview carries the vehicles between datagrams by v: a
+     * docked Orbiter whose v left out the ring's 0.076 in/s jittered
+     * against the ISS, 2026-10-09). */
+    double dpv[3] = { 0, 0, 0 }, wrel[3] = { 0, 0, 0 };
+    double dt = st.t - dock.tPrev;
+    if (dock.tPrev >= 0.0 && dt > 1e-6 && dt < 5.0) {
+        double dp[3], qi[4], dq[4];
+        for (int i = 0; i < 3; i++) dp[i] = (p[i] - dock.pPrev[i]) / dt;
+        mv(Rt, dp, dpv);
+        /* dq = conj(qPrev) * qr: the relative attitude's change, in the
+         * Orbiter's body; its rate is twice its vector part over dt */
+        qi[0] = dock.qPrev[0]; qi[1] = -dock.qPrev[1]; qi[2] = -dock.qPrev[2]; qi[3] = -dock.qPrev[3];
+        dq[0] = qi[0] * qr[0] - qi[1] * qr[1] - qi[2] * qr[2] - qi[3] * qr[3];
+        dq[1] = qi[0] * qr[1] + qi[1] * qr[0] + qi[2] * qr[3] - qi[3] * qr[2];
+        dq[2] = qi[0] * qr[2] - qi[1] * qr[3] + qi[2] * qr[0] + qi[3] * qr[1];
+        dq[3] = qi[0] * qr[3] + qi[1] * qr[2] - qi[2] * qr[1] + qi[3] * qr[0];
+        double sg = dq[0] < 0.0 ? -1.0 : 1.0;
+        for (int i = 0; i < 3; i++) wrel[i] = 2.0 * sg * dq[1 + i] / dt;
+    }
+    if (dt > 1e-6 || dock.tPrev < 0.0) {
+        memcpy(dock.pPrev, p, sizeof dock.pPrev);
+        memcpy(dock.qPrev, qr, sizeof dock.qPrev);
+        dock.tPrev = st.t;
+    }
+    for (int i = 0; i < 3; i++) { st.r[i] = rt[i] + pm[i]; st.v[i] = vt[i] + om[i] + dpv[i]; }
     mat_quat(Ro, st.q);
     mtv(Ro, wt, st.w);
+    for (int i = 0; i < 3; i++) st.w[i] += wrel[i];
 }
 
 /* Free: has the ring met a port?  At most one vehicle is in reach. */
@@ -2920,6 +2949,7 @@ static void dock_check(void) {
         for (int i = 0; i < 3; i++) { Rh[i][0] = g->portUp[i]; Rh[i][1] = y[i]; Rh[i][2] = g->portAx[i]; }
         mat_quat(Rh, dock.qHm);
         dock.state = DOCK_CAPTURED;
+        dock.tPrev = -1.0;
         apds.captureT = st.t + 1.0;                  /* the capture latches: CAPTURE a second on */
         apds.alpha = 0.0;
         apds.dampT0 = -1.0;
@@ -2932,7 +2962,7 @@ static void dock_check(void) {
     }
 }
 
-static void dock_reset(void) { memset(&dock, 0, sizeof dock); apds_prep(); }
+static void dock_reset(void) { memset(&dock, 0, sizeof dock); dock.tPrev = -1.0; apds_prep(); }
 
 int vehdyn_docked(void) { return dock.state == DOCK_CAPTURED ? (dock.mated ? 2 : 1) : 0; }
 
