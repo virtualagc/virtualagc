@@ -1031,7 +1031,7 @@ capture).
 **THE VOLUME.**
 - **The spec.** `yaGPC2/tools/sites/sts134-rndz-iloads.json` holds the
   same values, every rendezvous cell of the PATCH SUMMARY (#PCGZ, #DGW,
-  #PCGN, #DGL; 211 cells, was = LM, H = MM).
+  #PCGN, #DGL; was = LM, H = MM; 329 cell copies at flat positions, one per configuration's copy where a csect is on the volume more than once).
 - **Its sources.** It is checked against corrected-G2.fcm, the flown G2
   dump, which holds MM in all 211 cells.
 - **PASS-IDLE's values.** PASS-IDLE independently sent the flown values of
@@ -1051,19 +1051,55 @@ capture).
   are now legacy shortcuts).  Captures made from the old volume still need
   `--dass-iloads` when resumed.
 
-@@VOLRUN@@
+**THE WHOLE FLIGHT ON THE VOLUME** (`~/sts134-runs/rendezvous/vol-run1`).
+A fresh run from 06:10 on the reconfigured volume, with no
+`--dass-iloads`, `--zero-sensor-bias` or `--lambert-mc`, flown in one go
+to the arrival at rate 2.
+- **The load.** After UPLINK, PASS's memory held the flight's values: the
+  bias INITs 0, TAU_RR 4000, GL5_VEL_THRESH 0.06, DEL_X_TOL 1E-2/1E-8,
+  ICMAX 10, the target sets, and the Lambert flags 9-14, 19, 25-27, 29-40.
+  - **Set 7.** It was still ON (not in the PATCH SUMMARY); a hand-added
+    cell now clears it on the volume as written since.
+- **Navigation.** S TRK residuals were 0.00-0.01 deg from the first
+  marks.  The radar went to FLTR at Ti - 37.1 min.
+- **MC2's elevation search converged.** EL 28.83, 28.97 and 29.06 deg at
+  T1 Ti + 52.81, 56.01 and 57.67 min, from the preliminary to the final.
+  The final's +7.77 min slip is just outside [18B]'s +7, so TGT 19 flew
+  at nominal + 7 min.
+- **The pulse trim.** It cleared MC3's and MC4's last 0.1 ft/s; VGO was
+  left at 0.02-0.08 ft/s on every burn.
+
+| Burn | PASS (onboard) | Lambert from the truth | Checklist mean (3 sigma) | Burned (truth sensed) |
+|---|---|---|---|---|
+| Ti final | +9.75 -0.55 +4.54 | +9.72 -0.53 +4.56 | -- | (OMS) |
+| MC1 final | -0.09 -0.33 +0.09 | -0.07 -0.26 +0.14 | -0.1 (0.6), -0.1 (0.7), +0.5 (1.2) | -0.00 -0.32 +0.00 |
+| MC2 final (TGT 19, nominal + 7) | +0.29 -0.06 +1.55 | +0.28 -0.11 +1.58 | 0.0 (0.4), 0.0 (0.2), +0.9 (2.5) | +0.28 -0.03 +1.52 |
+| MC3 final | +0.31 -0.08 +0.26 | +0.20 -0.12 +0.16 | +0.9 (1.3), 0.0 (0.5), +1.1 (2.6) | +0.35 -0.09 +0.22 |
+| MC4 final | +0.33 -0.04 -1.35 | +0.30 -0.10 -1.53 | +1.3 (1.3), -0.1 (0.6), +0.9 (2.2) | +0.25 +0.00 -1.39 |
+
+- **Against the truth.** Every solution was PASS's own and every one was
+  burned.  All agree with the truth's Lambert within 0.18 ft/s per axis.
+- **Against the checklist.** All are inside its 3 sigma, except MC4's Z
+  (-1.35 against +0.9 +/- 2.2).
+- **The arrival.** At TGT 14's T2 (MC4 + 13.0 min) the truth was **112 ft
+  ahead, 72 ft out of plane and 652 ft below**, ZD -0.66 ft/s, against
+  0, 0, +600 -- 52 ft above the aim this time, on the R-bar ready for
+  the manual phase.
+
+
 
 **Not done.**
 - **The other I-loads.** `--dass-iloads all` (DAP, guidance, the other
   GNC compools: 2026 words) is not yet flown.
-- **The one-line run.** Not flown end to end in one run from a fresh start
-  with `--dass-iloads`.
+- **The one-line run.** Flown end to end only on the reconfigured volume
+  (vol-run1), not from a fresh start with `--dass-iloads`.
 - **GWY/GWW/GWR.** Which of their constants ended the EL = 0 ALARM KILLs
   is not isolated.
 - **Why the post-MC1 trajectory never reached 29.07 deg.** MC1's onboard
   solution was 0.16/0.10/0.23 ft/s from the truth's, and the Ti point was
   reached from the 06:10 start without NCC.  Not traced.
-- **The tape.** The flight's I-loads are not on it (Ron's decision).
+- **The volume.** The reconfigured copy is outside the repository.  Making
+  it the default volume is Ron's decision.
 
 ## 6. The stages
 
