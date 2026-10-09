@@ -98,6 +98,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 
 import crewscript
+import cwaudio
 import panelcontrols as PC
 import helvetica
 
@@ -894,6 +895,15 @@ class PanelO6:
                              for k, c in PC.CONTROLS.items() if c.get("halves"))
         # Talkbacks driven by output bits ('states'), not by a switch: the
         # first state whose bits are set, else barberpole.
+        # THE C&W ELECTRONICS UNIT'S LATCH AND TONES (panelcontrols.py,
+        # MASTER ALARM; cwaudio.py): latched by a rising backup C&W bit,
+        # cleared by either MASTER ALARM; the SM alert tone while PASS holds
+        # its bit, unless MASTER ALARM was pressed since it rose.
+        self.ma_latch = False
+        self._cw_bit = self._alert_bit = False
+        self.sm_silenced = False
+        self.tone_cw = cwaudio.Tone("cw", log)
+        self.tone_sm = cwaudio.Tone("sm", log)
         self.tb_state = dict((k, "BP") for k, c in PC.CONTROLS.items()
                              if c["kind"] == "tb" and c.get("states"))
         unconnected = collections.Counter(c["via"] for c in PC.CONTROLS.values()
@@ -1632,12 +1642,54 @@ class PanelO6:
                     for i, w in enumerate(words):
                         self._mdm_out[(unit, card, ch + i)] = w
 
+    MA_KEYS = ("master_alarm", "master_alarm_p")
+
+    def _cw_unit(self, out):
+        """The C&W electronics unit, from PASS's FF DOH card 10 channel 2:
+        backup C&W 0x1000 (FF3/FF4 continuous, FF1/FF2 pulsed) latches the
+        master alarm and its tone; the alert-tone bit 0x0800 sounds the SM tone
+        for as long as PASS holds it.  Writes the latch into 'out' as unit 0
+        card 1 so the MASTER ALARM lamps follow it."""
+        cw = any(out.get((u, 10, 2), 0) & 0x1000 for u in (1, 2, 3, 4))
+        alert = any(out.get((u, 10, 2), 0) & 0x0800 for u in (1, 2, 3, 4))
+        if cw and not self._cw_bit and not self.ma_latch:
+            self.ma_latch = True
+            log("MASTER ALARM: backup C&W from PASS -- C&W tone")
+        if alert and not self._alert_bit:
+            self.sm_silenced = False
+            log("SM alert tone (PASS)")
+        self._cw_bit, self._alert_bit = cw, alert
+        if self.ma_latch:
+            self.tone_cw.start()
+        else:
+            self.tone_cw.stop()
+        if alert and not self.sm_silenced:
+            self.tone_sm.start()
+        else:
+            self.tone_sm.stop()
+        w = 0x8000 if self.ma_latch else 0
+        out[(PC.VEH_UNIT, 1, 0)] = w
+        with self._rx_lock:
+            self._mdm_out[(PC.VEH_UNIT, 1, 0)] = w
+
+    def _master_alarm_pressed(self):
+        if self.ma_latch or self.tone_sm.on:
+            log("MASTER ALARM pressed: tones reset")
+        self.ma_latch = False
+        self.sm_silenced = True
+        self.tone_cw.stop()
+        self.tone_sm.stop()
+        with self._rx_lock:
+            self._mdm_out[(PC.VEH_UNIT, 1, 0)] = 0
+        self._lamps_follow()
+
     def _lamps_follow(self):
         """Light the DAP buttons from the output words heard."""
         with self._rx_lock:
             out = dict(self._mdm_out)
         if not out:
             return
+        self._cw_unit(out)
         changed = False
         for st, k in DAP_LAMP_UNIT.items():
             for name, (card, ch, mask) in DAP_LAMP.items():
@@ -1713,6 +1765,8 @@ class PanelO6:
         self._talkbacks_follow()
         self._idp_adopt()
         self._lamps_follow()
+        self.tone_cw.poll()                  # a player at the end of its file starts again
+        self.tone_sm.poll()
         with self._rx_lock:
             heard = list(self._mm_heard)
         for u, h in enumerate(heard):
@@ -3274,6 +3328,8 @@ class PanelO6:
             self.ctl_held[key] = bool(value)
             new = "ON" if value else "OFF"
             old = "ON" if old else "OFF"
+            if value and key in self.MA_KEYS:
+                self._master_alarm_pressed()
         else:
             self.ctl[key] = value
             new = value

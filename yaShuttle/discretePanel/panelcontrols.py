@@ -413,6 +413,22 @@ CONTROLS["f3_chute_gap"] = dict(panel="F3", kind="blank")
 PANES.setdefault("F3", []).append(("DRAG CHUTE", [["chute_jett", "f3_chute_gap", "chute_arm_p",
                                                    "chute_dpy_p"]]))
 PANES["F4"].append(("DRAG CHUTE", [["chute_jett_p"]]))
+
+# MASTER ALARM (F2, commander; F4, pilot): red lighted pushbuttons of the C&W
+# electronics unit, not of PASS.  The unit latches on PASS's backup C&W
+# discrete (FF DOH card 10 ch 2, 0x1000) -- continuous on FF3/FF4, PULSED on
+# FF1/FF2, so it must be remembered -- lights both buttons and sounds the C&W
+# tone until EITHER is pressed, which also silences the SM alert tone (CWWB
+# USA006019 4-3, 4-19, 4-20; SCOM OI-28 Part 1 2.2: "Any one of the MASTER
+# ALARM pushbutton indicators will reset all tones, including the systems
+# management tone").  panelO6 models that unit; it publishes the latch to
+# itself as unit 0, card 1, channel 0, bit 0x8000.  The tones: cwaudio.py.
+for _k, _pan in (("master_alarm", "F2"), ("master_alarm_p", "F4")):
+    CONTROLS[_k] = dict(panel=_pan, kind="pbi", caption="", legend="MASTER\nALARM",
+                        color="red", contacts=[], lamps=[(VEH_UNIT, 1, 0, 0x8000)],
+                        sources="CWWB USA006019 4-20; SCOM OI-28 Part 1 2.2")
+PANES["F2"].append(("MASTER ALARM", [["master_alarm"]]))
+PANES["F4"].append(("MASTER ALARM", [["master_alarm_p"]]))
 check()
 
 
