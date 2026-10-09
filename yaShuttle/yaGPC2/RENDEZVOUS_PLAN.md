@@ -1089,10 +1089,10 @@ to the arrival at rate 2.
 
 
 **THE SECOND VOLUME, rndz2** (2026-10-09, branch rndz-iloads-2).
-`tools/sites/sts134-rndz-iloads.json` now has 236 cells, all in G2's own
+`tools/sites/sts134-rndz-iloads.json` now has 242 cells, all in G2's own
 copy, and is written to
 `~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv`
-(SHA-256 f16c38dd...2806a).  The first volume, `-rndz.mmv`, is kept.
+(SHA-256 1684f4ca...17ae8e).  The first volume, `-rndz.mmv`, is kept.
 - **Added: mass properties and DAP.**  PASS-IDLE reported these from
   pure-G2.fcm; they agree with DASS_G2.ASC and corrected-G2.fcm.
   - **#DGCQORB.**
@@ -1125,20 +1125,31 @@ copy, and is written to
     -> **(45.74, 11.13, -5.79) ft** from the c.g.  This one was already in
     the first volume.
   - **CGNS_VAR_RR_RNG_MIN.** 711 -> 6400 ft^2.
+- **Added: CGRS_JET_MAP** (#PCGRRMC+0482, a resident compool), checked at
+  PASS-IDLE's request.
+  - **What changed.** The flown map holds the tape's 38 values, reordered.
+    It takes the DAP's internal jet order to the JON index that GRORCS
+    packs into the MDM fire words.
+  - **The check.** Every reordered run lies inside one jet group of
+    GKNRCS's JET_MAP_INDEX_START (1, 4, 6, 8, 11, 13, 15, 17, 19, 23, 27,
+    30, 33, 36).  Groups 1, 2, 3, 9, 10, 11 and 12 are reordered, each
+    keeping its own set of jets.
+  - **What it changes.** Only which jet of a group PASS prefers, the crew's
+    SPEC 23 jet priority preset, not where a command lands.  vehdyn decodes
+    the MDM bits by GRORCS's fixed layout.
+  - **Consistency.** DASS_G16.ASC carries the same patch.
 - **Only the G2 copy is changed now.**  STS-134's G1/G6 load
   (DASS_G16.ASC) has other values for 27 of #DGLJRCV's words.  The first
   volume changed all four configurations' copies of #DGLJRCV; this one
   leaves the others alone.
 - **Left out.**
-  - **#PCGRRMC CGRS_JET_MAP.** The flight's map swaps logical jet numbers;
-    vehdyn's decoding is unchecked against it.
   - **RCS redundancy management.** The VRCS leak limits and
     CGRS_DILEMMA_CTR_LIMIT.
   - **The other GNC compools.** About 1900 words, not reviewed.
   - **Thirteen cells not placed.**  They are listed in the spec's notes.
 - **The check.**  IPL to OPS 201 on port base 49800 (`rndz2-ipl`): PASS
   came up, its DAP configured A/AUTO/VERN.  The UPLINK capture holds
-  every value above.
+  every value above (rechecked after the jet map, `rndz2-ipl2`).
 
 **GLQREN against the flown load.**  Of GLQREN's 16 constant pairs, these
 differ (tape -> flown), all on both volumes:

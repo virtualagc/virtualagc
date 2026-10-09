@@ -1,6 +1,6 @@
 {
  "flight": "STS-134",
- "notes": "STS-134's own I-loads in G2 (GNC OPS 2) for rendezvous and proximity operations: every word of the orbit-targeting (#PCGZ*, #DGW*), relative-navigation (#PCGN*, #DGL*), and flight-control/DAP mass-property and gain (#DGCQORB, #DGC1ORB, #DGC9ORB, #PCGCFL2, #PCGCFL3, #PCGCCOM) csects that the flight's load changed from the load module. Source: the PATCH SUMMARY of PFS/mafgen/DASS_G2.ASC, the MAFGEN listing of STS-134's own GNC2 load ('STS134/OI034/C2 MDD 134.09 DASS GNC2', 13 Dec 2010): 'was' is its LM column (the load module, what this tape holds), H its MM column (the flight's); corrected-G2.fcm, the flown G2 dump, holds the MM value in every cell. PASS-IDLE independently sent flown values from the DASS G2 dump (pure-G2.fcm), 2026-10-09: CGZB_LAMB_ILOAD, the GLQREN locals, and STS-134's nominal c.g. and inertia in #DGCQORB (CGCS_CG_NOM 1104.2, 0.4, 371.8 in; CGCS_MOMENTS_OF_INERTIA_NOM 938131, 7129268, 7462045 slug-ft^2; CGCS_PRODUCTS_OF_INERTIA_NOM -2415, 273803, -2486; the tape's are 1105.2, 0.4, 376.2; 951736, 7180436, 7507857; -2475.2, 274960, -2538.9) -- all agree with these cells, except that PASS-IDLE listed the Lambert flags 28 and up OFF, where both DASS files have 29-40 ON (28 OFF); sets 29-40 are not used by STS-134's rendezvous. CGZB_LAMB_ILOAD's set 7 (X'0E354') and CGZV_ROFF_ILOAD_ARRAY+97 (X'0E02D') are among 54 summary lines printed with a '0' carriage control in column 1, which the first version of this spec missed; the rendezvous ones are in. Left out on purpose: #PCGRRMC CGRS_JET_MAP and CGRV_FDI_TOLERANCE (the flight's jet map swaps logical jet numbers; vehdyn's jet decoding has not been checked against it), the VRCS leak-temperature limits (#DGRRRCS) and CGRS_DILEMMA_CTR_LIMIT (#DGR8RCS) -- RCS redundancy management; and the rest of the GNC compools (#PCGGCOM, #PCGCMFR, ... about 1900 words), not reviewed. Positions: 'flat' (volume data halfwords) in each csect's G2 copy -- the csect's offset on the volume found from distinctive runs of its own halfwords; where several configurations carry the csect, the copy agreeing best with an OPS 2 memory image (rr-run2/sts134r-ipl) over +/-2048 halfwords; each cell confirmed ('was' there, and at least 48 of the 80 surrounding halfwords agreeing). Only the G2 copy is changed: STS-134's G1/G6 load (DASS_G16.ASC) has other values for 27 of #DGLJRCV's words and 7 of #PCGNFLT's, so other configurations' copies are left alone (the first version changed all four #DGLJRCV copies). Not placed, so not on the volume: CGCS_NUM_FILTERS (two cells), CGPS_CRHCRA+1, CGPS_CRHCPA+1, CGNS_T_GPS_CYCLE, CGNS_KFACTOR, CGNS_MEAS_THRESHOLD+1, five #PCGNREM GPS antenna boresight cells. RENDEZVOUS_PLAN.md 5e.",
+ "notes": "STS-134's own I-loads in G2 (GNC OPS 2) for rendezvous and proximity operations: every word of the orbit-targeting (#PCGZ*, #DGW*), relative-navigation (#PCGN*, #DGL*), and flight-control/DAP mass-property and gain (#DGCQORB, #DGC1ORB, #DGC9ORB, #PCGCFL2, #PCGCFL3, #PCGCCOM) csects that the flight's load changed from the load module. Source: the PATCH SUMMARY of PFS/mafgen/DASS_G2.ASC, the MAFGEN listing of STS-134's own GNC2 load ('STS134/OI034/C2 MDD 134.09 DASS GNC2', 13 Dec 2010): 'was' is its LM column (the load module, what this tape holds), H its MM column (the flight's); corrected-G2.fcm, the flown G2 dump, holds the MM value in every cell. PASS-IDLE independently sent flown values from the DASS G2 dump (pure-G2.fcm), 2026-10-09: CGZB_LAMB_ILOAD, the GLQREN locals, and STS-134's nominal c.g. and inertia in #DGCQORB (CGCS_CG_NOM 1104.2, 0.4, 371.8 in; CGCS_MOMENTS_OF_INERTIA_NOM 938131, 7129268, 7462045 slug-ft^2; CGCS_PRODUCTS_OF_INERTIA_NOM -2415, 273803, -2486; the tape's are 1105.2, 0.4, 376.2; 951736, 7180436, 7507857; -2475.2, 274960, -2538.9) -- all agree with these cells, except that PASS-IDLE listed the Lambert flags 28 and up OFF, where both DASS files have 29-40 ON (28 OFF); sets 29-40 are not used by STS-134's rendezvous. CGZB_LAMB_ILOAD's set 7 (X'0E354') and CGZV_ROFF_ILOAD_ARRAY+97 (X'0E02D') are among 54 summary lines printed with a '0' carriage control in column 1, which the first version of this spec missed; the rendezvous ones are in. CGRS_JET_MAP (#PCGRRMC+0482, a resident compool, one copy; the same 38 values as the tape's, reordered) is in as flown: the map takes the DAP's internal jet order to the JON index GRORCS packs into the MDM fire words, and every reordered run lies inside one jet group of GKNRCS's JET_MAP_INDEX_START (1,4,6,8,11,13,15,17,19,23,27,30,33,36: groups 1, 2, 3, 9, 10, 11 and 12 reordered, each the same set of jets), so it changes only which jet of a group PASS prefers -- the crew's SPEC 23 jet priority, preset -- not where a command lands; STS-134's G1/G6 load (DASS_G16.ASC) has the same patch; checked 2026-10-09 at PASS-IDLE's request. Left out on purpose: CGRV_FDI_TOLERANCE (#PCGRRMC), the VRCS leak-temperature limits (#DGRRRCS) and CGRS_DILEMMA_CTR_LIMIT (#DGR8RCS) -- RCS redundancy management; and the rest of the GNC compools (#PCGGCOM, #PCGCMFR, ... about 1900 words), not reviewed. Positions: 'flat' (volume data halfwords) in each csect's G2 copy -- the csect's offset on the volume found from distinctive runs of its own halfwords; where several configurations carry the csect, the copy agreeing best with an OPS 2 memory image (rr-run2/sts134r-ipl) over +/-2048 halfwords; each cell confirmed ('was' there, and at least 48 of the 80 surrounding halfwords agreeing). Only the G2 copy is changed: STS-134's G1/G6 load (DASS_G16.ASC) has other values for 27 of #DGLJRCV's words and 7 of #PCGNFLT's, so other configurations' copies are left alone (the first version changed all four #DGLJRCV copies). Not placed, so not on the volume: CGCS_NUM_FILTERS (two cells), CGPS_CRHCRA+1, CGPS_CRHCPA+1, CGNS_T_GPS_CYCLE, CGNS_KFACTOR, CGNS_MEAS_THRESHOLD+1, five #PCGNREM GPS antenna boresight cells. RENDEZVOUS_PLAN.md 5e.",
  "cells": [
   {
    "name": "#DGLCSTA GLC_VAR_ST_HORIZ",
@@ -489,6 +489,54 @@
    "flat": 133318,
    "H": "00000000",
    "was": "66666665"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP",
+   "config": "G2",
+   "addr": "06056",
+   "flat": 134630,
+   "H": "000D",
+   "was": "0001"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+2",
+   "config": "G2",
+   "addr": "06058",
+   "flat": 134632,
+   "H": "0001000E000200090006",
+   "was": "000D0002000E00060009"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+19",
+   "config": "G2",
+   "addr": "06069",
+   "flat": 134649,
+   "H": "0017",
+   "was": "0011"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+21",
+   "config": "G2",
+   "addr": "0606b",
+   "flat": 134651,
+   "H": "0011",
+   "was": "0017"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+23",
+   "config": "G2",
+   "addr": "0606d",
+   "flat": 134653,
+   "H": "001A",
+   "was": "0014"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+25",
+   "config": "G2",
+   "addr": "0606f",
+   "flat": 134655,
+   "H": "00140012001800030015001B0006",
+   "was": "001A00030012001800060015001B"
   },
   {
    "name": "#PCGZCOM CGZV_FUEL_WASTING_DIRECTION",
