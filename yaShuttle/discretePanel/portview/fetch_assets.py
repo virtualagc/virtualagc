@@ -479,6 +479,24 @@ GANTRY_SCALE = 5.89
 GANTRY_ROOT = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]) * GANTRY_SCALE
 GANTRY_ORIGIN = np.array([0.73, -1.39, -1.84])          # model units: ground under the trench
 
+HST_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+           "Hubble%20Space%20Telescope%20(A)/Hubble%20Space%20Telescope%20(A).glb")
+# Hubble, in inches: the aperture at +z (the 3.0 m light shield; the 4.3 m
+# aft shroud, with WFC3's bay, at z 0-200), the solar arrays along x.  This
+# takes it to its V1 (toward the aperture), V2 (along the arrays), V3, in
+# metres, about the middle of its length.
+MIR_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+           "Mir/Mir.glb")
+# Mir: ~0.0221 m a unit (its core module's 4.15 m across is ~188 units),
+# the core along y (+y toward the docking node, at y ~520), the axis at
+# x 461, z -940.  To +X along the core toward the node, +Y = model x,
+# +Z = -model z; origin at the node.
+MIR_SCALE = 0.0221
+MIR_ROOT = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]) * MIR_SCALE
+MIR_ORIGIN = np.array([461.0, 520.0, -940.0])
+HST_ROOT = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]) * INCH
+HST_ORIGIN = np.array([0.0, 0.0, 256.0])
+
 MODELS = {
     'iss': dict(url=ISS_URL, glb="iss-igoal.glb", root=ISS_ROOT, origin=np.zeros(3),
                 exclude=ISS_NOT_2011, name="ISS, STS-134 (May 2011)",
@@ -488,7 +506,109 @@ MODELS = {
                    exclude=set(), name="LC-39 pad structures (Shuttle era)",
                    frame="pad east-north-up; m; origin on the ground under the stack",
                    source="NASA 3D Resources, Gantry"),
+    'hst': dict(url=HST_URL, glb="hst.glb", root=HST_ROOT, origin=HST_ORIGIN, exclude=set(),
+                name="Hubble Space Telescope (after SM4, 2009)",
+                frame="HST V1 (toward the aperture), V2 (along the arrays), V3; m; mid-length",
+                source="NASA 3D Resources, Hubble Space Telescope (A)",
+                mag_1000km=1.5),            # ~2.2 half lit (the satellite catalogues' standard)
+    'mir': dict(url=MIR_URL, glb="mir.glb", root=MIR_ROOT, origin=MIR_ORIGIN, exclude=set(),
+                name="Mir (a simple model: core, node, Kvant, Kristall, Spektr, Priroda, Soyuz)",
+                frame="Mir: +X along the core toward the node, +Y, +Z; m; origin at the node",
+                source="NASA 3D Resources, Mir", mag_1000km=-0.8),
 }
+
+
+# Satellites the Shuttle visited that have no published model: simple
+# shapes to their published dimensions, as each was met (antennas stowed on
+# the HS-376s, retrieved by STS-51A; Leasat 3's deployed, repaired on
+# STS-51I).  Approximate -- shapes and colours, not details.  Each: name,
+# NORAD id, frame, brightness, parts (material, rgb, shape, dimensions, m):
+# 'cyl' (radius, x0, x1) along +X; 'cone' (r0, r1, x0, x1); 'box' (centre,
+# size); 'disc' (radius, x) facing +X.
+HS376 = (('solar drum', (0.04, 0.05, 0.10), 'cyl', (1.08, -1.41, 0.40)),
+         ('solar skirt', (0.04, 0.05, 0.10), 'cyl', (1.07, 0.40, 1.41)),
+         ('forward barrier', (0.75, 0.62, 0.30), 'disc', (1.08, 1.41)),
+         ('antenna mast', (0.80, 0.80, 0.80), 'cyl', (0.25, 1.41, 2.10)),
+         ('stowed reflector', (0.85, 0.85, 0.85), 'cyl', (0.85, 1.80, 1.95)),
+         ('apogee motor nozzle', (0.25, 0.25, 0.25), 'cone', (0.20, 0.45, -1.41, -2.00)),
+         ('aft barrier', (0.75, 0.62, 0.30), 'disc', (1.08, -1.41)))
+PROCEDURAL = {
+    'westar6': dict(norad=14688, name="Westar 6 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
+                    frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
+    'palapab2': dict(norad=14692, name="Palapa B2 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
+                     frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
+    'leasat3': dict(norad=15643, name="Leasat 3 (Syncom IV; approximate)", mag_1000km=2.0,
+                    frame="Leasat: +X along the spin axis toward the antennas; m; mid-drum",
+                    parts=(('solar drum', (0.04, 0.05, 0.10), 'cyl', (2.13, -1.40, 1.40)),
+                           ('forward deck', (0.80, 0.80, 0.80), 'disc', (2.13, 1.40)),
+                           ('aft deck', (0.75, 0.62, 0.30), 'disc', (2.13, -1.40)),
+                           ('UHF helix', (0.85, 0.85, 0.85), 'cyl', (0.30, 1.40, 3.30)),
+                           ('UHF dish', (0.90, 0.90, 0.90), 'cone', (0.15, 0.85, 1.40, 1.80)),
+                           ('omni', (0.80, 0.80, 0.80), 'cyl', (0.06, 3.30, 3.90)),
+                           ('liquid motor', (0.30, 0.30, 0.30), 'cone', (0.30, 0.60, -1.40, -2.20)))),
+    'smm': dict(norad=11703, name="Solar Maximum Mission (approximate)", mag_1000km=2.0,
+                frame="SMM: +X along the instruments' axis (toward the Sun); m; mid-length",
+                parts=(('MMS bus', (0.80, 0.80, 0.78), 'cyl', (1.15, -2.00, -0.50)),
+                       ('instrument module', (0.75, 0.62, 0.30), 'cyl', (1.00, -0.50, 2.00)),
+                       ('Sun end', (0.20, 0.20, 0.20), 'disc', (1.00, 2.00)),
+                       ('solar array +Y', (0.04, 0.05, 0.10), 'box', ((-1.2, 3.3, 0.0), (1.5, 4.2, 0.04))),
+                       ('solar array -Y', (0.04, 0.05, 0.10), 'box', ((-1.2, -3.3, 0.0), (1.5, 4.2, 0.04))),
+                       ('high-gain mast', (0.80, 0.80, 0.80), 'cyl', (0.05, -2.00, -3.20)),
+                       ('grapple pin', (0.80, 0.80, 0.80), 'box', ((-1.25, 0.0, 1.20), (0.10, 0.10, 0.25))))),
+}
+
+
+def shape_mesh(kind, dims, n=48):
+    """Corner points (k, 3) and triangles of a simple shape (see PROCEDURAL)."""
+    a = np.linspace(0.0, 2.0 * np.pi, n, endpoint=False)
+    c, s = np.cos(a), np.sin(a)
+    if kind in ('cyl', 'cone'):
+        r0, r1, x0, x1 = (dims[0], dims[0], dims[1], dims[2]) if kind == 'cyl' else dims
+        ring0 = np.column_stack([np.full(n, x0), r0 * c, r0 * s])
+        ring1 = np.column_stack([np.full(n, x1), r1 * c, r1 * s])
+        pts = np.vstack([ring0, ring1, [[x0, 0, 0]], [[x1, 0, 0]]])
+        tris = []
+        for i in range(n):
+            j = (i + 1) % n
+            tris += [(i, j, n + j), (i, n + j, n + i), (2 * n, j, i), (2 * n + 1, n + i, n + j)]
+        return pts, np.array(tris)
+    if kind == 'disc':
+        r, x = dims
+        pts = np.vstack([np.column_stack([np.full(n, x), r * c, r * s]), [[x, 0, 0]]])
+        return pts, np.array([(n, i, (i + 1) % n) for i in range(n)])
+    centre, size = (np.array(v, float) for v in dims)
+    corners = np.array([[i, j, k] for i in (-0.5, 0.5) for j in (-0.5, 0.5) for k in (-0.5, 0.5)])
+    pts = centre + corners * size
+    quads = ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3))
+    return pts, np.array([t for q in quads for t in ((q[0], q[1], q[2]), (q[0], q[2], q[3]))])
+
+
+def prepare_procedural(key):
+    import json
+    spec = PROCEDURAL[key]
+    out_dir = os.path.join(CACHE, "models", key)
+    if os.path.exists(os.path.join(out_dir, "model.json")):
+        return
+    os.makedirs(out_dir, exist_ok=True)
+    arrays, mats = {}, []
+    for k, (name, rgb, kind, dims) in enumerate(spec['parts']):
+        pts, tris = shape_mesh(kind, dims)
+        v = pts[tris].reshape(-1, 3)                  # each triangle its own corners: flat shading
+        fn = np.cross(pts[tris[:, 1]] - pts[tris[:, 0]], pts[tris[:, 2]] - pts[tris[:, 0]])
+        fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+        arrays['pos%d' % k] = v.astype(np.float32)
+        arrays['nrm%d' % k] = np.repeat(fn, 3, axis=0).astype(np.float32)
+        arrays['uv%d' % k] = np.zeros((len(v), 2), np.float32)
+        arrays['idx%d' % k] = np.arange(len(v), dtype=np.uint32)
+        mats.append(dict(name=name, color=list(rgb) + [1.0], metallic=0.0, texture=None))
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
+    with open(os.path.join(out_dir, "model.json"), "w") as f:
+        json.dump(dict(name=spec['name'], frame=spec['frame'], norad=spec['norad'],
+                       source="simple shapes to published dimensions (fetch_assets.py)",
+                       mag_1000km=spec['mag_1000km'], materials=mats,
+                       triangles=sum(len(a) // 3 for n_, a in arrays.items() if n_.startswith('idx'))),
+                  f, indent=1)
+    print("model %s: %s" % (key, spec['name']))
 
 
 def prepare_iss(keep):
@@ -600,9 +720,192 @@ def prepare_model(key, keep):
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
     tris = sum(len(arrays['idx%d' % k]) // 3 for k in range(len(mats)))
     with open(os.path.join(out_dir, "model.json"), "w") as f:
+        extra = {'mag_1000km': spec['mag_1000km']} if 'mag_1000km' in spec else {}
         json.dump(dict(name=spec['name'], frame=spec['frame'], source=spec['source'],
-                       triangles=tris, materials=mats), f, indent=1)
+                       triangles=tris, materials=mats, **extra), f, indent=1)
     print("  %d triangles in %d materials" % (tris, len(mats)))
+    if not keep:
+        os.remove(src)
+
+
+ISS2011_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res)/"
+               "International%20Space%20Station%20(ISS)%20(C)%20(High%20Res).7z")
+# What IGOAL lacks for May 2011, from JSC's VCL "ISS 2011" LightWave models
+# (inches, left-handed): each vehicle's file; the direction from its body to
+# its docking probe and a direction across it (its solar wings), in its own
+# axes made right-handed (z negated); the port, the direction from the port
+# into the station, and where the across-direction points (ISS frame, m).
+# Ports from IGOAL's own modules: Rassvet's nadir and Poisk's zenith drogues;
+# Zvezda's aft port; Zvezda's nadir port where IGOAL's Nauka (2021) has its
+# probe, Pirs's place until 2021.  The probe goes 0.35 m into a drogue.
+ISS_VISITORS = (
+    ('Pirs', 'pirs/Pirs.lwo', (0, 1, 0), (1, 0, 0), (-23.69, 0.0, 4.81), (0, 0, -1), (1, 0, 0), 0.0),
+    ('Progress M-10M, at Pirs', 'progress/prog-ani.lwo', (0, 0, -1), (0, 1, 0), 'Pirs', (0, 0, -1),
+     (1, 0, 0), 0.35),
+    ('Soyuz TMA-20, at Rassvet', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-11.14, 0.0, 11.243),
+     (0, 0, -1), (1, 0, 0), 0.35),
+    ('Soyuz TMA-21, at Poisk', 'soyuz/soyuz-ext.lwo', (0, 0, -1), (0, 1, 0), (-23.69, 0.0, -1.032),
+     (0, 0, 1), (1, 0, 0), 0.35),
+    ('ATV-2 Johannes Kepler, at Zvezda aft', 'atv/ATV_temp.lwo', (1, 0, 0), (0, 1, 0),
+     (-35.676, 0.0, 4.26), (1, 0, 0), (0, 1, 0), 0.35),
+)
+# Their textured surfaces, as plain colours: the Soyuz and Progress blankets,
+# and the solar cells.
+VISITOR_COLOURS = {'soyuz-side': (0.27, 0.28, 0.25), 'progress-side': (0.27, 0.28, 0.25),
+                   'soyuz-pan': (0.05, 0.07, 0.16), 'soyuz-panR': (0.05, 0.07, 0.16),
+                   'progress-pan': (0.05, 0.07, 0.16), 'progress-panR': (0.05, 0.07, 0.16),
+                   'ATV-panels': (0.05, 0.07, 0.16)}
+
+
+def read_lwo(path):
+    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles)],
+    every polygon's corners its own points (flat shading), all layers."""
+    import struct
+    data = open(path, 'rb').read()
+    if data[:4] != b'FORM' or data[8:12] != b'LWO2':
+        sys.exit("fetch_assets: %s is not an LWO2 object" % path)
+
+    def vx(b, o):                       # LightWave's variable-length index
+        if b[o] == 0xFF:
+            return struct.unpack('>I', b[o:o + 4])[0] & 0xFFFFFF, o + 4
+        return struct.unpack('>H', b[o:o + 2])[0], o + 2
+
+    def strings(b, o):                  # NUL-terminated, padded to even
+        e = b.index(b'\0', o)
+        return b[o:e].decode('latin-1'), e + 1 + ((e + 1 - o) & 1)
+
+    pos, end = 12, 8 + struct.unpack('>I', data[4:8])[0]
+    tags, colours, layers, cur = [], {}, [], None
+    while pos < end:
+        cid, size = data[pos:pos + 4], struct.unpack('>I', data[pos + 4:pos + 8])[0]
+        b = data[pos + 8:pos + 8 + size]
+        pos += 8 + size + (size & 1)
+        if cid == b'TAGS':
+            o = 0
+            while o < len(b):
+                t, o = strings(b, o)
+                tags.append(t)
+        elif cid in (b'LAYR', b'PNTS') and (cid == b'LAYR' or cur is None):
+            cur = dict(points=np.zeros((0, 3)), polys=[], ptag={})
+            layers.append(cur)
+        if cid == b'PNTS':
+            cur['points'] = np.frombuffer(b, '>f4').reshape(-1, 3).astype(np.float64)
+        elif cid == b'POLS' and b[:4] == b'FACE':
+            o, polys = 4, []
+            while o < len(b):
+                nv = struct.unpack('>H', b[o:o + 2])[0] & 0x3FF
+                o += 2
+                idx = []
+                for _ in range(nv):
+                    v, o = vx(b, o)
+                    idx.append(v)
+                polys.append(idx)
+            cur['polys'] = polys
+        elif cid == b'PTAG' and b[:4] == b'SURF':
+            o = 4
+            while o < len(b):
+                i, o = vx(b, o)
+                cur['ptag'][i] = struct.unpack('>H', b[o:o + 2])[0]
+                o += 2
+        elif cid == b'SURF':
+            name, o = strings(b, 0)
+            _, o = strings(b, o)
+            rgb = (0.7, 0.7, 0.7)
+            while o + 6 <= len(b):
+                sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+                if sid == b'COLR':
+                    rgb = struct.unpack('>3f', b[o + 6:o + 18])
+                o += 6 + ss + (ss & 1)
+            colours[name] = rgb
+    surfaces = {}
+    for L in layers:
+        for i, poly in enumerate(L['polys']):
+            if len(poly) < 3:
+                continue
+            name = tags[L['ptag'].get(i, 0)] if tags else 'default'
+            pts, tris = surfaces.setdefault(name, ([], []))
+            base = sum(len(q) for q in pts)
+            pts.append(L['points'][poly])
+            tris.extend((base, base + k, base + k + 1) for k in range(1, len(poly) - 1))
+    return [(name, colours.get(name, (0.7, 0.7, 0.7)), np.vstack(pts), np.array(tris, np.uint32))
+            for name, (pts, tris) in surfaces.items()]
+
+
+def prepare_iss_visitors(keep):
+    """Add Pirs and the vehicles docked in May 2011 (Soyuz TMA-20 and -21,
+    Progress M-10M, ATV-2) to the prepared ISS model, which lacks them."""
+    import json
+    import shutil
+    import subprocess
+    out_dir = os.path.join(CACHE, "models", "iss")
+    meta_path = os.path.join(out_dir, "model.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if meta.get('visitors'):
+        return
+    tool = shutil.which("7z") or shutil.which("7zz")
+    if tool is None:
+        print("fetch_assets: no 7z, so the ISS has no Soyuz, Progress, ATV or Pirs")
+        return
+    src = download(ISS2011_URL, os.path.join(CACHE, "models", "iss-2011.7z"))
+    work = os.path.join(CACHE, "models", "iss-2011")
+    files = sorted({v[1] for v in ISS_VISITORS})
+    subprocess.run([tool, "x", "-y", "-o" + work, src] + ["Objects/Modules/" + f for f in files],
+                   check=True, stdout=subprocess.DEVNULL)
+    z = dict(np.load(os.path.join(out_dir, "model.npz")))
+    mats = meta['materials']
+    placed = {}
+    for name, f, probe, across, port, inward, across_iss, depth in ISS_VISITORS:
+        parts = read_lwo(os.path.join(work, "Objects", "Modules", f))
+        rh = np.diag([INCH, INCH, -INCH])                    # inches, left-handed -> m, right
+        allp = np.vstack([p[2] for p in parts]) @ rh
+        a, c = np.array(probe, float), np.array(across, float)
+        # Its axis: the middle, across the probe direction, of its body's
+        # shell (the '-side' or 'body' surface; antennas and wings make the
+        # whole lopsided); the probe's tip: the farthest point along it
+        # within 0.4 m of the axis.
+        shell = [p[2] for p in parts if p[0].endswith('-side') or p[0] == 'body']
+        sp = (np.vstack(shell) if shell else np.vstack([p[2] for p in parts])) @ rh
+        sp = sp - np.outer(sp @ a, a)
+        mid = 0.5 * (sp.min(0) + sp.max(0))
+        body = allp - np.outer(allp @ a, a)
+        near = np.linalg.norm(body - mid, axis=1) < 0.4
+        tip = mid + a * (allp[near] @ a).max()
+        # Turned so the probe points into the station and the wings across as given.
+        n_in, w = np.array(inward, float), np.array(across_iss, float)
+        R = (np.column_stack([n_in, w, np.cross(n_in, w)]) @
+             np.column_stack([a, c, np.cross(a, c)]).T)
+        p0 = placed[port] if isinstance(port, str) else np.array(port, float)
+        t = p0 + np.array(inward, float) * depth - R @ tip
+        # The far end, for whatever docks to it.
+        free = mid - a * (allp[near] @ (-a)).max()
+        placed[name.split(',')[0]] = R @ free + t
+        for surf, rgb, pts, tris in parts:
+            k = len(mats)
+            pos = (pts @ rh) @ R.T + t
+            v = pos[tris]
+            fn = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
+            fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+            nrm = np.zeros_like(pos)
+            for j in range(3):
+                nrm[tris[:, j]] = fn
+            z['pos%d' % k] = pos.astype(np.float32)
+            z['nrm%d' % k] = nrm.astype(np.float32)
+            z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
+            z['idx%d' % k] = tris.ravel()
+            mats.append(dict(name="%s: %s" % (name, surf), color=list(VISITOR_COLOURS.get(surf, rgb)) + [1.0],
+                             metallic=0.0, texture=None))
+        print("  %s: %d triangles" % (name, sum(len(p[3]) for p in parts)))
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
+    meta['visitors'] = [v[0] for v in ISS_VISITORS]
+    meta['triangles'] = sum(len(z['idx%d' % k]) // 3 for k in range(len(mats)))
+    meta['source'] += "; Pirs and the visiting vehicles: NASA 3D Resources, ISS (C) (High Res)"
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=1)
+    shutil.rmtree(work, ignore_errors=True)
     if not keep:
         os.remove(src)
 
@@ -672,6 +975,79 @@ def prepare_site_patches(key):
             json.dump(meta, fp, indent=1)
 
 
+DEM_URL = ("https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/"
+           "exportImage?bbox=%.7f,%.7f,%.7f,%.7f&bboxSR=4326&imageSR=4326&size=%d,%d"
+           "&format=tiff&pixelType=F32&noData=-9999&interpolation=RSP_BilinearInterpolation&f=image")
+DEM_PX = 2048
+
+
+def fetch_heights(bounds, n):
+    """USGS 3DEP's bare-earth heights (m, NAVD88: sea level, as PASS's site
+    heights are) over a box, n x n, rows north first; 0 where it has none
+    (the sea, other countries)."""
+    import io
+    import certifi
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    Image = _image()
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(DEM_URL % (tuple(bounds) + (n, n)), context=ctx, timeout=300) as r:
+                data = r.read()
+            break
+        except Exception as e:                  # noqa: BLE001 -- the service is flaky
+            print("  retrying (%s)" % e)
+    else:
+        sys.exit("fetch_assets: could not fetch 3DEP heights")
+    # A tiled, uncompressed float TIFF, which Pillow's float decoder mangles:
+    # assembled here from its tiles.
+    im = Image.open(io.BytesIO(data))
+    order = '<f4' if data[:2] == b'II' else '>f4'
+    w, h = im.size
+    out = np.zeros((h + 512, w + 512), np.float32)
+    for t in im.tile:
+        if t.codec_name != 'raw':
+            sys.exit("fetch_assets: 3DEP sent %s-compressed tiles" % t.codec_name)
+        x0, y0, x1, y1 = t.extents
+        tw, th = x1 - x0, y1 - y0
+        if t.offset == 0:                       # a tile with no data at all: left out
+            continue
+        out[y0:y0 + th, x0:x0 + tw] = np.frombuffer(data[t.offset:t.offset + tw * th * 4], order).reshape(th, tw)
+    out = out[:h, :w]
+    out[~np.isfinite(out) | (out < -100.0) | (out > 9000.0)] = 0.0     # its no-data, -9999
+    return out
+
+
+def prepare_site_heights(key):
+    """The ground's heights under a site's rings 0-2 (3DEP), for portview's
+    terrain: the launch pads' mounds, and the mountains round Edwards and
+    White Sands."""
+    import json
+    d = os.path.join(CACHE, "sites", key)
+    meta_path = os.path.join(d, "ring.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if not meta.get('heights'):
+        files = []
+        for k in range(3):
+            b = meta['rings'][k]['bounds']
+            print("site %s heights %d: +-%g km from 3DEP" % (key, k, meta['rings'][k]['half_km']))
+            f = "height%d.npy" % k
+            np.save(os.path.join(d, f), fetch_heights(b, DEM_PX))
+            files.append(f)
+        meta['heights'] = files
+    # And finer under the launch pads (their mounds, ~2 m).
+    for name, pa in meta.get('patches', {}).items():
+        if 'height' not in pa:
+            print("site %s heights under %s: +-%g km from 3DEP" % (key, name, pa['half_km']))
+            f = "height_%s.npy" % name
+            np.save(os.path.join(d, f), fetch_heights(pa['bounds'], 1024))
+            pa['height'] = f
+    with open(meta_path, "w") as fp:
+        json.dump(meta, fp, indent=1)
+
+
 def rematch_site(key):
     """Match a prepared site's rings' colours again (as match_colours now
     does), from the coarsest inward, then its fine patches; no downloads."""
@@ -730,12 +1106,16 @@ def main():
         prepare_bluemarble(m, args.keep_downloads)
     for key in MODELS:
         prepare_model(key, args.keep_downloads)
+    prepare_iss_visitors(args.keep_downloads)
+    for key in PROCEDURAL:
+        prepare_procedural(key)
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))
         prepare_site(key)
         prepare_site_fine(key)
         prepare_site_patches(key)
+        prepare_site_heights(key)
     print("portview assets ready in", CACHE)
 
 

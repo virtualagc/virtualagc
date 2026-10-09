@@ -207,8 +207,21 @@ ground intersection uses a cancellation-free root, so the runway is steady
 at cockpit height.  Checked: the view down KSC 15's centreline from 600 m
 past the threshold is centred and symmetric, so the imagery and PASS's
 navaids agree to a few metres.  KSC only so far; Edwards and White Sands
-are entries in fetch_assets.py's SITES table.  Later: terrain heights
-(Copernicus GLO-30), and a finer ring (NAIP's native 0.3-0.6 m) for rollout.
+are entries in fetch_assets.py's SITES table, centred on approximate
+airfield reference points until yaGPC2 has navaids files for them.  The
+runway also has a finer ring (ringF, NAIP's native ~0.37 m) for rollout.
+
+Terrain (2026-10-08): USGS 3DEP's bare-earth heights (sea level, as PASS's
+site heights are; public domain, US only) on rings 0-2's footprints, 2048
+square each, and ~2 m under the pads, ~150 MB in the cache.  While the eye
+is within 60 km of the ground near the site, the Earth shader marches the
+ray through them (steps no longer than the gap could close at a 1:2.5
+slope, or 2% of the range; then bisection), tilts the ground's normal by the
+slope for the shading, and beyond ring 2 the ground is sea level.  This
+gives the pads' mounds (39A's top at 14.2 m, under the gantry's 48 ft) and
+the mountains on Edwards' and White Sands' horizons.  No terrain shadows;
+the imagery has its own.  `--terrain off` for the flat ground.  60 frames/s
+in four full-size views on the Mac, at 2 km and at 10 m.
 
 ## Ascent (started 2026-10-07; Ron: higher priority than the rest)
 
@@ -221,11 +234,12 @@ which portview follows from TRU1's attitude with no special handling.
   LC-39 structures (NASA 3D Resources "Gantry": FSS with lightning mast, RSS,
   pad deck; 5.89 m a model unit, from the FSS's 40 ft footprint) drawn as a
   ground-fixed model at the pad (`--pad lc39a|lc39b|none`).
-- To do: place and orient the gantry exactly from vehdyn's on-pad geometry
-  (asked of PASS-IDLE: the stack's position, attitude and height), so the
-  crew access arm meets the Orbiter's side hatch; then fly an ascent and
-  check the views on the pad, through the roll, and downrange.  The current
-  imagery shows today's pads (SpaceX's hangars and launch mount at 39A).
+- Done: the gantry placed from vehdyn's pad (its nav base, PAD_LAT_RAD and
+  PAD_LON_RAD, plus 9.12 m to the ET's axis), on its mound (terrain, above);
+  ascents flown from T-16.5 min and T-8 s and the views checked on the pad,
+  through the roll and downrange; the imagery is NAIP's 2010 (Shuttle-era
+  pads).  The FSS is an open lattice in the model; the RSS is solid, as its
+  clad walls were.
 
 ## Phases
 
@@ -261,15 +275,35 @@ which portview follows from TRU1's attitude with no special handling.
   million triangles, 35 MB prepared.  The model's root is a mirroring
   negative scale in inches; corrected to metres in the ISS analysis frame
   (checked: Kibo port, Columbus starboard, Cupola nadir, PMA-2 forward).
-  Missing from the model for 2011: Pirs, the docked Soyuz/Progress, ATV-2.
+  What IGOAL lacks for May 2011 comes from JSC's 2011 LightWave models
+  (NASA 3D Resources "ISS (C) (High Res)", read by fetch_assets.py's LWO2
+  reader): Pirs at Zvezda's nadir (IGOAL's Nauka port), Progress M-10M
+  below it, Soyuz TMA-20 at Rassvet and TMA-21 at Poisk, ATV-2 at Zvezda's
+  aft port, placed from IGOAL's own ports; their textured blankets and
+  solar cells as plain colours.  The Soyuz' and Progress' wings are set
+  fore-aft (not checked against photographs).
   Eye points per view (forward and aft stations, approximate Orbiter
   structural coordinates).  Far away: a point by magnitude.  `--test vbar
   --test-range M` flies the final V-bar approach with a synthetic ISS.
-  Other vehicles (HST, Mir, ...) are more models keyed by NORAD id.
+  Other vehicles are more models keyed by NORAD id (OTHER_VEHICLES), each
+  model.json giving its frame and brightness (mag_1000km):
+  - the Hubble Space Telescope (20580): NASA 3D Resources' Hubble (A), in
+    its V1-V2-V3 axes, metres from mid-length;
+  - Mir (16609): NASA 3D Resources' simple Mir, ~0.0221 m a unit, +X along
+    the core toward the node, origin at the node;
+  - Solar Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3
+    (15643): no published models, so simple shapes to their published
+    dimensions (fetch_assets.py's PROCEDURAL), +X along the spin axis
+    (Solar Max: toward the Sun), approximate.
+  `--test vbar --test-target hst|mir|smm|westar6|palapab2|leasat3` flies up
+  to one.  None is live until vehdyn sends TGT1 for it.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed
   `*.layout` files are never overwritten).
-- **P6 — polish:** Moon-lit Earth at night.  No simulated glare or eye
+- **P6 — polish:** Moonlit Earth at night (done 2026-10-08: the ground lit by
+  the Moon by phase, and its glint on the sea, on the city lights' scale).
+  The output is dithered (2026-10-07), so a smooth sky shows no 8-bit
+  rings.  No simulated glare or eye
   adaptation (Ron, 2026-10-07): the viewer's own eyes dim the stars next to
   a bright object on the screen, and a view dimming its own stars looks
   wrong beside one that doesn't.
