@@ -31,10 +31,21 @@
  * axes, u = CGNS_M_BODY_TO_RR . M50->body . (target - antenna): trunnion
  * asin(-u1), shaft atan2(u2, -u3).  Those are one rotation, so this radar
  * inverts it exactly: w = (-u1, u2, -u3), sin P = -(c w1 + s w2), and
- * tan R = (s w1 - c w2) / w3.  The antenna is GLRREN's GLR_R_OFFSET_BODY
- * (-12.2211, 11.1971, -1.82292 ft from the c.g., body axes), the same point
- * PASS predicts from, taken from the truth c.g.  CGNS_M_BODY_TO_RR is the
- * source's INITIAL (CGNMC2.hal 399-401): a turn of 67 deg about body Z.
+ * tan R = (s w1 - c w2) / w3.  The antenna is where GLRREN's
+ * GLR_R_OFFSET_BODY puts it as STS-134 flew it: (+45.738, +11.13, -5.79) ft
+ * from the c.g., body axes -- forward on the starboard sill, where the Ku
+ * dish deploys (DASS_G2.ASC, #DGLRREN+0014, a patched word; the source's
+ * INITIAL, -12.2211, 11.1971, -1.82292, is a placeholder 58 ft aft).  It
+ * is taken from the truth c.g.  With the placeholder here and the flown
+ * value on the volume (tools/sites/sts134-rndz-iloads.json), PASS took the
+ * marks from a point 58 ft from where they were made: inside a few
+ * thousand feet that is degrees of angle and tens of feet of range, and
+ * its relative state settled 50-130 ft off with every residual near zero,
+ * the -Z track and the RPM's quarter turns 6-10 deg off the station
+ * (manual-run2).  A volume without that patch has the placeholder: PASS
+ * then predicts from the wrong point, as the real one would have.
+ * CGNS_M_BODY_TO_RR is the source's INITIAL (CGNMC2.hal 399-401), as
+ * flown: a turn of 67 deg about body Z.
  *
  * THE MODEL -- an estimate, not a specification.  There is no SM computer
  * here to point the antenna from GNC's line of sight (SM antenna
@@ -84,7 +95,7 @@ static const double M_BODY_TO_RR[3][3] = {
     { -0.9205048, 0.3907311, 0.0 },
     { 0.0, 0.0, 1.0 },
 };
-static const double ANT_BODY_FT[3] = { -12.2211, 11.1971, -1.82292 };
+static const double ANT_BODY_FT[3] = { 45.738, 11.13, -5.79 };     /* GLR_R_OFFSET_BODY as flown */
 
 typedef struct {
     uint16_t panel;

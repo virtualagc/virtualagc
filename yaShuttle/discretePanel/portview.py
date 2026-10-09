@@ -303,6 +303,15 @@ EYE_FWD = _structural(520.0, 0.0, 470.0)
 #          for the Earth below while the Orbiter flies upside down (Ron).
 #   left, right: the side windows W1/W6, 71-103 deg outboard, 6 deg up to
 #          18-28 deg down: 88 deg out, 8 deg down.
+#   aft:   the aft flight deck's overhead windows W11/W12, from the aft
+#          station (eye ~X_o 560, Z_o 470), facing aft with the head tipped
+#          back: 10 deg aft of the zenith, the top of the picture toward the
+#          nose -- where the crew watched the ISS from the R-bar to the
+#          +V-bar.  APPROXIMATE.
+#   cl:    the ODS centerline camera, in the docking ring (X_o 576, Z_o 513,
+#          rndz_instruments.py's ODS_XO/ZO, APPROXIMATE), looking out along
+#          the ring's axis (body -Z), the top of the picture the nose; a 30 deg
+#          field.  The rendezvous's last legs are flown on it.
 VIEWS = {
     'front': dict(title="CDR/PLT Forward View", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
@@ -312,6 +321,10 @@ VIEWS = {
                  w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
     'right': dict(title="PLT Side View", fwd=_dir(88, -8), up=(0, 0, -1),
                   w=768, h=768, hfov=SIDE_HFOV, eye=EYE_FWD),
+    'aft': dict(title="Aft Station Overhead View", fwd=_dir(180, 80), up=(1, 0, 0),
+                w=768, h=768, hfov=SIDE_HFOV, eye=_structural(560.0, 0.0, 470.0)),
+    'cl': dict(title="ODS Centerline Camera", fwd=(0, 0, -1), up=(1, 0, 0),
+               w=768, h=768, hfov=30.0, eye=_structural(576.0, 0.0, 513.0)),
 }
 
 
