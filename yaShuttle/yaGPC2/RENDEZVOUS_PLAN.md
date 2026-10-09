@@ -14,7 +14,13 @@ STS-134's own GNC2 I-loads are in PFS/mafgen/DASS_G2.ASC (its PATCH
 SUMMARY), and this tape holds the load module's placeholders instead.
 With the flight's own values in the capture (`--dass-iloads rndz`, run
 only), PASS targets and flies all four midcourses itself -- no ALARM KILL,
-every burn within 0.15 ft/s of the truth's Lambert.
+every burn within 0.15 ft/s of the truth's Lambert.  **Section 5f:**
+Stages 4 and 5 -- the crew's instruments (HHL, TCS, COAS, centerline
+camera) and the manual phase, flown by a scripted pilot from the R-bar
+arrival through the RPM and TORVA to 100 ft station-keeping on the +V-bar,
+where docking (PASS-IDLE's autopilot) picks up; with three findings for
+yaGPC2 (LOW Z's sign without jet cants, the verniers' push, the radar's
+close-range range rate).
 Everything else is still a plan.  The plan was written read-only from the repository, the
 flight source, and the documents listed under Sources.
 
@@ -1100,6 +1106,229 @@ to the arrival at rate 2.
   reached from the 06:10 start without NCC.  Not traced.
 - **The volume.** The reconfigured copy is outside the repository.  Making
   it the default volume is Ron's decision.
+
+## 5f. Stages 4-5 as built: the instruments and the manual phase, to 100 ft on the +V-bar (2026-10-09, macOS)
+
+**Scope.**  The manual phase ends at STATION-KEEPING 100 FT OUT ON THE
++V-BAR (Ron and PASS-IDLE, 2026-10-06: nothing yet models the ODS mechanism
+or contact).  Docking picks up from that hold -- see "Interfaces for the
+docking autopilot" below; PASS-IDLE's `dock_autopilot.py` and a capture
+model in vehdyn start from the HOLD capture.
+
+**How to run it** (one line, from the ARRIVAL capture of a 5e run; the
+volume must be the one that capture was taken with -- see the note on
+volumes below):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --from RBAR --tape VOLUME
+
+Five new phases after ARRIVAL: RBAR, RPM, TORVA, VBAR, HOLD
+(`examples/flights/rndz_manual.py`, mixed into `Rendezvous`); `--hold-min`
+(default 20), `--low-z` (off: see LOW Z below).  Each phase is captured
+(`sts134r-rbar` ... `sts134r-hold-end`), so any of them resumes with
+`--from`.  `manual.json` keeps each leg's report; `--portview` shows it all
+in portview, and portview has two new views for it: `cl`, the ODS
+centerline camera, and `aft`, the aft station's overhead windows W11/W12.
+
+### Stage 4: the instruments (`examples/flights/rndz_instruments.py`)
+
+Python, from the truth -- PASS uses none of them.  `Instruments(seed).read(tru,
+tgt)` gives, each with its own noise (estimates; no document figures here):
+
+| Instrument | Reads | 1 sigma | In view |
+|---|---|---|---|
+| HHL | range, range rate to the nearest structure (a 25 m sphere about the ISS's c.m.) | 0.5 ft + 0.1 %, 0.02 ft/s | inside 5,000 ft |
+| TCS | range, range rate, bearing (H, V off -Z) of the reflectors at PMA-2, from the ODS ring | 0.1 ft + 0.05 %, 0.005 ft/s, 0.03 deg | inside 10,000 ft, -Z hemisphere |
+| -Z COAS | the ISS's c.m. in the reticle, H right V up | 0.1 deg | 10 deg field |
+| ODS centerline camera | PMA-2's face off the ring's axis (ft), range, and the two axes' pitch, yaw, roll misalignment | 0.05 ft, 0.05 deg | 50 deg of the axis |
+
+The pilot model flies on the TCS (truth + its noise, rotated by the
+attitude); every log line carries all four readings.
+
+### Stage 5: the pilot model and the legs
+
+**One control law for every leg.**  A goal -- a point and a velocity in the
+ISS's LVLH frame (x ahead, y right of the track, z down; the turning frame's
+rates, as `rndz_start.m50_to_lvc`) -- for a control point (the c.m., or for
+VBAR and HOLD the ODS ring against PMA-2's face):
+
+    v_cmd = v_goal + clip((r_goal - r) / tau, vmax),  dv = v_cmd - v
+
+turned into THC pulses along the body axes in DAP TRANS PULSE, back to
+back, whenever an axis needs most of a pulse.  Each axis's pulse is learned
+from the response (below).  A response check stops the leg if the pulses
+twice move the vehicle the wrong way.
+
+**Results (manual-run2, from vol-run1's ARRIVAL: X +112 Y +74 Z +571 ft,
+closing 0.28 ft/s):**
+
+| Leg | Time | Truth's error from the goal (rms; max) | RCS used (truth, lb) |
+|---|---|---|---|
+| RBAR: brake, null the 74 ft out of plane, station-keep 600 ft below | 30 min (the leg's limit; settled in ~10) | last 3 min: X 2.3 Y 5.2 Z 1.3 ft; max 3.7 6.0 2.2 ft | 378 (FRCS 143, L 118, R 117) |
+| RPM: 360 deg of pitch about the ISS line of sight, the R-bar point held | 21.9 min | X 5.9 Y 3.4 Z 6.2 ft; max 11.8 7.5 14.8 ft | 471 (FRCS 171, L 152, R 148) |
+| TORVA: R-bar to +V-bar, 90 deg at twice the orbital rate, 596 to 400 ft | 11.5 min arc, 15.1 min to settled | X 8.1 Y 2.6 Z 5.5 ft; max 35.6 12.8 22.4 ft | 416 (FRCS 164, L 130, R 122) |
+| VBAR: docking attitude, then the ODS ring in along PMA-2's axis, 334 to 100 ft at range/1000 ft/s | 23.7 min | X 2.7 Y 2.1 ft (Z: the 60 ft it started off the axis, nulled in 2 min); centerline camera under 2.5 ft and 1.5 deg from 270 ft in | 579 (FRCS 216, L 185, R 178) |
+| HOLD: 100 ft from PMA-2's face, on its axis | 20.1 min | X 2.7 Y 3.5 Z 1.6 ft; max 6.2 6.3 2.8 ft; rates up to 0.23 ft/s; 75 THC pulses (~9 ft/s) | 337 (FRCS 132, L 103, R 101) |
+
+The whole manual phase: about 2,180 lb of RCS propellant (the truth's,
+`vehdyn.json` in the phase captures; `manual_summary`).
+
+The checklist's propellant budget for the manual phase is not in this
+repository's notes, so these stand on their own.  It is the verniers'
+attitude work and the primary-jet pulses together.  The HOLD's 75 pulses in
+20 min (about 0.45 ft/s a minute) are the pilot chasing the TCS noise and
+the verniers' push with whole pulses: a deadband nearer a pulse, or a longer
+time constant, would spend less and hold looser; the 5 ft lateral offset it
+carried for the first 8 min is that deadband (5 ft over tau 90 s asks for
+0.06 ft/s, under half a 0.16 ft/s Y pulse).
+
+**The RPM.**  RPM SETUP (SPEC 20: DAP A's PRI ROT RATE, ITEM 10, and VERN ROT
+RATE, ITEM 23, to 0.75 deg/s), then four quarter turns of UNIV PTG's BODY
+VECT 5 (GKTUNI.hal's vector: cos P cos Y, sin Y, -sin P cos Y), TGT ID 1,
+P 180, 270, 0, 90 -- -X, +Z, +X and back to -Z on the ISS -- a full turn in
+pitch with the ISS tracked; then the rates back (A7: 0.200, 0.016) and the
+-Z track.  Each quarter turn took 3 to 4 min (8 for one: its body rate never
+settled under 0.1 deg/s) against the flight's 8 min for the whole, which was
+one continuous turn.  Each ended 6 to 10 deg from the true ISS: TGT ID 1
+points at PASS's own state of the ISS (see "PASS's relative state" below).
+
+**TORVA.**  The -Z target track throughout, so the bay stays on the ISS; the
+goal runs round a quarter circle at 2n, its radius from 596 to 400 ft.  It
+ends nose up and bay toward the ISS, which is already the docking attitude.
+
+**VBAR.**  ESTABLISH VBAR: UNIV PTG TGT ID 2 (the Earth's centre), BODY VECT
+5 P 180 (-X), OM 0 -- the nose to the zenith, the bay to the ISS; found by
+trying OMs, of which 0 is right (-Z 1.9 deg off the -V-bar).  The maneuver
+is flown in DAP B/AUTO/ALT (B7's 0.5 deg/s) and the attitude then held in
+A/AUTO/VERN.  The ring then comes in at range/1000 ft/s (0.33 at 334 ft, 0.1
+at 100).
+
+### Findings
+
+1. **LOW Z comes out the wrong way.**  With LOW Z pressed (the APPROACH card,
+   inside 1,000 ft), a +Z translation command moved the Orbiter -Z, toward
+   the ISS (manual-run1: ZD -0.27 to -1.39 ft/s in 70 s; the run was
+   stopped).  Without LOW Z, Z pulses go the right way.  PASS's LOW Z
+   (GFFORB.hal, X_JETS_PLUS_Z) gets +Z from firing the forward- and
+   aft-firing jets together, relying on the aft jets' cant; vehdyn models
+   every jet along a pure body axis ("The real jets are canted a few
+   degrees ... not modelled", vehdyn.c), so what comes out is whatever
+   the X jets' moment arms and the rest of the DAP's firings make.  **A
+   yaGPC2 fix**: the jets' real cant angles in vehdyn's jet table (from
+   the RCS jet table I-loads or the Orbiter data book).  Until then the
+   manual phase flies without LOW Z (`--low-z` to try it).
+2. **The verniers push.**  Turning the Orbiter with the verniers translates
+   it: vehdyn's vernier pairs fire along the body axes, so a pitch pair is a
+   net -Z.  The first RPM, holding the R-bar point only between the quarter
+   turns, drifted out to 1,640 ft at 2 ft/s; holding it through each turn
+   kept it within 15 ft.  Whether the real verniers' cant reduces this as
+   much is again the jet table's question (finding 1).
+3. **A pulse is bigger than PRI TRAN PLS.**  DAP A7's PRI TRAN PLS is
+   0.10 ft/s; the pulses measured 0.11-0.20 ft/s (x 0.11-0.14, y 0.10-0.20,
+   z 0.07-0.19, varying with the attitude and the jets chosen), and the MC
+   pulse trims saw 0.24.  The pilot learns each axis's pulse from the
+   response (60/40 running mean).
+4. **PASS's relative state drifts inside 1,000 ft.**  During the R-bar hold
+   PASS's FLTR state went from 64 to ~190 ft off the truth at 600 ft, with
+   ~750 radar marks accepted and small residuals.  The -Z track (TGT ID 1),
+   which points at that state, ran 10-12 deg off the true ISS; the RPM's
+   quarter turns ended 6-10 deg off.  One lead: the radar's range rate
+   read +0.50 to +0.55 ft/s, sample after sample, while the truth's was
+   ~+0.15 -- steadier than its 0.3 ft/s white noise allows; kuradar.c's
+   close-range range rate (the antenna's lever arm and rate, the noise
+   draw) wants a look.  Also: the range noise's 15 ft floor is 2.5 % at
+   600 ft, and the 3 m angle wander is 1 deg there.
+5. **Volumes and captures.**  A capture resumes only on the volume it was
+   taken with (simulatePASS checks the SHA-256).  vol-run1 flew the
+   reconfigured volume before CGZB_LAMB_ILOAD set 7 was added to the spec;
+   its captures need that volume, rebuilt with
+   `tools/mission_reconfig.py` from the spec less the set-7 cell (SHA-256
+   e98ed16b79d8...).
+
+### Interfaces for the docking autopilot
+
+1. **The hand controllers and the DAP from a script.**  simulatePASS's
+   `--rhc lh` starts handcontrollers.py's commander's window; a crew script
+   then moves the THC and RHC:
+   - `thc fwd|aft DIR S` -- hold THC direction DIR (`+x -x +y -y +z -z`,
+     body axes: THC +Z is +Z body, down) for S seconds (fwd = the
+     commander's, aft = the aft station's).  In TRANS PULSE one
+     deflection is one pulse (the pilot uses 0.30 s, one a second); in
+     TRANS NORM the jets fire for as long as it is held (the THC's
+     accelerations, measured in 5c: +X 0.43, -X 0.42, +Y 0.44, -Y 0.38,
+     +Z 0.65, -Z 1.22 ft/s^2 -- fly_rndz134's THC_ACC_SEED).
+   - `rhc lh|rh|aft AXIS F S` -- deflect roll, pitch or yaw by F of full
+     throw (-1..1; the detent is about 0.1) for S seconds.
+   - `dap c3|a6u x_norm|x_pulse|y_norm|y_pulse|z_norm|z_pulse|low_z|high_z`
+     -- TRANSLATION; `dap c3 a|b`, `auto|inrtl|lvlh|free`, `pri|alt|vern`.
+   - The pulse size: SPEC 20 DAP A's PRI TRAN PLS is ITEM 17 (B's 37);
+     `keys SPEC 2 0 PRO`, `keys ITEM 1 7 + . 1 EXEC`, `keys RESUME`
+     (rndz_manual's `spec20_rates` keys items 10 and 23 the same way).
+     The learned sizes above are what one deflection gives.
+   - The scripts go to panelO6 on port base + 92 (crewscript's
+     CONTROL_OFFSET); handcontrollers.py takes the `thc`/`rhc` lines on
+     base + 86 and acknowledges on base + 87 (HC_OFFSET, HC_ACK_OFFSET), and
+     drives the THC/RHC contacts on the MDMs' I/O ports, base + 100..103.
+     From Python: `fly_sts134.Flight.play(text, name)` and
+     `script_done(name, timeout)`; `rndz_manual.ManualPhase.thc_pulses()`
+     turns an LVLH dv into pulses.
+2. **What the crew sees, and where.**
+   - The truth: TRU1 on base + 98 (yaGPC2 mdmdev.c, `truth_publish`:
+     big-endian doubles -- t, GMT, q body->M50 (w x y z), w body rad/s, r,
+     v M50 m and m/s of the c.m., ..., [27:30] the c.m. off the dry CG,
+     body m); TGT1 on base + 109 (`targets_publish`: t, NORAD, r, v M50,
+     q body->M50 in the ISS frame).  fly_rndz134's `Ears` keeps both, time
+     aligned (`truth_at`).
+   - HHL, TCS, COAS, centerline camera: no port of their own --
+     `rndz_instruments.Instruments(seed).read(tru, tgt)` from those two
+     feeds returns `hhl_range_ft, hhl_rdot_fps, tcs_range_ft,
+     tcs_rdot_fps, tcs_bearing_deg (H, V), coas_deg (H, V),
+     cl_offset_ft (right, up), cl_range_ft, cl_pitch_deg, cl_yaw_deg,
+     cl_roll_deg`; `rndz_instruments.points(tru, tgt)` gives the ODS ring's
+     and PMA-2's M50 position and velocity.  An autopilot reads exactly
+     what these logs show by calling the same function.
+   - The rendezvous radar is yaGPC2's (kuradar.c), read by PASS on FF3
+     card 3 channel 3 (5d); what the crew sees of it is PASS's: SPEC 33
+     (RR RNG, RDOT, angles; `fly_rndz134.RadarNav.rr_summary` reads them off
+     the format-22 downlist, base + 88).  Inside 300 ft with RADAR OUTPUT
+     HIGH its range is flagged bad; the checklist has it LOW from 700 ft.
+3. **The geometry.**
+   - ODS ring (the APDS docking interface), Orbiter structural X_o 576,
+     Y_o 0, Z_o 513 in -- body (13.31, 0, -3.51) m from vehdyn's dry-CG
+     origin -- its axis body -Z.  APPROXIMATE: the external airlock's
+     station and a ring face above the sill, not from the ODS/APDS ICD
+     (rndz_instruments.ODS_XO/ZO; portview's `cl` view sits there too).
+   - PMA-2's docking face, ISS frame (+X forward, +Y starboard, +Z nadir;
+     origin the c.m. vehdyn moves) (15.66, 0, 5.48) m -- portview's
+     ISS_PMA2, from the ISS model -- its axis the ISS's +X.
+   - The docking attitude: LVLH, nose to the zenith, -Z (the ring's axis)
+     along -V-bar toward PMA-2, wings level (centerline camera roll ~0).
+4. **The 100 ft station-keeping capture.**  `~/sts134-runs/rendezvous/manual-run2/sts134r-hold`
+   (Mac-portview's machine; `sts134r-hold-end` is the same instant): the
+   ODS ring 98.9 ft from PMA-2's face, 1.3 ft and 1.6 ft off its axis,
+   rates under 0.06 ft/s, docking attitude in DAP A/AUTO/VERN (UNIV PTG
+   TGT ID 2, BODY VECT 5 P 180, OM 0, TRK), TRANS PULSE in X, Y and Z, no
+   LOW Z.  Its volume is `~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz-volrun1.mmv`
+   (SHA-256 e98ed16b79d8...; rebuilt from `sts134-rndz-iloads-noset7.json`
+   beside it).  To fly on from it, add the autopilot's phase after HOLD in
+   fly_rndz134's PHASES (the base class resumes `--from X` from the capture
+   of the phase before X) and run:
+
+       python3 examples/flights/fly_rndz134.py --logs ~/sts134-runs/rendezvous/manual-run2 --port-base 48800 --rate 2 --from DOCK --tape ~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz-volrun1.mmv
+
+   (or, without the driver, `simulatePASS.py ... --snapshot-resume
+   ~/sts134-runs/rendezvous/manual-run2/sts134r-hold --tape THAT VOLUME`,
+   with fly_rndz134's `start()` environment).  Copy the directory first if
+   it should stay as it is: a run writes its captures beside it.
+
+**Not done.**  LOW Z (finding 1, a vehdyn jet-cant fix); the radar's
+close-range range rate (finding 4); the RPM as one continuous turn; the
+COAS reticle drawn on portview's overhead view; the AUTO ANGULAR FLYOUT /
+TARGET ALIGNMENT cards' UNIV PTG corrections (the attitude is held in LVLH
+and lined up by translation alone); KU antenna stow, FLT CNTLR PWR and the
+RPM's photo callouts; plume logging of jets fired toward the ISS inside
+200 ft; the one-line run from IPL to HOLD in one go (manual-run2 flew
+RBAR from vol-run1's ARRIVAL, then RPM, TORVA, VBAR and HOLD from its own
+captures, the pilot fixed between them -- each fix is in the code).
 
 ## 6. The stages
 
