@@ -388,6 +388,11 @@ class ManualPhase(object):
                      % (sel.get("A"), vals.get(10), vals.get(23), sel.get("B"), vals.get(30), vals.get(43)))
             self.play("+1     keys RESUME\n", "rpm-check-resume")
             self.script_done("rpm-check-resume", 60)
+            mem = self.probe("rpm-setup")
+            ds = mem.dap_selected() if mem else None
+            if ds:
+                self.say("RPM SETUP check: PASS's selected DAP MNVR_RATE %.4f deg/s (A %s, B %s)"
+                         % (ds["MNVR_RATE"], ds["A"], ds["B"]))
         except Exception as e:                       # a check only
             self.say("RPM SETUP check: could not read SPEC 20 (%s)" % e)
         t0 = self.ears.snap()[0]["t"]
