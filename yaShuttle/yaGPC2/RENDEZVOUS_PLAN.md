@@ -1,8 +1,9 @@
 # STS-134 rendezvous with the ISS: plan
 
 Written 2026-10-08. **Status:** the first milestone (M1, and a first try
-at M1b) is built and has flown; see section 5a.  Everything after it is
-still a plan.  The plan was written read-only from the repository, the
+at M1b) is built and has flown; see section 5a.  Stage 1's star tracker
+target track is built and has flown to Ti; see section 5b -- with one
+blocker in this tape's I-loads.  Everything else is still a plan.  The plan was written read-only from the repository, the
 flight source, and the documents listed under Sources.
 
 The goal is to fly STS-134's rendezvous and docking (FD1-FD3) the way the
@@ -400,6 +401,104 @@ not keyed: this tape's configurations are unchecked); TGT sets keyed, not
 I-loaded; the burn pad's TV ROLL and trims left at PASS's own; no drag
 K-factor uplink; the orbiter's mass is the liftoff figure with full OMS
 tanks (`YAGPC_VEHDYN_ORBITER_KG` has no FD3 form).
+
+## 5b. Stage 1 as built: the -Z star tracker's target track (2026-10-08, macOS)
+
+**How to run it** (one line; about 45 min at rate 2):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --to TI
+
+New phases STRKNAV (STAR TRACKER NAV [10A]) between TRACK and TI, and
+STRKEND (END S TRK NAV [10B]) between TI and TIBURN; `--no-strk` skips
+both.  Every --check-every s, `rndz-check.log` gets a `strk:` line: the
+-Z tracker's words, PASS's display status, marks, ACPT/REJ, RESID,
+SV UPDATE POS and FLTR MINUS PROP, and PASS's relative state, FLTR and
+PROP, against the truth (all from the format-22 downlist; the FLTR, PROP
+and target states are staged together at one T_STATE).
+
+**The interface, from the flight source and the checklist.**
+- The tracker has no target mode.  SPEC 22 -Z(-Y) TGT TRK ITEM 6(5) sets
+  CGYB_MODE_CMD 3 (GYZSTS); GY3STT then breaks track, commands an offset
+  scan box at the LOS PASS predicts from its own states (GY5FOV; offset
+  code 15.5 + 15.5 x deg / 4.75; threshold from THOLD, ITEM 13/14), waits
+  4 s for STAR PRESENT, falls back to a 20 s full-field scan, then NO
+  TARGET (status 6) and starts over.  GY8DAT averages 21 samples (steady
+  within TOL6, body rate under TOL8) into CGYV_H/V_NAV, time and TM50ST;
+  GLCSTA/GLZANG incorporate them (S TRK ITEM 12, AUTO/INH/FORCE angles ITEM
+  23/24/25; edits set FALSE TARG, which makes GY3 break track and search
+  again).  The angles' residuals are GLZANG's: atan2 of the c.g.-to-c.g.
+  LOS in tracker axes plus a sensor bias state (GLQREN).
+- STAR TRACKER NAV [10A] (JSC-48072-134 p. 4-10): IMU DES, SV SEL PROP,
+  INH angles, S TRK; THOLD +3 both; TGT TRK; at S PRES the residuals four
+  cycles (BREAK TRK, ITEM 8, if they jump > 0.05 or exceed 0.6 deg); AUTO
+  angles; SV SEL FLTR when SV UPDATE POS < 1.0 kft with ACPT > 9.
+- The nominal pass is a daylight pass at ~40 nmi before NCC; the -Z
+  tracker on every Orbiter from STS-117 was an image dissector, which
+  tracked the large, bright ISS where the solid-state ones tripped target
+  suppress (Herrera, "Space Shuttle Star Tracker Challenges", NTRS
+  20110003998).
+
+**yaGPC2** (`startrk.c`, TARGET TRACK in its header): the ISS is one more
+object the raster can cross, from the nav base, sunlit only (Earth's
+shadow with the Sun's disc; not behind the Earth), magnitude from range and
+a Lambert phase function (standard -2.0 at 1000 km; -7 to -9 at 40 nmi),
+the light's centroid toward the Sun (Lambert sphere, r 44.6 m), the stars'
+20 arcsec noise and the word's count.  Captures keep it.
+`test/test_startrk_target.c` (27 checks).
+
+**THE BLOCKER: this tape initialises PASS's star tracker angle bias to 1.0
+RADIAN.**  GLQREN's local `GLQ_ST_ANGLES_BIAS_INIT ARRAY(2) INITIAL(1.0,
+1.0)` (the RR and COAS ones too) is copied into CGNV_SENSOR_BIAS when the
+angle set comes in, and GLZANG adds it to the predicted angles.  In memory
+at X'0B47E' (#DGLQREN X'0B45C' + X'22'); CGNV_SENSOR_BIAS_TLM reads 1.0 in
+every capture of `strk-run1`.  So every residual is about 57 deg off; the
+first two marks were accepted (the covariance is wide), the FLTR state was
+dragged 45-56 kft off, and every later mark rejected (RESID H -112 V -9,
+which is exactly the measured angle less 57.3 deg less the angle from the
+dragged state).  The bias variance beside it is 1e-6 rad^2 (1 mrad sigma):
+1.0 rad cannot be a flight value.  Whether the real I-load was 0 (or
+anything else) needs a document this repository lacks -- the FSSR STS
+81-0006 Part B 4.2.7 or the flight's I-load listing.  **Ron's call.**
+
+**Runs** (`~/sts134-runs/rendezvous/`).
+- `strk-run1`, the one-line command from 06:30 with the tape as it is.
+  TRACK finished at Ti -51 min; the ISS went into the Earth's shadow at
+  06:43 (Ti -55) and out at 07:17 (Ti -21), so the pass found nothing until
+  sunrise; then the tracker locked (full field: PASS's PROP LOS was 1.4 deg
+  off, outside the 1 deg box) at 59.8 kft, and the 1 rad bias ruined the
+  FLTR state as above.  SV SEL stayed PROP; Ti on PROP as in M1.
+- `strk-run2`, from 06:10 (`--start-utc`, PET -1:28, the checklist's [10A]
+  time; 40 nmi out), with `GLQ_ST_ANGLES_BIAS_INIT` set to 0.0 in the
+  UPLINK capture before RNDZ NAV ENA -- an EXPERIMENT, not a fix.  S PRES
+  at Ti -67.4 min, 237.6 kft; initial RESID H -0.001 V -0.023 deg, steady;
+  the first SV UPDATE POS 0.090 kft; ACPT 11/11 at Ti -65.4, SV SEL FLTR;
+  91/91 accepted by the ISS's sunset at Ti -55, 129/129 by Ti -16 (marks
+  again from sunrise, 57 kft); none rejected.  PASS's estimated angle
+  biases 0.22 and -0.29 mrad (the light's centroid and the lever arm).
+
+  | Ti - min | FLTR rel. error ft (x y z) | |r| | PROP rel. error ft | |r| |
+  |---|---|---|---|---|
+  | 56.6 | +183 -29 +42 | 190 | +517 -35 -11 | 519 |
+  | 45.1 | +174 +51 -36 | 185 | +415 -34 -499 | 650 |
+  | 34.3 | +74 +105 -82 | 152 | -511 -14 -1055 | 1172 |
+  | 22.0 | -75 +99 -62 | 139 | -2398 +20 -1411 | 2782 |
+  | 15.8 | +168 -70 -37 | 186 (0.46 ft/s) | -3468 +33 -1395 | 3738 (3.9 ft/s) |
+
+  PROP is the run without marks (the same trajectory; it grows from the
+  dropped small-maneuver delta-V, as in 5a, to 3.7 kft and 3.9 ft/s here
+  over the longer run).  PASS's own range at Ti -16 min: -169 ft and +0.27
+  ft/s from the truth (strk-run1, on PROP: -905 ft, +1.38 ft/s).
+- Ti on FLTR (TGT 10, COMPUTE T1): preliminary +9.82 -0.63 +4.28 (10.73)
+  against the truth's precision Lambert +9.82 -0.71 +4.32; final +9.93
+  -0.83 +4.15 (10.79) against +9.79 -0.71 +4.31 -- within 0.16 ft/s per
+  axis, well inside the final-ground limits.  (The 10.7 ft/s, not M1's 9,
+  is the 06:10 start's coast without NCC.)
+
+**Not done.**  The night: [18E] tracks on after sunset at THOLD 0 and
+nothing here says by what light, so the station is invisible in shadow.
+NCC itself (Stage 2).  The S TRK NAV contingencies (5-8, 5-9) beyond the
+break-track retries.  The IMU deselect is IMU 1 (MCC's call).  The
+solid-state -Y tracker's target suppress.  The 1 rad I-load above.
 
 ## 6. The stages
 

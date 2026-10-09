@@ -17,7 +17,10 @@ phase by phase, with a capture (sts134r-<phase>) after each:
 
   IPL      one GPC IPL'd and taken straight to OPS 201 (GPC MEMORY
            configuration 2), DAP FREE, SPEC 21 IMUs 1-3 to OPERATE, DAP
-           A/AUTO (examples/1gpc-ops201-imu.script)
+           A/AUTO (examples/1gpc-ops201-imu.script); then RNDZ OPS
+           INITIALIZATION [5A]'s "Config DAP A,B to A7,B7" (p. 4-5) on SPEC
+           20 -- DAP A ITEM 1 +7, DAP B ITEM 2 +7 -- with this tape's A7/B7
+           brought to p. 6-2's values first (DAP EDIT, LOAD - ITEM 5)
   UPLINK   the ground (RNDZ timeline p. 4-5, "MCC UPLINK ORB SV, TGT SV"):
            the RNP epoch 2011/136 (message 59), the Orbiter's state
            (message 9) and the ISS's (message 10), both from the truth
@@ -27,6 +30,13 @@ phase by phase, with a capture (sts134r-<phase>) after each:
   TRACK    -Z AXIS TARGET TRACK [12A] (p. 4-12): UNIV PTG CNCL - ITEM 21,
            TGT ID +1, BODY VECT +3, OM +0, DAP B/AUTO/ALT, TRK - ITEM 19;
            when the maneuver is complete DAP A/AUTO/VERN
+  STRKNAV  STAR TRACKER NAV [10A] (p. 4-10): SPEC 21 IMU DES; SPEC 33 SV SEL
+           PROP, INH Angles, S TRK; SPEC 22 THOLD +3 both, -Z TGT TRK - ITEM
+           6; when S PRES, the initial residuals watched (BREAK TRK - ITEM 8
+           if they jump or exceed 0.6); AUTO Angles - ITEM 23; when SV UPDATE
+           POS < 1.0 kft with Angle ACPT > 9, SV SEL - ITEM 4 (FLTR).  The
+           pass then runs on -- PASS takes a mark about every 8 s -- through
+           Ti targeting (--no-strk: none of this, the M1 baseline)
   TI       TARGET Ti BURN [13A] (p. 4-13) at PET -0:55 (and, with --to TI,
            the final [15A] at TIG - 17 min, in OPS 201): SPEC 34 TGT NO
            +10; the set checked against the checklist (DT 76.9, DX -0.9,
@@ -35,9 +45,14 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            solution and the states it came from are read out of PASS's
            memory (a capture) and set beside rndz_start.py's independent
            Lambert from the same states and from the truth
-  TIBURN   (M1b) [15A] in OPS 202 and RNDZ OMS BURN (p. 5-4): L OMS, WT,
-           COMPUTE T1, PROP or the ground (truth) solution by the
-           final-ground limits, LOAD, TIMER, MNVR, EXEC at TIG - 15 s
+  STRKEND  END S TRK NAV [10B] (p. 4-10): INH Angles - ITEM 24; IMU DES -
+           ITEM 7 again (the IMU reselected)
+  TIBURN   (M1b) [15A] in OPS 202 and RNDZ OMS BURN (p. 5-4): SPEC 20 A7/B7
+           checked; L OMS, the OMS 2/ORBIT OMS BURNS card's one-engine trims,
+           WT, COMPUTE T1, PROP or the ground (truth) solution by the
+           final-ground limits, LOAD, TIMER, MNVR, DAP TRANS NORM, EXEC at
+           TIG - 15 s; the residuals trimmed with the THC to < 0.2 ft/s each
+           axis; DAP B/INRTL/ALT, PULSE/PULSE/PULSE, RCS SEL
   COAST    OPS 201, -Z target track again, and the coast to T2 (TIG + 76.9
            min), the truth's relative state logged every 30 s
 
@@ -90,9 +105,49 @@ MET_ZERO_UNIX = calendar.timegm((2011, 5, 16, 12, 56, 27)) + 0.994
 NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
-PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "TI", "TIBURN", "COAST"]
+PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "STRKEND", "TIBURN", "COAST"]
 # TGT 10 as JSC-48072-134 lists it (TARGET Ti BURN [13A], [15A]):
 TGT10 = {"EL": 0.0, "DT": 76.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8}
+
+# THE RENDEZVOUS DAP, A7 and B7: JSC-48072-134 p. 6-2, ISS RNDZ OPS DAP
+# CONFIGURATIONS, the RNDZ column, by SPEC 20 item (A 10-28, B 30-48).  The
+# timeline configures them in RNDZ OPS INITIALIZATION [5A] (p. 4-5, "Config
+# DAP A,B to A7,B7", about PET -2:45, before this run starts) and they stand
+# -- "A7(B7)" in the margin of every page -- through NC, NCC, Ti and the
+# midcourses (pp. 4-9 to 4-18); RNDZ OMS BURN step 1 (p. 5-4) checks them
+# again ("GNC 20 DAP CONFIG ... DAP config A7,B7").  Options are the display's
+# words; the rest are numbers.  CNTL ACC (28, 48) is 0 in both.
+DAP_RNDZ = {
+    "A": {10: 0.200, 11: 2.00, 12: 0.20, 13: 0.10, 14: 0.0, 15: "ALL", 16: "ALL", 17: 0.10,
+          18: 0.10, 19: "ALL", 20: 2, 21: 0.08, 22: 0.00,
+          23: 0.016, 24: 1.00, 25: 0.020, 26: 0.010, 27: 0.0, 28: 0},
+    "B": {30: 0.500, 31: 2.00, 32: 0.20, 33: 0.04, 34: 0.0, 35: "ALL", 36: "ALL", 37: 0.05,
+          38: 0.10, 39: "ALL", 40: 2, 41: 0.08, 42: 0.00,
+          43: 0.200, 44: 1.00, 45: 0.020, 46: 0.002, 47: 0.0, 48: 0},
+}
+# SPEC 20's rows, 0-18 down the page (A item = 10 + row, B = 30 + row, DAP
+# EDIT = 50 + row), each with the format it is keyed in
+DAP_ROWS = ["PRI ROT RATE", "PRI ATT DB", "PRI RATE DB", "PRI ROT PLS", "PRI COMP", "PRI P OPTION",
+            "PRI Y OPTION", "PRI TRAN PLS", "ALT RATE DB", "ALT JET OPT", "ALT # JETS", "ALT ON TIME",
+            "ALT DELAY", "VERN ROT RATE", "VERN ATT DB", "VERN RATE DB", "VERN ROT PLS", "VERN COMP",
+            "VERN CNTL ACC"]
+DAP_FMT = {0: "%.4f", 1: "%.2f", 2: "%.2f", 3: "%.3f", 4: "%.3f", 7: "%.3f", 8: "%.3f", 10: "%d",
+           11: "%.2f", 12: "%.2f", 13: "%.4f", 14: "%.3f", 15: "%.3f", 16: "%.3f", 17: "%.3f", 18: "%d"}
+
+# THE OMS BURN, per the STS-134 Ascent Checklist's cue card OMS 2/ORBIT OMS
+# BURNS (ASC-6a/134/A,O/A, p. 4-3 of JSC-48005-134), which RNDZ OMS BURN step
+# 3 (p. 5-4) has the crew perform: "GMBL TRIM ... 1 engine: P = +0.4 LY =
+# +5.2 RY = -5.2" and, at cutoff, "Trim Residuals: ... Orbit: All axes < 0.2
+# fps".  The rendezvous book's own RCS BURN card (CC 9-3, RNDZ-1a/134/O/A,
+# step 5) gives the order -- "If VGO Z is neg, Z,X,Y seq; otherwise, X,Y,Z.
+# THC: Trim VGOs < 0.2 fps" -- and the OMS card gives none, so that order is
+# used.  The THC's acceleration: the checklist's one figure is +X in A7 with
+# DAP TRANS NORM, "THC: +X (up) for 6 sec (1.5 fps)" (VBAR BREAKOUT, p. 5-15),
+# 0.25 ft/s^2; for Y and Z there is none, so each axis starts from that and
+# is then measured from its own response.
+OMS_1ENG_TRIMS = {"P": 0.4, "LY": 5.2, "RY": -5.2}
+TRIM_TOL_FPS = 0.2
+THC_X_ACC_FPS2 = 1.5 / 6.0
 
 
 def unix(when):
@@ -115,6 +170,56 @@ def dhms(sec):
 def keys_num(x, fmt):
     t = fmt % abs(x)
     return ("- " if x < 0 else "+ ") + " ".join(t)
+
+
+def keys_short(x, fmt):
+    """As keys_num, but without the digits that say nothing (0.0160 is
+    keyed + . 0 1 6): an entry field takes only so many keystrokes."""
+    t = fmt % abs(x)
+    if "." in t:
+        t = t.rstrip("0").rstrip(".") or "0"
+        if t.startswith("0."):
+            t = t[1:]
+    return ("- " if x < 0 else "+ ") + " ".join(t)
+
+
+SPEC20_PAIR = re.compile(r"(?<![\d.])(\d{2}) +(_*-?\d*\.?\d+|ALL|TAIL|NOSE|_+)(?=\s|$)")
+
+
+def parse_spec20(text):
+    """SPEC 20 DAP CONFIG's text: {'A': 'nn', 'B': 'nn'} (the configurations
+    selected, '__' once edited) and {item: value} for items 10-68 (floats,
+    or the option word; None for an empty field)."""
+    sel = {}
+    for k, ab in (("A", "1 DAP A"), ("B", "2 DAP B")):
+        m = re.search(re.escape(ab) + r"(\S\S)", text)
+        sel[k] = m.group(1) if m else None
+    vals = {}
+    for line in text.splitlines():
+        for m in SPEC20_PAIR.finditer(line):
+            i, v = int(m.group(1)), m.group(2)
+            if not 10 <= i <= 68:
+                continue
+            if v.strip("_") == "":
+                vals[i] = None
+            elif v in ("ALL", "TAIL", "NOSE"):
+                vals[i] = v
+            else:
+                vals[i] = float(v.replace("_", ""))
+    return sel, vals
+
+
+def dap_mismatch(vals, side):
+    """Items of the active DAP A or B column that differ from p. 6-2's."""
+    bad = {}
+    for i, want in DAP_RNDZ[side].items():
+        got = vals.get(i)
+        if isinstance(want, str) or got is None or isinstance(got, str):
+            if got != want:
+                bad[i] = (got, want)
+        elif abs(got - want) > 0.0006:
+            bad[i] = (got, want)
+    return bad
 
 
 # --- what the ground hears: truth, the downlist, the displays ----------------
@@ -298,7 +403,31 @@ class PassMemory(object):
          # m1b-run2, as the display would), and PASS's one-engine OMS trims,
          # pitch then the left and right yaw (CGGC02 I-loads, -0.1, +5.21,
          # -5.21 on this tape)
-         "VGO_BODY": 0xF0C2, "ONE_ENG_TRIM_P": 0xF10C, "ONE_ENG_TRIM_Y": 0xF10E}
+         "VGO_BODY": 0xF0C2, "ONE_ENG_TRIM_P": 0xF10C, "ONE_ENG_TRIM_Y": 0xF10E,
+         # THE DAP CONFIGURATION IN USE (SPEC 20).  Bases found, not taken
+         # from a map: the downlist table (downlist-OI340700.json) gives the
+         # offsets -- CGCV_DAP_LOAD_SEL_A/B at CGCCOM +258/+259, and CGCFL2's
+         # CGCV_TRANS_PULSE_SIZE +6, MAG_MNVR_RATE +8, ROT_PULSE_SIZE +10,
+         # DEADBAND +100, SEL_ALT_ON_TIME +438, SEL_ALT_RATE_LIMIT +440,
+         # SEL_ALT_MAX_JETS +442, SEL_ALT_JET_OPTION +443 -- and keying ITEM
+         # 1 +7, ITEM 2 +7 and the 6-2 edits changed exactly these words
+         # (1 -> 7 at 0x4DA8/9; 0.2 -> 0.1 at 0xECF2, 0.2 -> 0.016 at 0xEB42),
+         # agreeing with the downlist's own values (2026-10-08): CGCCOM at
+         # 0x4CA6, CGCFL2 at 0xEB3A.
+         "DAP_LOAD_SEL_A": 0x4DA8, "DAP_LOAD_SEL_B": 0x4DA9,
+         "SEL_TRANS_PULSE": 0xEB40, "SEL_MNVR_RATE": 0xEB42, "SEL_ROT_PULSE": 0xEB44,
+         "SEL_DEADBAND": 0xEB9E, "SEL_ALT_ON_TIME": 0xECF0, "SEL_ALT_RATE_LIMIT": 0xECF2,
+         "SEL_ALT_MAX_JETS": 0xECF4, "SEL_ALT_JET_OPTION": 0xECF5}
+
+    def dap_selected(self):
+        A = self.A
+        return {"A": self.hw(A["DAP_LOAD_SEL_A"])[0], "B": self.hw(A["DAP_LOAD_SEL_B"])[0],
+                "TRANS_PULSE": self.sp(A["SEL_TRANS_PULSE"]), "MNVR_RATE": self.sp(A["SEL_MNVR_RATE"]),
+                "ROT_PULSE": self.sp(A["SEL_ROT_PULSE"]), "DEADBAND": self.svec(A["SEL_DEADBAND"]),
+                "ALT_ON_TIME": self.sp(A["SEL_ALT_ON_TIME"]),
+                "ALT_RATE_LIMIT": self.sp(A["SEL_ALT_RATE_LIMIT"]),
+                "ALT_MAX_JETS": self.hw(A["SEL_ALT_MAX_JETS"])[0],
+                "ALT_JET_OPTION": self.hw(A["SEL_ALT_JET_OPTION"])[0]}
 
     def __init__(self, path):
         self.m = open(path, "rb").read()
@@ -354,7 +483,287 @@ class PassMemory(object):
                                         self.sp(A["TARGET_AREA"])]}
 
 
-class Rendezvous(fly_sts134.Flight):
+class StarTrackerNav(object):
+    """STAR TRACKER NAV [10A] and END S TRK NAV [10B] (JSC-48072-134 p. 4-10;
+    the S TRK NAV contingencies p. 5-8, 5-9): the crew's side of the -Z star
+    tracker's target track (RENDEZVOUS_PLAN.md, Stage 1), and the record of
+    what PASS made of the marks.  A mixin for Rendezvous, its own phases.
+
+    The item numbers are the checklist's: SPEC 21 IMU DES - ITEM 7(8,9);
+    SPEC 33 SV SEL - ITEM 4, FLTR TO PROP - ITEM 8, S TRK - ITEM 12, AUTO /
+    INH Angles - ITEM 23 / 24; SPEC 22 -Z(-Y) TGT TRK - ITEM 6(5), BREAK TRK
+    - ITEM 8(7), -Y / -Z THOLD - ITEM 13 / 14.  In PASS: GKVREL (SPEC 33),
+    GYZSTS (SPEC 22's TGT TRK sets CGYB_MODE_CMD 3), GY3STT (the search),
+    GY8DAT (21-sample marks), GL3REN / GLCSTA / GLZANG (the filter)."""
+
+    def strk_watch(self):
+        if getattr(self, "_strkw", None) is None:
+            self._strkw = StrkWatch(self.base)
+        return self._strkw
+
+    def run(self):
+        threading.Thread(target=self.strk_monitor, daemon=True).start()
+        return super().run()
+
+    def strk_keys(self, script, name, timeout=120):
+        self.play(script, name)
+        self.script_done(name, timeout)
+
+    def strknav(self):
+        if self.a.no_strk:
+            self.say("STRKNAV: --no-strk, no star tracker pass (the M1 baseline)")
+            return
+        w = self.strk_watch()
+        w.wait_ready(60)
+        self.say("STAR TRACKER NAV [10A] at Ti %+.1f min; before it: %s"
+                 % ((self.truth()["gmt"] - self.ti_gmt) / 60.0, w.summary()))
+        sv_prop = w.sv_sel_bit()
+        # 1. CONFIG FOR STRK NAV.  DAP A/AUTO/VERN is TRACK's.  The IMU for
+        # deselect is MCC's call ("if no comm, use IMU 1"): IMU 1.
+        self.strk_keys("+1     keys SPEC 2 1 PRO\n"
+                       "+5     keys ITEM 7 EXEC\n", "strk-imu-des")
+        # SPEC 33: SV SEL PROP (the first NAV pass) checked; INH Angles and
+        # S TRK keyed -- both set rather than toggle (GKVREL cases 12 and 8),
+        # so keying a checked item is harmless; SV SEL toggles (case 14), so
+        # it is only checked
+        self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                       "+5     keys ITEM 2 4 EXEC\n"
+                       "+3     keys ITEM 1 2 EXEC\n", "strk-rel-nav")
+        self.wait_sim(5)
+        self.say("SPEC 33: SV SEL bit %s (as RNDZNAV left it: PROP), angles AIF %s; %s"
+                 % (sv_prop, w.get("CGNV_NAV_ANGLES_AIF_TLM"), w.summary()))
+        # SPEC 22: -Y THOLD - ITEM 13 + 3, -Z THOLD - ITEM 14 + 3, -Z TGT TRK - ITEM 6
+        self.strk_keys("+1     keys SPEC 2 2 PRO\n"
+                       "+5     keys ITEM 1 3 + 3 EXEC\n"
+                       "+3     keys ITEM 1 4 + 3 EXEC\n"
+                       "+3     keys ITEM 6 EXEC\n", "strk-tgt-trk")
+        # GY3STT's first passes break the track and put the box on the
+        # target's predicted place: an S PRES of the star the full-field
+        # star mode was holding is not the target's (run strk-run1)
+        self.wait_sim(5)
+        # 2. INITIAL MEASUREMENT EVALUATION: when S PRES, RESID V and H each
+        # NAV cycle for four cycles; BREAK TRK (ITEM 8) if they move more
+        # than 0.05 a cycle or exceed 0.6
+        for attempt in range(4):
+            if not self.strk_wait(lambda: w.s_pres(), 90):
+                self.say("STRK: no S PRES in 90 s; %s" % w.summary())
+                if attempt < 3:
+                    self.strk_keys("+1     keys ITEM 8 EXEC\n", "strk-break-%d" % attempt, 60)
+                    continue
+                self.say("STRK: the pass is abandoned -- no target")
+                self.strk_keys("+1     keys RESUME\n", "strk-resume", 60)
+                return
+            self.say("STRK: S PRES at Ti %+.1f min; %s"
+                     % ((self.truth()["gmt"] - self.ti_gmt) / 60.0, w.summary()))
+            res = []
+            for k in range(5):
+                self.wait_sim(3.84)
+                res.append(w.resid())
+            self.say("STRK: RESID H/V each NAV cycle: %s" % ", ".join("%+.3f/%+.3f" % r for r in res))
+            jump = max(max(abs(res[i][0] - res[i - 1][0]), abs(res[i][1] - res[i - 1][1]))
+                       for i in range(1, len(res)))
+            big = max(max(abs(r[0]), abs(r[1])) for r in res)
+            if jump <= 0.05 and big <= 0.6:
+                break
+            self.say("STRK: RESID %s (jump %.3f, largest %.3f): -Z BREAK TRK - ITEM 8"
+                     % ("jumping" if jump > 0.05 else "high", jump, big))
+            self.strk_keys("+1     keys ITEM 8 EXEC\n", "strk-break-%d" % attempt, 60)
+        else:
+            self.say("STRK: residuals never steady: S TRK NAV - HIGH INITIAL RESID (5-8) would follow; "
+                     "going on with the pass")
+        # 3. INCORPORATE DATA INTO NAV (SV SEL = PROP): AUTO Angles - ITEM 23
+        self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                       "+5     keys ITEM 2 3 EXEC\n", "strk-auto-angles")
+        acc0 = w.accepts()
+        self.strk_wait(lambda: w.accepts()[0] > acc0[0] or w.accepts()[1] > acc0[1], 120)
+        self.say("STRK: AUTO Angles; 1st SV UPDATE POS %s kft; %s" % (_f(w.get("CGNV_R_MEAS_RSS")), w.summary()))
+        # "When SV UPDATE POS < 1.0 and Angle ACPT > 9: SV SEL - ITEM 4 (FLTR)"
+        ok = self.strk_wait(lambda: min(w.accepts()) > 9 and (w.get("CGNV_R_MEAS_RSS") or 9e9) < 1.0, 900)
+        if not ok:
+            self.say("STRK: SV UPDATE POS < 1.0 with ACPT > 9 not reached in 15 min; SV SEL left PROP; %s"
+                     % w.summary())
+        else:
+            self.strk_keys("+1     keys ITEM 4 EXEC\n", "strk-sv-sel-fltr")
+            self.wait_sim(8)
+            self.say("STRK: SV SEL - ITEM 4 (FLTR) at Ti %+.1f min: bit %s (was %s); %s"
+                     % ((self.truth()["gmt"] - self.ti_gmt) / 60.0, w.sv_sel_bit(), sv_prop, w.summary()))
+        self.strk_keys("+1     keys RESUME\n", "strk-resume", 60)
+
+    def strkend(self):
+        """END S TRK NAV [10B]: INH Angles; the deselected IMU back."""
+        if self.a.no_strk:
+            return
+        self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                       "+5     keys ITEM 2 4 EXEC\n"
+                       "+3     keys SPEC 2 1 PRO\n"
+                       "+5     keys ITEM 7 EXEC\n"
+                       "+3     keys RESUME\n", "strk-end")
+        self.say("END S TRK NAV: %s" % self.strk_watch().summary())
+
+    def strk_wait(self, cond, sim_seconds):
+        t0 = self.truth()["t"]
+        while self.truth()["t"] < t0 + sim_seconds:
+            try:
+                if cond():
+                    return True
+            except (TypeError, ValueError):
+                pass
+            time.sleep(1.0)
+        return False
+
+    def strk_monitor(self):
+        """Every --check-every s of vehicle time: the pass as SPEC 33 shows
+        it, and PASS's relative state, FLTR and PROP, against the truth's
+        (ft; the truth target's LVLH, x ahead, y = -orbit normal, z down)."""
+        while getattr(self, "ears", None) is None:
+            time.sleep(1.0)
+        w = self.strk_watch()
+        last = -1e9
+        while True:
+            time.sleep(2.0)
+            try:
+                rel = w.rel_errors(self.ears)
+                if rel is None or rel["t"] - last < self.a.check_every:
+                    continue
+                last = rel["t"]
+                self.say("strk: T_STATE %.1f (Ti %+.1f min): %s\n"
+                         "      relative state error, ft (LVLH x y z |r|): FLTR %+.0f %+.0f %+.0f |%.0f|, "
+                         "PROP %+.0f %+.0f %+.0f |%.0f|; rate error ft/s FLTR %.3f PROP %.3f; truth range %.0f ft"
+                         % (rel["t"], (rel["t"] - self.ti_gmt) / 60.0, w.summary(), *rel["fltr"], rel["fltr_n"],
+                            *rel["prop"], rel["prop_n"], rel["fltr_vn"], rel["prop_vn"], rel["range"]))
+            except Exception as e:     # never let the log take the flight down
+                self.say("strk monitor: %r" % e)
+
+
+class StrkWatch(object):
+    """THE PASS AS THE GROUND SAW IT: format 22 (the OPS 2 GNC downlist,
+    DCDDG2) carries all of it -- the -Z tracker's three words (CGBV_STU),
+    PASS's display status for each tracker, the rel nav's mark count,
+    accept/reject counts and residuals (SPEC 33's ACPT, REJ, RESID), the
+    last SV update (SV UPDATE POS, CGNV_R_MEAS_RSS, kft), FLTR MINUS PROP
+    (CGNV_R_FMP_DISP), and, staged together at frames 0 and 25 and sent in
+    frames 15-24 (40-49), the FLTR, PROP and target states at one T_STATE
+    (CGNV_R_FILT_DL, CGNV_R_PROP_TLM, CGNV_R_TV_TLM; ft, M50)."""
+
+    def __init__(self, base):
+        self.lock = threading.Lock()
+        self.v = {}
+        self.rel = None
+        self._st = {}
+        self.table = downlist.load_table(None)
+        threading.Thread(target=self._run, args=(_listen(base + 88),), daemon=True).start()
+
+    def _run(self, s):
+        while True:
+            try:
+                d = s.recv(1024)
+            except socket.timeout:
+                continue
+            f = groundstation.parse_downlist(d)
+            if f is None:
+                continue
+            h = groundstation.frame_header(f["words"])
+            if h.get("format") != 22:
+                continue
+            fr = h.get("frame")
+            try:
+                vals = downlist.decode_full(f["words"], 22, fr, self.table)
+            except Exception:
+                continue
+            with self.lock:
+                for x in vals:
+                    if x.get("card") not in (6, 7, 8):      # the whole item, not one bit of it
+                        self.v[x["name"]] = x["value"]
+                g = self.v.get
+
+                def vec(n):
+                    return [g("%s$%d" % (n, i)) for i in (1, 2, 3)]
+                if fr in (15, 40):
+                    self._st = {"t": g("CGGV_T_STATE_DL"), "rf": vec("CGNV_R_FILT_DL"),
+                                "vf": vec("CGNV_V_FILT_DL")}
+                elif fr in (20, 45) and self._st:
+                    self._st.update(rt=vec("CGNV_R_TV_TLM"), vt=vec("CGNV_V_TV_TLM"))
+                elif fr in (24, 49) and "rt" in self._st:
+                    self._st.update(rp=vec("CGNV_R_PROP_TLM"), vp=vec("CGNV_V_PROP_TLM"))
+                    if all(isinstance(x, float) for k in ("rf", "vf", "rt", "vt", "rp", "vp")
+                           for x in self._st[k]) and isinstance(self._st["t"], float):
+                        self.rel = self._st
+                    self._st = {}
+
+    def get(self, name):
+        with self.lock:
+            return self.v.get(name)
+
+    def wait_ready(self, secs):
+        t0 = time.time()
+        while time.time() - t0 < secs and self.get("CGNV_ST_MARK_NUM") is None:
+            time.sleep(1.0)
+
+    def s_pres(self):
+        w1 = self.get("CGBV_STU$(1;1)")
+        return isinstance(w1, int) and (w1 & 0x0400) != 0
+
+    def resid(self):
+        return (self.get("CGNV_DISP_DELQ$1") or 0.0, self.get("CGNV_DISP_DELQ$2") or 0.0)
+
+    def accepts(self):
+        return (self.get("CGNV_N_ACCEPT$1") or 0, self.get("CGNV_N_ACCEPT$2") or 0)
+
+    def sv_sel_bit(self):
+        f = self.get("CGZB_REL_NAV_FLG_WD1_LFE")
+        return None if not isinstance(f, int) else int((f & 0x0040) != 0)
+
+    def summary(self):
+        g = self.get
+        w1, w2, w3 = g("CGBV_STU$(1;1)"), g("CGBV_STU$(1;2)"), g("CGBV_STU$(1;3)")
+        hv = ""
+        if isinstance(w2, int) and isinstance(w3, int):
+            def sx(x):
+                return ((x >> 4) & 0xFFF) - (0x1000 if x & 0x8000 else 0)
+            hv = " H %+.3f V %+.3f" % (sx(w2) * 0.0025390625, sx(w3) * 0.0025390625)
+        fl = g("CGYB_ST_TARG_FLAGS_LFE")
+        return ("-Z ST word1 %s%s%s, status %s, flags %s; marks %s, ACPT %s/%s REJ %s/%s, RESID H %s V %s, "
+                "SV UPDATE POS %s kft, FLTR-PROP %s kft, AIF %s, SV SEL bit %s"
+                % ("%04X" % w1 if isinstance(w1, int) else w1, " S PRES" if self.s_pres() else "", hv,
+                   g("CGYB_DISP_STAT_DL$1"), "%04X" % fl if isinstance(fl, int) else fl,
+                   g("CGNV_ST_MARK_NUM"), g("CGNV_N_ACCEPT$1"), g("CGNV_N_ACCEPT$2"), g("CGNV_N_REJECT$1"),
+                   g("CGNV_N_REJECT$2"), _f(g("CGNV_DISP_DELQ$1")), _f(g("CGNV_DISP_DELQ$2")),
+                   _f(g("CGNV_R_MEAS_RSS")), _f(g("CGNV_R_FMP_DISP")), g("CGNV_NAV_ANGLES_AIF_TLM"),
+                   self.sv_sel_bit()))
+
+    def rel_errors(self, ears):
+        """PASS's relative states (the FLTR and PROP Orbiter less the target,
+        at one T_STATE) against the truth's then, in the truth target's LVLH."""
+        with self.lock:
+            st = self.rel
+        if st is None:
+            return None
+        ts = st["t"]
+        to, tt = ears.truth_at("orbiter", ts), ears.truth_at("target", ts)
+        if not to or not tt:
+            return None
+        ro, vo = [x / FT for x in to[0]], [x / FT for x in to[1]]
+        rt, vt = [x / FT for x in tt[0]], [x / FT for x in tt[1]]
+        dr_true, dv_true = vsub(ro, rt), vsub(vo, vt)
+        ez = [-x / vnorm(rt) for x in rt]
+        hh = [rt[1] * vt[2] - rt[2] * vt[1], rt[2] * vt[0] - rt[0] * vt[2], rt[0] * vt[1] - rt[1] * vt[0]]
+        ey = [-x / vnorm(hh) for x in hh]
+        ex = [ey[1] * ez[2] - ey[2] * ez[1], ey[2] * ez[0] - ey[0] * ez[2], ey[0] * ez[1] - ey[1] * ez[0]]
+        out = {"t": ts, "range": vnorm(dr_true)}
+        for k, rk, vk in (("fltr", "rf", "vf"), ("prop", "rp", "vp")):
+            er = vsub(vsub(st[rk], st["rt"]), dr_true)
+            ev = vsub(vsub(st[vk], st["vt"]), dv_true)
+            out[k] = [vdot(er, e) for e in (ex, ey, ez)]
+            out[k + "_n"] = vnorm(er)
+            out[k + "_vn"] = vnorm(ev)
+        return out
+
+
+def _f(x):
+    return "%.3f" % x if isinstance(x, float) else str(x)
+
+
+class Rendezvous(StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
         self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a")
@@ -383,6 +792,10 @@ class Rendezvous(fly_sts134.Flight):
                    YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG="10",
                    YAGPC_VEHDYN_TARGETS=self.a.targets, YAGPC_VEHDYN_START_REL=rel,
                    YAGPC_MTU_MET_EPOCH="%.3f" % MET_ZERO_UNIX,
+                   # every row of the DPS page, not just the title (MEDS2's
+                   # announceScreen): SPEC 20's values are checked from the
+                   # page itself, and dump_screen shows whole pages
+                   NSTS_ANNOUNCE_ROWS="all",
                    PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
@@ -552,6 +965,108 @@ wait crt 1 title 2011/ timeout 600
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
         self.wait_sim(10)
+        # RNDZ OPS INITIALIZATION [5A] (p. 4-5) comes at PET -2:45, before
+        # this run's start; its "Config DAP A,B to A7,B7" is done here
+        self.dap_config("[5A]")
+
+    def spec20_page(self, name):
+        """SPEC 20 up and its page read (two looks a few seconds apart, so a
+        page still being drawn is not taken for the values)."""
+        self.play("+1     keys SPEC 2 0 PRO\n"
+                  "wait crt 1 title /020/ timeout 120\n", name)
+        self.script_done(name, 180)
+        last = None
+        for _ in range(10):
+            self.wait_sim(4)
+            page = self.ears.screen("crt1")
+            if "DAP CONFIG" in page and page == last:
+                break
+            last = page
+        return page
+
+    def dap_config(self, label):
+        """"Config DAP A,B to A7,B7" on SPEC 20 DAP CONFIG: DAP A - ITEM 1
+        +7, DAP B - ITEM 2 +7, and the page checked against p. 6-2.
+
+        THIS TAPE'S A7 AND B7 ARE NOT THE FLIGHT'S.  Its 15 + 15 stored
+        configurations are generic I-loads (read off the format-22 downlist's
+        rotating CGCV_DAP_DL_PRM, 2026-10-08): A7 has ALT RATE DB 0.200 and
+        VERN ROT RATE 0.2000 where 6-2 has 0.10 and 0.016, B7 ALT RATE DB
+        0.200 where 6-2 has 0.10; the rest agree.  The flight's I-loads held
+        6-2's values, so as with TGT 10 the crew keys the difference -- into
+        the stored configuration (DAP EDIT: DAP A - ITEM 3 +7, the edit
+        column's item 50 + row, LOAD - ITEM 5; the same with DAP B - ITEM 4),
+        so that A7 and B7 themselves are 6-2's and any later "Config DAP A,B
+        to A7,B7" gives them -- and then selects them.  A deviation, logged."""
+        page = self.spec20_page("dap-spec20-%s" % label.strip("[]"))
+        sel, vals = parse_spec20(page)
+        self.dump_screen("SPEC 20 DAP CONFIG (%s), as found" % label)
+        keys = ""
+        if sel != {"A": "07", "B": "07"}:
+            keys += "+3     keys ITEM 1 + 7 EXEC\n+3     keys ITEM 2 + 7 EXEC\n"
+        if keys:
+            self.play("+1" + keys[2:], "dap-select-%s" % label.strip("[]"))
+            self.script_done("dap-select-%s" % label.strip("[]"), 120)
+            # script_done means the last line STARTED: its keystrokes are
+            # still being typed, and the next SPEC 20 PRO cut ITEM 2 + 7 off
+            # (m1c-run1's first try, B left at B01)
+            self.wait_sim(6)
+            page = self.spec20_page("dap-spec20b-%s" % label.strip("[]"))
+            sel, vals = parse_spec20(page)
+        edits = ""
+        for side, item, edit in (("A", 1, 3), ("B", 2, 4)):
+            bad = dap_mismatch(vals, side)
+            if not bad:
+                continue
+            base = 10 if side == "A" else 30
+            self.say("DAP %s7 on this tape differs from 6-2: %s -- keyed (DAP EDIT, LOAD)"
+                     % (side, "; ".join("%s (item %d) %s, 6-2 %s" % (DAP_ROWS[i - base], i, g, w)
+                                        for i, (g, w) in sorted(bad.items()))))
+            edits += "+3     keys ITEM %d + 7 EXEC\n" % edit
+            for i, (got, want) in sorted(bad.items()):
+                row = i - base
+                if isinstance(want, str):
+                    self.say("DAP %s7 %s: the option %s is not keyed (an option item cycles); left %s"
+                             % (side, DAP_ROWS[row], want, got))
+                    continue
+                edits += "+3     keys ITEM %s %s EXEC\n" % (" ".join(str(50 + row)),
+                                                           keys_short(want, DAP_FMT[row]))
+            edits += "+3     keys ITEM 5 EXEC\n"
+        if edits:
+            edits += "+3     keys ITEM 1 + 7 EXEC\n+3     keys ITEM 2 + 7 EXEC\n"
+            self.play("+1" + edits[2:], "dap-edit-%s" % label.strip("[]"))
+            self.script_done("dap-edit-%s" % label.strip("[]"), 300)
+            self.wait_sim(6)
+            page = self.spec20_page("dap-spec20c-%s" % label.strip("[]"))
+            sel, vals = parse_spec20(page)
+        # a keystroke can be lost: the selection checked and keyed again
+        for attempt in range(3):
+            if sel == {"A": "07", "B": "07"}:
+                break
+            self.say("DAP CONFIG (%s): SPEC 20 shows A%s B%s; DAP A/B - ITEM 1/2 +7 keyed again"
+                     % (label, sel.get("A"), sel.get("B")))
+            name = "dap-reselect-%s-%d" % (label.strip("[]"), attempt)
+            self.play("+1     keys ITEM 1 + 7 EXEC\n+3     keys ITEM 2 + 7 EXEC\n", name)
+            self.script_done(name, 120)
+            self.wait_sim(6)
+            page = self.spec20_page(name + "-page")
+            sel, vals = parse_spec20(page)
+        self.dump_screen("SPEC 20 DAP CONFIG (%s), A7/B7" % label)
+        bad = {s: dap_mismatch(vals, s) for s in ("A", "B")}
+        mem = self.probe("dap-%s" % label.strip("[]").lower())
+        ds = mem.dap_selected() if mem else None
+        _, _, dl = self.ears.snap()
+        self.say("DAP CONFIG (%s): SPEC 20 shows DAP A%s B%s, %s; PASS's memory: DAP_LOAD_SEL A %s B %s, "
+                 "selected DAP's MAG_MNVR_RATE %s, ALT RATE DB %s, ALT jets %s, ALT ON TIME %s; downlist "
+                 "LOAD_SEL A %s B %s, SEL_ALT_RATE_LIMIT %s"
+                 % (label, sel.get("A"), sel.get("B"),
+                    "every item as p. 6-2" if not (bad["A"] or bad["B"]) else "STILL DIFFERENT: %s" % bad,
+                    *((ds["A"], ds["B"], "%.4f" % ds["MNVR_RATE"], "%.3f" % ds["ALT_RATE_LIMIT"],
+                       ds["ALT_MAX_JETS"], "%.2f" % ds["ALT_ON_TIME"]) if ds else ("?",) * 6),
+                    dl.get("CGCV_DAP_LOAD_SEL_A"), dl.get("CGCV_DAP_LOAD_SEL_B"),
+                    dl.get("CGCV_SEL_ALT_RATE_LIMIT")))
+        self.play("+1     keys RESUME\n", "dap-resume-%s" % label.strip("[]"))
+        self.script_done("dap-resume-%s" % label.strip("[]"), 60)
 
     @property
     def iloads(self):
@@ -747,14 +1262,24 @@ wait crt 1 title 2011/ timeout 600
 
     def tiburn(self):
         """TARGET Ti BURN [15A] (Final) and RNDZ OMS BURN (CONTINGENCY OPS
-        5-4), the burn the checklist calls for when DVT > 6 ft/s: at TIG - 17
-        min OPS 202 PRO; ORBIT MNVR EXEC: L OMS (ITEM 2) and WT (ITEM 9) per
-        the burn pad -- TV ROLL and the trims left at PASS's own for the
-        engine, the pad's not being known -- LOAD (ITEM 22); SPEC 34 TGT 10,
-        COMPUTE T1, which in MM 202 hands its PEG 7 solution to the MNVR
-        display; LOAD, TIMER, DAP A/AUTO/ALT, MNVR (ITEM 27); EXEC at TIG -
-        15 s; after the burn OPS 201 PRO and the -Z target track again."""
+        5-4), the burn the checklist calls for when DVT > 6 ft/s (p. 4-15):
+        step 1, SPEC 20 "DAP config A7,B7" checked, then at TIG - 17 min OPS
+        202 PRO; step 2, ORBIT MNVR EXEC: L OMS (ITEM 2), the trims (ITEMs
+        6-8) and WT (ITEM 9) "per Burn Pad" -- the pad (p. 3-7) is filled in
+        by MCC and blank in the book, so the trims are the OMS 2/ORBIT OMS
+        BURNS card's one-engine values and TV ROLL is left at PASS's own --
+        LOAD (ITEM 22); SPEC 34 TGT 10, COMPUTE T1, which in MM 202 hands its
+        PEG 7 solution to the MNVR display; LOAD, TIMER, DAP A/AUTO/ALT, MNVR
+        (ITEM 27); step 3, the card: DAP TRANS NORM, EXEC at TIG - 15 s, at
+        cutoff the residuals trimmed (trim_residuals); step 4, post-burn: DAP
+        B/INRTL/ALT, DAP TRANS PULSE/PULSE/PULSE, RCS SEL - ITEM 4; then
+        coast() for OPS 201 and step 5.  Not modelled, so not done: FLT
+        CNTLR PWR, the He PRESS/VAP ISOL valves, the OMS TVC gimbal check."""
         tig = self.ti_gmt
+        if self.truth()["gmt"] < tig - 19 * 60.0:
+            self.wait_gmt(tig - 19 * 60.0)
+        # 5-4 step 1: "1: GNC 20 DAP CONFIG / CRT1 DAP config A7,B7"
+        self.dap_config("5-4")
         if self.truth()["gmt"] < tig - 17 * 60.0:
             self.wait_gmt(tig - 17 * 60.0)
         wt = self.orbiter_lb()
@@ -799,7 +1324,11 @@ wait crt 1 title 2011/ timeout 600
                   "+3     dap c3 a\n"
                   "+2     dap c3 auto\n"
                   "+2     dap c3 alt\n"
-                  "+3     keys ITEM 2 7 EXEC\n", "ti-mnvr")
+                  "+3     keys ITEM 2 7 EXEC\n"
+                  # the OMS 2/ORBIT OMS BURNS card: "DAP TRANS - NORM (MM202)"
+                  "+3     dap c3 x_norm\n"
+                  "+2     dap c3 y_norm\n"
+                  "+2     dap c3 z_norm\n", "ti-mnvr")
         self.script_done("ti-mnvr", 180)
         mem = self.probe("ti-loaded")
         self.say("crew: Ti burn LOADed, TIMER, MNVR to burn attitude")
@@ -818,29 +1347,36 @@ wait crt 1 title 2011/ timeout 600
         if after:
             self.say("Ti burn: residuals VGO %+.2f %+.2f %+.2f ft/s (body)" % tuple(after.svec(after.A["VGO_BODY"])))
         self.trim_residuals()
+        # 5-4 step 4, OMS POST BURN RECONFIGURATION
+        self.play("+1     dap c3 b\n"
+                  "+2     dap c3 inrtl\n"
+                  "+2     dap c3 alt\n"
+                  "+2     dap c3 x_pulse\n"
+                  "+2     dap c3 y_pulse\n"
+                  "+2     dap c3 z_pulse\n"
+                  "+3     keys ITEM 4 EXEC\n", "ti-postburn")
+        self.script_done("ti-postburn", 120)
+        self.say("crew: post burn -- DAP B/INRTL/ALT, DAP TRANS PULSE/PULSE/PULSE, RCS SEL - ITEM 4")
         del mem, tr0
 
     def one_engine_trims(self):
-        """The burn pad's trims for a single-engine burn (5-4, "TRIM per Burn
-        Pad").  The pad is not to hand; PASS's own one-engine trims are (the
-        I-loads CGGV_ONE_ENG_OMS_PITCH_TRIM and _YAW_TRIM), keyed as P and LY
-        (ITEMs 6 and 7).  Without them m1b-run2 burned the left engine on the
-        two-engine trims (P +0.4, LY -5.75): the burn attitude was computed
-        for thrust along body X, the gimbal then swung 13 deg to put the
-        left engine's thrust through the CG, and the burn ended with VGO Y
-        -2.15 and Z +1.01 ft/s."""
+        """The trims for a single-engine burn, ITEMs 6-8 (5-4 step 2, "TRIM
+        LOAD ... per Burn Pad"; the pad, p. 3-7, is MCC's and blank in the
+        book): the OMS 2/ORBIT OMS BURNS card's "1 engine: P = +0.4 LY = +5.2
+        RY = -5.2" (ASC-6a/134/A,O/A), which the crew checks before every
+        orbit OMS burn ("GMBL TRIM").  PASS's own one-engine I-loads on this
+        tape (CGGC02) differ in pitch -- P -0.1, LY +5.21 -- and are logged
+        beside them.  Without one-engine trims at all m1b-run2 burned the
+        left engine on the two-engine ones (P +0.4, LY -5.75), and the burn
+        ended with VGO Y -2.15 and Z +1.01 ft/s."""
         mem = PassMemory.from_capture(os.path.join(self.a.logs, "sts134r-ti"),
                                       os.path.join(self.a.logs, "sts134r-ipl"))
-        if not mem:
-            self.say("one-engine trims: no capture to read them from; left as they are")
-            return ""
-        p = mem.sp(mem.A["ONE_ENG_TRIM_P"])
-        ly = mem.sp(mem.A["ONE_ENG_TRIM_Y"])
-        if not (abs(p) <= 6.0 and 0.0 < ly <= 7.0):
-            self.say("one-engine trims read as P %+.2f LY %+.2f -- not believable; left as they are" % (p, ly))
-            return ""
-        self.say("one-engine trims (PASS's I-loads): P %+.1f LY %+.1f" % (p, ly))
-        return "+4     keys ITEM 6 %s %s EXEC\n" % (keys_num(p, "%.1f"), keys_num(ly, "%.1f"))
+        if mem:
+            self.say("one-engine trims: the card's P %+.1f LY %+.1f RY %+.1f; PASS's I-loads P %+.2f Y %+.2f"
+                     % (OMS_1ENG_TRIMS["P"], OMS_1ENG_TRIMS["LY"], OMS_1ENG_TRIMS["RY"],
+                        mem.sp(mem.A["ONE_ENG_TRIM_P"]), mem.sp(mem.A["ONE_ENG_TRIM_Y"])))
+        return "+4     keys ITEM 6 %s %s %s EXEC\n" % tuple(keys_num(OMS_1ENG_TRIMS[k], "%.1f")
+                                                         for k in ("P", "LY", "RY"))
 
     def vehdyn_capture(self, name):
         """The truth in a capture: the sensed delta-V (m/s, M50) and each OMS
@@ -854,34 +1390,47 @@ wait crt 1 title 2011/ timeout 600
         i += 3 + 2 * 44                           # on[], onSec[]
         return {"sensed": sensed, "oms_s": (b[i + 6], b[i + 13])}
 
-    # RESIDUALS: trimmed with the THC to 0.2 ft/s per axis, the tolerance
-    # assumed here for a rendezvous burn (5-4's own numbers are not to hand).
-    # Body axes, as the MNVR display shows VGO; the THC's directions are the
-    # orbiter's (+z down), so each residual is flown in its own sign.  The
-    # hold is the residual over a guessed 0.25 ft/s^2, then measured again.
-    TRIM_TOL, TRIM_ACC = 0.2, 0.25
-
     def trim_residuals(self):
-        for n in range(8):
+        """At cutoff, "Trim Residuals: ... Orbit: All axes < 0.2 fps" (OMS
+        2/ORBIT OMS BURNS), with the THC, DAP TRANS NORM.  VGO in body axes,
+        as the MNVR display shows it (CGZ123), read from PASS's memory; the
+        THC's directions are the orbiter's (+z down), so each residual is
+        flown in its own sign.  One axis at a time, in RCS BURN's order (CC
+        9-3 step 5: "If VGO Z is neg, Z,X,Y seq; otherwise, X,Y,Z").  Each
+        hold is the residual over the axis's acceleration: +X starts from the
+        checklist's 1.5 fps in 6 s (p. 5-15), and every axis's figure is then
+        replaced by what its last hold actually did to VGO."""
+        acc = {"x": THC_X_ACC_FPS2, "y": THC_X_ACC_FPS2, "z": THC_X_ACC_FPS2}
+        measured = {}
+        prev = None
+        for n in range(10):
             mem = self.probe("ti-trim-%d" % n)
             if not mem:
                 self.say("TRIM: no capture; residuals left")
                 return
-            vgo = mem.svec(mem.A["VGO_BODY"])
-            if all(abs(v) <= self.TRIM_TOL for v in vgo):
-                self.say("TRIM: residuals VGO %+.2f %+.2f %+.2f ft/s -- trimmed" % tuple(vgo))
+            vgo = dict(zip("xyz", mem.svec(mem.A["VGO_BODY"])))
+            if prev:
+                ax, hold, v0 = prev
+                dv = abs(v0 - vgo[ax])
+                if dv > 0.02 and hold > 0:
+                    measured.setdefault(ax, []).append(dv / hold)
+                    acc[ax] = min(max(dv / hold, 0.02), 2.0)
+            if all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
+                self.say("TRIM: residuals VGO %+.2f %+.2f %+.2f ft/s -- all axes < %.1f fps; THC acceleration "
+                         "measured (ft/s^2): %s" % (vgo["x"], vgo["y"], vgo["z"], TRIM_TOL_FPS,
+                                                    {k: ["%.3f" % x for x in v] for k, v in measured.items()}))
                 return
-            script, longest = "", 0.0
-            for ax, v in zip("xyz", vgo):
-                if abs(v) > self.TRIM_TOL:
-                    hold = min(max(abs(v) / self.TRIM_ACC, 0.2), 10.0)
-                    longest = max(longest, hold)
-                    script += "+1     thc fwd %s%s %.2f\n" % ("+" if v > 0 else "-", ax, hold)
-            self.say("TRIM %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s" % (n, *vgo, script.strip().replace("\n", "; ")))
-            self.play(script, "ti-trim-%d" % n)
+            order = "zxy" if vgo["z"] < 0 else "xyz"
+            ax = next(a for a in order if abs(vgo[a]) >= TRIM_TOL_FPS)
+            v = vgo[ax]
+            hold = min(max(abs(v) / acc[ax], 0.1), 10.0)
+            self.say("TRIM %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s%s %.2f s (at %.3f ft/s^2)"
+                     % (n, vgo["x"], vgo["y"], vgo["z"], "+" if v > 0 else "-", ax.upper(), hold, acc[ax]))
+            self.play("+1     thc fwd %s%s %.2f\n" % ("+" if v > 0 else "-", ax, hold), "ti-trim-%d" % n)
             self.script_done("ti-trim-%d" % n, 120)
-            self.wait_sim(longest + 5.0)          # the holds run on after the script ends
-        self.say("TRIM: residuals not within %.1f ft/s after 8 tries" % self.TRIM_TOL)
+            self.wait_sim(hold + 4.0)             # the hold runs on after the script ends
+            prev = (ax, hold, v)
+        self.say("TRIM: residuals not all < %.1f fps after 10 holds" % TRIM_TOL_FPS)
 
     def coast(self):
         """After Ti: OPS 201, the -Z target track again ([12A]), and the
@@ -944,9 +1493,16 @@ def main():
                     help="COAST: minutes after Ti to fly before stopping (default 76.9, to T2)")
     ap.add_argument("--attach", dest="attach_running", action="store_true",
                     help="with --from: drive the vehicle already running on --port-base")
+    ap.add_argument("--start-utc", help="the run's start, UTC (default %s, Ti - 68 min); any time after "
+                    "NC (06:06) -- 06:10, PET -1:28, gives STAR TRACKER NAV [10A] its whole sunlit pass, "
+                    "the ISS going into the Earth's shadow at 06:43" % EPOCH)
+    ap.add_argument("--no-strk", action="store_true",
+                    help="no star tracker pass (STRKNAV, STRKEND do nothing): the M1 baseline")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()
+    if a.start_utc:
+        globals()["EPOCH"] = a.start_utc
     a.attach = a.attach_running
     fly_sts134.FL["name"] = "sts134r"
     f = Rendezvous(a)
