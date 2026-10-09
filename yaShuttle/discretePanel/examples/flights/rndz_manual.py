@@ -108,15 +108,46 @@ class ManualPhase(object):
         return self._instruments
 
     def feeds(self):
+        """TRU1 and TGT1 at ONE instant, TRU1's GMT: the target's 20 Hz
+        samples interpolated there, or -- when TRU1's newest sample is newer
+        than TGT1's, so nothing brackets it -- TGT1's newest carried forward
+        to it along its velocity with gravity (0.05 s: about a centimetre).
+        Before, the raw TGT1 was used then, up to a sample old: 0.066 s at
+        7.7 km/s is ~505 m, ~1,650 ft outliers in rel("ods") (PASS-IDLE's
+        dock7, at 25 ft).  More than 1 s apart, nothing is returned."""
         tru, tgt, _ = self.ears.snap()
         if not tru or not tgt:
             return None, None
-        at = self.ears.truth_at("target", tru["gmt"])
+        g = tru["gmt"]
+        at = self.ears.truth_at("target", g)
         if at:
-            tgt = dict(tgt, r=at[0], v=at[1])
-        return tru, tgt
+            return tru, dict(tgt, r=at[0], v=at[1], gmt=g)
+        with self.ears.lock:
+            last = self.ears.hist_t[-1] if self.ears.hist_t else None
+        if last is None:
+            return None, None
+        dt = g - last[0]
+        if abs(dt) > 1.0:
+            self.say("feeds: TRU1 and TGT1 %.2f s apart -- no state this time" % dt)
+            return None, None
+        r, v = list(last[1]), list(last[2])
+        rn = math.sqrt(sum(x * x for x in r))
+        a = [-3.986004418e14 * x / rn ** 3 for x in r]
+        r = [r[i] + v[i] * dt + 0.5 * a[i] * dt * dt for i in range(3)]
+        v = [v[i] + a[i] * dt for i in range(3)]
+        return tru, dict(tgt, r=r, v=v, gmt=g)
 
     def rel(self, point="cg", noisy=True):
+        """_rel_once until it gives a state (a dropped jump, or the feeds
+        not yet in): a few tries 0.1 s apart, then whatever it gives."""
+        for _ in range(30):
+            st = self._rel_once(point, noisy)
+            if st is not None:
+                return st
+            time.sleep(0.1)
+        return self._rel_once(point, noisy)
+
+    def _rel_once(self, point="cg", noisy=True):
         """The control point's state in the ISS's LVLH (ft, ft/s; x ahead,
         y right of the track, z down, the rotating frame's rates): the
         Orbiter's centre of mass against the ISS's, or ("ods") the ODS ring
@@ -136,6 +167,24 @@ class ManualPhase(object):
         # rates in the turning frame (as rndz_start.m50_to_lvc): it turns at
         # omega = -n y, and omega x r = (-n z, 0, n x)
         v = [v[0] + n * r[2], v[1], v[2] - n * r[0]]
+        # A JUMP GUARD on the truth itself: from one sample to the next the
+        # point can move only as its rate carries it (the jets add well under
+        # a foot per second); a step far beyond that is a timing fault in the
+        # feeds, logged and not used -- three in a row are taken (a restore)
+        lastj = self._rel_last.get(point) if hasattr(self, "_rel_last") else None
+        if not hasattr(self, "_rel_last"):
+            self._rel_last, self._rel_bad = {}, {}
+        if lastj and tru["gmt"] > lastj[0]:
+            dtj = tru["gmt"] - lastj[0]
+            pred = [lastj[1][i] + lastj[2][i] * dtj for i in range(3)]
+            jump = math.sqrt(sum((r[i] - pred[i]) ** 2 for i in range(3)))
+            if jump > 5.0 + 2.0 * dtj and self._rel_bad.get(point, 0) < 2:
+                self._rel_bad[point] = self._rel_bad.get(point, 0) + 1
+                self.say("rel(%s): a %.1f ft jump in %.2f s, beyond the motion -- sample dropped"
+                         % (point, jump, dtj))
+                return None
+        self._rel_bad[point] = 0
+        self._rel_last[point] = (tru["gmt"], list(r), list(v))
         if noisy:
             g = self._inst().g
             rng = math.sqrt(sum(x * x for x in r))
