@@ -1562,6 +1562,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.say("check: " + line)
 
     def snapshot(self, name):
+        if name == "hold" and getattr(self, "_hold_captured", False):
+            # HOLD takes its own capture during the steady hold
+            # (rndz_manual.hold); the run loop's later one would be of an
+            # unpiloted vehicle
+            self._hold_captured = False
+            return None
         if name.upper() in PHASES:
             self.save_state()
         return self._snapshot(name)
