@@ -555,6 +555,85 @@ int main(void) {
         }
     }
 
+    /* NO PHANTOM ACCELERATION OVER A LONG COAST WHILE THE VEHICLE TURNS
+     * (the rendezvous M1 runs, RENDEZVOUS_PLAN.md 5a: was the Orbiter's PROP
+     * drift an accelerometer residual?).  Half an hour of coasting while
+     * the vehicle pitches at the orbital rate, as it does in LVLH hold and
+     * in -Z target track; IMUs 1 and 3, low gain, read every 0.16 s as the
+     * HFE reads them, and compensated every sixth read (the 0.96 s MFE
+     * cycle) the way PASS does it: GMHACP's counts x weight - bias x dt in
+     * the cluster, GMLACP's TCM50 (here the platform's own orientation --
+     * nobody torques it in this test, so it drifts by GYREST and the
+     * compensation must follow it), and GRWIMU's navigation-base correction
+     * (the change of Q (w x r)).  Each IMU's compensated total must stay
+     * within a pulse of the truth's sensed delta-V for the whole half hour:
+     * a residual of the 19 micro-g size the M1 runs suggested would have
+     * reached 1 ft/s.  (It was not the IMUs: PASS discards each attitude
+     * maneuver's sensed delta-V below 0.9 ft/s, GL5NAV steps 9A-9C, and the
+     * jets' real translation goes with it.) */
+    {
+        const double SFL[4][3] = { { 0 }, { 45890.0, -42360.0, 54480.0 }, { 0 },
+                                   { 39680.0, 30080.0, -58080.0 } };
+        const double BIL[4][3] = { { 0 }, { 18280.0, -16789.0, 37444.0 }, { 0 },
+                                   { 14332.0, 12666.0, -39545.0 } };
+        const int BUS[4] = { 0, 20, 0, 22 };
+        const double RNB[3] = { 57.959, -0.067, -3.967 }, n_orb = 1.13e-3;
+        double q0[4] = { 1, 0, 0, 0 }, w0[3] = { 0.0, -n_orb, 0.0 };
+        vehdyn_reset(0.0);
+        vehdyn_set_attitude(q0, w0);
+        uint16_t cprev[4][3];
+        double tot[4][3] = { { 0 } }, tprev = 0.0, worst = 0.0, s0[3] = { 0, 0, 0 }, vnb0[3] = { 0, 0, 0 };
+        double t = 0.0;
+        for (int step = 0; step <= 11250; step++) {        /* 1800 s */
+            t = step * 0.16;
+            vehdyn_advance(t * 1e6);
+            uint16_t cnt[4][3];
+            memset(cnt, 0, sizeof cnt);
+            for (int k = 1; k <= 3; k += 2) {
+                read_words(BUS[k], FF(0x24C0Du), 14, w);
+                for (int a = 0; a < 3; a++) cnt[k][a] = w[9 + a];
+            }
+            if (step % 6) continue;
+            /* the navigation base's velocity about the CG, M50 ft/s */
+            const PhysState *ps = vehdyn_state();
+            double wr[3] = { ps->w[1] * RNB[2] - ps->w[2] * RNB[1], ps->w[2] * RNB[0] - ps->w[0] * RNB[2],
+                             ps->w[0] * RNB[1] - ps->w[1] * RNB[0] }, Rq[3][3], vnb[3], sd[3];
+            st_qmat(ps->q, Rq);
+            for (int i = 0; i < 3; i++) vnb[i] = Rq[i][0] * wr[0] + Rq[i][1] * wr[1] + Rq[i][2] * wr[2];
+            vehdyn_sensed_dv(sd);
+            if (step == 0) {
+                memcpy(cprev, cnt, sizeof cprev);
+                memcpy(vnb0, vnb, sizeof vnb0);
+                for (int i = 0; i < 3; i++) s0[i] = sd[i] / 0.3048;
+                tprev = t;
+                continue;
+            }
+            for (int k = 1; k <= 3; k += 2) {
+                double P[3][3], dc[3];
+                mdmdev_test_platform(k, P);
+                for (int a = 0; a < 3; a++) {
+                    int d = (int16_t)(uint16_t)(cnt[k][a] - cprev[k][a]);
+                    if (a == 2) d = -d;                      /* GMCACP */
+                    dc[a] = d * (1.0 + SFL[k][a] * 1e-6) * 0.0344488 - BIL[k][a] * 1e-6 * 32.174 * (t - tprev);
+                }
+                for (int i = 0; i < 3; i++) tot[k][i] += P[i][0] * dc[0] + P[i][1] * dc[1] + P[i][2] * dc[2];
+                for (int i = 0; i < 3; i++) {
+                    double e = fabs(tot[k][i] - (vnb[i] - vnb0[i]) - (sd[i] / 0.3048 - s0[i]));
+                    if (e > worst) worst = e;
+                }
+            }
+            memcpy(cprev, cnt, sizeof cprev);
+            tprev = t;
+        }
+        double c0 = vehdyn_state()->q[0];
+        double turned = 2.0 * acos(fabs(c0) > 1.0 ? 1.0 : fabs(c0)) * 180.0 / 3.14159265358979323846;
+        if (turned < 100.0) printf("coasting IMUs: the vehicle turned only %.1f deg\n", turned);
+        check(turned > 100.0, "the vehicle turned through the half hour (lever arm and frames exercised)");
+        /* one pulse of the heaviest weight here, IMU 1's Z: 0.0344488 x 1.05448 */
+        if (worst > 0.0364) printf("coasting IMUs: worst compensated error %.4f ft/s over %.0f s\n", worst, t);
+        check(worst <= 0.0364, "coasting, turning IMUs: PASS-compensated delta-V within a pulse of the truth for 30 min");
+    }
+
     /* GPS, FF1 CARD 11 CHANNEL 2.  Silent until commanded; then, in NAV,
      * a message PASS decodes -- by GPBGPS.hal's arithmetic and GLJRCV.hal's
      * frame change, done here independently -- back to the truth state at

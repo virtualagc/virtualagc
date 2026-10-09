@@ -266,9 +266,12 @@ and each Ti solution beside the independent Lambert.
    the source's (10 ON).  The crew keys TGT 10 (ITEM 6, 17, 18-20) and
    LOADs it, as the checklist's "check TGT set data" allows.  The target
    drag I-loads are mass 1, CD 2, area 1; no K-factor (message 42) was sent.
-3. **Run at rate 1.**  At `--rate 2`, with SPEC 33 up, the IDP's transfers
-   broke ("transfer abandoned", the bus pump not answering) and every key
-   after SPEC 33 was lost.  At rate 1 nothing was lost.
+3. **`--rate 2` works (fixed in b4eb048).**  At first, with SPEC 33 up, the
+   IDP's transfers broke at rate 2 ("transfer abandoned", the bus pump not
+   answering) and every key after SPEC 33 was lost.  The cause was macOS
+   App Nap throttling MEDS2 while its windows were unseen; macdock.py now
+   opts every GUI program out and MEDS2's bus pump yields between buses,
+   and the fixed code reached TI at rate 2 cleanly.
 
 **Results** (run DIRs `~/sts134-runs/rendezvous/m1-run2`, `-run3`, `-run4`).
 - **The uplinks land.**  A minute after messages 9 and 10 (run m1-run2),
@@ -301,16 +304,54 @@ and each Ti solution beside the independent Lambert.
   In that run the first comparison after the uplinks, with the target-track
   maneuver already under way, was -0.8 ft and -0.039 ft/s: the 0.01 ft/s
   holds only until the jets start (see the drift below).
-- **The Orbiter's PROP navigation drifts** once the vehicle is maneuvering:
-  1 ft at the uplink, 2 kft and 2.1 ft/s (mostly LVLH Z) by Ti - 23 min.
-  The truth's non-gravitational delta-V over the 33 min before final
-  targeting was only 0.044 ft/s; PASS's selected IMU velocity
-  (CGMV_VEL_SEL, downlist) meanwhile drifts about 0.0006 ft/s^2 (19 micro-g),
-  and PASS integrates it whenever a jet has fired in the nav cycle
-  (GL5NAV steps 7B-7E) -- in target track, nearly always.  Whether those
-  19 micro-g are an IMU-model residual (most likely: the model's
-  compensation is meant to be exact) or acceptable realism is open.  The
-  target's state stays within ~160 ft.
+- **The Orbiter's PROP navigation error** -- 1 ft at the uplink, 2 kft
+  and 2.1 ft/s (mostly LVLH Z) by Ti - 23 min, the target's within ~160
+  ft -- **is not an IMU artefact and not a drift.**  It is put in during
+  the first few minutes of attitude control after the uplink, by PASS's
+  own rule for small maneuvers, and orbital mechanics grows it from there
+  (investigated 2026-10-08, runs `imu-diag1`-`3`):
+  - *GL5NAV steps 9A-9C.*  On orbit PASS takes IMU velocity into the state
+    only while a "maneuver" is in progress (any jet fired since the last
+    3.84 s nav cycle, or a sensed acceleration over threshold), summing it
+    in GL5_DV_SUM; when a cycle without jets ends the maneuver, a sum under
+    0.9 ft/s is **removed** -- the velocity is put back as if nothing had
+    happened (CGNV_DV_COUNT, the count of maneuvers accepted, stayed 0 all
+    run).  Attitude control does translate the vehicle, and that real
+    translation goes out with the sum.  Watched in PASS's memory
+    (YAGPC_WATCHHW on GL5_DV_SUM) from the RNDZNAV capture: four maneuvers
+    in 125 s were removed, -0.49 +0.51 +0.00 ft/s M50 in all, and at each
+    removal PASS's velocity error jumped by that sum; the largest, 0.34
+    ft/s, was the target-track maneuver's start in B/AUTO/ALT -- L2D and
+    R2D alone for 1.6 s (PASS's own ALT jet choice, ALT_MAX_JETS 2), 1740
+    lbf x 1.6 s / 8354 slug = 0.33 ft/s, and the truth's sensed delta-V
+    agreed (0.33); the others were VERN attitude control before it (single
+    verniers on for 2-16 s at a time).  PASS's sums agreed with the truth's
+    sensed delta-V to 0.01-0.02 ft/s.
+  - *The growth afterwards is Clohessy-Wiltshire.*  From the Ti - 54.5 min
+    error (52 25 191 ft, -0.05 +0.06 +0.56 ft/s LVLH) CW alone predicts, at
+    Ti - 28.8 min, 1786 50 946 ft and +0.82 -0.04 +2.26 ft/s; m1-run4 had
+    1743 49 912 ft and +0.78 -0.04 +2.18.  (A comparison in the rotating
+    frame must take omega x dr out of the velocity error; without that it
+    looked like a 6e-4 ft/s^2 drift.)  In coast the nav takes no IMU data
+    at all -- CGNV_DV_FILT is zeroed every cycle (GL5NAV step 8) -- and the
+    truth Orbiter and the truth ISS agree with each other to under 1 mm/s
+    in 220 s against a gravity-only propagation.
+  - *The IMUs are right.*  Each IMU's compensated total (CGMV_TOT_DV_M50,
+    downlist) follows the truth's sensed delta-V to within a pulse; PASS's
+    time tags match the model's read times to 0.2 ms; a new test
+    (test_mdmdev, 30 min coasting while turning at orbital rate) holds every
+    compensated axis to one pulse.  The 19 micro-g wander of CGMV_VEL_SEL
+    is PASS's own: GRJIMU re-anchors each IMU's bias to the selected
+    velocity every 0.96 s, so GRHIMU's mid-value select works on per-cycle
+    increments, and the mid value of three accelerometers' quantised
+    (floor/ceiling) counts is not zero-mean; a replay of the logged counts
+    (YAGPC_IMU_ACCLOG) gave the same sign and order of size.  A real IMU counts the same way.  It reaches the
+    state only inside a maneuver, and is removed with the sum.
+  - *For the real flight*, the same: maneuver-induced translation under 0.9
+    ft/s is lost to PROP, which is why the flight burned NCC and Ti on the
+    FLTR state (star tracker marks) and why MC1-MC4 exist.  How large the
+    loss is depends on the DAP: this tape's DAP B (ALT, unconfigured, no
+    SPEC 20 B7) turned the vehicle at 0.64 deg/s with two aft jets.
 - **M1b (first try).**  PROP was within the limits of the ground solution,
   so PROP was burned (p. 1-3 rules).  Both OMS engines fired, 6.96 s each,
   not the left alone: the engine select keyed before COMPUTE T1 did not
@@ -326,6 +367,32 @@ and each Ti solution beside the independent Lambert.
   the limits, so with no sensor pass the miss is the honest outcome.
   M1b is therefore not passed: it needs the navigation drift above
   understood, or Stage 1's sensors, or both.
+- **M1b again (2026-10-08, `m1b-run2`, and `m1b-run3` from its Ti capture).**
+  The left engine alone now burns (L 12.48 s, R 0).  PROP +9.03 -0.68 +2.47
+  against the truth's ("ground") +8.92 -0.67 +2.81 ft/s: within the limits,
+  PROP burned; the Orbiter's nav error at final targeting was ~2.1 kft, 1.8
+  ft/s, put in by the target-track maneuver as above.
+  - `m1b-run2`, on the two-engine trims (P +0.4, LY -5.75) the driver left in
+    place: residuals VGO -- body -- +0.04 -2.15 +1.01 ft/s (the burn
+    attitude was computed for thrust along X; the left gimbal then swung
+    ~13 deg to put the thrust through the CG), untrimmed.  At T2 the truth
+    was **0.12 kft behind, 1.46 kft out of plane, 3.20 kft below**, closing
+    XD +4.23 YD +1.02 ZD -3.76 ft/s.
+  - `m1b-run3`, the same Ti state, with PASS's one-engine trims keyed (P
+    -0.1, LY +5.2, the CGGC02 I-loads): residuals +0.05 +0.32 -0.20 ft/s
+    (the THC trim moved nothing: no hand-controller window was running;
+    fixed for the next run, `--rhc lh`).  Truth sensed delta-V of the burn
+    9.42 ft/s.  At T2 the truth was **3.82 kft ahead of the station, 0.30
+    kft out of plane, 2.31 kft below**, XD +1.97 YD -0.28 ZD -3.09 ft/s,
+    against TGT 10's -0.9 / 0 / +1.8 kft: a miss of 4.7 kft along track,
+    0.3 across, 0.5 low.  It crossed the R-bar (X = 0) at Ti + 64.5 min
+    about 5.5 kft below, not the 600-1,800 ft of the MC4 region.
+  - Both coasts carried ~0.5 ft/s of real attitude-control translation (the
+    post-burn ALT target-track maneuver, then VERN), which alone moves T2
+    by kilofeet; that and the PROP error are what MC1-MC4 (and the sensor
+    filter) are for.  M1b's trajectory therefore lands within a few kft of
+    the aim point but not in the MC4 region; flying MC1-MC4 is the next
+    step.
 
 **Deviations, recorded.**  One GNC GPC where the rules want two; no SM, so
 no SM 2 TIME, SM ANTENNA or SM timer; DAP A7/B7 not configured (SPEC 20

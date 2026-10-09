@@ -388,6 +388,17 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     a->started = true;
     a->t = s->t;
     w[9] = a->count[0]; w[10] = a->count[1]; w[11] = a->count[2];
+    /* YAGPC_IMU_ACCLOG=1: every read of the velocity counters -- vehicle
+     * time, the three raw counters as sent, and the inertial velocity they
+     * stand for (the CG's sensed delta-V plus the navigation base's w x r,
+     * ft/s, M50) -- so that PASS's compensation and selection
+     * (GMHACP, GMLACP, GRHIMU, GRJIMU) can be replayed offline beside the
+     * downlist's CGMV_TOT_DV_M50 and CGMV_VEL_SEL. */
+    static int accLog = -1;
+    if (accLog < 0) accLog = yagpc_getenv("YAGPC_IMU_ACCLOG") != NULL;
+    if (accLog)
+        fprintf(stderr, "imu-acc: t=%.5f imu=%d count=%u %u %u ft=%.6f %.6f %.6f\n", s->t, n,
+                a->count[0], a->count[1], a->count[2], ft[0], ft[1], ft[2]);
 }
 
 static void imu_read(int n, uint16_t *out, int words) {
