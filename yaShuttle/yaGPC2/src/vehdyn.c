@@ -336,6 +336,7 @@ static double jet_mdot(const Jet *j) {
 
 static void mass_properties(void);
 static void qmat_body(const double q[4], double R[3][3]);
+static void dock_reset(void);
 
 /* =====================================================================
  * THE ASCENT: THE STACK ON THE PAD, IN FLIGHT, AND SHEDDING ITS PARTS.
@@ -1825,6 +1826,7 @@ static struct {
 void vehdyn_reset(double t) {
     flight_params();
     memset(&st, 0, sizeof st);
+    dock_reset();
     for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG;
     prop[3] = prop[4] = OMS_LOAD_KG;
     {
@@ -1937,7 +1939,11 @@ void vehdyn_reset(double t) {
  *
  * then "lvlh" (body +X along the velocity, +Z nadir: the ISS's +XVV
  * attitude) or "inertial W X Y Z" (body -> M50, held), and optionally
- * "bc KG_PER_M2" (default 130, the ISS's; 0 for no drag).  A target's state
+ * "bc KG_PER_M2" (default 130, the ISS's; 0 for no drag) and "port X Y Z
+ * [AX AY AZ UX UY UZ]", a docking port the Orbiter's ODS can capture (see
+ * THE DOCKING below): its face's centre in the vehicle's body (m), the axis
+ * out of it (default +X) and where the Orbiter's +X points when mated
+ * (default -Z).  PMA-2 on Node 2, May 2011: "port 15.66 0 5.48".  A target's state
  * is kept as an epoch in Unix time and an M50 state then, so a snapshot
  * (vehdyn_targets_save) restores it at any later clock by propagating, the
  * halt gap included. */
@@ -1955,6 +1961,11 @@ static struct Tgt {
     double r[3], v[3];        /* M50 at epoch */
     double t;                 /* the vehicle clock r, v are at, once placed */
     bool placed;
+    /* its docking port ("port", below): the face's centre, the axis out of
+     * it and the direction the Orbiter's +X points when mated, in its body
+     * (m; units) */
+    bool port;
+    double portB[3], portAx[3], portUp[3];
 } tgt[TGT_MAX];
 static int tgtN = -1;         /* -1: the file not read yet */
 
@@ -1976,15 +1987,17 @@ static bool tgt_num(const char *path, int lineNo, const char *tok, double *x) {
     return true;
 }
 
-static void targets_read(void) {
-    tgtN = 0;
+/* The targets file's vehicles into out[], at most max; how many, or -1 if
+ * there is no file. */
+static int targets_parse(struct Tgt *out, int max) {
+    int cnt = 0;
     const char *path = yagpc_getenv("YAGPC_VEHDYN_TARGETS");
-    if (path == NULL || *path == '\0') return;
+    if (path == NULL || *path == '\0') return -1;
     FILE *f = fopen(path, "r");
-    if (f == NULL) { fprintf(stderr, "vehdyn: cannot read targets file %s\n", path); return; }
+    if (f == NULL) { fprintf(stderr, "vehdyn: cannot read targets file %s\n", path); return -1; }
     char line[512];
     int lineNo = 0;
-    while (fgets(line, sizeof line, f) != NULL && tgtN < TGT_MAX) {
+    while (fgets(line, sizeof line, f) != NULL && cnt < max) {
         lineNo++;
         char *tok[24];
         int nt = 0;
@@ -2044,13 +2057,39 @@ static void targets_read(void) {
                 double bc;
                 if (tgt_num(path, lineNo, tok[k + 1], &bc) && bc >= 0.0) g.bc = bc;
                 k += 2;
+            } else if (strcmp(tok[k], "port") == 0 && k + 3 < nt) {
+                double x[9] = { 0, 0, 0, 1, 0, 0, 0, 0, -1 };
+                int m = (k + 9 < nt && isfinite(strtod(tok[k + 4], NULL))
+                         && strspn(tok[k + 4], "+-.0123456789eE") == strlen(tok[k + 4])) ? 9 : 3;
+                bool ok = true;
+                for (int i = 0; ok && i < m; i++) ok = tgt_num(path, lineNo, tok[k + 1 + i], &x[i]);
+                k += 1 + m;
+                if (!ok) continue;
+                double na = sqrt(x[3] * x[3] + x[4] * x[4] + x[5] * x[5]);
+                double nu = sqrt(x[6] * x[6] + x[7] * x[7] + x[8] * x[8]);
+                if (na <= 0.0 || nu <= 0.0) {
+                    fprintf(stderr, "vehdyn: %s:%d: a port's axis and up must not be zero; no port\n",
+                            path, lineNo);
+                    continue;
+                }
+                g.port = true;
+                for (int i = 0; i < 3; i++) {
+                    g.portB[i] = x[i]; g.portAx[i] = x[3 + i] / na; g.portUp[i] = x[6 + i] / nu;
+                }
             }
             else { fprintf(stderr, "vehdyn: %s:%d: what is %s?\n", path, lineNo, tok[k]); k++; }
         }
-        tgt[tgtN++] = g;
+        out[cnt++] = g;
     }
     fclose(f);
-    fprintf(stderr, "vehdyn: %d other vehicle%s from %s\n", tgtN, tgtN == 1 ? "" : "s", path);
+    return cnt;
+}
+
+static void targets_read(void) {
+    tgtN = targets_parse(tgt, TGT_MAX);
+    if (tgtN < 0) { tgtN = 0; return; }
+    fprintf(stderr, "vehdyn: %d other vehicle%s from %s\n", tgtN, tgtN == 1 ? "" : "s",
+            yagpc_getenv("YAGPC_VEHDYN_TARGETS"));
 }
 
 /* Gravity plus the target's own drag, at clock t. */
@@ -2309,20 +2348,28 @@ bool vehdyn_target(int k, int *norad, double r[3], double v[3], double q[4]) {
  * capture; before then (no calendar yet) none are, and the restored run
  * reads YAGPC_VEHDYN_TARGETS afresh. */
 #define TGT_SAVED 14          /* doubles a vehicle: id, lvlh, q, bc, epoch, r, v */
+#define TGT_SAVED2 24         /* ... and the port: flag, face, axis, up */
+#define TGT_SAVE_MARK2 (-2.0) /* first word of the second format (an id is never negative) */
 int vehdyn_targets_save(double *b, int max) {
     int n = 0;
 #define PUT(x) do { if (n < max) b[n] = (double)(x); n++; } while (0)
     double unix = vehdyn_unix(st.t);
     if (unix < 0.0) return 0;
+    if (tgtN <= 0) return 0;
     for (int k = 0; k < tgtN; k++)
         if (!tgt[k].placed) return 0;
-    for (int k = 0; k < (tgtN > 0 ? tgtN : 0); k++) {
+    PUT(TGT_SAVE_MARK2);
+    for (int k = 0; k < tgtN; k++) {
         const struct Tgt *g = &tgt[k];
         PUT(g->norad); PUT(g->lvlh ? 1 : 0);
         for (int i = 0; i < 4; i++) PUT(g->q[i]);
         PUT(g->bc); PUT(unix + (g->t - st.t));
         for (int i = 0; i < 3; i++) PUT(g->r[i]);
         for (int i = 0; i < 3; i++) PUT(g->v[i]);
+        PUT(g->port ? 1 : 0);
+        for (int i = 0; i < 3; i++) PUT(g->portB[i]);
+        for (int i = 0; i < 3; i++) PUT(g->portAx[i]);
+        for (int i = 0; i < 3; i++) PUT(g->portUp[i]);
     }
 #undef PUT
     return n;
@@ -2330,16 +2377,282 @@ int vehdyn_targets_save(double *b, int max) {
 
 void vehdyn_targets_load(const double *b, int n) {
     if (n < TGT_SAVED) return;                /* none captured: the file's, if any */
+    int i0 = 0, each = TGT_SAVED;             /* the first format: no ports */
+    if (b[0] == TGT_SAVE_MARK2) { i0 = 1; each = TGT_SAVED2; }
+    if (n - i0 < each) return;
     tgtN = 0;
-    for (int i = 0; i + TGT_SAVED <= n && tgtN < TGT_MAX; i += TGT_SAVED) {
+    for (int i = i0; i + each <= n && tgtN < TGT_MAX; i += each) {
         struct Tgt *g = &tgt[tgtN++];
         memset(g, 0, sizeof *g);
         g->norad = (int)b[i]; g->lvlh = b[i + 1] != 0.0;
         for (int k = 0; k < 4; k++) g->q[k] = b[i + 2 + k];
         g->bc = b[i + 6]; g->epoch = b[i + 7];
         for (int k = 0; k < 3; k++) { g->r[k] = b[i + 8 + k]; g->v[k] = b[i + 11 + k]; }
+        if (each == TGT_SAVED2) {
+            g->port = b[i + 14] != 0.0;
+            for (int k = 0; k < 3; k++) {
+                g->portB[k] = b[i + 15 + k]; g->portAx[k] = b[i + 18 + k]; g->portUp[k] = b[i + 21 + k];
+            }
+        }
+    }
+    /* A vehicle captured without a port (before ports existed) takes the
+     * targets file's, matched by its id: the state is the capture's, the
+     * port is a fact about the vehicle. */
+    struct Tgt file[TGT_MAX];
+    int nf = targets_parse(file, TGT_MAX);
+    for (int k = 0; k < tgtN; k++) {
+        if (tgt[k].port) continue;
+        for (int j = 0; j < nf; j++)
+            if (file[j].norad == tgt[k].norad && file[j].port) {
+                tgt[k].port = true;
+                memcpy(tgt[k].portB, file[j].portB, sizeof file[j].portB);
+                memcpy(tgt[k].portAx, file[j].portAx, sizeof file[j].portAx);
+                memcpy(tgt[k].portUp, file[j].portUp, sizeof file[j].portUp);
+                fprintf(stderr, "vehdyn: vehicle %d's docking port from the targets file\n", tgt[k].norad);
+                break;
+            }
     }
 }
+
+/* =====================================================================
+ * THE DOCKING: the Orbiter's ODS ring meeting a vehicle's "port".
+ *
+ * The ring (the APDS's) is on the ODS axis at Xo 649, Yo 0; its face is at
+ * Zo 475.75 ready to dock and Zo 460.00 retracted and hard-mated, and it
+ * looks out of the bay along body -Z (Shuttle Systems Handbook / SCOM;
+ * ~/workspace/pass-run/rndz/docking-geometry-findings.md section 1).
+ * CONTACT is the ring's face reaching the port's face plane within reach of
+ * the port (CATCH_M of its axis).  At contact the conditions are judged
+ * against the documented envelope (section 3 of the findings):
+ *
+ *   closing rate   <= 0.20 ft/s: the ODS hardware requirement (MR-112 p10;
+ *                  qualified at 0.4).  The specification's 0.13 is what the
+ *                  crew must fly, and is reported, not enforced: STS-112
+ *                  closed at 0.19 and captured.
+ *   lateral        <= 4.2 in: "Current docking mechanism requirements
+ *                  specify a maximum 4.2 inches of lateral misalignment"
+ *                  (GPO p138).
+ *   angular        <= ANG_LIM_DEG per axis.  NOT DOCUMENTED: no document in
+ *                  the mirror gives the mechanism's angular limit; the
+ *                  crew's own criterion is 1.0 deg at 30 ft (CC 9-8), which
+ *                  is a piloting rule, not the hardware's reach.  4 deg is
+ *                  this model's choice.
+ *
+ * INSIDE IT, CAPTURE: the latches hold, and from then on the Orbiter moves
+ * with the vehicle -- placed off it each step, its rates the vehicle's --
+ * held at the pose it captured in for DAMP_S (dampers on; motion damped by
+ * about 60 s, SCOM p682, APAS p10), then drawn in over RETRACT_S to the
+ * hard-mated pose: the ring at Zo 460 on the port's face, the axes aligned
+ * and the Orbiter's +X along the port's "up" (ring in to READY TO HOOK ~3
+ * min, hooks ~2:20: RNDZ p310, SCOM p681-683).  The crew's APDS commands
+ * are not modelled: the sequence runs by itself.  The stack's motion is the
+ * vehicle's own -- its mass is not known here, so the Orbiter's momentum at
+ * capture (0.1 ft/s against some 400 t) is not shared with it, and jets
+ * fired while docked move nothing (the checklist has the DAP in free drift).
+ * Post-contact thrusting is not modelled either.
+ *
+ * OUTSIDE IT, NO CAPTURE: the ring's closing along the axis stops there --
+ * the contact absorbs it, nothing passes through -- and the Orbiter is free
+ * to back away (the FAILED CAPTURE block of CC 9-8).  Bounce is not
+ * modelled.  Every contact, capture and mate is logged. */
+#define ODS_XO          649.0
+#define ODS_ZO_READY    475.75
+#define ODS_ZO_MATED    460.0
+#define CATCH_M         0.50      /* the face's reach about the axis: the ring's own radius, about */
+#define DOCK_NEAR_M     5.0       /* nearer than this, contact is looked for */
+#define CLOSE_MAX_FPS   0.20
+#define CLOSE_SPEC_FPS  0.13
+#define LAT_MAX_IN      4.2
+#define ANG_LIM_DEG     4.0
+#define DAMP_S          60.0
+#define RETRACT_S       320.0
+enum { DOCK_FREE, DOCK_CAPTURED };
+static struct {
+    int state;
+    int k;                        /* the vehicle */
+    double t0;                    /* the clock at capture */
+    double pCap[3], qCap[4];      /* the Orbiter's CG and attitude in the vehicle's body, captured */
+    double pHm[3], qHm[4];        /* ... hard-mated */
+    bool touching;                /* in an uncaptured contact: logged once */
+    bool mated;                   /* hard mate reached: logged once */
+    int contacts;                 /* contacts made, captured or not, since the reset or restore */
+} dock;
+
+/* A vehicle's body axes (columns, in M50) and its rate (rad/s, M50) at r, v. */
+static void tgt_frame(const struct Tgt *g, const double r[3], const double v[3],
+                      double R[3][3], double w[3]) {
+    if (g->lvlh) {
+        double x[3], y[3], z[3];
+        lvlh_axes(r, v, x, y, z);
+        for (int i = 0; i < 3; i++) { R[i][0] = x[i]; R[i][1] = -y[i]; R[i][2] = z[i]; }
+        double rr = r[0] * r[0] + r[1] * r[1] + r[2] * r[2];
+        double h[3] = { r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0] };
+        for (int i = 0; i < 3; i++) w[i] = h[i] / rr;
+    } else {
+        qmat_body(g->q, R);
+        w[0] = w[1] = w[2] = 0.0;
+    }
+}
+
+static void mv(const double R[3][3], const double a[3], double o[3]) {
+    for (int i = 0; i < 3; i++) o[i] = R[i][0] * a[0] + R[i][1] * a[1] + R[i][2] * a[2];
+}
+
+static void mtv(const double R[3][3], const double a[3], double o[3]) {
+    for (int i = 0; i < 3; i++) o[i] = R[0][i] * a[0] + R[1][i] * a[1] + R[2][i] * a[2];
+}
+
+static void cross3(const double a[3], const double b[3], double o[3]) {
+    o[0] = a[1] * b[2] - a[2] * b[1];
+    o[1] = a[2] * b[0] - a[0] * b[2];
+    o[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+/* The vehicle k's state now (the Orbiter's clock), without moving it. */
+static void tgt_now(const struct Tgt *g, double r[3], double v[3]) {
+    memcpy(r, g->r, sizeof g->r);
+    memcpy(v, g->v, sizeof g->v);
+    if (st.t != g->t) tgt_propagate(g, g->t, st.t, r, v);
+}
+
+/* The ring's face at Zo zo, from the CG, in body metres. */
+static void ring_body(double zo, double b[3]) {
+    to_body(ODS_XO, 0.0, zo, b);
+    for (int i = 0; i < 3; i++) b[i] -= cgB[i];
+}
+
+/* Misalignment (deg) of the Orbiter against the port: pitch and yaw of the
+ * port's axis in the Orbiter's body from body +Z, roll of the port's "up"
+ * from body +X -- the centerline camera's reading (rndz_instruments.py). */
+static void dock_angles(const double Ro[3][3], const double a[3], const double u[3], double ang[3]) {
+    double ab[3], ub[3];
+    mtv(Ro, a, ab);
+    mtv(Ro, u, ub);
+    ang[0] = atan2(ab[0], ab[2]) * 57.29578;
+    ang[1] = atan2(ab[1], ab[2]) * 57.29578;
+    ang[2] = atan2(-ub[1], ub[0]) * 57.29578;
+}
+
+static void quat_nlerp(const double a[4], const double b[4], double f, double o[4]) {
+    double d = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3], sg = d < 0.0 ? -1.0 : 1.0, n = 0.0;
+    for (int i = 0; i < 4; i++) { o[i] = (1.0 - f) * a[i] + f * sg * b[i]; n += o[i] * o[i]; }
+    n = sqrt(n);
+    for (int i = 0; i < 4; i++) o[i] /= n;
+}
+
+/* Captured: the Orbiter placed off the vehicle, its pose drawn from the
+ * captured one to the hard-mated one after the damping. */
+static void dock_hold(void) {
+    const struct Tgt *g = &tgt[dock.k];
+    double rt[3], vt[3], Rt[3][3], wt[3];
+    tgt_now(g, rt, vt);
+    tgt_frame(g, rt, vt, Rt, wt);
+    double f = (st.t - dock.t0 - DAMP_S) / RETRACT_S;
+    if (f < 0.0) f = 0.0;
+    if (f > 1.0) f = 1.0;
+    if (f >= 1.0 && !dock.mated) {
+        dock.mated = true;
+        fprintf(stderr, "vehdyn: HARD MATE with vehicle %d: the ring retracted to Zo %.2f, hooks closed\n",
+                g->norad, ODS_ZO_MATED);
+    }
+    double p[3], qr[4], Rr[3][3], Ro[3][3], pm[3], om[3];
+    for (int i = 0; i < 3; i++) p[i] = (1.0 - f) * dock.pCap[i] + f * dock.pHm[i];
+    quat_nlerp(dock.qCap, dock.qHm, f, qr);
+    qmat_body(qr, Rr);
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++) Ro[i][j] = Rt[i][0] * Rr[0][j] + Rt[i][1] * Rr[1][j] + Rt[i][2] * Rr[2][j];
+    mv(Rt, p, pm);
+    cross3(wt, pm, om);
+    for (int i = 0; i < 3; i++) { st.r[i] = rt[i] + pm[i]; st.v[i] = vt[i] + om[i]; }
+    mat_quat(Ro, st.q);
+    mtv(Ro, wt, st.w);
+}
+
+/* Free: has the ring met a port?  At most one vehicle is in reach. */
+static void dock_check(void) {
+    for (int k = 0; k < tgtN; k++) {
+        const struct Tgt *g = &tgt[k];
+        if (!g->port || !g->placed) continue;
+        double rt[3], vt[3], Rt[3][3], wt[3];
+        tgt_now(g, rt, vt);
+        if (fabs(rt[0] - st.r[0]) > 100.0 || fabs(rt[1] - st.r[1]) > 100.0 || fabs(rt[2] - st.r[2]) > 100.0)
+            continue;
+        tgt_frame(g, rt, vt, Rt, wt);
+        double pm[3], P[3], Pv[3], a[3], u[3], tmp[3];
+        mv(Rt, g->portB, pm);
+        mv(Rt, g->portAx, a);
+        mv(Rt, g->portUp, u);
+        cross3(wt, pm, tmp);
+        for (int i = 0; i < 3; i++) { P[i] = rt[i] + pm[i]; Pv[i] = vt[i] + tmp[i]; }
+        double Ro[3][3], b[3], bm[3], wb[3], Q[3], Qv[3];
+        qmat_body(st.q, Ro);
+        ring_body(ODS_ZO_READY, b);
+        mv(Ro, b, bm);
+        cross3(st.w, b, tmp);
+        mv(Ro, tmp, wb);
+        double d[3], dn = 0.0, s = 0.0, rv = 0.0;
+        for (int i = 0; i < 3; i++) {
+            Q[i] = st.r[i] + bm[i];
+            Qv[i] = st.v[i] + wb[i];
+            d[i] = Q[i] - P[i];
+            dn += d[i] * d[i];
+            s += d[i] * a[i];
+            rv += (Qv[i] - Pv[i]) * a[i];
+        }
+        if (sqrt(dn) > DOCK_NEAR_M) continue;
+        double lat = sqrt(fmax(0.0, dn - s * s));
+        if (s > 0.0 || lat > CATCH_M) { dock.touching = false; continue; }
+        double closing = -rv;                    /* along the axis, toward the port */
+        if (closing <= 0.0) continue;            /* inside the plane but opening */
+        const double FT = 0.3048;
+        double ang[3];
+        dock_angles(Ro, a, u, ang);
+        bool ok = closing / FT <= CLOSE_MAX_FPS && lat / 0.0254 <= LAT_MAX_IN &&
+                  fabs(ang[0]) <= ANG_LIM_DEG && fabs(ang[1]) <= ANG_LIM_DEG && fabs(ang[2]) <= ANG_LIM_DEG;
+        if (!dock.touching) {
+            dock.contacts++;
+            fprintf(stderr, "vehdyn: CONTACT with vehicle %d's port: closing %.3f ft/s%s, lateral %.2f in, "
+                            "pitch %+.2f yaw %+.2f roll %+.2f deg -- %s\n",
+                    g->norad, closing / FT, closing / FT > CLOSE_SPEC_FPS ? " (over the 0.13 spec)" : "",
+                    lat / 0.0254, ang[0], ang[1], ang[2],
+                    ok ? "CAPTURE" : "OUTSIDE THE CAPTURE ENVELOPE: no capture");
+        }
+        if (!ok) {
+            /* the contact takes the closing; nothing passes through */
+            for (int i = 0; i < 3; i++) st.v[i] += closing * a[i];
+            dock.touching = true;
+            return;
+        }
+        /* CAPTURE: the pose now, and the mated one, in the vehicle's body */
+        double Rr[3][3], dr[3], Rh[3][3], y[3], bh[3], bhv[3];
+        for (int i = 0; i < 3; i++) dr[i] = st.r[i] - rt[i];
+        mtv(Rt, dr, dock.pCap);
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++) Rr[i][j] = Rt[0][i] * Ro[0][j] + Rt[1][i] * Ro[1][j] + Rt[2][i] * Ro[2][j];
+        mat_quat(Rr, dock.qCap);
+        /* mated: body +Z along the port's axis (the ring, -Z, faces into
+         * it), +X along its up, +Y completing the set */
+        cross3(g->portAx, g->portUp, y);
+        for (int i = 0; i < 3; i++) { Rh[i][0] = g->portUp[i]; Rh[i][1] = y[i]; Rh[i][2] = g->portAx[i]; }
+        mat_quat(Rh, dock.qHm);
+        ring_body(ODS_ZO_MATED, bh);
+        mv(Rh, bh, bhv);
+        for (int i = 0; i < 3; i++) dock.pHm[i] = g->portB[i] - bhv[i];
+        dock.state = DOCK_CAPTURED;
+        dock.k = k;
+        dock.t0 = st.t;
+        dock.mated = false;
+        dock.touching = false;
+        dock_hold();
+        return;
+    }
+}
+
+static void dock_reset(void) { memset(&dock, 0, sizeof dock); }
+
+int vehdyn_docked(void) { return dock.state == DOCK_CAPTURED ? (dock.mated ? 2 : 1) : 0; }
+
+int vehdyn_dock_contacts(void) { return dock.contacts; }
 
 void vehdyn_advance(double sharedUs) {
     if (sharedUs < 0.0) return;
@@ -2410,6 +2723,9 @@ void vehdyn_advance(double sharedUs) {
         double ad0[3], ad1[3];
         phys_drag_accel(&st, ad0);
         phys_step(&st, dt, firing ? f : NULL, firing ? tau : NULL);
+        bool docked = dock.state == DOCK_CAPTURED;
+        if (docked) dock_hold();                  /* moved with the vehicle it is latched to */
+        else if (tgtN > 0) dock_check();
         phys_drag_accel(&st, ad1);
         hist_push();
         state_log();
@@ -2418,7 +2734,8 @@ void vehdyn_advance(double sharedUs) {
         if (firing) {
             double fi[3];
             phys_body_to_inertial(&st, f, fi);
-            for (int i = 0; i < 3; i++) sensedDv[i] += fi[i] / st.mass * dt;
+            if (!docked)
+                for (int i = 0; i < 3; i++) sensedDv[i] += fi[i] / st.mass * dt;
             for (int k = 0; k < VEHDYN_NJETS; k++)
                 if (on[k] && prop[jet_module(&JETS[k])] > 0.0) onSec[k] += dt;
             for (int e = 0; e < 2; e++)
@@ -2463,7 +2780,7 @@ void vehdyn_advance(double sharedUs) {
         if (asc == ASC_NONE) {
             double a[3], R[3][3];
             for (int i = 0; i < 3; i++) a[i] = 0.5 * (ad0[i] + ad1[i]);
-            if (firing) {
+            if (firing && !docked) {
                 double fi[3];
                 phys_body_to_inertial(&st, f, fi);
                 for (int i = 0; i < 3; i++) a[i] += fi[i] / st.mass;
@@ -2730,6 +3047,12 @@ int vehdyn_save(double *b, int max) {
     PUT(chuteArmed); PUT(chuteOut); PUT(chuteGone); PUT(chuteOutT < 0.0 ? -1.0 : st.t - chuteOutT);
     PUT(wowMain[0]); PUT(wowMain[1]); PUT(wowNose);
     PUT(brakesOn); PUT(probePos[0]); PUT(probePos[1]);
+    /* the docking: latched or not, to which vehicle, how long ago, the poses */
+    PUT(dock.state); PUT(dock.k); PUT(dock.state == DOCK_CAPTURED ? st.t - dock.t0 : 0.0);
+    for (int i = 0; i < 3; i++) PUT(dock.pCap[i]);
+    for (int i = 0; i < 4; i++) PUT(dock.qCap[i]);
+    for (int i = 0; i < 3; i++) PUT(dock.pHm[i]);
+    for (int i = 0; i < 4; i++) PUT(dock.qHm[i]);
 #undef PUT
     return n;
 }
@@ -2780,6 +3103,18 @@ double vehdyn_load(const double *b, int n) {
         }
         if (i + 3 <= n) {
             brakesOn = GET() != 0.0; probePos[0] = GET(); probePos[1] = GET();
+        }
+        memset(&dock, 0, sizeof dock);
+        if (i + 17 <= n) {
+            dock.state = (int)GET(); dock.k = (int)GET();
+            double ago = GET();
+            dock.t0 = -ago;                          /* the restored clock starts at 0 */
+            for (int k = 0; k < 3; k++) dock.pCap[k] = GET();
+            for (int k = 0; k < 4; k++) dock.qCap[k] = GET();
+            for (int k = 0; k < 3; k++) dock.pHm[k] = GET();
+            for (int k = 0; k < 4; k++) dock.qHm[k] = GET();
+            dock.mated = dock.state == DOCK_CAPTURED && ago >= DAMP_S + RETRACT_S;
+            if (dock.state != DOCK_CAPTURED || dock.k < 0 || dock.k >= TGT_MAX) dock.state = DOCK_FREE;
         }
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }

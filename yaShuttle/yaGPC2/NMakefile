@@ -217,6 +217,7 @@ UNIT_TESTS = \
 	$(TEST_BIN_DIR)\test_physics.exe \
 	$(TEST_BIN_DIR)\test_vehdyn.exe \
 	$(TEST_BIN_DIR)\test_vehdyn_rel.exe \
+	$(TEST_BIN_DIR)\test_vehdyn_dock.exe \
 	$(TEST_BIN_DIR)\test_startrk_target.exe \
 	$(TEST_BIN_DIR)\test_landaids.exe \
 	$(TEST_BIN_DIR)\test_kuradar.exe
@@ -256,6 +257,7 @@ test: all $(TEST_BIN_DIR) $(UNIT_TESTS) $(TEST_BIN_DIR)\example_gpcops_paced_run
 	@$(TEST_BIN_DIR)\test_physics.exe || echo test_physics>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_vehdyn.exe || echo test_vehdyn>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_vehdyn_rel.exe || echo test_vehdyn_rel>> "$(FAILED)"
+	@$(TEST_BIN_DIR)\test_vehdyn_dock.exe || echo test_vehdyn_dock>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_startrk_target.exe || echo test_startrk_target>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_landaids.exe || echo test_landaids>> "$(FAILED)"
 	@$(TEST_BIN_DIR)\test_kuradar.exe || echo test_kuradar>> "$(FAILED)"
@@ -339,6 +341,9 @@ $(TEST_BIN_DIR)\test_vehdyn.exe: test\test_vehdyn.c src\vehdyn.c src\vehdyn.h sr
 
 $(TEST_BIN_DIR)\test_vehdyn_rel.exe: test\test_vehdyn_rel.c src\vehdyn.c src\vehdyn.h src\physics.c src\physics.h src\envcache.c src\eiumodel.c src\mecmodel.c $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_vehdyn_rel.c src\vehdyn.c src\physics.c src\envcache.c src\eiumodel.c src\mecmodel.c $(W32) $(LDLIBS)
+
+$(TEST_BIN_DIR)\test_vehdyn_dock.exe: test\test_vehdyn_dock.c src\vehdyn.c src\vehdyn.h src\physics.c src\physics.h src\envcache.c src\eiumodel.c src\mecmodel.c $(TEST_BIN_DIR)
+	$(TEST_CC) test\test_vehdyn_dock.c src\vehdyn.c src\physics.c src\envcache.c src\eiumodel.c src\mecmodel.c $(W32) $(LDLIBS)
 
 $(TEST_BIN_DIR)\test_landaids.exe: test\test_landaids.c src\landaids.c src\landaids.h src\adtaair.c src\adtaair.h src\adtatables.h src\vehdyn.c src\vehdyn.h src\physics.c src\physics.h src\envcache.c src\eiumodel.c src\mecmodel.c $(TEST_BIN_DIR)
 	$(TEST_CC) test\test_landaids.c src\landaids.c src\adtaair.c src\vehdyn.c src\physics.c src\envcache.c src\eiumodel.c src\mecmodel.c $(W32) $(LDLIBS)

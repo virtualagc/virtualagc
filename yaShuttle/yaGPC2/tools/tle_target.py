@@ -2,7 +2,7 @@
 """A TLE as a target line for YAGPC_VEHDYN_TARGETS (vehdyn.c's other vehicles).
 
     tools/tle_target.py TLE_FILE [--at YYYY-MM-DDTHH:MM:SS] [--bc KG_PER_M2]
-                        [--attitude lvlh|inertial] >> targets.txt
+                        [--attitude lvlh|inertial] [--port X,Y,Z] >> targets.txt
 
 SGP4 (Skyfield) gives the vehicle's state at one instant -- the TLE's own
 epoch unless --at names another, best near the flight -- in GCRS, which is
@@ -11,6 +11,10 @@ into M50 and moves it from then on with its own gravity and the vehicle's
 drag, not SGP4.  TLE_FILE holds the two element lines (a name line before
 them is allowed); with several sets, the one whose epoch is nearest --at is
 used.  The ISS's TLE for STS-134 is Space-Track's (epoch 11138.51317551).
+--port gives the vehicle a docking port the Orbiter's ODS can capture
+(vehdyn.c, THE DOCKING): its face's centre in the vehicle's body, metres,
+axis +X.  PMA-2 on Node 2 in May 2011: --port 15.66,0,5.48 (a model value,
+not a sourced one: docking-geometry-findings.md section 2).
 """
 import argparse
 import datetime
@@ -36,7 +40,17 @@ def main():
     ap.add_argument("--attitude", choices=("lvlh", "inertial"), default="lvlh",
                     help="lvlh: +X along the velocity, +Z nadir (the ISS's); inertial: held "
                          "as identity -- edit the line for another")
+    ap.add_argument("--port", help="X,Y,Z: a docking port's face in the vehicle's body, m (axis +X)")
     args = ap.parse_args()
+    port = ""
+    if args.port:
+        try:
+            xyz = [float(x) for x in args.port.split(",")]
+        except ValueError:
+            xyz = []
+        if len(xyz) != 3:
+            sys.exit("tle_target: --port wants X,Y,Z in metres")
+        port = " port %g %g %g" % tuple(xyz)
     try:
         from skyfield.api import EarthSatellite, load
     except ImportError:
@@ -59,8 +73,8 @@ def main():
     att = "lvlh" if args.attitude == "lvlh" else "inertial 1 0 0 0"
     print("# %s, TLE epoch %s, state at %s UTC" % (sat.name or "NORAD %d" % sat.model.satnum,
                                                   sat.epoch.utc_iso(), t.utc_iso()))
-    print("target %d %.3f %.3f %.3f %.3f %.6f %.6f %.6f %s bc %g"
-          % (sat.model.satnum, unix, r[0], r[1], r[2], v[0], v[1], v[2], att, args.bc))
+    print("target %d %.3f %.3f %.3f %.3f %.6f %.6f %.6f %s bc %g%s"
+          % (sat.model.satnum, unix, r[0], r[1], r[2], v[0], v[1], v[2], att, args.bc, port))
 
 
 if __name__ == "__main__":
