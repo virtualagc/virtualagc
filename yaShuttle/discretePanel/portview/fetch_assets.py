@@ -1046,6 +1046,119 @@ def prepare_iss_visitors(keep):
         os.remove(src)
 
 
+# THE SHUTTLE CENTERLINE TARGET on PMA-2 (STS-134 RNDZ checklist p149, 6-11;
+# CC 9-9, p307): a backplate with 3 in. and 4 in. radius arcs, pitch/yaw
+# indicator bars at 2, 3, 4, 5 and 6 in. from its centre and roll blocks at
+# 2 deg steps, and a stand-off cross on a stalk 12 in. in front of it; the
+# centerline camera reads the Orbiter's misalignment off the cross against
+# the backplate.  Its place: on PMA-2's axis, against the face the model
+# closes PMA-2 with (X 15.655 m; the real target is behind the hatch
+# window, a recess not documented here).  Up on the target is the ISS's -Z
+# (zenith), as the Orbiter docks nose up.  Colours: a white plate with black
+# markings and a black cross and stalk -- as the target looks in docking
+# video; not from a document.  Sizes not on the drawing (the plate's 8 in.
+# radius, the cross's 1 in. arms, line widths) are choices.
+CL_TARGET_FACE = (15.656, 0.0, 5.48)      # PMA-2's face on its axis, ISS frame (m); portview's ISS_PMA2
+
+
+def _cl_target_tris():
+    """[(name, rgb, pos (N,3), normals, triangles)] for the target, ISS frame."""
+    x0, yc, zc = CL_TARGET_FACE
+    out = {}
+
+    def add(name, rgb, quads):
+        P, N, T = out.setdefault(name, (rgb, [], [], []))[1:]
+        for q, n in quads:
+            b = len(P)
+            P.extend(q)
+            N.extend([n] * 4)
+            T.extend([(b, b + 1, b + 2), (b, b + 2, b + 3)])
+
+    def pt(x, u, w):                        # u along +Y (right as the camera sees it), w up (-Z)
+        return (x, yc + u, zc - w)
+
+    def flat(x, u0, w0, u1, w1):            # a rectangle facing +X
+        return ([pt(x, u0, w0), pt(x, u1, w0), pt(x, u1, w1), pt(x, u0, w1)], (1.0, 0.0, 0.0))
+
+    def box(xa, xb, u0, w0, u1, w1):
+        q = [flat(xb, u0, w0, u1, w1)]
+        for (ua, wa, ub, wb), n in (((u0, w0, u1, w0), (0, 0, 1)), ((u0, w1, u1, w1), (0, 0, -1)),
+                                    ((u0, w0, u0, w1), (0, -1, 0)), ((u1, w0, u1, w1), (0, 1, 0))):
+            q.append(([pt(xa, ua, wa), pt(xb, ua, wa), pt(xb, ub, wb), pt(xa, ub, wb)], n))
+        return q
+
+    def ring(x, r, wdt, n=72):
+        q = []
+        for k in range(n):
+            a0, a1 = 2 * np.pi * k / n, 2 * np.pi * (k + 1) / n
+            ri, ro = r - wdt / 2, r + wdt / 2
+            q.append(([pt(x, ri * np.cos(a0), ri * np.sin(a0)), pt(x, ro * np.cos(a0), ro * np.sin(a0)),
+                       pt(x, ro * np.cos(a1), ro * np.sin(a1)), pt(x, ri * np.cos(a1), ri * np.sin(a1))],
+                      (1.0, 0.0, 0.0)))
+        return q
+
+    white, black = (0.85, 0.85, 0.83), (0.04, 0.04, 0.04)
+    R = 8 * INCH
+    plate = []
+    for k in range(48):                     # the plate, a disc a little proud of the face
+        a0, a1 = 2 * np.pi * k / 48, 2 * np.pi * (k + 1) / 48
+        plate.append(([pt(x0 + 0.003, 0, 0), pt(x0 + 0.003, R * np.cos(a0), R * np.sin(a0)),
+                       pt(x0 + 0.003, R * np.cos(a1), R * np.sin(a1)), pt(x0 + 0.003, 0, 0)],
+                      (1.0, 0.0, 0.0)))
+    add("centerline target: plate", white, plate)
+    xm = x0 + 0.006                         # the markings, on the plate
+    marks = ring(xm, 3 * INCH, 0.25 * INCH) + ring(xm, 4 * INCH, 0.25 * INCH)
+    for d in (2, 3, 4, 5, 6):               # pitch/yaw indicator bars, each axis both ways
+        h, l = 0.15 * INCH, 0.6 * INCH
+        for su in (-1, 1):
+            u = su * d * INCH
+            marks.append(flat(xm, u - h, -l, u + h, l))
+        for sw in (-1, 1):
+            w = sw * d * INCH
+            marks.append(flat(xm, -l, w - h, l, w + h))
+    for a in (-6, -4, -2, 0, 2, 4, 6):      # roll blocks, at 2 deg, at the top
+        th = np.radians(90 + a)
+        u, w, b = 6.8 * INCH * np.cos(th), 6.8 * INCH * np.sin(th), 0.15 * INCH
+        marks.append(flat(xm, u - b, w - 2 * b, u + b, w + 2 * b))
+    add("centerline target: markings", black, marks)
+    s = 0.25 * INCH                         # the stalk and the stand-off cross, 12 in. out
+    xc = x0 + 0.003 + 12 * INCH
+    cross = box(x0 + 0.003, xc - 0.1 * INCH, -s, -s, s, s)
+    a, t = 1.0 * INCH, 0.125 * INCH
+    cross += box(xc - 0.1 * INCH, xc, -a, -t, a, t) + box(xc - 0.1 * INCH, xc, -t, -a, t, a)
+    add("centerline target: stand-off cross", black, cross)
+    return [(name, rgb, np.array(P, np.float32), np.array(N, np.float32), np.array(T, np.int32))
+            for name, (rgb, P, N, T) in out.items()]
+
+
+def prepare_iss_cl_target():
+    """Add the Shuttle centerline target to the prepared ISS model's PMA-2."""
+    import json
+    out_dir = os.path.join(CACHE, "models", "iss")
+    meta_path = os.path.join(out_dir, "model.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if meta.get('cl_target'):
+        return
+    z = dict(np.load(os.path.join(out_dir, "model.npz")))
+    mats = meta['materials']
+    for name, rgb, pos, nrm, tris in _cl_target_tris():
+        k = len(mats)
+        z['pos%d' % k], z['nrm%d' % k] = pos, nrm
+        z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
+        z['idx%d' % k] = tris.ravel()
+        mats.append(dict(name=name, color=[float(c) for c in rgb] + [1.0], metallic=0.0, texture=None))
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
+    meta['cl_target'] = True
+    meta['triangles'] = sum(len(z['idx%d' % k]) // 3 for k in range(len(mats)))
+    meta['source'] += "; the centerline target at PMA-2: STS-134 RNDZ checklist p149"
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=1)
+    print("  the centerline target at PMA-2")
+
+
 def prepare_vehicles(keys=None, rebuild=False):
     """The vehicles in portview/vehicles/ (one module each; see its
     __init__.py): each prepared unless it is already, or rebuild."""
@@ -1271,6 +1384,7 @@ def main():
     for key in MODELS:
         prepare_model(key, args.keep_downloads)
     prepare_iss_visitors(args.keep_downloads)
+    prepare_iss_cl_target()
     prepare_vehicles()
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:

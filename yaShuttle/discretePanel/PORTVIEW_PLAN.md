@@ -60,6 +60,21 @@ Agreed with PASS-IDLE 2026-10-07.
   - left / right: the commander's and pilot's side windows (W1 / W6), looking
     outward, partly forward and somewhat downward; the angles are to be taken
     from Orbiter drawings.
+  - aft: the aft station's overhead windows W11/W12;
+  - cl: the ODS centerline camera's line of sight, as a plain window;
+  - cctv (built 2026-10-09): the same camera **as the aft monitor showed it**,
+    A3 MON 1, STS-134's docking setup (forClaude/docs/apds-cctv-aft-findings.md
+    (B)): a 4:3 NTSC picture at the CTVC's zoom (`--cctv-zoom` 40.0 corridor,
+    default; 10.1 full zoom, alignment; 74.4 none), its black stretch and an
+    NTSC-like softness and line structure (resolution and distortion are not
+    documented: choices), the monitor's green electronic crosshair with lens
+    and camera data, and the CC 9-17 corridor/alignment transparency taped to
+    the screen (`--cctv-overlay`).  The ISS model carries the Shuttle
+    centerline target on PMA-2 (RNDZ checklist p149): backplate arcs,
+    indicator bars, roll blocks and the stand-off cross 12 in. out
+    (`fetch_assets.prepare_iss_cl_target`).  Tests: `--test vbar --test-sight
+    cctv --test-range M [--test-offset RIGHT,UP]` puts PMA-2 on (or off) the
+    camera's axis.
 
 ## Rendering (back to front)
 
