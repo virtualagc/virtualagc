@@ -82,6 +82,12 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            T2: the R-bar, 600 ft below the ISS) and the burns' table, PASS's
            solutions beside the truth's Lambert and the checklist's MEAN and
            3 SIGMA (rndz-check.log, burns.json)
+  RBAR, RPM, TORVA, VBAR, HOLD
+           the manual phase (rndz_manual.py, Stage 5): a scripted pilot on
+           the crew's instruments (rndz_instruments.py, Stage 4) from the
+           R-bar through the R-bar pitch maneuver and the fly-around to
+           station-keeping 100 ft out on the +V-bar, where docking would
+           pick up (RENDEZVOUS_PLAN.md 5f; manual.json)
 
 --no-mc flies the M1b baseline instead: after Ti, OPS 201, the -Z track and
 the coast to T2 (TIG + 76.9 min).  --zero-sensor-bias is the sensor bias
@@ -130,6 +136,7 @@ sys.path.insert(0, HERE)
 import downlist      # noqa: E402
 import fly_sts134    # noqa: E402
 import groundstation  # noqa: E402
+from rndz_manual import ManualPhase  # noqa: E402
 
 FT = 0.3048
 EPOCH = "2011-05-18T06:30:00"
@@ -140,7 +147,9 @@ NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
-          "MC1", "MC2", "MC3", "MC4", "ARRIVAL"]
+          "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
+          # the manual phase (rndz_manual.py, Stage 5), to 100 ft station-keeping
+          "RBAR", "RPM", "TORVA", "VBAR", "HOLD"]
 # TGT 10 as JSC-48072-134 lists it (TARGET Ti BURN [13A], [15A]):
 TGT10 = {"T1": 0.0, "EL": 0.0, "DT": 76.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8}
 # The midcourse sets, as JSC-48072-134's timeline (pp. 4-17 to 4-20) and
@@ -403,7 +412,8 @@ class Ears(object):
                 n = (len(d) - 4) // 8
                 v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
                 with self.lock:
-                    self.tru = {"t": v[0], "gmt": v[1], "q": v[2:6], "w": v[6:9], "r": v[9:12], "v": v[12:15]}
+                    self.tru = {"t": v[0], "gmt": v[1], "q": v[2:6], "w": v[6:9], "r": v[9:12], "v": v[12:15],
+                                "cg": v[27:30] if n >= 30 else (0.0, 0.0, 0.0)}
                     self.hist_o.append((v[1], v[9:12], v[12:15]))
                     del self.hist_o[:-3000]
 
@@ -418,7 +428,8 @@ class Ears(object):
                 v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
                 with self.lock:
                     g = (self.tru["gmt"] - self.tru["t"] + v[0]) if self.tru else None
-                    self.tgt = {"t": v[0], "gmt": g, "norad": int(v[1]), "r": v[2:5], "v": v[5:8]}
+                    self.tgt = {"t": v[0], "gmt": g, "norad": int(v[1]), "r": v[2:5], "v": v[5:8],
+                                "q": v[8:12] if n >= 12 else (1.0, 0.0, 0.0, 0.0)}
                     if g is not None:
                         self.hist_t.append((g, v[2:5], v[5:8]))
                         del self.hist_t[:-3000]
@@ -1080,7 +1091,7 @@ class RadarNav(object):
 
 
 
-class Rendezvous(RadarNav, StarTrackerNav, fly_sts134.Flight):
+class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
         self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a")
@@ -2667,6 +2678,12 @@ def main():
     ap.add_argument("--no-rr", action="store_true",
                     help="no Ku-band rendezvous radar (RRNAV does nothing; the star tracker pass goes on "
                          "after Ti, as in Stage 2)")
+    ap.add_argument("--low-z", action="store_true",
+                    help="RBAR: press LOW Z, as the APPROACH card does inside 1,000 ft.  Off by default: "
+                         "vehdyn models the RCS jets without their cant, and LOW Z's +Z translation, "
+                         "which the aft-firing jets' cant makes, came out -Z (RENDEZVOUS_PLAN.md 5f)")
+    ap.add_argument("--hold-min", type=float, default=20.0,
+                    help="HOLD: minutes of station-keeping 100 ft out on the +V-bar (default %(default)s)")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()
