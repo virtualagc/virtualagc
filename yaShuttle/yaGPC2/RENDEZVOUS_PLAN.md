@@ -1467,6 +1467,139 @@ stopped in TORVA when the jet geometry landed.  FLTR ran 50-110 ft off in
 the static R-bar hold: volrun1 carries the tape's CGNS_VAR_RR_RNG_MIN 711
 (flown 6400), so range marks were weighted ~700x too heavily.
 
+
+## 5g. The clean run (2026-10-09, macOS)
+
+**What it is.** The whole rendezvous on the corrected vehicle, flown on
+branch `rndz-clean` (origin `review/rndz-clean`). That branch is
+`review/ops1-lps` 38a0783 (PASS-IDLE's RCS jet table: every jet fires as PASS
+assumes, so LOW Z pushes +Z; kuradar's flown antenna position), plus 62fa890
+(`script_done` waits for "script complete"), b0bf186 (the RPM turn test),
+ac70551 (I-load spec v2 with the jet map), and the driver fixes below.
+
+- **Tape:** `~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv`
+  (SHA-256 1684f4ca...), carrying the flown I-loads. No run-only patches.
+- **Run:** `~/sts134-runs/rendezvous/clean-run1`, port base 48800, rate 2,
+  `--low-z`.
+  - **IPL -> TORVA:** one process, start 06:10 UTC.
+  - **VBAR:** re-flown from the TORVA capture with the documented ODS geometry.
+  - **HOLD:** re-flown from the VBAR capture, with the RM thresholds seeded,
+    IMU 1 checked, MSG RESET and DAP A10/B10.
+
+    python3 examples/flights/fly_rndz134.py --logs ~/sts134-runs/rendezvous/clean-run1 --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --to HOLD --low-z --tape ~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv
+
+**The burns** (ft/s, LVLH). Every one was targeted and flown on PASS's own
+solution.
+
+| Burn | PASS (final) | Truth's Lambert | Flown (truth sensed) |
+|---|---|---|---|
+| Ti | +8.93 -1.14 +2.84 | +8.91 -0.67 +2.87 | 9.35 ft/s, left OMS 12.4 s; residuals VGO -0.04 -0.21 +0.40 |
+| MC1 | +0.09 -0.21 +0.05 | +0.10 +0.17 +0.04 | +0.14 +0.10 +0.01 |
+| MC2 | +0.08 +0.17 +0.58 | -0.01 -0.09 +0.58 | -0.02 +0.00 +0.62 |
+| MC3 | -0.13 -0.05 -0.37 | -0.13 -0.13 -0.35 | -0.07 -0.11 -0.45 |
+| MC4 | +1.66 +0.26 +0.93 | +1.66 +0.12 +0.90 | +1.71 +0.20 +0.76 |
+
+All are within the checklist's 3-sigma. MC4's +1.7 is X, inside its 1.3 +/-
+1.3.
+
+**Arrival** (MC4 + 13.0 min): X -36.8, Y +40.0, Z +515.8 ft; XD -0.07, YD
+-0.02, ZD -0.88 ft/s. The aim was 0, 0, +600.
+
+**The manual legs** (the truth's error from the goal; RCS from the captures)
+
+| Leg | Time | rms error ft (x y z) | max ft | RCS lb |
+|---|---|---|---|---|
+| RBAR, 600 ft | settled in ~8 min | 2.5 1.3 5.5 (last 3 min) | 4.6 1.7 10.0 | 507 |
+| RPM, 360 deg | 16.9 min | -- | -- | 1,552 |
+| TORVA | 15.5 min | 6.7 1.0 5.6 | 29.9 1.7 24.9 | 648 |
+| VBAR, 331 -> 100 ft | 21.3 min | 2.6 2.3 4.8 | 6.2 9.4 30.3 | 1,062 |
+| HOLD, 100 ft | 20.1 min, 13 pulses | 3.1 3.2 2.5 | 8.1 5.9 4.5 | 263 |
+
+The RPM's quarter turns stopped 2.2, 8.4, 6.4 and 8.3 deg from the ISS,
+where PASS's own target is.
+
+**FLTR** (|PASS's relative state - the truth|, ft, mean/max):
+
+| Phase | FLTR mean | FLTR max |
+|---|---|---|
+| star tracker pass | 16 | 21 |
+| Ti targeting | 44 | 125 |
+| RR nav | 65 | 85 |
+| MC1-MC4 | 11-58 | 92 |
+| ARRIVAL | 19 | 60 |
+| RBAR | 82 | 138 |
+| RPM | 130 | 188 |
+| TORVA | 89 | 187 |
+| VBAR | 124 | 177 |
+| HOLD | 58 | 114 |
+
+So VAR_RR_RNG_MIN 6400 did not bring the static R-bar and V-bar holds down to
+tens of feet. They run about 60-130 ft, mostly along the line of sight: still
+open.
+
+**-Z on the ISS:** 0.8-1.5 deg mean in the tracked phases (STRKNAV to
+ARRIVAL), 3.9 deg in RBAR and 4.9 deg in TORVA. In VBAR and HOLD the docking
+attitude points -Z down the -V-bar, so the number means nothing there.
+
+**LOW Z.** It is flown throughout the manual phase, and with the new jet table
++Z goes the right way: RBAR converged under it. LOW Z TOGGLES (GCQORB.hal
+1443-1458, 3256-3280), and the old blind press turned it off every second
+call. `dap_lamps.set_low_z` now presses only while FF1's lamp (card 10 ch 1,
+0x0001) disagrees, and confirms the change. Every other DAP pushbutton
+selects; HIGH Z also clears LOW Z.
+
+**Fixed on the way:**
+- **RPM turn test** (b0bf186): a turn now counts as stopped only once it has
+  been under way (> 0.3 deg/s) or after 5 min. Before, the verniers'
+  run-up was cut off.
+- **`feeds()` at one instant:** TGT1's newest sample is carried to TRU1's GMT
+  along its velocity, or nothing is used if they are over 1 s apart. This
+  fixes ~1,650 ft outliers in rel("ods").
+- **rel() jump guard:** it drops and logs any step beyond 5 ft + 2 ft/s x dt.
+- **ODS geometry** from the Shuttle Systems Handbook Vol 3, SCOM 2.20 and
+  Flight Rules A10-385:
+  - ring axis Xo 649.00, face Zo 475.75 ready to dock;
+  - centerline camera Zo 422.85;
+  - TCS head 599.68 / -7.45 / 415.31;
+  - portview's `cl` view moved with it.
+- **DAP A10/B10** stored as JSC-48072-134 p. 6-2's DOCKING column
+  (`rndz_manual.DAP_DOCK`): DAP EDIT, every item read back, A7/B7 kept
+  selected. ALT JET OPT only toggles ALL <-> TAIL (GKKORB.hal 688-697), so it
+  takes one press, not the P/Y options' two.
+- **The IMU caution** (with the IMU investigator):
+  - [10A]'s SPEC 21 ITEM 7 was never typed: `script_done` returned when the
+    step started, and the next play dropped the rest. ITEM 7 toggles
+    (GKUIMU.hal 203-212), so [10B]'s ITEM 7 deselected IMU 1 for the rest of
+    the flight. Fixed in fly_sts134 (62fa890), and `imu1_select` now keys
+    ITEM 7 only while CGUB_IMU_SEL_MFE (X'59DC') disagrees, then checks it.
+  - PASS's IMU attitude RM thresholds X'566E'-X'5679' are zero in any run
+    started in OPS 2, because GRS_IMU_RM_INIT never runs. With two IMUs the
+    RM dilemma lit IMU and the backup C&W. `seed_imu_rm` copies the six
+    I-load pairs into every capture flown on from; a fresh run restarts from
+    UPLINK to get them.
+  - Still lit in the final capture: the RM dilemma latched before the
+    seeding (RM DLMA IMU, GMT ...151325) keeps IMU and BACKUP C/W ALARM lit
+    after MSG RESET. PASS keeps writing them.
+- **C&W** (79d7451): every change of the PASS-driven C&W lights is logged to
+  driver.out and rndz-check.log.
+  - When the tone rises and every light on is expected (IMU after [10A]),
+    the driver presses MASTER ALARM, adds MSG RESET for latched class-2
+    lights, and logs the fault summary (X'1D02').
+  - An unexpected caution is logged and left sounding. The simulator's audio
+    stays on.
+
+**The docking start point.** `~/mnt/forClaude/rndz-hold-v2/` holds
+sts134r-hold, the rndz2 volume and README.txt. The ring is ~100 ft from
+PMA-2's face. The capture has:
+- DAP A10/B10 stored as DOCKING and A7/B7 selected;
+- LOW Z on;
+- IMU 1 selected and the thresholds seeded.
+
+Coming: vehdyn's capture model (PASS-IDLE), with TRU1 [30] the docking state
+and [31] the contact count.
+
+**Before the jet-geometry change.** full-run1 is recorded in 5f.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the
