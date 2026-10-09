@@ -28,11 +28,23 @@
  * verniers.  JSC-19350, the I-load document that has the true values, is not
  * available.
  *
- * Direction is opposite the plume, which the jet's last letter names (the
- * Draper legend): A aft plume, +X thrust; F fore plume, -X; L left plume,
- * +Y; R right plume, -Y; U up plume, +Z (body Z is down); D down plume, -Z.
- * The real jets are canted a few degrees off these axes; that is not
- * modelled.
+ * DIRECTION, MAGNITUDE AND POINT ARE PASS'S OWN (2026-10-09,
+ * ~/workspace/pass-run/rndz/rcs-jet-geometry-findings.md).  The on-orbit DAP
+ * holds the jets' geometry per GROUP, not per jet: GCQORB's K-loads
+ * CGCS_REF_FORCE (lbf, body axes) and CGCS_REF_TORQUE (about CGCS_REF_CG
+ * Xo 1076.7 Zo 375), 14 primary groups and the 6 verniers (FSSR STS
+ * 83-0009-34 Tables 4.2.2.2.1-4/-4b), identical in our tape and every DASS
+ * G2 dump.  Each jet carries its group's REF_FORCE (fx, fy, fz) -- the cant
+ * and nozzle scarfing (JSC-10511 Rev A p. 7-11): the X jets 10 deg toward
+ * +Z, the forward down-firers 44 deg outboard, the aft down-firers 32 deg
+ * with an aft component -- and its position is the point that makes the
+ * group's torque PASS's ("eff" in the findings).  The magnitudes are PASS's
+ * effective ones (aft down-firers 691 lbf, L5D/R5D 14.3), which the findings
+ * read, without a document saying so, as plume impingement; the propellant
+ * flow stays the nominal 870/24 lbf over Isp.  Before this every jet fired
+ * along a pure axis and LOW Z, which takes its +Z from the X jets' cant,
+ * pushed the Orbiter toward its target (Mac-portview, 2026-10-09).
+ * Body axes: +X forward, +Y right, +Z down.
  *
  * The fire bit is the jet's place in its MDM's B word (GRORCS.hal:138-151,
  * GRRRCS.hal:283-373, GP1ORB.hal:104-108).
@@ -42,61 +54,62 @@ typedef struct {
     char mdm;            /* 'F' forward, 'A' aft */
     int unit;            /* MDM 1-4 */
     uint16_t bit;
-    double xo, yo, zo;   /* inches, Orbiter structural */
+    double xo, yo, zo;   /* inches, Orbiter structural: PASS's effective point */
     bool vernier;
     bool estimated;
+    double fx, fy, fz;   /* lbf, body axes: PASS's REF_FORCE of the jet's group */
 } Jet;
 
 static const Jet JETS[VEHDYN_NJETS] = {
     /* forward module */
-    { "F1F", 'F', 1, 0x8000, 325.0, -14.0, 390.0, false, true  },
-    { "F1L", 'F', 1, 0x4000, 362.819, -69.538, 373.634, false, false },
-    { "F1U", 'F', 1, 0x2000, 350.542, -14.091, 413.244, false, false },
-    { "F1D", 'F', 1, 0x1000, 335.982, -63.481, 356.600, false, false },
-    { "F2F", 'F', 2, 0x8000, 325.0,  14.0, 390.0, false, true  },
-    { "F2R", 'F', 2, 0x4000, 362.819,  69.538, 373.634, false, true  },
-    { "F2U", 'F', 2, 0x2000, 350.542,  14.091, 413.244, false, false },
-    { "F2D", 'F', 2, 0x1000, 335.982,  63.481, 356.600, false, false },
-    { "F4R", 'F', 3, 0x8000, 364.814,  71.484, 359.506, false, true  },
-    { "F4D", 'F', 3, 0x4000, 349.971,  67.581, 357.543, false, false },
-    { "F5L", 'F', 3, 0x2000, 345.0, -66.0, 352.0, true,  true  },
-    { "F5R", 'F', 3, 0x1000, 345.0,  66.0, 352.0, true,  true  },
-    { "F3F", 'F', 4, 0x8000, 325.0,   0.0, 392.0, false, true  },
-    { "F3L", 'F', 4, 0x4000, 364.814, -71.484, 359.506, false, false },
-    { "F3U", 'F', 4, 0x2000, 350.524,   0.0, 414.231, false, false },
-    { "F3D", 'F', 4, 0x1000, 349.971, -67.581, 357.543, false, false },
+    { "F1F", 'F', 1, 0x8000, 325.1, -14.0, 390.6, false, true, -875.12, 0.00, 150.87 },
+    { "F1L", 'F', 1, 0x4000, 363.7, -69.6, 366.3, false, false, -20.98, 870.34, 0.52 },
+    { "F1U", 'F', 1, 0x2000, 350.9, -14.1, 413.3, false, false, -31.90, 0.00, 873.49 },
+    { "F1D", 'F', 1, 0x1000, 341.5, -64.6, 357.5, false, false, -24.80, 612.53, -639.37 },
+    { "F2F", 'F', 2, 0x8000, 325.1, 14.0, 390.6, false, true, -875.12, 0.00, 150.87 },
+    { "F2R", 'F', 2, 0x4000, 363.7, 69.6, 366.3, false, true, -20.98, -870.34, 0.52 },
+    { "F2U", 'F', 2, 0x2000, 350.9, 14.1, 413.3, false, false, -31.90, 0.00, 873.49 },
+    { "F2D", 'F', 2, 0x1000, 341.5, 64.6, 357.5, false, false, -24.80, -612.53, -639.37 },
+    { "F4R", 'F', 3, 0x8000, 365.7, 71.5, 352.2, false, true, -20.98, -870.34, 0.52 },
+    { "F4D", 'F', 3, 0x4000, 355.5, 68.7, 358.4, false, false, -24.80, -612.53, -639.37 },
+    { "F5L", 'F', 3, 0x2000, 328.1, -61.5, 348.4, true, true, -0.80, 17.01, -17.61 },
+    { "F5R", 'F', 3, 0x1000, 328.1, 61.5, 348.4, true, true, -0.80, -17.01, -17.61 },
+    { "F3F", 'F', 4, 0x8000, 325.1, 0.0, 392.6, false, true, -875.12, 0.00, 150.87 },
+    { "F3L", 'F', 4, 0x4000, 365.7, -71.5, 352.2, false, false, -20.98, 870.34, 0.52 },
+    { "F3U", 'F', 4, 0x2000, 350.9, 0.0, 414.2, false, false, -31.90, 0.00, 873.49 },
+    { "F3D", 'F', 4, 0x1000, 355.5, -68.7, 358.4, false, false, -24.80, 612.53, -639.37 },
     /* aft: FA1 */
-    { "L1A", 'A', 1, 0x8000, 1565.0, -132.0, 480.0, false, true  },
-    { "L1L", 'A', 1, 0x4000, 1555.0, -149.55, 459.04, false, true  },
-    { "L1U", 'A', 1, 0x2000, 1542.00, -132.00, 498.56, false, false },
-    { "R1A", 'A', 1, 0x1000, 1565.0,  132.0, 480.0, false, true  },
-    { "R1R", 'A', 1, 0x0800, 1555.0,  149.55, 459.04, false, true  },
-    { "R1U", 'A', 1, 0x0400, 1542.00,  132.00, 498.56, false, false },
-    { "L5D", 'A', 1, 0x0200, 1560.0, -118.0, 420.0, true,  true  },
-    { "L5L", 'A', 1, 0x0100, 1560.0, -149.55, 445.0, true,  true  },
+    { "L1A", 'A', 1, 0x8000, 1564.6, -137.0, 482.2, false, true, 856.78, 0.00, 151.12 },
+    { "L1L", 'A', 1, 0x4000, 1574.3, -149.5, 456.5, false, true, 1.30, 869.81, -11.74 },
+    { "L1U", 'A', 1, 0x2000, 1555.2, -123.9, 498.9, false, false, 0.00, 39.33, 871.13 },
+    { "R1A", 'A', 1, 0x1000, 1564.6, 137.0, 482.2, false, true, 856.78, 0.00, 151.12 },
+    { "R1R", 'A', 1, 0x0800, 1561.3, 149.5, 456.5, false, true, 1.30, -869.81, -11.74 },
+    { "R1U", 'A', 1, 0x0400, 1555.2, 123.9, 498.9, false, false, 0.00, -39.33, 871.13 },
+    { "L5D", 'A', 1, 0x0200, 1568.8, -109.1, 419.7, true, true, 3.91, 4.34, -13.05 },
+    { "L5L", 'A', 1, 0x0100, 1565.0, -149.9, 459.0, true, true, 0.00, 23.99, -0.60 },
     /* FA2 */
-    { "L3A", 'A', 2, 0x8000, 1565.0, -132.0, 465.0, false, true  },
-    { "L3L", 'A', 2, 0x4000, 1542.00, -149.55, 459.04, false, false },
-    { "L3D", 'A', 2, 0x2000, 1544.56, -114.40, 430.72, false, false },
-    { "R3A", 'A', 2, 0x1000, 1565.0,  132.0, 465.0, false, true  },
-    { "R3R", 'A', 2, 0x0800, 1542.00,  149.55, 459.04, false, false },
-    { "R3D", 'A', 2, 0x0400, 1544.56,  114.40, 430.72, false, false },
-    { "R5R", 'A', 2, 0x0200, 1560.0,  149.55, 445.0, true,  true  },
-    { "R5D", 'A', 2, 0x0100, 1560.0,  118.0, 420.0, true,  true  },
+    { "L3A", 'A', 2, 0x8000, 1564.6, -137.0, 467.2, false, true, 856.78, 0.00, 151.12 },
+    { "L3L", 'A', 2, 0x4000, 1561.3, -149.5, 456.5, false, false, 1.30, 869.81, -11.74 },
+    { "L3D", 'A', 2, 0x2000, 1558.0, -113.0, 434.5, false, false, 196.01, 305.11, -588.66 },
+    { "R3A", 'A', 2, 0x1000, 1564.6, 137.0, 467.2, false, true, 856.78, 0.00, 151.12 },
+    { "R3R", 'A', 2, 0x0800, 1548.3, 149.5, 456.5, false, false, 1.30, -869.81, -11.74 },
+    { "R3D", 'A', 2, 0x0400, 1558.0, 113.0, 434.5, false, false, 196.01, -305.11, -588.66 },
+    { "R5R", 'A', 2, 0x0200, 1565.0, 149.9, 459.0, true, true, 0.00, -23.99, -0.60 },
+    { "R5D", 'A', 2, 0x0100, 1568.8, 109.1, 419.7, true, true, 3.91, -4.34, -13.05 },
     /* FA3 */
-    { "L2L", 'A', 3, 0x8000, 1529.04, -149.55, 459.04, false, false },
-    { "L2U", 'A', 3, 0x4000, 1529.04, -132.00, 498.56, false, false },
-    { "L2D", 'A', 3, 0x2000, 1531.52, -115.28, 452.40, false, false },
-    { "R2R", 'A', 3, 0x1000, 1529.04,  149.55, 459.04, false, false },
-    { "R2U", 'A', 3, 0x0800, 1529.04,  132.00, 498.56, false, false },
-    { "R2D", 'A', 3, 0x0400, 1531.52,  115.28, 452.40, false, false },
+    { "L2L", 'A', 3, 0x8000, 1548.3, -149.5, 456.5, false, false, 1.30, 869.81, -11.74 },
+    { "L2U", 'A', 3, 0x4000, 1542.2, -123.9, 498.9, false, false, 0.00, 39.33, 871.13 },
+    { "L2D", 'A', 3, 0x2000, 1544.9, -113.9, 456.1, false, false, 196.01, 305.11, -588.66 },
+    { "R2R", 'A', 3, 0x1000, 1535.4, 149.5, 456.5, false, false, 1.30, -869.81, -11.74 },
+    { "R2U", 'A', 3, 0x0800, 1542.2, 123.9, 498.9, false, false, 0.00, -39.33, 871.13 },
+    { "R2D", 'A', 3, 0x0400, 1544.9, 113.9, 456.1, false, false, 196.01, -305.11, -588.66 },
     /* FA4 */
-    { "L4L", 'A', 4, 0x8000, 1516.00, -149.55, 459.04, false, false },
-    { "L4U", 'A', 4, 0x4000, 1516.00, -132.00, 498.56, false, false },
-    { "L4D", 'A', 4, 0x2000, 1518.56, -115.92, 425.52, false, false },
-    { "R4R", 'A', 4, 0x1000, 1516.00,  149.55, 459.04, false, false },
-    { "R4U", 'A', 4, 0x0800, 1516.00,  132.00, 498.56, false, false },
-    { "R4D", 'A', 4, 0x0400, 1518.56,  115.92, 425.52, false, false },
+    { "L4L", 'A', 4, 0x8000, 1535.3, -149.5, 456.5, false, false, 1.30, 869.81, -11.74 },
+    { "L4U", 'A', 4, 0x4000, 1529.2, -123.9, 498.9, false, false, 0.00, 39.33, 871.13 },
+    { "L4D", 'A', 4, 0x2000, 1532.0, -114.5, 429.3, false, false, 196.01, 305.11, -588.66 },
+    { "R4R", 'A', 4, 0x1000, 1522.3, 149.5, 456.5, false, false, 1.30, -869.81, -11.74 },
+    { "R4U", 'A', 4, 0x0800, 1529.2, 123.9, 498.9, false, false, 0.00, -39.33, 871.13 },
+    { "R4D", 'A', 4, 0x0400, 1532.0, 114.5, 429.3, false, false, 196.01, -305.11, -588.66 },
 };
 
 /* THRUST AND SPECIFIC IMPULSE.  Primary 870 lbf (TD0340 RCS training manual;
@@ -303,25 +316,8 @@ static void to_body(double xo, double yo, double zo, double b[3]) {
 }
 
 static void jet_axis(const Jet *j, double u[3]) {
-    u[0] = u[1] = u[2] = 0.0;
-    /* THE FORWARD VERNIERS ARE THE EXCEPTION TO THE NAMING RULE: F5L and F5R
-     * are named for their SIDE of the nose, and both fire DOWN (Shuttle Crew
-     * Operations Manual, Reaction Control System: the forward module's two
-     * verniers fire down; the aft pods' L5L, L5D, R5R and R5D fire left,
-     * down, right, down).  Read by the letter they were a left- and a
-     * right-firing jet whose forces and pitch torques cancelled: PASS's VERN
-     * attitude hold, asking them for nose-up pitch, got none and fired them
-     * without end, 0.09 kg/s of propellant (2026-10-08, the rendezvous M1
-     * run). */
-    char plume = (j->name[0] == 'F' && j->name[1] == '5') ? 'D' : j->name[2];
-    switch (plume) {
-    case 'A': u[0] =  1.0; break;
-    case 'F': u[0] = -1.0; break;
-    case 'L': u[1] =  1.0; break;
-    case 'R': u[1] = -1.0; break;
-    case 'U': u[2] =  1.0; break;
-    case 'D': u[2] = -1.0; break;
-    }
+    double m = sqrt(j->fx * j->fx + j->fy * j->fy + j->fz * j->fz);
+    u[0] = j->fx / m; u[1] = j->fy / m; u[2] = j->fz / m;
 }
 
 static int jet_module(const Jet *j) {
@@ -329,9 +325,13 @@ static int jet_module(const Jet *j) {
     return (j->name[0] == 'L') ? 1 : 2;
 }
 
-static double jet_thrust(const Jet *j) { return j->vernier ? JET_VER_N : JET_PRI_N; }
+/* The force on the vehicle, PASS's effective magnitude (N). */
+static double jet_thrust(const Jet *j) {
+    return sqrt(j->fx * j->fx + j->fy * j->fy + j->fz * j->fz) * LBF_N;
+}
+/* Propellant flow from the NOMINAL thrust: impingement does not change it. */
 static double jet_mdot(const Jet *j) {
-    return jet_thrust(j) / ((j->vernier ? ISP_VER_S : ISP_PRI_S) * G0);
+    return (j->vernier ? JET_VER_N : JET_PRI_N) / ((j->vernier ? ISP_VER_S : ISP_PRI_S) * G0);
 }
 
 static void mass_properties(void);

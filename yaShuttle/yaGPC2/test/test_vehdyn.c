@@ -76,12 +76,14 @@ int main(void) {
     check(fabs(s->w[1] - q1) < 0.01 * fabs(q1), "rate held while coasting", s->w[1], q1);
 
     /* THE FORWARD VERNIERS FIRE DOWN.  F5L and F5R are named for their side
-     * of the nose, not for their plume (vehdyn.c, jet_axis): together, for
-     * ten seconds, they pitch the nose UP -- 2 x 106.8 N about 19 m forward
-     * of the CG, some 4,060 N m on Iyy 1.05e7: 3.9e-3 rad/s after ten s, with no
-     * roll or yaw to speak of.  Read as a left- and a right-firing jet, they
-     * gave no pitch at all, and PASS's VERN attitude hold fired them for
-     * ever. */
+     * of the nose, not for their plume: together, for ten seconds, they pitch
+     * the nose UP.  Their thrust is PASS's (GCQORB CGCS_REF_FORCE, vehdyn.c
+     * JETS): 24.5 lbf each, 44 deg outboard, so the sideways parts cancel and
+     * 2 x 17.6 lbf (2 x 78.3 N) push down at PASS's effective point ~19.6 m
+     * forward of the CG -- some 3,070 N m on Iyy 1.05e7: 2.9e-3 rad/s after ten
+     * s, with no roll or yaw to speak of.  Read as a left- and a right-firing
+     * jet, they gave no pitch at all, and PASS's VERN attitude hold fired
+     * them for ever. */
     reset_rcs_only(0.0);
     memset(ff, 0, sizeof ff); memset(fa, 0, sizeof fa);
     ff[3] = 0x2000 | 0x1000;                          /* F5L + F5R */
@@ -89,7 +91,7 @@ int main(void) {
     memset(ff, 0, sizeof ff);
     vehdyn_set_fire_words(ff, fa, 10e6);
     s = vehdyn_state();
-    check(s->w[1] > 3.4e-3 && s->w[1] < 4.4e-3, "forward verniers pitch the nose up (rad/s)", s->w[1], 3.9e-3);
+    check(s->w[1] > 2.6e-3 && s->w[1] < 3.2e-3, "forward verniers pitch the nose up (rad/s)", s->w[1], 2.92e-3);
     check(fabs(s->w[0]) < 1e-6 && fabs(s->w[2]) < 1e-6, "and neither roll nor yaw",
           fabs(s->w[0]) + fabs(s->w[2]), 0.0);
 
@@ -377,6 +379,31 @@ int main(void) {
         check(wow[0] && wow[1] && wow[2], "all three gear carry weight", wow[0] + wow[1] + wow[2], 3);
         check(speed < 0.05, "and the vehicle stands still on the runway", speed, 0.0);
         check(pitch < -0.5 && pitch > -4.0, "a little nose down on its wheels", pitch, -2.0);
+    }
+
+    /* LOW Z.  PASS's DAP translates in LOW Z with two forward-firers and an
+     * aft-firer on each side (GFFORB: group 1 twice, groups 7 and 8), taking
+     * its +Z -- body-down, away from a target above the payload bay -- from
+     * those jets' 10-degree cant: with PASS's REF_FORCE, (-36.7, 0, +604.5)
+     * lbf.  Fired along pure axes they gave no Z at all, and LOW Z pushed the
+     * Orbiter toward the ISS (Mac-portview, 2026-10-09). */
+    {
+        double ident[4] = { 1, 0, 0, 0 }, dv0[3], dv1[3];
+        reset_rcs_only(0.0);
+        vehdyn_set_attitude(ident, NULL);
+        vehdyn_sensed_dv(dv0);
+        memset(ff, 0, sizeof ff); memset(fa, 0, sizeof fa);
+        ff[1] = 0x8000; ff[2] = 0x8000;               /* F1F, F2F */
+        fa[1] = 0x8000 | 0x1000;                      /* L1A, R1A */
+        vehdyn_set_fire_words(ff, fa, 0.0);
+        memset(ff, 0, sizeof ff); memset(fa, 0, sizeof fa);
+        vehdyn_set_fire_words(ff, fa, 1e6);
+        vehdyn_sensed_dv(dv1);
+        double m = vehdyn_state()->mass, F[3];
+        for (int i = 0; i < 3; i++) F[i] = (dv1[i] - dv0[i]) * m / 4.4482216152605;
+        check(F[2] > 570.0 && F[2] < 640.0, "LOW Z pushes +Z, away from the target (lbf)", F[2], 604.5);
+        check(fabs(F[0] + 36.7) < 15.0, "LOW Z's net X is small (lbf)", F[0], -36.7);
+        check(fabs(F[1]) < 5.0, "LOW Z's net Y is nil (lbf)", F[1], 0.0);
     }
 
     printf("vehdyn: %d/%d checks passed\n", checks - failures, checks);

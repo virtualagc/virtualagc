@@ -511,8 +511,8 @@ int main(void) {
          * high gain (commanded above), so a pulse weighs a tenth of
          * 0.0344488 ft/s times (1 + SFLO 1e-6), and each axis has its BILO
          * bias.  GMHACP's compensation -- counts x weight - bias x dt, Z
-         * negated first -- must give back the true delta-V: 2 F t / m along X
-         * and nothing along Y or Z -- once GRWIMU has taken out the
+         * negated first -- must give back the true delta-V: 2 F t / m along the
+         * jets' canted line, X and +Z, nothing along Y -- once GRWIMU has taken out the
          * navigation base's motion about the CG, w x r carried to the
          * platform (the aft pair also starts the vehicle turning, and the
          * accelerometers sit 58 ft forward of the CG: ledger #274). */
@@ -530,7 +530,11 @@ int main(void) {
         read_words(21, FF(0x24C0Du), 14, w);
         const double SF[3] = { -35780.0, -34250.0, -48240.0 };   /* IMU 2 */
         const double BI[3] = { -17842.0, -13376.0, -32666.0 };
-        double truth[3] = { 2.0 * 3870.0 * 4.0 / m0 / 0.3048, 0.0, 0.0 };
+        /* L1A and R1A are canted 10 deg toward +Z (PASS's GCQORB REF_FORCE,
+         * vehdyn.c JETS): each 856.78 lbf along X and 151.12 lbf along +Z. */
+        const double LBF = 4.4482216152605;
+        double truth[3] = { 2.0 * 856.78 * LBF * 4.0 / m0 / 0.3048, 0.0,
+                            2.0 * 151.12 * LBF * 4.0 / m0 / 0.3048 };
         const PhysState *ps = vehdyn_state();
         const double RNB[3] = { 57.959, -0.067, -3.967 };
         double wr[3] = { ps->w[1] * RNB[2] - ps->w[2] * RNB[1], ps->w[2] * RNB[0] - ps->w[0] * RNB[2],
