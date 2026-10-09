@@ -479,24 +479,6 @@ GANTRY_SCALE = 5.89
 GANTRY_ROOT = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]) * GANTRY_SCALE
 GANTRY_ORIGIN = np.array([0.73, -1.39, -1.84])          # model units: ground under the trench
 
-HST_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
-           "Hubble%20Space%20Telescope%20(A)/Hubble%20Space%20Telescope%20(A).glb")
-# Hubble, in inches: the aperture at +z (the 3.0 m light shield; the 4.3 m
-# aft shroud, with WFC3's bay, at z 0-200), the solar arrays along x.  This
-# takes it to its V1 (toward the aperture), V2 (along the arrays), V3, in
-# metres, about the middle of its length.
-MIR_URL = ("https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/"
-           "Mir/Mir.glb")
-# Mir: ~0.0221 m a unit (its core module's 4.15 m across is ~188 units),
-# the core along y (+y toward the docking node, at y ~520), the axis at
-# x 461, z -940.  To +X along the core toward the node, +Y = model x,
-# +Z = -model z; origin at the node.
-MIR_SCALE = 0.0221
-MIR_ROOT = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]]) * MIR_SCALE
-MIR_ORIGIN = np.array([461.0, 520.0, -940.0])
-HST_ROOT = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]) * INCH
-HST_ORIGIN = np.array([0.0, 0.0, 256.0])
-
 MODELS = {
     'iss': dict(url=ISS_URL, glb="iss-igoal.glb", root=ISS_ROOT, origin=np.zeros(3),
                 exclude=ISS_NOT_2011, name="ISS, STS-134 (May 2011)",
@@ -506,130 +488,26 @@ MODELS = {
                    exclude=set(), name="LC-39 pad structures (Shuttle era)",
                    frame="pad east-north-up; m; origin on the ground under the stack",
                    source="NASA 3D Resources, Gantry"),
-    'hst': dict(url=HST_URL, glb="hst.glb", root=HST_ROOT, origin=HST_ORIGIN, exclude=set(),
-                name="Hubble Space Telescope (after SM4, 2009)",
-                frame="HST V1 (toward the aperture), V2 (along the arrays), V3; m; mid-length",
-                source="NASA 3D Resources, Hubble Space Telescope (A)",
-                mag_1000km=1.5),            # ~2.2 half lit (the satellite catalogues' standard)
-    'mir': dict(url=MIR_URL, glb="mir.glb", root=MIR_ROOT, origin=MIR_ORIGIN, exclude=set(),
-                name="Mir (a simple model: core, node, Kvant, Kristall, Spektr, Priroda, Soyuz)",
-                frame="Mir: +X along the core toward the node, +Y, +Z; m; origin at the node",
-                source="NASA 3D Resources, Mir", mag_1000km=-0.8),
 }
-
-
-# Satellites the Shuttle visited that have no published model: simple
-# shapes to their published dimensions, as each was met (antennas stowed on
-# the HS-376s, retrieved by STS-51A; Leasat 3's deployed, repaired on
-# STS-51I).  Approximate -- shapes and colours, not details.  Each: name,
-# NORAD id, frame, brightness, parts (material, rgb, shape, dimensions, m):
-# 'cyl' (radius, x0, x1) along +X; 'cone' (r0, r1, x0, x1); 'box' (centre,
-# size); 'disc' (radius, x) facing +X.
-HS376 = (('solar drum', (0.04, 0.05, 0.10), 'cyl', (1.08, -1.41, 0.40)),
-         ('solar skirt', (0.04, 0.05, 0.10), 'cyl', (1.07, 0.40, 1.41)),
-         ('forward barrier', (0.75, 0.62, 0.30), 'disc', (1.08, 1.41)),
-         ('antenna mast', (0.80, 0.80, 0.80), 'cyl', (0.25, 1.41, 2.10)),
-         ('stowed reflector', (0.85, 0.85, 0.85), 'cyl', (0.85, 1.80, 1.95)),
-         ('apogee motor nozzle', (0.25, 0.25, 0.25), 'cone', (0.20, 0.45, -1.41, -2.00)),
-         ('aft barrier', (0.75, 0.62, 0.30), 'disc', (1.08, -1.41)))
-PROCEDURAL = {
-    'westar6': dict(norad=14688, name="Westar 6 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
-                    frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
-    'palapab2': dict(norad=14692, name="Palapa B2 (HS-376; approximate)", parts=HS376, mag_1000km=3.0,
-                     frame="HS-376: +X along the spin axis toward the antenna; m; mid-drum"),
-    'leasat3': dict(norad=15643, name="Leasat 3 (Syncom IV; approximate)", mag_1000km=2.0,
-                    frame="Leasat: +X along the spin axis toward the antennas; m; mid-drum",
-                    parts=(('solar drum', (0.04, 0.05, 0.10), 'cyl', (2.13, -1.40, 1.40)),
-                           ('forward deck', (0.80, 0.80, 0.80), 'disc', (2.13, 1.40)),
-                           ('aft deck', (0.75, 0.62, 0.30), 'disc', (2.13, -1.40)),
-                           ('UHF helix', (0.85, 0.85, 0.85), 'cyl', (0.30, 1.40, 3.30)),
-                           ('UHF dish', (0.90, 0.90, 0.90), 'cone', (0.15, 0.85, 1.40, 1.80)),
-                           ('omni', (0.80, 0.80, 0.80), 'cyl', (0.06, 3.30, 3.90)),
-                           ('liquid motor', (0.30, 0.30, 0.30), 'cone', (0.30, 0.60, -1.40, -2.20)))),
-    'smm': dict(norad=11703, name="Solar Maximum Mission (approximate)", mag_1000km=2.0,
-                frame="SMM: +X along the instruments' axis (toward the Sun); m; mid-length",
-                parts=(('MMS bus', (0.80, 0.80, 0.78), 'cyl', (1.15, -2.00, -0.50)),
-                       ('instrument module', (0.75, 0.62, 0.30), 'cyl', (1.00, -0.50, 2.00)),
-                       ('Sun end', (0.20, 0.20, 0.20), 'disc', (1.00, 2.00)),
-                       ('solar array +Y', (0.04, 0.05, 0.10), 'box', ((-1.2, 3.3, 0.0), (1.5, 4.2, 0.04))),
-                       ('solar array -Y', (0.04, 0.05, 0.10), 'box', ((-1.2, -3.3, 0.0), (1.5, 4.2, 0.04))),
-                       ('high-gain mast', (0.80, 0.80, 0.80), 'cyl', (0.05, -2.00, -3.20)),
-                       ('grapple pin', (0.80, 0.80, 0.80), 'box', ((-1.25, 0.0, 1.20), (0.10, 0.10, 0.25))))),
-}
-
-
-def shape_mesh(kind, dims, n=48):
-    """Corner points (k, 3) and triangles of a simple shape (see PROCEDURAL)."""
-    a = np.linspace(0.0, 2.0 * np.pi, n, endpoint=False)
-    c, s = np.cos(a), np.sin(a)
-    if kind in ('cyl', 'cone'):
-        r0, r1, x0, x1 = (dims[0], dims[0], dims[1], dims[2]) if kind == 'cyl' else dims
-        ring0 = np.column_stack([np.full(n, x0), r0 * c, r0 * s])
-        ring1 = np.column_stack([np.full(n, x1), r1 * c, r1 * s])
-        pts = np.vstack([ring0, ring1, [[x0, 0, 0]], [[x1, 0, 0]]])
-        tris = []
-        for i in range(n):
-            j = (i + 1) % n
-            tris += [(i, j, n + j), (i, n + j, n + i), (2 * n, j, i), (2 * n + 1, n + i, n + j)]
-        return pts, np.array(tris)
-    if kind == 'disc':
-        r, x = dims
-        pts = np.vstack([np.column_stack([np.full(n, x), r * c, r * s]), [[x, 0, 0]]])
-        return pts, np.array([(n, i, (i + 1) % n) for i in range(n)])
-    centre, size = (np.array(v, float) for v in dims)
-    corners = np.array([[i, j, k] for i in (-0.5, 0.5) for j in (-0.5, 0.5) for k in (-0.5, 0.5)])
-    pts = centre + corners * size
-    quads = ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3))
-    return pts, np.array([t for q in quads for t in ((q[0], q[1], q[2]), (q[0], q[2], q[3]))])
-
-
-def prepare_procedural(key):
-    import json
-    spec = PROCEDURAL[key]
-    out_dir = os.path.join(CACHE, "models", key)
-    if os.path.exists(os.path.join(out_dir, "model.json")):
-        return
-    os.makedirs(out_dir, exist_ok=True)
-    arrays, mats = {}, []
-    for k, (name, rgb, kind, dims) in enumerate(spec['parts']):
-        pts, tris = shape_mesh(kind, dims)
-        v = pts[tris].reshape(-1, 3)                  # each triangle its own corners: flat shading
-        fn = np.cross(pts[tris[:, 1]] - pts[tris[:, 0]], pts[tris[:, 2]] - pts[tris[:, 0]])
-        fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
-        arrays['pos%d' % k] = v.astype(np.float32)
-        arrays['nrm%d' % k] = np.repeat(fn, 3, axis=0).astype(np.float32)
-        arrays['uv%d' % k] = np.zeros((len(v), 2), np.float32)
-        arrays['idx%d' % k] = np.arange(len(v), dtype=np.uint32)
-        mats.append(dict(name=name, color=list(rgb) + [1.0], metallic=0.0, texture=None))
-    np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
-    with open(os.path.join(out_dir, "model.json"), "w") as f:
-        json.dump(dict(name=spec['name'], frame=spec['frame'], norad=spec['norad'],
-                       source="simple shapes to published dimensions (fetch_assets.py)",
-                       mag_1000km=spec['mag_1000km'], materials=mats,
-                       triangles=sum(len(a) // 3 for n_, a in arrays.items() if n_.startswith('idx'))),
-                  f, indent=1)
-    print("model %s: %s" % (key, spec['name']))
 
 
 def prepare_iss(keep):
     prepare_model('iss', keep)
 
 
-def prepare_model(key, keep):
+def glb_parts(src, root, origin, exclude=frozenset()):
+    """A glTF binary's meshes (Draco-compressed or plain) as model parts, one
+    per material: dict(name, color [r g b a], metallic, texture (a PIL image
+    or None), pos, nrm, uv, idx), in the frame root (3x3, applied to the
+    glTF scene's root node's children, in place of that node's own
+    transform), with origin (in the file's units) at 0.  A node named in
+    exclude drops its whole subtree."""
     import io
-    import json
-    spec = MODELS[key]
-    out_dir = os.path.join(CACHE, "models", key)
-    if os.path.exists(os.path.join(out_dir, "model.json")):
-        return
     try:
-        import DracoPy
         import pygltflib
     except ImportError:
         sys.exit("fetch_assets: pip install DracoPy pygltflib (needed once, to convert models)")
     Image = _image()
-    src = download(spec['url'], os.path.join(CACHE, "models", spec['glb']))
-    print("converting", os.path.basename(src))
     g = pygltflib.GLTF2().load(src)
     blob = g.binary_blob()
 
@@ -648,82 +526,166 @@ def prepare_model(key, keep):
             m[:3, 3] = n.translation
         return m
 
+    def accessor(i):
+        a = g.accessors[i]
+        bv = g.bufferViews[a.bufferView]
+        comps = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[a.type]
+        dt = np.dtype({5120: np.int8, 5121: np.uint8, 5122: np.int16, 5123: np.uint16,
+                       5125: np.uint32, 5126: np.float32}[a.componentType])
+        o = (bv.byteOffset or 0) + (a.byteOffset or 0)
+        stride = bv.byteStride or comps * dt.itemsize
+        if stride == comps * dt.itemsize:
+            return np.frombuffer(blob, dt, count=a.count * comps, offset=o).reshape(a.count, comps)
+        return np.vstack([np.frombuffer(blob, dt, count=comps, offset=o + k * stride)
+                          for k in range(a.count)])
+
     groups = {}                                  # material -> lists of arrays
-    root = g.scenes[g.scene or 0].nodes[0]
     top = np.eye(4)
-    top[:3, :3] = spec['root']
-    top[:3, 3] = -spec['root'] @ spec['origin']
+    top[:3, :3] = root
+    top[:3, 3] = -np.asarray(root) @ np.asarray(origin, float)
 
     def walk(i, parent):
         n = g.nodes[i]
-        if n.name in spec['exclude']:
+        if n.name in exclude:
             return
         w = parent @ local(n)
         if n.mesh is not None:
             nrm_m = np.linalg.inv(w[:3, :3]).T
             for p in g.meshes[n.mesh].primitives:
                 ext = (p.extensions or {}).get('KHR_draco_mesh_compression')
-                if not ext:
-                    continue                     # (every primitive in this model is Draco)
-                bv = g.bufferViews[ext['bufferView']]
-                o = bv.byteOffset or 0
-                d = DracoPy.decode(blob[o:o + bv.byteLength])
-                pts = np.asarray(d.points, np.float64).reshape(-1, 3)
-                nrm = (np.asarray(d.normals, np.float64).reshape(-1, 3) if d.normals is not None
-                       else np.zeros_like(pts))
-                uv = (np.asarray(d.tex_coord, np.float32).reshape(-1, 2) if d.tex_coord is not None
-                      else np.zeros((len(pts), 2), np.float32))
+                if ext:
+                    import DracoPy
+                    bv = g.bufferViews[ext['bufferView']]
+                    o = bv.byteOffset or 0
+                    d = DracoPy.decode(blob[o:o + bv.byteLength])
+                    pts = np.asarray(d.points, np.float64).reshape(-1, 3)
+                    nrm = (np.asarray(d.normals, np.float64).reshape(-1, 3) if d.normals is not None
+                           else None)
+                    uv = (np.asarray(d.tex_coord, np.float32).reshape(-1, 2) if d.tex_coord is not None
+                          else None)
+                    faces = np.asarray(d.faces, np.uint32).reshape(-1, 3)
+                else:
+                    pts = accessor(p.attributes.POSITION).astype(np.float64)
+                    nrm = (accessor(p.attributes.NORMAL).astype(np.float64)
+                           if p.attributes.NORMAL is not None else None)
+                    uv = (accessor(p.attributes.TEXCOORD_0).astype(np.float32)
+                          if p.attributes.TEXCOORD_0 is not None else None)
+                    faces = (accessor(p.indices).astype(np.uint32).reshape(-1, 3) if p.indices is not None
+                             else np.arange(len(pts), dtype=np.uint32).reshape(-1, 3))
                 pos = pts @ w[:3, :3].T + w[:3, 3]
-                nrm = nrm @ nrm_m.T
-                nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-12)
-                groups.setdefault(p.material, []).append(
-                    (pos.astype(np.float32), nrm.astype(np.float32), uv,
-                     np.asarray(d.faces, np.uint32).reshape(-1, 3)))
+                if nrm is not None:
+                    nrm = nrm @ nrm_m.T
+                    nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-12)
+                groups.setdefault(p.material, []).append((pos, nrm, uv, faces))
         for c in n.children or []:
             walk(c, w)
 
-    for c in g.nodes[root].children or []:
+    scene_root = g.scenes[g.scene or 0].nodes[0]
+    for c in g.nodes[scene_root].children or []:
         walk(c, top)
+    if g.nodes[scene_root].mesh is not None:   # a file whose root itself is a mesh
+        walk(scene_root, top)
+    parts = []
+    for mi, chunks in sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or 0)):
+        base, idx, pos, nrm, uv = 0, [], [], [], []
+        for p_, n_, u_, f_ in chunks:
+            idx.append(f_ + base)
+            base += len(p_)
+            pos.append(p_)
+            nrm.append(n_ if n_ is not None else flat_normals(p_, f_))
+            uv.append(u_ if u_ is not None else np.zeros((len(p_), 2), np.float32))
+        part = dict(pos=np.vstack(pos), nrm=np.vstack(nrm), uv=np.vstack(uv), idx=np.vstack(idx),
+                    name="(none)", color=[0.7, 0.7, 0.7, 1.0], metallic=0.0, texture=None)
+        if mi is not None:
+            mat = g.materials[mi]
+            pbr = mat.pbrMetallicRoughness
+            part.update(name=mat.name or "material %d" % mi,
+                        color=list(pbr.baseColorFactor or [1, 1, 1, 1]),
+                        metallic=pbr.metallicFactor if pbr.metallicFactor is not None else 1.0)
+            if pbr.baseColorTexture is not None:
+                t = g.textures[pbr.baseColorTexture.index]
+                srcimg = ((t.extensions or {}).get('EXT_texture_webp') or {}).get('source', t.source)
+                im = g.images[srcimg]
+                bv = g.bufferViews[im.bufferView]
+                o = bv.byteOffset or 0
+                part['texture'] = Image.open(io.BytesIO(blob[o:o + bv.byteLength])).convert("RGB")
+        parts.append(part)
+    return parts
+
+
+def flat_normals(pos, faces):
+    """Per-vertex normals for a mesh whose vertices are shared: each face's,
+    averaged at its corners (smooth where the mesh is, which glTF without
+    normals usually means)."""
+    n = np.zeros_like(pos, dtype=np.float64)
+    f = np.cross(pos[faces[:, 1]] - pos[faces[:, 0]], pos[faces[:, 2]] - pos[faces[:, 0]])
+    for j in range(3):
+        np.add.at(n, faces[:, j], f)
+    return n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
+
+
+def write_model(key, meta, parts):
+    """A prepared model, cache/models/KEY/: model.npz (per part: pos, nrm, uv,
+    idx) and model.json (meta, and per part its name, colour, metallic and
+    texture file).  parts as glb_parts gives them; a part's nrm may be None
+    (flat normals: each triangle given its own corners), uv None, texture a
+    PIL image or None.  meta: name, frame, source, and for a vehicle norad
+    and mag_1000km."""
+    import json
+    out_dir = os.path.join(CACHE, "models", key)
     os.makedirs(out_dir, exist_ok=True)
+    Image = _image()
     arrays, mats = {}, []
-    for k, (mi, parts) in enumerate(sorted(groups.items(), key=lambda kv: (kv[0] is None, kv[0] or 0))):
-        base, n = 0, []
-        for pos, nrm, uv, faces in parts:
-            n.append(faces + base)
-            base += len(pos)
-        arrays['pos%d' % k] = np.vstack([p[0] for p in parts])
-        arrays['nrm%d' % k] = np.vstack([p[1] for p in parts])
-        arrays['uv%d' % k] = np.vstack([p[2] for p in parts])
-        arrays['idx%d' % k] = np.vstack(n).ravel()
-        if mi is None:                           # no material: plain light grey
-            mats.append(dict(name="(none)", color=[0.7, 0.7, 0.7, 1.0], metallic=0.0, texture=None))
-            continue
-        mat = g.materials[mi]
-        pbr = mat.pbrMetallicRoughness
-        entry = dict(name=mat.name, color=list(pbr.baseColorFactor or [1, 1, 1, 1]),
-                     metallic=pbr.metallicFactor if pbr.metallicFactor is not None else 1.0,
-                     texture=None)
-        if pbr.baseColorTexture is not None:
-            t = g.textures[pbr.baseColorTexture.index]
-            srcimg = ((t.extensions or {}).get('EXT_texture_webp') or {}).get('source', t.source)
-            im = g.images[srcimg]
-            bv = g.bufferViews[im.bufferView]
-            o = bv.byteOffset or 0
-            img = Image.open(io.BytesIO(blob[o:o + bv.byteLength])).convert("RGB")
+    for k, p in enumerate(parts):
+        pos = np.asarray(p['pos'], np.float64)
+        idx = np.asarray(p['idx'], np.int64).reshape(-1, 3)
+        uv = p.get('uv')
+        if p.get('nrm') is None:                 # flat: each triangle its own corners
+            v = pos[idx].reshape(-1, 3)
+            fn = np.cross(pos[idx[:, 1]] - pos[idx[:, 0]], pos[idx[:, 2]] - pos[idx[:, 0]])
+            fn /= np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+            nrm = np.repeat(fn, 3, axis=0)
+            uv = (np.asarray(uv, np.float32)[idx].reshape(-1, 2) if uv is not None
+                  else np.zeros((len(v), 2), np.float32))
+            pos, idx = v, np.arange(len(v)).reshape(-1, 3)
+        else:
+            nrm = np.asarray(p['nrm'], np.float64)
+            uv = np.asarray(uv, np.float32) if uv is not None else np.zeros((len(pos), 2), np.float32)
+        arrays['pos%d' % k] = pos.astype(np.float32)
+        arrays['nrm%d' % k] = nrm.astype(np.float32)
+        arrays['uv%d' % k] = uv
+        arrays['idx%d' % k] = idx.astype(np.uint32).ravel()
+        entry = dict(name=p.get('name', 'part %d' % k), color=list(p.get('color', [0.7, 0.7, 0.7, 1.0])),
+                     metallic=p.get('metallic', 0.0), texture=None)
+        if len(entry['color']) == 3:
+            entry['color'].append(1.0)
+        img = p.get('texture')
+        if img is not None:
             if max(img.size) > 2048:
                 f = 2048.0 / max(img.size)
-                img = img.resize((max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f))),
-                                 Image.LANCZOS)
+                img = img.resize((max(1, int(img.size[0] * f)), max(1, int(img.size[1] * f))), Image.LANCZOS)
             entry['texture'] = "tex%d.jpg" % k
             img.save(os.path.join(out_dir, entry['texture']), quality=90)
         mats.append(entry)
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **arrays)
     tris = sum(len(arrays['idx%d' % k]) // 3 for k in range(len(mats)))
     with open(os.path.join(out_dir, "model.json"), "w") as f:
-        extra = {'mag_1000km': spec['mag_1000km']} if 'mag_1000km' in spec else {}
-        json.dump(dict(name=spec['name'], frame=spec['frame'], source=spec['source'],
-                       triangles=tris, materials=mats, **extra), f, indent=1)
-    print("  %d triangles in %d materials" % (tris, len(mats)))
+        json.dump(dict(meta, triangles=tris, materials=mats), f, indent=1)
+    print("  model %s: %d triangles in %d parts" % (key, tris, len(mats)))
+
+
+def prepare_model(key, keep):
+    spec = MODELS[key]
+    out_dir = os.path.join(CACHE, "models", key)
+    if os.path.exists(os.path.join(out_dir, "model.json")):
+        return
+    src = download(spec['url'], os.path.join(CACHE, "models", spec['glb']))
+    print("converting", os.path.basename(src))
+    parts = glb_parts(src, spec['root'], spec['origin'], spec['exclude'])
+    meta = dict(name=spec['name'], frame=spec['frame'], source=spec['source'])
+    if 'mag_1000km' in spec:
+        meta['mag_1000km'] = spec['mag_1000km']
+    write_model(key, meta, parts)
     if not keep:
         os.remove(src)
 
@@ -750,21 +712,119 @@ ISS_VISITORS = (
     ('ATV-2 Johannes Kepler, at Zvezda aft', 'atv/ATV_temp.lwo', (1, 0, 0), (0, 1, 0),
      (-35.676, 0.0, 4.26), (1, 0, 0), (0, 1, 0), 0.35),
 )
-# Their textured surfaces, as plain colours: the Soyuz and Progress blankets,
-# and the solar cells.
-VISITOR_COLOURS = {'soyuz-side': (0.27, 0.28, 0.25), 'progress-side': (0.27, 0.28, 0.25),
-                   'soyuz-pan': (0.05, 0.07, 0.16), 'soyuz-panR': (0.05, 0.07, 0.16),
-                   'progress-pan': (0.05, 0.07, 0.16), 'progress-panR': (0.05, 0.07, 0.16),
-                   'ATV-panels': (0.05, 0.07, 0.16)}
+# A surface whose colour layer has an image is drawn with it, the image's
+# values taken for albedo (as LightWave takes them, and as these models'
+# plain colours are taken); one with only a bump image (Pirs's blankets'
+# wrinkles), with that image's variation about its colour, the shading it
+# gave in LightWave, which portview does not do.  Here, surfaces' colours
+# (albedo; with an image, its mean, the image scaled to it): the solar
+# cells, whose image is a pale grey-violet (0.21, 0.19, 0.29), the dark blue
+# they are; the arrays' backs, which the files make a peach brighter than
+# white, tan.
+VISITOR_COLOURS = {'soyuz-pan': (0.05, 0.07, 0.16), 'progress-pan': (0.05, 0.07, 0.16),
+                   'ATV-panels': (0.05, 0.07, 0.16),
+                   'soyuz-panR': (0.55, 0.46, 0.38), 'progress-panR': (0.55, 0.46, 0.38)}
 
 
-def read_lwo(path):
-    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles)],
-    every polygon's corners its own points (flat shading), all layers."""
+def _lwo_albedo_image(img):
+    """An image whose sRGB-decoded values (as portview samples it) are img's
+    own values: LightWave works on its images' values as they are, and the
+    plain colours of these models are taken so too."""
+    lut = [int(round(255 * (1.055 * (i / 255) ** (1 / 2.4) - 0.055 if i / 255 > 0.0031308
+                            else 12.92 * i / 255))) for i in range(256)]
+    return img.point(lut * 3)
+
+
+def _lwo_rotation(hpb):
+    """A texture's TMAP rotation, heading, pitch, bank (rad), as the matrix
+    taking a point (relative to its centre) to the texture's own axes:
+    heading about +y (+z toward +x), pitch about +x (+z toward -y), bank
+    about +z (+y toward -x), applied bank, pitch, heading.  (The SDK's
+    sample ignores rotation; this sense of heading is the one that lays
+    Pirs's name, planar along a turned z, flat on its plate and reading
+    left to right from outside.  Pitch and bank are unused here.)"""
+    h, p, b = hpb
+    ch, sh, cp, sp, cb, sb = np.cos(h), np.sin(h), np.cos(p), np.sin(p), np.cos(b), np.sin(b)
+    H = np.array([[ch, 0, sh], [0, 1, 0], [-sh, 0, ch]])
+    P = np.array([[1, 0, 0], [0, cp, -sp], [0, sp, cp]])
+    B = np.array([[cb, -sb, 0], [sb, cb, 0], [0, 0, 1]])
+    return H @ P @ B
+
+
+def _lwo_heading(x, z):
+    """The LightWave SDK's xyztoh: the heading of (x, z), 0 <= h < 2 pi."""
+    return np.mod(-np.arctan2(x, z), 2 * np.pi)
+
+
+def _lwo_uv(m, pts, nrm, firsts):
+    """Texture coordinates (v down the image from its top) of a surface's
+    corners pts (n, 3), by its colour layer's projection m (dict: proj, axis,
+    cntr, size, rota, wrpw, wrph), as the LightWave SDK's sample objacces.c
+    computes them; nrm (n, 3) each corner's polygon's normal (for cubic).
+    Cylindrical and spherical u is made continuous across each polygon (whose
+    first corners are at firsts), so that the seam's polygons do not run
+    the whole image backwards: the renderer wraps."""
+    s = (pts - m['cntr']) @ _lwo_rotation(m['rota']).T      # the texture's own axes
+    x, y, z = s[:, 0], s[:, 1], s[:, 2]
+    sx, sy, sz = [v if abs(v) > 1e-9 else 1.0 for v in m['size']]
+    proj, axis = m['proj'], m['axis']
+    if proj in (1, 2):
+        # objacces: xyztoh(z, x, -y) about x, (-x, y, z) about y, (-x, z, -y) about z.
+        a, b, c = {0: (z, x, -y), 1: (-x, y, z), 2: (-x, z, -y)}[axis]
+        u = (1.0 - _lwo_heading(a, c) / (2 * np.pi)) * m['wrpw']
+        if proj == 1:
+            v = 0.5 - (x / sx, y / sy, z / sz)[axis]
+        else:
+            v = (0.5 - np.arctan2(b, np.hypot(a, c)) / np.pi) * m['wrph']
+        # Each polygon's u within half a turn of its first corner's.
+        turn = m['wrpw']
+        first = np.repeat(u[firsts], np.diff(np.append(firsts, len(u))))
+        u = u - turn * np.round((u - first) / turn)
+    else:                                                    # planar, cubic
+        if proj == 3:
+            an = np.abs(nrm @ _lwo_rotation(m['rota']).T)
+            ax = np.where((an[:, 0] >= an[:, 1]) & (an[:, 0] > an[:, 2]), 0,
+                          np.where(an[:, 1] > an[:, 2], 1, 2))
+        else:
+            ax = np.full(len(s), axis)
+        u = np.where(ax == 0, z / sz, x / sx) + 0.5
+        v = 0.5 - np.where(ax == 1, z / sz, y / sy)
+    return np.column_stack([u, v]).astype(np.float32)
+
+
+def _lwo_image(root, path, cache):
+    """A CLIP's still image (PIL, RGB), path relative to the content
+    directory root; None if it is not there."""
+    if path not in cache:
+        Image = _image()
+        cache[path] = None
+        rel = path.replace('\\', '/').split(':')[-1].lstrip('/')
+        for p in (os.path.join(root, rel), os.path.join(root, "Textures", os.path.basename(rel))):
+            if os.path.exists(p):
+                try:
+                    cache[path] = Image.open(p).convert("RGB")
+                    break
+                except OSError:
+                    pass
+    return cache[path]
+
+
+def read_lwo(path, root=None):
+    """A LightWave LWO2 object: [(surface, rgb, points (n, 3), triangles,
+    texture, uv, bump)], every polygon's corners its own points (flat
+    shading), all layers.  texture: the image (PIL, RGB) of the surface's
+    colour layer, or None; uv (n, 2) then its coordinates at the points, by
+    the layer's projection (planar, cylindrical, spherical or cubic; image v
+    from the top).  bump: (image, uv) of its bump layer likewise, or None.
+    root: the content directory the object's image paths are relative to
+    (default: the one holding its Objects directory)."""
     import struct
     data = open(path, 'rb').read()
     if data[:4] != b'FORM' or data[8:12] != b'LWO2':
         sys.exit("fetch_assets: %s is not an LWO2 object" % path)
+    if root is None:
+        parts = os.path.abspath(path).split(os.sep)
+        root = os.sep.join(parts[:parts.index('Objects')]) if 'Objects' in parts else os.path.dirname(path)
 
     def vx(b, o):                       # LightWave's variable-length index
         if b[o] == 0xFF:
@@ -775,8 +835,40 @@ def read_lwo(path):
         e = b.index(b'\0', o)
         return b[o:e].decode('latin-1'), e + 1 + ((e + 1 - o) & 1)
 
+    def subchunks(b, o=0):              # (id, body) of a chunk's subchunks
+        while o + 6 <= len(b):
+            sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+            yield sid, b[o + 6:o + 6 + ss]
+            o += 6 + ss + (ss & 1)
+
+    def block(b):
+        """A SURF's BLOK: its image layer as a dict, or None."""
+        hid, hb = next(subchunks(b))
+        if hid != b'IMAP':
+            return None
+        ordinal, o = strings(hb, 0)
+        m = dict(ordinal=ordinal, chan=None, enab=1, proj=0, axis=0, clip=None,
+                 cntr=np.zeros(3), size=np.ones(3), rota=np.zeros(3), wrpw=1.0, wrph=1.0)
+        for sid, sb in subchunks(hb, o):
+            if sid == b'CHAN':
+                m['chan'] = sb[:4]
+            elif sid == b'ENAB':
+                m['enab'] = struct.unpack('>H', sb[:2])[0]
+        for sid, sb in subchunks(b):
+            if sid == b'TMAP':
+                for tid, tb in subchunks(sb):
+                    if tid in (b'CNTR', b'SIZE', b'ROTA'):
+                        m[tid.decode().lower()] = np.array(struct.unpack('>3f', tb[:12]), np.float64)
+            elif sid in (b'PROJ', b'AXIS'):
+                m[sid.decode().lower()] = struct.unpack('>H', sb[:2])[0]
+            elif sid == b'IMAG':
+                m['clip'] = vx(sb, 0)[0]
+            elif sid in (b'WRPW', b'WRPH'):
+                m[sid.decode().lower()] = struct.unpack('>f', sb[:4])[0]
+        return m
+
     pos, end = 12, 8 + struct.unpack('>I', data[4:8])[0]
-    tags, colours, layers, cur = [], {}, [], None
+    tags, colours, maps, clips, layers, cur = [], {}, {}, {}, [], None
     while pos < end:
         cid, size = data[pos:pos + 4], struct.unpack('>I', data[pos + 4:pos + 8])[0]
         b = data[pos + 8:pos + 8 + size]
@@ -808,16 +900,25 @@ def read_lwo(path):
                 i, o = vx(b, o)
                 cur['ptag'][i] = struct.unpack('>H', b[o:o + 2])[0]
                 o += 2
+        elif cid == b'CLIP':
+            for sid, sb in subchunks(b, 4):
+                if sid == b'STIL':
+                    clips[struct.unpack('>I', b[:4])[0]] = strings(sb, 0)[0]
         elif cid == b'SURF':
             name, o = strings(b, 0)
             _, o = strings(b, o)
-            rgb = (0.7, 0.7, 0.7)
-            while o + 6 <= len(b):
-                sid, ss = b[o:o + 4], struct.unpack('>H', b[o + 4:o + 6])[0]
+            rgb, layer = (0.7, 0.7, 0.7), {}
+            for sid, sb in subchunks(b, o):
                 if sid == b'COLR':
-                    rgb = struct.unpack('>3f', b[o + 6:o + 18])
-                o += 6 + ss + (ss & 1)
+                    rgb = struct.unpack('>3f', sb[:12])
+                elif sid == b'BLOK':
+                    m = block(sb)
+                    if (m and m['chan'] in (b'COLR', b'BUMP') and m['enab'] and m['clip'] is not None
+                            and m['proj'] in (0, 1, 2, 3)):
+                        layer.setdefault(m['chan'], []).append(m)
             colours[name] = rgb
+            for chan, ms in layer.items():  # each channel's top layer (they sort by ordinal)
+                maps[name, chan] = max(ms, key=lambda m: m['ordinal'].encode('latin-1'))
     surfaces = {}
     for L in layers:
         for i, poly in enumerate(L['polys']):
@@ -828,13 +929,28 @@ def read_lwo(path):
             base = sum(len(q) for q in pts)
             pts.append(L['points'][poly])
             tris.extend((base, base + k, base + k + 1) for k in range(1, len(poly) - 1))
-    return [(name, colours.get(name, (0.7, 0.7, 0.7)), np.vstack(pts), np.array(tris, np.uint32))
-            for name, (pts, tris) in surfaces.items()]
+    images, out = {}, []
+    for name, (pts, tris) in surfaces.items():
+        p, t = np.vstack(pts), np.array(tris, np.uint32)
+        firsts = np.cumsum([0] + [len(q) for q in pts[:-1]])
+        # Each polygon's normal (Newell's), at its corners.
+        nrm = np.vstack([np.tile(np.cross(q - q.mean(0), np.roll(q, -1, 0) - q.mean(0)).sum(0),
+                                 (len(q), 1)) for q in pts])
+        got = {}
+        for chan in (b'COLR', b'BUMP'):
+            m = maps.get((name, chan))
+            img = _lwo_image(root, clips.get(m['clip'], ''), images) if m is not None else None
+            if img is not None:
+                got[chan] = (img, _lwo_uv(m, p, nrm, firsts))
+        img, uv = got.get(b'COLR', (None, None))
+        out.append((name, colours.get(name, (0.7, 0.7, 0.7)), p, t, img, uv, got.get(b'BUMP')))
+    return out
 
 
 def prepare_iss_visitors(keep):
     """Add Pirs and the vehicles docked in May 2011 (Soyuz TMA-20 and -21,
     Progress M-10M, ATV-2) to the prepared ISS model, which lacks them."""
+    import hashlib
     import json
     import shutil
     import subprocess
@@ -852,14 +968,16 @@ def prepare_iss_visitors(keep):
         return
     src = download(ISS2011_URL, os.path.join(CACHE, "models", "iss-2011.7z"))
     work = os.path.join(CACHE, "models", "iss-2011")
-    files = sorted({v[1] for v in ISS_VISITORS})
-    subprocess.run([tool, "x", "-y", "-o" + work, src] + ["Objects/Modules/" + f for f in files],
+    # The objects and their images (beside them, in other modules' folders
+    # and in Textures/).
+    subprocess.run([tool, "x", "-y", "-o" + work, src, "Objects/Modules/*", "Textures/*"],
                    check=True, stdout=subprocess.DEVNULL)
+    Image = _image()
     z = dict(np.load(os.path.join(out_dir, "model.npz")))
     mats = meta['materials']
-    placed = {}
+    placed, saved = {}, {}
     for name, f, probe, across, port, inward, across_iss, depth in ISS_VISITORS:
-        parts = read_lwo(os.path.join(work, "Objects", "Modules", f))
+        parts = read_lwo(os.path.join(work, "Objects", "Modules", f), work)
         rh = np.diag([INCH, INCH, -INCH])                    # inches, left-handed -> m, right
         allp = np.vstack([p[2] for p in parts]) @ rh
         a, c = np.array(probe, float), np.array(across, float)
@@ -883,7 +1001,7 @@ def prepare_iss_visitors(keep):
         # The far end, for whatever docks to it.
         free = mid - a * (allp[near] @ (-a)).max()
         placed[name.split(',')[0]] = R @ free + t
-        for surf, rgb, pts, tris in parts:
+        for surf, rgb, pts, tris, img, uv, bump in parts:
             k = len(mats)
             pos = (pts @ rh) @ R.T + t
             v = pos[tris]
@@ -894,10 +1012,28 @@ def prepare_iss_visitors(keep):
                 nrm[tris[:, j]] = fn
             z['pos%d' % k] = pos.astype(np.float32)
             z['nrm%d' % k] = nrm.astype(np.float32)
-            z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
+            colour = np.asarray(VISITOR_COLOURS.get(surf, rgb), np.float64)
+            if img is not None:         # (see VISITOR_COLOURS)
+                mean = np.asarray(img, np.float64).reshape(-1, 3).mean(0) / 255
+                colour = colour / mean if surf in VISITOR_COLOURS else np.ones(3)
+            elif bump is not None:
+                img, uv = bump
+                colour = colour / (np.asarray(img.convert('L'), np.float64).mean() / 255)
+            z['uv%d' % k] = uv if uv is not None else np.zeros((len(pos), 2), np.float32)
             z['idx%d' % k] = tris.ravel()
-            mats.append(dict(name="%s: %s" % (name, surf), color=list(VISITOR_COLOURS.get(surf, rgb)) + [1.0],
-                             metallic=0.0, texture=None))
+            mat = dict(name="%s: %s" % (name, surf), color=[float(c) for c in colour] + [1.0],
+                       metallic=0.0, texture=None)
+            if img is not None:
+                key = hashlib.sha1(img.tobytes() + repr(img.size).encode()).hexdigest()
+                if key not in saved:    # one file an image
+                    saved[key] = tex = "tex%d.jpg" % k
+                    if max(img.size) > 2048:
+                        g = 2048.0 / max(img.size)
+                        img = img.resize((max(1, int(img.size[0] * g)), max(1, int(img.size[1] * g))),
+                                         Image.LANCZOS)
+                    _lwo_albedo_image(img).save(os.path.join(out_dir, tex), quality=95)
+                mat['texture'] = saved[key]
+            mats.append(mat)
         print("  %s: %d triangles" % (name, sum(len(p[3]) for p in parts)))
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
     meta['visitors'] = [v[0] for v in ISS_VISITORS]
@@ -908,6 +1044,26 @@ def prepare_iss_visitors(keep):
     shutil.rmtree(work, ignore_errors=True)
     if not keep:
         os.remove(src)
+
+
+def prepare_vehicles(keys=None, rebuild=False):
+    """The vehicles in portview/vehicles/ (one module each; see its
+    __init__.py): each prepared unless it is already, or rebuild."""
+    import vehicles
+    from vehicles import kit
+    mods = vehicles.discover()
+    for key in (keys or sorted(mods)):
+        if key not in mods:
+            sys.exit("fetch_assets: no vehicle %r (vehicles: %s)" % (key, ", ".join(sorted(mods))))
+        out = os.path.join(CACHE, "models", key)
+        if os.path.exists(os.path.join(out, "model.json")) and not rebuild:
+            continue
+        print("vehicle", key)
+        made = mods[key].build(kit)
+        if os.path.isdir(out):
+            import shutil
+            shutil.rmtree(out)
+        write_model(key, made['meta'], made['parts'])
 
 
 def prepare_site_fine(key):
@@ -1086,9 +1242,17 @@ def main():
                     help="the Blue Marble months to prepare (default all twelve)")
     ap.add_argument("--sites", default=",".join(SITES), metavar="LIST",
                     help="the landing sites to prepare imagery for (default %s)" % ",".join(SITES))
+    ap.add_argument("--vehicles", metavar="LIST",
+                    help="only prepare these vehicles (portview/vehicles/; 'all' for every one)")
+    ap.add_argument("--rebuild", action="store_true",
+                    help="with --vehicles, prepare them again even if they are already")
     ap.add_argument("--rematch", action="store_true",
                     help="only match the prepared sites' ring colours again (no downloads)")
     args = ap.parse_args()
+    if args.vehicles:
+        prepare_vehicles(None if args.vehicles == 'all' else
+                         [k.strip() for k in args.vehicles.split(",") if k.strip()], args.rebuild)
+        return
     if args.rematch:
         for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
             rematch_site(key)
@@ -1107,8 +1271,7 @@ def main():
     for key in MODELS:
         prepare_model(key, args.keep_downloads)
     prepare_iss_visitors(args.keep_downloads)
-    for key in PROCEDURAL:
-        prepare_procedural(key)
+    prepare_vehicles()
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
             sys.exit("fetch_assets: no site %r (sites: %s)" % (key, ", ".join(SITES)))

@@ -401,9 +401,25 @@ _sm("sband_pm_ant", "C3", "rot", "S-BAND PM\nANTENNA",
     sources="SCOM 2.4-5; only GPC is read (SSMANTMG 982); order of the eight unverified")
 _sm("sband_fm_ant", "A1R", "t3", "S-BAND FM\nANTENNA", ("UPPER", "GPC", "LOWER"), "GPC", _PCM,
     sources="SSMANTMG 984-986")
+# A1U KU-BAND, the radar's side (RENDEZVOUS_PLAN.md Stage 3; AFT FLT
+# STATION CONFIG [4A]: "KU PWR STBY, sel MAN SLEW, MODE RDR PASSIVE, RADAR
+# OUTPUT HI, CNTL PNL").  The Ku signal processor and the SM computer they
+# really reach are not here: panelO6 sends POWER, MODE, STEERING MODE and
+# RADAR OUTPUT as one word ('ku' below; op 4 VALUE, type 9, to FF3) to
+# yaGPC2's kuradar.c, which stands in for them.  CONTROL is shown only.
+_KU = "Ku-band signal processor -- yaGPC2 kuradar.c (one word to FF3)"
 _sm("ku_steering", "A1U", "rot", "KU-BAND\nSTEERING MODE",
-    ("GPC", "GPC DESIG", "AUTO TRACK", "MAN SLEW"), "GPC", _PCM,
-    sources="SCOM 2.4-19 (panel A1U); only GPC ACQ is read (SSMANTMG 927)")
+    ("GPC", "GPC DESIG", "AUTO TRACK", "MAN SLEW"), "GPC", _KU,
+    ku={"GPC": 0x0000, "GPC DESIG": 0x0004, "AUTO TRACK": 0x0008, "MAN SLEW": 0x000C},
+    sources="SCOM 2.4-19 (panel A1U); SM reads only GPC ACQ (SSMANTMG 927)")
+_sm("ku_power", "A1U", "t3", "KU-BAND\nPOWER", ("ON", "STBY", "OFF"), "OFF", _KU,
+    ku={"ON": 0x8000}, sources="SCOM 2.4-19; [4A] KU PWR STBY, the KU OPS cue card ON")
+_sm("ku_mode", "A1U", "rot", "KU-BAND\nMODE", ("COMM", "RDR PASSIVE", "RDR COOP"), "COMM", _KU,
+    ku={"RDR PASSIVE": 0x0001, "RDR COOP": 0x0002}, sources="SCOM 2.4-19; [4A] MODE RDR PASSIVE")
+_sm("ku_radar_output", "A1U", "t3", "RADAR\nOUTPUT", ("HIGH", "MED", "LOW"), "HIGH", _KU,
+    ku={"HIGH": 0x0010}, sources="[4A] RADAR OUTPUT HI; LOW at about 700 ft")
+_sm("ku_control", "A1U", "t2", "KU-BAND\nCONTROL", ("PNL", "CMD"), "PNL", _KU,
+    sources="[4A] CNTL PNL, then CMD; not modelled (no SM computer)")
 _sm("rms_mode", "A8U", "rot", "MODE",
     ("TEST", "AUTO 1", "AUTO 2", "AUTO 3", "AUTO 4", "OPR CMD", "ORB UNL", "END EFF",
      "ORB LD", "PL", "SINGLE", "DIRECT"), "SINGLE", _MCIU, sources="V72K2970-2981J")
@@ -470,7 +486,7 @@ PANES["R2"].append(("HYDRAULICS", [["hyd_circ_pump1", "hyd_circ_pump2", "hyd_cir
 PANES["L1"] = [("FREON", [["freon_isol"]])]
 PANES["C3"].append(("S-BAND PM", [["sband_pm_ant"]]))
 PANES["A1R"] = [("S-BAND FM", [["sband_fm_ant"]])]
-PANES["A1U"] = [("KU-BAND", [["ku_steering"]])]
+PANES["A1U"] = [("KU-BAND", [["ku_power", "ku_mode", "ku_steering"], ["ku_radar_output", "ku_control"]])]
 PANES["A8U"] = [("RMS", [["rms_mode", "rms_mode_enter", "rms_parameter", "rms_joint"],
                          ["rms_brakes", "rms_drive", "rms_auto_seq", "rms_rate", "rms_rate_hold"],
                          ["rms_ee_mode", "rms_ee_man", "rms_safing", "rms_shoulder_brace",

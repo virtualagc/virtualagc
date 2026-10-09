@@ -152,4 +152,13 @@ bool vehdyn_air_data(double *pPsf, double *mach, double *alphaDeg, double *betaD
 /* For tests: set the position and velocity directly (M50, m and m/s). */
 void vehdyn_set_rv(const double r[3], const double v[3]);
 
+/* Other vehicles (YAGPC_VEHDYN_TARGETS; vehdyn.c): how many, and the k-th's
+ * NORAD id, M50 position and velocity and attitude (body -> M50, w x y z)
+ * at the current clock -- false until it is placed (the calendar known).
+ * Saved and restored with a snapshot as their own list. */
+int vehdyn_target_count(void);
+bool vehdyn_target(int k, int *norad, double r[3], double v[3], double q[4]);
+int vehdyn_targets_save(double *b, int max);
+void vehdyn_targets_load(const double *b, int n);
+
 #endif

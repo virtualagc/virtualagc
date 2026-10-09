@@ -1,5 +1,6 @@
 #include "vehdyn.h"
 
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,10 +158,23 @@ static const double TANK_XYZ[NMOD][3] = {  /* inches, Orbiter structural */
  * software's own I-loads (DASS G2/G3).  Thrust direction in body axes is
  * (cos P cos Y, sin Y, sin P cos Y) with P = 15.82 deg - pitch gimbal and
  * Y = yaw gimbal + 6.50 deg left, - 6.50 deg right (GHBCMD.hal:253-302): each
- * nozzle canted down and inboard so the thrust passes near the centre of
- * gravity.  The mounts, Xo 1518, Yo -/+88, Zo 492, are NOT from a document
- * found here; they are consistent with those cants, whose lines cross the
- * dry CG's Zo 375 and the centreline near its Xo 1100.
+ * nozzle canted up and outboard, so that the thrust points down and inboard
+ * and passes near the centre of gravity.  The same form and constants are the
+ * FSSR's: STS 83-0003-34 (GN&C Part A, On-Orbit/Deorbit Guidance, 2007) sec.
+ * 4.1, THRUST_BODY_OMSJ = (COS(OMS_PITCH_BODY) C_YAW, SIN(OMS_YAW_BODYJ),
+ * SIN(OMS_PITCH_BODY) C_YAW), with the K-loads PITCH_BIAS 0.276053 rad (15
+ * deg 49 min) and YAW_BIAS 0.113446 rad (6.50 deg), its Table 4.1.10-4; and
+ * the 1988 NSTS News Reference Manual's "nozzles up 15 degrees 49 [minutes]
+ * ... and outboard 6 degrees 30 [minutes]".  THE GIMBAL POINTS -- the pitch
+ * axis (the outer gimbal), on each engine's centreline -- are Xo 1518, Yo -88
+ * (left) and +88 (right), Zo 492: STS 82-0626's figure "OMS Gimbal Locations
+ * and Motions" as reproduced in P. Hattis (Draper Laboratory), "A Review of
+ * the Space Shuttle Orbiter Flight Control System", 2005, slide 22 (from
+ * CSDL-P-1786, 1983), dimensioned "Xo 1518", "Zo 492" (92 in above Zo 400),
+ * "Yo -88", "Yo +88", with the 15.82 and 6.50 deg null cants and the +/-6 deg
+ * pitch, +/-7 deg yaw ranges.  (First estimated here from the cants, whose
+ * lines cross the dry CG's Zo 375 and the centreline near its Xo 1100; the
+ * document gives the same numbers, 2026-10-08.)
  *
  * The gimbals follow the command of whichever actuator controller is
  * powered, at OMS_SLEW_DEG_S -- a rate not found in any document, chosen to
@@ -290,7 +304,17 @@ static void to_body(double xo, double yo, double zo, double b[3]) {
 
 static void jet_axis(const Jet *j, double u[3]) {
     u[0] = u[1] = u[2] = 0.0;
-    switch (j->name[2]) {
+    /* THE FORWARD VERNIERS ARE THE EXCEPTION TO THE NAMING RULE: F5L and F5R
+     * are named for their SIDE of the nose, and both fire DOWN (Shuttle Crew
+     * Operations Manual, Reaction Control System: the forward module's two
+     * verniers fire down; the aft pods' L5L, L5D, R5R and R5D fire left,
+     * down, right, down).  Read by the letter they were a left- and a
+     * right-firing jet whose forces and pitch torques cancelled: PASS's VERN
+     * attitude hold, asking them for nose-up pitch, got none and fired them
+     * without end, 0.09 kg/s of propellant (2026-10-08, the rendezvous M1
+     * run). */
+    char plume = (j->name[0] == 'F' && j->name[1] == '5') ? 'D' : j->name[2];
+    switch (plume) {
     case 'A': u[0] =  1.0; break;
     case 'F': u[0] = -1.0; break;
     case 'L': u[1] =  1.0; break;
@@ -1730,6 +1754,48 @@ static void oms_slew(double dt) {
     }
 }
 
+/* THE ORBITER STARTED OFF ANOTHER VEHICLE, for a run that begins in the
+ * middle of a rendezvous instead of flying the two days of phasing to it
+ * (RENDEZVOUS_PLAN.md, M1):
+ *
+ *   YAGPC_VEHDYN_START_REL=NORAD,X,Y,Z,XD,YD,ZD[,UNIX]
+ *
+ * puts the Orbiter at that state relative to the vehicle NORAD, which must
+ * be a "target" line of YAGPC_VEHDYN_TARGETS (see OTHER VEHICLES, below),
+ * when the calendar becomes known -- when the timing unit first tells this
+ * module what Unix time its clock's zero is.  That is not the run's start
+ * time: the timing unit's GMT includes the time the computers sat in HALT
+ * while the crew set up the IPL, a minute or two.  So the state is the one
+ * at UNIX (Unix time, seconds), when given: the target is carried from its
+ * file's epoch to UNIX, the Orbiter placed off it there, and carried from
+ * UNIX to the clock's present by gravity alone (the same field; a minute or
+ * two of the Orbiter's drag is centimetres).  Without UNIX the state is
+ * taken to be the present one.
+ *
+ * The numbers are PASS's own relative coordinates, so that a state worked
+ * out from the rendezvous checklist's target sets goes in as it stands: the
+ * target-centred CURVILINEAR LVLH frame of orbit targeting, GWJ_ORB_TGT_
+ * REL_COMP (GWJORB.hal), metres and metres a second.  X is the arc along the
+ * target's orbit (+ ahead), Y is along -(r x v), the negative orbit normal
+ * (+ to the right of the track; NOTE: the opposite of the "near" lines'
+ * +y), Z is the height below the target's radius (+ down); the rates are
+ * those seen in the rotating frame.  The SPEC 34 offsets (kft, the
+ * checklist's DX DY DZ) are in this frame (GWRORB.hal: COMPUTE T1 hands
+ * GWJ the T2 offset to turn into an aim point).
+ *
+ * The attitude is the LVLH one -- body +X along the track, +Z down
+ * (+XVV -ZLV: the payload bay to zenith), turning at the orbital rate so it
+ * stays there -- unless YAGPC_VEHDYN_ATT gives another, with
+ * YAGPC_VEHDYN_RATE's rates.  A restored capture is never moved: the vehicle
+ * is where it was. */
+static struct {
+    bool pending;
+    int norad;
+    double rel[6];
+    double unix;              /* when rel holds; < 0 the moment of placing */
+    bool keepAtt;             /* YAGPC_VEHDYN_ATT given: leave the attitude be */
+} startRel;
+
 void vehdyn_reset(double t) {
     flight_params();
     memset(&st, 0, sizeof st);
@@ -1792,6 +1858,24 @@ void vehdyn_reset(double t) {
         if (w != NULL && sscanf(w, "%lf,%lf,%lf", &a, &b, &c) >= 1) {
             st.w[0] = a * VD_PI / 180; st.w[1] = b * VD_PI / 180; st.w[2] = c * VD_PI / 180;
         }
+        startRel.keepAtt = (e != NULL);
+    }
+    {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_START_REL");
+        double x[8];
+        startRel.pending = false;
+        if (e != NULL && *e != '\0') {
+            int n = sscanf(e, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+                           &x[0], &x[1], &x[2], &x[3], &x[4], &x[5], &x[6], &x[7]);
+            if (n == 7 || n == 8) {
+                startRel.pending = true;
+                startRel.norad = (int)x[0];
+                memcpy(startRel.rel, &x[1], sizeof startRel.rel);
+                startRel.unix = (n == 8) ? x[7] : -1.0;
+            } else
+                fprintf(stderr, "vehdyn: YAGPC_VEHDYN_START_REL wants NORAD, 6 numbers and "
+                                "optionally a Unix time, got \"%s\"\n", e);
+        }
     }
     asc = ASC_NONE;
     phys_set_drag(2.2, 40.0, 220.0, 360.0);
@@ -1808,6 +1892,428 @@ void vehdyn_reset(double t) {
 /* Advance in steps no longer than STEP_S, re-deriving the loads and the mass
  * properties at each, so propellant use changes the vehicle as it goes. */
 #define STEP_S 0.005
+
+/* =====================================================================
+ * OTHER VEHICLES: the ISS, and whatever else the Shuttle met (portview
+ * draws them; TGT1, mdmdev.c).  Each is a point mass moved by the same
+ * gravity as the Orbiter and by its own drag (a ballistic coefficient,
+ * kg/m^2, in an atmosphere turning with the Earth) -- not SGP4 playback, so
+ * the one physics governs both and their relative motion is the real one.
+ * Integrated in 10 s RK4 steps; caught up to the Orbiter's clock at each
+ * vehdyn_advance.  None flies unless YAGPC_VEHDYN_TARGETS names a file:
+ *
+ *   # NORAD  UNIX_EPOCH  X Y Z  VX VY VZ   (J2000, m, m/s; tools/tle_target.py)
+ *   target 25544 1305721177.6 -1234567.8 ... lvlh bc 130
+ *   # or placed off the Orbiter when the clock is first known: LVLH metres,
+ *   # +x ahead along the velocity, +y left of track (the orbit normal),
+ *   # +z down; an offset along x only is co-orbiting, others drift
+ *   near 25544 -300 0 0 lvlh
+ *
+ * then "lvlh" (body +X along the velocity, +Z nadir: the ISS's +XVV
+ * attitude) or "inertial W X Y Z" (body -> M50, held), and optionally
+ * "bc KG_PER_M2" (default 130, the ISS's; 0 for no drag).  A target's state
+ * is kept as an epoch in Unix time and an M50 state then, so a snapshot
+ * (vehdyn_targets_save) restores it at any later clock by propagating, the
+ * halt gap included. */
+#define TGT_MAX 8
+#define TGT_STEP_S 10.0
+#define TGT_EPOCH_SPAN_S (30.0 * 86400.0)   /* a "target" state at most this far from the run's date */
+static struct Tgt {
+    int norad;
+    bool rel;                 /* "near": not placed yet */
+    double off[3];            /* its LVLH offset, until placed */
+    bool lvlh;
+    double q[4];              /* inertial attitude, body -> M50 */
+    double bc;                /* kg/m^2; 0 none */
+    double epoch;             /* Unix s of r, v; < 0 until known */
+    double r[3], v[3];        /* M50 at epoch */
+    double t;                 /* the vehicle clock r, v are at, once placed */
+    bool placed;
+} tgt[TGT_MAX];
+static int tgtN = -1;         /* -1: the file not read yet */
+
+static const double J2000_TO_M50[3][3] = {        /* as startrk.c */
+    {  0.9999256782,  0.0111820610,  0.0048579479 },
+    { -0.0111820611,  0.9999374784, -0.0000271474 },
+    { -0.0048579477, -0.0000271765,  0.9999881997 },
+};
+
+/* A number from the targets file, or false (and a message) if it is not one. */
+static bool tgt_num(const char *path, int lineNo, const char *tok, double *x) {
+    char *end;
+    errno = 0;
+    *x = strtod(tok, &end);
+    if (end == tok || *end != '\0' || errno != 0 || !isfinite(*x)) {
+        fprintf(stderr, "vehdyn: %s:%d: \"%s\" is not a number; line skipped\n", path, lineNo, tok);
+        return false;
+    }
+    return true;
+}
+
+static void targets_read(void) {
+    tgtN = 0;
+    const char *path = yagpc_getenv("YAGPC_VEHDYN_TARGETS");
+    if (path == NULL || *path == '\0') return;
+    FILE *f = fopen(path, "r");
+    if (f == NULL) { fprintf(stderr, "vehdyn: cannot read targets file %s\n", path); return; }
+    char line[512];
+    int lineNo = 0;
+    while (fgets(line, sizeof line, f) != NULL && tgtN < TGT_MAX) {
+        lineNo++;
+        char *tok[24];
+        int nt = 0;
+        for (char *p = strtok(line, " \t\r\n"); p != NULL && nt < 24; p = strtok(NULL, " \t\r\n")) {
+            if (*p == '#') break;
+            tok[nt++] = p;
+        }
+        if (nt == 0) continue;
+        struct Tgt g;
+        memset(&g, 0, sizeof g);
+        g.lvlh = true; g.q[0] = 1.0; g.bc = 130.0; g.epoch = -1.0;
+        int k;
+        if (strcmp(tok[0], "target") == 0 && nt >= 9) {
+            double id, rj[3], vj[3];
+            bool ok = tgt_num(path, lineNo, tok[1], &id) && tgt_num(path, lineNo, tok[2], &g.epoch);
+            for (int i = 0; ok && i < 3; i++)
+                ok = tgt_num(path, lineNo, tok[3 + i], &rj[i]) && tgt_num(path, lineNo, tok[6 + i], &vj[i]);
+            if (!ok) continue;
+            g.norad = (int)id;
+            double rn = sqrt(rj[0] * rj[0] + rj[1] * rj[1] + rj[2] * rj[2]);
+            if (rn < 6.3e6 || rn > 1e8 || g.epoch <= 0.0) {
+                fprintf(stderr, "vehdyn: %s:%d: vehicle %d at |r| %.0f m, epoch %.0f: not an orbit "
+                                "(r is metres, J2000; epoch Unix seconds); line skipped\n",
+                        path, lineNo, g.norad, rn, g.epoch);
+                continue;
+            }
+            for (int i = 0; i < 3; i++) {
+                g.r[i] = J2000_TO_M50[i][0] * rj[0] + J2000_TO_M50[i][1] * rj[1] + J2000_TO_M50[i][2] * rj[2];
+                g.v[i] = J2000_TO_M50[i][0] * vj[0] + J2000_TO_M50[i][1] * vj[1] + J2000_TO_M50[i][2] * vj[2];
+            }
+            k = 9;
+        } else if (strcmp(tok[0], "near") == 0 && nt >= 5) {
+            double id;
+            bool ok = tgt_num(path, lineNo, tok[1], &id);
+            for (int i = 0; ok && i < 3; i++) ok = tgt_num(path, lineNo, tok[2 + i], &g.off[i]);
+            if (!ok) continue;
+            g.norad = (int)id;
+            g.rel = true;
+            k = 5;
+        } else {
+            fprintf(stderr, "vehdyn: %s:%d: not a target line\n", path, lineNo);
+            continue;
+        }
+        while (k < nt) {
+            if (strcmp(tok[k], "lvlh") == 0) { g.lvlh = true; k++; }
+            else if (strcmp(tok[k], "inertial") == 0 && k + 4 < nt) {
+                g.lvlh = false;
+                double n = 0.0;
+                for (int i = 0; i < 4; i++) {
+                    if (!tgt_num(path, lineNo, tok[k + 1 + i], &g.q[i])) g.q[i] = (i == 0);
+                    n += g.q[i] * g.q[i];
+                }
+                n = sqrt(n);
+                for (int i = 0; i < 4; i++) g.q[i] = n > 0.0 ? g.q[i] / n : (i == 0);
+                k += 5;
+            } else if (strcmp(tok[k], "bc") == 0 && k + 1 < nt) {
+                double bc;
+                if (tgt_num(path, lineNo, tok[k + 1], &bc) && bc >= 0.0) g.bc = bc;
+                k += 2;
+            }
+            else { fprintf(stderr, "vehdyn: %s:%d: what is %s?\n", path, lineNo, tok[k]); k++; }
+        }
+        tgt[tgtN++] = g;
+    }
+    fclose(f);
+    fprintf(stderr, "vehdyn: %d other vehicle%s from %s\n", tgtN, tgtN == 1 ? "" : "s", path);
+}
+
+/* Gravity plus the target's own drag, at clock t. */
+static void tgt_accel(const struct Tgt *g, double t, const double r[3], const double v[3], double a[3]) {
+    phys_gravity(t, r, a);
+    if (g->bc <= 0.0) return;
+    double p[3], w = phys_earth_rate(), vr[3];
+    phys_earth_pole(p);
+    double wv[3] = { w * p[0], w * p[1], w * p[2] };
+    vr[0] = v[0] - (wv[1] * r[2] - wv[2] * r[1]);
+    vr[1] = v[1] - (wv[2] * r[0] - wv[0] * r[2]);
+    vr[2] = v[2] - (wv[0] * r[1] - wv[1] * r[0]);
+    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+    double sl = (r[0] * p[0] + r[1] * p[1] + r[2] * p[2]) / rn;    /* sin of the latitude */
+    double h = rn - 6378137.0 * (1.0 - sl * sl / 298.257223563);    /* over the ellipsoid, nearly */
+    double vn = sqrt(vr[0] * vr[0] + vr[1] * vr[1] + vr[2] * vr[2]);
+    double k = 0.5 * phys_air_density(h) * vn / g->bc;
+    for (int i = 0; i < 3; i++) a[i] -= k * vr[i];
+}
+
+/* Carry r, v from clock t0 to t1 (either way) in RK4 steps. */
+static void tgt_propagate(const struct Tgt *g, double t0, double t1, double r[3], double v[3]) {
+    double t = t0;
+    while (fabs(t1 - t) > 1e-9) {
+        double h = t1 - t;
+        if (h > TGT_STEP_S) h = TGT_STEP_S;
+        if (h < -TGT_STEP_S) h = -TGT_STEP_S;
+        double k1r[3], k1v[3], k2r[3], k2v[3], k3r[3], k3v[3], k4r[3], k4v[3], rr[3], vv[3];
+        memcpy(k1r, v, sizeof k1r);
+        tgt_accel(g, t, r, v, k1v);
+        for (int i = 0; i < 3; i++) { rr[i] = r[i] + 0.5 * h * k1r[i]; vv[i] = v[i] + 0.5 * h * k1v[i]; }
+        memcpy(k2r, vv, sizeof k2r);
+        tgt_accel(g, t + 0.5 * h, rr, vv, k2v);
+        for (int i = 0; i < 3; i++) { rr[i] = r[i] + 0.5 * h * k2r[i]; vv[i] = v[i] + 0.5 * h * k2v[i]; }
+        memcpy(k3r, vv, sizeof k3r);
+        tgt_accel(g, t + 0.5 * h, rr, vv, k3v);
+        for (int i = 0; i < 3; i++) { rr[i] = r[i] + h * k3r[i]; vv[i] = v[i] + h * k3v[i]; }
+        memcpy(k4r, vv, sizeof k4r);
+        tgt_accel(g, t + h, rr, vv, k4v);
+        for (int i = 0; i < 3; i++) {
+            r[i] += h / 6.0 * (k1r[i] + 2 * k2r[i] + 2 * k3r[i] + k4r[i]);
+            v[i] += h / 6.0 * (k1v[i] + 2 * k2v[i] + 2 * k3v[i] + k4v[i]);
+        }
+        t += h;
+    }
+}
+
+/* The Orbiter's LVLH axes: x ahead, y left (the orbit normal), z down. */
+static void lvlh_axes(const double r[3], const double v[3], double x[3], double y[3], double z[3]) {
+    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+    for (int i = 0; i < 3; i++) z[i] = -r[i] / rn;
+    double h[3] = { r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0] };
+    double hn = sqrt(h[0] * h[0] + h[1] * h[1] + h[2] * h[2]);
+    for (int i = 0; i < 3; i++) y[i] = h[i] / hn;
+    x[0] = y[1] * -z[2] - y[2] * -z[1];             /* normal x radial: ahead */
+    x[1] = y[2] * -z[0] - y[0] * -z[2];
+    x[2] = y[0] * -z[1] - y[1] * -z[0];
+}
+
+/* Body -> M50 quaternion (w x y z) from the matrix whose columns are the
+ * body axes in M50. */
+static void mat_quat(const double R[3][3], double q[4]) {
+    double tr = R[0][0] + R[1][1] + R[2][2];
+    if (tr > 0.0) {
+        double s4 = sqrt(tr + 1.0) * 2.0;
+        q[0] = 0.25 * s4; q[1] = (R[2][1] - R[1][2]) / s4;
+        q[2] = (R[0][2] - R[2][0]) / s4; q[3] = (R[1][0] - R[0][1]) / s4;
+    } else if (R[0][0] > R[1][1] && R[0][0] > R[2][2]) {
+        double s4 = sqrt(1.0 + R[0][0] - R[1][1] - R[2][2]) * 2.0;
+        q[0] = (R[2][1] - R[1][2]) / s4; q[1] = 0.25 * s4;
+        q[2] = (R[0][1] + R[1][0]) / s4; q[3] = (R[0][2] + R[2][0]) / s4;
+    } else if (R[1][1] > R[2][2]) {
+        double s4 = sqrt(1.0 + R[1][1] - R[0][0] - R[2][2]) * 2.0;
+        q[0] = (R[0][2] - R[2][0]) / s4; q[1] = (R[0][1] + R[1][0]) / s4;
+        q[2] = 0.25 * s4; q[3] = (R[1][2] + R[2][1]) / s4;
+    } else {
+        double s4 = sqrt(1.0 + R[2][2] - R[0][0] - R[1][1]) * 2.0;
+        q[0] = (R[1][0] - R[0][1]) / s4; q[1] = (R[0][2] + R[2][0]) / s4;
+        q[2] = (R[1][2] + R[2][1]) / s4; q[3] = 0.25 * s4;
+    }
+}
+
+/* Bring a vehicle to the Orbiter's clock: from its epoch the first time
+ * (placing it), forward after that. */
+static void tgt_catch_up(struct Tgt *g, double unix) {
+    if (!g->placed) {
+        tgt_propagate(g, st.t + (g->epoch - unix), st.t, g->r, g->v);
+        g->t = st.t;
+        g->placed = true;
+        fprintf(stderr, "vehdyn: vehicle %d placed (%.0f s from its epoch)\n", g->norad, unix - g->epoch);
+        return;
+    }
+    if (st.t > g->t) {
+        tgt_propagate(g, g->t, st.t, g->r, g->v);
+        g->t = st.t;
+    }
+}
+
+/* ORBIT TARGETING'S LVLH FRAME of a vehicle at r, v, as GWJ_ORB_TGT_REL_COMP
+ * builds it (GWJORB.hal steps 10-30): the rows of L are its axes in M50 --
+ * X = unit(r x (v x r)) along the track, Y = (v x r)/|v x r| the negative
+ * orbit normal, Z = -r/|r| down -- and the result is its angular rate,
+ * |v x r| / |r|^2, about -Y. */
+static double gwj_frame(const double r[3], const double v[3], double L[3][3]) {
+    double rn = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+    double vr[3] = { v[1] * r[2] - v[2] * r[1], v[2] * r[0] - v[0] * r[2], v[0] * r[1] - v[1] * r[0] };
+    double hn = sqrt(vr[0] * vr[0] + vr[1] * vr[1] + vr[2] * vr[2]);
+    double a[3] = { r[1] * vr[2] - r[2] * vr[1], r[2] * vr[0] - r[0] * vr[2], r[0] * vr[1] - r[1] * vr[0] };
+    double an = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+    for (int i = 0; i < 3; i++) {
+        L[0][i] = a[i] / an;
+        L[1][i] = vr[i] / hn;
+        L[2][i] = -r[i] / rn;
+    }
+    return hn / (rn * rn);
+}
+
+/* YAGPC_VEHDYN_START_REL (see vehdyn_reset): the Orbiter off its target.
+ * The target-centred curvilinear state is turned into M50 exactly as
+ * GWJ_ORB_TGT_REL_COMP does it with INER_TO_LVC off (GWJORB.hal steps
+ * 90-120): the arc X is an angle THETA = X / |rt| about the target's orbit
+ * normal at the radius |rt| - Z, Y is added as it is, and the rotating
+ * frame's rates become inertial by adding OMEGA x r, OMEGA = (0, -w, 0). */
+static void start_rel_place(double unix) {
+    startRel.pending = false;
+    struct Tgt *g = NULL;
+    for (int k = 0; k < tgtN; k++)
+        if (tgt[k].norad == startRel.norad && !tgt[k].rel) { g = &tgt[k]; break; }
+    if (g == NULL) {
+        fprintf(stderr, "vehdyn: YAGPC_VEHDYN_START_REL: no \"target\" line for vehicle %d; "
+                        "the orbiter stays where it was\n", startRel.norad);
+        return;
+    }
+    tgt_catch_up(g, unix);
+    /* the target where it was at the state's time, if that is not now */
+    double dt = (startRel.unix > 0.0) ? startRel.unix - unix : 0.0;
+    double tr[3], tv[3];
+    memcpy(tr, g->r, sizeof tr);
+    memcpy(tv, g->v, sizeof tv);
+    if (dt != 0.0) tgt_propagate(g, st.t, st.t + dt, tr, tv);
+    double L[3][3], w = gwj_frame(tr, tv, L);
+    double rt = sqrt(tr[0] * tr[0] + tr[1] * tr[1] + tr[2] * tr[2]);
+    const double *x = startRel.rel;          /* X Y Z, XD YD ZD */
+    double th = x[0] / rt, thd = x[3] / rt, zcon = rt - x[2];
+    double rl[3], vl[3];
+    rl[0] = sin(th) * zcon;
+    vl[0] = cos(th) * zcon * thd - x[5] * sin(th);
+    rl[2] = rt - cos(th) * zcon;
+    vl[2] = cos(th) * x[5] + rl[0] * thd;
+    rl[1] = x[1];
+    vl[1] = x[4];
+    vl[0] += -w * rl[2];                     /* + OMEGA x r, OMEGA = (0, -w, 0) */
+    vl[2] += w * rl[0];
+    for (int i = 0; i < 3; i++) {
+        st.r[i] = tr[i] + L[0][i] * rl[0] + L[1][i] * rl[1] + L[2][i] * rl[2];
+        st.v[i] = tv[i] + L[0][i] * vl[0] + L[1][i] * vl[1] + L[2][i] * vl[2];
+    }
+    if (dt != 0.0) {
+        struct Tgt o;                        /* the Orbiter, coasting, no drag */
+        memset(&o, 0, sizeof o);
+        tgt_propagate(&o, st.t + dt, st.t, st.r, st.v);
+    }
+    if (!startRel.keepAtt) {
+        /* +XVV -ZLV in the Orbiter's own LVLH, held at the orbital rate */
+        double Lo[3][3], R[3][3], wo = gwj_frame(st.r, st.v, Lo);
+        for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) R[i][j] = Lo[j][i];
+        mat_quat(R, st.q);
+        st.w[0] = 0.0; st.w[1] = -wo; st.w[2] = 0.0;
+    }
+    histCount = 0;
+    hist_push();
+    double d[3] = { st.r[0] - g->r[0], st.r[1] - g->r[1], st.r[2] - g->r[2] };
+    const double FT = 0.3048;
+    double gmt = vehdyn_gmt(st.t) + dt, sod = fmod(gmt, 86400.0);
+    fprintf(stderr, "vehdyn: the orbiter placed off vehicle %d: at GMT %03d/%02d:%02d:%06.3f "
+                    "X %.1f Y %.1f Z %.1f ft, XD %.3f YD %.3f ZD %.3f ft/s (curvilinear LVLH); "
+                    "coasted %.3f s to the present, range %.1f ft\n",
+            g->norad, (int)(gmt / 86400.0), (int)(sod / 3600.0), (int)fmod(sod / 60.0, 60.0),
+            fmod(sod, 60.0), x[0] / FT, x[1] / FT, x[2] / FT, x[3] / FT, x[4] / FT, x[5] / FT,
+            -dt, sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) / FT);
+}
+
+static void targets_advance(void) {
+    if (tgtN < 0) targets_read();
+    double unix = vehdyn_unix(st.t);
+    if (tgtN == 0 && startRel.pending) {
+        startRel.pending = false;
+        fprintf(stderr, "vehdyn: YAGPC_VEHDYN_START_REL is set but YAGPC_VEHDYN_TARGETS names no "
+                        "vehicles; the orbiter stays where it was\n");
+    }
+    if (tgtN == 0 || unix < 0.0) return;            /* nothing, or no calendar yet */
+    /* A "target" epoch far from the run's own date would have to be coasted
+     * through millions of steps (from 1970, if it were 0): not this one. */
+    for (int k = 0; k < tgtN; k++) {
+        struct Tgt *g = &tgt[k];
+        if (g->rel || g->placed || g->epoch < 0.0 || fabs(g->epoch - unix) <= TGT_EPOCH_SPAN_S) continue;
+        fprintf(stderr, "vehdyn: vehicle %d's state is %.1f days from the run's date; "
+                        "it is dropped (make its state nearer the date: tools/tle_target.py)\n",
+                g->norad, (g->epoch - unix) / 86400.0);
+        memmove(&tgt[k], &tgt[k + 1], (size_t)(tgtN - k - 1) * sizeof tgt[0]);
+        tgtN--;
+        k--;
+    }
+    if (tgtN == 0) return;
+    /* the Orbiter first, so that a "near" vehicle is placed off where it is */
+    if (startRel.pending) start_rel_place(unix);
+    for (int k = 0; k < tgtN; k++) {
+        struct Tgt *g = &tgt[k];
+        if (g->rel) {
+            /* Off the Orbiter: along the track by turning its state about
+             * the orbit normal (co-orbiting), the rest added as they are. */
+            double x[3], y[3], z[3];
+            lvlh_axes(st.r, st.v, x, y, z);
+            double ru = -(st.r[0] * z[0] + st.r[1] * z[1] + st.r[2] * z[2]);     /* |r| */
+            double vu = -(st.v[0] * z[0] + st.v[1] * z[1] + st.v[2] * z[2]);     /* radial */
+            double va = st.v[0] * x[0] + st.v[1] * x[1] + st.v[2] * x[2];        /* along */
+            double th = g->off[0] / ru, c = cos(th), s = sin(th);
+            for (int i = 0; i < 3; i++) {
+                double u = c * -z[i] + s * x[i], a = c * x[i] - s * -z[i];       /* turned by th */
+                g->r[i] = ru * u + g->off[1] * y[i] + g->off[2] * z[i];
+                g->v[i] = vu * u + va * a;
+            }
+            g->epoch = unix;
+            g->rel = false;
+        }
+        /* From its epoch to now, on the Orbiter's clock; then onward. */
+        tgt_catch_up(g, unix);
+    }
+}
+
+int vehdyn_target_count(void) {
+    if (tgtN < 0) targets_read();
+    return tgtN;
+}
+
+bool vehdyn_target(int k, int *norad, double r[3], double v[3], double q[4]) {
+    if (k < 0 || k >= tgtN || !tgt[k].placed) return false;
+    const struct Tgt *g = &tgt[k];
+    *norad = g->norad;
+    memcpy(r, g->r, sizeof g->r);
+    memcpy(v, g->v, sizeof g->v);
+    if (!g->lvlh) { memcpy(q, g->q, sizeof g->q); return true; }
+    /* +XVV, Z nadir: body x, y, z are LVLH's x, -y (to the right), z. */
+    double x[3], y[3], z[3], R[3][3];
+    lvlh_axes(r, v, x, y, z);
+    for (int i = 0; i < 3; i++) { R[i][0] = x[i]; R[i][1] = -y[i]; R[i][2] = z[i]; }
+    mat_quat(R, q);
+    return true;
+}
+
+/* A snapshot: each vehicle's id, attitude, drag, and its state with the
+ * Unix time it is at -- restored as an epoch, so whatever clock the
+ * restored run starts at, it is propagated there.  ALL OR NONE: the
+ * vehicles are saved only when every one is placed, so that their order --
+ * the index startrk's lock and kuradar's target 0 keep -- survives the
+ * capture; before then (no calendar yet) none are, and the restored run
+ * reads YAGPC_VEHDYN_TARGETS afresh. */
+#define TGT_SAVED 14          /* doubles a vehicle: id, lvlh, q, bc, epoch, r, v */
+int vehdyn_targets_save(double *b, int max) {
+    int n = 0;
+#define PUT(x) do { if (n < max) b[n] = (double)(x); n++; } while (0)
+    double unix = vehdyn_unix(st.t);
+    if (unix < 0.0) return 0;
+    for (int k = 0; k < tgtN; k++)
+        if (!tgt[k].placed) return 0;
+    for (int k = 0; k < (tgtN > 0 ? tgtN : 0); k++) {
+        const struct Tgt *g = &tgt[k];
+        PUT(g->norad); PUT(g->lvlh ? 1 : 0);
+        for (int i = 0; i < 4; i++) PUT(g->q[i]);
+        PUT(g->bc); PUT(unix + (g->t - st.t));
+        for (int i = 0; i < 3; i++) PUT(g->r[i]);
+        for (int i = 0; i < 3; i++) PUT(g->v[i]);
+    }
+#undef PUT
+    return n;
+}
+
+void vehdyn_targets_load(const double *b, int n) {
+    if (n < TGT_SAVED) return;                /* none captured: the file's, if any */
+    tgtN = 0;
+    for (int i = 0; i + TGT_SAVED <= n && tgtN < TGT_MAX; i += TGT_SAVED) {
+        struct Tgt *g = &tgt[tgtN++];
+        memset(g, 0, sizeof *g);
+        g->norad = (int)b[i]; g->lvlh = b[i + 1] != 0.0;
+        for (int k = 0; k < 4; k++) g->q[k] = b[i + 2 + k];
+        g->bc = b[i + 6]; g->epoch = b[i + 7];
+        for (int k = 0; k < 3; k++) { g->r[k] = b[i + 8 + k]; g->v[k] = b[i + 11 + k]; }
+    }
+}
 
 void vehdyn_advance(double sharedUs) {
     if (sharedUs < 0.0) return;
@@ -1940,6 +2446,7 @@ void vehdyn_advance(double sharedUs) {
             for (int i = 0; i < 3; i++) sfB[i] = R[0][i] * a[0] + R[1][i] * a[1] + R[2][i] * a[2];
         }
     }
+    targets_advance();
 }
 
 void vehdyn_set_fire_words(const uint16_t ff[5], const uint16_t fa[5], double sharedUs) {
@@ -2260,6 +2767,7 @@ double vehdyn_load(const double *b, int n) {
     if (gmtZero >= 0.0) gmtZero += t;
     if (unixZero >= 0.0) unixZero += t;
     restoredGmt = gmtCap;
+    startRel.pending = false;      /* a restored vehicle is where it was */
     return t;
 }
 

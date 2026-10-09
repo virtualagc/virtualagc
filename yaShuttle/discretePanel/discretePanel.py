@@ -670,6 +670,11 @@ def main():
     if args.gpc_id is not None:
         D.set_gpc(args.gpc_id)
 
+    try:                                    # its Dock name, and no App Nap (macdock.py)
+        import macdock
+        macdock.set_app_name("Discrete Panel")
+    except Exception:
+        pass
     root = tk.Tk()
     panel = Panel(root)
     if args.gpc_id is not None:

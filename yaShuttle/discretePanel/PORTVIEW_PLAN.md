@@ -28,7 +28,7 @@ Agreed with PASS-IDLE 2026-10-07.
 - **LEO targets:** planned in yaGPC2, not built yet.  The ISS is a second
   point-mass body in vehdyn, started from the historical TLE (epoch
   11138.51317551, for STS-134) and moved by the same gravity and drag.
-  Proposed feed: "TGT1" on port base + 96, big-endian doubles: vehicle t,
+  The feed (built 2026-10-08): "TGT1" on port base + 109 (96, first planned, is the crew scripts' progress; 85, used until 2026-10-09, is GPC 5's discretes), big-endian doubles: vehicle t,
   object id (NORAD number, 25544 for the ISS), M50 position (m), M50
   velocity (m/s), attitude quaternion body -> M50 (w x y z), already resolved
   by vehdyn.  One packet per object per 0.05 s of vehicle time.  portview maps
@@ -266,7 +266,7 @@ which portview follows from TRU1's attitude with no special handling.
   2017-08-21 eclipse (total at Hopkinsville at 18:26:40, 83-85% at Chicago
   and Atlanta).  Apple's OpenGL falls back to software for dual-source
   blending, so the Earth goes to its own buffers (colour, transmittance).
-- **P4 — LEO objects** (ISS done 2026-10-07): TGT1 reader on base + 96 per
+- **P4 — LEO objects** (ISS done 2026-10-07): TGT1 reader on base + 109 per
   PASS-IDLE's proposal (axes and origin confirmed with PASS-IDLE); the ISS
   from NASA JSC IGOAL's model (NASA 3D Resources "ISS (D) (IGOAL)", 96 MB
   glb, Draco-compressed; fetch_assets.py decodes it once, needing DracoPy and
@@ -285,18 +285,32 @@ which portview follows from TRU1's attitude with no special handling.
   Eye points per view (forward and aft stations, approximate Orbiter
   structural coordinates).  Far away: a point by magnitude.  `--test vbar
   --test-range M` flies the final V-bar approach with a synthetic ISS.
-  Other vehicles are more models keyed by NORAD id (OTHER_VEHICLES), each
-  model.json giving its frame and brightness (mag_1000km):
-  - the Hubble Space Telescope (20580): NASA 3D Resources' Hubble (A), in
-    its V1-V2-V3 axes, metres from mid-length;
-  - Mir (16609): NASA 3D Resources' simple Mir, ~0.0221 m a unit, +X along
-    the core toward the node, origin at the node;
-  - Solar Max (11703), Westar 6 (14688), Palapa B2 (14692), Leasat 3
-    (15643): no published models, so simple shapes to their published
-    dimensions (fetch_assets.py's PROCEDURAL), +X along the spin axis
-    (Solar Max: toward the Sun), approximate.
-  `--test vbar --test-target hst|mir|smm|westar6|palapab2|leasat3` flies up
-  to one.  None is live until vehdyn sends TGT1 for it.
+  Other vehicles are modules in portview/vehicles/ (2026-10-08), one each:
+  KEY.py's build(kit) returns its parts and meta (name, frame, NORAD id,
+  brightness mag_1000km), built with kit.py's shapes or from a NASA 3D
+  Resources glTF (kit.nasa_glb); `fetch_assets.py --vehicles LIST
+  [--rebuild]` prepares them, and portview draws every prepared model whose
+  model.json names a NORAD id.  Each body frame is in its meta; the origin
+  is the centre of mass, as a vehicle's state is.  preview.py renders one
+  from six points round a fly-around; gallery.py makes a page of them all,
+  showcase.py plays a fly-around of each.  A model may be a variant_of a
+  NORAD id instead (a vehicle met in different eras), drawn in place of
+  the usual one with --vehicle KEY (hst1990: Hubble as STS-31 deployed it).
+  Built 2026-10-08 (sub-agents, from press kits, NASA documents and the
+  flight photographs; sources in each module): Hubble after SM4, Mir as at
+  STS-91, Solar Max (STS-41C), Westar 6 and Palapa B2 (STS-51A), Leasat 3
+  (STS-51I), and the 28 others of vehicles/SURVEY.md -- every catalogued
+  LEO object the Shuttle met: LDEF, Intelsat 603, EURECA, SFU, Compton GRO,
+  UARS, the SPAS, Spartan and Wake Shield free-flyers, and the rest.
+  A vehicle's fragments write their own depth (perspective-correct), so a
+  long surface no longer lets one just behind it show through.
+  `--test vbar|flyaround --test-target KEY` flies up
+  to one.  Live (2026-10-08): vehdyn flies whatever YAGPC_VEHDYN_TARGETS
+  lists, as point masses under its own gravity and each one's drag, from a
+  J2000 state at a Unix epoch (tools/tle_target.py makes one from a TLE) or
+  placed off the Orbiter ("near ID X Y Z", LVLH metres), held in LVLH or
+  inertially, and saved with snapshots; TGT1 on base + 109.  The ISS's
+  STS-134 TLE (Space-Track, epoch 11138.51317551) is on the Linux machine.
 - **P5 — integration:** simulatePASS.py / manager.py launch it, and window
   layouts include it (coordinated with PASS-IDLE; Ron's hand-placed
   `*.layout` files are never overwritten).

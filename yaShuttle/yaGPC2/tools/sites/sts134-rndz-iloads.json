@@ -1,0 +1,2638 @@
+{
+ "flight": "STS-134",
+ "notes": "STS-134's own rendezvous I-loads in G2 (GNC OPS 2): every word of the orbit-targeting (#PCGZ*, #DGW*) and relative-navigation (#PCGN*, #DGL*) csects that the flight's load changed from the load module. Source: the PATCH SUMMARY of PFS/mafgen/DASS_G2.ASC, the MAFGEN listing of STS-134's own GNC2 load ('STS134/OI034/C2 MDD 134.09 DASS GNC2', 13 Dec 2010): 'was' is its LM column (the load module, what this tape holds), H its MM column (the flight's); corrected-G2.fcm, the flown G2 dump, holds the MM value in every one of these cells. PASS-IDLE independently sent the flown values of CGZB_LAMB_ILOAD and the GLQREN locals from the DASS G2 dump (pure-G2.fcm), 2026-10-09; they agree here except that PASS-IDLE listed the Lambert flags 28 and up OFF, where DASS_G2.ASC and corrected-G2.fcm both have 29-40 ON (28 OFF) -- sets 29-40 are not used by STS-134's rendezvous. Among the cells: GLQREN's sensor bias INITs 1.0 -> 0.0, TAU_RR 600 -> 4000, VAR/BIAS_VAR_RRDOT; CGZB_LAMB_ILOAD sets 9-14, 19, 25-27, 29-40 ON; GL5_VEL_THRESH 0.9 -> 0.06 ft/s; GWQ/GWS/GWX's CGZV_DEL_X_GUESS, DEL_X_TOL (1E7 -> 1E-2, 1E-8), ICMAX, EL tolerances, DEL_T_MAX; the target sets 9-39 (T1/DT/EL/ROFF_ILOAD). RENDEZVOUS_PLAN.md 5e. Cells are found by their context in a G2 memory image (--mem: an OPS 2 capture taken before RNDZ NAV ENA, e.g. a fly_rndz134 run's sts134r-ipl). CGNS_GPS_LOCKOUT (#PCGNGPS) is left to sts134-gps-lockout.json. Positions: \"flat\" (volume data halfwords) found per csect -- each csect's offset on the volume located by a distinctive run of its own halfwords and confirmed cell by cell (the \"was\" value there and at least 48 of the 80 surrounding halfwords agreeing with an OPS 2 capture, rr-run2/sts134r-ipl); #DGLJRCV's four copies (one per configuration) all changed. Not placed, so not on the volume: #PCGNFLT CGNS_EXP_SHAPE_FACTOR, #PCGNFLT CGNS_CDA, #PCGNFLT CGNS_CDF, #PCGNFLT CGNS_CDN, #PCGNFLT CGNS_CDS, #PCGNFLT CGNS_T_GPS_CYCLE, #PCGNFL2 CGNS_KFACTOR, #PCGNFL2 CGNS_MEAS_THRESHOLD+1, #PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT2, #PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT3, #PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT1, #PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT2, #PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT3. CGZB_LAMB_ILOAD's set 7 (X'0E354') is not in the PATCH SUMMARY (the DASS load module already had it OFF) but this tape has it ON; its cell was added by hand from the flown dump (OFF in DASS_G2.ASC's memory map and in corrected-G2.fcm).",
+ "cells": [
+  {
+   "name": "#DGLCSTA GLC_VAR_ST_HORIZ",
+   "addr": "0450a",
+   "H": "3C10C6F7",
+   "was": "38A4ED3F",
+   "config": "G2",
+   "flat": 667190
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+6 (set 7)",
+   "addr": "0e354",
+   "H": "0000",
+   "was": "0001",
+   "config": "G2",
+   "flat": 694004
+  },
+  {
+   "name": "#DGLCSTA GLC_VAR_ST_VERT",
+   "addr": "0450c",
+   "H": "3C10C6F7",
+   "was": "38A4ED3F",
+   "config": "G2",
+   "flat": 667192
+  },
+  {
+   "name": "#DGL5NAV GL5_VEL_THRESH",
+   "addr": "0453a",
+   "H": "3FF5C28F",
+   "was": "40E66666",
+   "config": "G2",
+   "flat": 667238
+  },
+  {
+   "name": "#DGLBRRA CGNS_K_ANG_COS+1",
+   "addr": "045e9",
+   "H": "0701",
+   "was": "06F4",
+   "config": "G2",
+   "flat": 667413
+  },
+  {
+   "name": "#DGLBRRA CGNS_K_ANG_SIN+1",
+   "addr": "045eb",
+   "H": "A62F",
+   "was": "A633",
+   "config": "G2",
+   "flat": 667415
+  },
+  {
+   "name": "#DGLGCOA GLG_VAR_COAS_HORIZ",
+   "addr": "045fc",
+   "H": "3C53E2D6",
+   "was": "3B2AF31D",
+   "config": "G2",
+   "flat": 667432
+  },
+  {
+   "name": "#DGLGCOA GLG_VAR_COAS_VERT",
+   "addr": "045fe",
+   "H": "3C53E2D6",
+   "was": "3B2AF31D",
+   "config": "G2",
+   "flat": 667434
+  },
+  {
+   "name": "#DGLGCOA C110+8",
+   "addr": "04608",
+   "H": "4110",
+   "was": "C110",
+   "config": "G2",
+   "flat": 667444
+  },
+  {
+   "name": "#DGLGCOA C110+6",
+   "addr": "04616",
+   "H": "C110",
+   "was": "4110",
+   "config": "G2",
+   "flat": 667458
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_F_FOM_GAX_MSG_CNT_MIN copy 1",
+   "addr": "0480e",
+   "H": "7FF8",
+   "was": "0014",
+   "config": "G2",
+   "flat": 549282
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_F_FOM_GAX_MSG_CNT_MIN copy 2",
+   "addr": "0480e",
+   "H": "7FF8",
+   "was": "0014",
+   "config": "G2",
+   "flat": 668346
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_F_FOM_GAX_MSG_CNT_MIN copy 3",
+   "addr": "0480e",
+   "H": "7FF8",
+   "was": "0014",
+   "config": "G2",
+   "flat": 940650
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_F_FOM_GAX_MSG_CNT_MIN copy 4",
+   "addr": "0480e",
+   "H": "7FF8",
+   "was": "0014",
+   "config": "G2",
+   "flat": 1169882
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_GAX_MSG_CNT_MIN copy 1",
+   "addr": "0480f",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 549283
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_GAX_MSG_CNT_MIN copy 2",
+   "addr": "0480f",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 668347
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_GAX_MSG_CNT_MIN copy 3",
+   "addr": "0480f",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 940651
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_GAX_MSG_CNT_MIN copy 4",
+   "addr": "0480f",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 1169883
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_GAX_MSG_CNT_MIN copy 1",
+   "addr": "04810",
+   "H": "7FF8",
+   "was": "0003",
+   "config": "G2",
+   "flat": 549284
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_GAX_MSG_CNT_MIN copy 2",
+   "addr": "04810",
+   "H": "7FF8",
+   "was": "0003",
+   "config": "G2",
+   "flat": 668348
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_GAX_MSG_CNT_MIN copy 3",
+   "addr": "04810",
+   "H": "7FF8",
+   "was": "0003",
+   "config": "G2",
+   "flat": 940652
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_GAX_MSG_CNT_MIN copy 4",
+   "addr": "04810",
+   "H": "7FF8",
+   "was": "0003",
+   "config": "G2",
+   "flat": 1169884
+  },
+  {
+   "name": "#DGLJRCV ? copy 1",
+   "addr": "04811",
+   "H": "7FF8",
+   "was": "0002",
+   "config": "G2",
+   "flat": 549285
+  },
+  {
+   "name": "#DGLJRCV ? copy 2",
+   "addr": "04811",
+   "H": "7FF8",
+   "was": "0002",
+   "config": "G2",
+   "flat": 668349
+  },
+  {
+   "name": "#DGLJRCV ? copy 3",
+   "addr": "04811",
+   "H": "7FF8",
+   "was": "0002",
+   "config": "G2",
+   "flat": 940653
+  },
+  {
+   "name": "#DGLJRCV ? copy 4",
+   "addr": "04811",
+   "H": "7FF8",
+   "was": "0002",
+   "config": "G2",
+   "flat": 1169885
+  },
+  {
+   "name": "#DGLJRCV CGNS_N_RATIOS_ABOVE_LIMIT_MIN copy 1",
+   "addr": "04812",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 549286
+  },
+  {
+   "name": "#DGLJRCV CGNS_N_RATIOS_ABOVE_LIMIT_MIN copy 2",
+   "addr": "04812",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 668350
+  },
+  {
+   "name": "#DGLJRCV CGNS_N_RATIOS_ABOVE_LIMIT_MIN copy 3",
+   "addr": "04812",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 940654
+  },
+  {
+   "name": "#DGLJRCV CGNS_N_RATIOS_ABOVE_LIMIT_MIN copy 4",
+   "addr": "04812",
+   "H": "7FF8",
+   "was": "0005",
+   "config": "G2",
+   "flat": 1169886
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_IMU_VEL_THRESH_SQ copy 1",
+   "addr": "0481c",
+   "H": "3EA3D708",
+   "was": "3E431BDE",
+   "config": "G2",
+   "flat": 549296
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_IMU_VEL_THRESH_SQ copy 2",
+   "addr": "0481c",
+   "H": "3EA3D708",
+   "was": "3E431BDE",
+   "config": "G2",
+   "flat": 668360
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_IMU_VEL_THRESH_SQ copy 3",
+   "addr": "0481c",
+   "H": "3EA3D708",
+   "was": "3E431BDE",
+   "config": "G2",
+   "flat": 940664
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_IMU_VEL_THRESH_SQ copy 4",
+   "addr": "0481c",
+   "H": "3EA3D708",
+   "was": "3E431BDE",
+   "config": "G2",
+   "flat": 1169896
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_GAX_OFF_ALERT_RMNDR_DT copy 1",
+   "addr": "04820",
+   "H": "461A5E00",
+   "was": "4312C000",
+   "config": "G2",
+   "flat": 549300
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_GAX_OFF_ALERT_RMNDR_DT copy 2",
+   "addr": "04820",
+   "H": "461A5E00",
+   "was": "4312C000",
+   "config": "G2",
+   "flat": 668364
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_GAX_OFF_ALERT_RMNDR_DT copy 3",
+   "addr": "04820",
+   "H": "461A5E00",
+   "was": "4312C000",
+   "config": "G2",
+   "flat": 940668
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_GAX_OFF_ALERT_RMNDR_DT copy 4",
+   "addr": "04820",
+   "H": "461A5E00",
+   "was": "4312C000",
+   "config": "G2",
+   "flat": 1169900
+  },
+  {
+   "name": "#DGLJRCV CGNS_DT_ANNCD_RESET copy 1",
+   "addr": "04822",
+   "H": "423C0000",
+   "was": "45151800",
+   "config": "G2",
+   "flat": 549302
+  },
+  {
+   "name": "#DGLJRCV CGNS_DT_ANNCD_RESET copy 2",
+   "addr": "04822",
+   "H": "423C0000",
+   "was": "45151800",
+   "config": "G2",
+   "flat": 668366
+  },
+  {
+   "name": "#DGLJRCV CGNS_DT_ANNCD_RESET copy 3",
+   "addr": "04822",
+   "H": "423C0000",
+   "was": "45151800",
+   "config": "G2",
+   "flat": 940670
+  },
+  {
+   "name": "#DGLJRCV CGNS_DT_ANNCD_RESET copy 4",
+   "addr": "04822",
+   "H": "423C0000",
+   "was": "45151800",
+   "config": "G2",
+   "flat": 1169902
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_RTOL_SF_INV copy 1",
+   "addr": "04826",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 549306
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_RTOL_SF_INV copy 2",
+   "addr": "04826",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 668370
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_RTOL_SF_INV copy 3",
+   "addr": "04826",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 940674
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_RTOL_SF_INV copy 4",
+   "addr": "04826",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 1169906
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_VTOL_SF_INV+1 copy 1",
+   "addr": "04829",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549309
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_VTOL_SF_INV+1 copy 2",
+   "addr": "04829",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668373
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_VTOL_SF_INV+1 copy 3",
+   "addr": "04829",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940677
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_VTOL_SF_INV+1 copy 4",
+   "addr": "04829",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1169909
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELR_RATIO_SF_INV copy 1",
+   "addr": "0482a",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 549310
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELR_RATIO_SF_INV copy 2",
+   "addr": "0482a",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 668374
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELR_RATIO_SF_INV copy 3",
+   "addr": "0482a",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 940678
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELR_RATIO_SF_INV copy 4",
+   "addr": "0482a",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 1169910
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELV_RATIO_SF_INV copy 1",
+   "addr": "0482c",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 549312
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELV_RATIO_SF_INV copy 2",
+   "addr": "0482c",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 668376
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELV_RATIO_SF_INV copy 3",
+   "addr": "0482c",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 940680
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELV_RATIO_SF_INV copy 4",
+   "addr": "0482c",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 1169912
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELR_RATIO_SF_INV+1 copy 1",
+   "addr": "0482f",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549315
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELR_RATIO_SF_INV+1 copy 2",
+   "addr": "0482f",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668379
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELR_RATIO_SF_INV+1 copy 3",
+   "addr": "0482f",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940683
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELR_RATIO_SF_INV+1 copy 4",
+   "addr": "0482f",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1169915
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELV_RATIO_SF_INV copy 1",
+   "addr": "04830",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 549316
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELV_RATIO_SF_INV copy 2",
+   "addr": "04830",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 668380
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELV_RATIO_SF_INV copy 3",
+   "addr": "04830",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 940684
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELV_RATIO_SF_INV copy 4",
+   "addr": "04830",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 1169916
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELR_RATIO_SF_INV copy 1",
+   "addr": "04832",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 549318
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELR_RATIO_SF_INV copy 2",
+   "addr": "04832",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 668382
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELR_RATIO_SF_INV copy 3",
+   "addr": "04832",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 940686
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELR_RATIO_SF_INV copy 4",
+   "addr": "04832",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 1169918
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELV_RATIO_SF_INV copy 1",
+   "addr": "04834",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 549320
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELV_RATIO_SF_INV copy 2",
+   "addr": "04834",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 668384
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELV_RATIO_SF_INV copy 3",
+   "addr": "04834",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 940688
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELV_RATIO_SF_INV copy 4",
+   "addr": "04834",
+   "H": "42640001",
+   "was": "41A00000",
+   "config": "G2",
+   "flat": 1169920
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_UVW_POS_SF_INV copy 1",
+   "addr": "04836",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 549322
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_UVW_POS_SF_INV copy 2",
+   "addr": "04836",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 668386
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_UVW_POS_SF_INV copy 3",
+   "addr": "04836",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 940690
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_UVW_POS_SF_INV copy 4",
+   "addr": "04836",
+   "H": "40199999",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 1169922
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_UVW_VEL_SF_INV+1 copy 1",
+   "addr": "04839",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549325
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_UVW_VEL_SF_INV+1 copy 2",
+   "addr": "04839",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668389
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_UVW_VEL_SF_INV+1 copy 3",
+   "addr": "04839",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940693
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_UVW_VEL_SF_INV+1 copy 4",
+   "addr": "04839",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1169925
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_SF_INV copy 1",
+   "addr": "0483a",
+   "H": "4325F9C8",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 549326
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_SF_INV copy 2",
+   "addr": "0483a",
+   "H": "4325F9C8",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 668390
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_SF_INV copy 3",
+   "addr": "0483a",
+   "H": "4325F9C8",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 940694
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_SF_INV copy 4",
+   "addr": "0483a",
+   "H": "4325F9C8",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 1169926
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_SF_INV+1 copy 1",
+   "addr": "0483d",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549329
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_SF_INV+1 copy 2",
+   "addr": "0483d",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668393
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_SF_INV+1 copy 3",
+   "addr": "0483d",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940697
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_SF_INV+1 copy 4",
+   "addr": "0483d",
+   "H": "0003",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1169929
+  },
+  {
+   "name": "#DGLJRCV CGNS_ANG_SF_INV copy 1",
+   "addr": "0483e",
+   "H": "42640001",
+   "was": "42B60960",
+   "config": "G2",
+   "flat": 549330
+  },
+  {
+   "name": "#DGLJRCV CGNS_ANG_SF_INV copy 2",
+   "addr": "0483e",
+   "H": "42640001",
+   "was": "42B60960",
+   "config": "G2",
+   "flat": 668394
+  },
+  {
+   "name": "#DGLJRCV CGNS_ANG_SF_INV copy 3",
+   "addr": "0483e",
+   "H": "42640001",
+   "was": "42B60960",
+   "config": "G2",
+   "flat": 940698
+  },
+  {
+   "name": "#DGLJRCV CGNS_ANG_SF_INV copy 4",
+   "addr": "0483e",
+   "H": "42640001",
+   "was": "42B60960",
+   "config": "G2",
+   "flat": 1169930
+  },
+  {
+   "name": "#DGLJRCV CGNS_ALT_SF_INV copy 1",
+   "addr": "04840",
+   "H": "42320000",
+   "was": "4242AAAA",
+   "config": "G2",
+   "flat": 549332
+  },
+  {
+   "name": "#DGLJRCV CGNS_ALT_SF_INV copy 2",
+   "addr": "04840",
+   "H": "42320000",
+   "was": "4242AAAA",
+   "config": "G2",
+   "flat": 668396
+  },
+  {
+   "name": "#DGLJRCV CGNS_ALT_SF_INV copy 3",
+   "addr": "04840",
+   "H": "42320000",
+   "was": "4242AAAA",
+   "config": "G2",
+   "flat": 940700
+  },
+  {
+   "name": "#DGLJRCV CGNS_ALT_SF_INV copy 4",
+   "addr": "04840",
+   "H": "42320000",
+   "was": "4242AAAA",
+   "config": "G2",
+   "flat": 1169932
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_RTOL_INV copy 1",
+   "addr": "04842",
+   "H": "3F147AE1",
+   "was": "3CA7C5AC",
+   "config": "G2",
+   "flat": 549334
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_RTOL_INV copy 2",
+   "addr": "04842",
+   "H": "3F147AE1",
+   "was": "3CA7C5AC",
+   "config": "G2",
+   "flat": 668398
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_RTOL_INV copy 3",
+   "addr": "04842",
+   "H": "3F147AE1",
+   "was": "3CA7C5AC",
+   "config": "G2",
+   "flat": 940702
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_RTOL_INV copy 4",
+   "addr": "04842",
+   "H": "3F147AE1",
+   "was": "3CA7C5AC",
+   "config": "G2",
+   "flat": 1169934
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_VTOL_INV copy 1",
+   "addr": "04844",
+   "H": "411AAAAA",
+   "was": "3F28F5C2",
+   "config": "G2",
+   "flat": 549336
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_VTOL_INV copy 2",
+   "addr": "04844",
+   "H": "411AAAAA",
+   "was": "3F28F5C2",
+   "config": "G2",
+   "flat": 668400
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_VTOL_INV copy 3",
+   "addr": "04844",
+   "H": "411AAAAA",
+   "was": "3F28F5C2",
+   "config": "G2",
+   "flat": 940704
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_VTOL_INV copy 4",
+   "addr": "04844",
+   "H": "411AAAAA",
+   "was": "3F28F5C2",
+   "config": "G2",
+   "flat": 1169936
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_RTOL_INV copy 1",
+   "addr": "04846",
+   "H": "3E83126E",
+   "was": "3F147AE1",
+   "config": "G2",
+   "flat": 549338
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_RTOL_INV copy 2",
+   "addr": "04846",
+   "H": "3E83126E",
+   "was": "3F147AE1",
+   "config": "G2",
+   "flat": 668402
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_RTOL_INV copy 3",
+   "addr": "04846",
+   "H": "3E83126E",
+   "was": "3F147AE1",
+   "config": "G2",
+   "flat": 940706
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_RTOL_INV copy 4",
+   "addr": "04846",
+   "H": "3E83126E",
+   "was": "3F147AE1",
+   "config": "G2",
+   "flat": 1169938
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_VTOL_INV copy 1",
+   "addr": "04848",
+   "H": "40333333",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 549340
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_VTOL_INV copy 2",
+   "addr": "04848",
+   "H": "40333333",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 668404
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_VTOL_INV copy 3",
+   "addr": "04848",
+   "H": "40333333",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 940708
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_VTOL_INV copy 4",
+   "addr": "04848",
+   "H": "40333333",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 1169940
+  },
+  {
+   "name": "#DGLJRCV CGNS_METER_DL_SF_INV copy 1",
+   "addr": "0484a",
+   "H": "42640001",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 549342
+  },
+  {
+   "name": "#DGLJRCV CGNS_METER_DL_SF_INV copy 2",
+   "addr": "0484a",
+   "H": "42640001",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 668406
+  },
+  {
+   "name": "#DGLJRCV CGNS_METER_DL_SF_INV copy 3",
+   "addr": "0484a",
+   "H": "42640001",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 940710
+  },
+  {
+   "name": "#DGLJRCV CGNS_METER_DL_SF_INV copy 4",
+   "addr": "0484a",
+   "H": "42640001",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 1169942
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_A copy 1",
+   "addr": "04888",
+   "H": "431F4000431F4000431F4000",
+   "was": "4427100044C35000433E8000",
+   "config": "G2",
+   "flat": 549404
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_A copy 2",
+   "addr": "04888",
+   "H": "431F4000431F4000431F4000",
+   "was": "4427100044C35000433E8000",
+   "config": "G2",
+   "flat": 668468
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_A copy 3",
+   "addr": "04888",
+   "H": "431F4000431F4000431F4000",
+   "was": "4427100044C35000433E8000",
+   "config": "G2",
+   "flat": 940772
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_A copy 4",
+   "addr": "04888",
+   "H": "431F4000431F4000431F4000",
+   "was": "4427100044C35000433E8000",
+   "config": "G2",
+   "flat": 1170004
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_B copy 1",
+   "addr": "0488e",
+   "H": "40238E4B411E5ED24017B3FA",
+   "was": "4228000041A0000041400000",
+   "config": "G2",
+   "flat": 549410
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_B copy 2",
+   "addr": "0488e",
+   "H": "40238E4B411E5ED24017B3FA",
+   "was": "4228000041A0000041400000",
+   "config": "G2",
+   "flat": 668474
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_B copy 3",
+   "addr": "0488e",
+   "H": "40238E4B411E5ED24017B3FA",
+   "was": "4228000041A0000041400000",
+   "config": "G2",
+   "flat": 940778
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_B copy 4",
+   "addr": "0488e",
+   "H": "40238E4B411E5ED24017B3FA",
+   "was": "4228000041A0000041400000",
+   "config": "G2",
+   "flat": 1170010
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A copy 1",
+   "addr": "0489a",
+   "H": "4120",
+   "was": "4246",
+   "config": "G2",
+   "flat": 549422
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A copy 2",
+   "addr": "0489a",
+   "H": "4120",
+   "was": "4246",
+   "config": "G2",
+   "flat": 668486
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A copy 3",
+   "addr": "0489a",
+   "H": "4120",
+   "was": "4246",
+   "config": "G2",
+   "flat": 940790
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A copy 4",
+   "addr": "0489a",
+   "H": "4120",
+   "was": "4246",
+   "config": "G2",
+   "flat": 1170022
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+2 copy 1",
+   "addr": "0489c",
+   "H": "4110",
+   "was": "4214",
+   "config": "G2",
+   "flat": 549424
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+2 copy 2",
+   "addr": "0489c",
+   "H": "4110",
+   "was": "4214",
+   "config": "G2",
+   "flat": 668488
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+2 copy 3",
+   "addr": "0489c",
+   "H": "4110",
+   "was": "4214",
+   "config": "G2",
+   "flat": 940792
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+2 copy 4",
+   "addr": "0489c",
+   "H": "4110",
+   "was": "4214",
+   "config": "G2",
+   "flat": 1170024
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+4 copy 1",
+   "addr": "0489e",
+   "H": "4110",
+   "was": "4150",
+   "config": "G2",
+   "flat": 549426
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+4 copy 2",
+   "addr": "0489e",
+   "H": "4110",
+   "was": "4150",
+   "config": "G2",
+   "flat": 668490
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+4 copy 3",
+   "addr": "0489e",
+   "H": "4110",
+   "was": "4150",
+   "config": "G2",
+   "flat": 940794
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+4 copy 4",
+   "addr": "0489e",
+   "H": "4110",
+   "was": "4150",
+   "config": "G2",
+   "flat": 1170026
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_B copy 1",
+   "addr": "048a0",
+   "H": "3E8509BF3D5E5F303D5E5F30",
+   "was": "000000000000000000000000",
+   "config": "G2",
+   "flat": 549428
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_B copy 2",
+   "addr": "048a0",
+   "H": "3E8509BF3D5E5F303D5E5F30",
+   "was": "000000000000000000000000",
+   "config": "G2",
+   "flat": 668492
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_B copy 3",
+   "addr": "048a0",
+   "H": "3E8509BF3D5E5F303D5E5F30",
+   "was": "000000000000000000000000",
+   "config": "G2",
+   "flat": 940796
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_B copy 4",
+   "addr": "048a0",
+   "H": "3E8509BF3D5E5F303D5E5F30",
+   "was": "000000000000000000000000",
+   "config": "G2",
+   "flat": 1170028
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_MAX_UVW copy 1",
+   "addr": "048ac",
+   "H": "437D000044520800435DC000",
+   "was": "444E200045186A00437D0000",
+   "config": "G2",
+   "flat": 549440
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_MAX_UVW copy 2",
+   "addr": "048ac",
+   "H": "437D000044520800435DC000",
+   "was": "444E200045186A00437D0000",
+   "config": "G2",
+   "flat": 668504
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_MAX_UVW copy 3",
+   "addr": "048ac",
+   "H": "437D000044520800435DC000",
+   "was": "444E200045186A00437D0000",
+   "config": "G2",
+   "flat": 940808
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_MAX_UVW copy 4",
+   "addr": "048ac",
+   "H": "437D000044520800435DC000",
+   "was": "444E200045186A00437D0000",
+   "config": "G2",
+   "flat": 1170040
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+2 copy 1",
+   "addr": "048b4",
+   "H": "4120",
+   "was": "4214",
+   "config": "G2",
+   "flat": 549448
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+2 copy 2",
+   "addr": "048b4",
+   "H": "4120",
+   "was": "4214",
+   "config": "G2",
+   "flat": 668512
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+2 copy 3",
+   "addr": "048b4",
+   "H": "4120",
+   "was": "4214",
+   "config": "G2",
+   "flat": 940816
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+2 copy 4",
+   "addr": "048b4",
+   "H": "4120",
+   "was": "4214",
+   "config": "G2",
+   "flat": 1170048
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+4 copy 1",
+   "addr": "048b6",
+   "H": "4120",
+   "was": "4150",
+   "config": "G2",
+   "flat": 549450
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+4 copy 2",
+   "addr": "048b6",
+   "H": "4120",
+   "was": "4150",
+   "config": "G2",
+   "flat": 668514
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+4 copy 3",
+   "addr": "048b6",
+   "H": "4120",
+   "was": "4150",
+   "config": "G2",
+   "flat": 940818
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+4 copy 4",
+   "addr": "048b6",
+   "H": "4120",
+   "was": "4150",
+   "config": "G2",
+   "flat": 1170050
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM copy 1",
+   "addr": "048b8",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549452
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM copy 2",
+   "addr": "048b8",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668516
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM copy 3",
+   "addr": "048b8",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940820
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM copy 4",
+   "addr": "048b8",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1170052
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+2 copy 1",
+   "addr": "048ba",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549454
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+2 copy 2",
+   "addr": "048ba",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668518
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+2 copy 3",
+   "addr": "048ba",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940822
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+2 copy 4",
+   "addr": "048ba",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1170054
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+4 copy 1",
+   "addr": "048bc",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549456
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+4 copy 2",
+   "addr": "048bc",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668520
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+4 copy 3",
+   "addr": "048bc",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940824
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+4 copy 4",
+   "addr": "048bc",
+   "H": "4228",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1170056
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+6 copy 1",
+   "addr": "048be",
+   "H": "4110",
+   "was": "0000",
+   "config": "G2",
+   "flat": 549458
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+6 copy 2",
+   "addr": "048be",
+   "H": "4110",
+   "was": "0000",
+   "config": "G2",
+   "flat": 668522
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+6 copy 3",
+   "addr": "048be",
+   "H": "4110",
+   "was": "0000",
+   "config": "G2",
+   "flat": 940826
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+6 copy 4",
+   "addr": "048be",
+   "H": "4110",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1170058
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+8 copy 1",
+   "addr": "048c0",
+   "H": "4099999940999999",
+   "was": "0000000000000000",
+   "config": "G2",
+   "flat": 549460
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+8 copy 2",
+   "addr": "048c0",
+   "H": "4099999940999999",
+   "was": "0000000000000000",
+   "config": "G2",
+   "flat": 668524
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+8 copy 3",
+   "addr": "048c0",
+   "H": "4099999940999999",
+   "was": "0000000000000000",
+   "config": "G2",
+   "flat": 940828
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+8 copy 4",
+   "addr": "048c0",
+   "H": "4099999940999999",
+   "was": "0000000000000000",
+   "config": "G2",
+   "flat": 1170060
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_LAT+1",
+   "addr": "05b2d",
+   "H": "D2DB03C734DD",
+   "was": "D2E0E30446B6",
+   "config": "G2",
+   "flat": 133309
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_LONG+2",
+   "addr": "05b32",
+   "H": "D0CF0FF3",
+   "was": "D8DCA587",
+   "config": "G2",
+   "flat": 133314
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_ALT+3",
+   "addr": "05b37",
+   "H": "0000",
+   "was": "6665",
+   "config": "G2",
+   "flat": 133319
+  },
+  {
+   "name": "#PCGZCOM CGZV_FUEL_WASTING_DIRECTION",
+   "addr": "060b0",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 134720
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_ROLL",
+   "addr": "060c4",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 134740
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_PITCH",
+   "addr": "060c6",
+   "H": "00000000",
+   "was": "43139000",
+   "config": "G2",
+   "flat": 134742
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_YAW",
+   "addr": "060c8",
+   "H": "00000000",
+   "was": "43166000",
+   "config": "G2",
+   "flat": 134744
+  },
+  {
+   "name": "#PCGZCOM CGZV_IMU_NAV_ACC_THRESH+1",
+   "addr": "061fb",
+   "H": "0F00",
+   "was": "04B0",
+   "config": "G2",
+   "flat": 135051
+  },
+  {
+   "name": "#PCGZCOM CGZV_OMS_DUMP_QTY",
+   "addr": "0624a",
+   "H": "424A8E3A",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 135130
+  },
+  {
+   "name": "#DGL6COV CGNS_VAR_IMU_ALIGN",
+   "addr": "067d4",
+   "H": "3C10C6F7",
+   "was": "40199999",
+   "config": "G2",
+   "flat": 669742
+  },
+  {
+   "name": "#DGL6COV CGNS_VAR_U_A_PWRD_FLT",
+   "addr": "067d6",
+   "H": "3C1421F53C1421F53C1421F5",
+   "was": "3F28F5C23F28F5C23F28F5C2",
+   "config": "G2",
+   "flat": 669744
+  },
+  {
+   "name": "#DGL6COV CGNS_COV_U_A_PWRD_FLT",
+   "addr": "067dc",
+   "H": "3C1421F53C1421F53C1421F5",
+   "was": "3FDB8BAC3FDB8BAC3FDB8BAC",
+   "config": "G2",
+   "flat": 669750
+  },
+  {
+   "name": "#DGLUACC GLU_ALT_L copy 1",
+   "addr": "0753a",
+   "H": "45D252F4",
+   "was": "45F04B90",
+   "config": "G2",
+   "flat": 551966
+  },
+  {
+   "name": "#DGLUACC GLU_ALT_L copy 2",
+   "addr": "0753a",
+   "H": "45D252F4",
+   "was": "45F04B90",
+   "config": "G2",
+   "flat": 673172
+  },
+  {
+   "name": "#DGLUACC GLU_CBM2 copy 1",
+   "addr": "0753c",
+   "H": "40FD3A59",
+   "was": "4048BF5C",
+   "config": "G2",
+   "flat": 551968
+  },
+  {
+   "name": "#DGLUACC GLU_CBM2 copy 2",
+   "addr": "0753c",
+   "H": "40FD3A59",
+   "was": "4048BF5C",
+   "config": "G2",
+   "flat": 673174
+  },
+  {
+   "name": "#DGLUACC GLU_ABM copy 1",
+   "addr": "0753e",
+   "H": "C217907C",
+   "was": "C2184829",
+   "config": "G2",
+   "flat": 551970
+  },
+  {
+   "name": "#DGLUACC GLU_ABM copy 2",
+   "addr": "0753e",
+   "H": "C217907C",
+   "was": "C2184829",
+   "config": "G2",
+   "flat": 673176
+  },
+  {
+   "name": "#DGLUACC GLU_ABM+3 copy 1",
+   "addr": "07541",
+   "H": "C512BC5432F3BC5BF196462A3CE646250540",
+   "was": "A512BC4E9871BC5EB274462ED82146247211",
+   "config": "G2",
+   "flat": 551973
+  },
+  {
+   "name": "#DGLUACC GLU_ABM+3 copy 2",
+   "addr": "07541",
+   "H": "C512BC5432F3BC5BF196462A3CE646250540",
+   "was": "A512BC4E9871BC5EB274462ED82146247211",
+   "config": "G2",
+   "flat": 673179
+  },
+  {
+   "name": "#DGLUACC GLU_BM copy 1",
+   "addr": "0754a",
+   "H": "BFE41F4D3C1447F9C52E24A3",
+   "was": "C03BC7B13C13505EC515B8F6",
+   "config": "G2",
+   "flat": 551982
+  },
+  {
+   "name": "#DGLUACC GLU_BM copy 2",
+   "addr": "0754a",
+   "H": "BFE41F4D3C1447F9C52E24A3",
+   "was": "C03BC7B13C13505EC515B8F6",
+   "config": "G2",
+   "flat": 673188
+  },
+  {
+   "name": "#DGLUACC GLU_LOC+1 copy 1",
+   "addr": "07551",
+   "H": "F07B45A324C1",
+   "was": "F3A378DD0AD9",
+   "config": "G2",
+   "flat": 551989
+  },
+  {
+   "name": "#DGLUACC GLU_LOC+1 copy 2",
+   "addr": "07551",
+   "H": "F07B45A324C1",
+   "was": "F3A378DD0AD9",
+   "config": "G2",
+   "flat": 673195
+  },
+  {
+   "name": "#DGLUACC GLU_PHASE_C copy 1",
+   "addr": "07558",
+   "H": "42D591017F5C00B1",
+   "was": "42BC6F31A08BFC19",
+   "config": "G2",
+   "flat": 551996
+  },
+  {
+   "name": "#DGLUACC GLU_PHASE_C copy 2",
+   "addr": "07558",
+   "H": "42D591017F5C00B1",
+   "was": "42BC6F31A08BFC19",
+   "config": "G2",
+   "flat": 673202
+  },
+  {
+   "name": "#DGLTREF CGNS_I_VENT_GPS_REF",
+   "addr": "0762f",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 673417
+  },
+  {
+   "name": "#DGLTREF CGNS_ACC_THRESH_GPS_REF",
+   "addr": "07632",
+   "H": "3FCCCCCC",
+   "was": "3F83126E",
+   "config": "G2",
+   "flat": 673420
+  },
+  {
+   "name": "#DGWYORB CGZV_DU",
+   "addr": "07bfc",
+   "H": "0000",
+   "was": "4120",
+   "config": "G2",
+   "flat": 674902
+  },
+  {
+   "name": "#DGWYORB CGZV_EPS_U",
+   "addr": "07bfe",
+   "H": "3B1AD7F2",
+   "was": "3C10C6F7",
+   "config": "G2",
+   "flat": 674904
+  },
+  {
+   "name": "#DGWRORB CGZV_ORB_TGT_DTMIN_LAMB",
+   "addr": "07d1e",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 675192
+  },
+  {
+   "name": "#DGWGORB CGZV_PROX_DTMIN",
+   "addr": "0afaa",
+   "H": "423C",
+   "was": "0000",
+   "config": "G2",
+   "flat": 680774
+  },
+  {
+   "name": "#DGWSORB CGZV_EL_DH_TOL",
+   "addr": "0b038",
+   "H": "42640000",
+   "was": "431F4000",
+   "config": "G2",
+   "flat": 680916
+  },
+  {
+   "name": "#DGWSORB CGZV_EL_TOL",
+   "addr": "0b03a",
+   "H": "3F147AE1",
+   "was": "3E418937",
+   "config": "G2",
+   "flat": 680918
+  },
+  {
+   "name": "#DGWWORB CGZV_N_MIN",
+   "addr": "0b058",
+   "H": "0003",
+   "was": "000F",
+   "config": "G2",
+   "flat": 680948
+  },
+  {
+   "name": "#DGWWORB CGZV_R_TOL",
+   "addr": "0b05e",
+   "H": "42FA0000",
+   "was": "444E2000",
+   "config": "G2",
+   "flat": 680954
+  },
+  {
+   "name": "#DGWXORB CGZV_DEL_T_MAX",
+   "addr": "0b070",
+   "H": "4312C000",
+   "was": "431F4000",
+   "config": "G2",
+   "flat": 680972
+  },
+  {
+   "name": "#DGLQREN GLQ_BIAS_VAR_RRDOT+2",
+   "addr": "0b46c",
+   "H": "41100000",
+   "was": "401C28F5",
+   "config": "G2",
+   "flat": 681992
+  },
+  {
+   "name": "#DGLQREN GLQ_COAS_ANGLES_BIAS_INIT",
+   "addr": "0b472",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 681998
+  },
+  {
+   "name": "#DGLQREN GLQ_COAS_ANGLES_BIAS_INIT+2",
+   "addr": "0b474",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682000
+  },
+  {
+   "name": "#DGLQREN GLQ_RR_ANGLES_BIAS_INIT",
+   "addr": "0b476",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682002
+  },
+  {
+   "name": "#DGLQREN GLQ_RR_ANGLES_BIAS_INIT+2",
+   "addr": "0b478",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682004
+  },
+  {
+   "name": "#DGLQREN GLQ_RRDOT_BIAS_INIT",
+   "addr": "0b47a",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682006
+  },
+  {
+   "name": "#DGLQREN GLQ_RRDOT_BIAS_INIT+2",
+   "addr": "0b47c",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682008
+  },
+  {
+   "name": "#DGLQREN GLQ_ST_ANGLES_BIAS_INIT",
+   "addr": "0b47e",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682010
+  },
+  {
+   "name": "#DGLQREN GLQ_ST_ANGLES_BIAS_INIT+2",
+   "addr": "0b480",
+   "H": "0000",
+   "was": "4110",
+   "config": "G2",
+   "flat": 682012
+  },
+  {
+   "name": "#DGLQREN GLQ_TAU_RR_ANGLES",
+   "addr": "0b486",
+   "H": "43FA000043FA0000",
+   "was": "4325800043258000",
+   "config": "G2",
+   "flat": 682018
+  },
+  {
+   "name": "#DGLQREN GLQ_VAR_RRDOT",
+   "addr": "0b49a",
+   "H": "432C7000",
+   "was": "41100000",
+   "config": "G2",
+   "flat": 682038
+  },
+  {
+   "name": "#DGLQREN GLQ_VAR_ST_ANGLES",
+   "addr": "0b49e",
+   "H": "3C10C6F73C10C6F7",
+   "was": "3C1421F53C1421F5",
+   "config": "G2",
+   "flat": 682042
+  },
+  {
+   "name": "#DGLRREN GLR_R_OFFSET_BODY",
+   "addr": "0b4ce",
+   "H": "422DBCED41B2147AC15CA3D7",
+   "was": "C1C389A041B32752C11D2AAE",
+   "config": "G2",
+   "flat": 682090
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DEL_X_GUESS",
+   "addr": "0de28",
+   "H": "4264000042640000",
+   "was": "431F4000431F4000",
+   "config": "G2",
+   "flat": 692680
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DEL_X_TOL",
+   "addr": "0de2c",
+   "H": "3F28F5C23A2AF31D",
+   "was": "4698968046989680",
+   "config": "G2",
+   "flat": 692684
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ICMAX",
+   "addr": "0de31",
+   "H": "000A",
+   "was": "0032",
+   "config": "G2",
+   "flat": 692689
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+16",
+   "addr": "0deec",
+   "H": "C239B333",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 692876
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+20",
+   "addr": "0def0",
+   "H": "4214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692880
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+22",
+   "addr": "0def2",
+   "H": "4231E6664211",
+   "was": "000000000000",
+   "config": "G2",
+   "flat": 692882
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+26",
+   "addr": "0def6",
+   "H": "421B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692886
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+66",
+   "addr": "0df1e",
+   "H": "C23B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692926
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+68",
+   "addr": "0df20",
+   "H": "C222",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692928
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+70",
+   "addr": "0df22",
+   "H": "C214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692930
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+16",
+   "addr": "0df3c",
+   "H": "4239B333424CE6664238E666421B",
+   "was": "0000000000000000000000000000",
+   "config": "G2",
+   "flat": 692956
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+24",
+   "addr": "0df44",
+   "H": "41A0",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692964
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+26",
+   "addr": "0df46",
+   "H": "41D0",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692966
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+36",
+   "addr": "0df50",
+   "H": "421B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692976
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+66",
+   "addr": "0df6e",
+   "H": "4219",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693006
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+68",
+   "addr": "0df70",
+   "H": "4222",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693008
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+70",
+   "addr": "0df72",
+   "H": "4214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693010
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+72",
+   "addr": "0df74",
+   "H": "421A",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693012
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+76",
+   "addr": "0df78",
+   "H": "421A",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693016
+  },
+  {
+   "name": "#PCGZMC2 CGZV_EL_ILOAD_ARRAY+22",
+   "addr": "0df92",
+   "H": "4081E4F7",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693042
+  },
+  {
+   "name": "#PCGZMC2 CGZV_EL_ILOAD_ARRAY+72",
+   "addr": "0dfc4",
+   "H": "40BBA5E3",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693092
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+96",
+   "addr": "0e02c",
+   "H": "C4BD",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693196
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+104",
+   "addr": "0e034",
+   "H": "434B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693204
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+108",
+   "addr": "0e038",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693208
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+116",
+   "addr": "0e040",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693216
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+120",
+   "addr": "0e044",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693220
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+128",
+   "addr": "0e04c",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693228
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+132",
+   "addr": "0e050",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693232
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+140",
+   "addr": "0e058",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693240
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+144",
+   "addr": "0e05c",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693244
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+152",
+   "addr": "0e064",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693252
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+164",
+   "addr": "0e070",
+   "H": "43258000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693264
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+216",
+   "addr": "0e0a4",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693316
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+224",
+   "addr": "0e0ac",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693324
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+396",
+   "addr": "0e158",
+   "H": "C452AB00",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693496
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+404",
+   "addr": "0e160",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693504
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+408",
+   "addr": "0e164",
+   "H": "C413E000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693508
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+416",
+   "addr": "0e16c",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693516
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+420",
+   "addr": "0e170",
+   "H": "C413E000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693520
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+428",
+   "addr": "0e178",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693528
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+432",
+   "addr": "0e17c",
+   "H": "C314D000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693532
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+440",
+   "addr": "0e184",
+   "H": "433E8000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693540
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+456",
+   "addr": "0e194",
+   "H": "C314D000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693556
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+464",
+   "addr": "0e19c",
+   "H": "433E8000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693564
+  },
+  {
+   "name": "#PCGZMC2 CGZV_N_MAX",
+   "addr": "0e1ac",
+   "H": "000A",
+   "was": "0032",
+   "config": "G2",
+   "flat": 693580
+  },
+  {
+   "name": "#PCGZMC2 PRED_STEP",
+   "addr": "0e234",
+   "H": "4312C000",
+   "was": "431F4000",
+   "config": "G2",
+   "flat": 693716
+  },
+  {
+   "name": "#PCGZMC2 GMO",
+   "addr": "0e2dd",
+   "H": "0002",
+   "was": "0004",
+   "config": "G2",
+   "flat": 693885
+  },
+  {
+   "name": "#PCGZMC2 GLU_FLAGS",
+   "addr": "0e2df",
+   "H": "0004",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693887
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD",
+   "addr": "0e34e",
+   "H": "000000000000000000000000",
+   "was": "000100010001000100010001",
+   "config": "G2",
+   "flat": 693998
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+7",
+   "addr": "0e355",
+   "H": "0000",
+   "was": "0001",
+   "config": "G2",
+   "flat": 694005
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+10",
+   "addr": "0e358",
+   "H": "0001000100010001",
+   "was": "0000000000000000",
+   "config": "G2",
+   "flat": 694008
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+18",
+   "addr": "0e360",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 694016
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+24",
+   "addr": "0e366",
+   "H": "000100010001",
+   "was": "000000000000",
+   "config": "G2",
+   "flat": 694022
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+28",
+   "addr": "0e36a",
+   "H": "000100010001000100010001000100010001000100010001",
+   "was": "000000000000000000000000000000000000000000000000",
+   "config": "G2",
+   "flat": 694026
+  },
+  {
+   "name": "#PCGZMC2 CGZV_R_TOL_CW",
+   "addr": "0e378",
+   "H": "3E418937",
+   "was": "3F28F5C2",
+   "config": "G2",
+   "flat": 694040
+  },
+  {
+   "name": "#PCGZMC2 GMO",
+   "addr": "0e37b",
+   "H": "0002",
+   "was": "0004",
+   "config": "G2",
+   "flat": 694043
+  },
+  {
+   "name": "#PCGZMC2 DM_VM_SOLAR_UV",
+   "addr": "0e37d",
+   "H": "0004",
+   "was": "0000",
+   "config": "G2",
+   "flat": 694045
+  },
+  {
+   "name": "#PCGZMC2 CGZV_SHUTTLE_PRED_ORB_AREA_I",
+   "addr": "0e37e",
+   "H": "44131B00",
+   "was": "42640000",
+   "config": "G2",
+   "flat": 694046
+  },
+  {
+   "name": "#PCGZMC2 CGZV_CONE",
+   "addr": "0e382",
+   "H": "402B851E",
+   "was": "3E418937",
+   "config": "G2",
+   "flat": 694050
+  },
+  {
+   "name": "#PCGNMC2 CGNV_TAU_UNMOD_ACC_COV",
+   "addr": "0e8d8",
+   "H": "4312C000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 695416
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_U_A_COAST",
+   "addr": "0e8e2",
+   "H": "3B1828C03B1828C03B1828C0",
+   "was": "39149DA739149DA739149DA7",
+   "config": "G2",
+   "flat": 695426
+  },
+  {
+   "name": "#PCGNMC2 CGNS_COV_U_A_COAST",
+   "addr": "0e8e8",
+   "H": "3B1828C03B1828C03B1828C0",
+   "was": "3A2AF31D3A2AF31D3A2AF31D",
+   "config": "G2",
+   "flat": 695432
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_SHAFT",
+   "addr": "0e95c",
+   "H": "3D431BDE",
+   "was": "3CB88CA3",
+   "config": "G2",
+   "flat": 695548
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_TRUN",
+   "addr": "0e95e",
+   "H": "3D431BDE",
+   "was": "3CB88CA3",
+   "config": "G2",
+   "flat": 695550
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_RR_RNG_MIN",
+   "addr": "0e966",
+   "H": "44190000",
+   "was": "432C7000",
+   "config": "G2",
+   "flat": 695558
+  },
+  {
+   "name": "#PCGNMC2 CGNS_M_BODY_TO_RR+3",
+   "addr": "0e96d",
+   "H": "A634",
+   "was": "A633",
+   "config": "G2",
+   "flat": 695565
+  },
+  {
+   "name": "#PCGNMC2 CGNS_M_BODY_TO_RR+7",
+   "addr": "0e971",
+   "H": "A634",
+   "was": "A633",
+   "config": "G2",
+   "flat": 695569
+  },
+  {
+   "name": "#PCGZ123 CGNS_K_UND_WGT",
+   "addr": "0f0ec",
+   "H": "40800000",
+   "was": "40333333",
+   "config": "G2",
+   "flat": 697484
+  },
+  {
+   "name": "#PCGZ123 CGNS_MS_POS_UND_WGT",
+   "addr": "0f0ee",
+   "H": "00000000",
+   "was": "475F5E10",
+   "config": "G2",
+   "flat": 697486
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB2",
+   "addr": "30323",
+   "H": "FFF2",
+   "was": "000E",
+   "config": "G2",
+   "flat": 1331405
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1",
+   "addr": "30328",
+   "H": "03C1",
+   "was": "FC83",
+   "config": "G2",
+   "flat": 1331410
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2",
+   "addr": "30329",
+   "H": "FFF3",
+   "was": "000E",
+   "config": "G2",
+   "flat": 1331411
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3",
+   "addr": "3032a",
+   "H": "FFB4",
+   "was": "0033",
+   "config": "G2",
+   "flat": 1331412
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1",
+   "addr": "3032b",
+   "H": "03B8",
+   "was": "FC7A",
+   "config": "G2",
+   "flat": 1331413
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2",
+   "addr": "3032c",
+   "H": "0057",
+   "was": "0056",
+   "config": "G2",
+   "flat": 1331414
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3",
+   "addr": "3032d",
+   "H": "0069",
+   "was": "00E8",
+   "config": "G2",
+   "flat": 1331415
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1",
+   "addr": "3032e",
+   "H": "CFC9",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331416
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT2",
+   "addr": "3032f",
+   "H": "0B69",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331417
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT3",
+   "addr": "30330",
+   "H": "7603",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331418
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT1",
+   "addr": "30331",
+   "H": "EBA4",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331419
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT2",
+   "addr": "30332",
+   "H": "BC90",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331420
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT3",
+   "addr": "30333",
+   "H": "9524",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331421
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB1",
+   "addr": "30334",
+   "H": "FF8B",
+   "was": "FFF4",
+   "config": "G2",
+   "flat": 1331422
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_NB1",
+   "addr": "30337",
+   "H": "FF9D",
+   "was": "FF99",
+   "config": "G2",
+   "flat": 1331425
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_NB3",
+   "addr": "30339",
+   "H": "00BF",
+   "was": "00C1",
+   "config": "G2",
+   "flat": 1331427
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1",
+   "addr": "3033a",
+   "H": "032A",
+   "was": "FBE8",
+   "config": "G2",
+   "flat": 1331428
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2",
+   "addr": "3033b",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331429
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3",
+   "addr": "3033c",
+   "H": "FF59",
+   "was": "FFD8",
+   "config": "G2",
+   "flat": 1331430
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1",
+   "addr": "3033d",
+   "H": "033D",
+   "was": "FBFA",
+   "config": "G2",
+   "flat": 1331431
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2",
+   "addr": "3033e",
+   "H": "0001",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331432
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3",
+   "addr": "3033f",
+   "H": "007F",
+   "was": "0101",
+   "config": "G2",
+   "flat": 1331433
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1",
+   "addr": "30340",
+   "H": "F842",
+   "was": "02F7",
+   "config": "G2",
+   "flat": 1331434
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT3",
+   "addr": "30342",
+   "H": "7FC2",
+   "was": "7FF7",
+   "config": "G2",
+   "flat": 1331436
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT1",
+   "addr": "30343",
+   "H": "FD08",
+   "was": "07C2",
+   "config": "G2",
+   "flat": 1331437
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT3",
+   "addr": "30345",
+   "H": "800C",
+   "was": "803C",
+   "config": "G2",
+   "flat": 1331439
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB2",
+   "addr": "30347",
+   "H": "000E",
+   "was": "FFF2",
+   "config": "G2",
+   "flat": 1331441
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB3",
+   "addr": "30348",
+   "H": "FFF4",
+   "was": "000C",
+   "config": "G2",
+   "flat": 1331442
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1",
+   "addr": "3034c",
+   "H": "03C1",
+   "was": "FC83",
+   "config": "G2",
+   "flat": 1331446
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2",
+   "addr": "3034d",
+   "H": "000F",
+   "was": "FFF2",
+   "config": "G2",
+   "flat": 1331447
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3",
+   "addr": "3034e",
+   "H": "FFB4",
+   "was": "004C",
+   "config": "G2",
+   "flat": 1331448
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1",
+   "addr": "3034f",
+   "H": "03B8",
+   "was": "FC7A",
+   "config": "G2",
+   "flat": 1331449
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2",
+   "addr": "30350",
+   "H": "FFAB",
+   "was": "0056",
+   "config": "G2",
+   "flat": 1331450
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3",
+   "addr": "30351",
+   "H": "0069",
+   "was": "00E8",
+   "config": "G2",
+   "flat": 1331451
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1",
+   "addr": "30352",
+   "H": "CFC9",
+   "was": "0000",
+   "config": "G2",
+   "flat": 1331452
+  },
+  {
+   "name": "#DGLWRNP CGNS_DETUTCDAYS",
+   "addr": "38d36",
+   "H": "3E3232E100000000",
+   "was": "3E2FEC56D5CFAACD",
+   "config": "G2",
+   "flat": 808758
+  }
+ ]
+}

@@ -1,0 +1,272 @@
+{
+  "site": "Edwards AFB (FAA KEDW): main runway 04/22, temporary runway 04L/22R (EDT), Rogers Dry Lake runways 15 and 18L",
+  "notes": [
+    "THE ONE DEFINITION of the Edwards landing areas, in the form of tools/sites/ksc.json (read its notes first: geodetic on PASS's ellipsoid, DELH 0 so MSL and the ellipsoid coincide, azimuth = the landing direction computed from the two runway ends, magnetic variation east positive, MLS bearings = landing azimuth + 180 deg).",
+    "AREAS AND SLOTS -- the STS-134 LANDING SITE TABLE, Entry Checklist ENT/134/FIN FS 3-4 (https://www.ibiblio.org/apollo/Shuttle/Entry%20Checklist/STS-134%20Entry%20Checklist.pdf, PDF page 14): site 40 EDW TEMP = EDT 22R (MLS 8, 12000 + 1000 overrun) / EDT 04L (MLS 6, 12000 + 1000); site 44 EDWARDS AFB = EDW 15 (no MLS, 16300, lakebed) / EDW 18L (no MLS, 15000, lakebed); site 45 EDWARDS AFB = EDW 22 (MLS 8, 15020, no overrun; 'dagger' = MSBLS Jr. ch 8 requires uplink) / EDW 04 (MLS 6, 14020 after displaced threshold, + 1800). Area N's primary runway is slot 2N-1 and its secondary slot 2N (GVPRUN.hal:183-205), its TACANs slots 2N-1 and 2N (GVQSIT.hal:253-258), so: area 40 = runway/TACAN slots 79, 80; area 44 = 87, 88; area 45 = 89, 90. Selecting EDW therefore needs SPEC 50 item 41 (LAND SITE 45, 44 or 40), as on the real flights; area 1 stays KSC (ksc.json). The slots do not collide with ksc.json's or nor.json's, so the three specs can be applied together.",
+    "THE SAME AREAS IN 1998: STS-89 LANDING SITE TABLE, ENT/89/FIN FS 3-3 (https://www.ibiblio.org/apollo/Shuttle/Entry%20Checklist/STS-89%20Entry%20Checklist.pdf, PDF page 6), which also lists each area's TACANs: site 22 EDW 15/33 (EDW 111, LHS 21), site 23 EDW 22/04 (EDW 111, LHS 21; 14995/13995), site 24 EDW 23L/18L (EDW 111, LHS 21). The site numbers changed from flight to flight; the STS-134 ones are used here because the volume is OI-34 STS-134.",
+    "SITE DATA SHEET: Flight Maps and Charts MAPS/ALL/GEN G PCN-5 (12/18/09), EDW-1 and EDW-3 (https://www.ibiblio.org/apollo/Shuttle/Charts/Flight%20Maps%20and%20Charts%20Rev%20G%20PCN%205.pdf, PDF pages 121, 123): TACAN EDW-111x (Pri), LHS-21x (Sec); MLS (22-Sr) ch 8, (04-Jr) ch 6, (22R-Jr) ch 8, (04L-Jr) ch 6; rwy 04 14,013 ft from a 1000-ft displaced threshold, rwy 22 15,013 ft with a 1782-ft displaced threshold at its own end ('Rwy 22 has no usable overrun'), elev 2301 (04 end) / 2282 (22 end); 04L/22R 12,000 x 200 with 1000-ft overruns, elev 2313/2289, 'either 04/22 or 04L/22R (not both) will be usable for a given mission'; lakebed 15/33 16,300 x 300 with 5000 ft of lakebed before 15, elev 2271/2270; lakebed 18L/36R 15,000 x 300, 5000 ft of lakebed before 18L and 1084 ft beyond 36R, elev 2269. 'The only usable lakebed runways are 15, 33 and 18L.' The STS-115 Navaids Chart (https://www.ibiblio.org/apollo/Shuttle/Charts/STS-115%20Navaids%20Chart.pdf) agrees: EDW 04 '2 JRs - CH 6', EDW 22 'SR - CH 8', lakebed runways no MLS, TACAN EDW 111 (SS) primary, LHS 21 / POM 41 / GMN 108 backups.",
+    "LENGTHS are the STS-134 table's (EDW 22 15020, EDW 04 14020, EDT 12000, EDW 15 16300, EDW 18L 15000), preferred to the charts' 15,013/14,013 and to FAA's 15,024, as ksc.json prefers the flight's figure.",
+    "MAIN RUNWAY 04/22 (today's 05R/23L, renumbered after the Shuttle era for the drift in magnetic variation; true heading 058/238 unchanged): FAA airport record via airnav.com (https://www.airnav.com/airport/KEDW): 05R end 34-53.673588N 117-54.300718W elev 2302.8 ft; 23L 34-54.977463N 117-51.745132W elev 2281.9 ft; 15,024 x 300; 046/058 and 226/238 magnetic/true. The FAA 23L point is the displaced threshold, not the pavement end: OurAirports (https://davidmegginson.github.io/ourairports-data/runways.csv) gives the paved strip as 16,798 ft with a 1,760-ft displaced threshold on 23L, and OpenStreetMap maps the same displaced segment -- matching the chart's 1782 ft. So EDW 22's threshold is the FAA 23L point (34-54-58.6478N 117-51-44.7079W, 2281.9 ft), and EDW 04's is 1000 ft up the centreline from the FAA 05R end (34-53-45.6225N 117-54-07.8369W; height 2301.4 ft interpolated between the FAA end elevations, the chart says 2301). Each runway's far end for the azimuth is the other's point on the same line (true azimuth 238.23 / 058.23).",
+    "TEMPORARY RUNWAY 04L/22R, PASS identifier EDT (today's 05L/23R): FAA record via airnav.com: 05L 34-54.164597N 117-54.288533W elev 2310.5; 23R 34-55.206092N 117-52.247292W elev 2287.4; 12,000 x 200 (the ends are 11,998 ft apart, true 058.23) -- the thresholds, with 1000-ft overruns beyond them (chart).",
+    "LAKEBED RUNWAYS 15 AND 18L -- ESTIMATED (+/-200 ft along the runway, +/-30 ft across). No surveyed threshold was found: the Shuttle's 16,300-ft (15) and 15,000-ft (18L) marked sections lie inside much longer lakebed strips (29,040 ft for 15/33). Centrelines: OpenStreetMap's Rogers Dry Lake runway ways (15/33 way 25361370, 18L/36R way 25361371, fetched 2026-10-08 through api.openstreetmap.org), checked against Esri World Imagery at 0.49 m/pixel, which puts the painted edge lines' midline 2-3 m (15/33) and ~5 m (18L) west of OSM's line; the lines used here are shifted accordingly. Along-track position: the DMAAC 1:62,500 runway charts in Flight Maps and Charts (EDW-11 'Runways 15 and 33', ed. 5 Apr 1990, bold section labelled 16300 X 300; EDW-15 'Runway 18L', ed. 1 Jan 1991, 15000 X 300; PDF pages 131, 135) measured from the lakebed compass rose, whose centre was located in the imagery (34.954105N 117.873332W). The charts' lateral rose-to-runway distances (2,357 and 3,062 ft) agree with the imagery's (2,406 and 3,022 ft) within 2 percent, which checks their scale and orientation. Result: EDW 15 threshold 5,142 ft from the NW end of the lakebed strip (the chart: 5000 ft of lakebed before 15), EDW 33 16,300 ft beyond it; EDW 18L threshold 7,126 ft from the strip's north end, 36R 15,000 ft beyond it and 973 ft from the strip's south end (the chart: 1084). An independent hobbyist runway table (Space Shuttle Vessel for Orbiter, https://github.com/GLS-SSV/SSV Config/SSV_RunwayDB.csv) puts these thresholds 70 ft (15) and 128 ft (18L) from these.",
+    "LAKEBED HEIGHTS: the chart's 2271 (15 end) and 2269 (18L end); the lakebed is flat to a few feet.",
+    "MAGNETIC VARIATION (runways) -- ESTIMATED: +14.6 deg (east), IGRF at 1979.0 (NOAA geomagnetic calculator, https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml). Basis: the NASA WSTF drawing for White Sands (nor.json) gives that site's runway variation as +11.2167, which is IGRF there at about 1979, so the landing-site data appear to carry a frozen ~1979 declination; the same epoch at Edwards gives 14.6. For comparison: IGRF 14.4 (1982), 13.9 (1998), 12.7 (May 2011); FAA airport record 15E (1985) and 12E (2015). It only feeds magnetic-heading displays.",
+    "TACAN EDW, channel 111X (VORTAC 116.40): FAA NAVAID record via fltplan.com (https://www.fltplan.com/nav/EDW.htm) and the FAA Chart Supplement SW (https://skyvector.com/files/tpp/2601/afdpdf/SW_152_22JAN2026.pdf): 34-58-56.506N 117-43-57.390W, elevation 2377.7 ft. Magnetic variation (the station's own alignment, which its bearings are measured from): 15E, as carried in FAA-derived navaid data before the station's 2015 realignment to 12E (FlightGear Navaids/nav.dat, 2014, https://gitlab.com/flightgear/fgdata/-/raw/next/Navaids/nav.dat.gz). The station has not moved (same position in both).",
+    "TACAN LHS (Lake Hughes VORTAC), channel 21X as the Shuttle tables and charts give it (VOR 108.40 then; it is 114.35 / 90Y today): position from the FAA NAVAID record via fltplan.com (https://www.fltplan.com/nav/LHS.htm): 34-40-58.704N 118-34-36.977W, elevation 5790 ft, variation 15E (1980); FlightGear's 2014 nav.dat has the same position with 108.40.",
+    "TACAN SLOTS: each area carries EDW 111X as its first TACAN and LHS 21X as its second (STS-89 table; data sheet 'EDW-111x (Pri), LHS-21x (Sec)'), so the pair is repeated in slots 79/80, 87/88 and 89/90.",
+    "MSBLS -- ESTIMATED positions; channels from the STS-134 table and the data sheet. No surveyed MSBLS coordinates for Edwards were found. Siting rules, JSC-23266 Flight Procedures Handbook, Approach, Landing and Rollout, section 3.2 (https://www.ibiblio.org/apollo/Shuttle/JSC-23266,%20Basic%20-%20Flight%20Procedures%20Handbook%20-%20Approach,%20Landing,%20and%20Rollout.pdf): MSBLS-GS 300 ft off the centreline (500 ft on military installations), newer installations with the elevation station 1500 ft down the runway from the threshold and the azimuth/DME station 1500 ft short of the rollout end; MSBLS-JR one shelter holding azimuth, DME and elevation, 300 (500 military) ft off the centreline and 1500 ft down the runway from the threshold. White Sands' surveyed JR antennas (nor.json) sit exactly so, 1499 ft down and 509 ft LEFT, and KSC's elevation station is on the left too, so the left side is assumed. EDW 22 (MSBLS-GS 'SR', ch 8): elevation 1500 ft past the 22 threshold, 500 ft left (34-54-46.6312N 117-51-56.8586W); azimuth/DME 13,520 ft past it (1500 short of the rollout end), 500 ft right (34-53-52.4365N 117-54-05.8834W) -- the newer siting, as KSC's survey showed there (an older GS would have the elevation station 3360 ft in and the az/DME 1300 ft beyond the rollout end). Current imagery shows a small structure 1,558 ft past the 22 threshold, 320 ft left, which may be that elevation shelter; not relied on. EDW 04 (JR, ch 6): 1500 ft past the displaced threshold, 500 ft left (34-53-57.6381N 117-53-55.6875W). EDT 22R (JR, ch 8): 34-55-00.3485N 117-52-26.9882W; EDT 04L (JR, ch 6): 34-54-21.8919N 117-54-05.1624W (each 1500 ft past its threshold, 500 ft left). All antennas at their runway threshold's height (the file has one height per MLS; for EDW 22 the az/DME ground is ~20 ft higher, a negligible error at its range).",
+    "MLS SLOTS 3-6 (EDW 22, EDW 04, EDT 22R, EDT 04L) -- the real flight's MSBLS indices are not known; these avoid ksc.json's 1-2 and nor.json's 7-8, and stay within landaids.c's NAV_MAX of 8. X/Y_DMEAZ_RW and X_EL_RW (unused in GN&C) in kft along/right of the threshold, as in ksc.json.",
+    "HEIGHTS: DELH 0, as ksc.json -- the real geoid here is about -32 m (MSL below the ellipsoid by ~105 ft), deliberately not modelled, so heights above PASS's ellipsoid equal the elevations above."
+  ],
+  "runways": [
+    {
+      "slot": 79,
+      "area": 40,
+      "id": "EDT22R",
+      "lat_dms": "34-55-12.3655N",
+      "lon_dms": "117-52-14.8375W",
+      "other_end_lat_dms": "34-54-09.8758N",
+      "other_end_lon_dms": "117-54-17.3120W",
+      "alt_ft": 2287.4,
+      "delh_ft": 0.0,
+      "length_ft": 12000,
+      "mag_var_deg": 14.6,
+      "msbls_index": 5,
+      "mls_channel": 8
+    },
+    {
+      "slot": 80,
+      "area": 40,
+      "id": "EDT04L",
+      "lat_dms": "34-54-09.8758N",
+      "lon_dms": "117-54-17.3120W",
+      "other_end_lat_dms": "34-55-12.3655N",
+      "other_end_lon_dms": "117-52-14.8375W",
+      "alt_ft": 2310.5,
+      "delh_ft": 0.0,
+      "length_ft": 12000,
+      "mag_var_deg": 14.6,
+      "msbls_index": 6,
+      "mls_channel": 6
+    },
+    {
+      "slot": 87,
+      "area": 44,
+      "id": "EDW15",
+      "lat_dms": "34-57-45.8870N",
+      "lon_dms": "117-52-02.8392W",
+      "other_end_lat_dms": "34-55-08.4674N",
+      "other_end_lon_dms": "117-51-20.5661W",
+      "alt_ft": 2271.0,
+      "delh_ft": 0.0,
+      "length_ft": 16300,
+      "mag_var_deg": 14.6,
+      "msbls_index": 0
+    },
+    {
+      "slot": 88,
+      "area": 44,
+      "id": "EDW18L",
+      "lat_dms": "34-58-32.6139N",
+      "lon_dms": "117-51-13.0183W",
+      "other_end_lat_dms": "34-56-12.5023N",
+      "other_end_lon_dms": "117-52-12.2970W",
+      "alt_ft": 2269.0,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": 14.6,
+      "msbls_index": 0
+    },
+    {
+      "slot": 89,
+      "area": 45,
+      "id": "EDW22",
+      "lat_dms": "34-54-58.6478N",
+      "lon_dms": "117-51-44.7079W",
+      "other_end_lat_dms": "34-53-40.4153N",
+      "other_end_lon_dms": "117-54-18.0431W",
+      "alt_ft": 2281.9,
+      "delh_ft": 0.0,
+      "length_ft": 15020,
+      "mag_var_deg": 14.6,
+      "msbls_index": 3,
+      "mls_channel": 8
+    },
+    {
+      "slot": 90,
+      "area": 45,
+      "id": "EDW04",
+      "lat_dms": "34-53-45.6225N",
+      "lon_dms": "117-54-07.8369W",
+      "other_end_lat_dms": "34-54-58.6478N",
+      "other_end_lon_dms": "117-51-44.7079W",
+      "alt_ft": 2301.4,
+      "delh_ft": 0.0,
+      "length_ft": 14020,
+      "mag_var_deg": 14.6,
+      "msbls_index": 4,
+      "mls_channel": 6
+    }
+  ],
+  "tacans": [
+    {
+      "slot": 79,
+      "id": "EDW",
+      "channel": 111,
+      "mode": "X",
+      "lat_dms": "34-58-56.506N",
+      "lon_dms": "117-43-57.390W",
+      "alt_ft": 2377.7,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    },
+    {
+      "slot": 80,
+      "id": "LHS",
+      "channel": 21,
+      "mode": "X",
+      "lat_dms": "34-40-58.704N",
+      "lon_dms": "118-34-36.977W",
+      "alt_ft": 5790.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    },
+    {
+      "slot": 87,
+      "id": "EDW",
+      "channel": 111,
+      "mode": "X",
+      "lat_dms": "34-58-56.506N",
+      "lon_dms": "117-43-57.390W",
+      "alt_ft": 2377.7,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    },
+    {
+      "slot": 88,
+      "id": "LHS",
+      "channel": 21,
+      "mode": "X",
+      "lat_dms": "34-40-58.704N",
+      "lon_dms": "118-34-36.977W",
+      "alt_ft": 5790.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    },
+    {
+      "slot": 89,
+      "id": "EDW",
+      "channel": 111,
+      "mode": "X",
+      "lat_dms": "34-58-56.506N",
+      "lon_dms": "117-43-57.390W",
+      "alt_ft": 2377.7,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    },
+    {
+      "slot": 90,
+      "id": "LHS",
+      "channel": 21,
+      "mode": "X",
+      "lat_dms": "34-40-58.704N",
+      "lon_dms": "118-34-36.977W",
+      "alt_ft": 5790.0,
+      "delh_ft": 0.0,
+      "mag_var_deg": 15.0
+    }
+  ],
+  "msbls_stations": [
+    {
+      "for": "EDW22 elevation (MSBLS-GS), ESTIMATED: 1500 ft past the 22 threshold, 500 ft left",
+      "lat_dms": "34-54-46.6312N",
+      "lon_dms": "117-51-56.8586W"
+    },
+    {
+      "for": "EDW22 azimuth/DME (MSBLS-GS), ESTIMATED: 13,520 ft past the 22 threshold, 500 ft right",
+      "lat_dms": "34-53-52.4365N",
+      "lon_dms": "117-54-05.8834W"
+    },
+    {
+      "for": "EDW04 MSBLS-JR, ESTIMATED: 1500 ft past the displaced threshold, 500 ft left",
+      "lat_dms": "34-53-57.6381N",
+      "lon_dms": "117-53-55.6875W"
+    },
+    {
+      "for": "EDT22R MSBLS-JR, ESTIMATED: 1500 ft past the threshold, 500 ft left",
+      "lat_dms": "34-55-00.3485N",
+      "lon_dms": "117-52-26.9882W"
+    },
+    {
+      "for": "EDT04L MSBLS-JR, ESTIMATED: 1500 ft past the threshold, 500 ft left",
+      "lat_dms": "34-54-21.8919N",
+      "lon_dms": "117-54-05.1624W"
+    }
+  ],
+  "mls": [
+    {
+      "slot": 3,
+      "for_runway_slot": 89,
+      "raz": {
+        "lat_dms": "34-53-52.4365N",
+        "lon_dms": "117-54-05.8834W"
+      },
+      "el": {
+        "lat_dms": "34-54-46.6312N",
+        "lon_dms": "117-51-56.8586W"
+      },
+      "alt_ft": 2281.9,
+      "x_dmeaz_kft": 13.52,
+      "x_el_kft": 1.5,
+      "y_dmeaz_kft": 0.5
+    },
+    {
+      "slot": 4,
+      "for_runway_slot": 90,
+      "raz": {
+        "lat_dms": "34-53-57.6381N",
+        "lon_dms": "117-53-55.6875W"
+      },
+      "el": {
+        "lat_dms": "34-53-57.6381N",
+        "lon_dms": "117-53-55.6875W"
+      },
+      "alt_ft": 2301.4,
+      "x_dmeaz_kft": 1.5,
+      "x_el_kft": 1.5,
+      "y_dmeaz_kft": -0.5
+    },
+    {
+      "slot": 5,
+      "for_runway_slot": 79,
+      "raz": {
+        "lat_dms": "34-55-00.3485N",
+        "lon_dms": "117-52-26.9882W"
+      },
+      "el": {
+        "lat_dms": "34-55-00.3485N",
+        "lon_dms": "117-52-26.9882W"
+      },
+      "alt_ft": 2287.4,
+      "x_dmeaz_kft": 1.5,
+      "x_el_kft": 1.5,
+      "y_dmeaz_kft": -0.5
+    },
+    {
+      "slot": 6,
+      "for_runway_slot": 80,
+      "raz": {
+        "lat_dms": "34-54-21.8919N",
+        "lon_dms": "117-54-05.1624W"
+      },
+      "el": {
+        "lat_dms": "34-54-21.8919N",
+        "lon_dms": "117-54-05.1624W"
+      },
+      "alt_ft": 2310.5,
+      "x_dmeaz_kft": 1.5,
+      "x_el_kft": 1.5,
+      "y_dmeaz_kft": -0.5
+    }
+  ]
+}

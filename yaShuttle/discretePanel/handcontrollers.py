@@ -901,9 +901,19 @@ def main(argv=None):
         # right-click would have been pitch/roll, not yaw (Mac-integrate).
         if sys.platform == "darwin":
             os.environ.setdefault("SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK", "1")
+        try:                                    # its Dock name, and no App Nap (macdock.py)
+            import macdock
+            macdock.set_app_name("Hand Controllers")
+        except Exception:
+            pass
         pygame.init()
         return run_virtual(pygame, args, pub, rp, status, script)
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    try:                                    # its Dock name, and no App Nap (macdock.py)
+        import macdock
+        macdock.set_app_name("Hand Controllers")
+    except Exception:
+        pass
     pygame.init()
 
     def open_stick():

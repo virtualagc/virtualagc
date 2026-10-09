@@ -10,6 +10,13 @@
                              ... from a given state instead: PASS GMT seconds
                              (day-of-year x 86400 + seconds of day), M50 feet
                              and feet per second
+    tsv [--norad N]          uplink a RENDEZVOUS (TARGET) VEHICLE STATE VECTOR
+                             (message 10) taken from the vehicle dynamics'
+                             truth for another vehicle (TGT1; the first, or
+                             NORAD id N), as MCC's "TGT SV" uplink before a
+                             rendezvous
+    tsv --state GMT X Y Z VX VY VZ
+                             ... from a given state, as for sv
     rnp YEAR DAY             the RNP epoch (message 59: CGNS_LAUNCH_YEAR and
                              CGNS_RNP_DAY; accepted only in MM 201)
     dolilu FILE [--only OP,...] [--dry-run]
@@ -72,6 +79,18 @@ state (GELORB, GL1ORB, GL2AUT, GV6STA): it must be within 54,000 s.  The
 frame is M50, the frame of PASS's orbit navigation (inferred: the words go
 straight into that state).
 
+Message 10, the rendezvous vehicle's state, is laid out exactly as message 9
+(GTBUPL.hal, MESSAGE 10 RENDEZVOUS VEHICLE STATE VECTOR LOAD, the same
+TIME_TAG_IN_GMT, X_POS and X_VEL) into CGNV_T/R/V_TV_GND_MFE.  GL2AUT then
+installs it as the target state CGNV_R_TV, V_TV with its time tag as it
+stands -- or, with rendezvous navigation already enabled, predicts it to the
+current navigation time first (with the I-loaded target mass, area and drag
+coefficient) and reinitialises the relative covariance.  The checklist's
+order is the first: MCC UPLINK ORB SV, TGT SV at PET -2:55, RNDZ NAV ENA at
+-2:15 (JSC-48072-134, pp. 4-5, 4-7).  The truth for it is yaGPC2's TGT1 feed
+(port base + 109: vehicle time, NORAD id, M50 r and v of the other vehicle's
+centre of mass), its GMT from TRU1's GMT at the same vehicle clock.
+
 DOLILU FILES.  {"messages": [{"op": 15, "name": "...", "fields": [...]}]};
 a field is {"D": x} an IBM long float (HAL DOUBLE), {"E": x} an IBM short
 (SINGLE), {"I": n} a signed halfword (INTEGER), {"H": "ABCD"} a raw
@@ -93,6 +112,7 @@ import time
 MCAST_GROUP = "239.255.1.1"
 UPLINK_OFFSET = 99
 TRUTH_OFFSET = 98
+TARGET_OFFSET = 109
 DOWNLINK_OFFSET = 88
 FT_M = 0.3048
 
@@ -100,6 +120,7 @@ VEHICLE = 0b010           # CDUV_NSP_VEHICLE_ILOAD
 MF_GNC = 7
 FIRST, MIDDLE, LAST, SINGLE = 2, 0, 1, 3
 OP_STATE_VECTOR = 9
+OP_TARGET_VECTOR = 10
 OP_RNP = 59
 OP_CLEAR = 0x41
 OP_EXECUTE = 0x43
@@ -205,14 +226,16 @@ def clear(mf=MF_GNC, vehicle=VEHICLE):
     return [header(OP_CLEAR, SINGLE, mf, vehicle), 0, 0]
 
 
-def state_vector_words(gmt, r_ft, v_fts, vehicle=VEHICLE):
+def state_vector_words(gmt, r_ft, v_fts, vehicle=VEHICLE, opcode=OP_STATE_VECTOR):
+    """Message 9 (the Orbiter) or, with opcode 10, the rendezvous vehicle:
+    the same 22 halfwords after the header (GTBUPL.hal)."""
     hw = ibm_long(gmt)
     for x in r_ft:
         hw += ibm_long(x)
     for x in v_fts:
         hw += ibm_short(x)
     assert len(hw) == 22
-    return two_stage(OP_STATE_VECTOR, hw, vehicle=vehicle)
+    return two_stage(opcode, hw, vehicle=vehicle)
 
 
 def dolilu_halfwords(fields):
@@ -286,6 +309,31 @@ def truth_state(base, timeout=5.0):
             if len(d) >= 4 + 8 * 17:                    # wheel height (ft), ground speed (kt)
                 out['wheel_ft'], out['gs_kt'] = struct.unpack(">2d", d[4 + 8 * 15:4 + 8 * 17])
             return out
+    return None
+
+
+def target_state(base, norad=None, timeout=5.0):
+    """Another vehicle's truth: TGT1 (vehicle time, NORAD id, M50 r m, v m/s,
+    attitude), with its PASS GMT from TRU1 at the same vehicle clock --
+    gmt = TRU1 gmt - TRU1 t + TGT1 t, the two clocks being one."""
+    tr = truth_state(base, timeout)
+    if tr is None:
+        return None
+    s = mcast_listen(base + TARGET_OFFSET)
+    s.settimeout(timeout)
+    end = time.time() + timeout
+    while time.time() < end:
+        try:
+            d = s.recv(256)
+        except socket.timeout:
+            break
+        if len(d) >= 4 + 8 * 8 and d[:4] == b"TGT1":
+            n = (len(d) - 4) // 8
+            v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
+            if norad is not None and int(v[1]) != norad:
+                continue
+            return {'t': v[0], 'norad': int(v[1]), 'gmt': tr['gmt'] - tr['t'] + v[0],
+                    'r': v[2:5], 'v': v[5:8], 'q': v[8:12] if n >= 12 else None}
     return None
 
 
@@ -485,6 +533,9 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sv = sub.add_parser("sv", help="uplink an orbiter state vector (message 9)")
     sv.add_argument("--state", nargs=7, type=float, metavar=("GMT", "X", "Y", "Z", "VX", "VY", "VZ"))
+    tsv = sub.add_parser("tsv", help="uplink a rendezvous (target) vehicle state vector (message 10)")
+    tsv.add_argument("--state", nargs=7, type=float, metavar=("GMT", "X", "Y", "Z", "VX", "VY", "VZ"))
+    tsv.add_argument("--norad", type=int, help="which other vehicle (default the first TGT1 heard)")
     rnp = sub.add_parser("rnp", help="uplink the RNP epoch (message 59)")
     rnp.add_argument("year", type=int)
     rnp.add_argument("day", type=int)
@@ -520,11 +571,11 @@ def main():
         return
     link = Link(args.port_base)
 
-    if args.cmd == "sv":
+    if args.cmd in ("sv", "tsv"):
         if args.state:
             gmt, x, y, z, vx, vy, vz = args.state
             r, v = (x, y, z), (vx, vy, vz)
-        else:
+        elif args.cmd == "sv":
             tr = truth_state(args.port_base)
             if tr is None:
                 sys.exit("groundstation: no truth state on port %d (YAGPC_MDM_DEVICES=1 "
@@ -532,11 +583,24 @@ def main():
             gmt = tr['gmt']
             r = tuple(c / FT_M for c in tr['r'])
             v = tuple(c / FT_M for c in tr['v'])
-        words = state_vector_words(gmt, r, v, args.vehicle)
+        else:
+            tg = target_state(args.port_base, args.norad)
+            if tg is None:
+                sys.exit("groundstation: no other vehicle's truth on port %d (YAGPC_VEHDYN_TARGETS, "
+                         "with the truth on %d)" % (args.port_base + TARGET_OFFSET,
+                                                    args.port_base + TRUTH_OFFSET))
+            gmt = tg['gmt']
+            r = tuple(c / FT_M for c in tg['r'])
+            v = tuple(c / FT_M for c in tg['v'])
+            print("vehicle %d" % tg['norad'])
+        op = OP_STATE_VECTOR if args.cmd == "sv" else OP_TARGET_VECTOR
+        words = state_vector_words(gmt, r, v, args.vehicle, opcode=op)
         d = int(gmt // 86400)
         sod = gmt - 86400 * d
-        print("state vector at GMT %03d/%02d:%02d:%06.3f  R %.1f %.1f %.1f ft  V %.3f %.3f %.3f ft/s"
-              % (d, sod // 3600, sod % 3600 // 60, sod % 60, r[0], r[1], r[2], v[0], v[1], v[2]))
+        print("%s state vector (message %d) at GMT %03d/%02d:%02d:%06.3f  R %.1f %.1f %.1f ft  "
+              "V %.3f %.3f %.3f ft/s"
+              % ("orbiter" if op == OP_STATE_VECTOR else "target", op, d, sod // 3600,
+                 sod % 3600 // 60, sod % 60, r[0], r[1], r[2], v[0], v[1], v[2]))
         for w in words:
             print("  %04X %04X %04X" % tuple(w))
         print("  %04X %04X %04X  execute" % tuple(execute(vehicle=args.vehicle)))

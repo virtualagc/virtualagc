@@ -213,6 +213,10 @@ MDM_TYPE_STU = 7
 # THE VEHICLE'S HARDWIRED WORD (landing gear, drag chute): the 'hardwired'
 # bits of the buttons held (panelcontrols.py), op 4 VALUE, type 8, to FF1.
 MDM_TYPE_HW = 8
+# THE KU-BAND RADAR'S PANEL (A1U; panelcontrols.py, the controls' 'ku'
+# bits), to yaGPC2's kuradar.c: op 4 VALUE, type 9, one word, to FF3.
+MDM_TYPE_KU = 9
+KU_UNIT = 3
 STU_UNIT = {"z": 1, "y": 3}                    # -Z on FF1, -Y on FF3
 STU_POWERED, STU_DOOR_OPEN = 0x8000, 0x4000
 # The doors (TD0216 pp. 3-1 to 3-6): two motors through a differential, 6 s
@@ -1211,6 +1215,15 @@ class PanelO6:
                 w |= hw
         return w
 
+    def ku_word(self):
+        """The Ku-band radar's panel word: each A1U control's 'ku' bits."""
+        w = 0
+        for key, c in PC.CONTROLS.items():
+            ku = c.get("ku")
+            if ku:
+                w |= ku.get(self.ctl.get(key), 0)
+        return w
+
     def stu_words(self):
         """What the star trackers' hardwired side tells yaGPC2: (unit, word)."""
         return [(STU_UNIT[sd], (STU_POWERED if self.ctl.get("strk_pwr_" + sd) == "ON" else 0)
@@ -1397,6 +1410,10 @@ class PanelO6:
         crew = self.crew_fields()
         stu = self.stu_words()
         hw = self.hw_word()
+        ku = self.ku_word()
+        if ku != getattr(self, "_ku_published", None):
+            log("Ku-band radar panel  %04x" % ku)
+            self._ku_published = ku
         if hw != getattr(self, "_hw_published", 0):
             log("hardwired  %04x" % hw)
             self._hw_published = hw
@@ -1405,6 +1422,7 @@ class PanelO6:
             self._pub_crew = crew
             self._pub_stu = stu
             self._pub_hw = hw
+            self._pub_ku = ku
         if stu != self._stu_published:
             log("star trackers  " + "  ".join(
                 "%s %s, door %s" % ("-Z" if u == 1 else "-Y", "ON" if w & STU_POWERED else "OFF",
@@ -1440,6 +1458,7 @@ class PanelO6:
                 crew = self._pub_crew
                 stu = self._pub_stu
                 hw = getattr(self, "_pub_hw", 0)
+                ku = getattr(self, "_pub_ku", 0)
             if columns is None:
                 continue
             try:
@@ -1456,6 +1475,8 @@ class PanelO6:
                                      (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET + u - 1))
                 self.sock.sendto(struct.pack(">HHHHH", MDM_OP_VALUE, MDM_TYPE_HW, 0, 1, hw),
                                  (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET))
+                self.sock.sendto(struct.pack(">HHHHH", MDM_OP_VALUE, MDM_TYPE_KU, (3 << 8) | 3, 1, ku),
+                                 (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET + KU_UNIT - 1))
             except OSError as e:
                 if not self._send_failed:
                     log("cannot publish the MDM crew contacts: %s" % e)

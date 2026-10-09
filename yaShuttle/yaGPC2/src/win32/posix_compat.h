@@ -89,6 +89,11 @@ static __inline int setenv(const char *name, const char *value, int overwrite) {
     return _putenv_s(name, value) == 0 ? 0 : -1;
 }
 
+/* An empty value removes the variable (_putenv_s's convention). */
+static __inline int unsetenv(const char *name) {
+    return _putenv_s(name, "") == 0 ? 0 : -1;
+}
+
 /* ---- compiler builtins (cl only; clang-cl has the real ones) --------- */
 
 #ifndef __clang__

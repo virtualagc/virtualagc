@@ -1,0 +1,172 @@
+{
+  "site": "White Sands Space Harbor (Northrup Strip, PASS identifier NOR): gypsum runways 17/35 and 05/23",
+  "notes": [
+    "THE ONE DEFINITION of the White Sands landing areas, in the form of tools/sites/ksc.json (read its notes first: geodetic on PASS's ellipsoid, DELH 0 so MSL and the ellipsoid coincide, azimuth = the landing direction computed from the two runway ends, magnetic variation east positive, MLS bearings = landing azimuth + 180 deg).",
+    "AREAS AND SLOTS -- the STS-134 LANDING SITE TABLE, Entry Checklist ENT/134/FIN FS 3-4 (https://www.ibiblio.org/apollo/Shuttle/Entry%20Checklist/STS-134%20Entry%20Checklist.pdf, PDF page 14): site 42 NORTHRUP = NOR 17 (MLS 6, 15000, lakebed overrun) / NOR 23 (MLS 6, 15000, lakebed); site 43 NORTHRUP = NOR 05 (no MLS, 15000) / NOR 35 (no MLS, 15000). Area N's primary runway is slot 2N-1, its secondary slot 2N (GVPRUN.hal:183-205), its TACANs slots 2N-1 and 2N (GVQSIT.hal:253-258): area 42 = runway/TACAN slots 83, 84; area 43 = 85, 86. Selecting NOR needs SPEC 50 item 41 (LAND SITE 42 or 43), as on the real flights; area 1 stays KSC (ksc.json). The slots do not collide with ksc.json's or edw.json's.",
+    "THE SAME AREAS IN 1998: STS-89 LANDING SITE TABLE, ENT/89/FIN FS 3-3 (https://www.ibiblio.org/apollo/Shuttle/Entry%20Checklist/STS-89%20Entry%20Checklist.pdf, PDF page 6): site 20 NOR 17/23, site 21 NOR 05/35, both with TACANs SNG 121Y and HMN 92.",
+    "SITE DATA SHEET: Flight Maps and Charts MAPS/ALL/GEN G PCN-5, NOR-1 (https://www.ibiblio.org/apollo/Shuttle/Charts/Flight%20Maps%20and%20Charts%20Rev%20G%20PCN%205.pdf, PDF page 305): TACAN SNG-121y (Pri), HMN-92x (Sec); MLS (17-JR) (23-JR) ch 6; runways 05/23 and 17/35 each 15,000 x 300 with lakebed beyond both ends; elev 05 3906, 23 3911, 17 3910, 35 3905; 'TAL training rwy 02/20 located in NW quadrant between rwys 05 and 17' (not in PASS's tables, not carried here). STS-115 Navaids Chart (https://www.ibiblio.org/apollo/Shuttle/Charts/STS-115%20Navaids%20Chart.pdf): NOR 17 and NOR 23 '2 JRs - CH 6', SNG 121Y (DS), HMN 92 (SS). STS-3 landed on runway 17 (30 March 1982), the only Shuttle landing here.",
+    "RUNWAY THRESHOLDS -- the NASA WSTF drawing 'WSSH Shuttle Landing Facility, Runways 2, 5, 17, 20, 23 and 35, Runway Visual Landing Aids', dwg 1003-C-01 (05/2008), tables 'WSSH RUNWAY LOCATIONS', 'WSSH TACAN LOCATIONS', 'WSSH MSBLS LOCATIONS' (WGS-84), reproduced as Figure 3 of HAER NM-28-B (https://www.nasa.gov/wp-content/uploads/2024/10/nm-28-b.pdf, PDF page 19; also https://www.loc.gov/item/nm0344/). The reproduction is small: the digits are read to 0.001 arc-second at best and the last one or two may be wrong. Read: 17 32-57-37.130N 106-25-02.619W 3910.475 ft, az 187.242; 35 32-55-09.937N 106-25-24.766W 3905.531 ft, az 7.230; 23 32-57-02.466N 106-24-12.046W 3911.290 ft, az 244.47; 05 32-55-58.485N 106-26-50.836W 3906.3 ft (third digit unclear, 3906 or 3908; the data sheet says 3906), az 64.445; geoid separation -23.9 to -24.0 m; magnetic variation +11.2167 for all. CHECKED against Esri World Imagery (0.5 m/pixel, measured 2026-10-08): the painted threshold bars of 17, 35 and 23 lie within 6 ft of these points (05's bar has faded; the centreline dashes begin 15,000 ft from 23's bar as they should), 17->35 measures 14,996 ft at 187.23 deg and 23->05 14,998 ft at 244.46 deg, and the runways cross 5,968 ft from the 17 threshold and 5,614 ft from 23's, as the DMAAC runway chart NOR-5 shows (0.39 and 0.38 of the way).",
+    "LENGTH 15,000 ft for all four (STS-134 table and data sheet).",
+    "MAGNETIC VARIATION (runways): +11.2167 deg, the WSTF table's value -- IGRF there at about 1979, kept as the landing-site data carried it (IGRF 2011 is 8.9).",
+    "MSBLS (MSBLS-JR: one shelter holding azimuth, DME and elevation; JSC-23266 Flight Procedures Handbook, Approach, Landing and Rollout, section 3.2, https://www.ibiblio.org/apollo/Shuttle/JSC-23266,%20Basic%20-%20Flight%20Procedures%20Handbook%20-%20Approach,%20Landing,%20and%20Rollout.pdf, and the Navigation Aids workbook, Table 3-1). WSTF 'MSBLS LOCATIONS' table: 17, ch 6, AZ/DME/EL, 32-57-21.780N, MSBLS az 7.242, elev 3911.253; 23, ch 6, AZ/DME/EL, 32-56-51.530N 106-24-25.349W, MSBLS az 64.472. The 17 station's longitude is illegible there; 106-24-58.89W is the centre of its concrete pad in the imagery (32-57-21.72N 106-24-58.89W; the table's latitude is 6 ft from it). Both stations sit 1,499 ft past their threshold and 509 ft LEFT of the centreline -- exactly the JR siting rule (1500 ft, 500 ft on military ranges) -- and HAER NM-28-P (https://www.loc.gov/item/nm0358/) describes them so ('1,500 ft to the south of the north end of Runway 17/35; 1,500 ft to the west of the east end of Runway 23/05'). The tables' MSBLS azimuths (7.242, 64.472) are the runway azimuths + 180, the bearing convention landing_sites.py uses. Antenna height: the table's 3911.25 ft.",
+    "MLS SLOTS 7 (NOR 17) and 8 (NOR 23) -- the real flight's MSBLS indices are not known; these avoid ksc.json's 1-2 and edw.json's 3-6 and stay within landaids.c's NAV_MAX of 8. X/Y_DMEAZ_RW and X_EL_RW (unused in GN&C) in kft along/right of the threshold, as in ksc.json.",
+    "TACAN SNG, channel 121Y (the White Sands Space Harbor TACAN, 1988-2011, HAER NM-28-S, https://www.loc.gov/item/nm0361/): WSTF 'TACAN LOCATIONS' table: 32-56-28.387N 106-24-11.408W (read from the drawing; the minutes' digits are clear, the last decimals are not), elevation 3924.557 ft, magnetic variation +12.0, geoid separation -23.844 m. 3,445 ft south of the 23 threshold, beside the access road -- where HAER NM-28-S's map puts it, and where the imagery still shows a faint circular scar. Not in FAA or FlightGear navaid data (a range-only military beacon).",
+    "TACAN HMN (Holloman), channel 92X (114.50): FAA NAVAID record via fltplan.com (https://www.fltplan.com/nav/HMN.htm): 32-51-43.574N 106-06-32.838W, elevation 4075.4 ft, variation 10E (1990); the WSTF table gives the same station within 2 m (32-51-43.54N 106-06-32.77W, 4079 ft, +10.0). FlightGear's 2014 nav.dat agrees.",
+    "TACAN SLOTS: each area carries SNG 121Y first and HMN 92X second (STS-89 table; data sheet 'SNG-121y (Pri), HMN-92x (Sec)'), so the pair is repeated in slots 83/84 and 85/86.",
+    "HEIGHTS: DELH 0, as ksc.json -- the real geoid here is -23.9 m (MSL ~78 ft below the ellipsoid; WSTF table), deliberately not modelled, so heights above PASS's ellipsoid equal the elevations above."
+  ],
+  "runways": [
+    {
+      "slot": 83,
+      "area": 42,
+      "id": "NOR17",
+      "lat_dms": "32-57-37.130N",
+      "lon_dms": "106-25-02.619W",
+      "other_end_lat_dms": "32-55-09.937N",
+      "other_end_lon_dms": "106-25-24.766W",
+      "alt_ft": 3910.5,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": 11.2167,
+      "msbls_index": 7,
+      "mls_channel": 6
+    },
+    {
+      "slot": 84,
+      "area": 42,
+      "id": "NOR23",
+      "lat_dms": "32-57-02.466N",
+      "lon_dms": "106-24-12.046W",
+      "other_end_lat_dms": "32-55-58.485N",
+      "other_end_lon_dms": "106-26-50.836W",
+      "alt_ft": 3911.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": 11.2167,
+      "msbls_index": 8,
+      "mls_channel": 6
+    },
+    {
+      "slot": 85,
+      "area": 43,
+      "id": "NOR05",
+      "lat_dms": "32-55-58.485N",
+      "lon_dms": "106-26-50.836W",
+      "other_end_lat_dms": "32-57-02.466N",
+      "other_end_lon_dms": "106-24-12.046W",
+      "alt_ft": 3906.3,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": 11.2167,
+      "msbls_index": 0
+    },
+    {
+      "slot": 86,
+      "area": 43,
+      "id": "NOR35",
+      "lat_dms": "32-55-09.937N",
+      "lon_dms": "106-25-24.766W",
+      "other_end_lat_dms": "32-57-37.130N",
+      "other_end_lon_dms": "106-25-02.619W",
+      "alt_ft": 3905.5,
+      "delh_ft": 0.0,
+      "length_ft": 15000,
+      "mag_var_deg": 11.2167,
+      "msbls_index": 0
+    }
+  ],
+  "tacans": [
+    {
+      "slot": 83,
+      "id": "SNG",
+      "channel": 121,
+      "mode": "Y",
+      "lat_dms": "32-56-28.387N",
+      "lon_dms": "106-24-11.408W",
+      "alt_ft": 3924.6,
+      "delh_ft": 0.0,
+      "mag_var_deg": 12.0
+    },
+    {
+      "slot": 84,
+      "id": "HMN",
+      "channel": 92,
+      "mode": "X",
+      "lat_dms": "32-51-43.574N",
+      "lon_dms": "106-06-32.838W",
+      "alt_ft": 4075.4,
+      "delh_ft": 0.0,
+      "mag_var_deg": 10.0
+    },
+    {
+      "slot": 85,
+      "id": "SNG",
+      "channel": 121,
+      "mode": "Y",
+      "lat_dms": "32-56-28.387N",
+      "lon_dms": "106-24-11.408W",
+      "alt_ft": 3924.6,
+      "delh_ft": 0.0,
+      "mag_var_deg": 12.0
+    },
+    {
+      "slot": 86,
+      "id": "HMN",
+      "channel": 92,
+      "mode": "X",
+      "lat_dms": "32-51-43.574N",
+      "lon_dms": "106-06-32.838W",
+      "alt_ft": 4075.4,
+      "delh_ft": 0.0,
+      "mag_var_deg": 10.0
+    }
+  ],
+  "msbls_stations": [
+    {
+      "for": "NOR17 MSBLS-JR (az/DME/el), ch 6: WSTF table latitude, imagery pad longitude",
+      "lat_dms": "32-57-21.780N",
+      "lon_dms": "106-24-58.89W",
+      "accuracy_ft": 15
+    },
+    {
+      "for": "NOR23 MSBLS-JR (az/DME/el), ch 6: WSTF table",
+      "lat_dms": "32-56-51.530N",
+      "lon_dms": "106-24-25.349W",
+      "accuracy_ft": 15
+    }
+  ],
+  "mls": [
+    {
+      "slot": 7,
+      "for_runway_slot": 83,
+      "raz": {
+        "lat_dms": "32-57-21.780N",
+        "lon_dms": "106-24-58.89W"
+      },
+      "el": {
+        "lat_dms": "32-57-21.780N",
+        "lon_dms": "106-24-58.89W"
+      },
+      "alt_ft": 3911.3,
+      "x_dmeaz_kft": 1.499,
+      "x_el_kft": 1.499,
+      "y_dmeaz_kft": -0.510
+    },
+    {
+      "slot": 8,
+      "for_runway_slot": 84,
+      "raz": {
+        "lat_dms": "32-56-51.530N",
+        "lon_dms": "106-24-25.349W"
+      },
+      "el": {
+        "lat_dms": "32-56-51.530N",
+        "lon_dms": "106-24-25.349W"
+      },
+      "alt_ft": 3911.3,
+      "x_dmeaz_kft": 1.499,
+      "x_el_kft": 1.499,
+      "y_dmeaz_kft": -0.508
+    }
+  ]
+}

@@ -17,6 +17,7 @@
 #include "envcache.h"
 #include "json.h"
 #include "startrk.h"
+#include "kuradar.h"
 #include "lpsmodel.h"
 #include "eiumodel.h"
 #include "mecmodel.h"
@@ -94,6 +95,7 @@ static void discrete_write(uint16_t (*out)[NCARD][NCHAN], bool (*seen)[NCARD][NC
 #define IMU_WRITE  0x20C01u   /* FIOIMUC3: card 3 ch 0, command words 1, 2  */
 #define STU_READ   0x24C42u   /* FIOFFIC5: card 3 ch 2, a star tracker's 3 words */
 #define STU_WRITE  0x20C40u   /* FIOHO203: card 3 ch 2, its command word     */
+#define RR_READ    0x24C69u   /* FIOFFIC3: FF3 card 3 ch 3, the Ku-band radar's 10 words */
 
 typedef struct {
     uint16_t cmd1, cmd2;      /* the last two command words, echoed back */
@@ -388,6 +390,17 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     a->started = true;
     a->t = s->t;
     w[9] = a->count[0]; w[10] = a->count[1]; w[11] = a->count[2];
+    /* YAGPC_IMU_ACCLOG=1: every read of the velocity counters -- vehicle
+     * time, the three raw counters as sent, and the inertial velocity they
+     * stand for (the CG's sensed delta-V plus the navigation base's w x r,
+     * ft/s, M50) -- so that PASS's compensation and selection
+     * (GMHACP, GMLACP, GRHIMU, GRJIMU) can be replayed offline beside the
+     * downlist's CGMV_TOT_DV_M50 and CGMV_VEL_SEL. */
+    static int accLog = -1;
+    if (accLog < 0) accLog = yagpc_getenv("YAGPC_IMU_ACCLOG") != NULL;
+    if (accLog)
+        fprintf(stderr, "imu-acc: t=%.5f imu=%d count=%u %u %u ft=%.6f %.6f %.6f\n", s->t, n,
+                a->count[0], a->count[1], a->count[2], ft[0], ft[1], ft[2]);
 }
 
 static void imu_read(int n, uint16_t *out, int words) {
@@ -629,6 +642,10 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * computer commands: op 4 VALUE, type 8, one word to FF1 -- vehdyn.c,
  * vehdyn_hardwired, has the bits and latches them. */
 #define CREW_TYPE_HW 8
+/* THE KU-BAND RADAR'S PANEL (A1U; kuradar.h has the bits), to FF3: op 4
+ * VALUE, type 9, one word.  The SM computer and the Ku signal processor
+ * that the switches really reach are not here; kuradar.c stands in. */
+#define CREW_TYPE_KU 9
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -808,6 +825,14 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t w = (uint16_t)(((unsigned)buf[8] << 8) | buf[9]);
         startrk_hardware(st, (w & 0x8000u) != 0, (w & 0x4000u) != 0,
                          vehdyn_enabled() ? vehdyn_state()->t : 0.0);
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
+    if (type == CREW_TYPE_KU) {
+        if (op != CREW_OP_VALUE || k != 3 || cnt < 1 || len < 10) return;
+        kuradar_panel((uint16_t)(((unsigned)buf[8] << 8) | buf[9]),
+                      vehdyn_enabled() ? vehdyn_state()->t : 0.0);
         crewHeard = true;
         crewMsgs++;
         return;
@@ -1665,6 +1690,40 @@ static void truth_publish(void) {
     sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
 }
 
+/* THE OTHER VEHICLES, for portview: one TGT1 datagram per vehicle per
+ * TRUTH_PERIOD_S of vehicle time on port base + TARGET_OFFSET: "TGT1", then
+ * big-endian IEEE doubles -- vehicle time (s), the NORAD id, M50 position (m)
+ * and velocity (m/s) of its centre of mass, and its attitude, quaternion
+ * body -> M50 (w x y z), in the body frame its model is drawn in (the ISS's:
+ * +X forward, +Y starboard, +Z nadir).  12 doubles; readers take the first
+ * N they know.  Only with the dynamics on, a panel wired and a target placed
+ * (YAGPC_VEHDYN_TARGETS, vehdyn.c). */
+#define TARGET_OFFSET 109     /* not 81-85 (GPCs' discretes, cam.py), 96 (crew progress) */
+
+static void targets_publish(void) {
+    static double next = -1.0;
+    if (!crewOpen || crewFd[1] < 0 || !vehdyn_enabled() || vehdyn_target_count() <= 0) return;
+    const PhysState *st = vehdyn_state();
+    if (st->t < next && st->t > next - 10.0) return;
+    next = st->t + TRUTH_PERIOD_S;
+    for (int k = 0; k < vehdyn_target_count(); k++) {
+        int id;
+        double r[3], v[3], q[4], d[12];
+        if (!vehdyn_target(k, &id, r, v, q)) continue;
+        d[0] = st->t; d[1] = id;
+        for (int i = 0; i < 3; i++) { d[2 + i] = r[i]; d[5 + i] = v[i]; }
+        for (int i = 0; i < 4; i++) d[8 + i] = q[i];
+        uint8_t b[4 + 8 * 12];
+        memcpy(b, "TGT1", 4);
+        for (int i = 0; i < 12; i++) put_be_double(b + 4 + 8 * i, d[i]);
+        struct sockaddr_in to = {0};
+        to.sin_family = AF_INET;
+        to.sin_addr.s_addr = inet_addr("239.255.1.1");
+        to.sin_port = htons((uint16_t)(crewPortBase + TARGET_OFFSET));
+        sendto(crewFd[1], (const char *)b, sizeof b, 0, (struct sockaddr *)&to, sizeof to);
+    }
+}
+
 /* ---------------------------------------------------------------------
  * THE DOWNLIST, to the ground.  Every 40 ms each GPC writes its downlist
  * frame to the PCM master unit on its own IP bus (BCE 24): 32-word "write
@@ -1919,6 +1978,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
     if (vehdyn_enabled()) {
         vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
         truth_publish();
+        targets_publish();
     }
     unsigned iua = CMD_IUA(cmd);
     uint32_t f = cmd & 0x3ffffu;
@@ -1962,6 +2022,16 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
             uint16_t sw[3];
             startrk_read(startrk_unit(u), sw, vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6);
             for (int i = 0; i < n; i++) out[i] = (i < 3) ? sw[i] : 0;
+            ffReads++;
+            return true;
+        }
+        /* Only in a run that has something to find: otherwise FF3's read
+         * stays unanswered, as before the radar was modelled, and PASS's
+         * I/O bookkeeping in every other run is as it was. */
+        if (u == 3 && f == RR_READ && vehdyn_enabled() && vehdyn_target_count() > 0) {
+            uint16_t rw[10];
+            kuradar_read(rw, vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6);
+            for (int i = 0; i < n; i++) out[i] = (i < 10) ? rw[i] : 0;
             ffReads++;
             return true;
         }
@@ -2046,6 +2116,10 @@ bool mdmdev_dump(const char *dir) {
         double sb[512];
         int ns = startrk_save(sb, 512);
         put_list(f, "starTrackers", sb, ns < 512 ? ns : 512, true);
+        ns = kuradar_save(sb, 512);
+        put_list(f, "kuRadar", sb, ns < 512 ? ns : 512, true);
+        ns = vehdyn_targets_save(sb, 512);
+        put_list(f, "targets", sb, ns < 512 ? ns : 512, true);
         ns = eiu_save(sb, 512);
         put_list(f, "engines", sb, ns < 512 ? ns : 512, true);
         ns = mec_save(sb, 512);
@@ -2148,6 +2222,10 @@ bool mdmdev_load(const char *dir) {
         double sb[512];
         int ns = get_list(root, "starTrackers", sb, 512);
         if (ns > 0) startrk_load(sb, ns, tCap);
+        ns = get_list(root, "kuRadar", sb, 512);
+        if (ns > 0) kuradar_load(sb, ns, tCap);
+        ns = get_list(root, "targets", sb, 512);
+        vehdyn_targets_load(sb, ns);
         ns = get_list(root, "engines", sb, 512);
         if (ns > 0) eiu_load(sb, ns, tCap);
         ns = get_list(root, "mecs", sb, 512);
@@ -2189,6 +2267,7 @@ void mdmdev_test_platform(int n, double P[3][3]) {
 
 void mdmdev_report(void) {
     startrk_report();
+    kuradar_report();
     lps_report();
     eiu_report();
     mec_report();

@@ -36,8 +36,18 @@ void startrk_load(const double *b, int n, double tCap);
 void startrk_report(void);
 
 /* For the tests: the star tracker k is locked on (0 none, -1 the self-test
- * light), and the Sun's M50 unit vector at vehicle time t. */
+ * light, STARTRK_LOCKED_TARGET the rendezvous target), and the Sun's M50
+ * unit vector at vehicle time t. */
+#define STARTRK_LOCKED_TARGET (-2)
 int startrk_test_locked(int k);
 void startrk_test_sun(double t, double u[3]);
+/* For the tests: where tracker k would see vehdyn's first target at vehicle
+ * time t -- H and V (deg, the centroid of its light, no noise), its
+ * magnitude, range (m) and phase angle (deg) -- returning its NORAD id, or
+ * 0 when it is not to be seen (shadowed, behind the Earth, behind the
+ * tracker); and a Lambert sphere's light centroid at a phase angle, in
+ * radii from its centre toward the Sun. */
+int startrk_test_target(int k, double t, double hv[2], double *mag, double *rangeM, double *phaseDeg);
+double startrk_test_centroid(double phaseDeg);
 
 #endif
