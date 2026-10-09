@@ -1222,12 +1222,28 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             # --hold-start: every window up and placed, the vehicle not yet
             # started -- the person watching arranges the windows, then says go
             self.wait_file(outp, "HELD:", 180)
-            try:
-                input("\n*** The windows are up and the vehicle is HELD.  Arrange them, then "
-                      "press Enter here to start. ***\n")
-            except EOFError:
-                pass
-            fly_sts134.crewscript.send_session("go", self.base)
+            # Enter here, or the manager's Start (which sends 'go' itself)
+            print("\n*** The windows are up and the vehicle is HELD.  Arrange them, then "
+                  "press Enter here, or Start in the manager. ***", flush=True)
+            interactive = sys.stdin is not None and sys.stdin.isatty()
+            if not interactive:
+                fly_sts134.crewscript.send_session("go", self.base)   # nobody to ask
+            while True:
+                with open(outp, errors="replace") as fh:
+                    if "released: the vehicle is running" in fh.read():
+                        break
+                if not interactive:
+                    time.sleep(1.0)
+                elif os.name == "nt":
+                    import msvcrt
+                    if msvcrt.kbhit() and msvcrt.getwch() in "\r\n":
+                        fly_sts134.crewscript.send_session("go", self.base)
+                    time.sleep(0.2)
+                else:
+                    import select
+                    if select.select([sys.stdin], [], [], 1.0)[0]:
+                        sys.stdin.readline()
+                        fly_sts134.crewscript.send_session("go", self.base)
             self.wait_file(outp, "released: the vehicle is running", 120)
             self.say("released by the user; the vehicle is running")
         time.sleep(5)

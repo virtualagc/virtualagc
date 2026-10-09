@@ -360,6 +360,9 @@ class Manager(object):
 
         self._section("SIMULATION", bold)
         row = self._row()
+        # START: a run begun held (simulatePASS --hold-start) waits, every
+        # window up and nothing moving, for this or Enter in its terminal
+        self._button(row, "Start", self.go)
         self._button(row, "Show Panel", self.show_panel)
         self._button(row, "End Simulation", self.end_simulation)
 
@@ -1186,6 +1189,11 @@ class Manager(object):
                              % os.path.basename(path.rstrip("/")))
                     return None
         return path
+
+    def go(self):
+        """Start a run that is held (simulatePASS --hold-start)."""
+        if self._session("go"):
+            self.say("Start: the vehicle starts if it was held")
 
     def _session(self, verb, path=None):
         try:
