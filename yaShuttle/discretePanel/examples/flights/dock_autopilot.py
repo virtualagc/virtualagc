@@ -636,4 +636,8 @@ if __name__ == "__main__":
     # and that station's windows
     if "--station" not in sys.argv:
         sys.argv += ["--station", "aft"]
+    # the virtual hand controllers, so the THC's deflections can be watched
+    # -- with a joystick plugged in, "auto" draws none (watch4, 2026-10-09)
+    if "--input" not in sys.argv:
+        sys.argv += ["--input", "virtual"]
     R.main()
