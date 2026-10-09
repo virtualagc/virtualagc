@@ -1385,6 +1385,10 @@ def main():
     ap.add_argument("--portview-views", default=None, metavar="LIST",
                     help="portview.py's --views: comma-separated, from front, up, left, right, "
                          "aft, cl (its default is front alone)")
+    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+                    help="which flight station's panels, displays and keyboards to show: "
+                         "forward, the aft flight deck (rendezvous, docking, RMS), or all "
+                         "(default); the manager's STATION row changes it")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring every window up and place it, but hold the vehicle -- yaGPC2 "
                          "not started, so nothing moves -- until the session command 'go' "
@@ -2200,6 +2204,11 @@ def main():
                       else None)
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
+        if args.station != "all":
+            # one station's windows, as the manager's STATION row would
+            crewscript.send_control("station %s" % args.station, args.port_base)
+            crewscript.send_meds("station %s" % args.station, args.port_base)
+            log("station: %s" % {"fwd": "forward", "aft": "the aft flight deck"}[args.station])
         if args.hold_start:
             # THE VEHICLE WAITS, NOT JUST A SCRIPT.  --wait-user holds a crew
             # script while the vehicle runs on; arranging the windows took

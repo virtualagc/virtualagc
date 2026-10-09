@@ -1205,6 +1205,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             cmd += ["--portview-views", self.a.views]
         if self.a.hold_start:
             cmd += ["--hold-start"]
+        if self.a.station != "all":
+            cmd += ["--station", self.a.station]
         os.makedirs(self.a.logs, exist_ok=True)
         outp = os.path.join(self.a.logs, "simulatePASS.out")
         if os.path.exists(outp):
@@ -2824,6 +2826,9 @@ def main():
     ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default="lh",
                     help="the station whose hand controllers are started (default lh, the "
                          "CDR's; dock_autopilot.py uses aft)")
+    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+                    help="the flight station whose windows are shown (simulatePASS --station; "
+                         "dock_autopilot.py uses aft)")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring the windows up with the vehicle held, and start it when Enter "
                          "is pressed here -- time to arrange the windows first")

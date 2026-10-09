@@ -445,20 +445,24 @@ def settled_at(t_run, n_needed=6, lat_ft=0.5, x_ft=1.0, rate=0.04):
 
 
 def orbit_pfd_on_crt2(self):
-    """With --crts 2: CRT 2 powered and showing the ORBIT PFD (MEDS FLT INST
-    menu: edgekey 2 FLT INST, then edgekey 3 ORBIT PFD), the attitude and
-    rates beside the DPS display the driver keys on CRT 1.  PASS loads IDP 2
-    itself once it is powered, in about 5 s (fly_sts134.PFD_ON_CRT2)."""
+    """The ORBIT PFD (MEDS FLT INST menu: edgekey 2 FLT INST, then edgekey 3
+    ORBIT PFD), the attitude and rates beside the DPS display the driver
+    keys on CRT 1: with --crts 4 on CRT 4, the aft station's display -- a
+    stand-in for the aft station's AFD 1, which is not simulated (and what
+    AFD 1 showed during docking is not documented: apds-cctv-aft-findings.md)
+    -- else on CRT 2 with --crts 2.  PASS loads the IDP itself once it is
+    powered, in about 5 s (fly_sts134.PFD_ON_CRT2)."""
     if self.a.crts < 2 or getattr(self, "pfd_up", False):
         return
-    self.play("+1     idppower 2 on\n"
-              "+10    edgekey crt2 1\n"          # UP: the main menu
-              "+2     edgekey crt2 2\n"          # FLT INST
-              "+2     edgekey crt2 3\n",         # ORBIT PFD
-              "dock-pfd-crt2")
-    self.script_done("dock-pfd-crt2", 120)
+    n = 4 if self.a.crts >= 4 else 2
+    self.play("+1     idppower %d on\n"
+              "+10    edgekey crt%d 1\n"          # UP: the main menu
+              "+2     edgekey crt%d 2\n"          # FLT INST
+              "+2     edgekey crt%d 3\n" % (n, n, n, n),  # ORBIT PFD
+              "dock-pfd-crt%d" % n)
+    self.script_done("dock-pfd-crt%d" % n, 120)
     self.pfd_up = True
-    self.say("crew: ORBIT PFD on CRT 2")
+    self.say("crew: ORBIT PFD on CRT %d" % n)
 
 
 def dock30(self):
@@ -629,4 +633,7 @@ if __name__ == "__main__":
     # the aft station's hand controllers, unless asked otherwise
     if "--rhc" not in sys.argv:
         sys.argv += ["--rhc", "aft"]
+    # and that station's windows
+    if "--station" not in sys.argv:
+        sys.argv += ["--station", "aft"]
     R.main()

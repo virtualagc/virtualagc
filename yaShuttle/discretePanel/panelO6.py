@@ -767,6 +767,14 @@ OPS_PANELS = {
                 "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
+# THE TWO FLIGHT STATIONS (owner, 2026-10-09): every switch is always there
+# and PASS reads them all, but a crew member sees one station's panels -- the
+# forward station's, or the aft flight deck's, where rendezvous, docking and
+# the RMS were flown.  The aft station's are the A panels and R11 (the aft
+# keyboard's IDP/CRT 4 switches); the rest are forward.  The manager's
+# STATION row sends 'station fwd|aft|all' (all: both, as before).
+def aft_station_panel(name):
+    return name.startswith("A") or name == "R11"
 # AN OPS TRANSITION SHOWS AN OPS 0 PAGE while the new OPS loads from mass
 # memory -- 13 s for OPS 1 -> 2, 30 s for OPS 9 -> 1 -- and following it
 # blinked every panel but O6, C2 and R11 out of a recorded video (owner,
@@ -957,6 +965,7 @@ class PanelO6:
         # shows every one (for saving a layout, or looking).  may_map is
         # False for an unattended scripted run, which maps nothing.
         self.panel_mode = "ops"
+        self.station = os.environ.get("NSTS_STATION", "all")
         self.may_map = True
         self.layout_path = None
         self._ops_seen = {}            # (major function, OPS) -> last seen
@@ -2629,6 +2638,8 @@ class PanelO6:
             want.update(OPS_PANELS.get(k, ()))
         if self.panel_mode == "all":
             want = set(self.wins)
+        if self.station in ("fwd", "aft"):
+            want = {n for n in want if aft_station_panel(n) == (self.station == "aft")}
         shown = tuple(n for n in self.wins if n in want)
         if (shown, tuple(ops)) != self._ops_shown:
             log("panels: %s -- showing %s"
@@ -5664,6 +5675,14 @@ def _listen_control(panel):
                     w.shown = False         # _panels_follow maps the ones wanted
                 panel._panels_follow()
             panel.root.after(0, show_all)
+        elif word == "station" and rest in ("fwd", "aft", "all"):
+            # The manager's STATION: one station's panels, or both
+            log("script command: station %s" % rest)
+            def set_station(m=rest):
+                panel.station = m
+                panel._ops_shown = None
+                panel._panels_follow()
+            panel.root.after(0, set_station)
         elif word == "panels" and rest in ("all", "ops"):
             # The manager's ALL PANELS: every window, to save a layout with all
             # of them in it; 'ops' goes back to following the displays.
