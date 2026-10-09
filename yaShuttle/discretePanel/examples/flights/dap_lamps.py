@@ -45,53 +45,70 @@ LAMP = {   # name: (card, channel, mask) -- panelO6.DAP_LAMP
 }
 
 
-class DapLamps(object):
-    def __init__(self, port_base, iface=None):
-        self.words = {}             # (card, channel) -> the last word PASS wrote
-        self.t = {}                 # (card, channel) -> when it came (time.time())
+class MdmLamps(object):
+    """Every output word PASS writes to the forward MDMs named (FF1-FF4), as
+    yaGPC2 sends them on each MDM's hardware-side bus (port base + 100 + k
+    - 1): words[(unit, card, channel)]."""
+    def __init__(self, port_base, units=(1,), iface=None):
+        self.words = {}             # (unit, card, channel) -> the last word PASS wrote
+        self.t = {}                 # (unit, card, channel) -> when it came (time.time())
         self.lock = threading.Lock()
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        except (AttributeError, OSError):
-            pass
-        s.bind(("", port_base + MDM_IO_OFFSET))
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                     struct.pack("4s4s", socket.inet_aton(GROUP), socket.inet_aton(
-                         iface or os.environ.get("NSTS_BUS_IFACE", "127.0.0.1"))))
-        self.sock = s
+        self.socks = {}
+        for k in units:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except (AttributeError, OSError):
+                pass
+            s.bind(("", port_base + MDM_IO_OFFSET + k - 1))
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                         struct.pack("4s4s", socket.inet_aton(GROUP), socket.inet_aton(
+                             iface or os.environ.get("NSTS_BUS_IFACE", "127.0.0.1"))))
+            self.socks[s] = k
         threading.Thread(target=self._listen, daemon=True).start()
 
     def _listen(self):
         while True:
             try:
-                ready, _, _ = select.select([self.sock], [], [], 1.0)
-                if not ready:
-                    continue
-                data = self.sock.recv(512)
+                ready, _, _ = select.select(list(self.socks), [], [], 1.0)
             except (OSError, ValueError):
                 return
-            if len(data) < 10:
-                continue
-            op, typ, addr, cnt = struct.unpack(">HHHH", data[:8])
-            if op != MDM_OP_VALUE or typ != MDM_TYPE_DOH:
-                continue
-            card, ch = addr >> 8, addr & 0xff
-            n = min(cnt, (len(data) - 8) // 2)
-            words = struct.unpack(">%dH" % n, data[8:8 + 2 * n])
-            now = time.time()
-            with self.lock:
-                for i, w in enumerate(words):
-                    self.words[(card, ch + i)] = w
-                    self.t[(card, ch + i)] = now
+            for sk in ready:
+                try:
+                    data = sk.recv(512)
+                except OSError:
+                    continue
+                if len(data) < 10:
+                    continue
+                op, typ, addr, cnt = struct.unpack(">HHHH", data[:8])
+                if op != MDM_OP_VALUE or typ != MDM_TYPE_DOH:
+                    continue
+                card, ch = addr >> 8, addr & 0xff
+                n = min(cnt, (len(data) - 8) // 2)
+                words = struct.unpack(">%dH" % n, data[8:8 + 2 * n])
+                now, unit = time.time(), self.socks[sk]
+                with self.lock:
+                    for i, w in enumerate(words):
+                        self.words[(unit, card, ch + i)] = w
+                        self.t[(unit, card, ch + i)] = now
+
+    def word(self, unit, card, ch):
+        with self.lock:
+            return self.words.get((unit, card, ch))
+
+
+class DapLamps(MdmLamps):
+    """C3's DAP lamps, FF1's words."""
+    def __init__(self, port_base, iface=None):
+        MdmLamps.__init__(self, port_base, (1,), iface)
 
     def wait(self, timeout=10.0):
         """Until the lamp words have come in at least once; False if not."""
         end = time.time() + timeout
         while time.time() < end:
             with self.lock:
-                if (10, 1) in self.words and (2, 1) in self.words:
+                if (1, 10, 1) in self.words and (1, 2, 1) in self.words:
                     return True
             time.sleep(0.2)
         return False
@@ -100,7 +117,7 @@ class DapLamps(object):
         """The lamp: True, False, or None before its word has come in."""
         card, ch, mask = LAMP[name]
         with self.lock:
-            w = self.words.get((card, ch))
+            w = self.words.get((1, card, ch))
         return None if w is None else bool(w & mask)
 
     def low_z_lit(self):
@@ -117,7 +134,7 @@ class DapLamps(object):
         """Whether the word holding the lamp has been rewritten since t0."""
         card, ch, _ = LAMP[name]
         with self.lock:
-            return self.t.get((card, ch), 0.0) > t0
+            return self.t.get((1, card, ch), 0.0) > t0
 
     def until(self, name, want, timeout=8.0):
         """Until the lamp reads want, after a fresh word (PASS rewrites the
@@ -148,3 +165,35 @@ def set_low_z(lamps, press, want, timeout=8.0, tries=2):
         if lamps.until("LOW_Z", want, timeout=timeout):
             return True, presses
     return lamps.low_z_lit() == want, presses
+
+
+# THE CAUTION AND WARNING LIGHTS PASS DRIVES (panelcontrols' F7): the
+# fourteen GNC class-2 lights, FF DOL card 5 channel 1 (all on FF3 but LEFT
+# RCS, FF1), latched on a class-2 message until MSG RESET; BACKUP C/W ALARM,
+# FF3/FF4 DOH card 10 ch 2 0x1000 (DLALIGHT), which latches MASTER ALARM and
+# the C&W tone; and the SM alert tone bit, 0x0800 on the same word.
+CW = {   # name: [(unit, card, channel, mask), ...]
+    "IMU": [(3, 5, 1, 0x0200)], "FWD RCS": [(3, 5, 1, 0x0008)], "RCS JET": [(3, 5, 1, 0x8000)],
+    "RGA/ACCEL": [(3, 5, 1, 0x0020)], "AIR DATA": [(3, 5, 1, 0x0040)], "LEFT RCS": [(1, 5, 1, 0x0010)],
+    "RIGHT RCS": [(3, 5, 1, 0x0010)], "LEFT RHC": [(3, 5, 1, 0x0080)], "RIGHT/AFT RHC": [(3, 5, 1, 0x0100)],
+    "LEFT OMS": [(3, 5, 1, 0x2000)], "RIGHT OMS": [(3, 5, 1, 0x1000)], "FCS SATURATION": [(3, 5, 1, 0x0400)],
+    "OMS TVC": [(3, 5, 1, 0x4000)], "FCS CHANNEL": [(3, 5, 1, 0x0800)],
+    "BACKUP C/W ALARM": [(3, 10, 2, 0x1000), (4, 10, 2, 0x1000)],
+    "SM ALERT TONE": [(1, 10, 2, 0x0800), (3, 10, 2, 0x0800), (4, 10, 2, 0x0800)],
+}
+TONES = ("BACKUP C/W ALARM", "SM ALERT TONE")
+
+
+class CwLamps(MdmLamps):
+    """The C&W lights PASS drives, from FF1, FF3 and FF4's words."""
+    def __init__(self, port_base, iface=None):
+        MdmLamps.__init__(self, port_base, (1, 3, 4), iface)
+
+    def lit(self):
+        """The names of the lights on now (a light any of whose words has it)."""
+        on = []
+        with self.lock:
+            for name, ls in CW.items():
+                if any(self.words.get((u, c, ch), 0) & m for u, c, ch, m in ls):
+                    on.append(name)
+        return on

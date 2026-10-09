@@ -280,6 +280,8 @@ class ManualPhase(object):
         fired = None                     # (LVLH dv commanded, the truth's v then)
         wrong = 0
         while True:
+            if hasattr(self, "cw_ack"):
+                self.cw_ack()                  # a known alarm, between pulses
             st = self.rel(point)
             if st is None:
                 time.sleep(1.0)
@@ -742,6 +744,14 @@ class ManualPhase(object):
         axis, for --hold-min minutes; the truth's errors, the pulses and the
         propellant over the hold."""
         self.man_start()
+        # the docking start point clean: IMU 1 selected (a capture flown
+        # before the [10A]/[10B] fix has it deselected), the latched class-2
+        # messages and lamps reset, the tone acknowledged
+        if hasattr(self, "imu1_select"):
+            self.imu1_select(True, "hold")
+            self.play("+1     keys MSG_RESET\n+3     press master_alarm\n", "hold-msg-reset")
+            self.script_done("hold-msg-reset", 60)
+            self.say("crew: MSG RESET, MASTER ALARM")
         p0 = dict(self.pulses)
         prop0 = self.propellant("vbar")
         mins = getattr(self.a, "hold_min", 20.0)
