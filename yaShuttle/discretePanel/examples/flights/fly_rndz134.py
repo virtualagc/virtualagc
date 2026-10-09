@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """FLY STS-134'S RENDEZVOUS, FROM NCC - 10 MIN: one GPC in OPS 201 on FD3,
 the Orbiter on its real final approach to the real ISS, PASS navigating and
-targeting the Ti burn and pointing the overhead windows at the station
-(RENDEZVOUS_PLAN.md, the first milestone, M1).
+targeting the Ti burn and the midcourses MC1-MC4 and pointing the overhead
+windows at the station (RENDEZVOUS_PLAN.md, M1 and Stages 1 and 2).
 
     python3 examples/flights/fly_rndz134.py --logs DIR [--port-base N]
             [--tape VOLUME] [--from STAGE] [--to STAGE] [--rate X]
@@ -53,8 +53,31 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            final-ground limits, LOAD, TIMER, MNVR, DAP TRANS NORM, EXEC at
            TIG - 15 s; the residuals trimmed with the THC to < 0.2 ft/s each
            axis; DAP B/INRTL/ALT, PULSE/PULSE/PULSE, RCS SEL
-  COAST    OPS 201, -Z target track again, and the coast to T2 (TIG + 76.9
-           min), the truth's relative state logged every 30 s
+  POSTTI   OPS 201, -Z target track again; TARGET MC1 BURN [17A]
+           (Preliminary); POST Ti NAV [16A] (FLTR TO PROP) and STAR TRACKER
+           NAV [10A] again (SV SEL PROP, marks, FLTR when converged); [17A]
+           (Intermediate) if there is time
+  MC1      [17A] (Final) in OPS 202 and RCS BURN (CC 9-3): RCS SEL, LOAD,
+           TIMER, DAP A/AUTO/PRI and TRANS NORM at TIG - 30 s, VGO nulled
+           with the THC at TIG (Z,X,Y if VGO Z is negative, else X,Y,Z; < 0.2
+           ft/s), DAP ALT and PULSE, OPS 201 and the -Z track; TARGET MC2
+           [17B] (Preliminary); MANUAL OUT-OF-PLANE NULL [19A] when Y = 0
+  MC2      [18A] (Intermediate), [18B] (Final: EL 29.07 deg, GWR iterating
+           the TIG; outside the -3/+7 min slip limits, TGT 19), FLTR TO PROP,
+           RCS BURN; END S TRK NAV [18C]
+  MC3      [19B] with BASE TIME = MC2 TIG keyed and LOADed; RCS BURN
+  MC4      [20A] (TGT 14: T2 offset 0, 0, +0.6 kft); RCS BURN -- on the
+           star tracker's FLTR state, there being no rendezvous radar yet
+  ARRIVAL  the truth's relative state every 30 s to MC4 + 13 min (TGT 14's
+           T2: the R-bar, 600 ft below the ISS) and the burns' table, PASS's
+           solutions beside the truth's Lambert and the checklist's MEAN and
+           3 SIGMA (rndz-check.log, burns.json)
+
+--no-mc flies the M1b baseline instead: after Ti, OPS 201, the -Z track and
+the coast to T2 (TIG + 76.9 min).  --zero-sensor-bias is the star tracker
+bias experiment (RENDEZVOUS_PLAN.md 5b): this tape's GLQ_ST_ANGLES_BIAS_INIT
+of 1.0 rad set to 0.0 in the capture the run resumes from -- pending Ron's
+decision on the real I-load, never the tape's value.
 
 Each step that keys an entry is checked in PASS's memory before the next
 (probe captures, sts134r-tgt10-*), since an entry can be lost.  Throughout
@@ -105,9 +128,30 @@ MET_ZERO_UNIX = calendar.timegm((2011, 5, 16, 12, 56, 27)) + 0.994
 NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
-PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "STRKEND", "TIBURN", "COAST"]
+PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "STRKEND", "TIBURN", "POSTTI",
+          "MC1", "MC2", "MC3", "MC4", "ARRIVAL"]
 # TGT 10 as JSC-48072-134 lists it (TARGET Ti BURN [13A], [15A]):
-TGT10 = {"EL": 0.0, "DT": 76.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8}
+TGT10 = {"T1": 0.0, "EL": 0.0, "DT": 76.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8}
+# The midcourse sets, as JSC-48072-134's timeline (pp. 4-17 to 4-20) and
+# TARGETING DATA (p. 6-4, the TGT ALTITUDE 210 rows, which the timeline
+# pages print; TGT 10 above is the same row's) list them: T1 in minutes after BASE
+# TIME (Ti TIG for 11 and 12; "BASETIME = MC2 TIG" for 13 and 14; 19 is the
+# slipped MC2's, T1 = BASE TIME), EL in degrees, DT in minutes, the T2 offset
+# in kft (target LVLH, +Z down).  MC2's T1 is only GWR's first guess: its EL
+# of 29.07 deg makes GWR iterate the TIG to that elevation.
+TGT_SETS = {10: TGT10,
+            11: {"T1": 20.0, "EL": 0.0, "DT": 56.9, "DX": -0.9, "DY": 0.0, "DZ": 1.8},
+            12: {"T1": 49.9, "EL": 29.07, "DT": 27.0, "DX": -0.9, "DY": 0.0, "DZ": 1.8},
+            13: {"T1": 17.0, "EL": 0.0, "DT": 10.0, "DX": -0.9, "DY": 0.0, "DZ": 1.8},
+            14: {"T1": 27.0, "EL": 0.0, "DT": 13.0, "DX": 0.0, "DY": 0.0, "DZ": 0.6},
+            19: {"T1": 0.0, "EL": 0.0, "DT": 27.0, "DX": -0.9, "DY": 0.0, "DZ": 1.8}}
+# MC1-MC4 BURN SOLUTION blocks (pp. 4-17 to 4-20): each axis's MEAN and 3
+# SIGMA VARIATION, ft/s, LVLH
+MC_DISPERSIONS = {11: ((-0.1, 0.6), (-0.1, 0.7), (0.5, 1.2)),
+                  12: ((0.0, 0.4), (0.0, 0.2), (0.9, 2.5)),
+                  13: ((0.9, 1.3), (0.0, 0.5), (1.1, 2.6)),
+                  14: ((1.3, 1.3), (-0.1, 0.6), (0.9, 2.2))}
+MC2_TIG_NOMINAL_MIN = 49.9          # Ti + 0:49:54, the TGT 12 row's T1
 
 # THE RENDEZVOUS DAP, A7 and B7: JSC-48072-134 p. 6-2, ISS RNDZ OPS DAP
 # CONFIGURATIONS, the RNDZ column, by SPEC 20 item (A 10-28, B 30-48).  The
@@ -146,8 +190,27 @@ DAP_FMT = {0: "%.4f", 1: "%.2f", 2: "%.2f", 3: "%.3f", 4: "%.3f", 7: "%.3f", 8: 
 # 0.25 ft/s^2; for Y and Z there is none, so each axis starts from that and
 # is then measured from its own response.
 OMS_1ENG_TRIMS = {"P": 0.4, "LY": 5.2, "RY": -5.2}
+# GLQREN's GLQ_ST_ANGLES_BIAS_INIT ARRAY(2), this tape's 1.0, 1.0 RADIAN
+# (RENDEZVOUS_PLAN.md 5b, THE BLOCKER): #DGLQREN X'0B45C' + X'22', two IBM
+# short floats.  --zero-sensor-bias writes 0.0 there in a capture before it is
+# resumed -- strk-run2's experiment, made an option.
+ST_BIAS_INIT_HW = 0xB47E
+IBM_ONE = (0x4110, 0x0000)
+# CGZB_LAMB_ILOAD ARRAY(40) BIT(1) (CGZMC2.hal:288, one halfword each): which
+# target sets GK3 solves with Lambert (GWR), the rest going to the
+# non-Lambert GWG.  This tape has the source's INITIAL(10#ON, 30#OFF), so
+# MC1-MC4's sets 11-14, and 19, are not Lambert -- and only GWR does MC2's
+# elevation-angle TIG search (GWS).  --lambert-mc turns them on in a capture.
+LAMB_ILOAD_HW = 0xE34E
+LAMBERT_MC_SETS = (11, 12, 13, 14, 19)
 TRIM_TOL_FPS = 0.2
 THC_X_ACC_FPS2 = 1.5 / 6.0
+# Each THC direction's acceleration with DAP A7, PRI, TRANS NORM, as the
+# VGO-nulling holds measured it (mc-run1, 2026-10-08; ft/s^2, the change in
+# VGO over the hold): the checklist's +X figure (0.25) proved low, and -Z,
+# whose jets give the most, was 5x it -- a first -Z hold from 0.25 overshot
+# 0.8 ft/s by 3.9.  The holds go on measuring and replace these.
+THC_ACC_SEED = {"+x": 0.43, "-x": 0.42, "+y": 0.44, "-y": 0.38, "+z": 0.65, "-z": 1.22}
 
 
 def unix(when):
@@ -455,7 +518,9 @@ class PassMemory(object):
     def svec(self, a): return [self.sp(a + 2 * i) for i in range(3)]
 
     def check(self):
-        return self.hw(self.A["LAMB_ILOAD"], 11) == [1] * 10 + [0]
+        # sets 1-10 ON (sets 11-40 OFF on the tape, but --lambert-mc turns
+        # some on in the captures it resumes from)
+        return self.hw(self.A["LAMB_ILOAD"], 10) == [1] * 10
 
     def iload(self, k):
         i = k - 1
@@ -509,14 +574,28 @@ class StarTrackerNav(object):
         self.play(script, name)
         self.script_done(name, timeout)
 
-    def strknav(self):
+    def strknav(self, again=False, until_gmt=None):
+        """[10A].  again: the pass after Ti (POST Ti NAV [16A], p. 4-16:
+        "IF SV SEL = FLTR: FLTR TO PROP - ITEM 8", then STAR TRACKER NAV
+        [10A] once in -Z TGT TRK attitude), which starts by putting SV SEL
+        back to PROP -- [10A]'s "SV SEL PROP" -- as the first pass found it.
+        until_gmt: the pass gives up waiting for convergence then (the next
+        burn's targeting comes first)."""
         if self.a.no_strk:
             self.say("STRKNAV: --no-strk, no star tracker pass (the M1 baseline)")
             return
         w = self.strk_watch()
         w.wait_ready(60)
-        self.say("STAR TRACKER NAV [10A] at Ti %+.1f min; before it: %s"
-                 % ((self.truth()["gmt"] - self.ti_gmt) / 60.0, w.summary()))
+        self.say("STAR TRACKER NAV [10A]%s at Ti %+.1f min; before it: %s"
+                 % (" (after Ti)" if again else "", (self.truth()["gmt"] - self.ti_gmt) / 60.0, w.summary()))
+        if again and w.sv_sel_bit() == 1:
+            # SV SEL toggles (GKVREL case 14), FLTR TO PROP copies (case 8)
+            self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                           "+5     keys ITEM 8 EXEC\n"
+                           "+4     keys ITEM 4 EXEC\n", "strk-fltr-to-prop")
+            self.wait_sim(8)
+            self.say("POST Ti NAV [16A]: FLTR TO PROP - ITEM 8, SV SEL - ITEM 4 (PROP): bit %s; %s"
+                     % (w.sv_sel_bit(), w.summary()))
         sv_prop = w.sv_sel_bit()
         # 1. CONFIG FOR STRK NAV.  DAP A/AUTO/VERN is TRACK's.  The IMU for
         # deselect is MCC's call ("if no comm, use IMU 1"): IMU 1.
@@ -575,13 +654,19 @@ class StarTrackerNav(object):
         self.strk_keys("+1     keys SPEC 3 3 PRO\n"
                        "+5     keys ITEM 2 3 EXEC\n", "strk-auto-angles")
         acc0 = w.accepts()
+        self.pass_acc0 = acc0
         self.strk_wait(lambda: w.accepts()[0] > acc0[0] or w.accepts()[1] > acc0[1], 120)
         self.say("STRK: AUTO Angles; 1st SV UPDATE POS %s kft; %s" % (_f(w.get("CGNV_R_MEAS_RSS")), w.summary()))
         # "When SV UPDATE POS < 1.0 and Angle ACPT > 9: SV SEL - ITEM 4 (FLTR)"
-        ok = self.strk_wait(lambda: min(w.accepts()) > 9 and (w.get("CGNV_R_MEAS_RSS") or 9e9) < 1.0, 900)
+        # -- the marks of this pass: SPEC 33's counts run on from the last
+        limit = 900.0
+        if until_gmt is not None:
+            limit = max(0.0, min(limit, until_gmt - self.truth()["gmt"]))
+        ok = self.strk_wait(lambda: min(w.accepts()[i] - acc0[i] for i in (0, 1)) > 9
+                            and (w.get("CGNV_R_MEAS_RSS") or 9e9) < 1.0, limit)
         if not ok:
-            self.say("STRK: SV UPDATE POS < 1.0 with ACPT > 9 not reached in 15 min; SV SEL left PROP; %s"
-                     % w.summary())
+            self.say("STRK: SV UPDATE POS < 1.0 with ACPT > 9 not reached in %.0f min; SV SEL left PROP; %s"
+                     % (limit / 60.0, w.summary()))
         else:
             self.strk_keys("+1     keys ITEM 4 EXEC\n", "strk-sv-sel-fltr")
             self.wait_sim(8)
@@ -770,6 +855,24 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
         self.ti_unix = unix(TI_TIG)
         self.ti_gmt = gmt_of_unix(self.ti_unix)
         self.ti_met = self.ti_unix - MET_ZERO_UNIX
+        # what the MC phases learn, kept so that --from MC2 (say) goes on
+        # with MC1's TIGs, solutions and THC accelerations
+        self.burns, self.mc_tig = {}, {}
+        try:
+            st = json.load(open(os.path.join(a.logs, "mc-state.json")))
+            self.burns = st.get("burns", {})
+            self.mc_tig = {int(k): v for k, v in st.get("mc_tig", {}).items()}
+            if st.get("thc_acc"):
+                self.thc_acc = st["thc_acc"]
+            if st.get("pass_acc0"):
+                self.pass_acc0 = tuple(st["pass_acc0"])
+        except (OSError, ValueError):
+            pass
+
+    def save_state(self):
+        json.dump({"burns": self.burns, "mc_tig": self.mc_tig, "thc_acc": getattr(self, "thc_acc", None),
+                   "pass_acc0": getattr(self, "pass_acc0", None)},
+                  open(os.path.join(self.a.logs, "mc-state.json"), "w"), indent=1)
 
     def say(self, text):
         print("fly_rndz134: %s" % text, flush=True)
@@ -806,6 +909,10 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
                # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
                # window for that station is running")
                "--rhc", "lh"]
+        if resume and self.a.zero_sensor_bias:
+            self.zero_sensor_bias(resume)
+        if resume and self.a.lambert_mc:
+            self.lambert_mc(resume)
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -822,6 +929,66 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
         self.wait_file(outp, "session commands on port", 180)
         time.sleep(5)
         threading.Thread(target=self.monitor, daemon=True).start()
+
+    def zero_sensor_bias(self, capdir):
+        """--zero-sensor-bias: GLQ_ST_ANGLES_BIAS_INIT set to 0.0 in a
+        capture's memory image -- AN EXPERIMENT, pending Ron's decision on
+        the real I-load (RENDEZVOUS_PLAN.md 5b); the tape is not touched.
+        Only the INIT cells: a capture whose angle set has already come in
+        holds the 1.0 in CGNV_SENSOR_BIAS too, which this does not reach."""
+        p = os.path.join(capdir, "gpc1.mem.bin")
+        m = bytearray(open(p, "rb").read())
+        a = 2 * ST_BIAS_INIT_HW
+        was = struct.unpack(">4H", bytes(m[a:a + 8]))
+        if was == (0, 0, 0, 0):
+            self.say("zero-sensor-bias: %s already holds 0.0, 0.0 at X'%05X'" % (capdir, ST_BIAS_INIT_HW))
+            return
+        if was != IBM_ONE * 2:
+            self.say("zero-sensor-bias: %s holds %s at X'%05X', not this tape's 1.0, 1.0 -- NOT patched (another "
+                     "tape's map?)" % (capdir, " ".join("%04X" % x for x in was), ST_BIAS_INIT_HW))
+            return
+        m[a:a + 8] = bytes(8)
+        open(p, "wb").write(m)
+        self.say("zero-sensor-bias: GLQ_ST_ANGLES_BIAS_INIT 1.0, 1.0 rad -> 0.0, 0.0 at X'%05X' in %s -- an "
+                 "EXPERIMENT pending the I-load decision, not the tape's value" % (ST_BIAS_INIT_HW, capdir))
+        self.bias_zeroed = True
+
+    def lambert_mc(self, capdir):
+        """--lambert-mc: CGZB_LAMB_ILOAD set ON for TGT 11-14 and 19 in a
+        capture's memory image -- AN EXPERIMENT, pending Ron's decision on
+        the flight's I-loads (that the flight's were ON is inferred: MC2's
+        elevation angle only works in GWR); the tape is not touched."""
+        p = os.path.join(capdir, "gpc1.mem.bin")
+        m = bytearray(open(p, "rb").read())
+        was = {}
+        for n in LAMBERT_MC_SETS:
+            a = 2 * (LAMB_ILOAD_HW + n - 1)
+            was[n] = struct.unpack(">H", bytes(m[a:a + 2]))[0]
+            m[a:a + 2] = struct.pack(">H", 1)
+        if struct.unpack(">10H", bytes(m[2 * LAMB_ILOAD_HW:2 * LAMB_ILOAD_HW + 20])) != (1,) * 10:
+            self.say("lambert-mc: %s does not hold sets 1-10 ON at X'%05X' -- NOT patched (another tape's map?)"
+                     % (capdir, LAMB_ILOAD_HW))
+            return
+        open(p, "wb").write(m)
+        self.say("lambert-mc: CGZB_LAMB_ILOAD for TGT %s, was %s, now ON at X'%05X' in %s -- an EXPERIMENT "
+                 "pending the I-load decision, not the tape's value"
+                 % (", ".join(str(n) for n in LAMBERT_MC_SETS), [was[n] for n in LAMBERT_MC_SETS],
+                    LAMB_ILOAD_HW, capdir))
+        self.lambert_patched = True
+
+    def restart_from(self, name):
+        """The simulation ended and started again from one of its own
+        captures (for --zero-sensor-bias on a fresh run: the UPLINK one,
+        patched)."""
+        fly_sts134.crewscript.send_session("quit", self.base)
+        try:
+            self.proc.wait(timeout=180)
+        except subprocess.TimeoutExpired:
+            self.proc.kill()
+            self.proc.wait()
+        self.say("restarting from sts134r-%s" % name)
+        self.start(os.path.join(self.a.logs, "sts134r-" + name))
+        self.wait_sim(20)
 
     def met_now(self):
         return self.truth()["gmt"] - (gmt_of_unix(MET_ZERO_UNIX))
@@ -913,6 +1080,60 @@ class Rendezvous(StarTrackerNav, fly_sts134.Flight):
             self.say("check: " + line)
 
     def snapshot(self, name):
+        if name.upper() in PHASES:
+            self.save_state()
+        return self._snapshot(name)
+
+    def ground_check(self, name, sol):
+        """The onboard solution against the ground's -- the precision
+        Lambert from the truth at COMPUTE T1, standing in for MCC's tracking
+        -- by the final-ground limits Ti uses (DVX 1.3, DVY 1.3, DVZ 1.1
+        ft/s, p. 4-14).  p. 1-3 has MC1-MC4 fly the onboard solution; that
+        presumes converged navigation, which here, without the rendezvous
+        radar, the star tracker's angles alone do not give after a
+        midcourse (RENDEZVOUS_PLAN.md 5c), so with --mc-rule limits (the
+        default) MCC's solution is burned when the onboard one is outside
+        the limits: its EXT DVs keyed on ORBIT MNVR EXEC (TIG, ITEMs 10-13;
+        DVX/Y/Z, ITEMs 19-21) before LOAD.  --mc-rule onboard: always the
+        onboard one, as the book has it.  Returns the keys (or "")."""
+        prop, gnd = sol.get("DISP_DV_LVLH"), (sol.get("lambert") or {}).get("truth")
+        sol["flown"] = "onboard"
+        if sol.get("ALARM_KILL"):
+            # GWR stopped (CGZB_ALARM_KILL; the display's PRED MATCH 999999):
+            # the DVs shown are the previous solution's, and the MNVR display
+            # gets nothing new -- there is no onboard solution to burn
+            if not gnd or self.a.mc_rule != "limits":
+                self.say("%s FINAL: COMPUTE T1 ended in ALARM KILL -- no onboard solution%s; no burn"
+                         % (name, "" if gnd else " and no ground one"))
+                sol["flown"] = "none (ALARM KILL)"
+                return None
+            self.say("%s FINAL: COMPUTE T1 ended in ALARM KILL -- no onboard solution; the ground's %+.2f %+.2f "
+                     "%+.2f ft/s burned as EXT DVs" % (name, *gnd))
+            within = False
+        elif not prop or not gnd:
+            self.say("%s: no ground solution to compare; onboard flown" % name)
+            return ""
+        else:
+            within = None
+        if within is None:
+            diff = [prop[i] - gnd[i] for i in range(3)]
+            within = all(abs(diff[i]) <= lim for i, lim in enumerate((1.3, 1.3, 1.1)))
+            self.say("%s FINAL: onboard (SV SEL %s) %+.2f %+.2f %+.2f, ground %+.2f %+.2f %+.2f ft/s: %s"
+                 % (name, {0: "PROP", 1: "FLTR"}.get(self.strk_watch().sv_sel_bit(), "?"), *prop, *gnd,
+                        "onboard within the limits -- burn onboard" if within else
+                        ("onboard outside the limits -- %s" % ("burn the ground solution's EXT DVs"
+                                                               if self.a.mc_rule == "limits" else
+                                                               "burned anyway (--mc-rule onboard)"))))
+        if within or self.a.mc_rule != "limits":
+            return ""
+        sol["flown"] = "ground"
+        d, h, m_, sx = dhms_f(sol["T1_TIG_MET"])
+        return ("+3     keys ITEM 1 0 + %d + %s + %s + %s EXEC\n"
+                "+4     keys ITEM 1 9 %s %s %s EXEC\n"
+                % (d, " ".join("%d" % h), " ".join("%d" % m_), " ".join("%.1f" % sx),
+                   keys_num(gnd[0], "%.1f"), keys_num(gnd[1], "%.1f"), keys_num(gnd[2], "%.1f")))
+
+    def _snapshot(self, name):
         """A capture, as fly_sts134's -- but one that does not come is not
         the end of the flight: tried twice, then noted and flown on."""
         import shutil
@@ -1093,6 +1314,13 @@ wait crt 1 title 2011/ timeout 600
         self.wait_sim(20)
 
     def rndznav(self):
+        if ((self.a.zero_sensor_bias and not getattr(self, "bias_zeroed", False))
+                or (self.a.lambert_mc and not getattr(self, "lambert_patched", False))):
+            if self.a.attach:
+                self.say("zero-sensor-bias: attached to a running vehicle -- its memory cannot be patched here")
+            else:
+                # the UPLINK capture, just taken, patched and flown on from
+                self.restart_from("uplink")
         # ENABLE RENDEZVOUS NAV [7A]
         self.play("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 1 EXEC\n", "rndz-nav-ena")
         self.script_done("rndz-nav-ena", 120)
@@ -1126,16 +1354,34 @@ wait crt 1 title 2011/ timeout 600
         self.dump_screen("UNIV PTG, TRK")
         self.track_complete("dap-a-vern")
 
-    def track_complete(self, name):
+    def track_complete(self, name, limit=1200.0):
         """[12A] "When MNVR cmplt, DAP: A/AUTO/VERN(ALT)": the -Z axis on the
         ISS, then the verniers hold it."""
         t0 = self.truth()["t"]
+        still = 0
         while True:
             c = self.compare()
             if c and c["minusZ_to_iss_deg"] < 2.0:
                 break
-            if self.truth()["t"] - t0 > 1200:
-                self.say("TRACK: the maneuver did not complete in 20 min")
+            # PASS points -Z where ITS state puts the ISS: with the state
+            # kilofeet off (mc-run2 after MC3: 34 deg) the truth angle never
+            # comes down, so the maneuver is also complete when the vehicle
+            # is no longer maneuvering -- body rate under 0.1 deg/s for ~15 s
+            # (the maneuver rates are A7's 0.2 and B7's 0.5 deg/s; the track
+            # itself turns at about orbital rate, 0.06 deg/s, so "stopped"
+            # at 0.02 never came: mc-run6's MC4 waited 20 min and missed TIG)
+            tru = self.ears.snap()[0]
+            el = self.truth()["t"] - t0
+            if tru and el > 60 and math.degrees(vnorm(tru["w"])) < 0.1:
+                still += 1
+                if still >= 3:
+                    self.say("TRACK: the vehicle has stopped turning with -Z %.2f deg from the ISS (PASS's own "
+                             "state of the ISS is that far off)" % (c or {}).get("minusZ_to_iss_deg", -1))
+                    break
+            else:
+                still = 0
+            if el > limit:
+                self.say("TRACK: the maneuver did not complete in %.0f min" % (limit / 60.0))
                 break
             time.sleep(5)
         self.play("+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n", name)
@@ -1151,67 +1397,143 @@ wait crt 1 title 2011/ timeout 600
                                        os.path.join(self.a.logs, "logs", "snapshot-staging"))
 
     def tgt10(self, label):
-        """TARGET Ti BURN: TGT NO 10; the set checked against the checklist
-        and, where it differs, keyed and LOADed; COMPUTE T1; then the
-        solution, and the states it was computed from, read out of PASS's
-        memory and set beside the independent Lambert.  Each step is checked
-        in memory before the next: an item entry can be lost (one TGT NO 10,
-        keyed five seconds after SPEC 34 was called from UNIV PTG, never
-        arrived, and COMPUTE T1 then solved TGT 1's empty set)."""
+        return self.target(10, label)
+
+    def target(self, n, label, base_met=None):
+        """TARGET <burn>: SPEC 34 TGT NO n; the set checked against the
+        checklist's (TGT_SETS) and, where it differs, keyed and LOADed;
+        COMPUTE T1; then the solution, and the states it was computed from,
+        read out of PASS's memory and set beside the independent Lambert.
+        base_met: first a new BASE TIME (MET s, whole seconds) keyed and
+        LOADed -- "BASETIME = MC2 TIG" for TGT 13 and 14 (p. 4-19), and the
+        slipped MC2's TGT 19.  Each step is checked in memory before the
+        next: an item entry can be lost (one TGT NO 10, keyed five seconds
+        after SPEC 34 was called from UNIV PTG, never arrived, and COMPUTE T1
+        then solved TGT 1's empty set).
+
+        THE T1 TIG OF A SET is an I-load in minutes after BASE TIME
+        (GKQORB case 1: T1 TIG = BASE + 60 T1_ILOAD); keying T1 TIG (items
+        2-5) and LOAD stores T1 TIG - BASE back into it (case 2, step 155),
+        so the set's own T1 survives a later reselection, as an I-load
+        would."""
+        want = TGT_SETS[n]
+        tag = "tgt%d-%s" % (n, label)
+        if n != 10:
+            self.sv_sel_check(tag)
+        if base_met is not None:
+            d, h, m, s_ = dhms(base_met)
+            self.play("+1     keys SPEC 3 4 PRO\n"
+                      "wait crt 1 title /034/ timeout 120\n"
+                      "+3     keys ITEM 2 1 + %d + %s + %s + %s EXEC\n"
+                      "+4     keys ITEM 2 6 EXEC\n"
+                      % (d, " ".join("%d" % h), " ".join("%d" % m), " ".join("%d" % s_)), tag + "-base")
+            self.script_done(tag + "-base", 180)
+            self.wait_sim(5)
         for attempt in range(3):
             self.play("+1     keys SPEC 3 4 PRO\n"
                       "wait crt 1 title /034/ timeout 120\n"
-                      "+3     keys ITEM 1 + 1 0 EXEC\n", "tgt10-%s-%d" % (label, attempt))
-            self.script_done("tgt10-%s-%d" % (label, attempt), 180)
+                      "+3     keys ITEM 1 + %s EXEC\n" % " ".join(str(n)), "%s-%d" % (tag, attempt))
+            self.script_done("%s-%d" % (tag, attempt), 180)
             self.wait_sim(5)
-            mem = self.probe("tgt10-%s" % label)
-            if mem and mem.orbit_tgt()["TGT_NO"] == 10:
+            mem = self.probe(tag)
+            if mem and mem.orbit_tgt()["TGT_NO"] == n:
                 break
-            self.say("TGT NO 10 not taken (attempt %d); keying it again" % (attempt + 1))
+            self.say("TGT NO %d not taken (attempt %d); keying it again" % (n, attempt + 1))
         else:
-            self.say("TGT NO 10 was never taken; no COMPUTE T1 (%s)" % label)
-            return
-        il = mem.iload(10)
-        ok = (abs(il["DT"] - TGT10["DT"]) < 0.05 and abs(il["EL"]) < 1e-6 and abs(il["T1"]) < 1e-6
-              and all(abs(il[k] - TGT10[k]) < 0.005 for k in ("DX", "DY", "DZ")))
-        self.say("TGT 10 as selected (%s): %s -- %s" % (label, il, "as the checklist" if ok else
-                 "NOT the checklist's (DT 76.9, DX -0.9, DY 0, DZ +1.8, EL 0, T1 = BASE); the crew keys "
-                 "the set and LOADs it -- a deviation: the flight's I-loads held it"))
-        if not ok:
-            script = ("+1     keys ITEM 6 + 0 EXEC\n"
-                      "+4     keys ITEM 1 7 %s EXEC\n"
-                      "+4     keys ITEM 1 8 %s %s %s EXEC\n"
-                      "+4     keys ITEM 2 6 EXEC\n"
-                      % (keys_num(TGT10["DT"], "%.1f"), keys_num(TGT10["DX"], "%.2f"),
-                         keys_num(TGT10["DY"], "%.2f"), keys_num(TGT10["DZ"], "%.2f")))
-            self.play(script, "tgt10-set-%s" % label)
-            self.script_done("tgt10-set-%s" % label, 120)
+            self.say("TGT NO %d was never taken; no COMPUTE T1 (%s)" % (n, label))
+            return None
+        ot = mem.orbit_tgt()
+        if base_met is not None:
+            self.say("BASE TIME for TGT %d (%s): keyed MET %03d/%02d:%02d:%02d; PASS has %03d/%02d:%02d:%06.3f"
+                     % (n, label, *dhms(base_met), *dhms_f(ot["BASE_TIME_MET"])))
+        il = mem.iload(n)
+        el_deg = math.degrees(il["EL"])
+        # an elevation-angle set's T1 is GWR's to change: its search puts
+        # BASE TIME and T1 TIG at the time it finds and zeroes the set's T1
+        # I-load (GWRORB step 140) -- the "BASETIME = MC2 TIG" that TGT 13
+        # and 14 then count from -- so a zero there is PASS's, not a lost set
+        t1_ok = abs(il["T1"] - want["T1"]) < 0.01 or (want["EL"] != 0.0 and abs(il["T1"]) < 1e-6
+                                                       and abs(el_deg - want["EL"]) < 0.005)
+        ok = (abs(il["DT"] - want["DT"]) < 0.05 and abs(el_deg - want["EL"]) < 0.005 and t1_ok
+              and all(abs(il[k] - want[k]) < 0.005 for k in ("DX", "DY", "DZ")))
+        self.say("TGT %d as selected (%s): T1 %+.2f min after BASE, EL %.2f deg, DT %.1f, DX %+.2f DY %+.2f "
+                 "DZ %+.2f kft -- %s" % (n, label, il["T1"], el_deg, il["DT"], il["DX"], il["DY"], il["DZ"],
+                                         "as the checklist" if ok else
+                 "NOT the checklist's (T1 %+.2f, EL %.2f, DT %.1f, DX %+.1f DY %+.1f DZ %+.1f); the crew keys the "
+                 "set and LOADs it -- a deviation: the flight's I-loads held it"
+                 % (want["T1"], want["EL"], want["DT"], want["DX"], want["DY"], want["DZ"])))
+        for attempt in range(3):
+            if ok:
+                break
+            t1 = ot["BASE_TIME_MET"] + 60.0 * want["T1"]
+            d, h, m, s_ = dhms(t1)
+            script = ("+1     keys ITEM 2 + %d + %s + %s + %s EXEC\n"
+                      % (d, " ".join("%d" % h), " ".join("%d" % m), " ".join("%d" % s_))
+                      if not t1_ok else "")
+            script += ("+4     keys ITEM 6 %s EXEC\n"
+                       "+4     keys ITEM 1 7 %s EXEC\n"
+                       "+4     keys ITEM 1 8 %s %s %s EXEC\n"
+                       "+4     keys ITEM 2 6 EXEC\n"
+                       % (keys_num(want["EL"], "%.2f"), keys_num(want["DT"], "%.1f"),
+                          keys_num(want["DX"], "%.2f"), keys_num(want["DY"], "%.2f"),
+                          keys_num(want["DZ"], "%.2f")))
+            self.play("+1" + script[2:], "%s-set-%d" % (tag, attempt))
+            self.script_done("%s-set-%d" % (tag, attempt), 120)
             self.wait_sim(5)
-            mem = self.probe("tgt10-loaded-%s" % label)
-            self.say("TGT 10 after LOAD (%s): %s; T1 TIG MET %03d/%02d:%02d:%06.3f"
-                     % (label, mem.iload(10), *dhms_f(mem.orbit_tgt()["T1_TIG_MET"])))
+            mem = self.probe(tag + "-loaded")
+            il = mem.iload(n)
+            el_deg = math.degrees(il["EL"])
+            t1_ok = abs(il["T1"] - want["T1"]) < 0.01 or (want["EL"] != 0.0 and abs(il["T1"]) < 1e-6
+                                                           and abs(el_deg - want["EL"]) < 0.005)
+            ok = (t1_ok and abs(il["DT"] - want["DT"]) < 0.05 and abs(el_deg - want["EL"]) < 0.005
+                  and all(abs(il[k] - want[k]) < 0.005 for k in ("DX", "DY", "DZ")))
+            self.say("TGT %d after LOAD (%s, attempt %d): T1 %+.2f min, EL %.2f, DT %.1f, DX %+.2f DY %+.2f DZ %+.2f; "
+                     "T1 TIG MET %03d/%02d:%02d:%06.3f%s"
+                     % (n, label, attempt + 1, il["T1"], el_deg, il["DT"], il["DX"], il["DY"], il["DZ"],
+                        *dhms_f(mem.orbit_tgt()["T1_TIG_MET"]), "" if ok else " -- an entry was lost; keyed again"))
         before = self.compare()
-        self.play("+1     keys ITEM 2 8 EXEC\n", "compute-t1-%s" % label)
-        self.script_done("compute-t1-%s" % label, 60)
-        for wait in range(10):
-            self.wait_sim(15)
-            mem = self.probe("ti-" + label)
-            busy = mem.hw(0xDE16)[0]                    # CGZB_COMP_QUEUED_ACTIVE_GK3
-            if not busy and struct.unpack(">h", mem.m[2 * 0xDE32:2 * 0xDE32 + 2])[0] == 10:
-                break                                   # CGZV_MAN_TGT_NO: GWA saw it done
-        self.dump_screen("after COMPUTE T1 (%s)" % label)
+        old = mem.orbit_tgt()
+        old_sig = (tuple(old["DISP_DV_LVLH"]), old["DISP_MISS"], old["T1_TIG_MET"], old["T2_TIG_MET"])
+        self.play("+1     keys ITEM 2 8 EXEC\n", "compute-t1-%s" % tag)
+        self.script_done("compute-t1-%s" % tag, 60)
+        for wait in range(16):
+            self.wait_sim(8)
+            mem = self.probe("sol-" + tag)
+            # done when GK3 is no longer queued or active
+            # (CGZB_COMP_QUEUED_ACTIVE_GK3) AND the solution has changed.
+            # CGZV_MAN_TGT_NO is no test (it stayed 11 through every later
+            # Lambert set, mc-run3, and each COMPUTE waited out all its
+            # looks), and the flag alone is not either: mc-run5's TGT 19 was
+            # taken as done 8 s after COMPUTE with MC1's DVs still shown
+            new = mem.orbit_tgt()
+            sig = (tuple(new["DISP_DV_LVLH"]), new["DISP_MISS"], new["T1_TIG_MET"], new["T2_TIG_MET"])
+            if not mem.hw(0xDE16)[0] and (sig != old_sig or
+                                          struct.unpack(">h", mem.m[2 * 0xDE32:2 * 0xDE32 + 2])[0] == n):
+                break
+            if wait == 7 and not mem.hw(0xDE16)[0]:
+                # neither working nor changed after a minute: the ITEM 28
+                # was lost -- keyed again
+                self.say("COMPUTE T1 (TGT %d, %s): nothing changed in a minute; ITEM 28 keyed again" % (n, label))
+                self.play("+1     keys ITEM 2 8 EXEC\n", "compute-t1-%s-again" % tag)
+                self.script_done("compute-t1-%s-again" % tag, 60)
+        else:
+            self.say("COMPUTE T1 (TGT %d, %s): no new solution seen -- the display's is a previous one's" % (n, label))
+        self.dump_screen("after COMPUTE T1 (TGT %d, %s)" % (n, label))
         sol = mem.orbit_tgt()
-        json.dump(sol, open(os.path.join(self.a.logs, "ti-%s.json" % label), "w"), indent=1)
         dv = sol["DISP_DV_LVLH"]
         tig = sol["T1_TIG_MET"]
-        self.say("PASS's COMPUTE T1, TGT %d (%s): T1 TIG MET %03d/%02d:%02d:%06.3f (GMT %.3f), "
+        self.say("PASS's COMPUTE T1, TGT %d (%s): T1 TIG MET %03d/%02d:%02d:%06.3f (GMT %.3f, Ti %+.2f min), "
                  "DT %.2f min, T2 offset %+.3f %+.3f %+.3f kft, EL %.3f deg;\n"
-                 "      DVX %+.2f DVY %+.2f DVZ %+.2f DVT %.2f ft/s  (alarm kill %s, miss %.1f)"
-                 % (sol["TGT_NO"], label, *dhms_f(tig), sol["T1_TIG_GMT"], sol["COMP_PROX_DT"] / 60.0,
+                 "      DVX %+.2f DVY %+.2f DVZ %+.2f DVT %.2f ft/s  (alarm kill %s, miss %.1f; SV SEL %s)"
+                 % (sol["TGT_NO"], label, *dhms_f(tig), sol["T1_TIG_GMT"],
+                    (sol["T1_TIG_GMT"] - self.ti_gmt) / 60.0, sol["COMP_PROX_DT"] / 60.0,
                     *(x / 1000.0 for x in sol["COMP_T2_OFF"]), math.degrees(sol["EL"]),
-                    dv[0], dv[1], dv[2], sol["DV_MAG"], sol["ALARM_KILL"], sol["DISP_MISS"]))
+                    dv[0], dv[1], dv[2], sol["DV_MAG"], sol["ALARM_KILL"], sol["DISP_MISS"],
+                    {0: "PROP", 1: "FLTR"}.get(self.strk_watch().sv_sel_bit(), "?")))
         sol["lambert"] = self.lambert_check(label, before, sol)
-        json.dump(sol, open(os.path.join(self.a.logs, "ti-%s.json" % label), "w"), indent=1)
+        json.dump(sol, open(os.path.join(self.a.logs, "%s.json" % tag), "w"), indent=1)
+        if n == 10:
+            json.dump(sol, open(os.path.join(self.a.logs, "ti-%s.json" % label), "w"), indent=1)
         return sol
 
     def lambert_check(self, label, c, sol):
@@ -1292,6 +1614,7 @@ wait crt 1 title 2011/ timeout 600
         self.script_done("ops202", 300)
         self.say("crew: OPS 202, L OMS, trims, WT %d lb, LOAD" % round(wt))
         sol = self.tgt10("final") or {}
+        self.burns["Ti final"] = sol or None
         # FINAL SOLUTION (p. 4-15 and the burn solution rules, p. 1-3): with
         # no sensor pass there is no FLTR solution; burn PROP if it is within
         # the final-ground limits (DVX 1.3, DVY 1.3, DVZ 1.1 ft/s, p. 4-14) of
@@ -1302,9 +1625,10 @@ wait crt 1 title 2011/ timeout 600
         if prop and gnd:
             diff = [prop[i] - gnd[i] for i in range(3)]
             within = all(abs(diff[i]) <= lim for i, lim in enumerate((1.3, 1.3, 1.1)))
-            self.say("FINAL Ti: PROP %+.2f %+.2f %+.2f, ground %+.2f %+.2f %+.2f ft/s: %s"
-                     % (*prop, *gnd, "PROP within the limits -- burn PROP" if within else
-                        "PROP outside the limits -- burn the ground solution's EXT DVs"))
+            self.say("FINAL Ti: onboard (SV SEL %s) %+.2f %+.2f %+.2f, ground %+.2f %+.2f %+.2f ft/s: %s"
+                     % ({0: "PROP", 1: "FLTR"}.get(self.strk_watch().sv_sel_bit(), "?"), *prop, *gnd,
+                        "onboard within the limits -- burn onboard" if within else
+                        "onboard outside the limits -- burn the ground solution's EXT DVs"))
             if not within:
                 d, h, m_, sx = dhms_f(self.ti_met)
                 keyed = ("+3     keys ITEM 1 0 + %d + %s + %s + %s EXEC\n"
@@ -1391,77 +1715,528 @@ wait crt 1 title 2011/ timeout 600
         return {"sensed": sensed, "oms_s": (b[i + 6], b[i + 13])}
 
     def trim_residuals(self):
-        """At cutoff, "Trim Residuals: ... Orbit: All axes < 0.2 fps" (OMS
-        2/ORBIT OMS BURNS), with the THC, DAP TRANS NORM.  VGO in body axes,
-        as the MNVR display shows it (CGZ123), read from PASS's memory; the
-        THC's directions are the orbiter's (+z down), so each residual is
-        flown in its own sign.  One axis at a time, in RCS BURN's order (CC
-        9-3 step 5: "If VGO Z is neg, Z,X,Y seq; otherwise, X,Y,Z").  Each
-        hold is the residual over the axis's acceleration: +X starts from the
-        checklist's 1.5 fps in 6 s (p. 5-15), and every axis's figure is then
-        replaced by what its last hold actually did to VGO."""
-        acc = {"x": THC_X_ACC_FPS2, "y": THC_X_ACC_FPS2, "z": THC_X_ACC_FPS2}
-        measured = {}
-        prev = None
-        for n in range(10):
-            mem = self.probe("ti-trim-%d" % n)
-            if not mem:
-                self.say("TRIM: no capture; residuals left")
-                return
-            vgo = dict(zip("xyz", mem.svec(mem.A["VGO_BODY"])))
-            if prev:
-                ax, hold, v0 = prev
-                dv = abs(v0 - vgo[ax])
-                if dv > 0.02 and hold > 0:
-                    measured.setdefault(ax, []).append(dv / hold)
-                    acc[ax] = min(max(dv / hold, 0.02), 2.0)
-            if all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
-                self.say("TRIM: residuals VGO %+.2f %+.2f %+.2f ft/s -- all axes < %.1f fps; THC acceleration "
-                         "measured (ft/s^2): %s" % (vgo["x"], vgo["y"], vgo["z"], TRIM_TOL_FPS,
-                                                    {k: ["%.3f" % x for x in v] for k, v in measured.items()}))
-                return
-            order = "zxy" if vgo["z"] < 0 else "xyz"
-            ax = next(a for a in order if abs(vgo[a]) >= TRIM_TOL_FPS)
-            v = vgo[ax]
-            hold = min(max(abs(v) / acc[ax], 0.1), 10.0)
-            self.say("TRIM %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s%s %.2f s (at %.3f ft/s^2)"
-                     % (n, vgo["x"], vgo["y"], vgo["z"], "+" if v > 0 else "-", ax.upper(), hold, acc[ax]))
-            self.play("+1     thc fwd %s%s %.2f\n" % ("+" if v > 0 else "-", ax, hold), "ti-trim-%d" % n)
-            self.script_done("ti-trim-%d" % n, 120)
-            self.wait_sim(hold + 4.0)             # the hold runs on after the script ends
-            prev = (ax, hold, v)
-        self.say("TRIM: residuals not all < %.1f fps after 10 holds" % TRIM_TOL_FPS)
+        return self.null_vgo("ti", 6)
 
-    def coast(self):
-        """After Ti: OPS 201, the -Z target track again ([12A]), and the
-        coast toward the MC4 region, T2 = TIG + 76.9 min; MC1-MC4 are not
-        flown.  Where the truth arrives is logged against TGT 10's aim point
-        (-0.9 kft behind, 1.8 kft below)."""
-        self.play("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title 2011/ timeout 180\n"
-                  "+3     keys ITEM 2 1 EXEC\n"
+    def null_vgo(self, label, passes):
+        """Null VGO with the THC, DAP TRANS NORM: the Ti burn's residuals
+        ("Trim Residuals: ... Orbit: All axes < 0.2 fps", OMS 2/ORBIT OMS
+        BURNS) and the whole of a multi-axis RCS burn (RCS BURN, CC 9-3, step
+        5: "If VGO Z is neg, Z,X,Y seq; otherwise, X,Y,Z.  THC: Trim VGOs <
+        0.2 fps").  VGO is the MNVR display's, body axes (CGZV_VGO, CGZ123),
+        from the format-22 downlist; the THC's directions are the orbiter's
+        (+z down), so each VGO is flown in its own sign.
+
+        ONE CONTINUOUS MANEUVER.  Each pass flies every axis still over 0.2
+        ft/s, in the card's order, back to back in one script -- each hold the
+        VGO over the direction's acceleration (THC_ACC_SEED, then what the
+        last hold did to VGO, kept from burn to burn in self.thc_acc) -- then
+        VGO is read again and the next pass follows at once.  The gaps matter:
+        PASS's navigation (GL5NAV steps 7-9C) sums the sensed velocity over a
+        "maneuver" -- jets fired in every 3.84 s cycle -- and when a cycle
+        passes without jets, a sum under 0.9 ft/s is REMOVED from the state.
+        mc-run1's first MC1 (2026-10-08) nulled one axis at a time with a
+        capture between holds; each hold, 0.2-0.6 ft/s, was its own maneuver,
+        all were removed, and the FLTR state, the burn missing from it, was
+        walked off 8 kft by the marks that followed.  Returns the last VGO."""
+        acc = getattr(self, "thc_acc", None) or dict(THC_ACC_SEED)
+        self.thc_acc = acc
+        w = self.strk_watch()
+        measured = {}
+        count0 = w.get("CGNV_DV_COUNT")
+
+        def read_vgo():
+            v = [w.get("CGZV_VGO$%d" % i) for i in (1, 2, 3)]
+            if all(isinstance(x, float) for x in v):
+                return dict(zip("xyz", v))
+            mem = self.probe("%s-vgo" % label)
+            return dict(zip("xyz", mem.svec(mem.A["VGO_BODY"]))) if mem else None
+
+        vgo = read_vgo()
+        if vgo is None:
+            self.say("VGO NULL (%s): VGO not readable; nothing flown" % label)
+            return None
+        for n in range(passes + 1):
+            if all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
+                break
+            if n == passes:
+                self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f -- not all < %.1f fps after %d passes"
+                         % (label, vgo["x"], vgo["y"], vgo["z"], TRIM_TOL_FPS, passes))
+                break
+            order = "zxy" if vgo["z"] < 0 else "xyz"
+            holds = []
+            for ax in order:
+                v = vgo[ax]
+                if abs(v) < TRIM_TOL_FPS:
+                    continue
+                key = ("+" if v > 0 else "-") + ax
+                holds.append((ax, key, v, min(max(abs(v) / acc[key], 0.1), 12.0)))
+            lines, gap = [], 0.0
+            for ax, key, v, hold in holds:
+                lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
+                gap = hold + 0.3
+            self.say("VGO NULL (%s) pass %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s"
+                     % (label, n, vgo["x"], vgo["y"], vgo["z"],
+                        ", ".join("%s %.2f s (%.3f ft/s^2)" % (k.upper(), h, acc[k]) for _, k, _, h in holds)))
+            name = "%s-null-%d" % (label, n)
+            self.play("\n".join(lines) + "\n", name)
+            self.script_done(name, 120)
+            self.wait_sim(holds[-1][3] + 1.5)       # the last hold runs on after the script ends
+            new = read_vgo() or vgo
+            for ax, key, v, hold in holds:
+                dv = abs(v - new[ax])
+                if dv > 0.03:
+                    measured.setdefault(key, []).append(dv / hold)
+                    acc[key] = min(max(dv / hold, 0.05), 3.0)
+            vgo = new
+        count1 = w.get("CGNV_DV_COUNT")
+        self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f ft/s%s; THC acceleration measured (ft/s^2): %s; PASS's "
+                 "accepted maneuvers (CGNV_DV_COUNT) %s -> %s"
+                 % (label, vgo["x"], vgo["y"], vgo["z"],
+                    " -- all axes < %.1f fps" % TRIM_TOL_FPS if all(abs(v) < TRIM_TOL_FPS for v in vgo.values())
+                    else "", {k: ["%.3f" % x for x in v] for k, v in measured.items()}, count0, count1))
+        return vgo
+
+    TRACK_KEYS = ("+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
                   "+3     keys ITEM 1 7 + 0 EXEC\n"
                   "+3     dap c3 b\n"
                   "+2     dap c3 auto\n"
                   "+2     dap c3 alt\n"
-                  "+3     keys ITEM 1 9 EXEC\n", "post-ti-track")
-        self.script_done("post-ti-track", 300)
+                  "+3     keys ITEM 1 9 EXEC\n")
+
+    def ops201_track(self, name, limit=1200.0):
+        """OPS 201 PRO and the -Z target track again ([12A], [18D]): UNIV
+        PTG TGT ID 1, BODY VECT 3, OM 0, DAP B/AUTO/ALT, TRK; then, the -Z
+        axis on the ISS, DAP A/AUTO/VERN.  The verniers matter: the first
+        M1b run left DAP B/ALT holding the track with the primaries for the
+        whole coast, which [12A] does not, and whose translations move the
+        truth itself."""
+        self.play("+1     keys OPS 2 0 1 PRO\n"
+                  "wait crt 1 title 2011/ timeout 180\n" + self.TRACK_KEYS, name)
+        self.script_done(name, 300)
         self.say("crew: OPS 201, -Z target track")
-        # and, as before Ti, the verniers once the -Z axis is on the ISS: the
-        # first M1b run left DAP B/ALT holding the track with the primaries
-        # for the whole coast, which [12A] does not, and whose translations
-        # move the truth itself
-        self.track_complete("post-ti-dap-a-vern")
+        self.track_complete(name + "-vern", limit)
+
+    def coast(self):
+        """After Ti with --no-mc: OPS 201, the -Z target track again, and the
+        coast toward the MC4 region, T2 = TIG + 76.9 min, MC1-MC4 not flown
+        (the M1b baseline).  Where the truth arrives is logged against TGT
+        10's aim point (-0.9 kft behind, 1.8 kft below)."""
+        self.ops201_track("post-ti-track")
         t2 = self.ti_gmt + TGT10["DT"] * 60.0
         stop = min(t2, self.ti_gmt + self.a.coast_min * 60.0)
-        while self.truth()["gmt"] < stop:
-            time.sleep(30)
+        self.log_rel_until(stop, "coast")
+        self.say("coast: ended at Ti %+.1f min" % ((self.truth()["gmt"] - self.ti_gmt) / 60.0))
+
+    def log_rel_until(self, stop_gmt, what, every=30.0):
+        last = None
+        while self.truth()["gmt"] < stop_gmt:
+            time.sleep(every / max(self.a.rate, 1.0))
             tru, tgt, _ = self.ears.snap()
             if tru and tgt:
-                self.rel_now(tru, tgt, "coast")
-        self.say("coast: ended at Ti %+.1f min" % ((self.truth()["gmt"] - self.ti_gmt) / 60.0))
+                last = self.rel_now(tru, tgt, what)
+        return last
+
+    # --- MC1-MC4 (RENDEZVOUS_PLAN.md, Stage 2) -------------------------------
+    def postti(self):
+        """After the Ti burn (p. 4-16, 4-17): OPS 201 and -Z target track;
+        TARGET MC1 BURN [17A] (Preliminary) "when MNVR to att cmplt"; POST Ti
+        NAV [16A] and STAR TRACKER NAV [10A] again, the pass running on until
+        MC1's final targeting; [17A] (Intermediate) "when NAV converged".
+        --no-mc: the old COAST instead."""
+        if self.a.no_mc:
+            self.coast()
+            return
+        self.ops201_track("post-ti-track")
+        self.mc_tig[11] = self.ti_gmt + TGT_SETS[11]["T1"] * 60.0
+        self.say("== TARGET MC1 BURN [17A] (preliminary), Ti %+.1f min" % self.ti_min())
+        self.burns["MC1 preliminary"] = self.target(11, "preliminary")
+        self.strknav(again=True, until_gmt=self.mc_tig[11] - 9 * 60.0)
+        if self.truth()["gmt"] < self.mc_tig[11] - 9 * 60.0:
+            self.say("== TARGET MC1 BURN [17A] (intermediate), Ti %+.1f min" % self.ti_min())
+            self.burns["MC1 intermediate"] = self.target(11, "intermediate")
+
+    def sv_sel_check(self, what):
+        """"CRT \u221aSV SEL correct" (every TARGET block, pp. 4-17 to 4-20):
+        the post-Ti star tracker pass ([10A]) starts on PROP and goes to
+        FLTR "when SV UPDATE POS < 1.0 and Angle ACPT > 9" -- which, the
+        targeting coming soon after Ti, is usually reached between TARGET
+        blocks rather than while [10A] waits; so each block checks it."""
+        w = self.strk_watch()
+        acc0 = getattr(self, "pass_acc0", None)
+        if acc0 is None or w.sv_sel_bit() != 0:
+            return
+        acc = w.accepts()
+        pos = w.get("CGNV_R_MEAS_RSS")
+        if min(acc[i] - acc0[i] for i in (0, 1)) > 9 and isinstance(pos, float) and pos < 1.0:
+            self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                           "+5     keys ITEM 4 EXEC\n", "sv-sel-fltr-%s" % what)
+            self.wait_sim(8)
+            self.say("SV SEL check (%s): converged (ACPT %d/%d this pass, SV UPDATE POS %.3f kft) -- SV SEL - "
+                     "ITEM 4 (FLTR): bit %s" % (what, acc[0] - acc0[0], acc[1] - acc0[1], pos, w.sv_sel_bit()))
+        else:
+            self.say("SV SEL check (%s): PROP, the pass not yet converged (ACPT %d/%d this pass, SV UPDATE POS "
+                     "%s kft)" % (what, acc[0] - acc0[0], acc[1] - acc0[1], _f(pos)))
+
+    def ti_min(self):
+        return (self.truth()["gmt"] - self.ti_gmt) / 60.0
+
+    def mc1(self):
+        """MC1: [17A] (Final) and RCS BURN; then TARGET MC2 [17B]
+        (Preliminary), and MANUAL OUT-OF-PLANE NULL [19A] "when Y = 0"."""
+        if self.a.no_mc:
+            return
+        self.rcs_burn(11, "MC1", self.mc_tig[11])
+        self.say("== TARGET MC2 [17B] (preliminary), Ti %+.1f min" % self.ti_min())
+        sol = self.target(12, "preliminary")
+        self.burns["MC2 preliminary"] = sol
+        self.mc_tig[12] = self.mc2_tig_slip(sol)
+        self.oop_null(self.mc_tig[12] - 14 * 60.0)
+
+    def mc2_tig_slip(self, sol):
+        """MC2's TIG for the schedule: PASS's, within the slip limits of
+        [18B] ("IF TIG CHANGE < -3 OR > +7 MIN": nominal -3 or +7 min, which
+        TGT 19 then flies); the elevation search can land a revolution or
+        more away (mc-run3: Ti + 466.6 min)."""
+        nominal = self.ti_gmt + MC2_TIG_NOMINAL_MIN * 60.0
+        if not sol:
+            return nominal
+        slip = (sol["T1_TIG_GMT"] - nominal) / 60.0
+        if -3.0 <= slip <= 7.0:
+            return sol["T1_TIG_GMT"]
+        self.say("MC2 TIG change %+.2f min from nominal: outside -3/+7 -- scheduled at nominal %+d min"
+                 % (slip, -3 if slip < -3.0 else 7))
+        return nominal + (-3.0 if slip < -3.0 else 7.0) * 60.0
+
+    def mc2(self):
+        """MC2: [18A] (Intermediate) when NAV converged, [18B] (Final) at
+        about TIG - 5 min -- EL 29.07 deg, GWR iterating the TIG; the TIG
+        slip limits (-3, +7 min from nominal: TGT 19, T1 = BASE TIME =
+        nominal -3 or +7); FLTR TO PROP; RCS BURN.  Then END S TRK NAV [18C]
+        (the ISS sets into the Earth's shadow before MC2; nothing more to
+        mark) and [18D] -Z target track."""
+        if self.a.no_mc:
+            return
+        tig = self.mc_tig[12]
+        if self.truth()["gmt"] < tig - 12 * 60.0:
+            self.wait_gmt(tig - 12 * 60.0)
+            self.say("== TARGET MC2 BURN [18A] (intermediate), Ti %+.1f min" % self.ti_min())
+            sol = self.target(12, "intermediate")
+            self.burns["MC2 intermediate"] = sol
+            self.mc_tig[12] = tig = self.mc2_tig_slip(sol)
+
+        def after_final(sol):
+            nominal = self.ti_gmt + MC2_TIG_NOMINAL_MIN * 60.0
+            slip = (sol["T1_TIG_GMT"] - nominal) / 60.0
+            self.say("MC2 TIG change %+.2f min from nominal (Ti + %.2f min)" % (slip, MC2_TIG_NOMINAL_MIN))
+            if -3.0 <= slip <= 7.0:
+                return sol
+            base = nominal + (-3.0 if slip < -3.0 else 7.0) * 60.0
+            self.say("MC2: TIG change outside -3/+7 min -- BASE TIME = nominal %+d min, TGT 19"
+                     % (-3 if slip < -3.0 else 7))
+            return self.target(19, "final", base_met=round(base - gmt_of_unix(MET_ZERO_UNIX)))
+
+        def before_burn(sol):
+            # [18B]: "GNC 33 REL NAV: FLTR TO PROP - ITEM 8 EXEC"
+            self.strk_keys("+1     keys SPEC 3 3 PRO\n"
+                           "+5     keys ITEM 8 EXEC\n"
+                           "+3     keys RESUME\n", "mc2-fltr-to-prop")
+            self.say("[18B]: FLTR TO PROP - ITEM 8")
+        # the slip decided from the latest solution (preliminary or
+        # intermediate): a far elevation search re-seeds the next from the
+        # BASE TIME it moved (GWRORB step 140), so each later TGT 12 COMPUTE
+        # lands further out (mc-run3: +466, +883, +1300 min) -- the final
+        # goes straight to TGT 19 rather than through TGT 12 first
+        last = self.burns.get("MC2 intermediate") or self.burns.get("MC2 preliminary")
+        nominal = self.ti_gmt + MC2_TIG_NOMINAL_MIN * 60.0
+        if last and not -3.0 <= (last["T1_TIG_GMT"] - nominal) / 60.0 <= 7.0:
+            k = -3.0 if last["T1_TIG_GMT"] < nominal else 7.0
+            self.say("MC2: the last solution's TIG change %+.2f min is outside -3/+7 -- [18B] with BASE TIME = "
+                     "nominal %+d min and TGT 19" % ((last["T1_TIG_GMT"] - nominal) / 60.0, k))
+            sol = self.rcs_burn(19, "MC2", nominal + k * 60.0, before_burn=before_burn,
+                                base_met=round(nominal + k * 60.0 - gmt_of_unix(MET_ZERO_UNIX)))
+        else:
+            sol = self.rcs_burn(12, "MC2", tig, after_final=after_final, before_burn=before_burn)
+        self.mc_tig[12] = sol["T1_TIG_GMT"] if sol else tig
+        self.say("== END S TRK NAV [18C], Ti %+.1f min" % self.ti_min())
+        self.strkend()
+
+    def mc_base_met(self):
+        """"BASETIME = MC2 TIG" (TGT 13, 14), as MET to the whole second."""
+        return round(self.mc_tig[12] - gmt_of_unix(MET_ZERO_UNIX))
+
+    def mc3(self):
+        """MC3: [19B] (Preliminary), with BASE TIME = MC2 TIG keyed and
+        LOADed; (Final) "at MC2 TIG + 14:00 (MC3 TIG - 3:00)"; RCS BURN."""
+        if self.a.no_mc:
+            return
+        base = self.mc_base_met()
+        self.mc_tig[13] = base + gmt_of_unix(MET_ZERO_UNIX) + TGT_SETS[13]["T1"] * 60.0
+        if self.truth()["gmt"] < self.mc_tig[13] - 12 * 60.0:
+            self.say("== TARGET MC3 [19B] (preliminary), Ti %+.1f min; BASE TIME = MC2 TIG" % self.ti_min())
+            self.burns["MC3 preliminary"] = self.target(13, "preliminary", base_met=base)
+            self.rcs_burn(13, "MC3", self.mc_tig[13])
+        else:
+            # MC3 comes 17 min after MC2: with MC2's burn, OPS 201 and the
+            # track between, the preliminary is dropped when the final is due
+            self.say("MC3: no time for the preliminary (Ti %+.1f, TIG Ti %+.1f min); BASE TIME = MC2 TIG "
+                     "keyed with the final" % (self.ti_min(), (self.mc_tig[13] - self.ti_gmt) / 60.0))
+            self.rcs_burn(13, "MC3", self.mc_tig[13], base_met=base)
+
+    def mc4(self):
+        """MC4: [20A] (Preliminary) and (Final); RCS BURN.  The flight
+        targeted MC4 on radar navigation (LATE RADAR NAV [20E]); with no
+        radar here (Stage 3) it is the star tracker pass's FLTR state,
+        propagated since the ISS set -- a deviation, logged."""
+        if self.a.no_mc:
+            return
+        self.mc_tig[14] = self.mc_base_met() + gmt_of_unix(MET_ZERO_UNIX) + TGT_SETS[14]["T1"] * 60.0
+        self.say("== TARGET MC4 [20A], Ti %+.1f min (no rendezvous radar: FLTR state without radar marks "
+                 "-- a deviation)" % self.ti_min())
+        if self.truth()["gmt"] < self.mc_tig[14] - 12 * 60.0:
+            self.burns["MC4 preliminary"] = self.target(14, "preliminary")
+        else:
+            self.say("MC4: no time for the preliminary (TIG Ti %+.1f min)" % ((self.mc_tig[14] - self.ti_gmt) / 60.0))
+        self.rcs_burn(14, "MC4", self.mc_tig[14])
+
+    def arrival(self):
+        """MC4's T2, TIG + 13 min: "the R-bar, about 600 ft below the ISS".
+        The truth's relative state every 30 s to then, the arrival against
+        TGT 14's aim point (0, 0, +0.6 kft), and the burns' table."""
+        if self.a.no_mc:
+            return
+        t2 = self.mc_tig[14] + TGT_SETS[14]["DT"] * 60.0
+        rel = self.log_rel_until(t2, "arrival", 30.0)
+        if rel is None:                     # T2 already past (a late MC4)
+            tru, tgt, _ = self.ears.snap()
+            rel = self.rel_now(tru, tgt, "arrival") if tru and tgt else None
+        if rel:
+            sys.path.insert(0, os.path.join(YAGPC2, "tools"))
+            import rndz_start
+            self.say("ARRIVAL at MC4 + %.1f min: truth %s; TGT 14 aims at X 0, Y 0, Z +600 ft"
+                     % ((self.truth()["gmt"] - self.mc_tig[14]) / 60.0, rndz_start.fmt_rel(rel)))
+            self.arrival_rel = rel
+        self.burn_table()
+        self.log_rel_until(t2 + 120.0, "after arrival", 30.0)
+
+    def burn_table(self):
+        lines = ["THE BURNS (ft/s, LVLH):",
+                 "  %-22s %-24s %-24s %-24s %s" % ("burn", "PASS (onboard)", "Lambert, truth", "checklist mean +-3s",
+                                                  "PASS within")]
+        for name, sol in self.burns.items():
+            if not sol:
+                lines.append("  %-22s (no solution)" % name)
+                continue
+            dv = sol["DISP_DV_LVLH"]
+            if sol.get("ALARM_KILL"):
+                dv = [float("nan")] * 3          # ALARM KILL: the shown DVs are a previous solution's
+            tr = (sol.get("lambert") or {}).get("truth")
+            disp = MC_DISPERSIONS.get(sol["TGT_NO"] if sol["TGT_NO"] != 19 else 12)
+            within = ("yes" if all(abs(dv[i] - disp[i][0]) <= disp[i][1] for i in range(3)) else "NO") if disp else ""
+            if sol.get("ALARM_KILL"):
+                within = "ALARM KILL"
+            lines.append("  %-22s %+6.2f %+6.2f %+6.2f %-3s %-24s %-24s %s"
+                         % (name, dv[0], dv[1], dv[2], "", ("%+6.2f %+6.2f %+6.2f" % tuple(tr)) if tr else "--",
+                            ("%+.1f(%.1f) %+.1f(%.1f) %+.1f(%.1f)" % (disp[0] + disp[1] + disp[2])) if disp else "",
+                            within))
+            sensed = sol.get("sensed_lvlh")
+            if sensed:
+                lines.append("  %-22s burned the %s solution: truth sensed (LVLH) %+6.2f %+6.2f %+6.2f; VGO left %s"
+                             % ("", sol.get("flown", "onboard"), *sensed, sol.get("vgo_left")))
+        self.say("\n".join(lines))
+        json.dump(self.burns, open(os.path.join(self.a.logs, "burns.json"), "w"), indent=1)
+
+    def rcs_burn(self, n, name, tig_gmt, after_final=None, before_burn=None, base_met=None):
+        """RCS BURN (+X, -X, Multi-axis), CC 9-3, for a midcourse: step 1,
+        OPS 202 PRO, RCS SEL - ITEM 4; step 2, "If onboard computed burn: TIG
+        and TGT PEG 7 Vs per Final solution", the final targeting done in MM
+        202 so that COMPUTE T1 hands its solution to the MNVR display (as the
+        Ti burn's, which found it so), WT, LOAD - ITEM 22, TIMER - ITEM 23;
+        no MNVR (multi-axis: the burn is flown in the -Z track attitude);
+        step 4 at TIG - 0:30, DAP A/AUTO/PRI, DAP TRANS NORM; step 5 at TIG,
+        "If VGO Z is neg, Z,X,Y seq; otherwise, X,Y,Z / THC: Trim VGOs < 0.2
+        fps" (null_vgo), then DAP ALT, DAP TRANS PULSE/PULSE/PULSE, OPS 201
+        PRO; steps 6-7, the -Z track and DAP A/AUTO/VERN.  FLT CNTLR PWR is
+        not modelled.  The burn solution rules (p. 1-3): MC1-MC4 fly the
+        onboard solution; RCS multi-axis below 4 ft/s."""
+        # the final targeting -- TGT NO, the set checked, COMPUTE T1, each
+        # step confirmed in a capture -- takes 3-6 min of vehicle time at
+        # rate 2, and a slipped MC2 two targetings
+        lead = 8 * 60.0
+        if self.truth()["gmt"] < tig_gmt - lead:
+            self.wait_gmt(tig_gmt - lead)
+        self.say("== %s: RCS BURN, Ti %+.1f min (TIG Ti %+.2f min)"
+                 % (name, self.ti_min(), (tig_gmt - self.ti_gmt) / 60.0))
+        wt = self.orbiter_lb()
+        wtk = "+4     keys ITEM 9 + %s EXEC\n" % " ".join("%d" % round(wt))
+        self.play("+1     keys OPS 2 0 2 PRO\n"
+                  "wait crt 1 title 2021/ timeout 180\n"
+                  "+3     keys ITEM 4 EXEC\n" + wtk, name.lower() + "-ops202")
+        self.script_done(name.lower() + "-ops202", 300)
+        self.say("crew: OPS 202, RCS SEL, WT %d lb" % round(wt))
+        sol = self.target(n, "final", base_met=base_met)
+        if sol and after_final:
+            sol = after_final(sol) or sol
+        if sol and sol["T1_TIG_GMT"] < self.truth()["gmt"] + 45.0:
+            # mc-run2's MC4: its TIG passed while the -Z track waited, and
+            # GWR then solved from the minimum TIG over a transfer of -0.6
+            # min (52 ft/s)
+            self.say("%s: TIG Ti %+.2f min is past or too near (now Ti %+.2f) -- no burn"
+                     % (name, (sol["T1_TIG_GMT"] - self.ti_gmt) / 60.0, self.ti_min()))
+            self.burns["%s final" % name] = sol
+            sol["flown"] = "none (TIG passed)"
+            self.ops201_track(name.lower() + "-post")
+            return sol
+        if not sol:
+            self.say("%s: no final solution -- no burn" % name)
+            self.ops201_track(name.lower() + "-post")
+            return None
+        self.burns["%s final" % name] = sol
+        dvt = sol["DV_MAG"]
+        if dvt >= 4.0:
+            self.say("%s: DVT %.2f ft/s -- p. 1-3 would have a +X burn (4-6) or an OMS burn (> 6); flown "
+                     "multi-axis here (a deviation)" % (name, dvt))
+        if before_burn:
+            before_burn(sol)
+        keyed = self.ground_check(name, sol)
+        if keyed is None:
+            self.ops201_track(name.lower() + "-post")
+            return sol
+        self.play("+1     keys RESUME\n"
+                  "wait crt 1 title 2021/ timeout 60\n"
+                  "+3     keys ITEM 4 EXEC\n" + wtk + keyed +
+                  "+3     keys ITEM 2 2 EXEC\n"
+                  "+4     keys ITEM 2 3 EXEC\n", name.lower() + "-load")
+        self.script_done(name.lower() + "-load", 180)
+        tig = sol["T1_TIG_GMT"]
+        mem = self.probe(name.lower() + "-loaded")
+        if mem:
+            self.say("%s LOADed, TIMER: VGO %+.2f %+.2f %+.2f ft/s (body); TIG Ti %+.2f min"
+                     % ((name,) + tuple(mem.svec(mem.A["VGO_BODY"])) + ((tig - self.ti_gmt) / 60.0,)))
+        if self.truth()["gmt"] < tig - 30.0:
+            self.wait_gmt(tig - 30.0)
+        self.play("+1     dap c3 a\n"
+                  "+2     dap c3 auto\n"
+                  "+2     dap c3 pri\n"
+                  "+2     dap c3 x_norm\n"
+                  "+2     dap c3 y_norm\n"
+                  "+2     dap c3 z_norm\n", name.lower() + "-tig30")
+        self.script_done(name.lower() + "-tig30", 60)
+        self.wait_gmt(tig)
+        self.say("%s: TIG" % name)
+        mark = self.probe(name.lower() + "-tig")
+        vgo = self.null_vgo(name.lower(), 6)
+        sol["vgo_left"] = ("%+.2f %+.2f %+.2f" % (vgo["x"], vgo["y"], vgo["z"])) if vgo else None
+        self.wait_sim(5)
+        after = self.probe(name.lower() + "-done")
+        v0 = self.vehdyn_capture(name.lower() + "-tig")
+        v1 = self.vehdyn_capture(name.lower() + "-done")
+        del mark, after
+        tru = self.truth()
+        if v0 and v1 and tru:
+            dv = [(v1["sensed"][i] - v0["sensed"][i]) / FT for i in range(3)]
+            ex, ey, ez = self.lvlh_axes(tru["r"], tru["v"])
+            sol["sensed_lvlh"] = [vdot(dv, e) for e in (ex, ey, ez)]
+            self.say("%s: the truth's sensed delta-V %.2f ft/s, Orbiter LVLH %+.2f %+.2f %+.2f; PASS's "
+                     "solution %+.2f %+.2f %+.2f" % (name, vnorm(dv), *sol["sensed_lvlh"], *sol["DISP_DV_LVLH"]))
+        self.play("+1     dap c3 alt\n"
+                  "+2     dap c3 x_pulse\n"
+                  "+2     dap c3 y_pulse\n"
+                  "+2     dap c3 z_pulse\n", name.lower() + "-post")
+        self.script_done(name.lower() + "-post", 60)
+        # after a midcourse the attitude is already near the track's: 5 min
+        self.ops201_track(name.lower() + "-track", 300.0)
+        return sol
+
+    @staticmethod
+    def lvlh_axes(r, v):
+        """An orbit's LVLH unit vectors (x along, y -orbit normal, z down)."""
+        ez = [-x / vnorm(r) for x in r]
+        h = [r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0]]
+        ey = [-x / vnorm(h) for x in h]
+        ex = [ey[1] * ez[2] - ey[2] * ez[1], ey[2] * ez[0] - ey[0] * ez[2], ey[0] * ez[1] - ey[1] * ez[0]]
+        return ex, ey, ez
+
+    def oop_null(self, deadline_gmt):
+        """MANUAL OUT-OF-PLANE NULL [19A] (p. 4-19): "When Y = 0", from
+        PASS's relative state (SPEC 33's Y; here the FLTR state from the
+        downlist), DAP A/AUTO/PRI, DAP TRANS as reqd (NORM), "THC: Null YDOT"
+        -- one hold along the body axis nearest the orbit normal, for PASS's
+        YDOT over that axis's measured acceleration -- then DAP A/AUTO/ALT
+        and VERN.  One hold, not a loop: in OPS 201 PASS takes no
+        translation under 0.9 ft/s into its state (GL5NAV), so its YDOT does
+        not show the null; the marks bring it in.  The truth's YDOT is
+        logged before and after."""
+        w = self.strk_watch()
+
+        def pass_y():
+            with w.lock:
+                st = w.rel
+            if not st:
+                return None
+            ex, ey, ez = self.lvlh_axes(st["rt"], st["vt"])
+            dr, dv = vsub(st["rf"], st["rt"]), vsub(st["vf"], st["vt"])
+            return st["t"], vdot(dr, ey), vdot(dv, ey), ey
+
+        first = pass_y()
+        if not first:
+            self.say("[19A]: no PASS relative state on the downlist; no out-of-plane null")
+            return
+        sign0 = first[1] > 0
+        self.say("[19A]: waiting for Y = 0 (PASS's FLTR Y %+.0f ft, YDOT %+.3f ft/s) until Ti %+.1f min"
+                 % (first[1], first[2], (deadline_gmt - self.ti_gmt) / 60.0))
+        cur = first
+        while self.truth()["gmt"] < deadline_gmt:
+            time.sleep(4.0 / max(self.a.rate, 1.0))
+            cur = pass_y() or cur
+            if (cur[1] > 0) != sign0:
+                break
+        else:
+            self.say("[19A]: Y did not cross 0 by Ti %+.1f min (Y %+.0f ft, YDOT %+.3f); no null"
+                     % ((deadline_gmt - self.ti_gmt) / 60.0, cur[1], cur[2]))
+            return
+        t, y, ydot, ey = cur
+        tru = self.ears.snap()[0]                       # with the attitude
+        tgt = self.ears.truth_at("target", tru["gmt"])
+        ty = None
+        if tgt:
+            _, tey, _ = self.lvlh_axes([x / FT for x in tgt[0]], [x / FT for x in tgt[1]])
+            ty = vdot(vsub([x / FT for x in tru["v"]], [x / FT for x in tgt[1]]), tey)
+        need = [-ydot * c for c in ey]                       # ft/s, M50
+        comp = [vdot(need, body_axis(tru["q"], k)) for k in range(3)]
+        k = max(range(3), key=lambda i: abs(comp[i]))
+        key = ("+" if comp[k] > 0 else "-") + "xyz"[k]
+        acc = (getattr(self, "thc_acc", None) or THC_ACC_SEED).get(key, THC_ACC_SEED[key])
+        hold = min(max(abs(comp[k]) / acc, 0.1), 10.0)
+        self.say("[19A] at Ti %+.1f min: PASS's Y %+.0f ft, YDOT %+.3f ft/s (truth YDOT %s); body %+.3f %+.3f "
+                 "%+.3f ft/s wanted; THC %s %.2f s (at %.3f ft/s^2)"
+                 % (self.ti_min(), y, ydot, "%+.3f" % ty if ty is not None else "?", *comp, key.upper(), hold, acc))
+        if abs(ydot) < 0.05:
+            self.say("[19A]: YDOT under 0.05 ft/s -- nothing to null")
+            return
+        self.play("+1     dap c3 a\n"
+                  "+2     dap c3 auto\n"
+                  "+2     dap c3 pri\n"
+                  "+2     dap c3 x_norm\n"
+                  "+2     dap c3 y_norm\n"
+                  "+2     dap c3 z_norm\n"
+                  "+2     thc fwd %s %.2f\n" % (key, hold), "oop-null")
+        self.script_done("oop-null", 120)
+        self.wait_sim(hold + 4.0)
+        self.play("+1     dap c3 alt\n"
+                  "+2     dap c3 x_pulse\n"
+                  "+2     dap c3 y_pulse\n"
+                  "+2     dap c3 z_pulse\n"
+                  "+20    dap c3 vern\n", "oop-null-end")
+        self.script_done("oop-null-end", 120)
+        tru = self.truth()
+        tgt = self.ears.truth_at("target", tru["gmt"])
+        if tgt:
+            _, tey, _ = self.lvlh_axes([x / FT for x in tgt[0]], [x / FT for x in tgt[1]])
+            self.say("[19A]: done; truth YDOT now %+.3f ft/s; PASS's %s"
+                     % (vdot(vsub([x / FT for x in tru["v"]], [x / FT for x in tgt[1]]), tey),
+                        "%+.3f" % (pass_y() or (0, 0, float("nan")))[2]))
 
     def rel_now(self, tru, tgt, what):
         """The truth's relative state, in PASS's curvilinear target LVLH."""
@@ -1498,6 +2273,24 @@ def main():
                     "the ISS going into the Earth's shadow at 06:43" % EPOCH)
     ap.add_argument("--no-strk", action="store_true",
                     help="no star tracker pass (STRKNAV, STRKEND do nothing): the M1 baseline")
+    ap.add_argument("--no-mc", action="store_true",
+                    help="after the Ti burn, no MC1-MC4: POSTTI coasts to T2 (--coast-min) and the MC "
+                         "phases do nothing (the M1b baseline)")
+    ap.add_argument("--lambert-mc", action="store_true",
+                    help="AN EXPERIMENT, pending Ron's decision on the flight's I-loads: CGZB_LAMB_ILOAD "
+                         "(this tape: Lambert for TGT 1-10 only, the source's INITIAL) set ON for TGT 11-14 "
+                         "and 19 in the capture the run resumes from (or, on a fresh run, the UPLINK "
+                         "capture), so that MC1-MC4 are Lambert-targeted (GWR) and MC2's 29.07 deg "
+                         "elevation angle sets its TIG; without it they go to the non-Lambert GWG")
+    ap.add_argument("--mc-rule", choices=("limits", "onboard"), default="limits",
+                    help="MC1-MC4: 'limits' (default) burns the onboard solution when it is within the "
+                         "final-ground limits of the ground's (the truth's Lambert, for MCC), else the "
+                         "ground's EXT DVs; 'onboard' always the onboard one (p. 1-3)")
+    ap.add_argument("--zero-sensor-bias", action="store_true",
+                    help="AN EXPERIMENT, pending Ron's decision on the real I-load: GLQ_ST_ANGLES_BIAS_INIT "
+                         "(this tape's 1.0, 1.0 RADIAN, RENDEZVOUS_PLAN.md 5b) set to 0.0 in the capture the "
+                         "run resumes from, or, on a fresh run, in the UPLINK capture, which the run then "
+                         "restarts from before RNDZ NAV ENA.  The tape and volume are untouched")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()

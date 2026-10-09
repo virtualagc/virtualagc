@@ -3,7 +3,10 @@
 Written 2026-10-08. **Status:** the first milestone (M1, and a first try
 at M1b) is built and has flown; see section 5a.  Stage 1's star tracker
 target track is built and has flown to Ti; see section 5b -- with one
-blocker in this tape's I-loads.  Everything else is still a plan.  The plan was written read-only from the repository, the
+blocker in this tape's I-loads.  Stage 2's midcourses MC1-MC4 are built and
+have flown; see section 5c -- with a second I-load question (the Lambert
+flags) and a navigation finding (PASS drops burns under 0.9 ft/s).
+Everything else is still a plan.  The plan was written read-only from the repository, the
 flight source, and the documents listed under Sources.
 
 The goal is to fly STS-134's rendezvous and docking (FD1-FD3) the way the
@@ -499,6 +502,152 @@ nothing here says by what light, so the station is invisible in shadow.
 NCC itself (Stage 2).  The S TRK NAV contingencies (5-8, 5-9) beyond the
 break-track retries.  The IMU deselect is IMU 1 (MCC's call).  The
 solid-state -Y tracker's target suppress.  The 1 rad I-load above.
+
+## 5c. Stage 2 as built: MC1-MC4 (2026-10-08, macOS)
+
+**How to run it** (one line, from a Ti capture; about 50 min at rate 2
+from Ti - 15 min to the arrival):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --from TIBURN --zero-sensor-bias --lambert-mc
+
+with DIR holding `sts134r-ipl`, `sts134r-ti` and `sts134r-strkend` from a
+Stage 1 run (or no `--from`, the whole flight from 06:10).  New phases after
+TIBURN: POSTTI, MC1, MC2, MC3, MC4, ARRIVAL; `--no-mc` gives the old COAST
+instead.  `burns.json` and the THE BURNS table in `rndz-check.log` are the
+record: every PASS solution beside the truth's precision Lambert ("ground")
+and the checklist's MEAN and 3 SIGMA, and what each burn put into the
+truth.  `mc-state.json` carries the TIGs, solutions and THC accelerations
+from phase to phase, so `--from MC2` (say) goes on from a capture.
+
+**What was built (`fly_rndz134.py`).**
+- **The timeline** (pp. 4-16 to 4-21): POST Ti NAV [16A] (FLTR TO PROP) and
+  STAR TRACKER NAV [10A] again after Ti; TARGET MC1 [17A] preliminary,
+  intermediate and final; TARGET MC2 [17B]/[18A]/[18B] with EL 29.07 and
+  the TIG slip limits (-3/+7 min, TGT 19 with BASE TIME = nominal -3 or +7);
+  MANUAL OUT-OF-PLANE NULL [19A] when PASS's Y crosses 0; END S TRK NAV
+  [18C] after MC2; TARGET MC3 [19B] and MC4 [20A] with BASE TIME = MC2 TIG;
+  each block's "SV SEL correct" check, which selects FLTR once the pass has
+  converged (ACPT > 9, SV UPDATE POS < 1.0).
+- **The target sets.** `target(n)` generalises the TGT 10 code: TGT_SETS
+  holds 10-14 and 19 from TARGETING DATA (p. 6-4, the TGT ALTITUDE 210 rows
+  that the timeline prints).  This tape's sets 11-14, 19 are zero, so they
+  are keyed (T1 TIG, EL, DT, offsets) and LOADed, each entry checked in a
+  capture and keyed again if lost (one T1 TIG entry was, in mc-run3).
+- **RCS BURN (CC 9-3)** for a multi-axis midcourse: OPS 202, RCS SEL, the
+  final targeting in MM 202, LOAD, TIMER; DAP A/AUTO/PRI and TRANS NORM at
+  TIG - 30 s; at TIG the VGOs nulled with the THC, Z,X,Y if VGO Z is
+  negative, else X,Y,Z, to < 0.2 ft/s; DAP ALT, PULSE, OPS 201, the -Z
+  track again.  A burn whose TIG has passed is not flown.
+- **The VGO-nulling loop** (also the Ti burn's residual trim) reads VGO from
+  the format-22 downlist (CGZV_VGO, frames 17 and 42), flies every axis
+  back to back in one script, and learns each THC direction's acceleration
+  (DAP A7, PRI, NORM, ft/s^2: +X 0.40-0.54, -X 0.42-0.45, +Y 0.44, -Y
+  0.28-0.38, +Z 0.52-0.73, -Z 1.03-1.22; the checklist's one figure, +X
+  0.25, was low, and a first -Z hold on it overshot 0.8 ft/s by 3.9).
+- **Ground solutions.** `--mc-rule limits` (the default) compares each final
+  onboard solution with the truth's Lambert at the same TIG, by Ti's
+  final-ground limits (1.3, 1.3, 1.1 ft/s), and keys the ground's EXT DVs
+  (ITEMs 10-13, 19-21) when it is outside; `--mc-rule onboard` always burns
+  the onboard one, as p. 1-3 says.
+- **Two run-only I-load experiments**, explicit options, never the tape:
+  `--zero-sensor-bias` (5b's blocker: GLQ_ST_ANGLES_BIAS_INIT 1.0 rad to 0,
+  in the capture resumed from) and `--lambert-mc` (below).  Both await Ron's
+  decision.
+
+**What the runs found** (run DIRs `~/sts134-runs/rendezvous/mc-run1`..`6`).
+
+1. **PASS throws away any burn under 0.9 ft/s.**  GL5NAV (steps 7-9C) sums
+   the IMU-sensed velocity over a "maneuver" -- jets fired in every 3.84 s
+   cycle -- and when a cycle passes without jets removes the sum if it is
+   under 0.9 ft/s (GL5_VEL_THRESH INITIAL(0.9), a constant, not an I-load).
+   The checklist's midcourses are mostly under that: MC1 flew 0.50-0.54
+   ft/s, and PASS's CGNV_DV_COUNT stayed at 1 (the Ti burn) with
+   CGNV_DV_DISP the Ti burn's alone.  mc-run1's first VGO loop nulled one
+   axis at a time with a capture between; each hold (0.2-0.6 ft/s) was its
+   own maneuver and all were removed; the loop now flies the axes back to
+   back, but a whole burn under 0.9 still goes.
+2. **Then the star tracker's angles walk the FLTR state off in range.**
+   With a 0.5 ft/s velocity change missing from the state, the marks that
+   follow (all accepted, residuals 0.00-0.03 deg) fit it with range: FLTR
+   went from 134 ft to 4.3 kft in a minute after MC1 and to 10-11 kft and
+   12 ft/s by MC2 (mc-run2), along the line of sight.  Angles alone do not
+   observe range; the flight had the rendezvous radar (Stage 3) for that,
+   and an MCC "Prox Ops Cov Matrix" uplink and COVAR REINIT after Ti
+   ([16A]), neither modelled.  Hence `--mc-rule limits`.
+3. **This tape's CGZB_LAMB_ILOAD has Lambert only for sets 1-10** (the
+   source's INITIAL(10#ON, 30#OFF)), so GK3 sent TGT 11-14 to the
+   non-Lambert GWG, which ignores the elevation angle (mc-run2: MC2's TIG
+   stayed at its seed, Ti + 49.90 min).  MC2's EL of 29.07 deg is a GWR
+   (GWS) feature, so the flight's I-loads must have had these sets ON;
+   `--lambert-mc` sets 11-14 and 19 ON in the capture resumed from -- an
+   EXPERIMENT pending Ron's decision.
+4. **With Lambert, MC2's elevation search lands revolutions away** from the
+   FLTR state after MC1 (Ti + 466.6 min in the preliminary, + 883 in the
+   intermediate, each search seeded from the BASE TIME the last one moved,
+   GWRORB step 140).  In mc-run2 the truth's elevation passed 29.07 deg at
+   about Ti + 55 min (17.9 deg at Ti + 49.9, 60.7 at Ti + 66.9), inside
+   the slip limits.  The checklist's slip
+   rule then applies, and the driver flies TGT 19 at nominal + 7 min.
+5. **Driver bugs fixed on the way:** COMPUTE T1's completion test
+   (CGZV_MAN_TGT_NO stays 11 after the first Lambert set; the GK3 flag alone
+   accepted MC1's numbers for TGT 19's); a -Z track "complete" that waited
+   20 min because PASS points -Z where its own (wrong) state puts the ISS
+   (now also complete when the vehicle stops turning); MC4 started after its
+   TIG had passed; the MC2 schedule taken from a TIG hours away.
+
+**Results.**  The pieces were flown in a chain of captures, each run
+resuming the last good one: Stage 1's `strk-run2` Ti capture; `mc-run2`
+TIBURN to POSTTI (the Ti burn, now trimmed in one pass); `mc-run3`
+POSTTI and MC1 with `--lambert-mc`; `mc-run7` MC2; `mc-run8` MC3, MC4
+and the arrival.  All with `--zero-sensor-bias --mc-rule limits`, rate 2.
+The THE BURNS table of `mc-run8` (ft/s, LVLH):
+
+| Burn | PASS (onboard) | Lambert from the truth ("ground") | Checklist mean (3 sigma) | Burned (truth sensed) |
+|---|---|---|---|---|
+| Ti final (FLTR) | +9.98 -0.83 +4.10 | +9.79 -0.71 +4.32 | -- | 10.79 ft/s, L OMS 14.4 s; residual -Y nulled to 0.10 |
+| MC1 final (PROP) | -0.08 -0.44 +0.27 | +0.07 +0.13 +0.53 | -0.1 (0.6), -0.1 (0.7), +0.5 (1.2) | onboard: +0.05 -0.40 +0.30 |
+| MC2 final (TGT 19, nominal + 7) | ALARM KILL | -0.05 -0.41 +0.34 | 0.0 (0.4), 0.0 (0.2), +0.9 (2.5) | ground: -0.14 -0.50 +0.24 |
+| MC3 final | ALARM KILL | +0.31 +0.12 +0.32 | +0.9 (1.3), 0.0 (0.5), +1.1 (2.6) | ground: +0.40 +0.01 +0.36 |
+| MC4 final | ALARM KILL | +0.67 -0.01 -1.47 | +1.3 (1.3), -0.1 (0.6), +0.9 (2.2) | ground: +0.65 -0.03 -1.57 |
+
+**Arrival** (TGT 14's T2, MC4 + 13.4 min): the truth **16 ft behind, 11 ft
+out of plane, 551 ft below the ISS**, XD -0.07 YD +0.09 ZD -0.66 ft/s,
+against the aim point 0, 0, +600 ft -- the R-bar, ready for the manual
+phase.  The ground's burns are all within the checklist's 3 sigma except
+MC4's Z (-1.57 against +0.9 +- 2.2: the low side; MC2 was flown 7 min late
+on TGT 19).  PASS's own Lambert solutions after MC1 all ended in ALARM KILL
+(GWY/GWM's Lambert or transfer-time alarm; CGZB_ALARM_KILL, PRED MATCH
+999999) -- every one of them on the FLTR state that the marks had walked off
+after MC1's dropped 0.5 ft/s (item 2: 4.5-11 kft, 6-12 ft/s); MC1's, on
+PROP, was fine.  Why GWR gives up on that state, rather than solving it
+wrongly, is not yet understood.  PASS's navigation at the arrival: FLTR =
+PROP (FLTR TO PROP at [18B]), 1.8 kft and 2.4 ft/s off; PASS's range
+2.4 kft against the truth's 530 ft -- the radar's job.
+
+Earlier runs, kept for the record: `mc-run1` (the per-axis VGO loop: MC1
+dropped, FLTR walked 8 kft; stopped), `mc-run2` (no `--lambert-mc`,
+non-Lambert MC sets, the onboard solution always burned: MC2 +2.46 -0.65
++6.34 ft/s from a FLTR 10 kft off, against the ground's +1.35 -0.51 +4.12;
+MC4's TIG passed during a 20-min track wait), `mc-run3`..`6` (the fixes in
+item 5, one at a time; `mc-run5` flew MC3 and MC4 on ground solutions with
+MC2 not flown and arrived 5 ft behind, 34 out of plane, 161 ft below).
+
+
+**Not yet exercised.**  The one-line command above has not been flown end
+to end in one run: the result is the chain of resumed captures listed under
+Results, each with the code as it then stood.  A fresh run with
+`--zero-sensor-bias` or `--lambert-mc` restarts itself from its UPLINK
+capture to patch it (`restart_from`): written, not yet run.  MANUAL
+OUT-OF-PLANE NULL [19A] never fired: PASS's Y did not cross 0 between MC1
+and MC2 - 14 min in any run.
+
+**Not done.**  The rendezvous radar (Stage 3), on which the flight's MC3-MC4
+navigation stood -- here MC3 and MC4 use the propagated FLTR state or the
+ground's solution.  NIGHTTIME STRK OPS [18E] (the ISS is invisible in the
+Earth's shadow from Ti + 36 min, 08:14 UTC: the last S PRES).  The MCC covariance uplink and COVAR
+REINIT ([16A]).  +X and OMS midcourses (p. 1-3, > 4 ft/s): every MC is flown
+multi-axis.  The burn pad and "Record solution in PAD" beyond the log.  The
+two I-load questions (sensor bias, Lambert flags) are Ron's.
 
 ## 6. The stages
 
