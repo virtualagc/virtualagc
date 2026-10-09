@@ -2151,7 +2151,12 @@ def main():
                 L.start("subtitles",
                         [py, "subtitles.py", "--port-base", str(args.port_base)] + look,
                         HERE, env)
-            deadline = time.time() + 12
+            # Portview loads its textures before its windows appear -- longer
+            # than twelve seconds without a GPU -- and on a held start the
+            # windows are the whole point (hold-test3: pv_aft and pv_cctv "not
+            # on screen"), so a layout naming its views waits for them longer.
+            wait_s = 90 if (args.hold_start and any(r.startswith("pv_") for r in roles_wanted)) else 12
+            deadline = time.time() + wait_s
             while time.time() < deadline:
                 mine = windowLayout.window_ids() - windows_before
                 roles = {w["role"] for w in windowLayout.windows() if w["id"] in mine}

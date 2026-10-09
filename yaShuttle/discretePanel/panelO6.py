@@ -969,6 +969,18 @@ class PanelO6:
         self.may_map = True
         self.layout_path = None
         self._ops_seen = {}            # (major function, OPS) -> last seen
+        # A RESTORED VEHICLE'S OPS, until its displays report their own: held
+        # (simulatePASS --hold-start) the computer is not running, so no
+        # display shows an OPS and only the base panels came up -- the very
+        # windows the hold was for arranging were missing (owner,
+        # 2026-10-09).  From the capture's panel.json, or NSTS_PANEL_OPS
+        # ("GNC,2") for a capture made before it was recorded.
+        self._restored_ops = []
+        env_ops = os.environ.get("NSTS_PANEL_OPS", "")
+        m_env = re.match(r"\s*(GNC|SM|PL)\s*,\s*(\d+)\s*$", env_ops)
+        if m_env:
+            self._restored_ops = [(m_env.group(1), int(m_env.group(2)))]
+        self._real_ops_seen = False
         self._ops_shown = None
 
         # The startup report is printed by start_bus(), not here: --restore
@@ -1327,6 +1339,8 @@ class PanelO6:
             out[name] = dict(v) if isinstance(v, dict) else (
                 list(v) if isinstance(v, list) else v)
         out["strk_door"] = dict(self.strk_door)
+        # the OPS on the displays, for a restore to show their panels at once
+        out["ops"] = sorted([list(k) for k in self._ops_on_screens() if k[1]])
         return out
 
     def restore(self, state):
@@ -1338,6 +1352,8 @@ class PanelO6:
         short one would silently leave the last computers at their defaults
         -- which for mode means HALT.
         """
+        if state.get("ops"):
+            self._restored_ops = [tuple(k) for k in state["ops"]]
         for name in self.SWITCHES:
             if name not in state:
                 continue
@@ -2621,7 +2637,11 @@ class PanelO6:
         now = time.monotonic()
         for key in self._ops_on_screens():
             self._ops_seen[key] = now
+            if key[1]:
+                self._real_ops_seen = True
         ops = sorted(k for k, t in self._ops_seen.items() if now - t <= OPS_HOLD_S)
+        if not self._real_ops_seen and self._restored_ops:
+            ops = sorted(set(ops) | set(self._restored_ops))
         held = ""
         if not any(k[1] for k in ops):
             # Only OPS 0, or nothing: an OPS transition, if a real OPS was

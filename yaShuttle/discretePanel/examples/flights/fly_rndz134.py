@@ -1178,6 +1178,10 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    # announceScreen): SPEC 20's values are checked from the
                    # page itself, and dump_screen shows whole pages
                    NSTS_ANNOUNCE_ROWS="all",
+                   # every rendezvous phase is GNC OPS 2: its panels from the
+                   # start, before the restored computer drives a display
+                   # (a held start's windows to arrange)
+                   NSTS_PANEL_OPS="GNC,2",
                    PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",

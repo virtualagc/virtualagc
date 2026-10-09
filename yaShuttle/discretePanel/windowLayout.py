@@ -474,7 +474,14 @@ PANEL_TITLE = re.compile(r"^([ACFLOR]\d{1,2}[ULR]?)$")
 PANEL_BASE_ROLES = {"panel_o6", "panel_c2", "panel_r11"}   # up from the start
 # portview.py's windows (the views out of the Orbiter's windows), by title.
 PORTVIEW_ROLES = {"CDR/PLT Forward View": "pv_front", "CDR/PLT Overhead View": "pv_up",
-                  "CDR Side View": "pv_left", "PLT Side View": "pv_right"}
+                  "CDR Side View": "pv_left", "PLT Side View": "pv_right",
+                  # the aft flight deck's: its overhead window, the ODS
+                  # centerline camera and the A3 monitor's picture of it --
+                  # missing here, so a layout neither saved nor placed them
+                  # (owner, 2026-10-09)
+                  "Aft Station Overhead View": "pv_aft", "ODS Centerline Camera": "pv_cl",
+                  "A3 MON 1": "pv_cctv",
+                  "A3 MON 1: Centerline Camera": "pv_cctv"}   # its title before 2026-10-09
 
 
 def role_of(pid, title):
