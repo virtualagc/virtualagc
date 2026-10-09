@@ -14493,6 +14493,23 @@ class MedsRunner(object):
                 except (BlockingIOError, OSError):
                     return
                 words = data.decode("utf-8", errors="replace").split()
+                if len(words) == 2 and words[0].lower() == "station" and \
+                        words[1].lower() in ("fwd", "aft", "all"):
+                    # THE MANAGER'S STATION: CRT 4 is the aft flight deck's,
+                    # CRTs 1-3 the forward station's; one station's are shown
+                    st = words[1].lower()
+                    for w in QtWidgets.QApplication.topLevelWidgets():
+                        if not isinstance(w, MDUWindow):
+                            continue
+                        n = re.match(r"crt(\d)$", str(w.lruName).lower())
+                        if not n:
+                            continue
+                        if st == "all" or (int(n.group(1)) == 4) == (st == "aft"):
+                            w.show()
+                        else:
+                            w.hide()
+                    print("meds: station %s" % st)
+                    continue
                 if len(words) != 3 or words[0].lower() != "edgekey":
                     continue
                 lru = self.lrus.get(words[1].lower())

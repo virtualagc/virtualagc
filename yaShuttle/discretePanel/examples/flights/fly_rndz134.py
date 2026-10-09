@@ -1180,14 +1180,14 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    NSTS_ANNOUNCE_ROWS="all",
                    PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
-               "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
+               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", "20000",
                # the commander's station, for the THC that trims the Ti burn's
                # residuals: without a hand-controller window a script's `thc`
                # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
                # window for that station is running")
-               "--rhc", "lh"]
+               "--rhc", self.a.rhc]
         if resume and self.a.zero_sensor_bias:
             self.zero_sensor_bias(resume)
         if resume and self.a.lambert_mc:
@@ -1201,6 +1201,16 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             cmd += ["--rt-factor", "%g" % self.a.rate]
         if not self.a.portview:
             cmd += ["--no-portview"]
+        elif self.a.views:
+            cmd += ["--portview-views", self.a.views]
+        if self.a.hold_start:
+            cmd += ["--hold-start"]
+        if self.a.station != "all":
+            cmd += ["--station", self.a.station]
+        if self.a.input:
+            cmd += ["--input", self.a.input]
+        if self.a.layout:
+            cmd += ["--layout", os.path.abspath(os.path.expanduser(self.a.layout))]
         os.makedirs(self.a.logs, exist_ok=True)
         outp = os.path.join(self.a.logs, "simulatePASS.out")
         if os.path.exists(outp):
@@ -1210,6 +1220,34 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
         self.wait_file(outp, "session commands on port", 180)
+        if self.a.hold_start:
+            # --hold-start: every window up and placed, the vehicle not yet
+            # started -- the person watching arranges the windows, then says go
+            self.wait_file(outp, "HELD:", 180)
+            # Enter here, or the manager's Start (which sends 'go' itself)
+            print("\n*** The windows are up and the vehicle is HELD.  Arrange them, then "
+                  "press Enter here, or Start in the manager. ***", flush=True)
+            interactive = sys.stdin is not None and sys.stdin.isatty()
+            if not interactive:
+                fly_sts134.crewscript.send_session("go", self.base)   # nobody to ask
+            while True:
+                with open(outp, errors="replace") as fh:
+                    if "released: the vehicle is running" in fh.read():
+                        break
+                if not interactive:
+                    time.sleep(1.0)
+                elif os.name == "nt":
+                    import msvcrt
+                    if msvcrt.kbhit() and msvcrt.getwch() in "\r\n":
+                        fly_sts134.crewscript.send_session("go", self.base)
+                    time.sleep(0.2)
+                else:
+                    import select
+                    if select.select([sys.stdin], [], [], 1.0)[0]:
+                        sys.stdin.readline()
+                        fly_sts134.crewscript.send_session("go", self.base)
+            self.wait_file(outp, "released: the vehicle is running", 120)
+            self.say("released by the user; the vehicle is running")
         time.sleep(5)
         threading.Thread(target=self.monitor, daemon=True).start()
         self.cw_start()
@@ -2808,6 +2846,25 @@ def main():
                          "--zero-sensor-bias or --lambert-mc is needed on a fresh run")
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
+    ap.add_argument("--views", default=None, metavar="LIST",
+                    help="with --portview: portview's views, from front, up, left, right, aft, cl "
+                         "(default front)")
+    ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default="lh",
+                    help="the station whose hand controllers are started (default lh, the "
+                         "CDR's; dock_autopilot.py uses aft)")
+    ap.add_argument("--layout", default=None, metavar="FILE",
+                    help="simulatePASS --layout: where to place the windows (a file saved from "
+                         "the manager's LAYOUT row); it wins over the capture's own layout")
+    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default=None,
+                    help="the hand controllers' input (simulatePASS --input): auto uses a "
+                         "joystick if one is plugged in, and then draws no virtual controllers; "
+                         "dock_autopilot.py uses virtual, so the THC's movements can be watched")
+    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+                    help="the flight station whose windows are shown (simulatePASS --station; "
+                         "dock_autopilot.py uses aft)")
+    ap.add_argument("--hold-start", action="store_true",
+                    help="bring the windows up with the vehicle held, and start it when Enter "
+                         "is pressed here -- time to arrange the windows first")
     ap.add_argument("--to", choices=PHASES)
     ap.add_argument("--from", dest="from_", choices=PHASES[1:])
     ap.add_argument("--crts", type=int, default=1)

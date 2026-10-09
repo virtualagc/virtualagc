@@ -8,11 +8,17 @@
  * closing rate and a lateral offset -- through a snapshot, as a restore
  * does -- and runs the clock on:
  *
- *   - INSIDE THE ENVELOPE (0.10 ft/s, 1 in off): CAPTURE; then, after the
- *     damping and the retraction, HARD MATE -- the ring's retracted face
- *     (Zo 460) on the port's face to a millimetre, the axes aligned, the
- *     Orbiter turning with the ISS.  A snapshot taken while mated restores
- *     mated, and stays so.
+ *   - INSIDE THE ENVELOPE (0.10 ft/s, 1 in off): CAPTURE, and the A7L
+ *     lights the cue cards expect.  Nothing retracts by itself: still soft
+ *     docked 8 minutes on.  Then the crew's part (CC 9-11/9-12): POWER ON
+ *     (dampers off, RING ALIGNED), RING IN, READY TO HOOK at 3:15, the hooks
+ *     closing by themselves, INTERF SEALED, HOOKS 1/2 CLOSED -- HARD MATE:
+ *     the ring's retracted face (Zo 460) on the port's face to a
+ *     millimetre, the axes aligned, the Orbiter turning with the ISS.  A
+ *     snapshot taken while mated restores mated, and stays so.
+ *   - THE APDS POWERED OFF (POWER OFF pressed): contact inside the envelope,
+ *     and no capture.
+ *   - LAMP TEST lights the whole STATUS block.
  *   - TOO FAST (0.30 ft/s, over the hardware's 0.20): no capture, and the
  *     ring does not pass through the port's face.
  *   - TOO FAR OFF THE AXIS (6 in, over the 4.2 in requirement): no capture.
@@ -154,6 +160,20 @@ static void place(double gap, double off, double fps) {
     vehdyn_targets_load(tb, nt);
 }
 
+/* A7L: hold a pushbutton for 1.5 s (it acts after a second), then let go. */
+static double run(double *t, double until);
+static void press(double *t, uint16_t pb) {
+    vehdyn_apds_panel(0, pb);
+    run(t, *t + 1.5);
+    vehdyn_apds_panel(0, 0);
+}
+
+static bool lit(int word, uint16_t bit) {
+    uint16_t w[2];
+    vehdyn_apds_lights(w);
+    return (w[word] & bit) != 0;
+}
+
 /* Run the clock on to t (s), in steps of 0.1 s; the least gap seen. */
 static double run(double *t, double until) {
     double least = 1e9, gap, lat, rv[3], pv[3];
@@ -213,13 +233,55 @@ int main(void) {
     run(&t, 15.0);
     check(vehdyn_docked() == 0, "no capture 6 in off the axis", vehdyn_docked(), 0);
 
+    /* THE APDS POWERED OFF: inside the envelope, no capture. */
+    t = 0.0;
+    place(0.3, 1.0 * IN_M, 0.10);
+    press(&t, 0x2000);                                   /* POWER OFF */
+    check(!lit(0, 0x8000), "POWER OFF: the POWER ON light out", 0, 0);
+    run(&t, 15.0);
+    check(vehdyn_docked() == 0, "no capture with the APDS powered off", vehdyn_docked(), 0);
+
+    /* LAMP TEST, with the APDS back on (the snapshot place() goes through
+     * carries the APDS too, so the POWER OFF above stands until undone) */
+    t = 0.0;
+    place(3.0, 0.0, 0.0);
+    press(&t, 0x4000);                                   /* POWER ON */
+    vehdyn_apds_panel(0, 0x8000);
+    run(&t, 0.5);
+    {
+        uint16_t w[2];
+        vehdyn_apds_lights(w);
+        check(w[0] == 0xFFFF && (w[1] & 0xC000) == 0xC000, "LAMP TEST lights the STATUS block", w[0], 0xFFFF);
+    }
+    vehdyn_apds_panel(0, 0);
+    run(&t, 1.0);
+    check(lit(0, 0x8000) && lit(0, 0x2000) && lit(0, 0x1000) && lit(0, 0x0600) && lit(0, 0x0100) &&
+          !lit(0, 0x0020), "docking prep: POWER ON, RING ALIGNED, INITIAL POSITION, HOOKS OPEN, LATCHES CLOSED", 0, 0);
+
     /* INSIDE THE ENVELOPE: 0.10 ft/s, 1 in off. */
     t = 0.0;
     place(0.3, 1.0 * IN_M, 0.10);
     run(&t, 15.0);
     check(vehdyn_docked() == 1, "CAPTURE at 0.10 ft/s, 1 in off", vehdyn_docked(), 1);
-    run(&t, 15.0 + 60.0 + 320.0 + 5.0);
-    check(vehdyn_docked() == 2, "HARD MATE after damping and retraction", vehdyn_docked(), 2);
+    check(lit(0, 0x0020) && !lit(0, 0x0040) && !lit(0, 0x1000),
+          "the CAPTURE light; INITIAL CONTACT and RING INITIAL POSITION out", 0, 0);
+    run(&t, 15.0 + 60.0);
+    check(!lit(0, 0x2000), "the dampers on: RING ALIGNED not lit", 0, 0);
+    run(&t, 15.0 + 480.0);
+    check(vehdyn_docked() == 1, "still soft docked 8 min on: the retraction is the crew's", vehdyn_docked(), 1);
+    press(&t, 0x4000);                                   /* POWER ON: dampers off */
+    run(&t, t + 2.0);
+    check(lit(0, 0x2000), "POWER ON (dampers off): RING ALIGNED", 0, 0);
+    press(&t, 0x0800);                                   /* RING IN */
+    double t0 = t;
+    run(&t, t0 + 190.0);
+    check(!lit(0, 0x0008), "no READY TO HOOK before 3:15", 0, 0);
+    run(&t, t0 + 200.0);
+    check(lit(0, 0x0008) && !lit(0, 0x0400), "READY TO HOOK at 3:15, the hooks starting", 0, 0);
+    run(&t, t0 + 196.0 + 100.0);
+    check(lit(0, 0x0004) && vehdyn_docked() == 1, "INTERF SEALED at 1:30, the hooks still closing", 0, 0);
+    run(&t, t0 + 196.0 + 145.0);
+    check(vehdyn_docked() == 2 && lit(0, 0x0003), "HARD MATE: HOOKS 1, 2 CLOSED at 2:20", vehdyn_docked(), 2);
     geometry(460.0, &gap, &lat, rv, pv);
     check(fabs(gap) < 1e-3, "retracted ring face on the port's face, along the axis (m)", gap, 0.0);
     check(lat < 1e-3, "and on its axis (m)", lat, 0.0);

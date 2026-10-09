@@ -2438,14 +2438,14 @@ void vehdyn_targets_load(const double *b, int n) {
  *                  is a piloting rule, not the hardware's reach.  4 deg is
  *                  this model's choice.
  *
- * INSIDE IT, CAPTURE: the latches hold, and from then on the Orbiter moves
- * with the vehicle -- placed off it each step, its rates the vehicle's --
- * held at the pose it captured in for DAMP_S (dampers on; motion damped by
- * about 60 s, SCOM p682, APAS p10), then drawn in over RETRACT_S to the
- * hard-mated pose: the ring at Zo 460 on the port's face, the axes aligned
- * and the Orbiter's +X along the port's "up" (ring in to READY TO HOOK ~3
- * min, hooks ~2:20: RNDZ p310, SCOM p681-683).  The crew's APDS commands
- * are not modelled: the sequence runs by itself.  The stack's motion is the
+ * INSIDE IT, CAPTURE -- if the APDS is ready: powered, its capture latches
+ * cocked, its hooks open and its ring at the initial position (THE APDS,
+ * below).  From then on the Orbiter moves with the vehicle -- placed off it
+ * each step, its rates the vehicle's -- and its pose is the APDS's: the
+ * misalignment it captured with damps out once the dampers come on, and the
+ * ring's own travel, which the crew commands from panel A7L, draws it in to
+ * the hard-mated pose -- the ring at Zo 460 on the port's face, the axes
+ * aligned and the Orbiter's +X along the port's "up".  The stack's motion is the
  * vehicle's own -- its mass is not known here, so the Orbiter's momentum at
  * capture (0.1 ft/s against some 400 t) is not shared with it, and jets
  * fired while docked move nothing (the checklist has the DAP in free drift).
@@ -2464,15 +2464,13 @@ void vehdyn_targets_load(const double *b, int n) {
 #define CLOSE_SPEC_FPS  0.13
 #define LAT_MAX_IN      4.2
 #define ANG_LIM_DEG     4.0
-#define DAMP_S          60.0
-#define RETRACT_S       320.0
 enum { DOCK_FREE, DOCK_CAPTURED };
 static struct {
     int state;
     int k;                        /* the vehicle */
     double t0;                    /* the clock at capture */
     double pCap[3], qCap[4];      /* the Orbiter's CG and attitude in the vehicle's body, captured */
-    double pHm[3], qHm[4];        /* ... hard-mated */
+    double qHm[4];                /* the aligned attitude in the vehicle's body (the hard mate's) */
     bool touching;                /* in an uncaptured contact: logged once */
     bool mated;                   /* hard mate reached: logged once */
     int contacts;                 /* contacts made, captured or not, since the reset or restore */
@@ -2540,24 +2538,305 @@ static void quat_nlerp(const double a[4], const double b[4], double f, double o[
     for (int i = 0; i < 4; i++) o[i] /= n;
 }
 
-/* Captured: the Orbiter placed off the vehicle, its pose drawn from the
- * captured one to the hard-mated one after the damping. */
+/* ---------------------------------------------------------------------
+ * THE APDS: the docking mechanism, and its control panel A7L.
+ *
+ * The Russian-built Androgynous Peripheral Docking System, run from panel
+ * A7L at the aft flight deck (SCOM p678-684; APAS Reference Guide USA008876
+ * p14-23; the STS-134 docking cue cards, RNDZ p306-310, CC 9-8/9-11/9-12;
+ * ~/workspace/pass-run/rndz/apds-cctv-aft-findings.md).  It is not on a GPC
+ * bus: A7L's switches and pushbuttons reach the mechanism's own control unit,
+ * so here they arrive straight from the panel (vehdyn_apds_panel) and its 18
+ * status lights go straight back (vehdyn_apds_lights).
+ *
+ * WHAT IS MODELLED.  POWER ON / POWER OFF.  APDS CIRC PROT OFF, which
+ * enables one protected command (RING OUT, OPEN HOOKS, OPEN LATCHES) and is
+ * used up by it.  The ring's travel on its drive: RING IN / RING OUT at the
+ * rate the card times (initial position to READY TO HOOK in 3:15), stopped by
+ * POWER ON or POWER OFF, at its limits, and 20 s after the hooks start.  At
+ * contact INITIAL CONTACT lights, and a second later -- the capture latches
+ * closing -- CAPTURE, if the APDS was ready: powered, latches cocked, hooks
+ * open, ring at the initial position.  Dampers on 5 s after capture until
+ * POWER ON (or POWER OFF, or their 5-minute limit); while they are on the
+ * captured misalignment damps out (time constant 15 s, "motion damped by
+ * about 60 s"), and RING ALIGNED lights again when it has.  READY TO HOOK at
+ * the end of the RING IN travel; the hooks then close by themselves (or on
+ * CLOSE HOOKS): INTERF SEALED at 1:30, HOOKS 1/2 CLOSED at 2:20 -- the hard
+ * mate, the ring drawn in to Zo 460.  OPEN LATCHES (5 s), FIXER OFF, LAMP
+ * TEST.  A pushbutton acts when it has been held a second ("two fingers for
+ * two seconds", SCOM p684).
+ *
+ * NOT MODELLED: the pyros and their commands (logged), UNDOCKING, the heater
+ * and DCU switches beyond their positions, the ring's load-relief travel
+ * after the hooks close (the stack is rigid then; the ring's own position
+ * still drives its lights), and the forces the ring transmits.
+ *
+ * A VEHICLE THAT HAS NEVER HEARD FROM A7L is in the docking-prep state the
+ * crew left it in before the approach (RNDZ p255: CONTROL PANEL POWER and
+ * APDS POWER on, POWER ON pressed, the ring at its initial position): the
+ * captures this model meets were all made before it existed. */
+#define APDS_ZO_FORWARD   480.0
+#define APDS_ZO_INITIAL   ODS_ZO_READY
+#define APDS_ZO_HOOK      461.0       /* READY TO HOOK: the faces about an inch apart (PETAL POS BASE ~7 %) */
+#define APDS_ZO_FINAL     ODS_ZO_MATED
+#define APDS_RING_IPS     ((APDS_ZO_INITIAL - APDS_ZO_HOOK) / 195.0)    /* RING IN to READY TO HOOK in 3:15 */
+#define APDS_PB_HOLD_S    1.0
+#define APDS_HOOK_S       140.0
+#define APDS_SEAL_S       90.0
+#define APDS_DAMP_DELAY_S 5.0
+#define APDS_DAMP_MAX_S   300.0
+#define APDS_ALIGN_TAU_S  15.0
+/* A7L's switches (vehdyn_apds_panel's first word) */
+#define APDS_SW_CPP       0xE000u     /* CONTROL PANEL POWER A B C */
+#define APDS_SW_DS_A      0x0200u     /* APDS POWER A DS, B DS, C DS */
+#define APDS_SW_DS_B      0x0100u
+#define APDS_SW_DS_C      0x0080u
+#define APDS_SW_DS        0x0380u
+#define APDS_SW_PYRO_A    0x0040u
+#define APDS_SW_PYRO_B    0x0020u
+#define APDS_SW_PYRO_C    0x0010u
+/* its pushbuttons (the second word) */
+#define APDS_PB_LAMP_TEST     0x8000u
+#define APDS_PB_POWER_ON      0x4000u
+#define APDS_PB_POWER_OFF     0x2000u
+#define APDS_PB_RING_OUT      0x1000u
+#define APDS_PB_RING_IN       0x0800u
+#define APDS_PB_CIRC_PROT_OFF 0x0400u
+#define APDS_PB_CLOSE_HOOKS   0x0200u
+#define APDS_PB_CLOSE_LATCHES 0x0100u
+#define APDS_PB_FIXER_OFF     0x0080u
+#define APDS_PB_OPEN_HOOKS    0x0040u
+#define APDS_PB_OPEN_LATCHES  0x0020u
+#define APDS_PB_UNDOCKING     0x0010u
+#define APDS_PB_PYRO_PROT_OFF 0x0008u
+#define APDS_PB_PYRO_PROT_ON  0x0004u
+#define APDS_PB_ACT_HOOKS     0x0002u
+#define APDS_PB_PAS_HOOKS     0x0001u
+static const char *const APDS_PB_NAME[16] = {
+    "PAS HOOKS FIRING", "ACT HOOKS FIRING", "PYRO CIRC PROT ON", "PYRO CIRC PROT OFF", "UNDOCKING",
+    "OPEN LATCHES", "OPEN HOOKS", "FIXER OFF", "CLOSE LATCHES", "CLOSE HOOKS", "APDS CIRC PROT OFF",
+    "RING IN", "RING OUT", "POWER OFF", "POWER ON", "LAMP TEST" };
+enum { HOOKS_OPEN, HOOKS_CLOSING, HOOKS_CLOSED };
+static struct {
+    uint16_t sw;                  /* the switches as last heard (or the prep state) */
+    uint16_t pbDown;              /* pushbuttons held now */
+    double pbT[16];               /* when each was pressed; < 0 not held or already acted */
+    bool on;                      /* POWER ON */
+    bool circProtOff;             /* one protected command enabled */
+    bool pyroProtOff;
+    double ring;                  /* the ring face, Zo inches */
+    int drive;                    /* -1 in, +1 out, 0 stopped */
+    double driveStopT;            /* stop the drive then (< 0 none) */
+    bool fixersOff;
+    bool dampers;
+    double dampT0;                /* when the dampers came on */
+    double latchT;                /* OPEN LATCHES started (< 0 none) */
+    bool latchesOpen;
+    int hooks;
+    double hookT0;
+    double contactT;              /* INITIAL CONTACT lit since (< 0 not lit) */
+    double captureT;              /* the CAPTURE light comes on then (< 0 none) */
+    double alpha;                 /* how far the captured misalignment has damped out, 0..1 */
+} apds;
+
+static void apds_prep(void) {
+    memset(&apds, 0, sizeof apds);
+    apds.sw = APDS_SW_CPP | APDS_SW_DS | 0x1C00u;      /* + HEATERS/DCU H1 H2 H3 */
+    apds.on = true;
+    apds.ring = APDS_ZO_INITIAL;
+    apds.driveStopT = apds.latchT = apds.contactT = apds.captureT = -1.0;
+    for (int i = 0; i < 16; i++) apds.pbT[i] = -1.0;
+}
+
+static bool apds_panel_powered(void) { return (apds.sw & APDS_SW_CPP) != 0; }
+
+/* Is the APDS ready to capture at a contact now? */
+static bool apds_ready(const char **why) {
+    if (!apds.on || !(apds.sw & APDS_SW_DS)) { *why = "APDS not powered (POWER ON)"; return false; }
+    if (apds.latchesOpen || apds.latchT >= 0.0) { *why = "capture latches open"; return false; }
+    if (apds.hooks != HOOKS_OPEN) { *why = "hooks not open"; return false; }
+    if (fabs(apds.ring - APDS_ZO_INITIAL) > 0.5) { *why = "ring not at its initial position"; return false; }
+    *why = "";
+    return true;
+}
+
+static void apds_command(int bit, double t) {
+    uint16_t m = (uint16_t)(1u << bit);
+    bool powered = apds_panel_powered() && (apds.sw & APDS_SW_DS);
+    const char *note = "";
+    switch (m) {
+    case APDS_PB_POWER_ON:
+        if (!powered) { note = " -- no power (CONTROL PANEL / APDS POWER switches)"; break; }
+        apds.on = true; apds.drive = 0; apds.driveStopT = -1.0;
+        if (apds.dampers) note = " -- dampers off";
+        apds.dampers = false;
+        break;
+    case APDS_PB_POWER_OFF:
+        apds.on = false; apds.drive = 0; apds.driveStopT = -1.0;
+        apds.dampers = false; apds.fixersOff = false; apds.circProtOff = false;
+        break;
+    case APDS_PB_CIRC_PROT_OFF:
+        if (apds.on) apds.circProtOff = true; else note = " -- APDS off";
+        break;
+    case APDS_PB_RING_IN:
+        if (apds.on) { apds.drive = -1; apds.driveStopT = -1.0; } else note = " -- APDS off";
+        break;
+    case APDS_PB_RING_OUT:
+        if (!apds.on) note = " -- APDS off";
+        else if (!apds.circProtOff) note = " -- protected (APDS CIRC PROT OFF first)";
+        else { apds.drive = +1; apds.driveStopT = -1.0; apds.circProtOff = false; }
+        break;
+    case APDS_PB_CLOSE_HOOKS:
+        if (apds.on && apds.hooks == HOOKS_OPEN) { apds.hooks = HOOKS_CLOSING; apds.hookT0 = t; }
+        break;
+    case APDS_PB_OPEN_HOOKS:
+        if (!apds.on) note = " -- APDS off";
+        else if (!apds.circProtOff) note = " -- protected (APDS CIRC PROT OFF first)";
+        else { note = " -- not modelled (undocking)"; apds.circProtOff = false; }
+        break;
+    case APDS_PB_OPEN_LATCHES:
+        if (!apds.on) note = " -- APDS off";
+        else if (!apds.circProtOff) note = " -- protected (APDS CIRC PROT OFF first)";
+        else if (!apds.latchesOpen && apds.latchT < 0.0) { apds.latchT = t; apds.circProtOff = false; }
+        break;
+    case APDS_PB_CLOSE_LATCHES:
+        if (apds.on) { apds.latchesOpen = false; apds.latchT = -1.0; }
+        break;
+    case APDS_PB_FIXER_OFF:
+        if (apds.on) apds.fixersOff = true;
+        break;
+    case APDS_PB_PYRO_PROT_OFF: apds.pyroProtOff = true; break;
+    case APDS_PB_PYRO_PROT_ON: apds.pyroProtOff = false; break;
+    default: note = " -- not modelled"; break;
+    }
+    fprintf(stderr, "vehdyn: A7L %s at t=%.1f%s\n", APDS_PB_NAME[bit], t, note);
+}
+
+void vehdyn_apds_panel(uint16_t sw, uint16_t pb) {
+    if (sw & 0x0001u) apds.sw = sw & ~0x0001u;          /* bit 0: the switches are real */
+    double t = st.t;
+    for (int b = 0; b < 16; b++) {
+        uint16_t m = (uint16_t)(1u << b);
+        if ((pb & m) && !(apds.pbDown & m)) apds.pbT[b] = t;
+        if (!(pb & m)) apds.pbT[b] = -1.0;
+    }
+    apds.pbDown = pb;
+}
+
+/* The mechanism, a step of dt at the clock st.t (already advanced). */
+static void apds_step(double dt) {
+    double t = st.t;
+    for (int b = 0; b < 16; b++) {
+        if (b == 15) continue;                           /* LAMP TEST acts while held */
+        if (apds.pbT[b] >= 0.0 && t - apds.pbT[b] >= APDS_PB_HOLD_S) {
+            apds.pbT[b] = -1.0;                          /* once a press */
+            apds_command(b, t);
+        }
+    }
+    if (!(apds.sw & APDS_SW_DS) && apds.on) {           /* its power switched off under it */
+        apds.on = false; apds.drive = 0; apds.dampers = false;
+    }
+    if (apds.driveStopT >= 0.0 && t >= apds.driveStopT) { apds.drive = 0; apds.driveStopT = -1.0; }
+    if (apds.drive != 0) {
+        apds.ring += apds.drive * APDS_RING_IPS * dt;
+        if (apds.ring >= APDS_ZO_FORWARD) { apds.ring = APDS_ZO_FORWARD; apds.drive = 0; }
+        if (apds.ring <= APDS_ZO_FINAL) { apds.ring = APDS_ZO_FINAL; apds.drive = 0; }
+        /* READY TO HOOK: the hooks close by themselves, the drive stops 20 s on */
+        if (apds.drive < 0 && apds.hooks == HOOKS_OPEN && dock.state == DOCK_CAPTURED &&
+            apds.ring <= APDS_ZO_HOOK) {
+            apds.ring = APDS_ZO_HOOK;
+            apds.hooks = HOOKS_CLOSING;
+            apds.hookT0 = t;
+            apds.driveStopT = t + 20.0;
+            fprintf(stderr, "vehdyn: APDS READY TO HOOK at t=%.1f: the hooks closing\n", t);
+        }
+    }
+    if (apds.hooks == HOOKS_CLOSING) {
+        double h = t - apds.hookT0;
+        /* the hooks draw the interfaces together, sealed at 1:30 */
+        double f = h / APDS_SEAL_S;
+        if (f > 1.0) f = 1.0;
+        if (apds.ring > APDS_ZO_FINAL && dock.state == DOCK_CAPTURED)
+            apds.ring = APDS_ZO_HOOK - f * (APDS_ZO_HOOK - APDS_ZO_FINAL);
+        if (h >= APDS_HOOK_S) {
+            apds.hooks = HOOKS_CLOSED;
+            if (dock.state == DOCK_CAPTURED && !dock.mated) {
+                dock.mated = true;
+                fprintf(stderr, "vehdyn: HARD MATE with vehicle %d: HOOKS 1, 2 CLOSED, the interface sealed "
+                                "(Zo %.2f)\n", tgt[dock.k].norad, APDS_ZO_FINAL);
+            }
+        }
+    }
+    if (apds.latchT >= 0.0 && t - apds.latchT >= 5.0) { apds.latchesOpen = true; apds.latchT = -1.0; }
+    if (apds.dampers && t - apds.dampT0 >= APDS_DAMP_MAX_S) apds.dampers = false;
+    if (dock.state == DOCK_CAPTURED) {
+        if (!apds.dampers && apds.captureT >= 0.0 && t >= apds.captureT + APDS_DAMP_DELAY_S &&
+            apds.dampT0 < apds.captureT) {
+            apds.dampers = true;
+            apds.dampT0 = t;
+            fprintf(stderr, "vehdyn: APDS dampers ON at t=%.1f\n", t);
+        }
+        if (apds.dampT0 >= apds.captureT && apds.captureT >= 0.0 && apds.alpha < 1.0)
+            apds.alpha += (1.0 - apds.alpha) * (1.0 - exp(-dt / APDS_ALIGN_TAU_S));
+    }
+    if (apds.contactT >= 0.0 && t - apds.contactT > 2.0 && dock.state != DOCK_CAPTURED) apds.contactT = -1.0;
+}
+
+void vehdyn_apds_lights(uint16_t w[2]) {
+    w[0] = w[1] = 0;
+    if (!apds_panel_powered()) return;
+    double t = st.t;
+    bool test = (apds.pbDown & APDS_PB_LAMP_TEST) != 0;
+    bool cap = dock.state == DOCK_CAPTURED && apds.captureT >= 0.0 && t >= apds.captureT;
+    if (apds.on) {
+        w[0] |= 0x8000u;                                                   /* POWER ON */
+        if (apds.circProtOff) w[0] |= 0x4000u;                             /* APDS PROTECT CIRCUIT OFF */
+        if (dock.state == DOCK_CAPTURED ? (apds.alpha > 0.98 && !apds.dampers)
+                                        : apds.contactT < 0.0) w[0] |= 0x2000u;   /* RING ALIGNED */
+        if (dock.state != DOCK_CAPTURED && fabs(apds.ring - APDS_ZO_INITIAL) < 0.05) w[0] |= 0x1000u;
+        if (apds.fixersOff) w[0] |= 0x0800u;                               /* FIXERS OFF */
+        if (apds.hooks == HOOKS_OPEN) w[0] |= 0x0600u;                     /* HOOKS 1, 2 OPEN */
+        if (!apds.latchesOpen) w[0] |= 0x0100u;                            /* LATCHES CLOSED */
+        if (apds.contactT >= 0.0 && !cap) w[0] |= 0x0040u;                 /* INITIAL CONTACT */
+        if (cap) w[0] |= 0x0020u;                                          /* CAPTURE */
+        if (apds.ring >= APDS_ZO_FORWARD - 0.05) w[0] |= 0x0010u;          /* RING FORWARD POSITION */
+        if (dock.state == DOCK_CAPTURED && apds.hooks != HOOKS_OPEN) w[0] |= 0x0008u;  /* READY TO HOOK */
+        if (apds.hooks != HOOKS_OPEN && t - apds.hookT0 >= APDS_SEAL_S) w[0] |= 0x0004u; /* INTERF SEALED */
+        if (apds.hooks == HOOKS_CLOSED) w[0] |= 0x0003u;                   /* HOOKS 1, 2 CLOSED */
+        if (apds.latchesOpen) w[1] |= 0x8000u;                             /* LATCHES OPEN */
+        if (apds.ring <= APDS_ZO_FINAL + 0.05 && apds.latchesOpen) w[1] |= 0x4000u;  /* RING FINAL POSITION */
+    }
+    if (test) { w[0] = 0xFFFFu; w[1] |= 0xC000u | 0x0080u; }
+    if (apds.sw & APDS_SW_DS_A) w[1] |= 0x2000u;                           /* A DS, B DS, C DS */
+    if (apds.sw & APDS_SW_DS_B) w[1] |= 0x1000u;
+    if (apds.sw & APDS_SW_DS_C) w[1] |= 0x0800u;
+    if (apds.sw & APDS_SW_PYRO_A) w[1] |= 0x0400u;                         /* A P, B P, C P */
+    if (apds.sw & APDS_SW_PYRO_B) w[1] |= 0x0200u;
+    if (apds.sw & APDS_SW_PYRO_C) w[1] |= 0x0100u;
+    if (apds.pyroProtOff) w[1] |= 0x0080u;                                 /* PYRO PROTECT CIRCUIT OFF */
+}
+
+/* Captured: the Orbiter placed off the vehicle.  Its pose is the APDS's --
+ * the aligned pose with the ring at its present travel, plus whatever of
+ * the captured misalignment the dampers have not yet taken out. */
 static void dock_hold(void) {
     const struct Tgt *g = &tgt[dock.k];
     double rt[3], vt[3], Rt[3][3], wt[3];
     tgt_now(g, rt, vt);
     tgt_frame(g, rt, vt, Rt, wt);
-    double f = (st.t - dock.t0 - DAMP_S) / RETRACT_S;
-    if (f < 0.0) f = 0.0;
-    if (f > 1.0) f = 1.0;
-    if (f >= 1.0 && !dock.mated) {
-        dock.mated = true;
-        fprintf(stderr, "vehdyn: HARD MATE with vehicle %d: the ring retracted to Zo %.2f, hooks closed\n",
-                g->norad, ODS_ZO_MATED);
-    }
+    double Rh[3][3], y[3], bAl[3], bCap[3], pAl[3], pAl0[3];
+    cross3(g->portAx, g->portUp, y);
+    for (int i = 0; i < 3; i++) { Rh[i][0] = g->portUp[i]; Rh[i][1] = y[i]; Rh[i][2] = g->portAx[i]; }
+    double ringZo = dock.mated ? APDS_ZO_FINAL : apds.ring;
+    ring_body(ringZo, bAl);
+    ring_body(APDS_ZO_INITIAL, bCap);
+    mv(Rh, bAl, pAl);
+    mv(Rh, bCap, pAl0);
+    double a = dock.mated ? 1.0 : apds.alpha;
     double p[3], qr[4], Rr[3][3], Ro[3][3], pm[3], om[3];
-    for (int i = 0; i < 3; i++) p[i] = (1.0 - f) * dock.pCap[i] + f * dock.pHm[i];
-    quat_nlerp(dock.qCap, dock.qHm, f, qr);
+    for (int i = 0; i < 3; i++)
+        p[i] = (g->portB[i] - pAl[i]) + (1.0 - a) * (dock.pCap[i] - (g->portB[i] - pAl0[i]));
+    quat_nlerp(dock.qCap, dock.qHm, a, qr);
     qmat_body(qr, Rr);
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++) Ro[i][j] = Rt[i][0] * Rr[0][j] + Rt[i][1] * Rr[1][j] + Rt[i][2] * Rr[2][j];
@@ -2586,7 +2865,7 @@ static void dock_check(void) {
         for (int i = 0; i < 3; i++) { P[i] = rt[i] + pm[i]; Pv[i] = vt[i] + tmp[i]; }
         double Ro[3][3], b[3], bm[3], wb[3], Q[3], Qv[3];
         qmat_body(st.q, Ro);
-        ring_body(ODS_ZO_READY, b);
+        ring_body(apds.ring, b);
         mv(Ro, b, bm);
         cross3(st.w, b, tmp);
         mv(Ro, tmp, wb);
@@ -2607,15 +2886,20 @@ static void dock_check(void) {
         const double FT = 0.3048;
         double ang[3];
         dock_angles(Ro, a, u, ang);
-        bool ok = closing / FT <= CLOSE_MAX_FPS && lat / 0.0254 <= LAT_MAX_IN &&
-                  fabs(ang[0]) <= ANG_LIM_DEG && fabs(ang[1]) <= ANG_LIM_DEG && fabs(ang[2]) <= ANG_LIM_DEG;
+        bool inside = closing / FT <= CLOSE_MAX_FPS && lat / 0.0254 <= LAT_MAX_IN &&
+                      fabs(ang[0]) <= ANG_LIM_DEG && fabs(ang[1]) <= ANG_LIM_DEG && fabs(ang[2]) <= ANG_LIM_DEG;
+        const char *why = "";
+        bool ready = apds_ready(&why);
+        bool ok = inside && ready;
         if (!dock.touching) {
             dock.contacts++;
+            apds.contactT = st.t;                    /* INITIAL CONTACT */
             fprintf(stderr, "vehdyn: CONTACT with vehicle %d's port: closing %.3f ft/s%s, lateral %.2f in, "
-                            "pitch %+.2f yaw %+.2f roll %+.2f deg -- %s\n",
+                            "pitch %+.2f yaw %+.2f roll %+.2f deg -- %s%s\n",
                     g->norad, closing / FT, closing / FT > CLOSE_SPEC_FPS ? " (over the 0.13 spec)" : "",
                     lat / 0.0254, ang[0], ang[1], ang[2],
-                    ok ? "CAPTURE" : "OUTSIDE THE CAPTURE ENVELOPE: no capture");
+                    ok ? "CAPTURE" : !inside ? "OUTSIDE THE CAPTURE ENVELOPE: no capture" : "NO CAPTURE: ",
+                    ok || !inside ? "" : why);
         }
         if (!ok) {
             /* the contact takes the closing; nothing passes through */
@@ -2623,8 +2907,8 @@ static void dock_check(void) {
             dock.touching = true;
             return;
         }
-        /* CAPTURE: the pose now, and the mated one, in the vehicle's body */
-        double Rr[3][3], dr[3], Rh[3][3], y[3], bh[3], bhv[3];
+        /* CAPTURE: the pose now, and the aligned attitude, in the vehicle's body */
+        double Rr[3][3], dr[3], Rh[3][3], y[3];
         for (int i = 0; i < 3; i++) dr[i] = st.r[i] - rt[i];
         mtv(Rt, dr, dock.pCap);
         for (int i = 0; i < 3; i++)
@@ -2635,10 +2919,10 @@ static void dock_check(void) {
         cross3(g->portAx, g->portUp, y);
         for (int i = 0; i < 3; i++) { Rh[i][0] = g->portUp[i]; Rh[i][1] = y[i]; Rh[i][2] = g->portAx[i]; }
         mat_quat(Rh, dock.qHm);
-        ring_body(ODS_ZO_MATED, bh);
-        mv(Rh, bh, bhv);
-        for (int i = 0; i < 3; i++) dock.pHm[i] = g->portB[i] - bhv[i];
         dock.state = DOCK_CAPTURED;
+        apds.captureT = st.t + 1.0;                  /* the capture latches: CAPTURE a second on */
+        apds.alpha = 0.0;
+        apds.dampT0 = -1.0;
         dock.k = k;
         dock.t0 = st.t;
         dock.mated = false;
@@ -2648,11 +2932,13 @@ static void dock_check(void) {
     }
 }
 
-static void dock_reset(void) { memset(&dock, 0, sizeof dock); }
+static void dock_reset(void) { memset(&dock, 0, sizeof dock); apds_prep(); }
 
 int vehdyn_docked(void) { return dock.state == DOCK_CAPTURED ? (dock.mated ? 2 : 1) : 0; }
 
 int vehdyn_dock_contacts(void) { return dock.contacts; }
+
+double vehdyn_apds_ring(void) { return apds.ring; }
 
 void vehdyn_advance(double sharedUs) {
     if (sharedUs < 0.0) return;
@@ -2723,6 +3009,7 @@ void vehdyn_advance(double sharedUs) {
         double ad0[3], ad1[3];
         phys_drag_accel(&st, ad0);
         phys_step(&st, dt, firing ? f : NULL, firing ? tau : NULL);
+        apds_step(dt);
         bool docked = dock.state == DOCK_CAPTURED;
         if (docked) dock_hold();                  /* moved with the vehicle it is latched to */
         else if (tgtN > 0) dock_check();
@@ -3047,12 +3334,20 @@ int vehdyn_save(double *b, int max) {
     PUT(chuteArmed); PUT(chuteOut); PUT(chuteGone); PUT(chuteOutT < 0.0 ? -1.0 : st.t - chuteOutT);
     PUT(wowMain[0]); PUT(wowMain[1]); PUT(wowNose);
     PUT(brakesOn); PUT(probePos[0]); PUT(probePos[1]);
-    /* the docking: latched or not, to which vehicle, how long ago, the poses */
+    /* the docking and the APDS (a -3 marks this form; times are kept
+     * relative to the clock, -1e9 for none) */
+#define REL(x) ((x) < 0.0 ? -1e9 : (x) - st.t)
+    PUT(-3.0);
     PUT(dock.state); PUT(dock.k); PUT(dock.state == DOCK_CAPTURED ? st.t - dock.t0 : 0.0);
     for (int i = 0; i < 3; i++) PUT(dock.pCap[i]);
     for (int i = 0; i < 4; i++) PUT(dock.qCap[i]);
-    for (int i = 0; i < 3; i++) PUT(dock.pHm[i]);
     for (int i = 0; i < 4; i++) PUT(dock.qHm[i]);
+    PUT(dock.mated); PUT(dock.contacts);
+    PUT(apds.sw); PUT(apds.on); PUT(apds.circProtOff); PUT(apds.pyroProtOff); PUT(apds.ring);
+    PUT(apds.drive); PUT(REL(apds.driveStopT)); PUT(apds.fixersOff); PUT(apds.dampers);
+    PUT(REL(apds.dampT0)); PUT(REL(apds.latchT)); PUT(apds.latchesOpen); PUT(apds.hooks);
+    PUT(apds.hooks == HOOKS_OPEN ? -1e9 : apds.hookT0 - st.t); PUT(REL(apds.captureT)); PUT(apds.alpha);
+#undef REL
 #undef PUT
     return n;
 }
@@ -3104,18 +3399,50 @@ double vehdyn_load(const double *b, int n) {
         if (i + 3 <= n) {
             brakesOn = GET() != 0.0; probePos[0] = GET(); probePos[1] = GET();
         }
-        memset(&dock, 0, sizeof dock);
-        if (i + 17 <= n) {
+        dock_reset();                                /* and the APDS in its docking-prep state */
+        if (i + 33 <= n && b[i] == -3.0) {
+            /* the restored clock starts at 0: a time t then is t - capture now */
+#define ABS(x) ((x) <= -1e8 ? -1.0 : (x))
+            i++;
             dock.state = (int)GET(); dock.k = (int)GET();
-            double ago = GET();
-            dock.t0 = -ago;                          /* the restored clock starts at 0 */
+            dock.t0 = -GET();
             for (int k = 0; k < 3; k++) dock.pCap[k] = GET();
             for (int k = 0; k < 4; k++) dock.qCap[k] = GET();
-            for (int k = 0; k < 3; k++) dock.pHm[k] = GET();
             for (int k = 0; k < 4; k++) dock.qHm[k] = GET();
-            dock.mated = dock.state == DOCK_CAPTURED && ago >= DAMP_S + RETRACT_S;
-            if (dock.state != DOCK_CAPTURED || dock.k < 0 || dock.k >= TGT_MAX) dock.state = DOCK_FREE;
+            dock.mated = GET() != 0.0; dock.contacts = (int)GET();
+            apds.sw = (uint16_t)GET(); apds.on = GET() != 0.0; apds.circProtOff = GET() != 0.0;
+            apds.pyroProtOff = GET() != 0.0; apds.ring = GET();
+            apds.drive = (int)GET(); { double x = GET(); apds.driveStopT = ABS(x); }
+            apds.fixersOff = GET() != 0.0; apds.dampers = GET() != 0.0;
+            { double x = GET(); apds.dampT0 = x <= -1e8 ? -1.0 : x; }
+            { double x = GET(); apds.latchT = ABS(x); }
+            apds.latchesOpen = GET() != 0.0; apds.hooks = (int)GET();
+            { double x = GET(); apds.hookT0 = x <= -1e8 ? 0.0 : x; }
+            { double x = GET(); apds.captureT = x <= -1e8 ? -1.0 : x; }
+            apds.alpha = GET();
+#undef ABS
+        } else if (i + 17 <= n) {
+            /* the first form (2026-10-09, before the APDS): the retraction
+             * ran by itself, 60 s of damping then 320 s */
+            dock.state = (int)GET(); dock.k = (int)GET();
+            double ago = GET();
+            dock.t0 = -ago;
+            for (int k = 0; k < 3; k++) dock.pCap[k] = GET();
+            for (int k = 0; k < 4; k++) dock.qCap[k] = GET();
+            for (int k = 0; k < 3; k++) (void)GET();             /* its hard-mated position */
+            for (int k = 0; k < 4; k++) dock.qHm[k] = GET();
+            if (dock.state == DOCK_CAPTURED) {
+                double f = (ago - 60.0) / 320.0;
+                f = f < 0.0 ? 0.0 : f > 1.0 ? 1.0 : f;
+                dock.mated = f >= 1.0;
+                apds.alpha = 1.0;
+                apds.captureT = -ago;
+                apds.dampT0 = -ago;
+                apds.ring = APDS_ZO_INITIAL - f * (APDS_ZO_INITIAL - APDS_ZO_FINAL);
+                if (dock.mated) { apds.hooks = HOOKS_CLOSED; apds.hookT0 = -ago; }
+            }
         }
+        if (dock.state != DOCK_CAPTURED || dock.k < 0 || dock.k >= TGT_MAX) dock.state = DOCK_FREE;
         if (asc != ASC_NONE) phys_set_drag(0.0, 0.0, 0.0, 0.0);
     }
 #undef GET

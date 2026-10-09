@@ -313,6 +313,11 @@ EYE_FWD = _structural(520.0, 0.0, 470.0)
 #          Handbook Vol 3, SCOM 2.20), looking out along the ring's axis
 #          (body -Z), the top of the picture the nose; a 30 deg field.  The
 #          rendezvous's last legs are flown on it.
+#   cctv:  the same camera as the crew saw it on the aft station's MON 1
+#          (panel A3): the CTVC's own 4:3 NTSC picture at its zoom (40.0 deg
+#          for the corridor, 10.1 for the alignment, 74.4 with none), the
+#          monitor's green crosshair and data, and the CC 9-17 transparency
+#          taped over the screen.  See CCTV below.
 VIEWS = {
     'front': dict(title="CDR/PLT Forward View", fwd=_dir(0, -4.5), up=(0, 0, -1),
                   w=1536, h=768, hfov=FRONT_HFOV, eye=EYE_FWD),
@@ -326,7 +331,35 @@ VIEWS = {
                 w=768, h=768, hfov=SIDE_HFOV, eye=_structural(560.0, 0.0, 470.0)),
     'cl': dict(title="ODS Centerline Camera", fwd=(0, 0, -1), up=(1, 0, 0),
                w=768, h=768, hfov=30.0, eye=_structural(649.0, 0.0, 422.85)),
+    'cctv': dict(title="A3 MON 1: Centerline Camera", fwd=(0, 0, -1), up=(1, 0, 0),
+                 w=768, h=576, hfov=40.0, eye=_structural(649.0, 0.0, 422.85), cctv=True),
 }
+
+# THE AFT MONITOR'S PICTURE (the 'cctv' view): STS-134's docking setup, from
+# the documents gathered in forClaude/docs/apds-cctv-aft-findings.md (B):
+#   - the camera: a CTVC, colour, 3-CCD, NTSC (RS-170A), so 4:3, behind the
+#     ODS hatch window (APAS p4; SCOM p163).  Its fields (GPO p114 Table
+#     3.9-2): full zoom 10.1 x 7.6 deg, the corridor setting 40.0 x 30.8, no
+#     zoom 74.4 x 59.9.  STS-134 docked at 40.0 with the corridor scale and
+#     checked alignment at 10.1 (RNDZ p154).
+#   - set up ALC AVG, GAM BLK STR ON, COLOR BAL SUN (RNDZ p154); the black
+#     stretch's gamma is 2.0 (SCOM p163).  Here: the low end of the picture
+#     lifted by a gamma-2 curve fading out by mid-grey.
+#   - the CTVC's resolution and lens distortion are NOT documented: drawn as
+#     a broadcast NTSC camera, ~480 visible lines and ~330 TV lines of
+#     horizontal resolution (a slight horizontal softness), faint scan
+#     lines, no distortion.  Choices, not data.
+#   - the monitor (A3 MON 1, a 10-inch colour CTVM, MON 1 - CENTERLINE): an
+#     electronic GREEN crosshair drawn by the monitor, green lens data
+#     (zoom/focus/iris) at the top and camera data (ID, pan/tilt, temp) at
+#     the bottom, USCAN ON so the whole frame shows (SCOM p172-173).
+#   - over the screen, a TRANSPARENCY, CC 9-17 "C/L CAMERA CORRIDOR AND
+#     ALIGNMENT" (RNDZ p315): a 10 x 8 grid on the crosshair, axis ticks 1-5
+#     across and 1-3 up, a small centre square, two circles -- the 5 and 8
+#     deg corridors at 40 deg (an inference from the card's scale, not
+#     printed on it).  Fixed to the screen, not the scene; black ink.
+CCTV = dict(zoom=40.0, overlay='corridor')
+CCTV_ZOOMS = {10.1: 7.6, 40.0: 30.8, 74.4: 59.9}         # HFOV -> VFOV, deg (GPO p114)
 
 
 def unit(v):
@@ -692,6 +725,8 @@ class TestFeed(TruthFeed):
         QtCore.QObject.__init__(self)
         self.targets = {}
         self.target_range = target_range
+        self.sight = 'up'                   # the view whose sight line the target is on
+        self.offset = (0.0, 0.0)            # m off it, that view's right and up
         self.approach_from = approach_from
         self.lap_s = lap_s
         self.phase_deg = phase_deg
@@ -745,10 +780,13 @@ class TestFeed(TruthFeed):
         fly-around's."""
         r, v = self._orbit(t)
         C = self._attitude(t)
-        eye = r + C @ np.asarray(VIEWS['up']['eye'], float)
+        sv = VIEWS[self.sight]
+        eye = r + C @ np.asarray(sv['eye'], float)
         if self.mode == 'flyaround':
             return eye + self.target_range * self._flyaround_dir(t, r, v)
-        los = unit(C @ np.asarray(VIEWS['up']['fwd'], float))
+        los = unit(C @ np.asarray(sv['fwd'], float))
+        B = view_basis(sv)                  # camera -> body: right, up, line of sight
+        eye = eye + C @ (B[:, 0] * self.offset[0] + B[:, 1] * self.offset[1])
         aim = np.zeros(3)
         if self.target_id == ISS_NORAD:     # the docking port, not the middle
             z = -unit(r)
@@ -1005,14 +1043,51 @@ PRESENT_FS = """
 out vec4 fragColor;
 uniform sampler2D uHdr, uEarth, uEarthTrans;
 uniform ivec2 uOffset;              // the view's corner in the window (inside its frame)
+uniform int uCctv;                  // 1: the aft monitor's camera picture (see CCTV)
+uniform ivec2 uSize;                // the view, device px
 vec3 toSrgb(vec3 c) {
     c = max(c, 0.0);
     c /= max(1.0, max(c.r, max(c.g, c.b)));    // saturate keeping the hue
     return mix(12.92 * c, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055,
                step(0.0031308, c));
 }
+vec3 scene(ivec2 p) {               // the linear picture at a pixel (as main's below)
+    p = clamp(p, ivec2(0), uSize - 1);
+    vec3 front = texelFetch(uEarth, p, 0).rgb;
+    float sky = dot(front, vec3(0.2126, 0.7152, 0.0722));
+    return texelFetch(uHdr, p, 0).rgb * texelFetch(uEarthTrans, p, 0).rgb
+           * exp(-sky / 0.002) + front;
+}
+vec3 cctv(ivec2 p) {
+    // ~330 TV lines across a 4:3 picture's height: a five-tap horizontal
+    // blur a little under a 640-pixel line's pixel wide; a touch vertically.
+    float s = max(1.0, float(uSize.x) / 640.0);
+    vec3 c = vec3(0.0);
+    float wt[5] = float[](1.0, 4.0, 6.0, 4.0, 1.0);
+    for (int i = -2; i <= 2; i++)
+        c += wt[i + 2] * scene(p + ivec2(int(round(float(i) * s * 0.6)), 0));
+    c /= 16.0;
+    c = mix(c, 0.5 * (scene(p + ivec2(0, 1)) + scene(p - ivec2(0, 1))), 0.15);
+    vec3 o = toSrgb(c);
+    // GAM BLK STR ON: the shadows lifted by a gamma-2 curve, fading out by
+    // mid-grey (SCOM p163).
+    o = mix(o, sqrt(o), 0.6 * (1.0 - smoothstep(0.0, 0.5, o)));
+    // NTSC colour: a little less saturated.
+    float y = dot(o, vec3(0.299, 0.587, 0.114));
+    o = mix(vec3(y), o, 0.88);
+    // ~480 visible lines: a faint line structure where the screen has the
+    // pixels to show it (two or more a line).
+    float per = float(uSize.y) / 480.0;
+    if (per >= 2.0)
+        o *= 0.93 + 0.07 * cos(6.2831853 * float(p.y) / per);
+    return o;
+}
 void main() {
     ivec2 p = ivec2(gl_FragCoord.xy) - uOffset;
+    if (uCctv == 1) {
+        fragColor = vec4(cctv(p), 1.0);
+        return;
+    }
     vec4 fr = texelFetch(uEarth, p, 0);
     vec3 front = fr.rgb;
     // A star or the Milky Way can't show through a daylit sky: the air's own
@@ -1346,7 +1421,8 @@ class Resources(object):
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
-        self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset")
+        self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
+                                 "uCctv", "uSize")
         self.set_star_epoch(2000.0)
         self.ready = True
 
@@ -2699,6 +2775,8 @@ class ViewWidget(QOpenGLWidget):
         GL.glViewport(frame, frame, w, h)
         GL.glUseProgram(res.presentProg)
         GL.glUniform2i(res.presentU["uOffset"], frame, frame)
+        GL.glUniform1i(res.presentU["uCctv"], 1 if self.spec.get('cctv') else 0)
+        GL.glUniform2i(res.presentU["uSize"], w, h)
         for i, (name, t) in enumerate((("uHdr", self.hdrTex), ("uEarth", self.earthTex),
                                        ("uEarthTrans", self.earthTransTex))):
             GL.glActiveTexture(GL.GL_TEXTURE0 + i)
@@ -2709,9 +2787,15 @@ class ViewWidget(QOpenGLWidget):
         GL.glBindVertexArray(0)
         GL.glUseProgram(0)
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)       # leave Qt's painter a clean state
+        if self.spec.get('cctv'):
+            self._cctv_overlay()
+        # The status line is the operator's, shown only when asked for (H):
+        # nothing like it was ever on a window or a CCTV monitor, so a view
+        # with no truth is simply dark (the CCTV keeps its monitor-generated
+        # crosshair and data) and the state goes to stderr when it changes.
         line = self.app.status_line(fs)
         warn = not fs.ok or fs.stale or fs.unix is None
-        if line and (self.app.hud or warn):
+        if line and self.app.hud:
             p = QtGui.QPainter(self)
             p.setPen(QtGui.QColor(255, 80, 80) if warn else QtGui.QColor(200, 200, 200))
             # Fixed-width, so the digits changing every frame don't shift the line.
@@ -2722,6 +2806,76 @@ class ViewWidget(QOpenGLWidget):
                                      self.height() / 10),
                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, line)
             p.end()
+
+    def _cctv_overlay(self):
+        """The monitor's green crosshair and data, and the CC 9-17
+        transparency over them (see CCTV)."""
+        vw, vh = self.view_size()
+        x0, y0 = float(FRAME_PX), float(FRAME_PX)
+        cx, cy = x0 + vw / 2.0, y0 + vh / 2.0
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        p.setClipRect(QtCore.QRectF(x0, y0, vw, vh))
+        # The transparency first, the monitor's own graphics are on the
+        # screen's face below it, but both show; the ink is black.
+        if CCTV['overlay'] != 'none':
+            ux, uy = vw / 10.0, vh / 8.0
+            ink = QtGui.QColor(0, 0, 0, 225)
+            pen = QtGui.QPen(ink)
+            pen.setWidthF(max(1.0, vw / 640.0))
+            p.setPen(pen)
+            for k in range(1, 10):
+                p.drawLine(QtCore.QPointF(x0 + k * ux, y0), QtCore.QPointF(x0 + k * ux, y0 + vh))
+            for k in range(1, 8):
+                p.drawLine(QtCore.QPointF(x0, y0 + k * uy), QtCore.QPointF(x0 + vw, y0 + k * uy))
+            pen.setWidthF(max(1.5, vw / 400.0))
+            p.setPen(pen)
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            for r in (1.25, 2.0):               # the 5 and 8 deg corridors at 40 deg
+                p.drawEllipse(QtCore.QPointF(cx, cy), r * ux, r * ux)
+            q = 0.12 * ux                         # the centre square
+            p.drawRect(QtCore.QRectF(cx - q, cy - q, 2 * q, 2 * q))
+            f = QtGui.QFont("Helvetica")
+            f.setPixelSize(max(8, round(vh / 30.0)))
+            f.setBold(True)
+            p.setFont(f)
+            t = 0.12 * uy
+            for k in range(1, 6):                 # axis ticks and their numbers
+                for sx in (-1, 1):
+                    x = cx + sx * k * ux
+                    p.drawLine(QtCore.QPointF(x, cy - 2 * t), QtCore.QPointF(x, cy + 2 * t))
+                    if k < 5:
+                        p.drawText(QtCore.QPointF(x + 3, cy - 3 * t), str(k))
+                    else:
+                        p.drawText(QtCore.QPointF(x - f.pixelSize(), cy - 3 * t), str(k))
+            for k in range(1, 4):
+                for sy in (-1, 1):
+                    y = cy + sy * k * uy
+                    p.drawLine(QtCore.QPointF(cx - 2 * t, y), QtCore.QPointF(cx + 2 * t, y))
+                    p.drawText(QtCore.QPointF(cx + 3 * t, y - 2), str(k))
+        # The monitor's electronic crosshair, green, edge to edge, with ticks
+        # at the edges; its data in green above and below.
+        g = QtGui.QColor(60, 255, 90, 235)
+        pen = QtGui.QPen(g)
+        pen.setWidthF(max(1.0, vw / 500.0))
+        p.setPen(pen)
+        p.drawLine(QtCore.QPointF(x0, cy), QtCore.QPointF(x0 + vw, cy))
+        p.drawLine(QtCore.QPointF(cx, y0), QtCore.QPointF(cx, y0 + vh))
+        e = vh / 40.0
+        for a, b, c_, d in ((x0, cy - e, x0, cy + e), (x0 + vw - 1, cy - e, x0 + vw - 1, cy + e),
+                            (cx - e, y0, cx + e, y0), (cx - e, y0 + vh - 1, cx + e, y0 + vh - 1)):
+            p.drawLine(QtCore.QPointF(a, b), QtCore.QPointF(c_, d))
+        f = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.SystemFont.FixedFont)
+        f.setPixelSize(max(8, round(vh / 28.0)))
+        p.setFont(f)
+        z = CCTV['zoom']
+        p.drawText(QtCore.QRectF(x0 + 8, y0 + 4, vw - 16, vh / 12.0),
+                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+                   "Z %5.1f   F  INF   I AUTO" % z)
+        p.drawText(QtCore.QRectF(x0 + 8, y0 + vh - vh / 12.0 - 4, vw - 16, vh / 12.0),
+                   Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom,
+                   "C/L   P +00  T +00   +22C")
+        p.end()
 
     def keyPressEvent(self, ev):
         k = ev.key()
@@ -2800,6 +2954,20 @@ class Portview(object):
             for g in self.ground:
                 fs.targets[g.key] = g.state(fs)
         self.frame = fs
+        state = "no truth" if not fs.ok else "stale" if fs.stale else "no date" if fs.unix is None else "ok"
+        if state != getattr(self, "_feedState", None):
+            if state == "ok":
+                if getattr(self, "_feedState", None) is not None:
+                    print("portview: truth data back", file=sys.stderr, flush=True)
+            elif state == "no truth":
+                print("portview: NO TRUTH DATA (yaGPC2 with YAGPC_VEHDYN=1, %s); views dark"
+                      % self.feed.describe(), file=sys.stderr, flush=True)
+            elif state == "stale":
+                print("portview: truth data STALE", file=sys.stderr, flush=True)
+            else:
+                print("portview: truth data has no date (Sun, Moon, planets hidden)",
+                      file=sys.stderr, flush=True)
+            self._feedState = state
         for v in self.views:
             if v.isVisible():
                 v.update()
@@ -2846,6 +3014,17 @@ def main(argv=None):
         description="The views out of the Orbiter's windows, from yaGPC2's truth state.")
     ap.add_argument("--views", default="front", metavar="LIST",
                     help="comma-separated, from %s (default front)" % ",".join(VIEWS))
+    ap.add_argument("--cctv-zoom", type=float, default=40.0, choices=sorted(CCTV_ZOOMS),
+                    help="the cctv view's camera field, deg across: 40.0 (the corridor, default), "
+                         "10.1 (full zoom, alignment) or 74.4 (no zoom)")
+    ap.add_argument("--cctv-overlay", choices=('auto', 'corridor', 'alignment', 'none'), default='auto',
+                    help="the CC 9-17 transparency on the cctv view (auto: on at 40.0 and 10.1)")
+    ap.add_argument("--test-sight", default='up', metavar="VIEW",
+                    help="--test vbar/flyaround: the view whose sight line the target is put on "
+                         "(default up; cctv or cl to line PMA-2 up on the centerline camera)")
+    ap.add_argument("--test-offset", default="0,0", metavar="RIGHT,UP",
+                    help="--test vbar: move the target off that sight line, m, in the view's "
+                         "right and up (e.g. 0.3048,0 for a foot to the right)")
     ap.add_argument("--size", type=int, default=FULL_SIZE, metavar="N",
                     help="Scale: 768 is full size (default), 512 is 2/3, 384 is half, etc.")
     ap.add_argument("--crop", action="store_true",
@@ -2916,6 +3095,11 @@ def main(argv=None):
                     help="save each view's first second as PREFIX-VIEW.png and exit")
     args = ap.parse_args(argv)
 
+    CCTV['zoom'] = args.cctv_zoom
+    VIEWS['cctv']['hfov'] = args.cctv_zoom
+    CCTV['overlay'] = (('none' if args.cctv_zoom > 70.0 else
+                        'alignment' if args.cctv_zoom < 20.0 else 'corridor')
+                       if args.cctv_overlay == 'auto' else args.cctv_overlay)
     names = [n.strip() for n in args.views.split(',') if n.strip()]
     for n in names:
         if n not in VIEWS:
@@ -2994,6 +3178,15 @@ def main(argv=None):
                      args.test_range, target_id, args.test_approach, args.test_lap,
                      args.test_phase) if test
             else TruthFeed(args.port_base))
+    if test:
+        if args.test_sight not in VIEWS:
+            sys.exit("portview: --test-sight: no view %r" % args.test_sight)
+        try:
+            feed.offset = tuple(float(x) for x in args.test_offset.split(','))
+            assert len(feed.offset) == 2
+        except (ValueError, AssertionError):
+            sys.exit("portview: --test-offset wants RIGHT,UP (m)")
+        feed.sight = args.test_sight
     scale = args.size / float(FULL_SIZE)
     exposure = Exposure(args.exposure, args.milkyway)
     models = {}

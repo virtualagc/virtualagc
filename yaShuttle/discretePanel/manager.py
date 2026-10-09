@@ -324,6 +324,20 @@ class Manager(object):
         self._button(row, "Aft", lambda: self.start_hands("aft"))
         self._button(row, "Stop", self.stop_hands)
 
+        # THE FLIGHT STATION (owner, 2026-10-09): every switch is always there
+        # and PASS reads them all, but a crew member sees one station -- the
+        # forward one, or the aft flight deck's, where rendezvous, docking and
+        # the RMS were flown.  Forward or Aft shows that station's panels,
+        # displays and keyboards and hides the other's (nothing is stopped:
+        # a script still reaches every control), starts that station's hand
+        # controllers, and restarts the window views with what can be seen
+        # from there.  Both shows everything, as before.
+        self._section("STATION", bold)
+        row = self._row()
+        self._button(row, "Forward", lambda: self.set_station("fwd"))
+        self._button(row, "Aft", lambda: self.set_station("aft"))
+        self._button(row, "Both", lambda: self.set_station("all"))
+
         # THE VIEWS OUT OF THE WINDOWS (portview.py), which simulatePASS starts
         # with the vehicle dynamics; here to bring them back after closing
         # them, or to start them on a run begun without.
@@ -346,6 +360,9 @@ class Manager(object):
 
         self._section("SIMULATION", bold)
         row = self._row()
+        # START: a run begun held (simulatePASS --hold-start) waits, every
+        # window up and nothing moving, for this or Enter in its terminal
+        self._button(row, "Start", self.go)
         self._button(row, "Show Panel", self.show_panel)
         self._button(row, "End Simulation", self.end_simulation)
 
@@ -1173,6 +1190,11 @@ class Manager(object):
                     return None
         return path
 
+    def go(self):
+        """Start a run that is held (simulatePASS --hold-start)."""
+        if self._session("go"):
+            self.say("Start: the vehicle starts if it was held")
+
     def _session(self, verb, path=None):
         try:
             crewscript.send_session(verb if path is None else "%s %s" % (verb, path),
@@ -1333,7 +1355,31 @@ class Manager(object):
             self.root.after(2500, lambda: self.restore_layout(
                 only_roles={windowLayout._hc_role(rhc)}))
 
-    def start_views(self):
+    # What can be seen from each station: the forward station's windows, or
+    # the aft flight deck's overhead window and its A3 monitor's centerline
+    # camera picture (portview's cctv).
+    STATION_VIEWS = {"fwd": "front,up,left,right", "aft": "aft,cctv", "all": None}
+    STATION_HANDS = {"fwd": "lh", "aft": "aft", "all": None}
+
+    def set_station(self, st):
+        crewscript.send_control("station %s" % st, self.args.port_base)
+        crewscript.send_meds("station %s" % st, self.args.port_base)
+        self.say("Station: %s" % {"fwd": "forward", "aft": "aft flight deck", "all": "both"}[st])
+        hands, views = self.STATION_HANDS[st], self.STATION_VIEWS[st]
+        if hands:
+            self.stop_hands()
+        if views:
+            self.stop_views()
+
+        def restart():
+            if hands:
+                self.start_hands(hands)
+            if views:
+                self.start_views(views)
+        # the stopped programs' ports and windows released first
+        self.root.after(2500, restart)
+
+    def start_views(self, views=None):
         if any(n == "portview.py" for n, _ in running(self.args.port_base)):
             self.say("The window views are already running on this port base; Stop them first")
             return
@@ -1349,6 +1395,8 @@ class Manager(object):
             return
         argv = [sys.executable, script, "--port-base", str(self.args.port_base),
                 "--size", str(self.args.portview_size)]
+        if views:
+            argv += ["--views", views]
         try:
             self.views = subprocess.Popen(argv, cwd=HERE, stdout=subprocess.DEVNULL,
                                           stderr=subprocess.STDOUT,

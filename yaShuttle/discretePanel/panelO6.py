@@ -214,6 +214,11 @@ MDM_TYPE_STU = 7
 # THE VEHICLE'S HARDWIRED WORD (landing gear, drag chute): the 'hardwired'
 # bits of the buttons held (panelcontrols.py), op 4 VALUE, type 8, to FF1.
 MDM_TYPE_HW = 8
+# THE APDS CONTROL PANEL A7L (panelcontrols.py, the controls' 'apds' bits),
+# to yaGPC2's vehdyn.c through mdmdev.c: op 4 VALUE, type 11, two words to
+# FF1 -- the switches (bit 0 set: they are the panel's) and the pushbuttons
+# held now.  Its lights come back as the vehicle status words, unit 0.
+MDM_TYPE_APDS = 11
 # THE KU-BAND RADAR'S PANEL (A1U; panelcontrols.py, the controls' 'ku'
 # bits), to yaGPC2's kuradar.c: op 4 VALUE, type 9, one word, to FF3.
 MDM_TYPE_KU = 9
@@ -748,11 +753,11 @@ PANEL_WINDOWS = (
 # and 6, G2, G3, G8, G9, S2).  O6, C2 and R11 -- FCMBOOT, GPCIPL and OPS 0's
 # -- are always up.  Panels not yet built are listed so that adding one is
 # only adding its window.
-BASE_PANELS = ("O6", "C2", "R11")
+BASE_PANELS = ("O6", "C2", "R11", "A7")    # A7: the aft MASTER ALARM, in every OPS
 OPS_PANELS = {
     ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
     ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
-    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7"),
+    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "A7L", "O7"),
     ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2"),
     ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7", "L2"),
     ("GNC", 9): ("C3", "F7", "L2"),
@@ -762,6 +767,14 @@ OPS_PANELS = {
                 "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
+# THE TWO FLIGHT STATIONS (owner, 2026-10-09): every switch is always there
+# and PASS reads them all, but a crew member sees one station's panels -- the
+# forward station's, or the aft flight deck's, where rendezvous, docking and
+# the RMS were flown.  The aft station's are the A panels and R11 (the aft
+# keyboard's IDP/CRT 4 switches); the rest are forward.  The manager's
+# STATION row sends 'station fwd|aft|all' (all: both, as before).
+def aft_station_panel(name):
+    return name.startswith("A") or name == "R11"
 # AN OPS TRANSITION SHOWS AN OPS 0 PAGE while the new OPS loads from mass
 # memory -- 13 s for OPS 1 -> 2, 30 s for OPS 9 -> 1 -- and following it
 # blinked every panel but O6, C2 and R11 out of a recorded video (owner,
@@ -952,6 +965,7 @@ class PanelO6:
         # shows every one (for saving a layout, or looking).  may_map is
         # False for an unattended scripted run, which maps nothing.
         self.panel_mode = "ops"
+        self.station = os.environ.get("NSTS_STATION", "all")
         self.may_map = True
         self.layout_path = None
         self._ops_seen = {}            # (major function, OPS) -> last seen
@@ -1232,6 +1246,19 @@ class PanelO6:
                 w |= hw
         return w
 
+    def apds_words(self):
+        """A7L: (switches | 1, pushbuttons held) from the controls' 'apds' bits."""
+        sw, pb = 0x0001, 0
+        for key, c in PC.CONTROLS.items():
+            a = c.get("apds")
+            if a is None:
+                continue
+            if isinstance(a, dict):                      # a switch: its position's bits
+                sw |= a.get(self.ctl.get(key), 0)
+            elif self.ctl_held.get(key):                 # a button: while held
+                pb |= a
+        return sw, pb
+
     def ku_word(self):
         """The Ku-band radar's panel word: each A1U control's 'ku' bits."""
         w = 0
@@ -1427,6 +1454,10 @@ class PanelO6:
         crew = self.crew_fields()
         stu = self.stu_words()
         hw = self.hw_word()
+        apds = self.apds_words()
+        if apds != getattr(self, "_apds_published", None):
+            log("A7L  switches %04x  held %04x" % apds)
+            self._apds_published = apds
         ku = self.ku_word()
         if ku != getattr(self, "_ku_published", None):
             log("Ku-band radar panel  %04x" % ku)
@@ -1440,6 +1471,7 @@ class PanelO6:
             self._pub_stu = stu
             self._pub_hw = hw
             self._pub_ku = ku
+            self._pub_apds = apds
         if stu != self._stu_published:
             log("star trackers  " + "  ".join(
                 "%s %s, door %s" % ("-Z" if u == 1 else "-Y", "ON" if w & STU_POWERED else "OFF",
@@ -1476,6 +1508,7 @@ class PanelO6:
                 stu = self._pub_stu
                 hw = getattr(self, "_pub_hw", 0)
                 ku = getattr(self, "_pub_ku", 0)
+                apds = getattr(self, "_pub_apds", (0x0001, 0))
             if columns is None:
                 continue
             try:
@@ -1494,6 +1527,8 @@ class PanelO6:
                                  (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET))
                 self.sock.sendto(struct.pack(">HHHHH", MDM_OP_VALUE, MDM_TYPE_KU, (3 << 8) | 3, 1, ku),
                                  (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET + KU_UNIT - 1))
+                self.sock.sendto(struct.pack(">HHHHHH", MDM_OP_VALUE, MDM_TYPE_APDS, 0, 2, *apds),
+                                 (D.GROUP, D.PORT_BASE + MDM_IO_OFFSET))
             except OSError as e:
                 if not self._send_failed:
                     log("cannot publish the MDM crew contacts: %s" % e)
@@ -1642,7 +1677,7 @@ class PanelO6:
                     for i, w in enumerate(words):
                         self._mdm_out[(unit, card, ch + i)] = w
 
-    MA_KEYS = ("master_alarm", "master_alarm_p")
+    MA_KEYS = ("master_alarm", "master_alarm_p", "master_alarm_a7")
 
     def _cw_unit(self, out):
         """The C&W electronics unit, from PASS's FF DOH card 10 channel 2:
@@ -2603,6 +2638,8 @@ class PanelO6:
             want.update(OPS_PANELS.get(k, ()))
         if self.panel_mode == "all":
             want = set(self.wins)
+        if self.station in ("fwd", "aft"):
+            want = {n for n in want if aft_station_panel(n) == (self.station == "aft")}
         shown = tuple(n for n in self.wins if n in want)
         if (shown, tuple(ops)) != self._ops_shown:
             log("panels: %s -- showing %s"
@@ -2956,7 +2993,19 @@ class PanelO6:
             r = self.ROT_D / 2.0
             return w, above + max(0.0, -y0 - r) + 4, self.ROT_D, max(0.0, y1 - r) + 4
         # pb / pbi
-        return max(cap_w, self.pb), above, self.pb, 0
+        bw, bh = self._pb_wh(c)
+        return max(cap_w, bw), above, bh, 0
+
+    def _pb_wh(self, c):
+        """A pushbutton's face: the panel's button size, or larger where its
+        legend needs it (A7L's two-line legends -- "APDS CIRC / PROT OFF" --
+        ran off a square sized for "SEP")."""
+        if c.get("halves"):
+            return self.pb, self.pb
+        lines = self._ctl_lines(c.get("legend"))
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
+        return (max(self.pb, max([self._tw(l) for l in lines] or [0]) + 12),
+                max(self.pb, len(lines) * ls + 8))
 
     def _draw_ctl_item(self, key, cx, top):
         """Draw one control centred on cx, its caption starting at top --
@@ -3071,26 +3120,26 @@ class PanelO6:
         elif k == "rot":
             self._rotary(key, cx, y + body / 2.0)
         else:
-            b = self.pb
+            bw, bh = self._pb_wh(c)
             held = self.ctl_held[key]
             if k == "pbi":
                 if c.get("guarded"):
                     g = 5
-                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                    self._rect(cx - bw / 2 - g, y - g, cx + bw / 2 + g, y + bh + g, fill="",
                                outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
                 if c.get("halves"):
-                    self._pbi_halves(cx - b / 2, y, cx + b / 2, y + b, c, held,
+                    self._pbi_halves(cx - bw / 2, y, cx + bw / 2, y + bh, c, held,
                                      self.ctl_lamp.get(key) or (False,) * len(c["halves"]))
                 else:
-                    self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
+                    self._pbi(cx - bw / 2, y, cx + bw / 2, y + bh, c.get("legend", ""), held,
                               self.ctl_lamp.get(key, False), c.get("color"))
             else:
                 if c.get("guarded"):
                     g = 5
-                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                    self._rect(cx - bw / 2 - g, y - g, cx + bw / 2 + g, y + bh + g, fill="",
                                outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
-                self._legend_pb(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held)
-            self._hit("ctl", key, cx - b / 2, y, cx + b / 2, y + b)
+                self._legend_pb(cx - bw / 2, y, cx + bw / 2, y + bh, c.get("legend", ""), held)
+            self._hit("ctl", key, cx - bw / 2, y, cx + bw / 2, y + bh)
 
     def _rot_legends(self, key):
         """[(legend, dx, dy, angle)] of a rotary's positions about its centre:
@@ -5638,6 +5687,14 @@ def _listen_control(panel):
                     w.shown = False         # _panels_follow maps the ones wanted
                 panel._panels_follow()
             panel.root.after(0, show_all)
+        elif word == "station" and rest in ("fwd", "aft", "all"):
+            # The manager's STATION: one station's panels, or both
+            log("script command: station %s" % rest)
+            def set_station(m=rest):
+                panel.station = m
+                panel._ops_shown = None
+                panel._panels_follow()
+            panel.root.after(0, set_station)
         elif word == "panels" and rest in ("all", "ops"):
             # The manager's ALL PANELS: every window, to save a layout with all
             # of them in it; 'ops' goes back to following the displays.

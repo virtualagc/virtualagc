@@ -585,7 +585,35 @@ def main(argv=None):
         root.geometry("%dx%d" % (w, h))
     _dont_steal_focus(root)
     root._kb = kb
+    _station_listener(root, int(args.kybd))
     root.mainloop()
+
+
+def _station_listener(root, n):
+    """THE MANAGER'S STATION ('station fwd|aft|all' on MEDS2's port, base +
+    95): keyboard 3 is the aft flight deck's (R11L), 1 and 2 the forward
+    station's; one station's are shown.  The window is withdrawn, not
+    closed, and its keys still work from a script."""
+    try:
+        import crewscript
+        sock = crewscript.meds_receiver(PORT_BASE)
+    except Exception as e:
+        sys.stderr.write("stsKeyboard: no station listener (%s)\n" % e)
+        return
+
+    def listen():
+        while True:
+            try:
+                data, _a = sock.recvfrom(4096)
+            except OSError:
+                return
+            w = data.decode("utf-8", errors="replace").split()
+            if len(w) != 2 or w[0].lower() != "station" or w[1].lower() not in ("fwd", "aft", "all"):
+                continue
+            st = w[1].lower()
+            show = st == "all" or (n == 3) == (st == "aft")
+            root.after(0, root.deiconify if show else root.withdraw)
+    threading.Thread(target=listen, daemon=True).start()
 
 
 if __name__ == "__main__":

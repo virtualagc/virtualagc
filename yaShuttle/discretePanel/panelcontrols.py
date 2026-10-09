@@ -429,6 +429,15 @@ for _k, _pan in (("master_alarm", "F2"), ("master_alarm_p", "F4")):
                         sources="CWWB USA006019 4-20; SCOM OI-28 Part 1 2.2")
 PANES["F2"].append(("MASTER ALARM", [["master_alarm"]]))
 PANES["F4"].append(("MASTER ALARM", [["master_alarm_p"]]))
+# AND THE AFT FLIGHT DECK'S: "four red MASTER ALARM pushbutton indicators
+# on panels F2, F4, A7, and MO52J" (SCOM OI-29 2.2; SFOC-FL0884 Rev B, p.
+# 2.2-1 and again for class 1 and the fire alarm).  Which part of A7 is not
+# said, so it is a window of its own, "A7" (MO52J, the middeck's, is not
+# drawn).  There is no C&W annunciator matrix aft: that is F7 alone.
+CONTROLS["master_alarm_a7"] = dict(panel="A7", kind="pbi", caption="", legend="MASTER\nALARM",
+                                   color="red", contacts=[], lamps=[(VEH_UNIT, 1, 0, 0x8000)],
+                                   sources="SCOM OI-29 2.2 (panels F2, F4, A7, MO52J)")
+PANES["A7"] = [("MASTER ALARM", [["master_alarm_a7"]])]
 check()
 
 
@@ -749,4 +758,94 @@ CONTROLS["sm_alert"] = dict(panel="F7", kind="ann", caption="", legend="SM\nALER
                             sources="DLALIGHT; PF MDMs in SM configurations (not captured)")
 PANES["F7"] = [("CAUTION / WARNING", _rows, {"grid": True}),
                ("MAIN ENGINE STATUS", [["mes_left", "mes_ctr", "mes_right"], ["sm_alert"]])]
+check()
+
+# ---- PANEL A7L, THE APDS CONTROL PANEL -----------------------------------
+#
+# The Russian-built control panel of the Androgynous Peripheral Docking
+# System, at the aft flight deck (SCOM p678-684 and its drawing p680; APAS
+# Reference Guide USA008876 p14-23; ~/workspace/pass-run/rndz/
+# apds-cctv-aft-findings.md).  No computer reads or drives it: its switches
+# and pushbuttons reach the docking mechanism's own control unit and its
+# lights come back from it -- here yaGPC2's vehdyn.c (THE APDS), the switches
+# and held buttons as two words ('apds' bits below; mdmdev.c crew type 11)
+# and the lights as the vehicle status words, unit 0 card 0 channels 2-3
+# (vehdyn.h vehdyn_apds_lights).  Pushbuttons are held two seconds ("two
+# fingers for two seconds", SCOM p684); the mechanism acts after one.
+#
+# LAMP COLOURS ARE NOT DOCUMENTED: the APAS rendering shows INITIAL CONTACT,
+# CAPTURE, UNDOCK COMPLET and PYRO PROTECT CIRCUIT OFF pale yellow (amber
+# here) and the rest white, and the SCOM drawing marks those four with
+# corner triangles; that is all.
+_A7L_SRC = "SCOM p678-684 (drawing p680); APAS USA008876 p14-23"
+for key, cap, bit in (("a7l_cpp_a", "A", 0x8000), ("a7l_cpp_b", "B", 0x4000), ("a7l_cpp_c", "C", 0x2000),
+                      ("a7l_htr_1", "H1", 0x1000), ("a7l_htr_2", "H2/DCU", 0x0800),
+                      ("a7l_htr_3", "H3/DCU", 0x0400),
+                      ("a7l_ds_a", "A DS", 0x0200), ("a7l_ds_b", "B DS", 0x0100), ("a7l_ds_c", "C DS", 0x0080),
+                      ("a7l_pyro_a", "A P", 0x0040), ("a7l_pyro_b", "B P", 0x0020), ("a7l_pyro_c", "C P", 0x0010)):
+    # the docking-prep configuration (RNDZ p255): power on, pyros off
+    CONTROLS[key] = dict(panel="A7L", kind="t2", caption=cap, positions=("ON", "OFF"),
+                         default="OFF" if key.startswith("a7l_pyro") else "ON",
+                         contacts={}, apds={"ON": bit}, sources=_A7L_SRC)
+for key, legend, w, bit in (("a7l_ds_a_lt", "A DS", 1, 0x2000), ("a7l_ds_b_lt", "B DS", 1, 0x1000),
+                            ("a7l_ds_c_lt", "C DS", 1, 0x0800),
+                            ("a7l_p_a_lt", "A P", 1, 0x0400), ("a7l_p_b_lt", "B P", 1, 0x0200),
+                            ("a7l_p_c_lt", "C P", 1, 0x0100)):
+    CONTROLS[key] = dict(panel="A7L", kind="ann", caption="", legend=legend, color="white", contacts=[],
+                         lamps=[(VEH_UNIT, 0, 2 + w, bit)], sources=_A7L_SRC)
+_A7L_STATUS = (   # (left, right), row by row; (legend, word, bit, colour)
+    (("POWER\nON", 0, 0x8000, "white"), ("INITIAL\nCONTACT", 0, 0x0040, "amber")),
+    (("APDS PROTECT\nCIRCUIT OFF", 0, 0x4000, "white"), ("CAPTURE", 0, 0x0020, "amber")),
+    (("RING\nALIGNED", 0, 0x2000, "white"), ("RING FORWARD\nPOSITION", 0, 0x0010, "white")),
+    (("RING INITIAL\nPOSITION", 0, 0x1000, "white"), ("READY\nTO HOOK", 0, 0x0008, "white")),
+    (("FIXERS\nOFF", 0, 0x0800, "white"), ("INTERF\nSEALED", 0, 0x0004, "white")),
+    (("HOOKS 1\nOPEN", 0, 0x0400, "white"), ("HOOKS 1\nCLOSED", 0, 0x0002, "white")),
+    (("HOOKS 2\nOPEN", 0, 0x0200, "white"), ("HOOKS 2\nCLOSED", 0, 0x0001, "white")),
+    (("LATCHES\nCLOSED", 0, 0x0100, "white"), ("LATCHES\nOPEN", 1, 0x8000, "white")),
+    (("UNDOCK\nCOMPLET", 0, 0x0080, "amber"), ("RING FINAL\nPOSITION", 1, 0x4000, "white")),
+)
+_a7l_status_rows = []
+for _row in _A7L_STATUS:
+    _keys = []
+    for legend, w, bit, colour in _row:
+        key = "a7l_st_" + legend.lower().replace("\n", "_").replace(" ", "_")
+        CONTROLS[key] = dict(panel="A7L", kind="ann", caption="", legend=legend, color=colour,
+                             contacts=[], lamps=[(VEH_UNIT, 0, 2 + w, bit)], sources=_A7L_SRC)
+        _keys.append(key)
+    _a7l_status_rows.append(_keys)
+CONTROLS["a7l_pyro_prot_lt"] = dict(panel="A7L", kind="ann", caption="", color="amber",
+                                    legend="PYRO PROTECT\nCIRCUIT OFF", contacts=[],
+                                    lamps=[(VEH_UNIT, 0, 3, 0x0080)], sources=_A7L_SRC)
+for key, legend, bit, guarded in (
+        ("a7l_lamp_test", "LAMP\nTEST", 0x8000, False),
+        ("a7l_power_on", "POWER\nON", 0x4000, False), ("a7l_power_off", "POWER\nOFF", 0x2000, False),
+        ("a7l_ring_out", "RING\nOUT", 0x1000, False), ("a7l_ring_in", "RING\nIN", 0x0800, False),
+        ("a7l_circ_prot_off", "APDS CIRC\nPROT OFF", 0x0400, False),
+        ("a7l_close_hooks", "CLOSE\nHOOKS", 0x0200, False),
+        ("a7l_close_latches", "CLOSE\nLATCHES", 0x0100, False),
+        ("a7l_fixer_off", "FIXER\nOFF", 0x0080, False),
+        ("a7l_open_hooks", "OPEN\nHOOKS", 0x0040, True), ("a7l_open_latches", "OPEN\nLATCHES", 0x0020, True),
+        ("a7l_undocking", "UNDOCKING", 0x0010, True),
+        ("a7l_pyro_prot_off", "PYRO CIRC\nPROT OFF", 0x0008, True),
+        ("a7l_pyro_prot_on", "PYRO CIRC\nPROT ON", 0x0004, True),
+        ("a7l_act_hooks", "ACT HOOKS\nFIRING", 0x0002, True),
+        ("a7l_pas_hooks", "PAS HOOKS\nFIRING", 0x0001, True)):
+    # the covered groups (under hinged covers) drawn with a guard
+    CONTROLS[key] = dict(panel="A7L", kind="pb", caption="", legend=legend, contacts=[],
+                         apds=bit, hold_ms=2000, guarded=guarded, sources=_A7L_SRC)
+PANES["A7L"] = [
+    ("POWER", ["CONTROL PANEL POWER", ["a7l_cpp_a", "a7l_cpp_b", "a7l_cpp_c"],
+               "HEATERS/DCU POWER", ["a7l_htr_1", "a7l_htr_2", "a7l_htr_3"],
+               "APDS POWER", ["a7l_ds_a", "a7l_ds_b", "a7l_ds_c"],
+               ["a7l_ds_a_lt", "a7l_ds_b_lt", "a7l_ds_c_lt"], ["a7l_lamp_test"]]),
+    ("STATUS", _a7l_status_rows, {"grid": True}),
+    ("PYROS", [["a7l_pyro_a", "a7l_pyro_b", "a7l_pyro_c"], ["a7l_p_a_lt", "a7l_p_b_lt", "a7l_p_c_lt"],
+               ["a7l_pyro_prot_lt"],
+               "PYRO COMMANDS", ["a7l_pyro_prot_off", "a7l_pyro_prot_on"],
+               ["a7l_act_hooks", "a7l_pas_hooks"]]),
+    ("APDS CONTROL COMMANDS", [["a7l_open_hooks", "a7l_open_latches", "a7l_undocking"],
+                               ["a7l_power_on", "a7l_power_off", "a7l_ring_out", "a7l_ring_in"],
+                               ["a7l_circ_prot_off", "a7l_close_hooks", "a7l_close_latches",
+                                "a7l_fixer_off"]]),
+]
 check()
