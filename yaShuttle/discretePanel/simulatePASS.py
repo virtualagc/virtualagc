@@ -2199,7 +2199,12 @@ def main():
 
         start_layout = (os.path.join(args.snapshot_resume, "layout.json")
                         if args.snapshot_resume else None)
+        # A --layout GIVEN HERE WINS over a capture's own layout.json: the
+        # capture's is where the windows were on the machine that took it
+        # (Mac-portview's screen, for the rendezvous captures), the --layout
+        # is where this person wants them (owner, 2026-10-09).
         place_windows(windows_before,
+                      None if args.layout else
                       start_layout if start_layout and os.path.isfile(start_layout)
                       else None)
         threading.Thread(target=session_listener,
