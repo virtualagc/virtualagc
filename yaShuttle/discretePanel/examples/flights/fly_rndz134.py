@@ -688,8 +688,7 @@ class StarTrackerNav(object):
         sv_prop = w.sv_sel_bit()
         # 1. CONFIG FOR STRK NAV.  DAP A/AUTO/VERN is TRACK's.  The IMU for
         # deselect is MCC's call ("if no comm, use IMU 1"): IMU 1.
-        self.strk_keys("+1     keys SPEC 2 1 PRO\n"
-                       "+5     keys ITEM 7 EXEC\n", "strk-imu-des")
+        self.imu1_select(False, "strk-des")
         # SPEC 33: SV SEL PROP (the first NAV pass) checked; INH Angles and
         # S TRK keyed -- both set rather than toggle (GKVREL cases 12 and 8),
         # so keying a checked item is harmless; SV SEL toggles (case 14), so
@@ -771,9 +770,8 @@ class StarTrackerNav(object):
         self.strk_ended = True
         self.strk_keys("+1     keys SPEC 3 3 PRO\n"
                        "+5     keys ITEM 2 4 EXEC\n"
-                       "+3     keys SPEC 2 1 PRO\n"
-                       "+5     keys ITEM 7 EXEC\n"
                        "+3     keys RESUME\n", "strk-end")
+        self.imu1_select(True, "strk-end")
         self.say("END S TRK NAV: %s" % self.strk_watch().summary())
 
     def strk_wait(self, cond, sim_seconds):
@@ -1091,6 +1089,25 @@ class RadarNav(object):
 
 
 
+# THE IMUs.  CGUB_IMU_SEL_MFE (X'59DC'): the IMUs PASS's RM has selected, IMU
+# 1 the 4 bit (7 all three).  SPEC 21's ITEM 7(8, 9) TOGGLES an IMU's
+# deselect (GKUIMU.hal 203-212), so a deselect or a reselect is checked here
+# before and after.  And PASS's IMU attitude RM thresholds, X'566E'-X'5679'
+# (CGRV_A_CONS(1,2), A_RAMP(1,2), 2A_CONS_2, 2A_RAMP_2), are set only by
+# GRS_IMU_RM_INIT after MM101 or an onboard alignment, which a run started
+# in OPS 2 never does: they are zero in every capture from IPL, so with
+# three IMUs every IMU miscompares unseen, and with two selected the RM
+# dilemma fires within four passes (RM DLMA IMU: the IMU caution and the
+# backup C&W).  They are seeded in the capture flown on from (DASS_G2.ASC's
+# addresses; the pairings #CGRSIMU+9D..C5): single-precision pairs copied
+# source -> target.  CGRV_OPS_TR_TIME stays 0; the MM101 init flag is not set.
+IMU_SEL_HW = 0x59DC
+IMU_RM_SEED = ((0x563C, 0x566E, "A_CONS_5 -> A_CONS(1)"), (0x5638, 0x5670, "A_CONS_1 -> A_CONS(2)"),
+               (0x564C, 0x5672, "A_RAMP_5 -> A_RAMP(1)"), (0x5648, 0x5674, "A_RAMP_2 -> A_RAMP(2)"),
+               (0x5644, 0x5676, "A_CONS_9 -> 2A_CONS_2"), (0x5650, 0x5678, "A_RAMP_8 -> 2A_RAMP_2"))
+FAULT_SUMMARY_HW = 0x1D02          # CDL_FAULT_SUMMARY_PAGE
+
+
 class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
@@ -1163,6 +1180,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.lambert_mc(resume)
         if resume and self.a.dass_iloads:
             self.dass_iloads(resume)
+        if resume:
+            self.seed_imu_rm(resume)
         cmd +=["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -1284,6 +1303,51 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.bias_zeroed = True
         if "#PCGZMC2" in by:
             self.lambert_patched = True
+
+    def seed_imu_rm(self, capdir):
+        """PASS's IMU attitude RM thresholds seeded in a capture's memory
+        image where they are still zero (IMU_RM_SEED); the tape untouched."""
+        p = os.path.join(capdir, "gpc1.mem.bin")
+        m = bytearray(open(p, "rb").read())
+        done, have = [], []
+        for src, dst, what in IMU_RM_SEED:
+            if bytes(m[2 * dst:2 * dst + 4]) != bytes(4):
+                have.append(what)
+                continue
+            m[2 * dst:2 * dst + 4] = m[2 * src:2 * src + 4]
+            done.append("%s %.3g" % (what, groundstation.from_ibm_short(
+                list(struct.unpack(">2H", bytes(m[2 * dst:2 * dst + 4]))))))
+        if done:
+            open(p, "wb").write(m)
+        self.say("IMU RM thresholds: %s%s" % ("seeded in %s: %s" % (os.path.basename(capdir), "; ".join(done))
+                                              if done else "already set",
+                                              "" if not have or not done else " (already set: %s)" % ", ".join(have)))
+        self.imu_rm_seeded = True
+
+    def imu_sel(self, label):
+        """CGUB_IMU_SEL_MFE now (a probe capture), or None."""
+        mem = self.probe("imu-%s" % label)
+        return mem.hw(IMU_SEL_HW)[0] if mem else None
+
+    def imu1_select(self, want, label):
+        """IMU 1 selected (want True) or deselected, by SPEC 21 ITEM 7 -- a
+        TOGGLE -- keyed only while CGUB_IMU_SEL_MFE disagrees, and checked."""
+        for attempt in range(3):
+            sel = self.imu_sel("%s-%d" % (label, attempt))
+            if sel is None:
+                self.say("IMU 1 (%s): CGUB_IMU_SEL_MFE unreadable -- ITEM 7 keyed blind" % label)
+            elif bool(sel & 4) == want:
+                self.say("IMU 1 (%s): %s (CGUB_IMU_SEL_MFE %d)" % (label, "selected" if want else "deselected",
+                                                                 sel))
+                return True
+            self.strk_keys("+1     keys SPEC 2 1 PRO\n"
+                           "+5     keys ITEM 7 EXEC\n"
+                           "+3     keys RESUME\n", "imu1-%s-%d" % (label, attempt))
+            self.wait_sim(6)
+            if sel is None:
+                return None
+        self.say("IMU 1 (%s): STILL NOT %s" % (label, "selected" if want else "deselected"))
+        return False
 
     def restart_from(self, name):
         """The simulation ended and started again from one of its own
@@ -1625,7 +1689,8 @@ wait crt 1 title 2011/ timeout 600
     def rndznav(self):
         if ((self.a.zero_sensor_bias and not getattr(self, "bias_zeroed", False))
                 or (self.a.lambert_mc and not getattr(self, "lambert_patched", False))
-                or (self.a.dass_iloads and not getattr(self, "dass_patched", False))):
+                or (self.a.dass_iloads and not getattr(self, "dass_patched", False))
+                or not getattr(self, "imu_rm_seeded", False)):
             if self.a.attach:
                 self.say("zero-sensor-bias: attached to a running vehicle -- its memory cannot be patched here")
             else:
