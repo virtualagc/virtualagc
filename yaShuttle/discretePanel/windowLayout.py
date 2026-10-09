@@ -480,8 +480,11 @@ PORTVIEW_ROLES = {"CDR/PLT Forward View": "pv_front", "CDR/PLT Overhead View": "
                   # missing here, so a layout neither saved nor placed them
                   # (owner, 2026-10-09)
                   "Aft Station Overhead View": "pv_aft", "ODS Centerline Camera": "pv_cl",
-                  "A3 MON 1": "pv_cctv",
-                  "A3 MON 1: Centerline Camera": "pv_cctv"}   # its title before 2026-10-09
+                  # the A3 monitor, titled as its panel labels it (owner):
+                  # MON1, and MON2 should the other ever be drawn
+                  "MON1": "pv_cctv", "MON2": "pv_mon2",
+                  "A3 MON 1": "pv_cctv",                          # earlier titles,
+                  "A3 MON 1: Centerline Camera": "pv_cctv"}       # still recognised
 
 
 def role_of(pid, title):
