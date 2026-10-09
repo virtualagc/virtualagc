@@ -70,6 +70,50 @@
  *     field, no star.  Door not fully open: no stars and no bright objects;
  *     the self-test light is inside and still works.  The 15 minute warm-up
  *     is a checklist wait; nothing here changes during it.
+ *
+ * TARGET TRACK (rendezvous).  The tracker has no target mode of its own:
+ * the flight software's GY3_ST_TARGET_TRK (GY3STT.hal) points the
+ * offset-scan box at the line of sight PASS predicts from its own states
+ * (GY5FOV; offsets GY3_CMD_OUT, 15.5 + 15.5 x deg / 4.75, the threshold
+ * from SPEC 22's THOLD), breaks track first, waits 4 s for STAR PRESENT,
+ * then falls back to a 20 s full-field scan before NO TARGET; GY8DAT
+ * averages 21 samples (consecutive ones within TOL6, body rate under TOL8)
+ * into the mark GLC_STAR_TRACKER_NAV gives the relative navigation filter.
+ * So here the other vehicle (vehdyn's YAGPC_VEHDYN_TARGETS, the ISS) is
+ * simply one more object in the sky the raster can cross -- in either
+ * scan, and so able to be beaten to the lock by a star, or to steal one:
+ *   - Seen from the tracker, which sits on the navigation base (Xo 404.5,
+ *     Yo -0.8, Zo 422.6, vehdyn.c) -- not the c.g., 57.9 ft aft; the
+ *     relative navigation filter (GLZANG) uses the c.g. states without a
+ *     lever arm, as the flight did.  The light-time and aberration terms of
+ *     a target 10-40 nmi away come to the relative velocity over c, under a
+ *     milli-arcsecond: left out.
+ *   - Only when sunlit: the station out of the Earth's shadow (the Sun's
+ *     disc, 0.27 deg, going behind the limb as the station sees it), and not
+ *     behind the Earth and its air from the tracker.  The night is NOT
+ *     modelled: the checklist's NIGHTTIME STRK OPS [18E] lowers THOLD to 0
+ *     at sunset and goes on tracking, by a light no document here names.
+ *   - Its brightness: the ISS's standard magnitude -2.0 (1000 km, phase 90
+ *     deg; CalSky, from visual observations, the 109 x 73 m assembly), the
+ *     range by the inverse square, the phase by a Lambert sphere's
+ *     (sin a + (pi - a) cos a) / pi.  At the nominal pass's 40 nmi that is
+ *     magnitude -7 to -9 -- far brighter than any threshold (THOLD 3, the
+ *     checklist's, is 1.0), and why the solid-state trackers' target
+ *     suppress tripped on it (Herrera, "Space Shuttle Star Tracker
+ *     Challenges", Boeing/NASA 2010, NTRS 20110003998) where the image
+ *     dissector modelled here tracked on to 8 nmi and beyond.
+ *   - Where the tracker sees it: the centroid of its light, not its centre
+ *     of mass -- a Lambert sphere of the assembly's mean radius (44.6 m),
+ *     the light's centroid displaced toward the Sun, by 3 pi / 16 = 0.59
+ *     radius at a 90 deg phase (an APPROXIMATION: the real station is
+ *     mostly flat arrays).  Tens of arcseconds at 40 nmi; PASS's filter carries a star
+ *     tracker angle bias state for this kind of error (GLQREN, bias
+ *     variance 1e-6 rad^2, 1300 s time constant).
+ *   - Its size is no limit to the image dissector: the station's ~7 arcmin
+ *     at 40 nmi against a specified 8 (Herrera), tracked well inside it.
+ *   - The angles have the stars' noise (20 arcsec, more with body rate) and
+ *     the words' 0.0025390625 deg count.
+ *   - Break track drops it and leaves it out of the search, as a star.
  * ------------------------------------------------------------------- */
 #include "startrk.h"
 
@@ -100,6 +144,19 @@
 
 static const double THRESHOLD_MAG[4] = { 3.5, 2.4, 2.0, 1.0 };
 
+/* The rendezvous target (see TARGET TRACK above). */
+#define IN_M 0.0254
+#define NB_XO 404.5                 /* the navigation base, vehdyn.c */
+#define NB_YO (-0.8)
+#define NB_ZO 422.6
+#define DRY_CG_XO 1100.0            /* the body origin vehdyn_cg_offset is from */
+#define DRY_CG_ZO 375.0
+#define TGT_STD_MAG (-2.0)          /* the ISS: 1000 km, phase 90 deg */
+#define TGT_RADIUS_M 44.6           /* the photometric sphere: sqrt(109 x 73) / 2 */
+#define SUN_HALF_DEG 0.267
+#define TGT_MAXN 8
+#define LOCK_TARGET0 (-10)          /* locked: -10 - k for vehdyn target k */
+
 /* CGYS_TNBST (nav base -> tracker), 1 = -Z, 2 = -Y, and CGMS_TNBBODY (nav
  * base -> body), as in memory on this tape (tools/pasvar.py). */
 static const double TNBST[3][3][3] = {
@@ -124,8 +181,10 @@ typedef struct {
     uint16_t cmd;
     int mode;
     double t0, lastT, pPrev;     /* the search's start, the last update, the raster's place */
-    int locked;                  /* catalog index + 1, -1 the self-test light, 0 none */
+    int locked;                  /* catalog index + 1, -1 the self-test light, 0 none,
+                                    LOCK_TARGET0 - k vehdyn's target k */
     unsigned char excl[STAR_TABLE_N];
+    unsigned exclTgt;            /* targets left out by break track, a bit each */
     bool shutterClosed, sunA, horA, moonA, alert;
     bool stFail, stAngErr;
     double stStart;
@@ -275,6 +334,110 @@ static bool star_hv(const Sky *sk, int i, double *H, double *V) {
     return true;
 }
 
+/* THE TARGET'S LIGHT.  A Lambert sphere seen at phase angle a: the centroid
+ * of its light, from its centre toward the Sun's side, in radii -- by
+ * summing the lit disc (radiance n.s, the disc's own area element), once,
+ * a degree at a time. */
+static double photo_centroid(double aDeg) {
+    static double tab[181];
+    static bool ready = false;
+    if (!ready) {
+        const int N = 240;
+        for (int d = 0; d <= 180; d++) {
+            double a = d * D2R, sx = sin(a), sz = cos(a), sum = 0.0, sumX = 0.0;
+            for (int i = 0; i < N; i++)
+                for (int j = 0; j < N; j++) {
+                    double x = -1.0 + (i + 0.5) * 2.0 / N, y = -1.0 + (j + 0.5) * 2.0 / N;
+                    double rr = x * x + y * y;
+                    if (rr >= 1.0) continue;
+                    double ns = x * sx + sqrt(1.0 - rr) * sz;
+                    if (ns <= 0.0) continue;
+                    sum += ns;
+                    sumX += x * ns;
+                }
+            tab[d] = sum > 0.0 ? sumX / sum : 1.0;
+        }
+        ready = true;
+    }
+    if (aDeg <= 0.0) return 0.0;
+    if (aDeg >= 180.0) return tab[180];
+    int i = (int)aDeg;
+    return tab[i] + (aDeg - i) * (tab[i + 1] - tab[i]);
+}
+
+/* The tracker's place, M50 m: the navigation base, from the truth c.g. */
+static void tracker_pos(double p[3]) {
+    const PhysState *s = vehdyn_state();
+    double cg[3], d[3], R[3][3];
+    vehdyn_cg_offset(cg);
+    d[0] = -(NB_XO - DRY_CG_XO) * IN_M - cg[0];
+    d[1] = NB_YO * IN_M - cg[1];
+    d[2] = -(NB_ZO - DRY_CG_ZO) * IN_M - cg[2];
+    qmat(s->q, R);
+    for (int i = 0; i < 3; i++) p[i] = s->r[i] + R[i][0] * d[0] + R[i][1] * d[1] + R[i][2] * d[2];
+}
+
+/* Where vehdyn's target j appears to tracker k: H, V (deg) of the centroid
+ * of its light, and its magnitude; false when it is not in front of the
+ * tracker, is in the Earth's shadow or behind the Earth.  Optionally its
+ * range (m) and the fraction of the Sun it sees. */
+typedef struct { double H, V, mag, range, lit, phaseDeg; int norad; } TgtView;
+
+static bool target_view(const Sky *sk, int j, double t, TgtView *o) {
+    int id;
+    double rt[3], vt[3], qt[4];
+    double ux = vehdyn_unix(t);
+    if (!sk->ok || ux <= 0 || j >= TGT_MAXN || !vehdyn_target(j, &id, rt, vt, qt)) return false;
+    double p[3], d[3];
+    tracker_pos(p);
+    for (int i = 0; i < 3; i++) d[i] = rt[i] - p[i];
+    double R = norm(d);
+    if (R < 1.0) return false;
+    /* behind the Earth and its air: the sight line's nearest point to the
+     * Earth's centre, if it lies between the two */
+    double tc = -dot(p, d) / (R * R);
+    if (tc > 0.0 && tc < 1.0) {
+        double c[3];
+        for (int i = 0; i < 3; i++) c[i] = p[i] + tc * d[i];
+        if (norm(c) < RE_M + ATMOS_M) return false;
+    }
+    /* sunlight at the target: the Sun's disc against the Earth's limb */
+    double sun[3], lam, eps, e[3], rtn = norm(rt);
+    sun_dir(ux, sun, &lam, &eps);
+    for (int i = 0; i < 3; i++) e[i] = -rt[i] / rtn;
+    double rho = asin(RE_M / rtn > 1 ? 1 : RE_M / rtn) * R2D;
+    double lit = (angle_deg(sun, e) - rho + SUN_HALF_DEG) / (2.0 * SUN_HALF_DEG);
+    lit = lit > 1.0 ? 1.0 : lit;
+    if (lit <= 0.0) return false;
+    /* phase: the Sun as seen from the target against the tracker */
+    double back[3] = { -d[0], -d[1], -d[2] };
+    double a = angle_deg(sun, back) * D2R;
+    double phase = (sin(a) + (3.14159265358979323846 - a) * cos(a)) / 3.14159265358979323846;
+    if (phase <= 1e-6) return false;
+    o->mag = TGT_STD_MAG + 5.0 * log10(R / 1.0e6) - 2.5 * log10(phase * 3.14159265358979323846)
+           - 2.5 * log10(lit);
+    /* the light's centroid: toward the Sun, across the sight line */
+    double u[3] = { d[0] / R, d[1] / R, d[2] / R }, sp[3], su = dot(sun, u);
+    for (int i = 0; i < 3; i++) sp[i] = sun[i] - su * u[i];
+    double spn = norm(sp), shift = TGT_RADIUS_M * photo_centroid(a * R2D);
+    if (spn > 1e-9)
+        for (int i = 0; i < 3; i++) d[i] += shift * sp[i] / spn;
+    double v0 = dot(sk->M[0], d), v1 = dot(sk->M[1], d), v2 = dot(sk->M[2], d);
+    if (v2 <= 0.0) return false;
+    o->H = atan2(v1, v2) * R2D;
+    o->V = atan2(-v0, v2) * R2D;
+    o->range = R;
+    o->lit = lit;
+    o->phaseDeg = a * R2D;
+    o->norad = id;
+    return true;
+}
+
+static int target_count(void) {
+    int n = vehdyn_enabled() ? vehdyn_target_count() : 0;
+    return n > TGT_MAXN ? TGT_MAXN : n;
+}
+
 /* The bright object sensor, with its hysteresis. */
 static void bos(int k, const Sky *sk, double t) {
     Trk *s = &trk[k];
@@ -315,6 +478,7 @@ static void bos(int k, const Sky *sk, double t) {
 static void new_search(Trk *s, double t) {
     s->locked = 0;
     memset(s->excl, 0, sizeof s->excl);
+    s->exclTgt = 0;
     s->t0 = t;
     s->pPrev = 0.0;
 }
@@ -375,11 +539,24 @@ static void update(int k, double t) {
 
     bool canSee = sk.ok && s->doorOpen && !s->shutterClosed && rate <= RATE_LOSE_DEGS;
     /* THE TRACK */
-    if (s->locked > 0) {
-        double H, V;
-        int i = s->locked - 1;
-        if (!canSee || !star_hv(&sk, i, &H, &V) || fabs(H) > FIELD_DEG || fabs(V) > FIELD_DEG ||
-            STAR_TABLE[i].mag > sk.limit) {
+    if (s->locked > 0 || s->locked <= LOCK_TARGET0) {
+        double H = 0, V = 0, mag = 99.0;
+        bool seen;
+        if (s->locked > 0) {
+            int i = s->locked - 1;
+            seen = canSee && star_hv(&sk, i, &H, &V);
+            mag = STAR_TABLE[i].mag;
+        } else {
+            TgtView tv;
+            seen = canSee && target_view(&sk, LOCK_TARGET0 - s->locked, t, &tv);
+            if (seen) { H = tv.H; V = tv.V; mag = tv.mag; }
+        }
+        if (!seen || fabs(H) > FIELD_DEG || fabs(V) > FIELD_DEG || mag > sk.limit) {
+            if (s->locked <= LOCK_TARGET0)
+                fprintf(stderr, "startrk: %s tracker lost the target at t=%.2f (%s)\n", k == 1 ? "-Z" : "-Y", t,
+                        !canSee ? (rate > RATE_LOSE_DEGS ? "body rate" : "shutter or door") :
+                        !seen ? "not lit, or not in front" : mag > sk.limit ? "below the threshold"
+                                                                            : "out of the field");
             s->locked = 0;                         /* lost: search on from here */
             s->pPrev = fmod((t - s->t0) / (s->mode == MODE_OFFSET ? OFFSET_RASTER_S : FULL_RASTER_S), 1.0);
         }
@@ -401,20 +578,42 @@ static void update(int k, double t) {
         double swept = (t - s->t0) / raster;
         double p = fmod(swept, 1.0), from = s->pPrev;
         bool whole = (t - s->lastT) >= raster;
-        int best = -1;
+        int best = 0;
         double bestKey = 2.0;
-        for (int i = 0; i < STAR_TABLE_N; i++) {
+        int nTgt = target_count();
+        /* the catalog's stars, then the other vehicles: candidates alike */
+        for (int i = 0; i < STAR_TABLE_N + nTgt; i++) {
             double H, V;
-            if (s->excl[i] || STAR_TABLE[i].mag > sk.limit || !star_hv(&sk, i, &H, &V)) continue;
+            if (i < STAR_TABLE_N) {
+                if (s->excl[i] || STAR_TABLE[i].mag > sk.limit || !star_hv(&sk, i, &H, &V)) continue;
+            } else {
+                TgtView tv;
+                int j = i - STAR_TABLE_N;
+                if ((s->exclTgt >> j) & 1u) continue;
+                if (!target_view(&sk, j, t, &tv) || tv.mag > sk.limit) continue;
+                H = tv.H; V = tv.V;
+            }
             if (fabs(H - hc) > half || fabs(V - vc) > half) continue;
             double f = (vc + half - V) / (2.0 * half);          /* 0 at the top */
             double key;
             if (whole) key = f;
             else if (p >= from) { if (f <= from || f > p) continue; key = f - from; }
             else { if (f > p && f <= from) continue; key = (f > from) ? f - from : f + 1.0 - from; }
-            if (key < bestKey) { bestKey = key; best = i; }
+            if (key < bestKey) {
+                bestKey = key;
+                best = i < STAR_TABLE_N ? i + 1 : LOCK_TARGET0 - (i - STAR_TABLE_N);
+            }
         }
-        if (best >= 0) { s->locked = best + 1; s->acquisitions++; }
+        if (best != 0) {
+            s->locked = best;
+            s->acquisitions++;
+            TgtView tv;
+            if (best <= LOCK_TARGET0 && target_view(&sk, LOCK_TARGET0 - best, t, &tv))
+                fprintf(stderr, "startrk: %s tracker locked on vehicle %d at t=%.2f (%s scan, threshold %.1f): "
+                        "range %.1f kft, magnitude %.1f, phase %.0f deg, H %+.3f V %+.3f deg\n",
+                        k == 1 ? "-Z" : "-Y", tv.norad, t, offset ? "offset" : "full-field", sk.limit,
+                        tv.range / 0.3048 / 1000.0, tv.mag, tv.phaseDeg, tv.H, tv.V);
+        }
         s->pPrev = p;
     }
     s->lastT = t;
@@ -442,6 +641,17 @@ void startrk_read(int k, uint16_t w[3], double t) {
                        (rate > RATE_DEGRADE_DEGS ? 1.0 + 4.0 * (rate - RATE_DEGRADE_DEGS) / 0.3 : 1.0);
             H += n * gauss(s); V += n * gauss(s);
             mag = STAR_TABLE[s->locked - 1].mag; present = true;
+        }
+    } else if (s->locked <= LOCK_TARGET0) {
+        Sky sk;
+        TgtView tv;
+        sky_setup(k, &sk, t);
+        if (target_view(&sk, LOCK_TARGET0 - s->locked, t, &tv)) {
+            double rate = norm(vehdyn_state()->w) * R2D;
+            double n = NOISE_ARCSEC / 3600.0 *
+                       (rate > RATE_DEGRADE_DEGS ? 1.0 + 4.0 * (rate - RATE_DEGRADE_DEGS) / 0.3 : 1.0);
+            H = tv.H + n * gauss(s); V = tv.V + n * gauss(s);
+            mag = tv.mag; present = true;
         }
     }
     s->H = H; s->V = V;
@@ -488,6 +698,7 @@ void startrk_command(int k, uint16_t cmd, double t) {
         }
         if ((cmd & 0x2000u) && !(old & 0x2000u)) {  /* break track */
             if (s->locked > 0) s->excl[s->locked - 1] = 1;
+            if (s->locked <= LOCK_TARGET0) s->exclTgt |= 1u << (LOCK_TARGET0 - s->locked);
             s->locked = 0;
             s->breaks++;
         }
@@ -507,6 +718,9 @@ void startrk_hardware(int k, bool powered, bool doorOpen, double t) {
 
 /* ------------------------------------------------------------------ */
 
+/* A capture: per tracker 21 numbers and the catalog's break-track marks,
+ * then (since target track) each tracker's targets left out -- a capture
+ * without them still loads. */
 #define SAVE_PER (21 + STAR_TABLE_N)
 int startrk_save(double *b, int max) {
     int n = 0;
@@ -519,12 +733,14 @@ int startrk_save(double *b, int max) {
         for (int i = 0; i < 21; i++) if (n < max) b[n++] = v[i]; else n++;
         for (int i = 0; i < STAR_TABLE_N; i++) if (n < max) b[n++] = s->excl[i]; else n++;
     }
+    for (int k = 1; k <= 2; k++) if (n < max) b[n++] = trk[k].exclTgt; else n++;
     return n;
 }
 
 void startrk_load(const double *b, int n, double tCap) {
-    if (n != 2 * SAVE_PER) return;
-    for (int k = 1, j = 0; k <= 2; k++) {
+    if (n != 2 * SAVE_PER && n != 2 * SAVE_PER + 2) return;
+    int j = 0;
+    for (int k = 1; k <= 2; k++) {
         Trk *s = &trk[k];
         s->started = b[j++] != 0; s->powered = b[j++] != 0; s->doorOpen = b[j++] != 0;
         s->cmd = (uint16_t)b[j++]; s->mode = (int)b[j++];
@@ -534,7 +750,10 @@ void startrk_load(const double *b, int n, double tCap) {
         s->stFail = b[j++] != 0; s->stAngErr = b[j++] != 0; s->stStart = b[j++] - tCap;
         s->rng = (unsigned)b[j++]; s->H = b[j++]; s->V = b[j++]; s->acquisitions = (long)b[j++];
         for (int i = 0; i < STAR_TABLE_N; i++) s->excl[i] = (unsigned char)(b[j++] != 0);
+        s->exclTgt = 0;
     }
+    if (n == 2 * SAVE_PER + 2)
+        for (int k = 1; k <= 2; k++) trk[k].exclTgt = (unsigned)b[j++];
 }
 
 void startrk_report(void) {
@@ -546,16 +765,32 @@ void startrk_report(void) {
                         "%ld break track(s), shutter closed by bright objects %ld time(s); now %s\n",
                 NAME[k], s->powered ? "on" : "OFF", s->doorOpen ? "open" : "NOT OPEN", s->reads,
                 s->acquisitions, s->breaks, s->closes,
-                s->locked > 0 ? STAR_TABLE[s->locked - 1].name : s->locked < 0 ? "on the self-test light"
-                                                                           : "searching");
+                s->locked > 0 ? STAR_TABLE[s->locked - 1].name
+                : s->locked <= LOCK_TARGET0 ? "on the rendezvous target"
+                : s->locked < 0 ? "on the self-test light" : "searching");
     }
 }
 
 int startrk_test_locked(int k) {
     if (k < 1 || k > 2) return 0;
     int l = trk[k].locked;
-    return l > 0 ? STAR_TABLE[l - 1].id : l;
+    return l > 0 ? STAR_TABLE[l - 1].id : l <= LOCK_TARGET0 ? STARTRK_LOCKED_TARGET : l;
 }
+
+int startrk_test_target(int k, double t, double hv[2], double *mag, double *rangeM, double *phaseDeg) {
+    if (k < 1 || k > 2) return 0;
+    Sky sk;
+    TgtView tv;
+    sky_setup(k, &sk, t);
+    if (!target_view(&sk, 0, t, &tv)) return 0;
+    hv[0] = tv.H; hv[1] = tv.V;
+    if (mag) *mag = tv.mag;
+    if (rangeM) *rangeM = tv.range;
+    if (phaseDeg) *phaseDeg = tv.phaseDeg;
+    return tv.norad;
+}
+
+double startrk_test_centroid(double phaseDeg) { return photo_centroid(phaseDeg); }
 
 void startrk_test_sun(double t, double u[3]) {
     double lam, eps;

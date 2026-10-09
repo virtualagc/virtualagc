@@ -151,5 +151,15 @@ software and a 10 deg square in hardware.
   them).
 - The self-test latch-clear time is not documented.
 - The hardware configuration (image dissector or solid-state) per vehicle;
-  the image-dissector bits are modelled.
-- Target track (rendezvous) needs a target vehicle, which does not exist yet.
+  the image-dissector bits are modelled.  From STS-117 on every Orbiter flew
+  an image dissector at -Z and a solid-state tracker at -Y (Herrera, "Space
+  Shuttle Star Tracker Challenges", NTRS 20110003998), so -Z, the
+  rendezvous tracker, is the right one to model this way.
+- Target track (rendezvous): DONE 2026-10-08 (RENDEZVOUS_PLAN.md Stage 1;
+  startrk.c, TARGET TRACK).  The vehdyn target (the ISS) is one more object
+  the raster can cross, sunlit only, seen from the nav base; its light's
+  centroid, brightness and the stars' noise.  Test
+  `test/test_startrk_target.c`.  Not modelled: the night (NIGHTTIME STRK
+  OPS [18E] tracks on at THOLD 0 after sunset, by a light no document here
+  names), and the solid-state tracker's target suppress on a large bright
+  target.
