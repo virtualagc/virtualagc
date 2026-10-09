@@ -50,8 +50,10 @@ the Orbiter's navigation error in LVLH, and the angle between the body -Z
 axis -- the -Z star tracker's and COAS's line of sight; the overhead
 windows look 5 deg aft of it -- and the ISS.
 
-RUN AT --rate 1: at 2, with SPEC 33 up, the IDP's transfers broke and the
-keys after it were lost (2026-10-08).
+--rate 2 works: the IDP transfers that broke at rate 2 with SPEC 33 up, and
+lost every key after it (2026-10-08), were macOS App Nap throttling MEDS2;
+fixed in b4eb048 (macdock.py opts the GUI programs out, MEDS2's bus pump
+yields between buses).
 
 Unlike fly_sts134.py this is not the flight from liftoff: the start skips
 FD1-FD3's phasing (RENDEZVOUS_PLAN.md, Stage 7), and one GPC flies where the
@@ -290,7 +292,13 @@ class PassMemory(object):
          "T1_ILOAD": 0xDEDC, "DT_ILOAD": 0xDF2C, "EL_ILOAD": 0xDF7C, "ROFF_ILOAD": 0xDFCC,
          "SHUTTLE_M50": 0xE1F0, "TARGET_M50": 0xE214, "LAMB_ILOAD": 0xE34E,
          "DISP_MISS": 0xE376, "ALARM_KILL": 0xE386,
-         "TARGET_MASS": 0xE7DE, "TARGET_CD": 0xE7E0, "TARGET_AREA": 0xE7E2}
+         "TARGET_MASS": 0xE7DE, "TARGET_CD": 0xE7E0, "TARGET_AREA": 0xE7E2,
+         # the ORBIT MNVR EXEC display's VGO, body axes (CGZ123; read 9.36
+         # -0.68 -0.34 before the Ti burn and 0.04 -2.15 +1.01 after it in
+         # m1b-run2, as the display would), and PASS's one-engine OMS trims,
+         # pitch then the left and right yaw (CGGC02 I-loads, -0.1, +5.21,
+         # -5.21 on this tape)
+         "VGO_BODY": 0xF0C2, "ONE_ENG_TRIM_P": 0xF10C, "ONE_ENG_TRIM_Y": 0xF10E}
 
     def __init__(self, path):
         self.m = open(path, "rb").read()
@@ -379,7 +387,12 @@ class Rendezvous(fly_sts134.Flight):
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", "1", "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
-               "--snapshot-dir", self.a.logs, "--duration", "20000"]
+               "--snapshot-dir", self.a.logs, "--duration", "20000",
+               # the commander's station, for the THC that trims the Ti burn's
+               # residuals: without a hand-controller window a script's `thc`
+               # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
+               # window for that station is running")
+               "--rhc", "lh"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -428,8 +441,13 @@ class Rendezvous(fly_sts134.Flight):
             # the navigation's cycle turns over between them the two states
             # are of different times (seen: a 24 kft "error", ~1 s of orbital
             # speed).  Such a cycle is not a comparison; keep the last good one.
-            if to and tt and (vnorm(vsub(rt, [x / FT for x in tt[0]])) > 2000.0 or
-                              vnorm(vsub(ro, [x / FT for x in to[0]])) > 2000.0):
+            # The TARGET's error is the test: R/V_TARGET are the ones that
+            # come late, and PASS's target state stays within a few hundred
+            # feet of the truth, while a turnover moves it ~24 kft.  The
+            # Orbiter's own error is no test -- it grew past 2 kft by Ti - 29
+            # min in m1-run4, and from there every comparison was refused and
+            # the log repeated the last good one for the rest of the run.
+            if to and tt and vnorm(vsub(rt, [x / FT for x in tt[0]])) > 8000.0:
                 for k in [k for k in out if k.startswith("pass_")]:
                     del out[k]
                 out.update(getattr(self, "_last_good", {}))
@@ -591,7 +609,11 @@ wait crt 1 title 2011/ timeout 600
         self.script_done("target-track", 120)
         self.wait_sim(5)
         self.dump_screen("UNIV PTG, TRK")
-        # "When MNVR cmplt, DAP: A/AUTO/VERN(ALT)" -- the -Z axis on the ISS
+        self.track_complete("dap-a-vern")
+
+    def track_complete(self, name):
+        """[12A] "When MNVR cmplt, DAP: A/AUTO/VERN(ALT)": the -Z axis on the
+        ISS, then the verniers hold it."""
         t0 = self.truth()["t"]
         while True:
             c = self.compare()
@@ -601,8 +623,8 @@ wait crt 1 title 2011/ timeout 600
                 self.say("TRACK: the maneuver did not complete in 20 min")
                 break
             time.sleep(5)
-        self.play("+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n", "dap-a-vern")
-        self.script_done("dap-a-vern", 60)
+        self.play("+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n", name)
+        self.script_done(name, 60)
         self.say("crew: MNVR complete (-Z %.2f deg from the ISS); DAP A/AUTO/VERN"
                  % (self.compare() or {}).get("minusZ_to_iss_deg", -1))
 
@@ -736,13 +758,14 @@ wait crt 1 title 2011/ timeout 600
         if self.truth()["gmt"] < tig - 17 * 60.0:
             self.wait_gmt(tig - 17 * 60.0)
         wt = self.orbiter_lb()
+        trims = self.one_engine_trims()
         self.play("+1     keys OPS 2 0 2 PRO\n"
                   "wait crt 1 title 2021/ timeout 180\n"
-                  "+3     keys ITEM 2 EXEC\n"
+                  "+3     keys ITEM 2 EXEC\n" + trims +
                   "+4     keys ITEM 9 + %s EXEC\n"
                   "+4     keys ITEM 2 2 EXEC\n" % " ".join("%d" % round(wt)), "ops202")
         self.script_done("ops202", 300)
-        self.say("crew: OPS 202, L OMS, WT %d lb, LOAD" % round(wt))
+        self.say("crew: OPS 202, L OMS, trims, WT %d lb, LOAD" % round(wt))
         sol = self.tgt10("final") or {}
         # FINAL SOLUTION (p. 4-15 and the burn solution rules, p. 1-3): with
         # no sensor pass there is no FLTR solution; burn PROP if it is within
@@ -769,7 +792,7 @@ wait crt 1 title 2011/ timeout 600
                   # COMPUTE T1, which in MM 202 re-initialises the MNVR display
                   # -- the first run's L OMS did not survive it, and both
                   # engines burned (2026-10-08)
-                  "+3     keys ITEM 2 EXEC\n"
+                  "+3     keys ITEM 2 EXEC\n" + trims +
                   "+4     keys ITEM 9 + %s EXEC\n" % " ".join("%d" % round(wt)) + keyed +
                   "+3     keys ITEM 2 2 EXEC\n"
                   "+4     keys ITEM 2 3 EXEC\n"
@@ -784,15 +807,81 @@ wait crt 1 title 2011/ timeout 600
         tr0 = self.truth()
         self.play("+0     keys EXEC\n", "ti-exec")
         self.say("crew: EXEC at TIG-15 s (TIG GMT %.1f)" % tig)
-        self.wait_gmt(tig + 120.0)
-        tr1 = self.truth()
-        dv = [(tr1["v"][i] - tr0["v"][i]) for i in range(3)]
-        self.say("Ti burn: the truth's velocity changed by %.2f ft/s from TIG-15 s to TIG+120 s "
-                 "(gravity's share included)" % (vnorm(dv) / FT))
-        for line in self.log_text().splitlines()[-4000:]:
-            if "OMS" in line and ("ON" in line or "off" in line) and line.startswith("vehdyn"):
-                self.say("  " + line.strip())
-        del mem
+        self.wait_gmt(tig + 60.0)
+        after = self.probe("ti-cutoff")
+        v0, v1 = self.vehdyn_capture("ti-loaded"), self.vehdyn_capture("ti-cutoff")
+        if v0 and v1:
+            dv = [(v1["sensed"][i] - v0["sensed"][i]) / FT for i in range(3)]
+            self.say("Ti burn: the truth's sensed delta-V %.2f ft/s (M50 %+.2f %+.2f %+.2f); OMS on "
+                     "L %.2f s, R %.2f s" % (vnorm(dv), *dv, v1["oms_s"][0] - v0["oms_s"][0],
+                                            v1["oms_s"][1] - v0["oms_s"][1]))
+        if after:
+            self.say("Ti burn: residuals VGO %+.2f %+.2f %+.2f ft/s (body)" % tuple(after.svec(after.A["VGO_BODY"])))
+        self.trim_residuals()
+        del mem, tr0
+
+    def one_engine_trims(self):
+        """The burn pad's trims for a single-engine burn (5-4, "TRIM per Burn
+        Pad").  The pad is not to hand; PASS's own one-engine trims are (the
+        I-loads CGGV_ONE_ENG_OMS_PITCH_TRIM and _YAW_TRIM), keyed as P and LY
+        (ITEMs 6 and 7).  Without them m1b-run2 burned the left engine on the
+        two-engine trims (P +0.4, LY -5.75): the burn attitude was computed
+        for thrust along body X, the gimbal then swung 13 deg to put the
+        left engine's thrust through the CG, and the burn ended with VGO Y
+        -2.15 and Z +1.01 ft/s."""
+        mem = PassMemory.from_capture(os.path.join(self.a.logs, "sts134r-ti"),
+                                      os.path.join(self.a.logs, "sts134r-ipl"))
+        if not mem:
+            self.say("one-engine trims: no capture to read them from; left as they are")
+            return ""
+        p = mem.sp(mem.A["ONE_ENG_TRIM_P"])
+        ly = mem.sp(mem.A["ONE_ENG_TRIM_Y"])
+        if not (abs(p) <= 6.0 and 0.0 < ly <= 7.0):
+            self.say("one-engine trims read as P %+.2f LY %+.2f -- not believable; left as they are" % (p, ly))
+            return ""
+        self.say("one-engine trims (PASS's I-loads): P %+.1f LY %+.1f" % (p, ly))
+        return "+4     keys ITEM 6 %s %s EXEC\n" % (keys_num(p, "%.1f"), keys_num(ly, "%.1f"))
+
+    def vehdyn_capture(self, name):
+        """The truth in a capture: the sensed delta-V (m/s, M50) and each OMS
+        engine's burning seconds (vehdyn_save's order)."""
+        try:
+            b = json.load(open(os.path.join(self.a.logs, "sts134r-" + name, "vehdyn.json")))["vehdyn"]
+        except (OSError, ValueError, KeyError):
+            return None
+        i = 3 + 3 + 3 + 4 + 3 + 5                # version, have, t, r, v, q, w, propellant
+        sensed = b[i:i + 3]
+        i += 3 + 2 * 44                           # on[], onSec[]
+        return {"sensed": sensed, "oms_s": (b[i + 6], b[i + 13])}
+
+    # RESIDUALS: trimmed with the THC to 0.2 ft/s per axis, the tolerance
+    # assumed here for a rendezvous burn (5-4's own numbers are not to hand).
+    # Body axes, as the MNVR display shows VGO; the THC's directions are the
+    # orbiter's (+z down), so each residual is flown in its own sign.  The
+    # hold is the residual over a guessed 0.25 ft/s^2, then measured again.
+    TRIM_TOL, TRIM_ACC = 0.2, 0.25
+
+    def trim_residuals(self):
+        for n in range(8):
+            mem = self.probe("ti-trim-%d" % n)
+            if not mem:
+                self.say("TRIM: no capture; residuals left")
+                return
+            vgo = mem.svec(mem.A["VGO_BODY"])
+            if all(abs(v) <= self.TRIM_TOL for v in vgo):
+                self.say("TRIM: residuals VGO %+.2f %+.2f %+.2f ft/s -- trimmed" % tuple(vgo))
+                return
+            script, longest = "", 0.0
+            for ax, v in zip("xyz", vgo):
+                if abs(v) > self.TRIM_TOL:
+                    hold = min(max(abs(v) / self.TRIM_ACC, 0.2), 10.0)
+                    longest = max(longest, hold)
+                    script += "+1     thc fwd %s%s %.2f\n" % ("+" if v > 0 else "-", ax, hold)
+            self.say("TRIM %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s" % (n, *vgo, script.strip().replace("\n", "; ")))
+            self.play(script, "ti-trim-%d" % n)
+            self.script_done("ti-trim-%d" % n, 120)
+            self.wait_sim(longest + 5.0)          # the holds run on after the script ends
+        self.say("TRIM: residuals not within %.1f ft/s after 8 tries" % self.TRIM_TOL)
 
     def coast(self):
         """After Ti: OPS 201, the -Z target track again ([12A]), and the
@@ -811,6 +900,11 @@ wait crt 1 title 2011/ timeout 600
                   "+3     keys ITEM 1 9 EXEC\n", "post-ti-track")
         self.script_done("post-ti-track", 300)
         self.say("crew: OPS 201, -Z target track")
+        # and, as before Ti, the verniers once the -Z axis is on the ISS: the
+        # first M1b run left DAP B/ALT holding the track with the primaries
+        # for the whole coast, which [12A] does not, and whose translations
+        # move the truth itself
+        self.track_complete("post-ti-dap-a-vern")
         t2 = self.ti_gmt + TGT10["DT"] * 60.0
         stop = min(t2, self.ti_gmt + self.a.coast_min * 60.0)
         while self.truth()["gmt"] < stop:
