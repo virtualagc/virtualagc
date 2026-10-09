@@ -147,3 +147,52 @@ def cells_atlas(seed=1984):
             p[mid + 9:mid + 260, 150:225] = STRIP
         img[:, k * w:(k + 1) * w] = p
     return Image.fromarray(np.uint8(np.clip(img, 0, 255))), 3
+
+
+# The paddles' backs: white (the substrate's white paint) with the wiring
+# harness laid over it in dark-brown runs -- as the STS-41C photographs of
+# the released observatory show them: two runs across the wing's width, jogging
+# over the middle panel, a radial trunk up the middle panel's centre and
+# short branches, each run dotted with tie-downs.  The atlas is the whole
+# wing's back, u across the three panels (as cells_atlas), v radial.
+BACK_PX = (3 * 280, 520)
+BACK = (232, 232, 228)
+HARNESS = (92, 62, 40)
+TIE = (60, 40, 26)
+
+
+def back_atlas(seed=1985):
+    from PIL import Image, ImageDraw
+    rng = np.random.default_rng(seed)
+    w, h = BACK_PX
+    pw = w // 3
+    img = Image.new("RGB", (w, h), BACK)
+    d = ImageDraw.Draw(img)
+    for k in range(3):                         # each panel a shade apart, a grey frame
+        s = int(rng.integers(-6, 6))
+        d.rectangle([k * pw, 0, (k + 1) * pw - 1, h - 1], fill=tuple(c + s for c in BACK),
+                    outline=(150, 150, 148), width=4)
+    def run(pts, width=4, ties=True):
+        d.line(pts, fill=HARNESS, width=width, joint="curve")
+        if not ties:
+            return
+        for (x0, y0), (x1, y1) in zip(pts[:-1], pts[1:]):
+            L = math.hypot(x1 - x0, y1 - y0)
+            for t in np.arange(8, L, 16):
+                x, y = x0 + (x1 - x0) * t / L, y0 + (y1 - y0) * t / L
+                d.rectangle([x - 3, y - 3, x + 3, y + 3], fill=TIE)
+    # the two long runs across the wing (v ~ 0.40 and 0.56), jogging over the middle panel
+    run([(10, int(0.40 * h)), (int(1.15 * pw), int(0.40 * h)), (int(1.30 * pw), int(0.47 * h)),
+         (int(1.70 * pw), int(0.47 * h)), (int(1.85 * pw), int(0.40 * h)), (w - 10, int(0.40 * h))])
+    run([(10, int(0.62 * h)), (int(1.10 * pw), int(0.62 * h)), (int(1.25 * pw), int(0.55 * h)),
+         (int(1.75 * pw), int(0.55 * h)), (int(1.90 * pw), int(0.62 * h)), (w - 10, int(0.62 * h))])
+    # the radial trunk to the yoke (v = 0, the inner edge) up the middle panel, doubled
+    for du in (-10, 10):
+        run([(int(1.5 * pw) + du, 0), (int(1.5 * pw) + du, int(0.80 * h))], width=5)
+    # short radial branches on the outer panels (a cross with each long run)
+    for xc in (int(0.5 * pw), int(2.5 * pw)):
+        run([(xc, int(0.25 * h)), (xc, int(0.78 * h))], width=3)
+    # the panels' hinge-line cable crossings
+    for k in (1, 2):
+        run([(k * pw - 14, int(0.51 * h)), (k * pw + 14, int(0.51 * h))], width=3, ties=False)
+    return img

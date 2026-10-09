@@ -59,8 +59,8 @@ HGA_DEPLOYED = False            # True: the high-gain antenna as deployed after 
 
 # ----------------------------------------------------------------- colours
 # linear albedo
-KAPTON = (0.66, 0.29, 0.07)          # aluminized Kapton, outward (x the crinkle map ~0.8)
-KAPTON_B = (0.57, 0.24, 0.055)       # the neighbouring blankets, a shade apart
+KAPTON = (0.64, 0.37, 0.10)          # aluminized Kapton, outward (x the crinkle map ~0.8)
+KAPTON_B = (0.55, 0.31, 0.08)        # the neighbouring blankets, a shade apart
 SEAMS = (0.10, 0.05, 0.02)           # between blankets
 WHITE = (0.80, 0.80, 0.78)           # the Sun face's white paint
 SILVER = (0.70, 0.71, 0.72)          # bare aluminium, silver Teflon
@@ -410,7 +410,7 @@ def solar_wings(kit):
     atlas, npan = S.cells_atlas()
     x = X_WING
     th = 0.025
-    one_cells, backs, hinges, yoke, drive = [], [], [], [], []
+    one_cells, one_backs, backs, hinges, yoke, drive = [], [], [], [], [], []
     z0 = WING_Z_MID - (3 * PANEL_W + 2 * PANEL_GAP) / 2
     du = 1.0 / npan
     eps = 0.5 / S.PANEL_PX[0] / npan
@@ -422,6 +422,9 @@ def solar_wings(kit):
         u0, u1 = k * du + eps, (k + 1) * du - eps
         one_cells.append(S.quad((xf, ya, za), (xf, ya, zb), (xf, yb, zb), (xf, yb, za),
                                 uv=[(u0, 0.0), (u1, 0.0), (u1, 1.0), (u0, 1.0)]))
+        xb = x - th / 2 - 0.005                      # the white back and its harness
+        one_backs.append(S.quad((xb, ya, za), (xb, yb, za), (xb, yb, zb), (xb, ya, zb),
+                                uv=[(u0, 0.0), (u0, 1.0), (u1, 1.0), (u1, 0.0)]))
         if k < 2:                                    # hinges between the panels
             zh = zb + PANEL_GAP / 2
             for yh in (ya + 0.35, yb - 0.35):
@@ -446,7 +449,10 @@ def solar_wings(kit):
         cells_all.append(kit.turn(cells_mesh, R))
         uv_all.append(cells_uv)
     cells, cells_uv2 = S.merge_uv(list(zip(cells_all, uv_all)))
+    bk_mesh, bk_uv = S.merge_uv(one_backs)
+    bk, bk_uv2 = S.merge_uv([(kit.turn(bk_mesh, kit.rot('x', WING_CANT + f)), bk_uv) for f in (0.0, 180.0)])
     parts = [kit.part("solar cells", (1.0, 1.0, 1.0), cells, texture=atlas, uv=cells_uv2),
+             kit.part("solar paddle back harness", (1.0, 1.0, 1.0), bk, texture=S.back_atlas(), uv=bk_uv2),
              kit.part("solar paddle backs", ARRAY_BACK, *(placed(backs, False) + placed(backs, True))),
              kit.part("solar paddle hinges", SILVER, *(placed(hinges, False) + placed(hinges, True))),
              kit.part("solar paddle yokes", SILVER, *(placed(yoke, False) + placed(yoke, True))),
@@ -485,8 +491,9 @@ def high_gain_antenna(kit):
         metal.append(kit.rod(piv + 0.02 * d, piv + 0.35 * d, 0.03, n=10))
         metal.append(kit.along(kit.cylinder(0.10, 0.0, 0.02, n=24), d, piv + 0.35 * d))
         mass_at = tuple(piv + 0.1 * d)
-    return [kit.part("HGA dish", (0.78, 0.78, 0.76), *dish_w, smooth=True),
-            kit.part("HGA dish back", (0.22, 0.13, 0.05), *dish_b, smooth=True),
+    # the dish's tan-gold face and back (every photograph of it, stowed or deployed)
+    return [kit.part("HGA dish", (0.58, 0.45, 0.24), *dish_w, smooth=True),
+            kit.part("HGA dish back", (0.46, 0.34, 0.15), *dish_b, smooth=True),
             kit.part("HGA feed and mast", SILVER, *metal)], mass_at
 
 
