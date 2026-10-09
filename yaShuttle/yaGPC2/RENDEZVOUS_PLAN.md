@@ -1088,6 +1088,93 @@ to the arrival at rate 2.
 
 
 
+**THE SECOND VOLUME, rndz2** (2026-10-09, branch rndz-iloads-2).
+`tools/sites/sts134-rndz-iloads.json` now has 236 cells, all in G2's own
+copy, and is written to
+`~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv`
+(SHA-256 f16c38dd...2806a).  The first volume, `-rndz.mmv`, is kept.
+- **Added: mass properties and DAP.**  PASS-IDLE reported these from
+  pure-G2.fcm; they agree with DASS_G2.ASC and corrected-G2.fcm.
+  - **#DGCQORB.**
+    - CGCS_CG_NOM: 1105.2, 0.4, 376.2 -> 1104.2, 0.4, 371.8 in.
+    - CGCS_MOMENTS_OF_INERTIA_NOM: 951736, 7180436, 7507857 -> 938131,
+      7129268, 7462045 slug-ft^2.
+    - CGCS_PRODUCTS_OF_INERTIA_NOM: -2475, 274960, -2539 -> -2415,
+      273803, -2486.
+    - Jet-select and VERN candidate thresholds.  CGCS_REF_FORCE is
+      unchanged.
+  - **#PCGCFL2.**
+    - CGKV_PRINCIPAL_INERTIA_REF: 840000, 6.11E6, 6.30E6 -> STS-134's.
+    - The primary and vernier acceleration gains: 6.4E-5 -> 6.4E-6.
+    - The unique-filter gains, CGCS_VERN_ROT_MIN_IMPULSE 0.0015 -> 0.002,
+      and CGCK_MAG_CONTROL_FORCE.
+  - **#PCGCFL3.** The phase-plane hysteresis CGPS_DHYS1/2, and
+    CGCS_MAG_CONTROL_ACCL_REF_PRIM 0.98, 1.0, 0.73 -> 0.8, 0.9, 0.6.
+  - **#PCGCCOM.** The phase-plane switching lines CGPS_K4/K5 (all to -10).
+  - **#DGC1ORB.** The DAP load-percentage table.
+  - **#DGC9ORB.** KH.
+- **Added: navigation and targeting.**
+  - **What else came in.** The 54 PATCH SUMMARY lines that carry a '0'
+    carriage control in column 1.  The first version's parser missed them.
+    The rendezvous ones among them: CGZV_ROFF_ILOAD_ARRAY+97 (TGT 9's
+    offset's low half), CGNS_QA3_DELR_RATIO_SF_INV, CGNS_GPS_QA2_VTOL_MAX_UVW
+    and CGGS_NAVBASE_ALT+2.
+  - **#PCGNFLT.** The drag coefficients CGNS_CDA/CDF/CDN/CDS and
+    CGNS_EXP_SHAPE_FACTOR.
+  - **GLRREN's antenna offset, GLR_R_OFFSET_BODY.** (-12.22, 11.20, -1.82)
+    -> **(45.74, 11.13, -5.79) ft** from the c.g.  This one was already in
+    the first volume.
+  - **CGNS_VAR_RR_RNG_MIN.** 711 -> 6400 ft^2.
+- **Only the G2 copy is changed now.**  STS-134's G1/G6 load
+  (DASS_G16.ASC) has other values for 27 of #DGLJRCV's words.  The first
+  volume changed all four configurations' copies of #DGLJRCV; this one
+  leaves the others alone.
+- **Left out.**
+  - **#PCGRRMC CGRS_JET_MAP.** The flight's map swaps logical jet numbers;
+    vehdyn's decoding is unchecked against it.
+  - **RCS redundancy management.** The VRCS leak limits and
+    CGRS_DILEMMA_CTR_LIMIT.
+  - **The other GNC compools.** About 1900 words, not reviewed.
+  - **Thirteen cells not placed.**  They are listed in the spec's notes.
+- **The check.**  IPL to OPS 201 on port base 49800 (`rndz2-ipl`): PASS
+  came up, its DAP configured A/AUTO/VERN.  The UPLINK capture holds
+  every value above.
+
+**GLQREN against the flown load.**  Of GLQREN's 16 constant pairs, these
+differ (tape -> flown), all on both volumes:
+- **Bias INITs:** 1.0 -> 0, all four pairs.
+- **TAU_RR_ANGLES:** 600 -> 4000 s.
+- **BIAS_VAR_RRDOT(2):** 0.11 -> 1.0 (ft/s)^2.
+- **VAR_RRDOT(1):** 1.0 -> **711 ft^2**.
+- **VAR_ST_ANGLES:** 1.2E-6 -> 1E-6.
+
+These are the same as the flown load: BIAS_VAR_COAS, BIAS_VAR_RR,
+BIAS_VAR_RRDOT(1) 711, BIAS_VAR_ST, TAU_COAS, TAU_RRDOT 600, TAU_ST,
+VAR_COAS and VAR_RR.
+
+**The range bias.**  The range bias is a Gauss-Markov state, sigma 26.7 ft
+(711 ft^2) with a 600 s time constant, on both loads.
+- **The tape's range mark is too precise.**  It is weighted at 1 ft^2 (a
+  1 ft sigma), where the radar model's noise is 15 ft and more.  The filter
+  takes each mark as almost exact.
+- **What that does in a static R-bar hold.**  The range is constant, so
+  the bias and the position along the line of sight are hard to tell
+  apart.  A 1 ft^2 weight lets each mark's 15 ft of noise move the
+  estimates, so the bias estimate random-walks within its 26.7 ft sigma
+  and beyond: the 6-to-51 ft drift the kuradar agent saw.
+- **What the flown values change.**  The flown 711 ft^2, with
+  CGNS_VAR_RR_RNG_MIN raised 711 -> 6400, gives each mark 1/700 of the
+  weight.  The bias estimate should then settle near its true value and
+  stay within a few feet.  Expected, not yet flown: vol-run1 had these
+  values but no hold.
+- **The antenna offset (above) needs care.**  kuradar.c's angle inversion
+  uses the tape's (-12.22, 11.20, -1.82) ft.  The Ku antenna is forward,
+  over the payload bay, so the flown (45.74, 11.13, -5.79) is the physical
+  one.  With the flown offset in PASS and the old one in kuradar.c, the
+  predicted and measured angles disagree by about atan(58 ft / range):
+  5 deg at 600 ft.  The model should take the flown offset (a yaGPC2
+  change, for the radar's owner).  vol-run1 flew with this mismatch.
+
 **Not done.**
 - **The other I-loads.** `--dass-iloads all` (DAP, guidance, the other
   GNC compools: 2026 words) is not yet flown.
