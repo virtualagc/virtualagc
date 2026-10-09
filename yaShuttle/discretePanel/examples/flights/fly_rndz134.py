@@ -1391,8 +1391,10 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             return
         self.cw_pending = False
         on = set(self.cw.lit()) if getattr(self, "cw", None) else set()
-        script = "+1     press master_alarm\n" + ("+2     keys MSG_RESET\n" if on - {"BACKUP C/W ALARM",
-                                                                                  "SM ALERT TONE"} else "")
+        # MSG RESET twice when latched lights are to be reset: a pending
+        # class-5 message (ILLEGAL ENTRY) absorbs the first (DMTERR.hal:766-788)
+        script = "+1     press master_alarm\n" + ("+2     keys MSG_RESET\n+3     keys MSG_RESET\n"
+                                                  if on - {"BACKUP C/W ALARM", "SM ALERT TONE"} else "")
         n = getattr(self, "_cw_n", 0) + 1
         self._cw_n = n
         self.play(script, "cw-ack-%d" % n)

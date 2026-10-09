@@ -749,7 +749,13 @@ class ManualPhase(object):
         # messages and lamps reset, the tone acknowledged
         if hasattr(self, "imu1_select"):
             self.imu1_select(True, "hold")
-            self.play("+1     keys MSG_RESET\n+3     press master_alarm\n", "hold-msg-reset")
+            # MSG RESET twice: with a class-5 message pending (an ILLEGAL
+            # ENTRY on the IDP), the first press only clears that and brings
+            # back the queued fault message -- CDL_MSG is not set
+            # (DMTERR.hal:766-788), so the C&W latches (DGNLIGHT, DLALIGHT)
+            # stay set; the second press resets them.  A spare press is harmless.
+            self.play("+1     keys MSG_RESET\n+3     keys MSG_RESET\n+3     press master_alarm\n",
+                      "hold-msg-reset")
             self.script_done("hold-msg-reset", 60)
             self.say("crew: MSG RESET, MASTER ALARM")
         p0 = dict(self.pulses)
