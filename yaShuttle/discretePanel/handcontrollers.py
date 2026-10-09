@@ -89,6 +89,17 @@ THC_UNITS = (1, 2, 3)                       # contacts A, B, C
 THC_BITS = {"+X": 0x0100, "-X": 0x0080, "+Y": 0x0040,
             "-Y": 0x0020, "+Z": 0x0010, "-Z": 0x0008}
 THC_MASK = 0x01F8
+# THE AFT THC'S WIRING: its physical movement (relative to its panel) closes
+# the contacts of a DIFFERENT direction for Y and Z -- GPO (RNDZ CHB/DM-CH-08
+# Rev B) Table 3.8-1, the "Display Outputs" column: +X -> +X, -X -> -X,
+# +Y -> -Z, -Y -> +Z, +Z -> +Y, -Z -> -Y.  PASS then turns those contacts
+# into body axes by the SENSE switch (GP0THC.hal THC_AFT_TRANS_TABLE), so in
+# -Z sense in/out is toward/away from the target overhead, left/right body Y
+# and up/down body X.  Every direction this program is given -- a key, a
+# joystick, a script's `thc aft` -- is a PHYSICAL movement of the stick; the
+# contacts it closes are the wired ones.  (Without this, a person flying the
+# aft THC got PASS's response to the wrong axis for Y and Z, 2026-10-09.)
+AFT_WIRING = {"+X": "+X", "-X": "-X", "+Y": "-Z", "-Y": "+Z", "+Z": "+Y", "-Z": "-Y"}
 REPUBLISH_S = 0.25
 TYPE_AID, OP_VALUE = 6, 4
 RHC_FULL = 32000                 # counts at full throw: 5.0 V
@@ -188,16 +199,24 @@ class Publisher:
         now = time.monotonic()
         if not force and self.bits == self.sent and now - self.last_send < REPUBLISH_S:
             return
+        wired = self.bits
+        if self.station == "aft":
+            wired = 0
+            for k, b in THC_BITS.items():
+                if self.bits & b:
+                    wired |= THC_BITS[AFT_WIRING[k]]
         for u in THC_UNITS:
             port = D.PORT_BASE + MDM_IO_OFFSET + u - 1
-            for op, w in ((OP_RESET, THC_MASK & ~self.bits), (OP_SET, self.bits)):
+            for op, w in ((OP_RESET, THC_MASK & ~wired), (OP_SET, wired)):
                 if w:
                     self.sock.sendto(struct.pack(">HHHHH", op, TYPE_DIL,
                                                  (self.card << 8) | self.ch, 1, w),
                                      (D.GROUP, port))
         if self.bits != self.sent and not sys.stdout.isatty():
             on = [k for k, b in THC_BITS.items() if self.bits & b]
-            log("%s THC %s" % (self.station.upper(), " ".join(on) or "in detent"))
+            log("%s THC %s%s" % (self.station.upper(), " ".join(on) or "in detent",
+                                 "" if self.station != "aft" or not on else
+                                 " (contacts %s)" % " ".join(AFT_WIRING[k] for k in on)))
         self.sent = self.bits
         self.last_send = now
 

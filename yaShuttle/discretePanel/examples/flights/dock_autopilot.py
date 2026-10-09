@@ -118,15 +118,17 @@ def tru_dock(self, timeout=3.0):
 # camera on the A3 monitor (~/workspace/pass-run/rndz/apds-cctv-aft-findings.md).
 # A6U's FLT CNTLR PWR is not modelled: the aft controllers are always live.
 DAP_PANEL = "a6u"
-# The aft THC in SENSE -Z, as PASS transforms it: GP0THC.hal's
-# THC_AFT_TRANS_TABLE, the -Z row (6, 5, 2, 1, 3, 4) over the aft stick's
-# +X -X +Y -Y +Z -Z -- stick +X -> body -Z, -X -> +Z, +Y -> -X, -Y -> +X,
-# +Z -> +Y, -Z -> -Y.  Measured the same on aft1 (2026-10-09): three +y
-# pulses gave body -0.057 ft/s in X, three +z +0.042 in Y.  The first
-# version took the mapping from a transcription of GPO Table 3.8-1 that had
-# Y and Z wrong, and aft1 flew off 64 ft.  Body axis -> (stick axis, sign
-# of the stick deflection for a POSITIVE body command):
-AFT_STICK = {"x": ("y", "-"), "y": ("z", "+"), "z": ("x", "-")}
+# The aft THC in SENSE -Z: a PHYSICAL stick movement (relative to its panel)
+# -> the body axis PASS commands, GPO Table 3.8-1 (its "Display Output" column
+# is the aft THC's wiring, which handcontrollers.py applies; GP0THC.hal's
+# THC_AFT_TRANS_TABLE then maps those contacts by SENSE): +X (in) -> -Z, -X
+# -> +Z, +Y -> -Y, -Y -> +Y, +Z -> -X, -Z -> +X.  Body axis -> (stick axis,
+# sign of the stick movement for a POSITIVE body command).  The first aft
+# flight used this mapping against a handcontrollers that closed same-named
+# contacts, and flew 64 ft off (aft1); the second fitted the miswiring
+# instead (aft2, apds1).  With the wiring modelled, the physical mapping
+# is right again (2026-10-09).
+AFT_STICK = {"x": ("z", "-"), "y": ("y", "-"), "z": ("x", "-")}
 
 
 def thc_pulses_aft(self, dv_lvlh, axes, q, label, nmax=4):
