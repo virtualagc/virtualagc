@@ -263,7 +263,16 @@ class Flight:
         end = time.time() + timeout
         while time.time() < end:
             if getattr(self, "proc", None) is not None and self.proc.poll() is not None:
-                raise SystemExit("fly_sts134: simulatePASS.py has exited (see simulatePASS.out)")
+                # and why, in its own words: "has exited" alone sent the owner
+                # looking (a missing --layout file, 2026-10-09)
+                outp = os.path.join(self.a.logs, "simulatePASS.out")
+                why = ""
+                try:
+                    lines = [l.strip() for l in open(outp, errors="replace") if l.strip()]
+                    why = (": " + lines[-1]) if lines else ""
+                except OSError:
+                    pass
+                raise SystemExit("fly_sts134: simulatePASS.py has exited%s (%s)" % (why, outp))
             try:
                 with open(path, "rb") as fh:
                     fh.seek(after)

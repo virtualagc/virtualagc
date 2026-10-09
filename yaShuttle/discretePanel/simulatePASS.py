@@ -1547,7 +1547,15 @@ def main():
     # everything is running.
     layout_roles = []
     windows_before = set()
-    if args.layout:
+    if args.layout and not os.path.exists(args.layout):
+        # NOT YET SAVED: a run is how one makes it.  The windows come up
+        # unplaced, and the manager's layout field names this file, so its
+        # Save writes it there for next time.  It used to stop everything,
+        # which a driver reported only as "simulatePASS.py has exited"
+        # (owner, 2026-10-09).
+        log("layout %s does not exist yet: the windows are not placed; arrange them and "
+            "press Save in the manager's LAYOUT row to write it" % args.layout)
+    elif args.layout:
         try:
             layout_roles = windowLayout.roles_in(args.layout)
         except (OSError, ValueError, KeyError) as e:
@@ -2114,7 +2122,7 @@ def main():
             # windows go back where they were when it was taken, without
             # anyone having to remember a --layout or press Restore twice.
             layout = layout or args.layout
-            if not layout:
+            if not layout or not os.path.exists(layout):
                 return
             # THE ROLES OF THE LAYOUT BEING USED, not of the one named on the
             # command line.  A resume uses the snapshot's own layout, and a

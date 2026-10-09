@@ -991,6 +991,15 @@ class Manager(object):
         top.title(title)
         top.transient(self.root)
         top.resizable(True, True)
+        # IN FRONT, AND KEPT THERE: with a simulation's two dozen windows up,
+        # End Simulation's question opened behind them and the button seemed
+        # to do nothing (owner, 2026-10-09)
+        try:
+            top.attributes("-topmost", True)
+        except tk.TclError:
+            pass
+        top.lift()
+        top.after(50, top.focus_force)
         # Over the window it belongs to, not wherever the pointer happens to be.
         self._place_dialog(top, W, H)
 
