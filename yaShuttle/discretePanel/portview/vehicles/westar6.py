@@ -7,9 +7,13 @@ the outer solar panel 1.95 m long.  Body frame and origin: see _hs376.py
 centre of mass)."""
 from . import _hs376
 
+# True: with the Stinger in the apogee motor's nozzle, as the RMS held it
+# after the EVA capture (see _hs376.py); False: as the Orbiter approached it.
+CAPTURED = False
+
 KEY = 'westar6'
 
 
 def build(kit):
     return dict(meta=_hs376.meta("Westar 6 (HS-376, stowed, as retrieved by STS-51A)", 14688),
-                parts=_hs376.parts(kit, skirt=1.95, seed=6))
+                parts=_hs376.parts(kit, skirt=1.95, seed=6, capture=CAPTURED))

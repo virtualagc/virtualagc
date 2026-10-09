@@ -10,9 +10,13 @@ forward end, the gold feed assembly and the omni.  Body frame and origin:
 see _hs376.py."""
 from . import _hs376
 
+# True: with the Stinger in the apogee motor's nozzle, as the RMS held it
+# after the EVA capture (see _hs376.py); False: as the Orbiter approached it.
+CAPTURED = False
+
 KEY = 'palapab2'
 
 
 def build(kit):
     return dict(meta=_hs376.meta("Palapa B2 (HS-376, stowed, as retrieved by STS-51A)", 14692),
-                parts=_hs376.parts(kit, skirt=2.05, seed=2))
+                parts=_hs376.parts(kit, skirt=2.05, seed=2, capture=CAPTURED))
