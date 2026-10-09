@@ -546,7 +546,7 @@ class Target(object):
     """One TGT1 datagram: another vehicle (the ISS), from yaGPC2's vehicle
     dynamics: vehicle t, NORAD id, M50 position (m) and velocity (m/s) of its
     centre of mass, and its attitude, quaternion body -> M50 (w x y z)."""
-    __slots__ = ('t', 'id', 'r', 'v', 'q')
+    __slots__ = ('t', 'id', 'r', 'v', 'q', 'a', 'v_seen')
 
     @classmethod
     def parse(cls, d):
@@ -556,15 +556,26 @@ class Target(object):
         s = cls()
         s.t, s.id = v[0], int(v[1])
         s.r, s.v, s.q = np.array(v[2:5]), np.array(v[5:8]), np.array(v[8:12])
+        s.a = s.v_seen = None
         return s
 
     def at(self, t):
         """Position and attitude at vehicle time t (the attitude turns too
-        slowly, ~0.07 deg/s in LVLH, to matter between datagrams)."""
+        slowly, ~0.07 deg/s in LVLH, to matter between datagrams).  Carried
+        forward EXACTLY as extrapolate() carries the Orbiter -- the velocity
+        its positions show and the acceleration seen between its last two
+        datagrams -- so that two vehicles moving together (docked, or close
+        in) stay together on the screen: by two different extrapolations at
+        7.7 km/s, a difference of a few mm/s between vehdyn's v and how r
+        moves was a sawtooth of the target in the centerline camera."""
         dt = t - self.t
-        rn = np.linalg.norm(self.r)
-        g = -MU_EARTH * self.r / rn ** 3
-        return self.r + self.v * dt + 0.5 * g * dt * dt, quat_to_matrix(unit(self.q))
+        if self.a is not None:
+            g = self.a
+        else:
+            rn = np.linalg.norm(self.r)
+            g = -MU_EARTH * self.r / rn ** 3
+        v = self.v_seen if self.v_seen is not None else self.v
+        return self.r + v * dt + 0.5 * g * dt * dt, quat_to_matrix(unit(self.q))
 
 
 def extrapolate(s, t):
@@ -648,6 +659,11 @@ class TruthFeed(QtCore.QObject):
                 break
             g = Target.parse(d)
             if g is not None:
+                prev = self.targets.get(g.id)
+                if prev is not None and 0.0 < g.t - prev[0].t < 1.0:
+                    h = g.t - prev[0].t
+                    g.a = (g.v - prev[0].v) / h
+                    g.v_seen = (g.r - prev[0].r) / h + 0.5 * g.a * h     # at g.t, as Truth's
                 self.targets[g.id] = (g, time.monotonic())
 
     def _target_states(self, fs, wall):
