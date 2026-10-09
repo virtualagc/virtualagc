@@ -157,10 +157,23 @@ static const double TANK_XYZ[NMOD][3] = {  /* inches, Orbiter structural */
  * software's own I-loads (DASS G2/G3).  Thrust direction in body axes is
  * (cos P cos Y, sin Y, sin P cos Y) with P = 15.82 deg - pitch gimbal and
  * Y = yaw gimbal + 6.50 deg left, - 6.50 deg right (GHBCMD.hal:253-302): each
- * nozzle canted down and inboard so the thrust passes near the centre of
- * gravity.  The mounts, Xo 1518, Yo -/+88, Zo 492, are NOT from a document
- * found here; they are consistent with those cants, whose lines cross the
- * dry CG's Zo 375 and the centreline near its Xo 1100.
+ * nozzle canted up and outboard, so that the thrust points down and inboard
+ * and passes near the centre of gravity.  The same form and constants are the
+ * FSSR's: STS 83-0003-34 (GN&C Part A, On-Orbit/Deorbit Guidance, 2007) sec.
+ * 4.1, THRUST_BODY_OMSJ = (COS(OMS_PITCH_BODY) C_YAW, SIN(OMS_YAW_BODYJ),
+ * SIN(OMS_PITCH_BODY) C_YAW), with the K-loads PITCH_BIAS 0.276053 rad (15
+ * deg 49 min) and YAW_BIAS 0.113446 rad (6.50 deg), its Table 4.1.10-4; and
+ * the 1988 NSTS News Reference Manual's "nozzles up 15 degrees 49 [minutes]
+ * ... and outboard 6 degrees 30 [minutes]".  THE GIMBAL POINTS -- the pitch
+ * axis (the outer gimbal), on each engine's centreline -- are Xo 1518, Yo -88
+ * (left) and +88 (right), Zo 492: STS 82-0626's figure "OMS Gimbal Locations
+ * and Motions" as reproduced in P. Hattis (Draper Laboratory), "A Review of
+ * the Space Shuttle Orbiter Flight Control System", 2005, slide 22 (from
+ * CSDL-P-1786, 1983), dimensioned "Xo 1518", "Zo 492" (92 in above Zo 400),
+ * "Yo -88", "Yo +88", with the 15.82 and 6.50 deg null cants and the +/-6 deg
+ * pitch, +/-7 deg yaw ranges.  (First estimated here from the cants, whose
+ * lines cross the dry CG's Zo 375 and the centreline near its Xo 1100; the
+ * document gives the same numbers, 2026-10-08.)
  *
  * The gimbals follow the command of whichever actuator controller is
  * powered, at OMS_SLEW_DEG_S -- a rate not found in any document, chosen to
