@@ -58,6 +58,20 @@ TORVA_END_FT = 400.0             # the +V-bar point TORVA ends at (CG range, "40
 HOLD_FT = 100.0                  # ODS ring to PMA-2's face
 RPM_RATE = 0.75                  # deg/s, RPM SETUP's PRI and VERN ROT RATE
 RPM_STEPS = (180, 270, 0, 90)    # UNIV PTG BODY VECT 5 P: -X, +Z, +X, -Z on the ISS
+# DAP A10 and B10, the DOCKING configurations, as JSC-48072-134 p. 6-2's
+# DOCKING column has them (SPEC 20 items; this tape's A10/B10 are the generic
+# load, 11 items different in each).  Stored, not selected, before the V-bar
+# approach, so that the 100 ft capture holds them for the docking autopilot
+# (keyed at the hold they cost ~3.5 min and 27-36 ft of drift).
+DAP_DOCK = {
+    "A": {10: 0.050, 11: 0.60, 12: 0.10, 13: 0.10, 14: 0.0, 15: "TAIL", 16: "TAIL", 17: 0.05,
+          18: 0.10, 19: "TAIL", 20: 2, 21: 0.08, 22: 0.0,
+          23: 0.050, 24: 0.50, 25: 0.020, 26: 0.050, 27: 0.0, 28: 0},
+    "B": {30: 0.050, 31: 0.60, 32: 0.10, 33: 0.04, 34: 0.0, 35: "TAIL", 36: "TAIL", 37: 0.01,
+          38: 0.10, 39: "TAIL", 40: 2, 41: 0.08, 42: 0.0,
+          43: 0.050, 44: 0.50, 45: 0.020, 46: 0.020, 47: 0.0, 48: 0},
+}
+DAP_OPTIONS = ("ALL", "NOSE", "TAIL")     # an option item cycles in this order
 
 
 def turn_stopped(t, rate, peak):
@@ -564,11 +578,71 @@ class ManualPhase(object):
                  % best)
         return best
 
+    def dap_dock_store(self, config=10, tries=3):
+        """DAP A10/B10 keyed to DAP_DOCK in the stored configurations (DAP
+        EDIT: DAP A - ITEM 3 +10, the edit column's item 50 + row, LOAD -
+        ITEM 5; the same with DAP B - ITEM 4), A7/B7 left selected; every
+        item read back off SPEC 20's edit column.  An option item is pressed
+        once per step ALL -> NOSE -> TAIL.  Returns the items still wrong."""
+        from fly_rndz134 import parse_spec20, keys_short, DAP_FMT
+        left = {}
+        for side, edit in (("A", 3), ("B", 4)):
+            base = 10 if side == "A" else 30
+            want = DAP_DOCK[side]
+            bad = None
+            for attempt in range(tries):
+                name = "dap-dock-%s%d-%d" % (side.lower(), config, attempt)
+                self.play("+1     keys SPEC 2 0 PRO\n"
+                          "wait crt 1 title /020/ timeout 120\n"
+                          "+3     keys ITEM %d + %s EXEC\n" % (edit, " ".join(str(config))), name)
+                self.script_done(name, 180)
+                self.wait_sim(6)
+                sel, vals = parse_spec20(self.spec20_page(name + "-page"))
+                bad, keys = {}, ""
+                for item, w in sorted(want.items()):
+                    row = item - base
+                    e = 50 + row
+                    got = vals.get(e)
+                    if isinstance(w, str):
+                        if got != w:
+                            bad[item] = (got, w)
+                            n = ((DAP_OPTIONS.index(w) - DAP_OPTIONS.index(got)) % 3
+                                 if got in DAP_OPTIONS else 1)
+                            keys += "+3     keys ITEM %s EXEC\n" % " ".join(str(e)) * 1
+                            keys += ("+3     keys ITEM %s EXEC\n" % " ".join(str(e))) * (n - 1)
+                    else:
+                        fmt = DAP_FMT.get(row, "%.3f")
+                        if got is None or isinstance(got, str) or abs(got - w) > 0.5 * 10 ** -int(
+                                fmt[2] if fmt[1] == "." else 0):
+                            bad[item] = (got, w)
+                            keys += "+3     keys ITEM %s %s EXEC\n" % (" ".join(str(e)), keys_short(w, fmt))
+                if not bad:
+                    break
+                self.say("DAP %s%d: %d items differ from p. 6-2's DOCKING column: %s -- keyed (DAP EDIT, LOAD)"
+                         % (side, config, len(bad), "; ".join("item %d %s, 6-2 %s" % (i, g, w2)
+                                                            for i, (g, w2) in sorted(bad.items()))))
+                name = "dap-dock-%s%d-edit-%d" % (side.lower(), config, attempt)
+                self.play("+1" + (keys + "+3     keys ITEM 5 EXEC\n")[2:], name)
+                self.script_done(name, 600)
+                self.wait_sim(6)
+            if bad:
+                left[side] = bad
+            self.say("DAP %s%d: %s" % (side, config, "every item as p. 6-2's DOCKING column" if not bad
+                                         else "STILL DIFFERENT: %s" % bad))
+        sel, _ = parse_spec20(self.spec20_page("dap-dock-check"))
+        self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s (A7/B7 kept)" % (config, config, sel.get("A"),
+                                                                           sel.get("B")))
+        self.play("+1     keys RESUME\n", "dap-dock-resume")
+        self.script_done("dap-dock-resume", 60)
+        return left
+
     def vbar(self):
         """VBAR APPROACH to 100 ft, ODS ring to PMA-2's face, along PMA-2's
         axis: closing at range/1000 ft/s (0.1 ft/s at the least), the
-        lateral and vertical lined up to the centerline camera's cross."""
+        lateral and vertical lined up to the centerline camera's cross.
+        First DAP A10/B10 are stored as p. 6-2's DOCKING (dap_dock_store)."""
         self.man_start()
+        self.dap_dock_store()
         om = self.docking_attitude()
         self.dap_pulse_modes()
         st = self.rel("ods")
