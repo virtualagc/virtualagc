@@ -71,7 +71,8 @@ DAP_DOCK = {
           38: 0.10, 39: "TAIL", 40: 2, 41: 0.08, 42: 0.0,
           43: 0.050, 44: 0.50, 45: 0.020, 46: 0.020, 47: 0.0, 48: 0},
 }
-DAP_OPTIONS = ("ALL", "NOSE", "TAIL")     # an option item cycles in this order
+DAP_OPTIONS = ("ALL", "NOSE", "TAIL")     # PRI P and Y OPTION cycle in this order;
+# ALT JET OPT (row 9) only toggles ALL <-> TAIL (GKKORB.hal 688-697: option 1 <-> 3)
 
 
 def turn_stopped(t, rate, peak):
@@ -188,8 +189,30 @@ class ManualPhase(object):
         if noisy:
             g = self._inst().g
             rng = math.sqrt(sum(x * x for x in r))
-            s = 0.1 + 0.0005 * rng + rng * math.radians(0.03)
-            r = [x + g(s) for x in r]
+            # Range and bearing errors separately: the TCS ranges to 0.1 ft +
+            # 0.05 % along the line of sight, but the sideways position comes
+            # from its bearings (0.03 deg), so it is good to rng x 0.03 deg --
+            # a hundredth of an inch at a foot, not the range floor.  Close in
+            # to PMA-2 the crew flew on the centerline camera's crosshair: its
+            # picture read to about 0.05 deg from the camera, 53 in behind the
+            # ring face (rndz_instruments.CLCAM_BODY), whichever is the finer.
+            sr = 0.1 + 0.0005 * rng
+            sl = rng * math.radians(0.03)
+            if point == "ods":
+                sl = min(sl, (rng + 4.4) * math.radians(0.05))
+            sl = max(sl, 0.002)
+            if rng > 1e-6:
+                u = [x / rng for x in r]
+                # two unit vectors across the line of sight
+                a = [0.0, 0.0, 1.0] if abs(u[2]) < 0.9 else [1.0, 0.0, 0.0]
+                p1 = [u[1] * a[2] - u[2] * a[1], u[2] * a[0] - u[0] * a[2], u[0] * a[1] - u[1] * a[0]]
+                n1 = math.sqrt(sum(x * x for x in p1))
+                p1 = [x / n1 for x in p1]
+                p2 = [u[1] * p1[2] - u[2] * p1[1], u[2] * p1[0] - u[0] * p1[2], u[0] * p1[1] - u[1] * p1[0]]
+                er, e1, e2 = g(sr), g(sl), g(sl)
+                r = [r[i] + er * u[i] + e1 * p1[i] + e2 * p2[i] for i in range(3)]
+            else:
+                r = [x + g(sr) for x in r]
             v = [x + g(0.005) for x in v]
         return {"r": r, "v": v, "t": tru["t"], "gmt": tru["gmt"], "tru": tru, "tgt": tgt,
                 "axes": (ex, ey, ez)}
@@ -279,6 +302,8 @@ class ManualPhase(object):
         fired = None                     # (LVLH dv commanded, the truth's v then)
         wrong = 0
         while True:
+            if hasattr(self, "cw_ack"):
+                self.cw_ack()                  # a known alarm, between pulses
             st = self.rel(point)
             if st is None:
                 time.sleep(1.0)
@@ -632,7 +657,8 @@ class ManualPhase(object):
         EDIT: DAP A - ITEM 3 +10, the edit column's item 50 + row, LOAD -
         ITEM 5; the same with DAP B - ITEM 4), A7/B7 left selected; every
         item read back off SPEC 20's edit column.  An option item is pressed
-        once per step ALL -> NOSE -> TAIL.  Returns the items still wrong."""
+        once per step ALL -> NOSE -> TAIL, ALT JET OPT once (it toggles ALL
+        <-> TAIL).  Returns the items still wrong."""
         from fly_rndz134 import parse_spec20, keys_short, DAP_FMT
         left = {}
         for side, edit in (("A", 3), ("B", 4)):
@@ -655,8 +681,11 @@ class ManualPhase(object):
                     if isinstance(w, str):
                         if got != w:
                             bad[item] = (got, w)
-                            n = ((DAP_OPTIONS.index(w) - DAP_OPTIONS.index(got)) % 3
-                                 if got in DAP_OPTIONS else 1)
+                            if row == 9:                      # ALT JET OPT: a toggle
+                                n = 1
+                            else:
+                                n = ((DAP_OPTIONS.index(w) - DAP_OPTIONS.index(got)) % 3
+                                     if got in DAP_OPTIONS else 1)
                             keys += "+3     keys ITEM %s EXEC\n" % " ".join(str(e)) * 1
                             keys += ("+3     keys ITEM %s EXEC\n" % " ".join(str(e))) * (n - 1)
                     else:
@@ -679,8 +708,16 @@ class ManualPhase(object):
             self.say("DAP %s%d: %s" % (side, config, "every item as p. 6-2's DOCKING column" if not bad
                                          else "STILL DIFFERENT: %s" % bad))
         sel, _ = parse_spec20(self.spec20_page("dap-dock-check"))
-        self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s (A7/B7 kept)" % (config, config, sel.get("A"),
-                                                                           sel.get("B")))
+        if sel != {"A": "07", "B": "07"}:
+            # "__": the active DAP edited in place (RPM SETUP's rates, then
+            # A7's put back by hand) -- A7/B7 loaded again, as stored
+            self.say("DAP DOCK: SPEC 20 shows A%s B%s -- DAP A/B - ITEM 1/2 +7 keyed"
+                     % (sel.get("A"), sel.get("B")))
+            self.play("+1     keys ITEM 1 + 7 EXEC\n+3     keys ITEM 2 + 7 EXEC\n", "dap-dock-sel7")
+            self.script_done("dap-dock-sel7", 120)
+            self.wait_sim(6)
+            sel, _ = parse_spec20(self.spec20_page("dap-dock-check2"))
+        self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s" % (config, config, sel.get("A"), sel.get("B")))
         self.play("+1     keys RESUME\n", "dap-dock-resume")
         self.script_done("dap-dock-resume", 60)
         return left
@@ -729,6 +766,20 @@ class ManualPhase(object):
         axis, for --hold-min minutes; the truth's errors, the pulses and the
         propellant over the hold."""
         self.man_start()
+        # the docking start point clean: IMU 1 selected (a capture flown
+        # before the [10A]/[10B] fix has it deselected), the latched class-2
+        # messages and lamps reset, the tone acknowledged
+        if hasattr(self, "imu1_select"):
+            self.imu1_select(True, "hold")
+            # MSG RESET twice: with a class-5 message pending (an ILLEGAL
+            # ENTRY on the IDP), the first press only clears that and brings
+            # back the queued fault message -- CDL_MSG is not set
+            # (DMTERR.hal:766-788), so the C&W latches (DGNLIGHT, DLALIGHT)
+            # stay set; the second press resets them.  A spare press is harmless.
+            self.play("+1     keys MSG_RESET\n+3     keys MSG_RESET\n+3     press master_alarm\n",
+                      "hold-msg-reset")
+            self.script_done("hold-msg-reset", 60)
+            self.say("crew: MSG RESET, MASTER ALARM")
         p0 = dict(self.pulses)
         prop0 = self.propellant("vbar")
         mins = getattr(self.a, "hold_min", 20.0)
@@ -740,7 +791,12 @@ class ManualPhase(object):
         self.say("HOLD: %d THC pulses (%s) in %.0f min, about %.2f ft/s of translation; %s"
                  % (sum(dp.values()), ", ".join("%s %d" % kv for kv in dp.items() if kv[1]), mins,
                     sum(n * self.pulse_est[k[1]] for k, n in dp.items()), self.readings()))
-        self.man_record("HOLD", minutes=mins, report=rep, pulses=dp, prop_before=prop0)
+        # p. 6-2's DOCKING A10/B10 checked (and finished) in the stored configurations
+        # and A7/B7 selected, so that the capture after the hold carries them
+        dock_left = self.dap_dock_store()
+        self.dap_pulse_modes()
+        self.man_record("HOLD", minutes=mins, report=rep, pulses=dp, prop_before=prop0,
+                        dap_dock_left={k: {str(i): v for i, v in d.items()} for k, d in dock_left.items()})
         self.snapshot("hold-end")
         self.manual_summary()
 

@@ -599,6 +599,17 @@ class PassMemory(object):
     def ibm(self, a, n):
         return groundstation.from_ibm_long(self.hw(a, 4)) if n == 4 else groundstation.from_ibm_short(self.hw(a, 2))
 
+    def fault_summary(self):
+        """CDL_FAULT_SUMMARY_PAGE (X'1D02'): its lines, oldest first, each
+        16 halfwords of two 7-bit characters and a 32-bit time."""
+        out = []
+        for i in range(15):
+            w = self.hw(FAULT_SUMMARY_HW + 18 * i, 18)
+            txt = "".join(chr(c) if 32 <= c < 127 else "" for x in w[:16] for c in ((x >> 7) & 0x7f, x & 0x7f))
+            if txt.strip():
+                out.append("%s %d" % (" ".join(txt.split()), w[16] << 16 | w[17]))
+        return out
+
     def sp(self, a): return self.ibm(a, 2)
     def dp(self, a): return self.ibm(a, 4)
     def dvec(self, a): return [self.dp(a + 4 * i) for i in range(3)]
@@ -688,8 +699,10 @@ class StarTrackerNav(object):
         sv_prop = w.sv_sel_bit()
         # 1. CONFIG FOR STRK NAV.  DAP A/AUTO/VERN is TRACK's.  The IMU for
         # deselect is MCC's call ("if no comm, use IMU 1"): IMU 1.
-        self.strk_keys("+1     keys SPEC 2 1 PRO\n"
-                       "+5     keys ITEM 7 EXEC\n", "strk-imu-des")
+        self.imu1_select(False, "strk-des")
+        self.cw_known = getattr(self, "cw_known", set()) | {"IMU"}    # the deselect's IMU caution
+        self.wait_sim(6)
+        self.cw_ack("[10A] IMU deselect")
         # SPEC 33: SV SEL PROP (the first NAV pass) checked; INH Angles and
         # S TRK keyed -- both set rather than toggle (GKVREL cases 12 and 8),
         # so keying a checked item is harmless; SV SEL toggles (case 14), so
@@ -771,9 +784,8 @@ class StarTrackerNav(object):
         self.strk_ended = True
         self.strk_keys("+1     keys SPEC 3 3 PRO\n"
                        "+5     keys ITEM 2 4 EXEC\n"
-                       "+3     keys SPEC 2 1 PRO\n"
-                       "+5     keys ITEM 7 EXEC\n"
                        "+3     keys RESUME\n", "strk-end")
+        self.imu1_select(True, "strk-end")
         self.say("END S TRK NAV: %s" % self.strk_watch().summary())
 
     def strk_wait(self, cond, sim_seconds):
@@ -1091,6 +1103,25 @@ class RadarNav(object):
 
 
 
+# THE IMUs.  CGUB_IMU_SEL_MFE (X'59DC'): the IMUs PASS's RM has selected, IMU
+# 1 the 4 bit (7 all three).  SPEC 21's ITEM 7(8, 9) TOGGLES an IMU's
+# deselect (GKUIMU.hal 203-212), so a deselect or a reselect is checked here
+# before and after.  And PASS's IMU attitude RM thresholds, X'566E'-X'5679'
+# (CGRV_A_CONS(1,2), A_RAMP(1,2), 2A_CONS_2, 2A_RAMP_2), are set only by
+# GRS_IMU_RM_INIT after MM101 or an onboard alignment, which a run started
+# in OPS 2 never does: they are zero in every capture from IPL, so with
+# three IMUs every IMU miscompares unseen, and with two selected the RM
+# dilemma fires within four passes (RM DLMA IMU: the IMU caution and the
+# backup C&W).  They are seeded in the capture flown on from (DASS_G2.ASC's
+# addresses; the pairings #CGRSIMU+9D..C5): single-precision pairs copied
+# source -> target.  CGRV_OPS_TR_TIME stays 0; the MM101 init flag is not set.
+IMU_SEL_HW = 0x59DC
+IMU_RM_SEED = ((0x563C, 0x566E, "A_CONS_5 -> A_CONS(1)"), (0x5638, 0x5670, "A_CONS_1 -> A_CONS(2)"),
+               (0x564C, 0x5672, "A_RAMP_5 -> A_RAMP(1)"), (0x5648, 0x5674, "A_RAMP_2 -> A_RAMP(2)"),
+               (0x5644, 0x5676, "A_CONS_9 -> 2A_CONS_2"), (0x5650, 0x5678, "A_RAMP_8 -> 2A_RAMP_2"))
+FAULT_SUMMARY_HW = 0x1D02          # CDL_FAULT_SUMMARY_PAGE
+
+
 class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
@@ -1163,6 +1194,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.lambert_mc(resume)
         if resume and self.a.dass_iloads:
             self.dass_iloads(resume)
+        if resume:
+            self.seed_imu_rm(resume)
         cmd +=["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -1195,6 +1228,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.say("released by the user; the vehicle is running")
         time.sleep(5)
         threading.Thread(target=self.monitor, daemon=True).start()
+        self.cw_start()
 
     def zero_sensor_bias(self, capdir):
         """--zero-sensor-bias: GLQREN's four sensor bias INITs -- COAS, RR
@@ -1300,6 +1334,145 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.bias_zeroed = True
         if "#PCGZMC2" in by:
             self.lambert_patched = True
+
+    # --- CAUTION AND WARNING ------------------------------------------------
+    # The C&W lights PASS drives (dap_lamps.CW: the GNC class-2 lights, BACKUP
+    # C/W ALARM, the SM alert tone bit), watched from the MDM words: every
+    # change logged (driver.out and rndz-check.log), so an unexpected caution
+    # shows; and the tone acknowledged -- MASTER ALARM, and MSG RESET for the
+    # class-2 lights -- when every light on is one the flight expects
+    # (self.cw_known: IMU once [10A] has deselected one).  The pressing is
+    # done between steps (wait_sim, the manual pilot's loop), never from the
+    # watcher's thread: a play stops the one under way.  The simulator runs
+    # with its audio on, so an unexpected alarm is heard.
+    def cw_start(self):
+        try:
+            from dap_lamps import CwLamps
+        except ImportError:
+            return
+        if not hasattr(self, "cw_known"):
+            self.cw_known = set()
+            # resumed past [10A]: its IMU caution (the deselect, and the RM
+            # dilemma of captures flown before the thresholds were seeded)
+            fr = getattr(self.a, "from_", None)
+            if fr in PHASES and "STRKNAV" in PHASES and PHASES.index(fr) > PHASES.index("STRKNAV"):
+                self.cw_known.add("IMU")
+        self.cw_pending = False
+        if getattr(self, "cw", None) is None:
+            self.cw = CwLamps(self.base)
+            threading.Thread(target=self.cw_watch, daemon=True).start()
+
+    def cw_log(self, text):
+        self.say(text)
+        try:
+            self.checklog.write("%s %s\n" % (time.strftime("%H:%M:%S"), text))
+            self.checklog.flush()
+        except (AttributeError, OSError, ValueError):
+            pass
+
+    def cw_watch(self):
+        from dap_lamps import TONES
+        last, tone_was = None, False
+        while True:
+            time.sleep(2.0)
+            try:
+                on = set(self.cw.lit())
+            except Exception:
+                continue
+            if last is None or on != last:
+                gmt = ""
+                try:
+                    gmt = " (GMT %.0f)" % self.ears.snap()[0]["gmt"]
+                except Exception:
+                    pass
+                self.cw_log("C&W: lit %s%s%s" % (", ".join(sorted(on)) or "nothing", gmt,
+                                                  "" if last is None else "; +%s -%s" % (
+                                                      ", ".join(sorted(on - last)) or "0",
+                                                      ", ".join(sorted(last - on)) or "0")))
+            tone = any(t in on for t in TONES)
+            cautions = on - set(TONES)
+            if tone and not tone_was:
+                unknown = cautions - self.cw_known
+                if unknown:
+                    self.cw_log("C&W: ALARM, NOT ACKNOWLEDGED -- unexpected: %s" % ", ".join(sorted(unknown)))
+                else:
+                    self.cw_pending = True
+            tone_was = tone
+            last = on
+
+    def cw_ack(self, why=""):
+        """MASTER ALARM (and MSG RESET for latched class-2 lights) if the
+        watcher has a known alarm waiting, or always if why is given."""
+        if not (getattr(self, "cw_pending", False) or why):
+            return
+        self.cw_pending = False
+        on = set(self.cw.lit()) if getattr(self, "cw", None) else set()
+        # MSG RESET twice when latched lights are to be reset: a pending
+        # class-5 message (ILLEGAL ENTRY) absorbs the first (DMTERR.hal:766-788)
+        script = "+1     press master_alarm\n" + ("+2     keys MSG_RESET\n+3     keys MSG_RESET\n"
+                                                  if on - {"BACKUP C/W ALARM", "SM ALERT TONE"} else "")
+        n = getattr(self, "_cw_n", 0) + 1
+        self._cw_n = n
+        self.play(script, "cw-ack-%d" % n)
+        self.script_done("cw-ack-%d" % n, 60)
+        self.cw_log("crew: MASTER ALARM%s%s (lit: %s)" % (", MSG RESET" if "MSG_RESET" in script else "",
+                                                           " -- " + why if why else "",
+                                                           ", ".join(sorted(on)) or "nothing"))
+        try:
+            mem = self.probe("cw-ack-%d" % n)
+            if mem:
+                self.cw_log("fault summary: " + " | ".join(mem.fault_summary()[-4:]))
+        except Exception as e:
+            self.cw_log("fault summary: unreadable (%s)" % e)
+
+    def wait_sim(self, dt):
+        self.cw_ack()
+        fly_sts134.Flight.wait_sim(self, dt)
+
+    def seed_imu_rm(self, capdir):
+        """PASS's IMU attitude RM thresholds seeded in a capture's memory
+        image where they are still zero (IMU_RM_SEED); the tape untouched."""
+        p = os.path.join(capdir, "gpc1.mem.bin")
+        m = bytearray(open(p, "rb").read())
+        done, have = [], []
+        for src, dst, what in IMU_RM_SEED:
+            if bytes(m[2 * dst:2 * dst + 4]) != bytes(4):
+                have.append(what)
+                continue
+            m[2 * dst:2 * dst + 4] = m[2 * src:2 * src + 4]
+            done.append("%s %.3g" % (what, groundstation.from_ibm_short(
+                list(struct.unpack(">2H", bytes(m[2 * dst:2 * dst + 4]))))))
+        if done:
+            open(p, "wb").write(m)
+        self.say("IMU RM thresholds: %s%s" % ("seeded in %s: %s" % (os.path.basename(capdir), "; ".join(done))
+                                              if done else "already set",
+                                              "" if not have or not done else " (already set: %s)" % ", ".join(have)))
+        self.imu_rm_seeded = True
+
+    def imu_sel(self, label):
+        """CGUB_IMU_SEL_MFE now (a probe capture), or None."""
+        mem = self.probe("imu-%s" % label)
+        return mem.hw(IMU_SEL_HW)[0] if mem else None
+
+    def imu1_select(self, want, label):
+        """IMU 1 selected (want True) or deselected, by SPEC 21 ITEM 7 -- a
+        TOGGLE -- keyed only while CGUB_IMU_SEL_MFE disagrees, and checked."""
+        for attempt in range(3):
+            sel = self.imu_sel("%s-%d" % (label, attempt))
+            if sel is None:
+                self.say("IMU 1 (%s): CGUB_IMU_SEL_MFE unreadable -- ITEM 7 keyed blind" % label)
+            elif bool(sel & 4) == want:
+                self.say("IMU 1 (%s): %s (CGUB_IMU_SEL_MFE %d)" % (label, "selected" if want else "deselected",
+                                                                 sel))
+                return True
+            self.strk_keys("+1     keys SPEC 2 1 PRO\n"
+                           "+5     keys ITEM 7 EXEC\n"
+                           "+3     keys RESUME\n", "imu1-%s-%d" % (label, attempt))
+            self.wait_sim(6)
+            if sel is None:
+                return None
+        self.say("IMU 1 (%s): STILL NOT %s" % (label, "selected" if want else "deselected"))
+        return False
 
     def restart_from(self, name):
         """The simulation ended and started again from one of its own
@@ -1641,7 +1814,8 @@ wait crt 1 title 2011/ timeout 600
     def rndznav(self):
         if ((self.a.zero_sensor_bias and not getattr(self, "bias_zeroed", False))
                 or (self.a.lambert_mc and not getattr(self, "lambert_patched", False))
-                or (self.a.dass_iloads and not getattr(self, "dass_patched", False))):
+                or (self.a.dass_iloads and not getattr(self, "dass_patched", False))
+                or not getattr(self, "imu_rm_seeded", False)):
             if self.a.attach:
                 self.say("zero-sensor-bias: attached to a running vehicle -- its memory cannot be patched here")
             else:
