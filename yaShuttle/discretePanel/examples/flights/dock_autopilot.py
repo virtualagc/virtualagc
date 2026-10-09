@@ -626,10 +626,28 @@ def dock(self):
     self.manual_summary()
 
 
+def stay(self):
+    """STAY: the docked stack left running for whoever is watching -- a demo
+    should not end the moment the APDS is powered down (owner, 2026-10-09:
+    "Did you end it?").  Until the simulation is ended: the manager's End
+    Simulation, or Ctrl-C here.  --from STAY reopens a finished docking (its
+    DOCK capture) and does only this."""
+    self.say("STAY: the docked stack is yours -- End Simulation in the manager, or Ctrl-C here, "
+             "to finish")
+    try:
+        while getattr(self, "proc", None) is not None and self.proc.poll() is None:
+            time.sleep(2.0)
+    except KeyboardInterrupt:
+        pass
+    self.say("the simulation has ended")
+    raise SystemExit(0)                  # no capture after STAY: there is nothing left to capture
+
+
 R.Rendezvous.thc_pulses = thc_pulses_aft
 R.Rendezvous.dock30 = dock30
 R.Rendezvous.dock = dock
-R.PHASES.extend(["DOCK30", "DOCK"])
+R.Rendezvous.stay = stay
+R.PHASES.extend(["DOCK30", "DOCK", "STAY"])
 
 if __name__ == "__main__":
     # the aft station's hand controllers, unless asked otherwise
