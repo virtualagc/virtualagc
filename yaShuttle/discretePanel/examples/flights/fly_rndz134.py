@@ -233,6 +233,52 @@ CGNV_SENSOR_BIAS_HW = 0xE7A2
 # elevation-angle TIG search (GWS).  --lambert-mc turns them on in a capture.
 LAMB_ILOAD_HW = 0xE34E
 LAMBERT_MC_SETS = (11, 12, 13, 14, 19)
+# THE FLIGHT'S OWN I-LOADS.  PFS/mafgen/DASS_G2.ASC is the MAFGEN listing of
+# STS-134's own GNC2 load ("STS134/OI034/C2 MDD 134.09 DASS GNC2", 13 Dec
+# 2010).  Its PATCH SUMMARY lists, word by word, every halfword the flight's
+# I-loads changed from the load module: ADDR, CSECT+OFFSET, LM (the load
+# module's, the source's INITIAL) and MM (the flight's, on mass memory).
+# This tape's G2 holds the LM column almost everywhere (2026-10-09: 2026 of
+# the 2919 words LM, 853 MM, all of those in the system's #PFCMGPT and
+# #PCDCPHA), so its rendezvous I-loads are the source's placeholders.  The
+# ones that bit, LM -> MM:
+#   GLQREN's sensor bias INITs, all four pairs  1.0 -> 0.0   (5b, 5d)
+#   CGZB_LAMB_ILOAD   sets 1-10 ON -> 9-14, 19, 25-27, 29-40 ON  (5c)
+#   GL5_VEL_THRESH    0.9 -> 0.06 ft/s: the smallest burn GL5NAV keeps (5c)
+#   CGZV_DEL_X_GUESS  500, 500 -> 100, 100 s   GWQ's first step
+#   CGZV_DEL_X_TOL    1E7, 1E7 -> 1E-2, 1E-8   GWQ's secant guard (5e)
+#   CGZV_ICMAX        50 -> 10                 GWS/GWQ iterations
+#   GWS's EL_DH_TOL 500 -> 100 ft, EL_TOL 1E-3 -> 5E-3 rad; GWX's
+#   DEL_T_MAX 500 -> 300 s; and the target sets 9-39 themselves (the
+#   p. 6-4 TARGETING DATA, TGT 12's EL 29.072)
+# --dass-iloads applies the MM column, in the capture resumed from, to the
+# csects of the groups named; only words still holding LM are written.
+DASS_G2 = os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC")
+# the same values made permanent on a volume (yaGPC2/tools/sites/
+# sts134-rndz-iloads.json through tools/mission_reconfig.py, 2026-10-09)
+RNDZ_VOLUME = os.path.expanduser("~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz.mmv")
+DASS_GROUPS = {
+    # orbit targeting (CGZ compools, GW*) and relative navigation (CGN
+    # compools, GL*): what SPEC 33 and 34 run on
+    "rndz": ("#PCGZ", "#DGW", "#PCGN", "#DGL"),
+    # every GNC application csect the summary lists (not the system's
+    # #PFCMGPT or the display/uplink #PCD, #DD ones)
+    "all": ("#PCG", "#DG"),
+}
+DASS_PATCH = re.compile(r"^ (0[0-9A-F]{5})    ([#$]?[A-Z0-9]+)\+([0-9A-F]{4})    ([0-9A-F]{4})    ([0-9A-F]{4})\s*$")
+
+
+def dass_patches(path):
+    """[(halfword address, csect, LM, MM)] from a MAFGEN listing's PATCH
+    SUMMARY."""
+    out, on = [], False
+    for ln in open(path, errors="replace"):
+        if "P A T C H   S U M M A R Y" in ln:
+            on = True
+        m = on and DASS_PATCH.match(ln.rstrip("\n"))
+        if m:
+            out.append((int(m.group(1), 16), m.group(2), int(m.group(4), 16), int(m.group(5), 16)))
+    return out
 TRIM_TOL_FPS = 0.2
 THC_X_ACC_FPS2 = 1.5 / 6.0
 # Each THC direction's acceleration with DAP A7, PRI, TRANS NORM, as the
@@ -548,9 +594,10 @@ class PassMemory(object):
     def svec(self, a): return [self.sp(a + 2 * i) for i in range(3)]
 
     def check(self):
-        # sets 1-10 ON (sets 11-40 OFF on the tape, but --lambert-mc turns
-        # some on in the captures it resumes from)
-        return self.hw(self.A["LAMB_ILOAD"], 10) == [1] * 10
+        # sets 9 and 10 ON: the tape's INITIAL(10#ON, 30#OFF) and the
+        # flight's own (DASS: 9-14, 19, 25-27, 29-40) both have them; the
+        # rest differ (--lambert-mc, --dass-iloads)
+        return self.hw(self.A["LAMB_ILOAD"] + 8, 2) == [1, 1]
 
     def iload(self, k):
         i = k - 1
@@ -1103,7 +1150,9 @@ class Rendezvous(RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.zero_sensor_bias(resume)
         if resume and self.a.lambert_mc:
             self.lambert_mc(resume)
-        cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
+        if resume and self.a.dass_iloads:
+            self.dass_iloads(resume)
+        cmd +=["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
         if not self.a.portview:
@@ -1179,6 +1228,51 @@ class Rendezvous(RadarNav, StarTrackerNav, fly_sts134.Flight):
                  % (", ".join(str(n) for n in LAMBERT_MC_SETS), [was[n] for n in LAMBERT_MC_SETS],
                     LAMB_ILOAD_HW, capdir))
         self.lambert_patched = True
+
+    def dass_iloads(self, capdir):
+        """--dass-iloads: STS-134's own I-loads (DASS_G2.ASC's PATCH SUMMARY,
+        the MM column) written into a capture's memory image, for the csects
+        of the groups named (DASS_GROUPS) -- only words that still hold the
+        load module's LM value, so a cell the run has since changed is left
+        alone.  The tape is not touched.  A range/range-rate bias pair
+        already copied into CGNV_SENSOR_BIAS (RNDZ NAV ENA) as the LM's 1.0,
+        1.0 goes to the MM's 0 with it, as --zero-sensor-bias does."""
+        prefixes = []
+        for g in self.a.dass_iloads.split(","):
+            prefixes += DASS_GROUPS.get(g, (g if g.startswith("#") else "#" + g,))
+        p = os.path.join(capdir, "gpc1.mem.bin")
+        m = bytearray(open(p, "rb").read())
+        n_set, n_mm, odd, by = 0, 0, [], {}
+        rrdot_init = 2 * 0xB47A
+        rrdot_was = bytes(m[rrdot_init:rrdot_init + 8])
+        for a, cs, lm, mm in dass_patches(self.a.dass):
+            if not any(cs.startswith(x) for x in prefixes):
+                continue
+            t = struct.unpack(">H", bytes(m[2 * a:2 * a + 2]))[0]
+            if t == mm:
+                n_mm += 1
+            elif t == lm:
+                m[2 * a:2 * a + 2] = struct.pack(">H", mm)
+                n_set += 1
+                by[cs] = by.get(cs, 0) + 1
+            else:
+                odd.append("%s X'%05X' %04X (LM %04X MM %04X)" % (cs, a, t, lm, mm))
+        a = 2 * (CGNV_SENSOR_BIAS_HW + 4)
+        if (rrdot_was == struct.pack(">4H", *(IBM_ONE * 2)) and bytes(m[rrdot_init:rrdot_init + 8]) == bytes(8)
+                and struct.unpack(">4H", bytes(m[a:a + 8])) == IBM_ONE * 2):
+            m[a:a + 8] = bytes(8)
+            n_set += 2
+            by["CGNV_SENSOR_BIAS$(3,4)"] = 2
+        open(p, "wb").write(m)
+        self.say("dass-iloads %s: %d halfwords LM -> MM in %s (%s); %d already MM; %d changed by the run, "
+                 "left%s -- STS-134's own I-loads (%s), not the tape's"
+                 % (self.a.dass_iloads, n_set, capdir, ", ".join("%s %d" % kv for kv in sorted(by.items())),
+                    n_mm, len(odd), (": " + "; ".join(odd[:12])) if odd else "", os.path.basename(self.a.dass)))
+        self.dass_patched = True
+        if any(cs.startswith(("#DGLQREN",)) for cs in by) or "CGNV_SENSOR_BIAS$(3,4)" in by:
+            self.bias_zeroed = True
+        if "#PCGZMC2" in by:
+            self.lambert_patched = True
 
     def restart_from(self, name):
         """The simulation ended and started again from one of its own
@@ -1519,7 +1613,8 @@ wait crt 1 title 2011/ timeout 600
 
     def rndznav(self):
         if ((self.a.zero_sensor_bias and not getattr(self, "bias_zeroed", False))
-                or (self.a.lambert_mc and not getattr(self, "lambert_patched", False))):
+                or (self.a.lambert_mc and not getattr(self, "lambert_patched", False))
+                or (self.a.dass_iloads and not getattr(self, "dass_patched", False))):
             if self.a.attach:
                 self.say("zero-sensor-bias: attached to a running vehicle -- its memory cannot be patched here")
             else:
@@ -1992,12 +2087,47 @@ wait crt 1 title 2011/ timeout 600
                     measured.setdefault(key, []).append(dv / hold)
                     acc[key] = min(max(dv / hold, 0.05), 3.0)
             vgo = new
+        if label != "ti" and self.a.pulse_trim > 0 and vgo and all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
+            vgo = self.pulse_trim(label, vgo, read_vgo)
         count1 = w.get("CGNV_DV_COUNT")
         self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f ft/s%s; THC acceleration measured (ft/s^2): %s; PASS's "
                  "accepted maneuvers (CGNV_DV_COUNT) %s -> %s"
                  % (label, vgo["x"], vgo["y"], vgo["z"],
                     " -- all axes < %.1f fps" % TRIM_TOL_FPS if all(abs(v) < TRIM_TOL_FPS for v in vgo.values())
                     else "", {k: ["%.3f" % x for x in v] for k, v in measured.items()}, count0, count1))
+        return vgo
+
+    def pulse_trim(self, label, vgo, read_vgo):
+        """A midcourse's last residuals in DAP TRANS PULSE: one A7 pulse
+        (PRI TRAN PLS, 0.10 ft/s) per THC deflection, for each axis still at
+        --pulse-trim ft/s or more, all axes back to back (one GL5NAV
+        maneuver); up to three passes.  The card's "Trim VGOs < 0.2 fps"
+        is met before this starts; a midcourse is itself only 0.3-2 ft/s,
+        and rr-run3's MC4 left -0.14 ft/s of body X that the card allowed --
+        0.13 ft/s along the V-bar, 85 ft of the arrival's 228 ft shortfall
+        over its 13-minute transfer (RENDEZVOUS_PLAN.md 5e)."""
+        tol = self.a.pulse_trim
+        pulse = DAP_RNDZ["A"][17]
+        self.play("+1     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n", label + "-pulse")
+        self.script_done(label + "-pulse", 60)
+        for n in range(3):
+            todo = [(ax, vgo[ax]) for ax in "xyz" if abs(vgo[ax]) >= tol]
+            if not todo:
+                break
+            lines, plan = [], []
+            for ax, v in todo:
+                k = max(1, int(round(abs(v) / pulse)))
+                plan.append("%s%s x%d" % ("+" if v > 0 else "-", ax.upper(), k))
+                for _ in range(k):
+                    lines.append("+1.0   thc fwd %s%s 0.30" % ("+" if v > 0 else "-", ax))
+            self.say("PULSE TRIM (%s) pass %d: VGO %+.2f %+.2f %+.2f ft/s; THC pulses %s"
+                     % (label, n, vgo["x"], vgo["y"], vgo["z"], ", ".join(plan)))
+            name = "%s-pulse-%d" % (label, n)
+            self.play("\n".join(lines) + "\n", name)
+            self.script_done(name, 120)
+            self.wait_sim(2.0)
+            vgo = read_vgo() or vgo
+        self.say("PULSE TRIM (%s): VGO %+.2f %+.2f %+.2f ft/s" % (label, vgo["x"], vgo["y"], vgo["z"]))
         return vgo
 
     TRACK_KEYS = ("+3     keys ITEM 2 1 EXEC\n"
@@ -2480,7 +2610,11 @@ def main():
     ap.add_argument("--port-base", type=int, default=48600)
     ap.add_argument("--rate", type=float, default=1.0)
     ap.add_argument("--tape", default=os.path.expanduser(
-        "~/dropbox-copy/sts134-ksc6-entry/OI340700-v44boot-sts134-ksc6.mmv"))
+        "~/dropbox-copy/sts134-ksc6-entry/OI340700-v44boot-sts134-ksc6.mmv"),
+                    help="the mass-memory volume (default %(default)s); for STS-134's own rendezvous I-loads "
+                         "from the IPL on, a copy with yaGPC2/tools/sites/sts134-rndz-iloads.json applied "
+                         "(tools/mission_reconfig.py), e.g. " + RNDZ_VOLUME + " -- then no --dass-iloads, "
+                         "--zero-sensor-bias or --lambert-mc is needed on a fresh run")
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--to", choices=PHASES)
@@ -2499,7 +2633,8 @@ def main():
                     help="after the Ti burn, no MC1-MC4: POSTTI coasts to T2 (--coast-min) and the MC "
                          "phases do nothing (the M1b baseline)")
     ap.add_argument("--lambert-mc", action="store_true",
-                    help="AN EXPERIMENT, pending Ron's decision on the flight's I-loads: CGZB_LAMB_ILOAD "
+                    help="LEGACY (superseded by --dass-iloads, or a volume with yaGPC2/tools/sites/sts134-rndz-iloads.json "
+                         "applied): CGZB_LAMB_ILOAD "
                          "(this tape: Lambert for TGT 1-10 only, the source's INITIAL) set ON for TGT 11-14 "
                          "and 19 in the capture the run resumes from (or, on a fresh run, the UPLINK "
                          "capture), so that MC1-MC4 are Lambert-targeted (GWR) and MC2's 29.07 deg "
@@ -2509,11 +2644,26 @@ def main():
                          "final-ground limits of the ground's (the truth's Lambert, for MCC), else the "
                          "ground's EXT DVs; 'onboard' always the onboard one (p. 1-3)")
     ap.add_argument("--zero-sensor-bias", action="store_true",
-                    help="AN EXPERIMENT, pending Ron's decision on the real I-loads: GLQREN's sensor bias INITs "
+                    help="LEGACY (superseded by --dass-iloads, or a volume with yaGPC2/tools/sites/sts134-rndz-iloads.json "
+                         "applied; STS-134's own values are 0.0): GLQREN's sensor bias INITs "
                          "-- S TRK and RR angles (this tape's 1.0, 1.0 RADIAN, RENDEZVOUS_PLAN.md 5b, 5d), RR "
                          "range and range rate (1.0 ft, 1.0 ft/s), COAS -- set to 0.0 in the capture the "
                          "run resumes from, or, on a fresh run, in the UPLINK capture, which the run then "
                          "restarts from before RNDZ NAV ENA.  The tape and volume are untouched")
+    ap.add_argument("--dass-iloads", metavar="GROUPS",
+                    help="STS-134's OWN I-LOADS, from its DASS listing (--dass): the PATCH SUMMARY's MM values "
+                         "written, in the capture the run resumes from (or, on a fresh run, the UPLINK "
+                         "capture), over the load module's LM values this tape holds, for the csects of "
+                         "GROUPS, comma-separated: 'rndz' (CGZ/GW targeting, CGN/GL navigation), 'all' "
+                         "(every GNC #PCG/#DG csect), or csect names.  The flight's bias INITs (0), Lambert "
+                         "flags (9-14, 19 ON), GL5NAV's 0.06 ft/s and the GWS/GWQ iteration constants among "
+                         "them (RENDEZVOUS_PLAN.md 5e).  The tape and volume are untouched")
+    ap.add_argument("--pulse-trim", type=float, default=0.08, metavar="FPS",
+                    help="after a midcourse's VGO null (TRANS NORM, every axis < 0.2 ft/s, the card's), trim "
+                         "each axis still at FPS or more with single TRANS PULSE pulses (0.10 ft/s, DAP A7); "
+                         "0 for the card's 0.2 alone (default %(default)s)")
+    ap.add_argument("--dass", default=DASS_G2,
+                    help="the MAFGEN DASS listing for --dass-iloads (default %(default)s)")
     ap.add_argument("--no-rr", action="store_true",
                     help="no Ku-band rendezvous radar (RRNAV does nothing; the star tracker pass goes on "
                          "after Ti, as in Stage 2)")

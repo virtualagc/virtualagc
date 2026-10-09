@@ -9,7 +9,12 @@ flags) and a navigation finding (PASS drops burns under 0.9 ft/s).  Stage
 3's Ku-band rendezvous radar is built and has flown from Ti - 44 min to the
 arrival; see section 5d -- PASS's FLTR now holds tens of feet, the RR bias
 I-loads bite like the star tracker's, and PASS's MC2-MC4 ALARM KILL turns
-out not to be navigation's.
+out not to be navigation's.  **Section 5e settles the I-load questions:**
+STS-134's own GNC2 I-loads are in PFS/mafgen/DASS_G2.ASC (its PATCH
+SUMMARY), and this tape holds the load module's placeholders instead.
+With the flight's own values in the capture (`--dass-iloads rndz`, run
+only), PASS targets and flies all four midcourses itself -- no ALARM KILL,
+every burn within 0.15 ft/s of the truth's Lambert.
 Everything else is still a plan.  The plan was written read-only from the repository, the
 flight source, and the documents listed under Sources.
 
@@ -466,6 +471,7 @@ dragged state).  The bias variance beside it is 1e-6 rad^2 (1 mrad sigma):
 1.0 rad cannot be a flight value.  Whether the real I-load was 0 (or
 anything else) needs a document this repository lacks -- the FSSR STS
 81-0006 Part B 4.2.7 or the flight's I-load listing.  **Ron's call.**
+(Answered in 5e: STS-134's DASS listing has all four bias INITs at 0.0.)
 
 **Runs** (`~/sts134-runs/rendezvous/`).
 - `strk-run1`, the one-line command from 06:30 with the tape as it is.
@@ -623,8 +629,12 @@ on TGT 19).  PASS's own Lambert solutions after MC1 all ended in ALARM KILL
 (GWY/GWM's Lambert or transfer-time alarm; CGZB_ALARM_KILL, PRED MATCH
 999999) -- every one of them on the FLTR state that the marks had walked off
 after MC1's dropped 0.5 ft/s (item 2: 4.5-11 kft, 6-12 ft/s); MC1's, on
-PROP, was fine.  Why GWR gives up on that state, rather than solving it
-wrongly, is not yet understood.  PASS's navigation at the arrival: FLTR =
+PROP, was fine.  [5d and 5e correct this: the ALARM KILLs were not the
+drifted state's.  MC2's elevation search ran 50 fixed 500 s steps because
+this tape holds the load module's GWQ constants (CGZV_DEL_X_TOL 1E7, not
+the flight's 1E-2/1E-8), and with STS-134's own I-loads every MC solves
+onboard.  Items 1 and 3 above are I-load placeholders as well: the flight's
+GL5_VEL_THRESH is 0.06 ft/s, and its Lambert flags are ON for 9-14 and 19.]  PASS's navigation at the arrival: FLTR =
 PROP (FLTR TO PROP at [18B]), 1.8 kft and 2.4 ft/s off; PASS's range
 2.4 kft against the truth's 530 ft -- the radar's job.
 
@@ -849,6 +859,211 @@ of plane and **372 ft below** the ISS, ZD -1.14 ft/s, against 0, 0, +600.
 - **Prox ops.** The rendezvous radar's role inside 200 ft (Stage 5).
 - **One-line run.** Not flown end to end in one run: `rr-run2` and
   `rr-run3` are the result.
+
+## 5e. STS-134's own I-loads: PASS targets every midcourse (2026-10-09, macOS)
+
+**How to run it** (one line, from a POSTTI capture of a Stage 3 run; about
+75 min at rate 2 from Ti + 11 min to the arrival):
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --from MC1 --dass-iloads rndz
+
+`--dass-iloads rndz` replaces `--zero-sensor-bias --lambert-mc`: it puts
+the flight's own values into every cell that those two options patched,
+and into the rest of the rendezvous I-loads.
+
+**THE SOURCE: STS-134'S OWN DASS LISTING.**  `~/workspace/PFS/mafgen/DASS_G2.ASC`
+is the MAFGEN memory map of the flight's own GNC2 load (its header reads
+"STS134/OI034/C2 MDD 134.09 DASS GNC2", 13 Dec 2010).  Its PATCH SUMMARY
+lists every halfword that the flight's I-loads changed from the load
+module: ADDR, CSECT+OFFSET, LM (the load module's value, the source's
+INITIAL) and MM (the flight's value, on mass memory).  It has 2919 entries,
+all in data csects.
+
+**What this tape holds.**  Of those 2919 words, 2026 hold LM and 853 hold MM.
+- **The 853 MM words** are all in the system's #PFCMGPT and #PCDCPHA.
+- **The GNC application csects hold LM throughout**: #PCGZMC2, #PCGGCOM,
+  #PCGCMFR, #DGL*, #DGW*, #PCGN*.
+
+So every rendezvous I-load on this tape is the source's placeholder, not
+STS-134's.
+
+The ones that bit (LM to MM):
+
+| Cell | LM (tape) | MM (STS-134) | Effect |
+|---|---|---|---|
+| GLQ_{COAS,RR,RRDOT,ST}_..._BIAS_INIT (#DGLQREN) | 1.0, 1.0 each | 0.0 | 5b's and 5d's 1 rad / 1 ft/s biases |
+| CGZB_LAMB_ILOAD (#PCGZMC2) | sets 1-10 ON | 9-14, 19, 25-27, 29-40 ON | 5c item 3: MC1-MC4 and TGT 19 are Lambert sets |
+| GL5_VEL_THRESH (#DGL5NAV) | 0.9 ft/s | 0.06 ft/s | 5c item 1: PASS keeps a midcourse in its state |
+| CGZV_DEL_X_GUESS (#PCGZMC2) | 500, 500 s | 100, 100 s | GWQ's first step |
+| CGZV_DEL_X_TOL | 1E7, 1E7 | 1E-2, 1E-8 | GWQ's secant guard (below) |
+| CGZV_ICMAX | 50 | 10 | GWS/GWQ iteration limit |
+| CGZV_EL_DH_TOL, CGZV_EL_TOL (#DGWSORB) | 500 ft, 1E-3 | 100 ft, 5E-3 | GWS tolerances |
+| CGZV_DEL_T_MAX (#DGWXORB) | 500 s | 300 s | GWX's step limit |
+| CGZV_ORB_TGT_DTMIN_LAMB, CGZV_PROX_DTMIN | 0 | 60 s | minimum time to TIG |
+| CGZV_DU, CGZV_EPS_U (#DGWYORB); CGZV_N_MIN, CGZV_R_TOL (#DGWWORB) | 2, 1E-6; 15, 824.5 | 0, 1E-7; 3, 125 | Lambert and precision iteration |
+| T1/DT/EL/ROFF_ILOAD (#PCGZMC2) | 0 | the flight's target sets 9-39 | TGT 9-14 and 19 as p. 6-4 has them (TGT 12's EL 29.072 deg) |
+
+These answer three open questions:
+- **The bias I-loads:** 0.0.
+- **The Lambert flags:** ON for 9-14 and 19.
+- **TGT 10 keyed by hand:** the flight had the sets loaded.
+
+**WHY MC2's ELEVATION SEARCH LANDED REVOLUTIONS AWAY.**  GWQ (the secant
+iterator that GWS calls through GWX) takes a secant step only when
+|ΔX_DEP| >= CGZV_DEL_X_TOL; otherwise it steps -DEL_X_GUESS.
+- **On the tape:** with DEL_X_TOL at 1E7 and elevation errors in radians,
+  it never took a secant step.  Every iteration moved T1 +500 s, until
+  ICMAX = 50 set SFAIL: 50 x 500 s = 416.7 min.
+- **The runs fit this exactly:** mc-run3 and rr-run2 landed at Ti + 466.6
+  min, which is 49.9 + 416.7.  The next compute, seeded from the BASE
+  TIME that step 140 had moved, landed at Ti + 883.2 min.
+
+With the flight's 1E-8 the search is a true secant.
+
+The ALARM KILLs on the EL = 0 sets after it (MC3, MC4 in rr-run2/3) are
+also gone with the flight's values.  Which of the GWY/GWW/GWR constants
+above did it was not isolated.
+
+**The elevation search with the flight's constants** (`dass-run1`).  The
+search converges when an EL = 29.07 time exists.
+- **This trajectory never reached 29.07.**  After MC1 the elevation, by
+  GWS's own formula from the truth, peaked at 24.0 deg at Ti + 56 and fell
+  after; TGT 19 then flies MC2 (below).
+- **What GWS did with it.**  It oscillated about that maximum, alternating
+  +/-300 s (DEL_T_MAX) steps until ICMAX.  It exits with SFAIL, the TGT EL
+  ANG alarm, displaying EL 21.4 and 23.7 deg.
+- **The TIG it left.**  Ti + 56.57, 53.23 and 59.90 min for the
+  preliminary, intermediate and final; each is seed + 100 + (+/-300) x 9.
+- **What the driver did.**  The final's slip of +10.0 min is outside
+  [18B]'s -3/+7, so the driver flew TGT 19 at nominal + 7 min, as the
+  checklist says.
+
+**What 5c's "dropped burns" became.**  With GL5_VEL_THRESH at 0.06 ft/s,
+PASS's PROP state shows no step at MC1, and MC2-MC4 are in its state.
+CGNV_DV_COUNT rose from 1 to 6 by MC4.
+
+**`--dass-iloads GROUPS`** (fly_rndz134.py):
+- **What it writes.** The PATCH SUMMARY's MM values go into the capture
+  resumed from (on a fresh run, the UPLINK capture).
+- **Which csects.**
+  - `rndz`: #PCGZ, #DGW, #PCGN and #DGL, about 400 halfwords.
+  - `all`: every #PCG and #DG csect; not flown yet.
+  - Or csect names.
+- **Which words.** Only words that still hold LM are written; a word the
+  run has changed is left alone and logged.  A pair that happens to be 0
+  again (TGT 12's T1_ILOAD after a search) is restored.
+- **The live range-bias pair.** CGNV_SENSOR_BIAS$(3,4) goes to 0 when it
+  holds the LM's 1.0, 1.0.
+- **What is untouched.** The tape and the volume.
+
+Putting these values on the volume (tools/mission_reconfig.py, or an
+OPS 2 build from the DASS) is Ron's decision.
+
+**Results** (`~/sts134-runs/rendezvous/dass-run1`, from rr-run2's POSTTI
+capture, rate 2; Ku radar on, FLTR within 9-60 ft of the truth
+throughout).  Every solution is PASS's own, and every burn was flown on it
+(`--mc-rule limits` never had to substitute).
+
+| Burn | PASS (onboard) | Lambert from the truth | Checklist mean (3 sigma) | Burned (truth sensed) |
+|---|---|---|---|---|
+| MC1 final | -0.13 +0.12 +0.89 | -0.29 +0.02 +1.12 | -0.1 (0.6), -0.1 (0.7), +0.5 (1.2) | -0.09 +0.01 +0.93 |
+| MC2 (TGT 12: ICMAX, slip +10.0) | +0.46 +0.03 +2.49 (TGT 19, nominal + 7) | +0.45 +0.01 +2.62 | 0.0 (0.4), 0.0 (0.2), +0.9 (2.5) | +0.50 +0.00 +2.40 |
+| MC3 final | +0.75 +0.05 +1.06 | +0.72 +0.02 +1.06 | +0.9 (1.3), 0.0 (0.5), +1.1 (2.6) | +0.78 -0.01 +1.04 |
+| MC4 final | -0.49 +0.05 -0.71 | -0.54 +0.06 -0.71 | +1.3 (1.3), -0.1 (0.6), +0.9 (2.2) | -0.52 -0.01 -0.75 |
+
+- **Against the truth.** PASS's MC2-MC4 agree with the truth's Lambert to
+  0.13 ft/s; MC1 to 0.23 ft/s.
+- **Against the checklist.** MC2's X (+0.46 against 0.0 +/- 0.4) and Z
+  (+2.49 against 0.9 +/- 2.5, just inside) and MC4's X and Z (the wrong
+  sign) fall outside its means.  The burns there absorb the trajectory's
+  dispersion after MC1; the elevation never reached 29.07, so the
+  trajectory was off nominal from the start of MC2.
+
+**THE ARRIVAL.** `dass-run1`, at TGT 14's T2 (MC4 + 13.0 min): 35 ft
+behind, 48 ft out of plane, **462 ft below** the ISS, ZD -1.01 ft/s,
+against 0, 0, +600.  The 138 ft shortfall comes from two sources:
+- **The burn's residuals.** About 70 ft.
+  - **What was left.** VGO was left at +0.06 +0.08 +0.19 ft/s (body), so
+    the sensed delta-V was off the required by +0.03 -0.07 -0.05 ft/s
+    (LVLH).
+  - **What it leads to.** The post-burn truth, coasted to T2 with J2
+    (RK4), arrives 12 ft behind and 529 ft below.
+  - **The cross-check.** An independent J2 Lambert from the truth at TIG
+    asks -0.543 +0.058 -0.704 ft/s, as PASS and the ground did.
+  - **Why it was left.** The card's "Trim VGOs < 0.2 fps" lets 0.19 ft/s
+    stand, which is a third of a 0.9 ft/s burn.
+- **The vernier jets in the 13-minute coast.** About 67 ft.
+  - **The jets.** In DAP A/AUTO/VERN on the -Z track, the down-firing
+    verniers (F5L, F5R, L5D, R5D) fired 72 jet-seconds and the side ones
+    9.
+  - **The delta-V.** The IMU-sensed delta-V over the coast was -0.02 +0.01
+    -0.20 ft/s (LVLH): 0.2 ft/s toward the ISS, as down-firing jets must
+    give with body -Z on the target.
+  - **Its time pattern.** A CW coast from just after the burn matches the
+    truth to 12 ft for 8.5 min and diverges after that.
+  - **Physics, not a bug.** rr-run3's MC4 showed the same (0.39 ft/s of
+    down-firing VERN in 12 min).  On the flight the commander flies from
+    MC4 on (the manual phase, Stage 5), so no burn of the flight's
+    corrects it.
+
+**The fix in the driver: `--pulse-trim FPS`** (default 0.08).
+- **When.** After a midcourse's VGO null has met the card (TRANS NORM,
+  every axis < 0.2), DAP TRANS PULSE.
+- **What.** Each axis at FPS or more gets one THC deflection per A7 pulse
+  (PRI TRAN PLS 0.10 ft/s), all axes back to back, up to three passes.
+- **Why back to back.** It is one GL5NAV maneuver.
+- **Exempt.** The Ti burn's residual trim keeps its card's 0.2 alone.
+- **Off.** `--pulse-trim 0` gives the card alone.
+
+**With the pulse trim** (`dass-run2`, MC4 again from dass-run1's MC3
+capture).
+- **The burn.** The NORM null left VGO at -0.01 +0.05 -0.05 ft/s, so no
+  pulse was needed.  PASS's solution was -0.50 +0.05 -0.74 against the
+  truth's -0.54 +0.06 -0.71, and the truth sensed -0.54 -0.01 -0.64.
+  PASS's CGNV_DV_COUNT went 6 to 7: GL5NAV kept it.
+- **Its coast.** The post-burn truth coasted ballistically to T2 arrives
+  44 ft ahead and 611 ft below.
+- **What it reached.** At T2 the truth was **27 ft ahead, 45 ft out of
+  plane and 558 ft below**, ZD -0.90 ft/s.  The 42 ft left is the
+  verniers': 0.16 ft/s toward the ISS over the coast.  `dass-run1` had 35
+  behind, 48 out and 462 below.
+
+**THE VOLUME.**
+- **The spec.** `yaGPC2/tools/sites/sts134-rndz-iloads.json` holds the
+  same values, every rendezvous cell of the PATCH SUMMARY (#PCGZ, #DGW,
+  #PCGN, #DGL; 211 cells, was = LM, H = MM).
+- **Its sources.** It is checked against corrected-G2.fcm, the flown G2
+  dump, which holds MM in all 211 cells.
+- **PASS-IDLE's values.** PASS-IDLE independently sent the flown values of
+  CGZB_LAMB_ILOAD and the GLQREN locals, from the DASS G2 dump
+  (pure-G2.fcm), on 2026-10-09:
+  - **What agrees.** The bias INITs at 0, TAU_RR at 4000, VAR_RRDOT and
+    BIAS_VAR_RRDOT at 711 and 1, VAR_ST at 1E-6, and the Lambert flags 9-14,
+    19, 25-27 ON.
+  - **What differs.** PASS-IDLE listed sets 28 and up OFF; DASS_G2.ASC and
+    corrected-G2.fcm both have 29-40 ON.  Sets 29-40 are not used here.
+- **The volume.** `tools/mission_reconfig.py` applied the spec to a copy
+  of the volume, with the G2 context taken from a pre-RNDZ NAV ENA
+  capture (`rr-run2/sts134r-ipl`).  The copy is
+  `~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz.mmv`.
+- **Using it.** `--tape` that file, and a fresh run needs no
+  `--dass-iloads`, `--zero-sensor-bias` or `--lambert-mc` (the last two
+  are now legacy shortcuts).  Captures made from the old volume still need
+  `--dass-iloads` when resumed.
+
+@@VOLRUN@@
+
+**Not done.**
+- **The other I-loads.** `--dass-iloads all` (DAP, guidance, the other
+  GNC compools: 2026 words) is not yet flown.
+- **The one-line run.** Not flown end to end in one run from a fresh start
+  with `--dass-iloads`.
+- **GWY/GWW/GWR.** Which of their constants ended the EL = 0 ALARM KILLs
+  is not isolated.
+- **Why the post-MC1 trajectory never reached 29.07 deg.** MC1's onboard
+  solution was 0.16/0.10/0.23 ft/s from the truth's, and the Ti point was
+  reached from the 06:10 start without NCC.  Not traced.
+- **The tape.** The flight's I-loads are not on it (Ron's decision).
 
 ## 6. The stages
 
