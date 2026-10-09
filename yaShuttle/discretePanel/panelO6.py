@@ -753,7 +753,7 @@ PANEL_WINDOWS = (
 # and 6, G2, G3, G8, G9, S2).  O6, C2 and R11 -- FCMBOOT, GPCIPL and OPS 0's
 # -- are always up.  Panels not yet built are listed so that adding one is
 # only adding its window.
-BASE_PANELS = ("O6", "C2", "R11")
+BASE_PANELS = ("O6", "C2", "R11", "A7")    # A7: the aft MASTER ALARM, in every OPS
 OPS_PANELS = {
     ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
     ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
@@ -1677,7 +1677,7 @@ class PanelO6:
                     for i, w in enumerate(words):
                         self._mdm_out[(unit, card, ch + i)] = w
 
-    MA_KEYS = ("master_alarm", "master_alarm_p")
+    MA_KEYS = ("master_alarm", "master_alarm_p", "master_alarm_a7")
 
     def _cw_unit(self, out):
         """The C&W electronics unit, from PASS's FF DOH card 10 channel 2:
@@ -2993,7 +2993,19 @@ class PanelO6:
             r = self.ROT_D / 2.0
             return w, above + max(0.0, -y0 - r) + 4, self.ROT_D, max(0.0, y1 - r) + 4
         # pb / pbi
-        return max(cap_w, self.pb), above, self.pb, 0
+        bw, bh = self._pb_wh(c)
+        return max(cap_w, bw), above, bh, 0
+
+    def _pb_wh(self, c):
+        """A pushbutton's face: the panel's button size, or larger where its
+        legend needs it (A7L's two-line legends -- "APDS CIRC / PROT OFF" --
+        ran off a square sized for "SEP")."""
+        if c.get("halves"):
+            return self.pb, self.pb
+        lines = self._ctl_lines(c.get("legend"))
+        ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
+        return (max(self.pb, max([self._tw(l) for l in lines] or [0]) + 12),
+                max(self.pb, len(lines) * ls + 8))
 
     def _draw_ctl_item(self, key, cx, top):
         """Draw one control centred on cx, its caption starting at top --
@@ -3108,26 +3120,26 @@ class PanelO6:
         elif k == "rot":
             self._rotary(key, cx, y + body / 2.0)
         else:
-            b = self.pb
+            bw, bh = self._pb_wh(c)
             held = self.ctl_held[key]
             if k == "pbi":
                 if c.get("guarded"):
                     g = 5
-                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                    self._rect(cx - bw / 2 - g, y - g, cx + bw / 2 + g, y + bh + g, fill="",
                                outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
                 if c.get("halves"):
-                    self._pbi_halves(cx - b / 2, y, cx + b / 2, y + b, c, held,
+                    self._pbi_halves(cx - bw / 2, y, cx + bw / 2, y + bh, c, held,
                                      self.ctl_lamp.get(key) or (False,) * len(c["halves"]))
                 else:
-                    self._pbi(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held,
+                    self._pbi(cx - bw / 2, y, cx + bw / 2, y + bh, c.get("legend", ""), held,
                               self.ctl_lamp.get(key, False), c.get("color"))
             else:
                 if c.get("guarded"):
                     g = 5
-                    self._rect(cx - b / 2 - g, y - g, cx + b / 2 + g, y + b + g, fill="",
+                    self._rect(cx - bw / 2 - g, y - g, cx + bw / 2 + g, y + bh + g, fill="",
                                outline=C_GUARD_LO, width=max(2, int(2 * self.s)))
-                self._legend_pb(cx - b / 2, y, cx + b / 2, y + b, c.get("legend", ""), held)
-            self._hit("ctl", key, cx - b / 2, y, cx + b / 2, y + b)
+                self._legend_pb(cx - bw / 2, y, cx + bw / 2, y + bh, c.get("legend", ""), held)
+            self._hit("ctl", key, cx - bw / 2, y, cx + bw / 2, y + bh)
 
     def _rot_legends(self, key):
         """[(legend, dx, dy, angle)] of a rotary's positions about its centre:

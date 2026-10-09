@@ -429,6 +429,15 @@ for _k, _pan in (("master_alarm", "F2"), ("master_alarm_p", "F4")):
                         sources="CWWB USA006019 4-20; SCOM OI-28 Part 1 2.2")
 PANES["F2"].append(("MASTER ALARM", [["master_alarm"]]))
 PANES["F4"].append(("MASTER ALARM", [["master_alarm_p"]]))
+# AND THE AFT FLIGHT DECK'S: "four red MASTER ALARM pushbutton indicators
+# on panels F2, F4, A7, and MO52J" (SCOM OI-29 2.2; SFOC-FL0884 Rev B, p.
+# 2.2-1 and again for class 1 and the fire alarm).  Which part of A7 is not
+# said, so it is a window of its own, "A7" (MO52J, the middeck's, is not
+# drawn).  There is no C&W annunciator matrix aft: that is F7 alone.
+CONTROLS["master_alarm_a7"] = dict(panel="A7", kind="pbi", caption="", legend="MASTER\nALARM",
+                                   color="red", contacts=[], lamps=[(VEH_UNIT, 1, 0, 0x8000)],
+                                   sources="SCOM OI-29 2.2 (panels F2, F4, A7, MO52J)")
+PANES["A7"] = [("MASTER ALARM", [["master_alarm_a7"]])]
 check()
 
 
