@@ -165,14 +165,44 @@ class ManualPhase(object):
                 pass
         return flown
 
-    def dap_pulse_modes(self, low_z=False):
-        """DAP A/AUTO/VERN, TRANS PULSE in X, Y and Z; LOW Z pressed when
-        asked (it is the Y column's third button, a jet-selection mode of
-        its own beside Z's NORM/PULSE)."""
+    def lamps(self):
+        """The C3 DAP lamps as PASS lights them (dap_lamps.DapLamps)."""
+        if getattr(self, "_lamps", None) is None:
+            from dap_lamps import DapLamps
+            self._lamps = DapLamps(self.a.port_base)
+            if not self._lamps.wait(15.0):
+                self.say("DAP lamps: no lamp words from FF1 on port base + 100 in 15 s")
+        return self._lamps
+
+    def dap_pulse_modes(self, low_z=None):
+        """DAP A/AUTO/VERN, TRANS PULSE in X, Y and Z -- buttons that select,
+        so pressing them again does no harm -- and LOW Z as the run asks
+        (--low-z; low_z overrides).  LOW Z TOGGLES (GCQORB.hal 1443-1458,
+        3256-3280: pressed with the +Z jets already inhibited, it turns the
+        option off), so it is pressed only while its lamp disagrees, and the
+        lamp is then checked: pressed blind, every second call turned it
+        off.  The Y column's third button, a jet selection of its own beside
+        Z's NORM/PULSE, which leave it alone; HIGH Z would clear it."""
+        if low_z is None:
+            low_z = bool(getattr(self.a, "low_z", False))
         self.play("+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n"
-                  "+2     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n"
-                  + ("+2     dap c3 low_z\n" if low_z else ""), "man-dap")
+                  "+2     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n", "man-dap")
         self.script_done("man-dap", 120)
+        from dap_lamps import set_low_z
+        n = {"k": 0}
+
+        def press():
+            n["k"] += 1
+            name = "man-low-z-%d" % n["k"]
+            self.play("+1     dap c3 low_z\n", name)
+            self.script_done(name, 60)
+
+        lamps = self.lamps()
+        before = lamps.low_z_lit()
+        ok, presses = set_low_z(lamps, press, low_z)
+        self.say("DAP: LOW Z %s (lamp %s -> %s, %d press%s)%s"
+                 % ("ON" if low_z else "OFF", before, lamps.low_z_lit(), presses,
+                    "" if presses == 1 else "es", "" if ok else " -- THE LAMP DID NOT FOLLOW"))
 
     # --- the one control law ---------------------------------------------------
     def fly(self, label, goal, done, point="cg", tau=120.0, vmax=0.3, dead=0.07, every=10.0,
@@ -355,10 +385,10 @@ class ManualPhase(object):
         1,000 ft, so that the up-firing jets do not plume the ISS); DAP
         A/AUTO/VERN, TRANS PULSE."""
         self.man_start()
-        self.dap_pulse_modes(low_z=getattr(self.a, "low_z", False))
+        self.dap_pulse_modes()
         self.say("crew: DAP A/AUTO/VERN, TRANS PULSE%s; stationkeep on the R-bar at %.0f ft"
-                 % (", LOW Z" if getattr(self.a, "low_z", False) else " (NOT LOW Z: vehdyn's jets have no cant, "
-                    "so LOW Z's +Z comes out -Z -- RENDEZVOUS_PLAN.md 5f)", RBAR_FT))
+                 % (", LOW Z" if getattr(self.a, "low_z", False) else " (NOT LOW Z: --low-z not given)",
+                    RBAR_FT))
         settled = {"n": 0}
 
         def done(t, st, err):
@@ -540,7 +570,7 @@ class ManualPhase(object):
         lateral and vertical lined up to the centerline camera's cross."""
         self.man_start()
         om = self.docking_attitude()
-        self.dap_pulse_modes(low_z=False)
+        self.dap_pulse_modes()
         st = self.rel("ods")
         d0 = st["r"][0]
         self.say("VBAR: ODS ring %.1f ft from PMA-2's face; %s" % (d0, self.readings()))
