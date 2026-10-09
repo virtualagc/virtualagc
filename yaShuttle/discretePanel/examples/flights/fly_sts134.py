@@ -301,6 +301,16 @@ class Flight:
         last = [l for l in open(path) if l.strip() and not l.lstrip().startswith("#")][-1].strip()
         self.wait_file(os.path.join(self.a.logs, "logs", "panel.log"), last, timeout,
                        after=getattr(self, "played_at", 0))
+        # ...but a step is logged when it STARTS: a `keys` line is still being
+        # typed (about 0.35 s a key), and a script played meanwhile stops this
+        # one (panelO6.py 5571), which drops its last keys without a word.
+        # Mac-portview found [10A] SPEC 21 ITEM 7 EXEC losing its "7 EXEC",
+        # and ITEM 7 toggles, so [10B] then DESELECTED IMU 1; dock5 lost the
+        # end of a DAP-button script, and dock4-dock10 the last pulses of THC
+        # trains (2026-10-09).  Done is "script complete" (crewscript.py
+        # 1516), which a stopped player never logs.
+        self.wait_file(os.path.join(self.a.logs, "logs", "panel.log"), "script complete", timeout,
+                       after=getattr(self, "played_at", 0))
         return n
 
     def truth(self):
