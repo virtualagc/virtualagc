@@ -259,6 +259,23 @@ def settled_at(t_run, n_needed=6, lat_ft=0.5, x_ft=1.0, rate=0.04):
     return done
 
 
+def orbit_pfd_on_crt2(self):
+    """With --crts 2: CRT 2 powered and showing the ORBIT PFD (MEDS FLT INST
+    menu: edgekey 2 FLT INST, then edgekey 3 ORBIT PFD), the attitude and
+    rates beside the DPS display the driver keys on CRT 1.  PASS loads IDP 2
+    itself once it is powered, in about 5 s (fly_sts134.PFD_ON_CRT2)."""
+    if self.a.crts < 2 or getattr(self, "pfd_up", False):
+        return
+    self.play("+1     idppower 2 on\n"
+              "+10    edgekey crt2 1\n"          # UP: the main menu
+              "+2     edgekey crt2 2\n"          # FLT INST
+              "+2     edgekey crt2 3\n",         # ORBIT PFD
+              "dock-pfd-crt2")
+    self.script_done("dock-pfd-crt2", 120)
+    self.pfd_up = True
+    self.say("crew: ORBIT PFD on CRT 2")
+
+
 def dock30(self):
     """A10/B10 loaded and selected while stationkeeping (A10's PRI TRAN PLS
     is the 0.05 ft/s pulse this leg wants); then one continuous approach:
@@ -270,6 +287,14 @@ def dock30(self):
     doing it at 75 ft, drifted back out to 102 ft meanwhile.  The card's
     "A10/B10" at 75 ft is a selection the crew had prepared."""
     self.man_start()
+    orbit_pfd_on_crt2(self)
+    # Lamps latched from before the capture -- rndz-hold-v2's IMU caution and
+    # B/U C&W, whose dilemma the RM-threshold seeding had already cleared --
+    # reset as the crew would: MSG RESET twice (a pending class-5 ILLEGAL
+    # ENTRY absorbs the first, DMTERR.hal 766-788) and MASTER ALARM
+    self.play("+1     keys MSG_RESET\n+3     keys MSG_RESET\n+3     press master_alarm\n",
+              "dock-msg-reset")
+    self.script_done("dock-msg-reset", 60)
     dap_load(self, "dock", 10, DAP_DOCK)
     dap_modes(self, "A", low_z=True)
     self._inst()

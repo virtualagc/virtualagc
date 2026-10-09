@@ -382,7 +382,7 @@ def win_stop_tree(pid, force):
 # listener records the request and wakes the main thread with SIGINT, which is
 # already the "stop what you are doing" path here -- main tells the two apart
 # by looking at this.
-SESSION = {"action": None, "dir": None, "cancel": False}
+SESSION = {"action": None, "dir": None, "cancel": False, "go": False}
 
 
 def session_listener(port_base, stop_event):
@@ -395,7 +395,7 @@ def session_listener(port_base, stop_event):
         return
     sock.settimeout(0.5)
     log("session commands on port %d ('save DIR', 'save-and-quit DIR', "
-        "'resume DIR', 'rate X', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
+        "'resume DIR', 'rate X', 'go', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
     while not stop_event.is_set():
         try:
             data, _ = sock.recvfrom(4096)
@@ -406,6 +406,11 @@ def session_listener(port_base, stop_event):
         text = data.decode("utf-8", errors="replace").strip()
         word, _, rest = text.partition(" ")
         word, rest = word.lower(), rest.strip()
+        if word == "go":
+            # --hold-start: the windows are up and placed; start the vehicle
+            SESSION["go"] = True
+            log("session command: go")
+            continue
         if word == "cancel":
             # A FLAG, AND NO SIGNAL.  The main thread is not parked in
             # input() when this arrives -- it is inside take_snapshot,
@@ -1377,6 +1382,14 @@ def main():
                          "default it starts with the vehicle dynamics, YAGPC_VEHDYN=1, when "
                          "it can run here: for a machine too weak to render it, or unattended "
                          "runs)")
+    ap.add_argument("--portview-views", default=None, metavar="LIST",
+                    help="portview.py's --views: comma-separated, from front, up, left, right, "
+                         "aft, cl (its default is front alone)")
+    ap.add_argument("--hold-start", action="store_true",
+                    help="bring every window up and place it, but hold the vehicle -- yaGPC2 "
+                         "not started, so nothing moves -- until the session command 'go' "
+                         "(or Enter, when this terminal is interactive): time to arrange "
+                         "the windows before anything happens")
     ap.add_argument("--portview-size", type=int, default=368, metavar="N",
                     help="portview.py's --size (768 is full size; default 368, four views "
                          "across one 1920-wide screen)")
@@ -1828,7 +1841,7 @@ def main():
             except (OSError, subprocess.TimeoutExpired) as e:
                 log("portview: not started -- %s" % e)
 
-        def bring_up(resume=None):
+        def bring_up(resume=None, hold=False):
             # NO PREFIX UNLESS ONE WAS ASKED FOR.  It used to name the GPCs,
             # which made every display's task-bar button read "GPCs 1,2,3,4,..."
             # with the one thing that tells them apart -- CRT1, CRT2, CRT3 --
@@ -1883,8 +1896,11 @@ def main():
                 L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
                                       "--size", str(tk_px(size))], HERE, env)
             if start_portview:
-                L.start("portview", [py, "portview.py", "--port-base", str(args.port_base),
-                                     "--size", str(args.portview_size)], HERE, env)
+                pv_argv = [py, "portview.py", "--port-base", str(args.port_base),
+                           "--size", str(args.portview_size)]
+                if args.portview_views:
+                    pv_argv += ["--views", args.portview_views]
+                L.start("portview", pv_argv, HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
             # instead of the tape: --resume makes each computer load its own
@@ -1951,11 +1967,17 @@ def main():
                          "--rt-factor", "%g" % args.rt_factor, "--port-base", str(args.port_base),
                          "--no-halucp-svc", "--max-steps", "0", "--rt-idle-timeout", "86400000",
                          "--verbose"] + shlex.split(args.yagpc_extra)
-            gpc = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,
-                          pass_fds=gpc_pass_fds, stdin_text=gpc_stdin)
-            for _fd in gpc_pass_fds:        # ours to close once it is inherited
-                os.close(_fd)
-            time.sleep(3)
+            def launch_gpc():
+                g = L.start("yaGPC2", gpc_argv, YAGPC_DIR, env,
+                            pass_fds=gpc_pass_fds, stdin_text=gpc_stdin)
+                for _fd in gpc_pass_fds:        # ours to close once it is inherited
+                    os.close(_fd)
+                time.sleep(3)
+                return g
+            # HELD (--hold-start): the panel comes up now -- it seeds its
+            # switches from the capture, so it may start before the computer
+            # -- and the computer only on 'go', after the windows are placed.
+            gpc = None if hold else launch_gpc()
             if ((script_has_subtitles(args.keys, False)
                  or script_has_subtitles(args.panel_script, True))
                     and "subtitles" not in layout_roles):
@@ -2034,8 +2056,9 @@ def main():
                     log("note: the script has a 'wait user', and --duration counts from "
                         "start-up -- including the time spent waiting")
             L.start("panel", panel_argv, HERE, env)
-            return gpc
-        gpc = bring_up(args.snapshot_resume)
+            return launch_gpc if hold else gpc
+        held = bring_up(args.snapshot_resume, hold=args.hold_start)
+        gpc = None if args.hold_start else held
         t0 = time.time()
 
         if args.manager:
@@ -2177,6 +2200,25 @@ def main():
                       else None)
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
+        if args.hold_start:
+            # THE VEHICLE WAITS, NOT JUST A SCRIPT.  --wait-user holds a crew
+            # script while the vehicle runs on; arranging the windows took
+            # long enough for an Orbiter 100 ft from the ISS to drift.  Here
+            # the computer has not started, so nothing moves at all.
+            tty = sys.stdin is not None and sys.stdin.isatty() and os.name != "nt"
+            log("HELD: every window is up and placed; the vehicle starts on the session "
+                "command 'go'%s" % (" or Enter here" if tty else ""))
+            while not SESSION["go"]:
+                if tty:
+                    import select as _select
+                    if _select.select([sys.stdin], [], [], 0.5)[0]:
+                        sys.stdin.readline()
+                        break
+                else:
+                    time.sleep(0.5)
+            gpc = held()
+            t0 = time.time()
+            log("released: the vehicle is running")
         if wsl:
             threading.Thread(target=wslg_redraw_watcher, args=(stop_event, wslg_raw),
                              daemon=True).start()
