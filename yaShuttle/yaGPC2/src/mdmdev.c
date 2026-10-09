@@ -646,6 +646,11 @@ static uint16_t crewIn[CREW_NUNIT + 1][CREW_NCARD][CREW_NCHAN];
  * VALUE, type 9, one word.  The SM computer and the Ku signal processor
  * that the switches really reach are not here; kuradar.c stands in. */
 #define CREW_TYPE_KU 9
+/* THE APDS CONTROL PANEL A7L, which reaches the docking mechanism's own
+ * control unit and no computer: op 4 VALUE, type 11, two words to FF1 --
+ * the switches (bit 0 set: they are the panel's) and the pushbuttons held
+ * now; vehdyn.h vehdyn_apds_panel has the bits. */
+#define CREW_TYPE_APDS 11
 #define CREW_AID_NCH 8
 static int16_t crewAid[CREW_NFF + 1][CREW_NCARD][CREW_AID_NCH];
 static bool crewAidHeard;
@@ -837,6 +842,14 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         crewMsgs++;
         return;
     }
+    if (type == CREW_TYPE_APDS) {
+        if (op != CREW_OP_VALUE || cnt < 2 || len < 12) return;
+        vehdyn_apds_panel((uint16_t)(((unsigned)buf[8] << 8) | buf[9]),
+                          (uint16_t)(((unsigned)buf[10] << 8) | buf[11]));
+        crewHeard = true;
+        crewMsgs++;
+        return;
+    }
     if (type == CREW_TYPE_HW) {
         if (op != CREW_OP_VALUE || cnt < 1 || len < 10) return;
         vehdyn_hardwired(((unsigned)buf[8] << 8) | buf[9]);
@@ -913,18 +926,20 @@ static void crew_send_out(int k, unsigned card, unsigned ch, uint16_t w) {
  * (landing-indicators-findings.md), so the panel lights them from the
  * vehicle's state, never from its own button press.  Type 10 (VEH) VALUE
  * records on FF1's hardware-side bus, card 0, channels 0-1 (vehdyn.c
- * vehdyn_landing_status), on change and every VEH_REFRESH calls; panelO6
+ * vehdyn_landing_status), and channels 2-3 the APDS control panel's lights
+ * (vehdyn_apds_lights), on change and every VEH_REFRESH calls; panelO6
  * files them as unit 0. */
 #define CREW_TYPE_VEH 10
 #define VEH_REFRESH 200
 static void veh_status_publish(void) {
-    static uint16_t sent[2];
+    static uint16_t sent[4];
     static long calls;
     if (!crewOpen || crewFd[1] < 0 || crewPortBase <= 0) return;
-    uint16_t w[2];
+    uint16_t w[4];
     vehdyn_landing_status(w);
+    vehdyn_apds_lights(w + 2);
     bool due = (++calls % VEH_REFRESH) == 0;
-    for (unsigned ch = 0; ch < 2; ch++) {
+    for (unsigned ch = 0; ch < 4; ch++) {
         if (w[ch] == sent[ch] && !due && calls > 1) continue;
         sent[ch] = w[ch];
         uint8_t b[10] = { 0, CREW_OP_VALUE_OUT, 0, CREW_TYPE_VEH, 0, (uint8_t)ch,
@@ -1678,8 +1693,9 @@ static void fc_output(int busID, uint32_t cmd, const uint16_t *words, int n, dou
  * Zo 375), body metres, +X forward +Y right +Z down: it moves with propellant
  * and on the pad is the whole stack's (vehdyn_cg_offset); then the docking
  * -- 0 free, 1 captured, 2 hard-mated (vehdyn_docked) -- and the ODS ring's
- * contacts with a port so far, captured or not.  32 doubles in all; readers
- * take the first N they know.  Only with the dynamics on and a panel wired. */
+ * contacts with a port so far, captured or not; then the APDS ring's face,
+ * Zo inches (vehdyn_apds_ring: 475.75 initial, 480 forward, 460 final), for
+ * portview's ring.  33 doubles in all; readers take the first N they know.  Only with the dynamics on and a panel wired. */
 #define TRUTH_OFFSET 98
 #define TRUTH_PERIOD_S 0.05
 
@@ -1695,7 +1711,7 @@ static void truth_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9 + 3 + 2];
+    double v[2 + 4 + 3 + 3 + 3 + 2 + 1 + 9 + 3 + 2 + 1];
     int n = 0;
     v[n++] = st->t;
     v[n++] = vehdyn_gmt(st->t);
@@ -1713,7 +1729,8 @@ static void truth_publish(void) {
     n += 3;
     v[n++] = vehdyn_docked();
     v[n++] = vehdyn_dock_contacts();
-    uint8_t b[4 + 8 * 32];
+    v[n++] = vehdyn_apds_ring();
+    uint8_t b[4 + 8 * 33];
     memcpy(b, "TRU1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};

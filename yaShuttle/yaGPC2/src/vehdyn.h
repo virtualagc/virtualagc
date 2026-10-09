@@ -152,6 +152,28 @@ void vehdyn_cg_offset(double b[3]);
 int vehdyn_docked(void);
 /* Contacts of the ODS ring with a port so far, captured or not. */
 int vehdyn_dock_contacts(void);
+/* The APDS control panel A7L (vehdyn.c, THE APDS): its switches (bit 0 set
+ * when they are the panel's own; CONTROL PANEL POWER A B C 0xE000, HEATERS/
+ * DCU 0x1C00, APDS POWER A B C DS 0x0380, PYROS A B C 0x0070) and the
+ * pushbuttons held now (LAMP TEST 0x8000, POWER ON 0x4000, POWER OFF 0x2000,
+ * RING OUT 0x1000, RING IN 0x0800, APDS CIRC PROT OFF 0x0400, CLOSE HOOKS
+ * 0x0200, CLOSE LATCHES 0x0100, FIXER OFF 0x0080, OPEN HOOKS 0x0040, OPEN
+ * LATCHES 0x0020, UNDOCKING 0x0010, PYRO CIRC PROT OFF 0x0008, PYRO CIRC
+ * PROT ON 0x0004, ACT HOOKS FIRING 0x0002, PAS HOOKS FIRING 0x0001). */
+void vehdyn_apds_panel(uint16_t sw, uint16_t pb);
+/* Its lights.  w[0], the STATUS block row by row, left column then right:
+ * POWER ON 0x8000, APDS PROTECT CIRCUIT OFF 0x4000, RING ALIGNED 0x2000,
+ * RING INITIAL POSITION 0x1000, FIXERS OFF 0x0800, HOOKS 1 OPEN 0x0400,
+ * HOOKS 2 OPEN 0x0200, LATCHES CLOSED 0x0100, UNDOCK COMPLET 0x0080,
+ * INITIAL CONTACT 0x0040, CAPTURE 0x0020, RING FORWARD POSITION 0x0010,
+ * READY TO HOOK 0x0008, INTERF SEALED 0x0004, HOOKS 1 CLOSED 0x0002, HOOKS 2
+ * CLOSED 0x0001.  w[1]: LATCHES OPEN 0x8000, RING FINAL POSITION 0x4000,
+ * A DS 0x2000, B DS 0x1000, C DS 0x0800, A P 0x0400, B P 0x0200, C P 0x0100,
+ * PYRO PROTECT CIRCUIT OFF 0x0080. */
+void vehdyn_apds_lights(uint16_t w[2]);
+/* The APDS ring's face, Zo inches: 475.75 at its initial (ready to dock)
+ * position, 480 forward, 460 final (retracted, hard-mated). */
+double vehdyn_apds_ring(void);
 /* The air data probes, left and right: 0 stowed .. 1 deployed (the crew's
  * AIR DATA PROBE switches, hardwired 0x0100/0x0080 DEPLOY, 0x0040/0x0020
  * STOW).  And the air they meet: free-stream pressure (psf), Mach, alpha,
