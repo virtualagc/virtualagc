@@ -60,6 +60,19 @@ RPM_RATE = 0.75                  # deg/s, RPM SETUP's PRI and VERN ROT RATE
 RPM_STEPS = (180, 270, 0, 90)    # UNIV PTG BODY VECT 5 P: -X, +Z, +X, -Z on the ISS
 
 
+def turn_stopped(t, rate, peak):
+    """Whether an attitude maneuver has come to rest (deg/s): slower than
+    0.1 deg/s after it has been under way -- faster than 0.3 deg/s at some
+    point.  The verniers take more than a minute to bring the Orbiter up
+    to speed, so a time limit alone (the first test, "60 s and under
+    0.1 deg/s") ends a quarter turn that has barely begun: full-run1's
+    first RPM stopped P 180 after 1.2 min, 98 deg from the ISS, turning at
+    0.07 deg/s.  A maneuver that never gets going is given up after 5 min."""
+    if peak > 0.3:
+        return rate < 0.1
+    return t > 300.0 and rate < 0.1
+
+
 def vclip(x, m):
     return max(-m, min(m, x))
 
@@ -298,12 +311,13 @@ class ManualPhase(object):
         degrees off the truth once the radar is down to OUTPUT LOW
         (manual-run2's R-bar: 12 deg), as track_complete found after MC4."""
         t0 = self.ears.snap()[0]["t"]
-        still = 0
+        still, peak = 0, 0.0
         while True:
             e = self.body_vec_err(p, toward)
             w = self.body_rate_dps()
             t = self.ears.snap()[0]["t"] - t0
-            still = still + 1 if (t > 60.0 and w < 0.1) else 0
+            peak = max(peak, w)
+            still = still + 1 if turn_stopped(t, w, peak) else 0
             if (e < tol and w < 0.1) or still >= 3 or t > limit:
                 self.say("%s: BODY VECT P %d %.1f deg from %s after %.1f min (rate %.2f deg/s)%s"
                          % (label, p, e, "the ISS" if toward == "iss" else "the Earth's centre", t / 60.0, w,
@@ -376,12 +390,13 @@ class ManualPhase(object):
             # axes, so every pitch pair is a net -Z), and manual-run2's
             # first RPM, holding only between quarter turns, drifted out
             # to 1,640 ft at 2 ft/s
-            w = {"still": 0}
+            w = {"still": 0, "peak": 0.0}
 
             def turned(t, st, err, p=p, w=w):
                 e = self.body_vec_err(p, "iss")
                 rate = self.body_rate_dps()
-                w["still"] = w["still"] + 1 if (t > 60.0 and rate < 0.1) else 0
+                w["peak"] = max(w["peak"], rate)
+                w["still"] = w["still"] + 1 if turn_stopped(t, rate, w["peak"]) else 0
                 if (e < 3.0 and rate < 0.1) or w["still"] >= 2:
                     w["e"], w["t"] = e, t
                     return True
