@@ -22,7 +22,7 @@ models made before this survey by others; "--" is not modelled.
 
 | Object | NORAD | Intl. des. | Missions (what the Shuttle did) | Configuration at the encounter | Size | Key |
 |---|---|---|---|---|---|---|
-| SPAS-01 (Shuttle Pallet Satellite) | 14142 | 1983-059F | STS-7 (Jun 1983): released, formation flight to ~300 m, photographed Challenger, recaptured | Open carbon-fibre truss shaped to the bay's cross-section; cameras and 10 experiments on top | 4.8 m across x 3.4 m high x 1.5 m; 1,448 kg | `spas01` |
+| SPAS-01 (Shuttle Pallet Satellite) | 14142 | 1983-059F | STS-7 (Jun 1983): released, formation flight to ~300 m, photographed Challenger, recaptured | Blanketed box across the bay under an instrument deck, a round beam along its foot, a V keel truss below; cameras and 10 experiments on the deck and forward face | 4.8 m across x 3.4 m high x 1.5 m; 1,448 kg | `spas01` |
 | SPAS-01A | -- (not catalogued: never released) | -- | STS-41B (Feb 1984): stayed on the arm after an RMS wrist fault | as SPAS-01 | as SPAS-01 | -- (not free) |
 | Integrated Rendezvous Target (IRT) | 14689 | 1984-011C | STS-41B: a 2 m balloon released as a radar/optical target; it burst on inflation, so no rendezvous | Fragments | -- | -- |
 | Solar Maximum Mission | 11703 | 1980-014A | STS-41C (Apr 1984): rendezvous, MMU capture attempt, RMS capture, repair, release | MMS bus + instrument module, two arrays, HGA mast | 4 m x 2.3 m; arrays ~12 m | `smm` (others) |
@@ -31,7 +31,7 @@ models made before this survey by others; "--" is not modelled.
 | Westar 6 (HS-376) | 14688 | 1984-011B | STS-51A (Nov 1984): retrieved by MMU/stinger | Spinning drum, antenna stowed | 2.16 m x 2.8 m | `westar6` (others) |
 | Palapa B2 (HS-376) | 14692 | 1984-011D | STS-51A: retrieved | as Westar 6 | as Westar 6 | `palapab2` (others) |
 | Leasat 3 (Syncom IV-3) | 15643 | 1985-028C | STS-51D (Apr 1985): rendezvous, "flyswatter" attempt; STS-51I (Aug 1985): captured, repaired, re-released | Spinning drum, UHF helix and dish stowed | 4.26 m x 4.3 m (6.2 m with antennas) | `leasat3` (others) |
-| Spartan 101 (Spartan-1) | 15831 | 1985-048E | STS-51G (Jun 1985): X-ray astronomy free-flyer, deployed and retrieved | Spartan carrier (box ~1.3 m) with the X-ray detectors | ~1.3 x 1.1 x 1.5 m; ~1 t | `spartan101` |
+| Spartan 101 (Spartan-1) | 15831 | 1985-048E | STS-51G (Jun 1985): X-ray astronomy free-flyer, deployed and retrieved | Spartan carrier lengthened by the X-ray instrument section, white blankets | 3.20 x 1.07 x 1.22 m (126 x 42 x 48 in) | `spartan101` |
 | Plasma Diagnostics Package (PDP) | 15929 | 1985-063B | STS-51F (Jul 1985): released from the arm; Challenger flew round it (~6 h) and recaptured it | Cylindrical instrument package on its RMS fitting | 1.06 m dia. x 0.6 m; 360 kg | `pdp` |
 | Hubble Space Telescope | 20580 | 1990-037B | STS-31 deploy; STS-61, 82, 103, 109, 125 servicing | | 13.2 m x 4.2 m | `hst` (others) |
 | Compton Gamma Ray Observatory | 21225 | 1991-027B | STS-37 (Apr 1991): unberthed; its high-gain antenna boom freed by EVA (Ross, Apt), then released | Arrays and HGA boom deployed | 7.6 m long x 4.6 m; arrays 21 m; 17 t | `cgro` |
@@ -105,33 +105,34 @@ Each module's docstring gives its sources and the configuration it shows;
 each meta['frame'] its body axes and origin.  Shared pieces live in
 `_leo_util.py` (fixtures, procedural textures, mesh refinement),
 `_leo_spartan.py` (the Spartan carrier, from NASA 3D Resources' Spartan
-201), `_leo_astrospas.py` (+ `_leo_orfeus.py`, `_leo_crista.py`),
+201, and a procedural one, `bus_parts()`, for 101, 204 and OAST-Flyer), `_leo_astrospas.py` (+ `_leo_orfeus.py`, `_leo_crista.py`),
 `_leo_wsf.py` and `_leo_iae.py`.  mag_1000km values are estimates from
 size and finish.
 
 | Key | NORAD | Built from | Configuration | Triangles |
 |---|---|---|---|---|
-| `ldef` | 14898 | shapes; 41C/STS-32 photos | 1984 look; tray finishes a representative pattern | 38,712 |
-| `intelsat603` | 20523 | shapes; STS-49 photos | stowed, as captured (no capture bar, no new motor) | 12,492 |
+| `ldef` | 14898 | shapes; NASA SP-473 fig. 2 and SP-531 (tray map, structure, finishes); 41C, STS-32 (S32-85-081, s32-541-018, STS032-85-008) and KSC (KSC-84PC-0219) photos | 1990 retrieval look, every tray its own experiment (`LOOK = "1984"` gives the deploy look) | 51,940 |
+| `intelsat603` | 20523 | shapes; STS-49 photos (9301572, 9257083, 9259496, 9301420, s49-91-020/026/029) | stowed, as captured (no capture bar, no new motor) | 15,268 |
 | `eureca` | 22065 | shapes; eoPortal; STS-46/57 photos | arrays folded, antennas up (STS-57); `ARRAYS_DEPLOYED = True` gives STS-46's | 26,896 |
-| `sfu` | 23521 | shapes; STS-72 photos | arrays jettisoned (STS-72) | 6,204 |
+| `sfu` | 23521 | shapes measured off STS072-720-076, STS072-734-018/011, sts072-720-042; JAXA diameter | arrays jettisoned (STS-72) | 5,292 |
 | `cgro` | 21225 | shapes; GRO Prelaunch Mission Operations Report (NTRS 20050229325) drawings, STS-37 and KSC photos (Ron's collection) | deployed, as released | 26,520 |
-| `uars` | 21701 | shapes; STS-48 photos | array and HGA deployed | 12,932 |
-| `spas01` | 14142 | shapes; 41B press kit dimensions | layout representative (few photos of it exist) | 2,676 |
+| `uars` | 21701 | shapes measured off NASA 9254338 (scale: the array's 3.3 m), 9248071, s48-05-024, s48-31-002, s48-e-013, STS048-23-12/21; NTRS 19930015545/19930019519 drawings; Ron's collection (sts48uarsdeploy) | array up and HGA out, as released | 11,892 |
+| `spas01` | 14142 | shapes measured off STS-7 photos (S07-25-1421, S07-11-528, S83-35782, S07-18-774); STS-41B photos of SPAS-01A | as released on STS-7 (STS-7 fit-out); aft face unphotographed | 7,512 |
 | `orfeus_spas`, `orfeus_spas2` | 22798, 24661 | shapes; STS-51/80 photos, the ASTRO-SPAS carrier from Ron's collection | free-flying | 8,540 |
 | `crista_spas`, `crista_spas2` | 23341, 24890 | shapes; STS-66/85 and KSC photos (Ron's collection) | free-flying (II with IPEX-II) | 8,448 / 11,252 |
-| `wsf2`, `wsf3` | 23669, 24662 | shapes; STS-60/69 photos | free-flying | 5,800 |
+| `wsf2` | 23669 | shapes measured off sts069-723-072/732-048, sts060-76-095/74-054 | free-flying (grey boxes, green bars) | 10,288 |
+| `wsf3` | 24662 | as `wsf2` + sts080-708-065/084, 755-016 (white boxes, gold bars, extra box and bar) | free-flying | 10,348 |
 | `spartan201` ... `spartan201_5` | 22623, 23253, 23668, 25062, 25521 | NASA 3D Resources "Spartan 201", recoloured | free-flying | 30,672 |
 | `spartan207` | 23871 | Spartan carrier + shapes; STS-77 photos | IAE inflated; `IAE_ATTACHED = False` gives the bare Spartan retrieved | 13,875 |
 | `iae` | 23872 | shapes; STS-77 photos | jettisoned antenna | 5,940 |
-| `ibss` | 21244 | shapes; STS-39 photos | free-flying | 3,260 |
-| `pdp` | 15929 | shapes; 51F photos | free-flying, booms out | 2,096 |
+| `ibss` | 21244 | shapes; STS-39 photos s39-15-017/17-017/19-015/11-027, preflight s91-27781/27784 | free-flying (cryostat across the bay, aperture -Y) | 5,556 |
+| `pdp` | 15929 | shapes; Univ. of Iowa spec (NTRS 19810006441); 51F-34-041, 51F-33-024, 8772046, STS-3 sts003-009-444 | free-flying, booms out | 5,020 |
 | `erbs` | 15354 | shapes; STS-41G and KSC photos (s84-41265/41266), NASA Langley, eoPortal (Ron's collection) | panels deployed, as released | 6,632 |
-| `spartan204` | 23470 | Spartan carrier + shapes; STS-63 photo | free-flying | 7,284 |
-| `oast_flyer` | 23763 | Spartan carrier + shapes; STS-72 photos | free-flying | 7,732 |
-| `spartan101` | 15831 | Spartan carrier + shapes | instruments representative | 7,240 |
-| `pams_stu` | 23876 | shapes; STS-77 photos | free-flying | 192 |
-| `tss1r` | 23805 | shapes; STS-75 photo | the satellite (its 2.5 mm tether not drawn) | 2,672 |
+| `spartan204` | 23470 | procedural Spartan carrier + shapes; STS-63 photos (STS063-716-055/060/066/072, sts063-716-064) | free-flying | 3,116 |
+| `oast_flyer` | 23763 | procedural Spartan carrier + shapes; STS-72 photos (STS072-726-051/054) | free-flying | 2,844 |
+| `spartan101` | 15831 | procedural Spartan carrier + shapes; STS-51G press kit (126 x 42 x 48 in), 51-G photos (STS51G-35-53/54/57/64, 36-77/80/82) | free-flying | 4,862 |
+| `pams_stu` | 23876 | shapes; STS-77 ESC frames S77-E-5067/5068/5069 | free-flying | 1,632 |
+| `tss1r` | 23805 | shapes; Aeritalia exploded view (NTRS 19910009845); STS-46 9311302, STS-75 STS075-701-087, 9612176, 9606462 | the satellite (its 2.5 mm tether not drawn) | 7,296 |
 
 A note for all models: portview writes a depth linear in distance at each
 vertex, which the GPU then interpolates linearly across the screen; across
