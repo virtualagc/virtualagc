@@ -54,6 +54,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import fly_rndz134 as R  # noqa: E402
+import rndz_instruments as ins  # noqa: E402
 import discretes as D    # noqa: E402  (fly_rndz134 put the panel directory on the path)
 
 DOCK30_FT = 30.0
@@ -110,14 +111,77 @@ def tru_dock(self, timeout=3.0):
         s.close()
 
 
+# THE AFT FLIGHT STATION.  The approach was flown standing at the aft
+# station, facing the payload bay: the commander on the AFT THC, the aft
+# DAP pushbuttons on A6U, SENSE -Z (AFT FLT STATION CONFIG [4A], RNDZ p74;
+# "√SENSE: -Z", RNDZ p90, p117), the overhead windows and the centerline
+# camera on the A3 monitor (~/workspace/pass-run/rndz/apds-cctv-aft-findings.md).
+# A6U's FLT CNTLR PWR is not modelled: the aft controllers are always live.
+DAP_PANEL = "a6u"
+# The aft THC in SENSE -Z, as PASS transforms it: GP0THC.hal's
+# THC_AFT_TRANS_TABLE, the -Z row (6, 5, 2, 1, 3, 4) over the aft stick's
+# +X -X +Y -Y +Z -Z -- stick +X -> body -Z, -X -> +Z, +Y -> -X, -Y -> +X,
+# +Z -> +Y, -Z -> -Y.  Measured the same on aft1 (2026-10-09): three +y
+# pulses gave body -0.057 ft/s in X, three +z +0.042 in Y.  The first
+# version took the mapping from a transcription of GPO Table 3.8-1 that had
+# Y and Z wrong, and aft1 flew off 64 ft.  Body axis -> (stick axis, sign
+# of the stick deflection for a POSITIVE body command):
+AFT_STICK = {"x": ("y", "-"), "y": ("z", "+"), "z": ("x", "-")}
+
+
+def thc_pulses_aft(self, dv_lvlh, axes, q, label, nmax=4):
+    """rndz_manual's thc_pulses on the AFT THC in SENSE -Z: the same body-
+    axis pulses, each deflected on the stick axis PASS maps to it
+    (AFT_STICK).  The pulse sizes and counts stay per BODY axis, so the
+    control law's learning is unchanged.  The response check in fly()
+    stops a leg whose pulses come out the wrong way, so a mapping error
+    cannot run away."""
+    self._inst()
+    ex, ey, ez = axes
+    m = [dv_lvlh[0] * ex[i] + dv_lvlh[1] * ey[i] + dv_lvlh[2] * ez[i] for i in range(3)]
+    Rm = ins.qmat(q)
+    b = ins.to_body(Rm, m)
+    lines, flown = [], [0.0, 0.0, 0.0]
+    for k, ax in enumerate("xyz"):
+        npl = min(int(round(abs(b[k]) / self.pulse_est[ax])), nmax)
+        if npl == 0:
+            continue
+        sgn = "+" if b[k] > 0 else "-"
+        self.pulses[sgn + ax] += npl
+        flown[k] = (1 if b[k] > 0 else -1) * npl
+        st_ax, pos = AFT_STICK[ax]
+        neg = "+" if pos == "-" else "-"
+        stick = (pos if b[k] > 0 else neg) + st_ax
+        lines += ["+1.0   thc aft %s 0.30" % stick] * npl
+    if lines:
+        name = "man-%s-%d" % (label, int(time.time() * 10) % 100000)
+        self.play("\n".join(lines) + "\n", name)
+        self.script_done(name, 120)
+        try:
+            os.remove(os.path.join(self.a.logs, name + ".script"))
+        except OSError:
+            pass
+    return flown
+
+
+def aft_station(self):
+    """AFT FLT STATION CONFIG for the approach: SENSE -Z on A6U."""
+    if getattr(self, "aft_up", False):
+        return
+    self.play("+1     sense -z\n", "dock-sense")
+    self.script_done("dock-sense", 60)
+    self.aft_up = True
+    self.say("crew: aft flight station -- A6U SENSE -Z, aft THC, A6U DAP")
+
+
 def dap_modes(self, side, low_z):
     """DAP <side>/AUTO/VERN, TRANS PULSE in X, Y and Z -- buttons that
     select -- and LOW Z as asked, pressed only while its lamp disagrees: it
     TOGGLES (GCQORB.hal 1348-1360), and dock3, pressing it blind, flew its
     DOCK leg in NORM Z.  The lamps are rndz_manual's (dap_lamps.py)."""
     from dap_lamps import set_low_z
-    self.play("+1     dap c3 %s\n+2     dap c3 auto\n+2     dap c3 vern\n"
-              "+2     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n" % side.lower(),
+    self.play("".join("+%d     dap %s %s\n" % (1 if i == 0 else 2, DAP_PANEL, b)
+                      for i, b in enumerate((side.lower(), "auto", "vern", "x_pulse", "y_pulse", "z_pulse"))),
               "dock-dap")
     self.script_done("dock-dap", 120)
     n = {"k": 0}
@@ -125,7 +189,7 @@ def dap_modes(self, side, low_z):
     def press():
         n["k"] += 1
         name = "dock-lowz-%d" % n["k"]
-        self.play("+1     dap c3 low_z\n", name)
+        self.play("+1     dap %s low_z\n" % DAP_PANEL, name)
         self.script_done(name, 60)
 
     lamps = self.lamps()
@@ -201,6 +265,127 @@ def dap_load(self, label, n, table):
                 "every item as p. 6-2" if not (bad["A"] or bad["B"]) else "STILL DIFFERENT: %s" % bad))
     self.play("+1     keys RESUME\n", "dock-resume-%s" % label)
     self.script_done("dock-resume-%s" % label, 60)
+
+
+# A7L's LIGHTS, as the docking mechanism lights them: the vehicle status
+# words on FF1's hardware-side bus, op 4 type 10, card 0 channels 2-3
+# (vehdyn.h vehdyn_apds_lights has the bits).
+A7L_LIGHT = {"POWER ON": (0, 0x8000), "APDS PROTECT CIRCUIT OFF": (0, 0x4000),
+             "RING ALIGNED": (0, 0x2000), "RING INITIAL POSITION": (0, 0x1000),
+             "FIXERS OFF": (0, 0x0800), "HOOKS 1 OPEN": (0, 0x0400), "HOOKS 2 OPEN": (0, 0x0200),
+             "LATCHES CLOSED": (0, 0x0100), "INITIAL CONTACT": (0, 0x0040), "CAPTURE": (0, 0x0020),
+             "RING FORWARD POSITION": (0, 0x0010), "READY TO HOOK": (0, 0x0008),
+             "INTERF SEALED": (0, 0x0004), "HOOKS 1 CLOSED": (0, 0x0002), "HOOKS 2 CLOSED": (0, 0x0001),
+             "LATCHES OPEN": (1, 0x8000), "RING FINAL POSITION": (1, 0x4000)}
+
+
+def a7l_lights(self, timeout=6.0):
+    """The A7L lights lit now, by name (None if no word came)."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    try:
+        D.share_port(s)
+        s.bind(("", self.a.port_base + 100))
+        s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                     struct.pack("4s4s", socket.inet_aton(D.GROUP), socket.inet_aton(D.IFACE)))
+        s.settimeout(0.5)
+        w = {}
+        end = time.monotonic() + timeout
+        while time.monotonic() < end and len(w) < 2:
+            try:
+                d = s.recv(512)
+            except socket.timeout:
+                continue
+            if len(d) < 10:
+                continue
+            op, typ, addr, cnt = struct.unpack(">HHHH", d[:8])
+            if op != 4 or typ != 10:
+                continue
+            n = min(cnt, (len(d) - 8) // 2)
+            for i, v in enumerate(struct.unpack(">%dH" % n, d[8:8 + 2 * n])):
+                ch = (addr & 0xff) + i
+                if ch in (2, 3):
+                    w[ch - 2] = v
+        if len(w) < 2:
+            return None
+        return {name for name, (k, m) in A7L_LIGHT.items() if w[k] & m}
+    finally:
+        s.close()
+
+
+def a7l(self, *buttons, tag="a7l"):
+    """The MS at A7L: each pushbutton pressed in turn (two fingers, two
+    seconds -- the controls' hold_ms), a few seconds apart."""
+    lines = "".join("+%d     press a7l_%s\n" % (1 if i == 0 else 4, b) for i, b in enumerate(buttons))
+    self.play(lines, "dock-" + tag)
+    self.script_done("dock-" + tag, 120)
+
+
+def a7l_wait(self, light, want=True, limit=600.0, label=""):
+    """Until an A7L light is lit (or out); True if it was in time (vehicle s)."""
+    t0 = self.truth()["t"]
+    while self.truth()["t"] - t0 < limit:
+        lit = a7l_lights(self)
+        if lit is not None and (light in lit) == want:
+            return True
+        time.sleep(2.0)
+    self.say("A7L: %s never %s (%s)" % (light, "lit" if want else "went out", label))
+    return False
+
+
+def apds_sequence(self):
+    """The DOCKING SEQUENCE after CAPTURE (CC 9-11/9-12, RNDZ p309-310), the
+    MS at A7L: the dampers left to settle the stack, POWER ON (dampers off),
+    the ring checked aligned, RING IN to READY TO HOOK and the hooks closing
+    by themselves to HOOKS 1/2 CLOSED -- the hard mate -- then the load
+    relief, the capture latches opened, the ring to its final position, and
+    the APDS powered down.  The waits for MCC's GO are not modelled."""
+    def lights():
+        lit = a7l_lights(self)
+        return ", ".join(sorted(lit)) if lit else "(none)"
+    self.say("A7L after CAPTURE: %s" % lights())
+    # "PETAL POS BASE steady 60 s": the dampers working on the misalignment
+    self.wait_sim(90)
+    a7l(self, "power_on", tag="a7l-dampers-off")
+    if not a7l_wait(self, "RING ALIGNED", limit=60, label="dampers off"):
+        return False
+    self.say("A7L: dampers off, RING ALIGNED -- %s" % lights())
+    # the ring check (CC 9-11): FIXER OFF, RING IN, 5 s, POWER ON; APDS CIRC
+    # PROT OFF, RING OUT, 5 s, POWER OFF; POWER ON
+    self.wait_sim(30)
+    a7l(self, "fixer_off", "ring_in", tag="a7l-fixers")
+    self.wait_sim(5)
+    a7l(self, "power_on", "circ_prot_off", "ring_out", tag="a7l-ringout")
+    self.wait_sim(5)
+    a7l(self, "power_off", "power_on", tag="a7l-repower")
+    self.say("A7L: ring check done -- %s" % lights())
+    # the retraction: RING ALIGNED and 30 s steady, then RING IN
+    if not a7l_wait(self, "RING ALIGNED", limit=120, label="before RING IN"):
+        return False
+    self.wait_sim(30)
+    a7l(self, "ring_in", tag="a7l-retract")
+    t0 = self.truth()["t"]
+    if not a7l_wait(self, "READY TO HOOK", limit=300, label="RING IN"):
+        return False
+    self.say("A7L: READY TO HOOK %.0f s after RING IN (card 3:15); the hooks closing" %
+             (self.truth()["t"] - t0))
+    if not a7l_wait(self, "INTERF SEALED", limit=200, label="hooks"):
+        return False
+    self.say("A7L: INTERF SEALED")
+    if not a7l_wait(self, "HOOKS 2 CLOSED", limit=200, label="hooks"):
+        return False
+    self.say("A7L: HOOKS 1, 2 CLOSED -- HARD MATE -- %s" % lights())
+    # load relief, the latches, the final position, power down
+    a7l(self, "circ_prot_off", "ring_out", tag="a7l-relief")
+    self.wait_sim(10)
+    a7l(self, "power_on", "circ_prot_off", "open_latches", tag="a7l-latches")
+    a7l_wait(self, "LATCHES OPEN", limit=60, label="OPEN LATCHES")
+    a7l(self, "ring_in", tag="a7l-final")
+    a7l_wait(self, "RING FINAL POSITION", limit=60, label="RING IN to final")
+    self.say("A7L: LATCHES OPEN, RING FINAL POSITION -- %s" % lights())
+    self.wait_sim(20)
+    a7l(self, "power_off", tag="a7l-power-off")
+    self.say("A7L: POWER OFF -- %s" % lights())
+    return True
 
 
 def camera(self):
@@ -287,6 +472,7 @@ def dock30(self):
     doing it at 75 ft, drifted back out to 102 ft meanwhile.  The card's
     "A10/B10" at 75 ft is a selection the crew had prepared."""
     self.man_start()
+    aft_station(self)
     orbit_pfd_on_crt2(self)
     # Lamps latched from before the capture -- rndz-hold-v2's IMU caution and
     # B/U C&W, whose dilemma the RM-threshold seeding had already cleared --
@@ -336,6 +522,7 @@ def dock(self):
     to contact; then vehdyn's verdict -- CAPTURE (and the DAP to FREE, the
     stack in free drift until hard mate) or none."""
     self.man_start()
+    aft_station(self)
     dap_modes(self, "B", low_z=False)
     # B10's 0.01 ft/s pulse, as it comes out (0.02-0.04 in dock4): unless
     # this process has learned it already (DOCK30), from there.  A fresh
@@ -421,24 +608,25 @@ def dock(self):
         # "Capture confirmed": the Orbiter's DAP to free drift (CC 9-8
         # CAPTURE block; the ISS goes free too); the APDS damps, retracts
         # and hooks by itself in vehdyn
-        self.play("+1     dap c3 free\n", "dock-free")
+        self.play("+1     dap %s free\n" % DAP_PANEL, "dock-free")
         self.script_done("dock-free", 60)
-        self.say("DOCK: DAP FREE; waiting for the hard mate")
-        t_end = time.monotonic() + 1800.0
-        while time.monotonic() < t_end:
+        self.say("DOCK: DAP FREE; the MS to A7L")
+        if apds_sequence(self):
             dk = tru_dock(self)
-            if dk and dk[0] == 2:
-                self.say("DOCK: HARD MATE -- %s" % self.readings())
-                break
-            time.sleep(10.0)
+            self.say("DOCK: %s -- %s" % ("HARD MATE" if dk and dk[0] == 2 else "NOT MATED: %s" % (dk,),
+                                          self.readings()))
         else:
-            self.say("DOCK: no hard mate within 30 min of wall time")
+            self.say("DOCK: the APDS sequence stopped -- see the A7L lines above")
     self.manual_summary()
 
 
+R.Rendezvous.thc_pulses = thc_pulses_aft
 R.Rendezvous.dock30 = dock30
 R.Rendezvous.dock = dock
 R.PHASES.extend(["DOCK30", "DOCK"])
 
 if __name__ == "__main__":
+    # the aft station's hand controllers, unless asked otherwise
+    if "--rhc" not in sys.argv:
+        sys.argv += ["--rhc", "aft"]
     R.main()

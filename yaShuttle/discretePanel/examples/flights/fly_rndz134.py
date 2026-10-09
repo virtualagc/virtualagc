@@ -1156,7 +1156,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                # residuals: without a hand-controller window a script's `thc`
                # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
                # window for that station is running")
-               "--rhc", "lh"]
+               "--rhc", self.a.rhc]
         if resume and self.a.zero_sensor_bias:
             self.zero_sensor_bias(resume)
         if resume and self.a.lambert_mc:
@@ -2647,6 +2647,9 @@ def main():
     ap.add_argument("--views", default=None, metavar="LIST",
                     help="with --portview: portview's views, from front, up, left, right, aft, cl "
                          "(default front)")
+    ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default="lh",
+                    help="the station whose hand controllers are started (default lh, the "
+                         "CDR's; dock_autopilot.py uses aft)")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring the windows up with the vehicle held, and start it when Enter "
                          "is pressed here -- time to arrange the windows first")
