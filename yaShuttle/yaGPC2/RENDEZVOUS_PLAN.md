@@ -1227,16 +1227,44 @@ at 100).
    z 0.07-0.19, varying with the attitude and the jets chosen), and the MC
    pulse trims saw 0.24.  The pilot learns each axis's pulse from the
    response (60/40 running mean).
-4. **PASS's relative state drifts inside 1,000 ft.**  During the R-bar hold
-   PASS's FLTR state went from 64 to ~190 ft off the truth at 600 ft, with
-   ~750 radar marks accepted and small residuals.  The -Z track (TGT ID 1),
-   which points at that state, ran 10-12 deg off the true ISS; the RPM's
-   quarter turns ended 6-10 deg off.  One lead: the radar's range rate
-   read +0.50 to +0.55 ft/s, sample after sample, while the truth's was
-   ~+0.15 -- steadier than its 0.3 ft/s white noise allows; kuradar.c's
-   close-range range rate (the antenna's lever arm and rate, the noise
-   draw) wants a look.  Also: the range noise's 15 ft floor is 2.5 % at
-   600 ft, and the 3 m angle wander is 1 deg there.
+4. **PASS's relative state drifts inside 1,000 ft -- found and fixed
+   (kuradar-close-range).**  During the R-bar hold PASS's FLTR state went
+   from 64 to ~190 ft off the truth at 600 ft, with ~750 radar marks
+   accepted and small residuals; the -Z track (TGT ID 1), which points at
+   that state, ran 10-12 deg off the true ISS, and the RPM's quarter turns
+   ended 6-10 deg off.  THE CAUSE was the radar's antenna point.  PASS
+   predicts every mark from GLR_R_OFFSET_BODY (GLRREN), which STS-134 flew
+   as (+45.738, +11.13, -5.79) ft from the c.g. -- forward on the starboard
+   sill, where the Ku dish deploys (DASS_G2.ASC #DGLRREN+0014, a patched
+   word, carried by tools/sites/sts134-rndz-iloads.json).  kuradar.c
+   measured from the source's INITIAL, (-12.2211, 11.1971, -1.82292), a
+   placeholder 58 ft aft.  Far out that is nothing; inside a few thousand
+   feet it is degrees of angle and tens of feet of range, and PASS's filter
+   absorbed it into its own sensor biases (CGNV_SENSOR_BIAS: RR angle bias
+   8.5 deg and range bias 84 ft at the end of the R-bar leg, from 0.3 deg
+   and 50 ft at arrival) and into its state, the residuals near zero all
+   the while.  test_kuradar's own check of the radar against PASS's
+   prediction used the same placeholder, and only beyond 135 kft, so it
+   could not see it.  (The range rate, first suspected, is unbiased:
+   +0.02 ft/s mean against the truth's 0.00 over 61 samples, sigma 0.31.)
+   THE FIX: kuradar.c measures from the flown point, and test_kuradar
+   checks range, shaft/trunnion and range rate against PASS's prediction
+   from that point -- written out from the listing -- 600 ft from the
+   station with it along -Z, +X and -X (the old offset fails 8 of those
+   checks; 7.3 deg of angle along -Z).  THE CHECK, kuradar-run2 (vol-run1's
+   MC4 capture through ARRIVAL and the R-bar leg, the vol-run1 volume):
+   at arrival PASS's FLTR state was 10-15 ft off the truth and the -Z
+   track 1.0 deg off the ISS (manual-run2: 64 ft, 10 deg); over the R-bar
+   leg the track held 1.3 deg mean, 2.7 max, and PASS's angle biases stayed
+   under 0.7 deg; the radar read 7.4 ft short of the c.g.-to-c.g. range
+   inside 700 ft, where the antenna point should read 4 short.  STILL OPEN:
+   in the static R-bar hold PASS's range bias walked from 6 to 51 ft and
+   its FLTR state 37 ft mean, 85 max, off along the line of sight, with
+   zero-mean residuals -- on a fixed line of sight a range bias and a
+   position error along it cannot be told apart, and PASS trades them; its
+   I-loaded range-bias process noise is the next thing to look at.  Also:
+   the range noise's 15 ft floor is 2.5 % at 600 ft, and the 3 m angle
+   wander is 1 deg there.
 5. **Volumes and captures.**  A capture resumes only on the volume it was
    taken with (simulatePASS checks the SHA-256).  vol-run1 flew the
    reconfigured volume before CGZB_LAMB_ILOAD set 7 was added to the spec;

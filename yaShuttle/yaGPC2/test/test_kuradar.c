@@ -101,10 +101,13 @@ static void shaft_trun(double rollDeg, double pitchDeg, double *shaft, double *t
     *trun = asin(tr > 1 ? 1 : tr < -1 ? -1 : tr);
     *shaft = atan2(-s * sin(P) - c * sin(R) * cos(P), cos(R) * cos(P));
 }
-/* PASS's prediction: the antenna (GLR_R_OFFSET_BODY, ft) to the station, in
- * CGNS_M_BODY_TO_RR axes; shaft atan2(u2, -u3), trunnion asin(-u1). */
+/* PASS's prediction: the antenna (GLR_R_OFFSET_BODY, ft, as STS-134 flew it:
+ * DASS_G2.ASC #DGLRREN+0014 -- written out here from the listing, not taken
+ * from kuradar.c, so that the radar is checked against what PASS predicts
+ * from) to the station, in CGNS_M_BODY_TO_RR axes; shaft atan2(u2, -u3),
+ * trunnion asin(-u1). */
 static void predict(double *shaft, double *trun, double *rangeFt, double *rdot) {
-    static const double off[3] = { -12.2211, 11.1971, -1.82292 };
+    static const double off[3] = { 45.738, 11.13, -5.79 };
     static const double M[3][3] = { { 0.3907311, 0.9205048, 0 }, { -0.9205048, 0.3907311, 0 }, { 0, 0, 1 } };
     const PhysState *s = vehdyn_state();
     int id;
@@ -274,6 +277,42 @@ int main(void) {
     check(!k.locked && decode(w).R == 1 && !decode(w).trk, "the station behind the body: no track", k.locked, 0);
     point_at_target(minusZ);
     check(lock_within(21.0), "back in view: lock again", 0, 1);
+
+    /* CLOSE IN, where the antenna's place matters: 600 ft below the
+     * station on the R-bar, the station seen along -Z, +X and -X in turn.
+     * The antenna is 47 ft from the c.g., so a radar measuring from any
+     * other point than PASS's would miss here by tens of feet of range and
+     * degrees of angle (it did: the source's placeholder offset, 58 ft
+     * aft of the flown one, left PASS's relative state 50-130 ft off). */
+    {
+        int id;
+        double rt[3], vt[3], qt[4], r[3], v[3];
+        vehdyn_target(0, &id, rt, vt, qt);
+        double rn = norm(rt);
+        for (int i = 0; i < 3; i++) { r[i] = rt[i] * (1.0 - 600.0 * FT / rn); v[i] = vt[i]; }
+        vehdyn_set_rv(r, v);
+        const double minusX[3] = { -1, 0, 0 }, plusX[3] = { 1, 0, 0 };
+        const double *look[3] = { minusZ, plusX, minusX };
+        const char *name[3] = { "-Z", "+X", "-X" };
+        kuradar_panel(KU_PWR_ON | KU_MODE_PASSIVE | KU_SEL_GPC | KU_OUT_HIGH, t);
+        for (int k3 = 0; k3 < 3; k3++) {
+            point_at_target(look[k3]);
+            lock_within(21.0);
+            step(0.96);
+            d = decode(w);
+            predict(&sh, &tr, &rf, &rd);
+            shaft_trun(d.roll, d.pitch, &msh, &mtr);
+            char what[96];
+            snprintf(what, sizeof what, "600 ft, station along %s: range from PASS's antenna point (ft)",
+                     name[k3]);
+            check(d.R == 4 && fabs(d.rngFt - rf) < 0.5, what, d.rngFt, rf);
+            snprintf(what, sizeof what, "600 ft, station along %s: shaft and trunnion (deg)", name[k3]);
+            check(fabs(msh - sh) * R2D < 0.07 && fabs(mtr - tr) * R2D < 0.07, what,
+                  (fabs(msh - sh) + fabs(mtr - tr)) * R2D, 0);
+            snprintf(what, sizeof what, "600 ft, station along %s: range rate (ft/s)", name[k3]);
+            check(fabs(d.rdot - rd) < 0.08, what, d.rdot, rd);
+        }
+    }
 
     /* SELF-TEST */
     kuradar_panel(KU_PWR_ON | KU_MODE_PASSIVE | KU_SEL_GPC | KU_OUT_HIGH | KU_SELF_TEST, t);
