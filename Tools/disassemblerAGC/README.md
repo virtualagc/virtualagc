@@ -69,7 +69,7 @@ I mention this for the sake of completeness.  There are many examples given late
 * For `specifyAGC.py` alone:  `--min`, `--invent`.
 * For `disassemblerAGC.py --find` alone:  All others. 
 
-# Envisaged Workflow</a>
+# Envisaged Workflow
 
 ## In a Nutshell
 
@@ -154,7 +154,7 @@ Retread 44 can be processed using the same switches as for DAP Aurora 12.  So ca
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ \
                             --hint='NEWJ(S)@PCOPYCYC' --hint='NEWY(S)@NEWJ(S)'
 
-### Baseline Comanche 55</a>
+### Baseline Comanche 55
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ
@@ -587,7 +587,7 @@ You'll notice that all four of the subroutines I mentioned now appear among the 
 
 By the way, I should mention that *only* special subroutines that are in fixed-fixed memory can be used as labels in flexible operands at the present time.  Thus although `BLANKDSP` and `NVSUB` are shown here as having been found, the disassembler doesn't actually treat them as being special.  On the other hand, `JAMPROC` and `JAMTERM` are in fixed-fixed memory, and the disassembler treats them just like any other special subroutine.
 
-# Example: Comanche 72 Module B2</a>
+# Example: Comanche 72 Module B2
 
 Here's a worked-out example for the following scenario:  We have the dump of rope module B2 for Comanche 72 (Apollo 13 CM), in the form of a partial `--bin --hardware` file.  There are a total of 6 rope modules, B1 through B6, each of which contains 6 memory banks:
 
