@@ -2082,6 +2082,70 @@ the radar (above) or MCC.  No further search was added.
 
 **Not done.**  More seeds; the trial on through MC2-MC4 and the manual phase.
 
+**The owner's decision, pending.**  5k and 5l together leave the choice of
+default for rendezvous runs open.  With the radar ahead of the final Ti
+targeting, `--dass-iloads all` with `YAGPC_STARTRK_MOUNT=flown` and
+`--onboard-error flown` recovers on both seeds; Mac-portview's recommendation
+is that combination.  The tracker mounting is in yaGPC2 (startrk.c, peer-passed
+at 6e767035f) but opt-in, the tape's mounting the default.  `all` less
+#PCGEIPD with the flown mounting reproduces the baseline when PASS is started
+with the true state.  Also still the owner's: the default volume
+(Mac-portview suggests `-rndz2.mmv`) and the IGOAL radiator white plate.
+
+## 5m. Docking, and the aft flight station (2026-10-09/10, Linux)
+
+**Docking is flown.**  vehdyn's capture model and `examples/flights/
+dock_autopilot.py` fly from the 100 ft hold to hard mate unattended, at cue
+card 9-8's schedule: LOW Z at 0.15 ft/s to 75 ft; DAP B, NORM Z and A10/B10 at
+0.10 ft/s to 30 ft; an alignment hold; 0.07 ft/s to 10 ft; 0.10 ft/s to
+contact.  First flown in dock10 (contact 0.100 ft/s, 1.17 in, 0.51 deg or
+less); every run since captures and hard-mates the same way.  The A7L sequence
+follows cue cards 9-11/9-12.  Run with `dock_autopilot.py --from DOCK30
+--targets <file>`, the ISS's line ending in `port 15.655 0 5.562`.
+
+**PMA-2's port is the ISS model's own.**  The port was first a model value,
+(15.66, 0, 5.48) m.  The ISS model portview draws puts its PMA-2 face at
+(15.655, 0, 5.562) m, axis +X, 8.2 cm further nadir, and MON1 showed the ring
+2.3 deg low against the crosshair.  The crew docked to what they saw, so the
+port follows the model -- in the targets file, `tools/tle_target.py`,
+portview, rndz_instruments and the centerline target -- and a restore takes
+the port from the targets file over the capture's.  Hard-mated, MON1's ring,
+target and crosshair are concentric within 2-3 px.
+
+**The aft station, as the crew had it** (with `--crts 4 --views
+aft,cctv,rpop`):
+
+- AFD 1 shows the ORBIT PFD and CRT 4 shows PASS (SPEC 33 REL NAV), both fed
+  by IDP 4, with keyboard 3 wired to IDP 4 alone (SCOM p261, p277, p310).
+  What AFD 1 showed during docking is not documented; the checklist names DPS
+  pages for "CRT", so the split is an inference.
+- CRT 3 is released before CRT 4 is assigned to GPC 1, because a PASS GPC
+  commands at most three IDPs ('>3 DEU', gpc-causes #99).
+- PASS loads an IDP only in OPS 0 after its IPL, in PL 9, or in SM 2/SM 4
+  (OI340600 DMIMCD.hal 508-530).  A GNC computer in OPS 2 polls a freshly
+  powered IDP 4 and never loads it (gpc-causes #294).  On the vehicle every
+  IDP was loaded long before docking.  So `fly_rndz134.seed_idp4` gives a
+  capture with IDP 4 off IDP 1's loaded state.  A full flight could instead
+  power and load IDP 4 in OPS 0.
+- RPOP, the aft PGSC's display (`rpop.py`, Mac-portview, from JSC-63400 Fig
+  20.4), gives TCS and HHL range and rate; `rpop` in `--views` or the
+  Manager's aft station starts it.
+- MON1 is the ODS centerline camera on A3; MON2 is its neighbour.
+
+**Open.**
+
+- SPEC 23 F1F/F2F deselect, and the angular flyout.
+- The crew's commands to the APDS, beyond the A7L sequence.
+- The stack's shared momentum at contact, and the post-contact thruster
+  firing (PCT).
+- The 4 deg angular capture limit is a model choice, not documented.
+- The virtual RHC/THC shows its red "inactive" message while scripted input
+  visibly moves the controllers.  It should not show while scripted input
+  drives them; the window should not grab focus to hide it.
+- For the video: a layout per station, switched by the script at the handover
+  to the aft station, and SimpleScreenRecorder driven through its stdin
+  (`record-start`, `record-save`).  Agreed with the owner; not started.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

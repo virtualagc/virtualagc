@@ -377,6 +377,35 @@ get right:
    `NSTS_ANNOUNCE_ROWS=all` and `screenwatch.py`. The traffic starts in OPS 0
    but the display doesn't, so the check needs an OPS transition.
 
+### Other vehicles, and docking
+
+With the vehicle dynamics on, `YAGPC_VEHDYN_TARGETS` names a file of other
+vehicles, such as the ISS. `tools/tle_target.py` writes one from a TLE. Each
+vehicle line can end with `port X Y Z [AX AY AZ UX UY UZ]`, a docking port
+the Orbiter's ODS can capture (`tle_target.py --port X,Y,Z`):
+
+- `X Y Z` is the face's centre in the vehicle's body, in metres.
+- `AX AY AZ` is the axis out of the face (default +X).
+- `UX UY UZ` is where the Orbiter's +X points when mated (default -Z).
+
+For STS-134's PMA-2 it is `port 15.655 0 5.562`, the PMA-2 face of the ISS
+model portview draws. The header comment of `src/vehdyn.c` has the whole
+format.
+
+A snapshot saves each vehicle with its port. On restore, the targets file's
+port wins over the saved one, matched by NORAD id. A capture from before ports
+existed takes the file's port the same way.
+
+The truth datagram, `TRU1` on port base + 98, is 33 doubles. The last three
+are about docking:
+
+- [30] is the docking state: 0 free, 1 captured, 2 hard-mated.
+- [31] is the number of ODS ring contacts so far.
+- [32] is the APDS ring face, in inches of Zo.
+
+Readers take the first N doubles they know. The full layout is in
+`src/mdmdev.c` at `TRUTH_OFFSET`.
+
 ### The regression gate
 
 Most of `yaGPC2`'s defects have been caught not by the unit tests but by one
