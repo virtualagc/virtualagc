@@ -77,30 +77,6 @@ BUTTON_GAP = 2
 MAC = sys.platform == "darwin"
 
 
-def _client_window(top):
-    """The X window the window manager knows a Tk toplevel by: Tk's wrapper,
-    the PARENT of winfo_id() -- not wm_frame(), which under a reparenting
-    window manager is the manager's own decoration."""
-    try:
-        out = subprocess.run(["xwininfo", "-id", str(top.winfo_id()), "-tree"],
-                             capture_output=True, text=True, timeout=2).stdout
-        m = re.search(r"Parent window id: (0x[0-9a-f]+)", out)
-        return int(m.group(1), 16) if m else None
-    except (OSError, subprocess.SubprocessError):
-        return None
-
-
-def _active_window_id():
-    """The X window the window manager says is active (_NET_ACTIVE_WINDOW),
-    or None."""
-    try:
-        out = subprocess.run(["xprop", "-root", "_NET_ACTIVE_WINDOW"], capture_output=True,
-                             text=True, timeout=2).stdout
-        return int(out.rsplit("#", 1)[1].split(",")[0].strip(), 16)
-    except (OSError, subprocess.SubprocessError, IndexError, ValueError):
-        return None
-
-
 def pad(n):
     return int(round(n / 2.0)) if MAC else n
 
@@ -993,14 +969,22 @@ class Manager(object):
             "The simulation is still running and has not been touched.")
 
     def _dialog(self, title, lead, detail, footnote, confirm=None):
-        """A window of our own rather than tkinter.messagebox.
+        """A question or a notice, drawn INSIDE the Manager's own window.
 
-        The native dialogs hand their shape to the platform: they size to the
-        text, which for messages of this length comes out tall, narrow and
-        bold -- and bold is what makes them read as an alarm when what they
-        need to do is be legible.  A Toplevel can be shaped: wider than it is
-        tall, the reason set off from the sentence around it, the ordinary
-        face at the window's own size, and nothing emboldened anywhere.
+        NOT A WINDOW OF ITS OWN.  As a separate Toplevel -- transient, marked
+        always-above, raised, then re-activated every second -- End
+        Simulation's question still showed BEHIND the Manager and a full-screen
+        backdrop on the owner's desktop (2026-10-09).  Measured there: the
+        window manager had it on top, mapped and focused, and the dialog's own
+        pixels were right, but the screen at its place showed the Manager --
+        Marco's compositor drawing it underneath (never reproduced with Marco
+        on Xvfb, composited or not).  Holding the keyboard while invisible, it
+        made the Manager seem to swallow every click.  A panel laid over the
+        Manager's controls cannot be stacked wrongly: it is wherever the
+        Manager is.
+
+        Not tkinter.messagebox either: the native dialogs size to the text,
+        which for messages of this length comes out tall, narrow and bold.
 
         `confirm`, when given, is the label of the button that says yes, and
         makes this ask rather than tell: it waits, and returns True or False.
@@ -1008,64 +992,41 @@ class Manager(object):
         base = tkfont.nametofont("TkDefaultFont", self.root)
         body = tkfont.Font(family=base.cget("family"),
                            size=abs(base.cget("size")), weight="normal")
-
-        W, H = 620, 400            # wider than 4:3, which is what was asked for
+        head = tkfont.Font(family=base.cget("family"),
+                           size=abs(base.cget("size")), weight="bold")
         answer = {"ok": False}
-        top = tk.Toplevel(self.root, bg=C_BG)
-        top.title(title)
-        top.transient(self.root)
-        top.resizable(True, True)
-        # IN FRONT, AND KEPT THERE: with a simulation's two dozen windows up,
-        # End Simulation's question opened behind them and the button seemed
-        # to do nothing (owner, 2026-10-09)
+        done = tk.BooleanVar(self.root, False)
+
+        # the Manager itself to the front: the question is in it
         try:
-            top.attributes("-topmost", True)
+            self.root.deiconify()
+            self.root.lift()
         except tk.TclError:
             pass
-        top.lift()
-        top.after(50, top.focus_force)
-
-        # AND PUT BACK IN FRONT WHILE IT IS OPEN.  Marked always-above and
-        # raised once, it still ended up behind the simulation's windows on the
-        # owner's desktop (2026-10-09).  A question nobody can see is a frozen
-        # Manager, so until it is answered it is re-activated every second.
-        # NOT BY lift(): Marco ignores a raise asked for by an application
-        # that is not in focus -- measured, an always-above window activated
-        # over it stayed there through lift() and -topmost.  An activation
-        # request (_NET_ACTIVE_WINDOW, what wmctrl -a sends) is honoured.
-        def keep_in_front():
-            if not top.winfo_exists():
-                return
-            try:
-                top.attributes("-topmost", True)
-                top.lift()
-                if sys.platform.startswith("linux"):
-                    frame = _client_window(top)
-                    if frame and _active_window_id() != frame:
-                        subprocess.run(["wmctrl", "-i", "-a", "0x%x" % frame],
-                                       check=False, stdout=subprocess.DEVNULL,
-                                       stderr=subprocess.DEVNULL, timeout=2)
-            except (tk.TclError, ValueError, OSError, subprocess.SubprocessError):
-                pass
-            top.after(1000, keep_in_front)
-        top.after(500, keep_in_front)
-        # Over the window it belongs to, not wherever the pointer happens to be.
-        self._place_dialog(top, W, H)
-
+        self.root.update_idletasks()
+        W = max(300, self.root.winfo_width())
         pad = 24
+        wrap = W - 2 * pad
+
+        top = tk.Frame(self.root, bg=C_BG, highlightthickness=2,
+                       highlightbackground=C_NOTE)
+        top.place(x=0, y=0, relwidth=1, relheight=1)
+        top.lift()
+        tk.Label(top, text=title.upper(), bg=C_BG, fg=C_NOTE, font=head, anchor="w"
+                 ).pack(fill="x", padx=pad, pady=(pad, 8))
         tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=body, anchor="w",
-                 justify="left", wraplength=W - 2 * pad
-                 ).pack(fill="x", padx=pad, pady=(pad, 12))
+                 justify="left", wraplength=wrap
+                 ).pack(fill="x", padx=pad, pady=(0, 12))
         # The part that differs between one of these and the next, in a panel
         # of its own so it does not compete with the sentence around it.
         box = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
                        highlightbackground="#4a4a4a")
-        box.pack(fill="both", expand=True, padx=pad)
+        box.pack(fill="x", padx=pad)
         tk.Label(box, text=detail, bg="#1b1b1b", fg=C_FG, font=body, anchor="nw",
-                 justify="left", wraplength=W - 2 * pad - 24
+                 justify="left", wraplength=wrap - 24
                  ).pack(fill="both", expand=True, padx=12, pady=12)
         tk.Label(top, text=footnote, bg=C_BG, fg="#9a9a9a", font=body,
-                 anchor="w", justify="left", wraplength=W - 2 * pad
+                 anchor="w", justify="left", wraplength=wrap
                  ).pack(fill="x", padx=pad, pady=(12, 8))
 
         row = tk.Frame(top, bg=C_BG)
@@ -1073,7 +1034,14 @@ class Manager(object):
 
         def close(ok):
             answer["ok"] = ok
+            for seq in ("<Return>", "<Escape>"):
+                self.root.unbind(seq)
+            try:
+                top.grab_release()
+            except tk.TclError:
+                pass
             top.destroy()
+            done.set(True)
 
         def button(text, ok, default):
             if MAC:
@@ -1093,18 +1061,22 @@ class Manager(object):
 
         if confirm is None:
             button("OK", True, True)
-            top.bind("<Return>", lambda _e: close(True))
+            self.root.bind("<Return>", lambda _e: close(True))
         else:
             # Cancel is the default, because this is asked only where saying
             # yes cannot be undone.
             button(confirm, True, False)
             button("Cancel", False, True)
-            top.bind("<Return>", lambda _e: close(False))
-        top.bind("<Escape>", lambda _e: close(False))
-        top.protocol("WM_DELETE_WINDOW", lambda: close(False))
-        self._grab_dialog(top)
+            self.root.bind("<Return>", lambda _e: close(False))
+        self.root.bind("<Escape>", lambda _e: close(False))
+        # modal within the Manager: the controls under the panel are covered,
+        # and a grab on the panel keeps a click from reaching them anyway
+        try:
+            top.grab_set()
+        except tk.TclError:
+            pass
         if confirm is not None:
-            self.root.wait_window(top)
+            self.root.wait_variable(done)
         return answer["ok"]
 
     # ---- while it is happening ------------------------------------------
