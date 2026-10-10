@@ -600,7 +600,7 @@ Here's a worked-out example for the following scenario:  We have the dump of rop
 
 But we only have module B2.  
 
-The closest AGC software version to Comanche 72 for which we actually have source code is Comanche 55, though there is also [*very* partially (incomplete) reconstructed code for Comanche 67https://github.com/virtualagc/virtualagc/issues/1140](URL), and we do have [engineering drawing 2021153](https://archive.org/details/apertureCardBox467Part2NARASW_images/page/n91/mode/1up?view=theater), which lists all of the memory bank checksums for Comanche 55, 67, and 72.  If any of those of Comanche 72 matched those of Comanche 55 or 67, perhaps we could import those memory banks to supplement module B2.
+The closest AGC software version to Comanche 72 for which we actually have source code is Comanche 55, though there is also [*very* partially (incomplete) reconstructed code for Comanche 67](https://github.com/virtualagc/virtualagc/issues/1140), and we do have [engineering drawing 2021153](https://archive.org/details/apertureCardBox467Part2NARASW_images/page/n91/mode/1up?view=theater), which lists all of the memory bank checksums for Comanche 55, 67, and 72.  If any of those of Comanche 72 matched those of Comanche 55 or 67, perhaps we could import those memory banks to supplement module B2.
 
 Alas, there's no agreement between the checksums of Comanche 55 and Comanche 72.  On the other hand, there is agreement of several memory banks between Comanche 67 and 72, namely:  00, 02, 03, 05, 33, 35.  The question would then be, Are those any of the banks in Comanche 67 which are believed to have already been reconstructed?  The possibly-correctly reconstructed banks of Comanche 67 are:  00, 02, 03, 41.  
 
