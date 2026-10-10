@@ -1808,8 +1808,25 @@ it -- and almost all the rest is the R-bar's own dynamics, paid either
 continuously (the old hold) or once afterwards (here).  The flight's own
 RPM propellant is not in our sources.
 
-**Not done.** TORVA from wherever the RPM ends (as the card), not from the
-R-bar point; the photo window calls; PRI Y OPTION ALL (a toggle on SPEC 20:
+**TORVA from wherever the RPM ends, as the card** (now the default;
+`--rpm-return` keeps the return to the R-bar point first).  TORVA's arc was
+already built from the current angle and radius, blending the radius to
+400 ft along it.  Flown through TORVA, port 49900:
+
+| | As the card: TORVA from the turn's end (rpm-cont-3) | Return first (rpm-cont-2, then rpm-cont-2b) |
+|---|---|---|
+| Start rates + RPM | 5.7 + 19.4 kg | 5.7 + 22.1 kg |
+| Return to the R-bar point | -- | 78.9 kg, 26 pulses, 8.7 min |
+| TORVA starts at | X +118, Z +670 ft (703 ft), XD +0.35 ZD +0.13 ft/s; 78 deg of arc | the R-bar point, 600 ft; 90 deg |
+| TORVA | 412.0 kg, 70 pulses, 14.0 min | 320.5 kg, 69 pulses, 15.6 min |
+| TORVA error, rms (max) | 5.7 / 3.3 / 11.5 (19 / 17 / 43) ft | 10.3 / 2.3 / 6.1 (43 / 9 / 22) ft |
+| **RPM + return + TORVA** | **437 kg (964 lb), ~24 min** | **427 kg (942 lb), ~34 min** |
+
+Within 2 % on propellant: what the return saves TORVA, it spends itself.
+The card's way is ten minutes shorter and is what was flown, so it is the
+default.
+
+**Not done.** The photo window calls; PRI Y OPTION ALL (a toggle on SPEC 20:
 left as it is).
 
 ## 6. The stages

@@ -2940,9 +2940,12 @@ def main():
                          "with LOW Z)")
     ap.add_argument("--rpm-mode", choices=("continuous", "quarters"), default="continuous",
                     help="RPM: 'continuous' (default) flies cue card B's one turn -- PRI spin-up, VERN, FREE "
-                         "coast, PRI brake, hands off -- then returns to the R-bar point if more than 50 ft "
-                         "off; 'quarters' the older four UNIV PTG quarter turns with the point held "
+                         "coast, PRI brake, hands off -- and TORVA starts from wherever it ends, as the card; "
+                         "'quarters' the older four UNIV PTG quarter turns with the point held "
                          "(RENDEZVOUS_PLAN 5j)")
+    ap.add_argument("--rpm-return", action="store_true",
+                    help="after a continuous RPM, fly back to the R-bar point (if more than 50 ft off) before "
+                         "TORVA, instead of starting TORVA from where the turn ended")
     ap.add_argument("--hold-min", type=float, default=20.0,
                     help="HOLD: minutes of station-keeping 100 ft out on the +V-bar (default %(default)s)")
     ap.add_argument("--check-every", type=float, default=30.0,
