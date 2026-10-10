@@ -546,7 +546,7 @@ class Target(object):
     """One TGT1 datagram: another vehicle (the ISS), from yaGPC2's vehicle
     dynamics: vehicle t, NORAD id, M50 position (m) and velocity (m/s) of its
     centre of mass, and its attitude, quaternion body -> M50 (w x y z)."""
-    __slots__ = ('t', 'id', 'r', 'v', 'q', 'a', 'v_seen')
+    __slots__ = ('t', 'id', 'r', 'v', 'q', 'a', 'v_seen', 'w')
 
     @classmethod
     def parse(cls, d):
@@ -556,7 +556,7 @@ class Target(object):
         s = cls()
         s.t, s.id = v[0], int(v[1])
         s.r, s.v, s.q = np.array(v[2:5]), np.array(v[5:8]), np.array(v[8:12])
-        s.a = s.v_seen = None
+        s.a = s.v_seen = s.w = None
         return s
 
     def at(self, t):
@@ -575,7 +575,13 @@ class Target(object):
             rn = np.linalg.norm(self.r)
             g = -MU_EARTH * self.r / rn ** 3
         v = self.v_seen if self.v_seen is not None else self.v
-        return self.r + v * dt + 0.5 * g * dt * dt, quat_to_matrix(unit(self.q))
+        # Its attitude turned on too, at the body rate its last two datagrams
+        # show, as the Orbiter's is at TRU1's: held, the ISS lags the
+        # Orbiter (turning together at the orbital rate, 0.065 deg/s, when
+        # docked) by up to 0.005 deg at each datagram, which across the 17 m
+        # from its centre to PMA-2 jumps the centerline target a few lines.
+        q = self.q if self.w is None else quat_advance(self.q, self.w, dt)
+        return self.r + v * dt + 0.5 * g * dt * dt, quat_to_matrix(unit(q))
 
 
 def extrapolate(s, t):
@@ -664,6 +670,14 @@ class TruthFeed(QtCore.QObject):
                     h = g.t - prev[0].t
                     g.a = (g.v - prev[0].v) / h
                     g.v_seen = (g.r - prev[0].r) / h + 0.5 * g.a * h     # at g.t, as Truth's
+                    # body rate from the two attitudes: dq = conj(q0) q1
+                    q0 = unit(prev[0].q)
+                    dq = quat_mul(np.array([q0[0], -q0[1], -q0[2], -q0[3]]), unit(g.q))
+                    if dq[0] < 0:
+                        dq = -dq
+                    sn = float(np.linalg.norm(dq[1:]))
+                    ang = 2.0 * math.atan2(sn, float(dq[0]))
+                    g.w = (dq[1:] / sn * ang / h) if sn > 1e-15 else np.zeros(3)
                 self.targets[g.id] = (g, time.monotonic())
 
     def _target_states(self, fs, wall):
