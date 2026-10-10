@@ -1669,6 +1669,149 @@ between (the run loop's later capture is skipped).  The chores here moved ZD onl
 XD +0.001 YD -0.019 ZD +0.001 ft/s.  Published as `forClaude/rndz-hold-v3/` with the volume and a
 README; it supersedes v2.
 
+## 5i. Close in: PASS's filtered state, and the RPM's propellant (2026-10-09, macOS)
+
+Two questions left by the clean run (5g), answered from its logs and
+captures (`~/sts134-runs/rendezvous/clean-run1`) and one test run.
+
+**PASS's FLTR state runs 60-130 ft off inside 1,500 ft: PASS behaving as
+it should, given its inputs.** The error is along the line of sight
+(RBAR and RPM: LVLH Z; VBAR and HOLD: LVLH X), and it equals PASS's own
+estimate of the radar's range bias, CGNV_SENSOR_BIAS(3) (#PCGNMC2+3FA,
+X'E7A6'), read from each capture:
+
+| Capture (phase end) | FLTR error along the LOS (ft, mean) | Range bias estimate (ft) | Angle bias estimates (rad) |
+|---|---|---|---|
+| ARRIVAL | -7 | +8.6 | 0.022, 0.001 |
+| RBAR | -75 | +82.5 | 0.072, 0.001 |
+| RPM | -122 | +108.9 | 0.068, 0.020 |
+| TORVA | -64 / -35 | +59.7 | 0.037, -0.030 |
+| HOLD | -94 | +111.2 | 0.008, 0.023 |
+
+- **The measurements are right.** In the static R-bar hold the radar's
+  range less the truth's averages +1.2 ft (σ 13.9, 31 samples). In the RPM
+  it swings ±40-60 ft with the line of sight, which is the antenna's
+  45.7 ft lever arm. PASS's model has the same arm (GLR_R_OFFSET_BODY in
+  the capture: 45.738, 11.13, -5.79 = kuradar's `ANT_BODY_FT`), and its
+  range residuals stay near zero throughout. The check's truth points
+  (TRU1's c.g., TGT1's ISS point) are the ones kuradar ranges to.
+- **The split is what moves.** On a fixed line of sight, a range bias and a
+  position error along it give the same range, and an angle bias and a
+  lateral error give the same angles, so only the orbital dynamics can tell
+  them apart. PASS lets them trade: range bias σ 26.7 ft (BIAS_VAR 711 ft²),
+  τ 600 s, range marks weighted at σ 80 ft (VAR_RR_RNG_MIN 6400).
+- **What pushes the split: the verniers' steady translation, which PASS
+  never sees.** VERN attitude hold fires continuously at ~0.5 lb/min, about
+  0.0003 ft/s² of net translation. That is ~0.011 ft/s per 3.84 s nav cycle,
+  under GL5_VEL_THRESH (0.06), so GL5NAV drops every cycle of it, as flown.
+  PROP (no marks) therefore runs away: 0.13 to 0.49 ft/s of velocity error
+  over RBAR, and 0.5-1.15 ft/s over RPM and TORVA. FLTR follows the radar
+  only as fast as those weights allow, and the difference lands in the
+  bias states.
+- **Operationally:** close in, the crew flew on TCS, HHL and the centerline
+  camera, not on PASS's REL NAV. The checklist even says, after the RPM, "use
+  raw TCS and raw radar for Rdot until TCS NAV converges" (the
+  prox ops sensor table, PDF p. 173). Our pilot and PASS-IDLE's docking autopilot read
+  the instruments, not FLTR.
+- **Nothing to fix in our measurements.** The vernier's translational
+  authority is PASS-IDLE's jet table; if real duty cycles prove smaller,
+  PROP's drift and these numbers shrink with it.
+
+**The RPM's 1,552 lb: the pilot held the R-bar point through the turn, the
+cue card doesn't.**
+- **Where it went:** clean-run1's RPM took 67 THC pulses (+x 16, -x 10,
+  +y 3, -y 1, +z 30, -z 7). Its 30 LOW Z +Z pulses cost ~40 lb each,
+  because LOW Z makes +Z from opposed, canted X jets. In the HOLD, each +Z
+  pulse shows as a 44-50 lb/min spike in the truth's mass (yaGPC2.log
+  `vehdyn-state`), against a 0-0.7 lb/min VERN baseline. RBAR (51 pulses,
+  7 +Z) cost 507 lb, and HOLD (13 pulses, 5 +Z) 263 lb, the same way.
+- **The cue card:** RBAR PITCH MNVR, B, CC 9-8 (PDF p. 306) flies the RPM
+  hands off. FLT CNTLR PWR is OFF from P = 100 to P = 60, KU PWR STBY, VERN
+  (PRI) for the turn. `--rpm-cue-card` now does that: no pulses, and the Ku
+  radar in STBY until the turn ends.
+- **Flown that way (`~/sts134-runs/rendezvous/rpm-cue-test`, from
+  clean-run1's RBAR capture, port base 49900):**
+  - 360° in 17.6 min, every quarter turn within 1.3° of the ISS;
+  - **145 lb** for the whole leg, setup included;
+  - **but the Orbiter drifted to 1,446 ft ahead and 1,669 ft below, at
+    2.5 ft/s ahead and 1.55 ft/s down.** The verniers fire nearly
+    continuously through the turns, about 8-12 lb/min or 1.5 jets'
+    worth. That is far more than starting and stopping 0.75 °/s needs
+    (~70 lb for four quarter turns), so the turn is fighting a coupling.
+    The likely source is the new canted F5L/F5R (44° outboard: a lone F5
+    yaws and rolls as well as pitches), which PASS-IDLE flagged.
+- **So the default stays the position hold** (expensive but safe for TORVA).
+  `--rpm-cue-card` is there for when the vernier coupling is understood.
+- **For PASS-IDLE (the jet table):**
+  - the RPM's ~1.5-jet continuous vernier duty and its 2.9 ft/s net
+    translation, against the ~0.4 ft/s a single start and stop should give;
+  - whether VERN rate holding at 0.75 °/s chatters on the canted F5s.
+
+## 5j. The RPM as one turn, cue card B (2026-10-09, macOS)
+
+**Why.** The driver flew the RPM as four separate UNIV PTG quarter turns, with
+the R-bar point held by THC pulses. That cost 1,552 lb (clean-run1) and
+2,219 lb (e2e-run1) over 16-22 min, against 263-1,077 lb for the other legs
+(5i: 67 pulses in clean-run1, 30 of them LOW Z +Z at ~40 lb each; and the
+verniers spin up at only ~0.007 deg/s^2, so each quarter turn spent about 2
+of its 3.3 min accelerating and braking).
+
+**What the card does** (APPROACH, CC 9-7, JSC-48072-134 p. 305; RPM SETUP
+A and RBAR PITCH MNVR B). RPM SETUP: PRI and VERN ROT RATE 0.75, PRI Y
+OPTION ALL, UNIV PTG P 145 loaded. Then one turn, staged by the aft ADI's
+pitch, which starts at 90 in the R-bar attitude (theta below = aft P - 90):
+
+| theta | Card | What it does |
+|---|---|---|
+| 0 | A/AUTO/PRI, TRK (ITEM 19); FLT CNTLR PWR OFF | PRI spins the Orbiter up toward a target 125 deg on, so that the shortest way there is the RPM's way round |
+| 10 | VERN (PRI); KU PWR STBY | vernier hold of the rate |
+| 80 | FREE; P ITEM 15 + 270, TRK | no jets: it coasts at 0.75 deg/s; the target is set back to the start attitude |
+| 145-215 | photos | the ISS crew photographs the TPS |
+| 280 | PRI, A/AUTO | PRI brakes the last 80 deg onto the target |
+| 330 | KU PWR ON | |
+| 360 | VERN (PRI); FLT CNTLR PWR ON | THC: set up for TORVA |
+
+The card's P values are in its BODY VECT convention; the driver flies the
+same stages in its own (P 90 = -Z on the ISS): the intermediate target 125
+deg on (P 215), the final one the start (P 90). The APPROACH card also asks,
+at 620-580 ft, for "-0.2 < Rdot < -0.1 ... Null Xdot to 0 +- 0.1 ft/sec prior
+to mnvr start": the R-bar is no equilibrium -- 600 ft below the ISS with no
+thrust the Orbiter falls away at 3 n^2 z (~0.0024 ft/s^2) -- and closing at
+0.15 ft/s at the start takes part of that back.
+
+**Built** (rndz_manual.py, `--rpm-mode continuous`, now the default;
+`--rpm-mode quarters` keeps the older four quarter turns and `--rpm-cue-card`):
+`rpm_continuous()` flies the stages by theta, measured from the truth as the
+pitch at which the ISS lies in the Orbiter's body (`iss_pitch`); no THC from
+start to end; the vehdyn mass logged every 30 s and at each stage.  Before
+it, the card's start rates (Xdot 0, Rdot -0.15) when they are not already
+so.  After it, `rpm_recover()` flies back to the R-bar point if the turn left
+the Orbiter more than 50 ft off (the card instead goes on into TORVA from
+wherever it is; the driver's TORVA arc starts at the R-bar point), its
+pulses and propellant logged apart from the turn's.
+
+**Flown** from e2e-run1's RBAR capture, rndz2 volume, LOW Z, port 49900
+(~/sts134-runs/rendezvous/rpm-cont-1, -2):
+
+| | four quarter turns, hold (clean-run1 / e2e-run1) | one turn (rpm-cont-1) | one turn, card start rates (rpm-cont-2) |
+|---|---|---|---|
+| Turn | 16.9 / 16.3 min | 9.0 min | 9.8 min |
+| -Z off the ISS at the end | 2-8 deg | 1.2 deg | 2.2 deg |
+| Start rates | -- | -- | 5.7 kg |
+| Turn: PRI spin-up / VERN / FREE / PRI brake | -- | 7.5 / 0.7 / 0.0 / 1.9 kg | 7.4 / 1.1 / 0.0 / 13.6 kg |
+| Position at the end | held within ~10 ft | 273 ft off (0.56 / 0.64 ft/s) | 141 ft off (0.36 / 0.03 ft/s) |
+| Back to the R-bar point | -- | 129.3 kg, 45 pulses, 15 min | 78.9 kg, 26 pulses, 8.7 min |
+| **RCS in all** | **704 / 1,007 kg (1,552 / 2,219 lb)** | **139 kg (307 lb)** | **107 kg (235 lb)** |
+
+So the turn itself costs 10-22 kg -- the verniers coast through 200 deg of
+it -- and almost all the rest is the R-bar's own dynamics, paid either
+continuously (the old hold) or once afterwards (here).  The flight's own
+RPM propellant is not in our sources.
+
+**Not done.** TORVA from wherever the RPM ends (as the card), not from the
+R-bar point; the photo window calls; PRI Y OPTION ALL (a toggle on SPEC 20:
+left as it is).
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

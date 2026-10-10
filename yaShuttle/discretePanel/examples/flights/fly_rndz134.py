@@ -2937,6 +2937,16 @@ def main():
                     help="RBAR: press LOW Z, as the APPROACH card does inside 1,000 ft.  Off by default: "
                          "vehdyn models the RCS jets without their cant, and LOW Z's +Z translation, "
                          "which the aft-firing jets' cant makes, came out -Z (RENDEZVOUS_PLAN.md 5f)")
+    ap.add_argument("--rpm-cue-card", action="store_true",
+                    help="RPM as the RBAR PITCH MNVR cue card flies it: FLT CNTLR PWR OFF (no THC) and KU PWR "
+                         "STBY through the turn.  Off by default: on this vehicle the RPM then drifts ~2.9 ft/s "
+                         "(RENDEZVOUS_PLAN 5h); the default holds the R-bar point with THC pulses (~1,550 lb "
+                         "with LOW Z)")
+    ap.add_argument("--rpm-mode", choices=("continuous", "quarters"), default="continuous",
+                    help="RPM: 'continuous' (default) flies cue card B's one turn -- PRI spin-up, VERN, FREE "
+                         "coast, PRI brake, hands off -- then returns to the R-bar point if more than 50 ft "
+                         "off; 'quarters' the older four UNIV PTG quarter turns with the point held "
+                         "(RENDEZVOUS_PLAN 5j)")
     ap.add_argument("--hold-min", type=float, default=20.0,
                     help="HOLD: minutes of station-keeping 100 ft out on the +V-bar (default %(default)s)")
     ap.add_argument("--check-every", type=float, default=30.0,
