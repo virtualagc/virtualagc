@@ -42,10 +42,26 @@ forClaude dropbox, docs/):
 WHAT IS APPROXIMATED (said again in the findings):
   - The filter's own equations and I-loads are not public: this one is an
     extended Kalman filter on the [NESC] description -- Clohessy-Wiltshire
-    propagation about the target's orbit, IMU delta-V from the truth's
-    velocity less gravity (J2), the four TCS measurements processed one at a
-    time, an edit test at three sigma -- with the variances set wider than
-    rndz_instruments' noise, as [NESC] says RPOP's were.  RATIO is the
+    propagation about the target's orbit; the IMU's sensed delta-V (the
+    truth's velocity change relative to the target's, less the difference
+    in gravity) at every mark, WITHOUT [NESC]'s 0.01829 m/s threshold, which
+    guards a real IMU's bias and here only hid the docking's jet pulses; the
+    four TCS measurements processed one at a time with exactly
+    rndz_instruments' geometry (the TCS head's lever arm, the reflector at
+    PMA-2's face in the target's own attitude, the same bearing signs); an
+    edit test at three sigma, taken anyway after five rejections in a row
+    (the checklist's "Force Measurements") -- with the variances set wider
+    than rndz_instruments' noise, as [NESC] says RPOP's were.  Checked on
+    examples/rpop_synth.py's docking (jet pulses, capture, hard mate): within
+    0.1 ft of the truth from 100 ft through contact, residual ratios under
+    0.5, and DP-DP 0.0 +/- 0.03 ft for 20 minutes mated.
+  - TCS to contact: JSC-63400 Fig 20.4 has TCS NAV still accepting marks at
+    docking (raw Rng 5, REJ 0), and the VBAR APPROACH card lists raw TCS
+    ranges to contact, so no minimum range is modelled.  (The STS-134
+    checklist's STORRM pages, 7-41, do say "when range < 10 ft, TCS data will
+    be lost and PGSC ALERT will be annunciated".)
+  - The Orbiter's DP is the ODS ring's face: ready to dock (Zo 475.75) until
+    TRU1 [30] says hard-mated, then retracted (Zo 460).  RATIO is the
     residual over three sigma of its predicted spread (edited above 1), the
     Shuttle REL NAV convention; RPOP's own definition is not published.
   - "Pitch" is taken as the orbiter's LVLH pitch on the aft ADI (forward
@@ -60,18 +76,19 @@ WHAT IS APPROXIMATED (said again in the findings):
   - The orbiter and Node 2 / PMA-2 outlines are simple side views drawn to
     the real dimensions, not RPOP's own artwork.  The fonts are a fixed-width
     face (Courier New, else Menlo / DejaVu Sans Mono) like the figures'.
-  - Autoscale: the view fits the target, the orbiter and its predictors, in
-    50 / 100 / 500 ... ft ticks; RPOP's own autoscale rule is not published.
-  - HHL: the range the cue cards read (CG-CG less 10 ft on the approach,
-    DP-DP plus 7 ft to Node 2 on the V-bar; see Rpop.hhl_reading), not
-    rndz_instruments' 25 m sphere; a mark every 5 s; HHL/dt is the range difference over the last
+  - The plot's frame is fixed, as JSC-63400 Fig 20.4's: the target's point
+    91 % across and 43 % down, 50 ft ticks ~10 % of the width apart.  Only
+    the documented keys change it (Ctrl+PgUp/PgDn, Ctrl+arrows, Ctrl+Home).
+  - HHL: rndz_instruments' reading (the cue cards' ranges: CG-CG less 10 ft
+    on the approach, DP-DP plus 7 ft to Node 2 on the V-bar, none inside
+    12 ft); a mark every 5 s; HHL/dt is the range difference over the last
     mark, HHLFlt an alpha-beta filter on the marks (the real one also used
     radar R-dot, which this simulator does not feed RPOP).
 
 KEYS, from the checklist's RPOP FUNCTION KEY SUMMARY: F5 Rdot window,
 F7 view (XZ, XY, YZ), Ctrl+F8 point of reference (CG-CG / DP-DP),
 Shift+F9 clear trajectory, Ctrl+F9 back 1, Shift+F10 exit, Ctrl+PgUp /
-Ctrl+PgDn zoom, Ctrl+Home autoscale, Ctrl+arrows move the axes, Space the
+Ctrl+PgDn zoom, Ctrl+Home the default scale and axes, Ctrl+arrows move the axes, Space the
 function-key menu.
 
 DATA.  TRU1 (port base + 98) and TGT1 (port base + 109), multicast on
@@ -104,7 +121,10 @@ J2 = 1.08262668e-3
 DESIGN_W, DESIGN_H = 1024, 768          # --size 768: the PGSC's 1024 x 768 screen
 TCS_PERIOD_S = 1.0                      # TCS marks to the filter (vehicle s)
 HHL_PERIOD_S = 5.0
-DV_THRESHOLD = 0.01829                  # m/s, [NESC]
+# The plot's frame, from JSC-63400 Fig 20.4 (1770 px wide): the target's
+# point at x 1605 (91 %), y 43 % down the plot; 50 ft ticks 185 px apart.
+ORIGIN_X, ORIGIN_Y = 0.907, 0.434
+PX_PER_FT = DESIGN_W * 185.0 / 1770.0 / 50.0
 MET_ZERO = "136/12:56:27.994"           # STS-134 (fly_rndz134.MET_ZERO_UNIX)
 
 GREEN = QtGui.QColor(0, 255, 0)
@@ -143,7 +163,8 @@ def parse_tru(d):
     n = (len(d) - 4) // 8
     v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
     return {"t": v[0], "gmt": v[1], "q": v[2:6], "w": v[6:9], "r": v[9:12], "v": v[12:15],
-            "cg": v[27:30] if n >= 30 else (0.0, 0.0, 0.0)}
+            "cg": v[27:30] if n >= 30 else (0.0, 0.0, 0.0),
+            "dock": int(v[30]) if n >= 31 else 0}        # 0 free, 1 captured, 2 hard-mated
 
 
 def parse_tgt(d):
@@ -233,7 +254,8 @@ class TcsNav(object):
     NAMES = ("RNG", "RDOT", "ELV", "AZI")
     SIG = (lambda r: 1.0 + 0.002 * r, lambda r: 0.03, lambda r: math.radians(0.1),
            lambda r: math.radians(0.1))
-    Q_ACC = 1e-3                    # ft/s^2: the thrusting below the delta-V threshold, drag
+    FORCE_AFTER = 5                 # then take it anyway (RNDZ 7-27's "Force Measurements")
+    Q_ACC = 1e-3                    # ft/s^2: what the delta-V and CW miss
 
     def __init__(self):
         self.reset()
@@ -246,6 +268,7 @@ class TcsNav(object):
         self.ratio = [None] * 4
         self.acpt = [0] * 4
         self.rej = [0] * 4
+        self.run = [0] * 4             # rejections in a row
         self.last_accept = None
 
     @staticmethod
@@ -254,7 +277,7 @@ class TcsNav(object):
         for the state x and the measurement geometry."""
         A, arm, wrel = geo["A"], geo["arm"], geo["wrel"]
         head = x[:3] + A @ arm
-        los = ri_pma2_ft() - head
+        los = geo["refl"] - head
         rng = np.linalg.norm(los)
         vhead = x[3:] + np.cross(wrel, A @ arm)
         rdot = float(los @ (-vhead)) / rng
@@ -269,7 +292,7 @@ class TcsNav(object):
         d = np.array([-math.tan(elv), math.tan(azi), -1.0])
         d /= np.linalg.norm(d)
         los = geo["A"] @ (d * rng)
-        head = ri_pma2_ft() - los
+        head = geo["refl"] - los
         x = np.zeros(6)
         x[:3] = head - geo["A"] @ geo["arm"]
         x[3:] = -rdot * los / rng                  # the range rate, along the line of sight
@@ -316,9 +339,11 @@ class TcsNav(object):
             ratio = abs(res) / (3.0 * math.sqrt(S))
             self.resid[i] = math.degrees(res) if i >= 2 else res
             self.ratio[i] = ratio
-            if ratio > 1.0 and self.acpt[i] > 5:
+            if ratio > 1.0 and self.acpt[i] > 5 and self.run[i] < self.FORCE_AFTER:
                 self.rej[i] += 1
+                self.run[i] += 1
                 continue
+            self.run[i] = 0
             K = self.P @ H / S
             self.x = self.x + K * res
             self.P = (np.eye(6) - np.outer(K, H)) @ self.P
@@ -329,6 +354,19 @@ class TcsNav(object):
 
 def ri_pma2_ft():
     return np.array(ri.PMA2) / FT
+
+
+def ods_face(cg, dock):
+    """The ODS ring's face (the Orbiter's DP), body ft from the CG: ready to
+    dock (Zo 475.75) until hard mate, then retracted (Zo 460)."""
+    b = ri.ODS_HARDMATE_BODY if dock >= 2 else ri.ODS_BODY
+    return (np.array(b) - np.array(cg)) / FT
+
+
+def dp_of(x, geo, cg):
+    """Orbiter DP to target DP (PMA-2's face), LVLH ft and ft/s, for the state x."""
+    arm = geo["A"] @ ods_face(cg, geo["dock"])
+    return x[:3] + arm - geo["refl"], x[3:] + np.cross(geo["wrel"], arm)
 
 
 # ---------------------------------------------------------------------------
@@ -346,7 +384,7 @@ class Rpop(QtCore.QObject):
         self.pending = []              # TRU1s waiting for their TGT1
         self.s_used = None             # the TRU1 the filter has reached
         self.geo = None
-        self.hist = []                 # (t, x, y, z) filtered CG-CG, ft
+        self.hist = []                 # (t, CG-CG, DP-DP) filtered, LVLH ft
         self.raw_tcs = None            # (t, rng, rdot, elv, azi)
         self.next_tcs = None
         self.next_hhl = None
@@ -428,15 +466,26 @@ class Rpop(QtCore.QObject):
 
     def _process(self, s):
         t = s["t"]
-        # The IMU's sensed delta-V: the change in velocity less gravity's.
-        if self.last_v is not None and 0.0 < t - self.last_v[0] < 5.0:
-            h = t - self.last_v[0]
-            gm = 0.5 * (gravity(self.last_v[2]) + gravity(s["r"]))
-            self.dv_acc += np.array(s["v"]) - self.last_v[1] - gm * h
-        self.last_v = (t, np.array(s["v"]), np.array(s["r"]))
         if self.tgt is None:
             return
         tgt = self.tgt_at(t)
+        # THE IMU'S SENSED DELTA-V: the change in velocity less gravity's.
+        # Taken relative to the target, whose state RPOP had from the GPC
+        # propagated by the same gravity: the change in the two velocities'
+        # difference less the difference of gravity at the two (point mass
+        # and J2 suffice for that difference; vehdyn's full field drops out).
+        # Handed to the filter at every mark.  [NESC]'s 0.01829 m/s threshold
+        # is not applied: it guards against a real IMU's bias, which this
+        # truth has none of, and with it every jet pulse of a docking (each
+        # under it) went unmodelled -- 0.06 ft/s of unseen velocity is a
+        # degree of TCS elevation at 60 ft, and the filter rejected its own
+        # measurements and drifted away (Ron's live docking, 2026-10-09).
+        dv = np.array(s["v"]) - tgt["v"]
+        dg = gravity(s["r"]) - gravity(tgt["r"])
+        if self.last_v is not None and 0.0 < t - self.last_v[0] < 5.0:
+            h = t - self.last_v[0]
+            self.dv_acc += dv - self.last_v[1] - 0.5 * (dg + self.last_v[2]) * h
+        self.last_v = (t, dv, dg)
         self.s_used = s
         if self.next_tcs is None or t >= self.next_tcs or t < self.next_tcs - 2 * TCS_PERIOD_S:
             self.next_tcs = t + TCS_PERIOD_S
@@ -450,7 +499,12 @@ class Rpop(QtCore.QObject):
         n = ri.orbital_rate(tgt["r"], tgt["v"])
         w_lvlh_body = A @ np.array(s["w"])                     # body rate, in LVLH axes
         wrel = w_lvlh_body - np.array([0.0, -n, 0.0])           # less LVLH's own turn
-        return {"A": A, "arm": arm, "wrel": wrel, "L": L, "n": n}
+        # The reflector, PMA-2's face, where rndz_instruments puts it: the
+        # target's own attitude (the crew's "Update target attitude", RNDZ
+        # 7-17), moving with the target's LVLH (instruments.points).
+        refl = L.T @ (np.array(ri.qmat(tgt["q"])) @ np.array(ri.PMA2)) / FT
+        return {"A": A, "arm": arm, "wrel": wrel, "L": L, "n": n, "refl": refl,
+                "dock": s.get("dock", 0)}
 
     def rel_truth(self, s, tgt, geo):
         L = geo["L"]
@@ -463,9 +517,8 @@ class Rpop(QtCore.QObject):
         geo = self.geometry(s, tgt)
         self.geo = geo
         rd = self.inst.read(s, tgt)
-        dv = geo["L"].T @ self.dv_acc / FT
+        dv_use = geo["L"].T @ self.dv_acc / FT
         self.dv_acc = np.zeros(3)
-        dv_use = dv if np.linalg.norm(dv) * FT > DV_THRESHOLD else None
         if "tcs_range_ft" in rd:
             azi, elv = (math.radians(a) for a in rd["tcs_bearing_deg"])
             z = np.array([rd["tcs_range_ft"], rd["tcs_rdot_fps"], elv, azi])
@@ -478,45 +531,17 @@ class Rpop(QtCore.QObject):
         if self.nav.x is not None:
             x = self.nav.x
             if not self.hist or t - self.hist[-1][0] >= 1.0:
-                self.hist.append((t, x[0], x[1], x[2]))
+                self.hist.append((t, x[:3].copy(), dp_of(x, geo, s["cg"])[0]))
                 del self.hist[:-20000]
             if int(t) % 30 == 0:
                 tr, _ = self.rel_truth(s, tgt, geo)
                 log("t %.0f nav %.1f %.1f %.1f ft, truth %.1f %.1f %.1f ft"
                     % (t, x[0], x[1], x[2], tr[0], tr[1], tr[2]))
+        # the HHL as rndz_instruments reads it: the STS-134 cue cards' ranges,
+        # none inside 12 ft (RNDZ 7-21, note 9)
         if "hhl_range_ft" in rd and (self.next_hhl is None or t >= self.next_hhl):
-            rng, rdot = self.hhl_reading(s, tgt, geo)
-            # no HHL marks closer than 12 ft ([RNDZ] 7-21, note 9)
-            if rng >= 12.0:
-                self.next_hhl = t + HHL_PERIOD_S
-                self._hhl_mark(t, rng, rdot)
-
-    def hhl_reading(self, s, tgt, geo):
-        """The HHL's range and range rate as the STS-134 cue cards read it.
-
-        (rndz_instruments' read() now uses this same model; it had ranged to
-        a 25 m sphere about the ISS's CG, 82 ft short close in.)  The cards
-        give the HHL against the
-        other ranges directly, and are followed here: on the approach the
-        crew aims at the ISS CG and reads the CG-CG range less 10 ft
-        (APPROACH, CC 9-7: 2000 -> 1990, 1000 -> 990, 400 -> 390); once on the
-        +V-bar (inside 400 ft CG-CG, the card's switch) the aim point is
-        Node 2's forward face (RPOP OPS 7-16's HHL table) and the HHL reads
-        the DP-DP range plus 7 ft (VBAR APPROACH, CC 9-8: 250 -> 257,
-        170 -> 177, 75 -> 82, 30 -> 37, 10 -> 17).  The noise is
-        rndz_instruments' HHL noise."""
-        dr, dv = self.rel_truth(s, tgt, geo)
-        rcg = float(np.linalg.norm(dr))
-        if rcg >= 400.0:
-            rng, rdot = rcg - 10.0, float(dr @ dv) / rcg
-        else:
-            A = geo["A"]
-            ods = (np.array(ri.ODS_BODY) - np.array(s["cg"])) / FT
-            dp = dr + A @ ods - ri_pma2_ft()
-            dpv = dv + np.cross(geo["wrel"], A @ ods)
-            rdp = float(np.linalg.norm(dp))
-            rng, rdot = rdp + 7.0, float(dp @ dpv) / max(rdp, 1e-6)
-        return rng + self.inst.g(0.5 + 0.001 * rng), rdot + self.inst.g(0.02)
+            self.next_hhl = t + HHL_PERIOD_S
+            self._hhl_mark(t, rd["hhl_range_ft"], rd["hhl_rdot_fps"])
 
     def _hhl_mark(self, t, rng, rdot):
         self.hhl.append((t, rng, rdot))
@@ -551,7 +576,7 @@ class Rpop(QtCore.QObject):
 def nice_step(span):
     """50, 100, 500, 1000 ... ft ticks: about four across the span."""
     for s in (5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000):
-        if span / s <= 6:
+        if span / s <= 10:
             return s
     return 100000
 
@@ -583,7 +608,6 @@ class View(QtWidgets.QWidget):
         self.fkeys = False
         self.zoom = 1.0
         self.pan = [0.0, 0.0]
-        self.scale_hold = None
         fams = set(QtGui.QFontDatabase.families())
         fam = next((f for f in ("Courier New", "Menlo", "DejaVu Sans Mono", "Courier") if f in fams),
                    "Monospace")
@@ -619,11 +643,7 @@ class View(QtWidgets.QWidget):
         cg = x[:3].copy()
         if not self.por_dp():
             return x[:3], x[3:], cg
-        geo = self.rp.geo
-        A = geo["A"]
-        ods = (np.array(ri.ODS_BODY) - np.array(self.rp.tru["cg"])) / FT
-        p = x[:3] + A @ ods - ri_pma2_ft()
-        v = x[3:] + np.cross(geo["wrel"], A @ ods)
+        p, v = dp_of(x, self.rp.geo, self.rp.tru["cg"])
         return p, v, cg
 
     # --- keys -------------------------------------------------------------
@@ -820,7 +840,7 @@ class View(QtWidgets.QWidget):
     def draw_rdot(self, p):
         """The Rdot window: a Windows dialog over the plot ([GNC], [RNDZ] 7-16)."""
         rp = self.rp
-        x0, y0, w, h = 732, 340, 288, 124
+        x0, y0, w, h = 732, 556, 288, 124       # lower right, clear of the docking
         p.fillRect(QtCore.QRectF(x0, y0, w, h), DLG)
         p.fillRect(QtCore.QRectF(x0 + 2, y0 + 2, w - 4, 14), QtGui.QColor(128, 128, 128))
         black = QtGui.QColor(0, 0, 0)
@@ -876,7 +896,7 @@ class View(QtWidgets.QWidget):
         if st is not None:
             pos, vel, cg = st
             off = pos - cg                       # the POR's offset from the CG, now
-        pts = [np.array([h[1], h[2], h[3]]) + off for h in hist]
+        pts = [h[2] if dp else h[1] for h in hist]
         preds = []
         if rp.nav.x is not None:
             s = rp.nav.x.copy()
@@ -884,18 +904,16 @@ class View(QtWidgets.QWidget):
             for k in range(1, 10):
                 s = cw_step(s, n, 60.0)
                 preds.append(s[:3] + off)
-        # autoscale: the target, the orbiter and its predictors
-        span_pts = [np.zeros(3)] + ([st[0]] if st is not None else []) + preds
-        hs = [q[ih] * sh for q in span_pts]
-        vs = [q[iv] * sv for q in span_pts]
-        top, bot = 190.0, H - 135.0
-        left, right = 20.0, DESIGN_W - 20.0
-        ext = max(max(hs) - min(hs), (max(vs) - min(vs)) * (right - left) / (bot - top), 150.0)
-        k = (right - left) / (ext * 1.25) * self.zoom          # px per ft
-        ch = 0.5 * (max(hs) + min(hs))
-        cv = 0.5 * (max(vs) + min(vs))
-        ox = (left + right) / 2 - ch * k + self.pan[0]
-        oy = (top + bot) / 2 - cv * k + self.pan[1]
+        # A FIXED FRAME, as JSC-63400 Fig 20.4: the target's point at a fixed
+        # place on the screen (the figure's, 91 % across and 43 % down the
+        # plot) and the figure's scale, 50 ft ticks ~10 % of the width apart.
+        # Only Ctrl+PgUp/PgDn (zoom), Ctrl+arrows (move the axes) and
+        # Ctrl+Home (back to this) change it (RNDZ 7-25).  The YZ view, seen
+        # along the V-bar, has the target in the middle.
+        k = PX_PER_FT * self.zoom
+        ox = (DESIGN_W * (0.5 if ih != 0 else ORIGIN_X)) + self.pan[0]
+        oy = (H - 20) * ORIGIN_Y + self.pan[1]
+        right, left = DESIGN_W - 20.0, 20.0
 
         def to_px(q):
             return QtCore.QPointF(ox + q[ih] * sh * k, oy + q[iv] * sv * k)
@@ -920,7 +938,8 @@ class View(QtWidgets.QWidget):
                 p.drawLine(QtCore.QPointF(ox - tick, y), QtCore.QPointF(ox + tick, y))
         self.text(p, ox - step * k, oy - 10, "%d" % step, 13, GREY_TXT, align="c")
         self.text(p, ox - 12, oy + step * k + 5, "%d" % step, 13, GREY_TXT, align="r")
-        self.draw_overlay(p, to_px, ih, iv, np.zeros(3) if dp else ri_pma2_ft())
+        refl = rp.geo["refl"] if rp.geo is not None else ri_pma2_ft()
+        self.draw_overlay(p, to_px, ih, iv, np.zeros(3) if dp else refl)
         self.draw_target(p, to_px, ih, iv, dp)
         # the prime trajectory: its history, the orbiter, the predictors
         tri = QtGui.QPolygonF([QtCore.QPointF(0, -4.5), QtCore.QPointF(4, 3), QtCore.QPointF(-4, 3)])
@@ -988,7 +1007,8 @@ class View(QtWidgets.QWidget):
         """PMA-2 and Node 2 ahead of the ISS ([JSC] draws the node as a box):
         PMA-2's face at rndz_instruments.PMA2, ~6 ft across and 8 ft long,
         then Node 2, 14.5 ft across and 24 ft long, aft of it (-X)."""
-        face = np.zeros(3) if dp else ri_pma2_ft()
+        g = self.rp.geo
+        face = np.zeros(3) if dp else (g["refl"] if g is not None else ri_pma2_ft())
         p.setPen(QtGui.QPen(WHITE, 1))
 
         def box(x0, x1, half):
@@ -1008,7 +1028,7 @@ class View(QtWidgets.QWidget):
     def draw_orbiter(self, p, to_px, ih, iv, st):
         """The orbiter's outline at its attitude, and its CG (the [JSC] circle-plus)."""
         _, _, cg = st
-        shift = -ri_pma2_ft() if self.por_dp() else np.zeros(3)
+        shift = -self.rp.geo["refl"] if self.por_dp() else np.zeros(3)
         A = self.rp.geo["A"]
         cgb = np.array(self.rp.tru["cg"]) / FT
 

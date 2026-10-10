@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""A synthetic +V-bar approach for testing rpop.py without the simulator:
-TRU1 (port base + 98) and TGT1 (port base + 109) as yaGPC2 sends them.
+"""A synthetic +V-bar approach and docking for testing rpop.py without the
+simulator: TRU1 (port base + 98) and TGT1 (port base + 109) as yaGPC2 sends
+them, with TRU1 [30] [31] the docking state (0 free, 1 captured, 2
+hard-mated) and contacts.
 
-    python3 examples/rpop_synth.py --port-base 59100 --from 360 --to 3 --rate 20
+    python3 examples/rpop_synth.py --port-base 59100 --from 360 --rate 20
 
-The ISS flies a circular 350 km, 51.6 deg orbit (J2 gravity), held in LVLH;
-the Orbiter is in the docking attitude (nose to the zenith, payload bay to
-the ISS) on the +V-bar, its ODS ring's face coming in on PMA-2's along the
-VBAR APPROACH cue card's range rates (STS-134 RNDZ CC 9-8), with a few feet
-of drift off the axis that the crew would be nulling.  It stops at --to and
-holds there.  Vehicle time runs --rate times faster than the wall clock.
+The ISS flies a circular 350 km, 51.6 deg orbit (J2 gravity) held in LVLH.
+The Orbiter is in the docking attitude (nose to the zenith, payload bay to
+the ISS) on the +V-bar.  Its centre of mass moves by Clohessy-Wiltshire
+about the ISS plus jet pulses: every 2 s a 0.02 ft/s pulse in any axis that
+is off the VBAR APPROACH cue card's range rate (STS-134 RNDZ CC 9-8), or
+drifting off the axis, by more than 0.015 ft/s -- each pulse below RPOP's
+delta-V threshold, as a docking's are.  At contact (the ODS ring's face on
+PMA-2's) it is captured: the closing rate stops, it moves with the ISS, the
+captured misalignment damps out in 30 s, and the ring then draws it in to
+hard mate (the face from Zo 475.75 to 460, 60 s).  --to N stops and holds at
+N ft instead of docking.  Vehicle time runs --rate times the wall clock.
 """
 import argparse
 import math
@@ -27,6 +34,7 @@ import rndz_instruments as ri          # noqa: E402
 MU, RE, J2 = 3.986004418e14, 6378137.0, 1.08262668e-3
 FT = 0.3048
 GMT0 = 136 * 86400 + 12 * 3600 + 56 * 60 + 27.994 + (1 * 86400 + 21 * 3600)   # MET 1/21:00:00
+RETRACT_FT = (ri.ODS_ZO - ri.ODS_HARDMATE_ZO) / 12.0
 
 
 def gravity(r):
@@ -66,11 +74,16 @@ def rdot_for(rng):
     return -0.10
 
 
+def cw(s, n):
+    x, y, z, vx, vy, vz = s
+    return np.array([vx, vy, vz, 2 * n * vz, -n * n * y, 3 * n * n * z - 2 * n * vx])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port-base", type=int, required=True)
     ap.add_argument("--from", dest="r0", type=float, default=360.0, help="start, DP-DP ft")
-    ap.add_argument("--to", dest="r1", type=float, default=3.0, help="hold at, DP-DP ft")
+    ap.add_argument("--to", dest="r1", type=float, default=None, help="hold at this DP-DP ft (default: dock)")
     ap.add_argument("--rate", type=float, default=20.0)
     ap.add_argument("--hz", type=float, default=10.0, help="datagrams per wall second")
     ap.add_argument("--duration", type=float, default=0.0, help="wall s, 0 forever")
@@ -84,53 +97,76 @@ def main():
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
     dest_t, dest_g = ("239.255.1.1", a.port_base + 98), ("239.255.1.1", a.port_base + 109)
 
-    # the ISS: circular, 350 km, 51.6 deg
     rn = RE + 350e3
     inc = math.radians(51.6)
     r = np.array([rn, 0.0, 0.0])
     v = math.sqrt(MU / rn) * np.array([0.0, math.cos(inc), math.sin(inc)])
-    pma = np.array(ri.PMA2)
-    ods = np.array(ri.ODS_BODY)
-    t, rng, h = 0.0, a.r0, 0.5          # vehicle time, DP-DP range (ft), the integrator's step
+    A = np.column_stack([[0, 0, -1.0], [0, 1.0, 0], [1.0, 0, 0]])     # body -> LVLH, docking attitude
+    pma = np.array(ri.PMA2) / FT
+    ods = np.array(ri.ODS_BODY) / FT
+    off = pma - A @ ods                 # CG - (ODS face - PMA face), LVLH ft
+    # the Orbiter's centre of mass relative to the ISS's, LVLH ft, ft/s
+    s = np.concatenate([off + np.array([a.r0, 3.0, -4.0]), [rdot_for(a.r0), 0.0, 0.0]])
+    t, h = 0.0, 0.5
+    dock, t_cap, cap_p, next_jet = 0, None, None, 0.0
     wall0 = time.monotonic()
     sent = 0
     while True:
         tw = (time.monotonic() - wall0) * a.rate
-        while t < tw:                   # the ISS's orbit (RK4) and the approach
-            def f(s):
-                return np.concatenate([s[3:], gravity(s[:3])])
-            s = np.concatenate([r, v])
-            k1 = f(s); k2 = f(s + 0.5 * h * k1); k3 = f(s + 0.5 * h * k2); k4 = f(s + h * k3)
-            s = s + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
-            r, v = s[:3], s[3:]
-            if rng > a.r1:
-                rng = max(a.r1, rng + rdot_for(rng) * h)
+        while t < tw:
+            def f(x):
+                return np.concatenate([x[3:], gravity(x[:3])])
+            x = np.concatenate([r, v])
+            k1 = f(x); k2 = f(x + 0.5 * h * k1); k3 = f(x + 0.5 * h * k2); k4 = f(x + h * k3)
+            x = x + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+            r, v = x[:3], x[3:]
+            n = math.sqrt(MU / np.linalg.norm(r) ** 3)
+            p = s[:3] - off                                      # ODS face - PMA face, ft
+            if dock == 0:
+                k1 = cw(s, n); k2 = cw(s + 0.5 * h * k1, n); k3 = cw(s + 0.5 * h * k2, n); k4 = cw(s + h * k3, n)
+                s = s + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+                p = s[:3] - off
+                hold = a.r1 is not None and p[0] <= a.r1
+                if t >= next_jet:                                # the pilot's pulses
+                    next_jet = t + 2.0
+                    want = np.array([0.0 if hold else rdot_for(p[0]),
+                                     max(-0.05, min(0.05, -0.02 * p[1])),
+                                     max(-0.05, min(0.05, -0.02 * p[2]))])
+                    for i in range(3):
+                        if abs(want[i] - s[3 + i]) > 0.015:
+                            s[3 + i] += math.copysign(0.02, want[i] - s[3 + i])
+                if p[0] <= 0.0 and a.r1 is None:                 # contact: capture
+                    dock, t_cap, cap_p = 1, t, p.copy()
+                    sys.stderr.write("rpop_synth: t %.0f CAPTURE, misalignment %.2f %.2f ft\n"
+                                     % (t, p[1], p[2]))
+            else:
+                tc = t - t_cap
+                lat = cap_p * max(0.0, 1.0 - tc / 30.0)          # misalignment damping out
+                ax = -RETRACT_FT * min(1.0, max(0.0, (tc - 30.0) / 60.0))
+                new = off + np.array([ax, lat[1], lat[2]])
+                s = np.concatenate([new, (new - s[:3]) / h])
+                if tc >= 90.0 and dock == 1:
+                    dock = 2
+                    sys.stderr.write("rpop_synth: t %.0f HARD MATE\n" % t)
             t += h
-        L = ri.lvlh_axes(list(r), list(v))
-        L = np.column_stack([np.array(c) for c in L])           # LVLH -> M50
+        L = np.column_stack([np.array(c) for c in ri.lvlh_axes(list(r), list(v))])   # LVLH -> M50
         n = ri.orbital_rate(list(r), list(v))
-        w_lvlh = L @ np.array([0.0, -n, 0.0])                    # LVLH's turn, M50
-        # the Orbiter: body X up (-Z LVLH), body Z toward +X LVLH, body Y = +Y LVLH
-        A = np.column_stack([[0, 0, -1.0], [0, 1.0, 0], [1.0, 0, 0]])     # body -> LVLH
+        w_lvlh = L @ np.array([0.0, -n, 0.0])
         C = L @ A
-        # a little drift off the axis, shrinking with range (ft)
-        dz = 0.012 * rng * math.sin(t / 240.0)
-        dy = 0.008 * rng * math.cos(t / 300.0)
-        rdot = rdot_for(rng) if rng > a.r1 else 0.0
-        face = pma + np.array([rng, dy, dz]) * FT                # the ODS face, ISS LVLH frame, m
-        rel = face - A @ ods                                     # the Orbiter's CG
-        relv = np.array([rdot, 0.0, 0.0]) * FT
+        rel = s[:3] * FT
+        relv = s[3:] * FT
         ro = r + L @ rel
         vo = v + L @ relv + np.cross(w_lvlh, L @ rel)
-        wb = C.T @ w_lvlh                                        # body rates: LVLH hold
+        wb = C.T @ w_lvlh
         tru = ([t, GMT0 + t] + quat(C) + list(wb) + list(ro) + list(vo) + [0.0, 0.0, -1.0]
-               + [1, 0, 0, 0, 1, 0, 0, 0, 1] + [0.0, 0.0, 0.0])
-        sock.sendto(b"TRU1" + struct.pack(">30d", *tru), dest_t)
+               + [1, 0, 0, 0, 1, 0, 0, 0, 1] + [0.0, 0.0, 0.0] + [float(dock), 1.0 if dock else 0.0])
+        sock.sendto(b"TRU1" + struct.pack(">32d", *tru), dest_t)
         tgt = [t, 25544] + list(r) + list(v) + quat(L)
         sock.sendto(b"TGT1" + struct.pack(">12d", *tgt), dest_g)
         sent += 1
         if sent % int(a.hz * 10) == 0:
-            sys.stderr.write("rpop_synth: t %.0f DP-DP %.1f ft\n" % (t, rng))
+            p = s[:3] - off
+            sys.stderr.write("rpop_synth: t %.0f DP-DP %.2f %.2f %.2f ft, dock %d\n" % (t, *p, dock))
         if a.duration and time.monotonic() - wall0 > a.duration:
             return
         time.sleep(1.0 / a.hz)
