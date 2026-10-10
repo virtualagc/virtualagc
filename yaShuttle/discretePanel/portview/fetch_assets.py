@@ -1140,21 +1140,27 @@ def prepare_iss_cl_target():
         return
     with open(meta_path) as f:
         meta = json.load(f)
-    if meta.get('cl_target') == list(CL_TARGET_FACE):
-        return
-    z = dict(np.load(os.path.join(out_dir, "model.npz")))
-    mats = meta['materials']
     made = _cl_target_tris()
-    if meta.get('cl_target'):
-        # one placed before (at an older face): the target's materials are the
-        # last ones; take them off before putting it at the face now
-        names = {m[0] for m in made}
-        while mats and mats[-1].get('name') in names:
-            k = len(mats) - 1
+    mats = meta['materials']
+    placed = sum(1 for m in mats if m.get('name') in {t[0] for t in made})
+    if meta.get('cl_target') == list(CL_TARGET_FACE) and placed == len(made):
+        return                   # there, once, at this face (a doubled one is redone)
+    z = dict(np.load(os.path.join(out_dir, "model.npz")))
+    # A target placed before (at an older face, or more than one): every
+    # material of it taken off, wherever it sits -- other parts (the ISS's
+    # visitors) may have been added after it -- and the rest renumbered.
+    names = {m[0] for m in made}
+    keep = [k for k, m in enumerate(mats) if m.get('name') not in names]
+    if len(keep) != len(mats):
+        z2 = {}
+        for new_k, old_k in enumerate(keep):
             for a in ('pos', 'nrm', 'uv', 'idx'):
-                z.pop('%s%d' % (a, k), None)
-            mats.pop()
-        meta['source'] = meta['source'].replace("; the centerline target at PMA-2: STS-134 RNDZ checklist p149", "")
+                if '%s%d' % (a, old_k) in z:
+                    z2['%s%d' % (a, new_k)] = z['%s%d' % (a, old_k)]
+        z = {**{key: v for key, v in z.items() if not any(key.startswith(a) and key[len(a):].isdigit()
+                                                          for a in ('pos', 'nrm', 'uv', 'idx'))}, **z2}
+        mats[:] = [mats[k] for k in keep]
+    meta['source'] = meta['source'].replace("; the centerline target at PMA-2: STS-134 RNDZ checklist p149", "")
     for name, rgb, pos, nrm, tris in made:
         k = len(mats)
         z['pos%d' % k], z['nrm%d' % k] = pos, nrm
