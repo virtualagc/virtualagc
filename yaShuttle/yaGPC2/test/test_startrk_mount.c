@@ -15,6 +15,8 @@
 
 #include "../src/startrk.h"
 
+#define PI 3.14159265358979323846     /* as test_startrk_target.c: strict C11 has no M_PI */
+
 static int checks, failures;
 
 static void check(int ok, const char *what, double got, double want) {
@@ -54,13 +56,13 @@ int main(void) {
                 if (fabs(d) > orth) orth = fabs(d);
                 tr += F[i][j] * T[i][j];                   /* trace(F T^T) */
             }
-        double ang = acos(fmin(1.0, (tr - 1.0) / 2.0)) * 180.0 / M_PI;
+        double ang = acos(fmin(1.0, (tr - 1.0) / 2.0)) * 180.0 / PI;
         /* (the tape's rows are unit only to ~1e-5, which near 1 moves an
          * unnormalised arccos by a tenth of a degree) */
         double nf = sqrt(F[2][0] * F[2][0] + F[2][1] * F[2][1] + F[2][2] * F[2][2]);
         double nt = sqrt(T[2][0] * T[2][0] + T[2][1] * T[2][1] + T[2][2] * T[2][2]);
         double b = acos(fmin(1.0, (F[2][0] * T[2][0] + F[2][1] * T[2][1] + F[2][2] * T[2][2]) / (nf * nt)))
-                   * 180.0 / M_PI;
+                   * 180.0 / PI;
         char w[64];
         snprintf(w, sizeof w, "tracker %d orthonormal (max error)", k);
         check(orth < 1e-6, w, orth, 0.0);
