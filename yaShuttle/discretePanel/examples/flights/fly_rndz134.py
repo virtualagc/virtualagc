@@ -1749,7 +1749,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
 +0     mode HALT
 +0.02  idppower 1 on
 +0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
-+11    keys ITEM 1 + 2 EXEC
+{idp4}+11    keys ITEM 1 + 2 EXEC
 +8     keys ITEM 2 + 1 EXEC
 +8     keys ITEM 7 + 1 EXEC
 +8     keys ITEM 8 + 1 EXEC
@@ -1757,7 +1757,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
 +8     keys ITEM 1 0 + 1 EXEC
 +8     keys ITEM 1 1 + 1 EXEC
 +8     keys ITEM 1 2 + 1 EXEC
-+8     keys ITEM 1 8 + 1 EXEC
+{nbat_crt4}+8     keys ITEM 1 8 + 1 EXEC
 +8     keys ITEM 1 9 + 1 EXEC
 +21    keys OPS 2 0 1 PRO
 wait crt 1 title 2011/ timeout 600
@@ -1772,8 +1772,24 @@ wait crt 1 title 2011/ timeout 600
 +2     dap c3 vern
 """
 
+    # THE AFT STATION'S IDP 4, loaded while it can be (with --crts 4).  PASS
+    # loads an IDP only in OPS 0 after its IPL, PL 9 or SM 2/SM 4 (OI340600
+    # DMIMCD.hal 508-530; gpc-causes #294), so on the vehicle every IDP was
+    # loaded long before docking.  Here: in OPS 0, IDP 4 powered, CRT 3
+    # released and CRT 4 given to GPC 1 (a PASS GPC commands at most three
+    # IDPs, '>3 DEU', #99), time for the load; and the NBAT keeps CRT 4 with
+    # GPC 1 through OPS 201 (its CRT items are 12-15, #99).  A run restored
+    # from a capture without it gets IDP 4 from seed_idp4 instead.
+    IPL_IDP4 = ("+5     idppower 4 on\n"
+                "+5     keys KB1 GPC/CRT 0 3 EXEC\n"
+                "+3     keys KB1 GPC/CRT 1 4 EXEC\n"
+                "+20    keys KB1 SPEC 0 PRO\n")
+    IPL_NBAT_CRT4 = "+8     keys ITEM 1 5 + 1 EXEC\n"
+
     def ipl(self):
-        self.play(self.IPL_SCRIPT.format(panel=PANEL), "ipl")
+        four = getattr(self.a, "crts", 1) >= 4
+        self.play(self.IPL_SCRIPT.format(panel=PANEL, idp4=self.IPL_IDP4 if four else "",
+                                         nbat_crt4=self.IPL_NBAT_CRT4 if four else ""), "ipl")
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
         self.wait_sim(10)
