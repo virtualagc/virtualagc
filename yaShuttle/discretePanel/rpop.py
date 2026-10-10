@@ -93,8 +93,8 @@ F7 view (XZ, XY, YZ), Shift+F7 overlay, F8 target / orbiter centred,
 Ctrl+F8 point of reference (CG-CG / DP-DP), F9 THC clear, Shift+F9 clear
 trajectory, Ctrl+F9 back 1, Shift+F10 exit, Ctrl+F10 RPOP Configuration,
 Ctrl+PgUp / Ctrl+PgDn zoom (with X, Y or Z held, that axis only),
-Ctrl+Home the default scale and axes (the real one also resumed
-autoscaling, which this does not do), Ctrl+arrows move the axes, Space
+Ctrl+Home "Resume autoscaling and reset scale" (autoscaling: the scale
+only, in steps, never moving the target; see AUTO_STEPS), Ctrl+arrows move the axes, Space
 the function-key menu, arrows the THC "What if" pulses (-Z sense: Right
 Z IN, Left Z OUT, Up X UP, Down X DOWN; plain DAP B8, Shift DAP A8).
 The menus hold the same functions with their keys; the undescribed ones
@@ -141,6 +141,18 @@ HHL_PERIOD_S = 5.0
 # point at x 1605 (91 %), y 43 % down the plot; 50 ft ticks 185 px apart.
 ORIGIN_X, ORIGIN_Y = 0.907, 0.434
 PX_PER_FT = DESIGN_W * 185.0 / 1770.0 / 50.0
+# Autoscaling (RNDZ 7-25: Ctrl+Home "Resume autoscaling and reset scale";
+# each view "may be independently scaled and/or autoscaled").  How the real
+# one chose its scale isn't described; this one only ever changes the scale,
+# never moves the target, in steps: the scale at which ticks of AUTO_STEPS
+# ft would sit [JSC]'s 50 ft apart.  It fits the orbiter's point of
+# reference and its last AUTO_TRAIL_S of trail (not the predictors) inside
+# the plot; it zooms out at once when one would leave AUTO_BOX, in only after
+# they have all sat inside AUTO_COMFORT of it at the next step for AUTO_DWELL_S.
+AUTO_STEPS = (5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000)
+AUTO_TRAIL_S = 60.0
+AUTO_DWELL_S = 10.0
+AUTO_COMFORT = 0.7
 MET_ZERO = "136/12:56:27.994"           # STS-134 (fly_rndz134.MET_ZERO_UNIX)
 
 GREEN = QtGui.QColor(0, 255, 0)
@@ -665,6 +677,10 @@ class View(QtWidgets.QWidget):
         self.fkeys = False
         self.zoom = [1.0, 1.0, 1.0]     # per LVLH axis (RNDZ 7-25: Ctrl+X/Y/Z with PgUp/PgDn)
         self.pan = [0.0, 0.0]
+        self.auto = True                # autoscaling, until a manual zoom (RNDZ 7-25)
+        self.auto_i = AUTO_STEPS.index(50)
+        self.auto_pick = True           # choose at once (start, Ctrl+Home, a new view)
+        self.auto_since = None          # data time the next step in has fitted since
         self.held = set()               # X, Y, Z held with Ctrl, for those
         self.orb_centered = False       # F8, Tgt/Orb (RNDZ 7-23)
         self.overlay = True             # Shift+F7, Ovrlay
@@ -680,7 +696,7 @@ class View(QtWidgets.QWidget):
         self.met_zero = parse_dhms(args.met_zero)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
         t = QtCore.QTimer(self)
-        t.timeout.connect(self.update)
+        t.timeout.connect(self.tick)
         t.start(200)
 
     def font(self, px, bold=False):
@@ -720,12 +736,14 @@ class View(QtWidgets.QWidget):
 
     def act_view(self, which=None):
         self.view = (self.view + 1) % len(self.VIEWS) if which is None else which
+        self.auto_pick = True
 
     def act_overlay(self):
         self.overlay = not self.overlay
 
     def act_tgt_orb(self):
         self.orb_centered = not self.orb_centered
+        self.auto_pick = True
 
     def act_por(self):
         self.por = "cg" if self.por_dp() else "dp"
@@ -743,11 +761,88 @@ class View(QtWidgets.QWidget):
         self.fkeys = not self.fkeys
 
     def act_zoom(self, f, axes=(0, 1, 2)):
+        if self.auto:
+            log("autoscale off (manual zoom)")
+        self.auto = False                  # a manual scale holds until Ctrl+Home
         for a in axes:
             self.zoom[a] *= f
 
     def act_reset_scale(self):
+        """RNDZ 7-25: Ctrl+Home, "Resume autoscaling and reset scale"."""
         self.zoom, self.pan = [1.0, 1.0, 1.0], [0.0, 0.0]
+        self.auto, self.auto_pick, self.auto_since = True, True, None
+
+    # --- autoscaling ---------------------------------------------------------
+    def tick(self):
+        try:
+            self.autoscale()
+        except Exception as e:             # never let the scale stop the display
+            log("autoscale: %s" % e)
+        self.update()
+
+    def frame(self, H, st):
+        """The plot's fixed frame: the screen point of the view's centre
+        (the target, or the orbiter's POR when orbiter-centred) and that centre."""
+        (ih, _), _ = self.axes_of()
+        centre = st[0] if (self.orb_centered and st is not None) else np.zeros(3)
+        ox = (DESIGN_W * (0.5 if (ih != 0 or self.orb_centered) else ORIGIN_X)) + self.pan[0]
+        oy = (H - 20) * ORIGIN_Y + self.pan[1]
+        return ox, oy, centre
+
+    def autoscale(self):
+        if not self.auto or not self.rp.pcm_ok():
+            return
+        st = self.state_shown()
+        if st is None:
+            return
+        H = DESIGN_H - 40
+        (ih, sh), (iv, sv) = self.axes_of()
+        ox, oy, centre = self.frame(H, st)
+        now = self.rp.tru["t"]
+        dp = self.por_dp()
+        pts = [st[0]] + [h[2] if dp else h[1] for h in self.rp.hist if h[0] >= now - AUTO_TRAIL_S]
+        if self.orb_centered:
+            pts.append(np.zeros(3))        # the target, which moves in this view
+        # the plot clear of its edges and the header (x 30..994, y 60..H-50)
+        x0, x1, y0, y1 = 30.0, DESIGN_W - 30.0, 60.0, H - 50.0
+
+        def fits(i, frac):
+            k = PX_PER_FT * 50.0 / AUTO_STEPS[i]
+            for q in pts:
+                x = (q[ih] - centre[ih]) * sh * k
+                y = (q[iv] - centre[iv]) * sv * k
+                if not (frac * (x0 - ox) <= x <= frac * (x1 - ox) and frac * (y0 - oy) <= y <= frac * (y1 - oy)):
+                    return False
+            return True
+
+        def best():
+            for i in range(len(AUTO_STEPS)):
+                if fits(i, AUTO_COMFORT):
+                    return i
+            return len(AUTO_STEPS) - 1
+
+        i = self.auto_i
+        why = None
+        if self.auto_pick:
+            self.auto_pick = False
+            i, why = best(), "reset"
+        elif not fits(i, 1.0):
+            i, why = max(best(), i + 1), "out"
+            self.auto_since = None
+        elif i > 0 and fits(i - 1, AUTO_COMFORT):
+            if self.auto_since is None:
+                self.auto_since = now
+            elif now - self.auto_since >= AUTO_DWELL_S:
+                i, why = i - 1, "in"
+                self.auto_since = None
+        else:
+            self.auto_since = None
+        if why is not None and i != self.auto_i:
+            r = float(np.linalg.norm(st[0]))
+            log("autoscale %s: %d -> %d ft step, range %.1f ft (%s), MET %s"
+                % (why, AUTO_STEPS[self.auto_i], AUTO_STEPS[i], r, "DP-DP" if dp else "CG-CG",
+                   fmt_met(self.rp.tru["gmt"] - self.met_zero)))
+            self.auto_i = i
 
     def act_move(self, dx, dy):
         self.pan[0] += dx
@@ -1064,20 +1159,18 @@ class View(QtWidgets.QWidget):
                 preds.append(s[:3] + off)
         # A FIXED FRAME, as JSC-63400 Fig 20.4: the target's point at a fixed
         # place on the screen (the figure's, 91 % across and 43 % down the
-        # plot) and the figure's scale, 50 ft ticks ~10 % of the width apart.
-        # Only Ctrl+PgUp/PgDn (zoom), Ctrl+arrows (move the axes) and
-        # Ctrl+Home (back to this) change it (RNDZ 7-25).  The YZ view, seen
-        # along the V-bar, has the target in the middle.
-        kh, kv = PX_PER_FT * self.zoom[ih], PX_PER_FT * self.zoom[iv]
+        # plot), never moved but by Ctrl+arrows (move the axes, RNDZ 7-25).
+        # The scale steps with autoscaling until Ctrl+PgUp/PgDn sets it by
+        # hand; Ctrl+Home resets it and resumes autoscaling (7-25).  The YZ
+        # view, seen along the V-bar, has the target in the middle.
+        # Autoscaling (see autoscale) changes only the scale, in steps.
+        k0 = PX_PER_FT * 50.0 / AUTO_STEPS[self.auto_i]
+        kh, kv = k0 * self.zoom[ih], k0 * self.zoom[iv]
         k = kh
         # F8: target-centred (the target fixed, at [JSC]'s place) or
         # orbiter-centred (the orbiter's point of reference fixed in the
         # middle, the target moving)
-        centre = np.zeros(3)
-        if self.orb_centered and st is not None:
-            centre = st[0]
-        ox = (DESIGN_W * (0.5 if (ih != 0 or self.orb_centered) else ORIGIN_X)) + self.pan[0]
-        oy = (H - 20) * ORIGIN_Y + self.pan[1]
+        ox, oy, centre = self.frame(H, st)
         right, left = DESIGN_W - 20.0, 20.0
 
         def to_px(q):
@@ -1280,7 +1373,7 @@ class Window(QtWidgets.QMainWindow):
         for a, nm in enumerate("XYZ"):
             item(m, "Zoom In %s Axis" % nm, "Ctrl+%s+PgUp" % nm, lambda a=a: v.act_zoom(1.25, (a,)))
             item(m, "Zoom Out %s Axis" % nm, "Ctrl+%s+PgDn" % nm, lambda a=a: v.act_zoom(1 / 1.25, (a,)))
-        item(m, "Reset Scale", "Ctrl+Home", v.act_reset_scale)
+        item(m, "Resume Autoscaling and Reset Scale", "Ctrl+Home", v.act_reset_scale)
         m = mb.addMenu("Display")
         item(m, "Rdot Window", "F5", v.act_rdot, check=lambda: v.show_rdot)
         item(m, "Overlay", "Shift+F7", v.act_overlay, check=lambda: v.overlay)
@@ -1389,9 +1482,22 @@ def main(argv=None):
     w = Window(rp, args)
     w.show()
     if args.snapshot:
+        # QPixmap.save fails silently on a missing directory or an unknown
+        # suffix: make the directory, default to PNG, and say if it failed
+        path = os.path.abspath(os.path.expanduser(args.snapshot))
+
         def snap():
-            w.grab().save(args.snapshot)
-            log("snapshot %s" % args.snapshot)
+            try:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+            except OSError as e:
+                log("snapshot: %s" % e)
+            ext = os.path.splitext(path)[1][1:].upper()
+            fmt = ext if ext.encode() in [bytes(f).upper() for f in QtGui.QImageWriter.supportedImageFormats()] \
+                else "PNG"
+            if w.grab().save(path, fmt) and os.path.isfile(path) and os.path.getsize(path) > 0:
+                log("snapshot %s" % path)
+            else:
+                log("snapshot FAILED: could not write %s" % path)
             app.quit()
         QtCore.QTimer.singleShot(int(args.snapshot_after * 1000), snap)
     return app.exec()
