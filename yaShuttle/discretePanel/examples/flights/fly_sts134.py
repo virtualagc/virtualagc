@@ -229,10 +229,10 @@ TAL_OPS3 = "+1     keys OPS 3 0 1 PRO\nwait crt 1 title 3041/ timeout 180\n"
 #   MRN area 3, slot 5 MRN20  326 (slot 6 MRN02  341), DELH 57 ->  269 ft MSL
 #   ZZA area 4, slot 7 ZZA30  927 (slot 8 ZZA12  899), DELH 65 ->  862 ft MSL
 # (areas 12-14, slots 23-28, repeat them).  PASS flies CGNS_TAL_PRIME_AREA:
-# flown 4 (Zaragoza, DASS_G3 patch summary 0002 -> 0004), but #PCGNFL1 is not
-# among the abort I-loads, so the -full2 volume keeps the tape's 2: Ben Guerir.
+# the tape's 2 (Ben Guerir); flown 4 (Zaragoza, DASS_G3 patch summary 0002 ->
+# 0004), which sts134-abort-iloads.json puts in both copies (G16, G3) on -full2.
 TAL_SITES = {"BEN": 1449.0, "MRN": 326.0, "ZZA": 927.0}
-TAL_DEFAULT = "BEN"
+TAL_DEFAULT = "ZZA"
 
 
 def keys_signed(x, fmt):

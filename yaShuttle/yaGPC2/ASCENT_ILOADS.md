@@ -129,8 +129,8 @@ values.
 
 ## The OPS 1 abort I-loads (-full2, 2026-10-10)
 
-`tools/sites/sts134-abort-iloads.json` puts STS-134's flown values on 5,762
-halfwords in 2,210 cells.  The source is DASS_G16.ASC's PATCH SUMMARY: every
+`tools/sites/sts134-abort-iloads.json` puts STS-134's flown values on 5,764
+halfwords in 2,212 cells.  The source is DASS_G16.ASC's PATCH SUMMARY: every
 word whose tape value is the generic one and whose flown value differs.  The
 cells sit in seven load blocks: six in the G1/G16 loads, one in G3.
 
@@ -140,7 +140,7 @@ python3 mission_reconfig.py sites/sts134-abort-iloads.json …-ksc6-full.mmv --o
 
 | Volume | Built from | SHA-256 |
 |---|---|---|
-| `~/sts134-runs/ascent/OI340700-v44boot-sts134-ksc6-full2.mmv` | full + abort | `a4c7670355f9b5840b8ce561fada8322e63b20af97f7abe433b266e531509bc8` |
+| `~/sts134-runs/ascent/OI340700-v44boot-sts134-ksc6-full2.mmv` | full + abort | `eeaf4636254de996e5b1e83f4077773681b50ce63be925e21db62452dbd234b9` |
 
 **The landing-site table #PCGN13R was blank on the tape.**  Its slots held
 spaces and zeros: no runway had a latitude, longitude or azimuth, so a TAL or
@@ -158,7 +158,9 @@ heading in degrees, length in feet):
 | 61-90 | Pacific and western sites | KKI JDG AMB PTN JTY GUA WAK HNL EDF HAO EDT HAW NOR EDW | | | |
 
 The TAL sites for STS-134's 51.6° flight are therefore Zaragoza, Morón and
-Ben Guerir.  The table also carries the MLS and TACAN tables, and these
+Ben Guerir.  The prime one is CGNS_TAL_PRIME_AREA in #PCGNFL1: 2 (Ben Guerir)
+on the tape and 4 (Zaragoza) flown.  Both copies of it, G16 (flat 965,433)
+and G3 (flat 1,192,923), are on -full2.  The table also carries the MLS and TACAN tables, and these
 indexes:
 
 - CGGS_TARGET_INDEX: 0x000A.

@@ -6,7 +6,8 @@
   "#PCGN13R's G3 copy (entry's; flat = address + 1,130,718, load block @1328128): DASS_G3's flown words where the volume still holds the blank tape value -- slots 3-90 and their MLS/TACAN entries, for a TAL's or ECAL's OPS 3 (OPS 304 keeps the OPS 1 site index, which must find its runway in G3).  The 82 words landing_sites.py already wrote from ksc.json (KSC 15/33 in slots 1-2, their MLS and TACAN) are left as it wrote them.  G3's flown table matches G16's in all but 9 of these words.",
   "#PCGGC01, #PCGGD01, #PCGGC13, #PCGG01R: the RTLS/TAL/ATO guidance and abort-boundary words. Left out: the cells sts134-reconfig.json sets or the launch day superseded (V_MAG_MECO_NOM, RAD_MECO_NOM, CGGV_RAD_MECO, FPA_MECO_NOM, ROLL_CMD_CHANGE_V, ASSUMED_SSME_FAIL_MET, K_CMD_NOM -- none is LM on the volume) CGGS_P_Y_INDEX_CHG_LIMIT (tied to the 2011 first-stage pitch/yaw tables), and CGGB_EF_PLANE_SW: flown OFF (an inertial target plane rotated from #PCGGCOM's T_GMTLO_REF, the 2010 build's day 210 -- a launch-day product), and with it OFF second stage on our KSC6 tape pitched up 25 deg after SRB SEP and fell back (bisected 2026-10-10); the tape's ON (the earth-fixed plane) flies to the ISS plane. #PCGGC13 has a second copy in G3 (flat addr+1135264); only the G1 copy is patched.",
   "D-csects (G1): #DGG42ND (TAL SSME trim mass, K_CMD_STG2 106 -> 104), #DGG9GLI and #DGHHPHA (glide RTLS), #DGDORTL, #DGEHRTL, #DGSTETS (RTLS ET SEP inhibit limits, ETSEP_INH_TIME), #DGSSSSM (the low-level cutoff delays: DT_DRY 1.918 -> 0.238 s, RTLS_DT_DRY, PTM_DT_DRY, both LH2 LL delays -> 0; prevalve close delays), #DGSMMPS, #DGSFABT, #DGSQASC. Left out: #DGG31ST (first stage, launch-day coupled), #DGSRRSL (RSLS countdown timing), #DGSESRB (already the flown values).",
-  "Every cell is placed flat (the csect's one copy, found by a +/-32 hw context and checked over the csect's whole range against an OPS 1 capture), with 'was' the tape's value: a context search with --mem matched blank (zero) neighbourhoods all over the volume."
+  "Every cell is placed flat (the csect's one copy, found by a +/-32 hw context and checked over the csect's whole range against an OPS 1 capture), with 'was' the tape's value: a context search with --mem matched blank (zero) neighbourhoods all over the volume.",
+  "#PCGNFL1 CGNS_TAL_PRIME_AREA: the tape's 2 (Ben Guerir) -> the flown 4 (Zaragoza), DASS_G3 00D19D and DASS_G16 00D94D; both copies (G16 flat 965433, the overlays' +909804; G3 flat 1192923), each found by its +/-300 hw agreement with an OPS 1 / OPS 3 capture."
  ],
  "cells": [
   {
@@ -25364,6 +25365,22 @@
    ],
    "H": "45268F20",
    "was": "452579C0"
+  },
+  {
+   "name": "#PCGNFL1 CGNS_TAL_PRIME_AREA (G16)",
+   "config": "G16",
+   "addr": "0d94d",
+   "flat": 965433,
+   "H": "0004",
+   "was": "0002"
+  },
+  {
+   "name": "#PCGNFL1 CGNS_TAL_PRIME_AREA (G3)",
+   "config": "G3",
+   "addr": "0d19d",
+   "flat": 1192923,
+   "H": "0004",
+   "was": "0002"
   }
  ]
 }
