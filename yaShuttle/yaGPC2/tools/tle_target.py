@@ -13,8 +13,9 @@ them is allowed); with several sets, the one whose epoch is nearest --at is
 used.  The ISS's TLE for STS-134 is Space-Track's (epoch 11138.51317551).
 --port gives the vehicle a docking port the Orbiter's ODS can capture
 (vehdyn.c, THE DOCKING): its face's centre in the vehicle's body, metres,
-axis +X.  PMA-2 on Node 2 in May 2011: --port 15.66,0,5.48 (a model value,
-not a sourced one: docking-geometry-findings.md section 2).
+axis +X.  PMA-2 on Node 2 in May 2011: --port 15.655,0,5.562, the face of
+the PMA-2 in portview's ISS model, so that what MON1 shows lines up with
+what vehdyn captures (a model value, not a sourced one).
 """
 import argparse
 import datetime

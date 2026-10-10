@@ -41,7 +41,7 @@ face, which stops it; inside the APDS's capture envelope the latches hold and
 the Orbiter moves with the ISS, damped, retracted and hooked to hard mate by
 itself; outside it there is no capture.  vehdyn reports both in TRU1 [30-31],
 and this leg ends on them, the DAP to FREE after a capture.  The ISS needs its
-port in the targets file ("port 15.66 0 5.48"; tools/tle_target.py --port).
+port in the targets file ("port 15.655 0 5.562"; tools/tle_target.py --port).
 With a yaGPC2 that does not send them, the leg ends at CONTACT_FT by the
 truth, as before.
 """
