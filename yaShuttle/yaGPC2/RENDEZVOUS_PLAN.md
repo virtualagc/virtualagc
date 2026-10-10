@@ -1982,6 +1982,65 @@ gates.
    tape's zeros.
 Runs: ~/sts134-runs/rendezvous/bis-{a,b,c,c1,c2,c3,d1,d2,d3,e1,e2,e3}.
 
+## 5l. Starting PASS with a realistic relative-state error (2026-10-10, macOS)
+
+5k found that STS-134's own initial rendezvous covariance (#PCGEIPD+00B4) is
+right, and that the baseline's tens of feet come from starting PASS with the
+truth.  `fly_rndz134.py --onboard-error flown[:SEED]` (opt-in, default off)
+now starts it the way the flight did: with an error the size of that covariance.
+
+**The draw.**  The target state MCC uplinks (message 10, groundstation `tsv
+--state`) is the truth's less e, so PASS's relative state (Orbiter minus
+target) starts off by e.  e comes from the covariance GLL_COVINIT_UVW builds
+(GLLREN.hal steps 120-140), in the shuttle's UVW frame (GVGUVW.hal: U radial,
+W = R x V the orbit normal, V = W x U downtrack):
+- CGNV_SIG_UPDATE_LFE (DASS_G2.ASC 21189-21190): position 2000 / 20000 / 2000 ft,
+  velocity 21 / 2 / 6 ft/s;
+- CGNV_COV_COR_UPDATE_LFE (21193-21194): seven correlations, of which the flight
+  set two, (1,5) U with Vdot and (2,4) V with Udot, both -0.9.
+The driver logs the drawn e.  Everything else is unchanged: the Orbiter's own
+state (message 9) is the truth's, as before.
+
+**Trial** (IPL to final Ti targeting, rndz2 volume, `--dass-iloads all`,
+`YAGPC_STARTRK_MOUNT=flown`, `--low-z`, rate 2; oe-run1 on port 49900, oe-run2
+on 49700):
+
+| | seed 1 | seed 2 |
+|---|---|---|
+| drawn e, ft (U V W) | +2576 +28989 +133 | +4676 -13257 +790 |
+| drawn e, ft/s | -34.39 -3.27 +0.19 | +13.87 -3.48 -8.41 |
+| FLTR at TRACK, mean / max ft | 27,293 / 28,031 | 16,409 / 17,390 |
+| FLTR at STRKNAV | 26,101 / 26,807 | 18,040 / 19,707 |
+| FLTR at Ti -55 (preliminary) | 15,414 | 4,155 |
+| FLTR at Ti -16 (final) | **2,133** | **14,236** |
+| marks accepted, by Ti -16 | 123 (34 after sunrise) | 72 (none after sunrise) |
+| Ti, PASS final, ft/s | +8.98 -0.76 +3.25 (DVT 9.58) | +6.50 -0.64 -2.30 (DVT 6.92) |
+| Ti, the truth's precision Lambert | +9.51 -0.65 +3.54 (DVT 10.17) | (PASS's own relative state at T1 off by about 30 kft) |
+
+Against 5k's e3 (all but #PCGEIPD, truth start): 18/27 ft at STRKNAV, 43/54 ft at Ti.
+
+**What it shows.**
+- Star-tracker marks pull the filter in.  Both runs closed several kft within
+  the first 30-40 accepted marks; seed 2 was at 2.6 kft by Ti -45.  Then the
+  ISS went into the Earth's shadow (Ti -55) and marks stopped.
+- **Seed 1** reacquired at sunrise (Ti -21) and closed to 2.1 kft.  Its final Ti
+  is within 0.5 ft/s per axis of the truth's Lambert, inside the final-ground limits.
+- **Seed 2 never reacquired.**  Its velocity error carried the filter from 2.6
+  kft back out to 14 kft while the ISS was in shadow.  At sunrise the -Z track
+  pointed where PASS believed the ISS was, about 11 deg off at 70 kft, outside
+  the tracker's search, so there was no S PRES and no marks.  Final Ti stayed
+  at the preliminary solution.  On the flight, the radar (RR NAVIGATION below
+  135 kft, 5d) and MCC's ground solutions are what recover from this; in this
+  driver RRNAV comes after the TI phase, so neither run had the radar for Ti.
+- So with the flown covariance and a flown-size error, star-tracker navigation
+  alone converges or not depending on the draw and the night pass.  That is
+  realistic, and it is why the checklist has the radar and the ground's Ti.
+
+**Not done.**  Bringing RR NAVIGATION ahead of final Ti targeting in the
+driver (the flight's order) and flying the trial through MC4 with it; a
+full-field star tracker search when the S TRK finds nothing (the checklist's
+contingency); more seeds.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

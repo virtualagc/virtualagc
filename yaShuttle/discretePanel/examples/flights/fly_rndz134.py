@@ -1876,11 +1876,58 @@ wait crt 1 title 2011/ timeout 600
         self.say("ground: RNP epoch %d day %d (message 59)" % RNP)
         time.sleep(5)
         for verb in ("sv", "tsv"):
-            out = subprocess.run([sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base",
-                                  str(self.base), verb], check=True, capture_output=True, text=True).stdout
-            self.say("ground: " + out.strip().splitlines()[0 if verb == "sv" else 1])
+            cmd = [sys.executable, os.path.join(PANEL, "groundstation.py"), "--port-base", str(self.base), verb]
+            if verb == "tsv" and self.a.onboard_error:
+                cmd += ["--state"] + ["%.6f" % x for x in self.tsv_with_error()]
+            out = subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
+            lines = out.strip().splitlines()
+            self.say("ground: " + lines[0 if verb == "sv" or self.a.onboard_error else 1])
             time.sleep(5)
         self.wait_sim(20)
+
+    # STS-134's initial relative-navigation covariance (#PCGEIPD+00B4, DASS_G2.ASC
+    # 21189-21194): CGNV_SIG_UPDATE_LFE, sigmas in the shuttle's UVW frame --
+    # U radial, V = W x U downtrack, W = R x V the orbit normal (GVGUVW.hal) --
+    # position ft, velocity ft/s; CGNV_COV_COR_UPDATE_LFE's seven correlations
+    # (1,2) (1,4) (1,5) (2,4) (2,5) (3,6) (4,5), of which the flight set only
+    # (1,5) and (2,4), to -0.9 (GLLREN.hal GLL_COVINIT_UVW, steps 120-140).
+    ONBOARD_SIG = (2000.0, 20000.0, 2000.0, 21.0, 2.0, 6.0)
+    ONBOARD_COR = {(0, 4): -0.9, (1, 3): -0.9}
+
+    def tsv_with_error(self):
+        """--onboard-error: the target state MCC uplinks (message 10), the truth's
+        less a draw from the flown initial covariance, so that PASS starts the
+        rendezvous with a relative-state error the size its own covariance says
+        -- the Orbiter's filter state, relative to the target, off by e (UVW).
+        Returns GMT and M50 ft, ft/s for groundstation's tsv --state."""
+        import random
+        spec = self.a.onboard_error.split(":")
+        rnd = random.Random(int(spec[1]) if len(spec) > 1 else 134)
+        sig = self.ONBOARD_SIG
+        z = [rnd.gauss(0.0, 1.0) for _ in range(6)]
+        e = [sig[i] * z[i] for i in range(6)]
+        for (i, j), rho in self.ONBOARD_COR.items():       # each pair independent of the rest
+            e[j] = sig[j] * (rho * z[i] + math.sqrt(1.0 - rho * rho) * z[j])
+        tg = groundstation.target_state(self.base)
+        if tg is None:
+            raise RuntimeError("--onboard-error: no TGT1 heard on port %d" % (self.base + groundstation.TARGET_OFFSET))
+        FTM = groundstation.FT_M
+        r = [c / FTM for c in tg["r"]]
+        v = [c / FTM for c in tg["v"]]
+        rn = math.sqrt(sum(c * c for c in r))
+        u = [c / rn for c in r]
+        h = [r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0]]
+        hn = math.sqrt(sum(c * c for c in h))
+        w = [c / hn for c in h]
+        vv = [w[1] * u[2] - w[2] * u[1], w[2] * u[0] - w[0] * u[2], w[0] * u[1] - w[1] * u[0]]
+        dr = [e[0] * u[k] + e[1] * vv[k] + e[2] * w[k] for k in range(3)]
+        dv = [e[3] * u[k] + e[4] * vv[k] + e[5] * w[k] for k in range(3)]
+        self.onboard_error_uvw = e
+        self.say("onboard error (%s): the uplinked target state is the truth's less e, so PASS's relative "
+                 "state starts off by e -- U %+.0f V %+.0f W %+.0f ft, %+.2f %+.2f %+.2f ft/s (UVW; flown "
+                 "sigmas 2000/20000/2000 ft, 21/2/6 ft/s, rho(U,Vdot) = rho(V,Udot) = -0.9)"
+                 % (self.a.onboard_error, *e))
+        return [tg["gmt"]] + [r[k] - dr[k] for k in range(3)] + [v[k] - dv[k] for k in range(3)]
 
     def rndznav(self):
         if ((self.a.zero_sensor_bias and not getattr(self, "bias_zeroed", False))
@@ -2963,6 +3010,13 @@ def main():
                          "(every GNC #PCG/#DG csect), or csect names.  The flight's bias INITs (0), Lambert "
                          "flags (9-14, 19 ON), GL5NAV's 0.06 ft/s and the GWS/GWQ iteration constants among "
                          "them (RENDEZVOUS_PLAN.md 5e).  The tape and volume are untouched")
+    ap.add_argument("--onboard-error", metavar="flown[:SEED]",
+                    help="start PASS's rendezvous navigation with a REALISTIC relative-state error: the "
+                         "target state uplinked (message 10) is the truth's less a draw (seed SEED, default "
+                         "134) from STS-134's own initial covariance, #PCGEIPD's CGNV_SIG_UPDATE_LFE / "
+                         "CGNV_COV_COR_UPDATE_LFE (UVW 2000/20000/2000 ft, 21/2/6 ft/s, two -0.9 "
+                         "correlations) -- the covariance --dass-iloads all gives the filter.  Without it the "
+                         "uplink is the truth (RENDEZVOUS_PLAN.md 5k, 5l)")
     ap.add_argument("--pulse-trim", type=float, default=0.08, metavar="FPS",
                     help="after a midcourse's VGO null (TRANS NORM, every axis < 0.2 ft/s, the card's), trim "
                          "each axis still at FPS or more with single TRANS PULSE pulses (0.10 ft/s, DAP A7); "
