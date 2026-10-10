@@ -1004,7 +1004,11 @@ class RadarNav(object):
 
     def rrnav(self):
         """KU OPS and RR NAVIGATION [13B], between Ti's preliminary and final
-        targeting (the radar's 135 kft comes at about Ti - 40 min)."""
+        targeting (the radar's 135 kft comes at about Ti - 40 min).  Once:
+        TI calls it ahead of the final targeting when the run stops there."""
+        if getattr(self, "rr_done", False):
+            return
+        self.rr_done = True
         if not self.rr_on():
             self.say("RRNAV: --no-rr, no rendezvous radar (the Stage 2 baseline)")
             return
@@ -1590,11 +1594,24 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             # Orbiter's own error is no test -- it grew past 2 kft by Ti - 29
             # min in m1-run4, and from there every comparison was refused and
             # the log repeated the last good one for the rest of the run.
-            if to and tt and vnorm(vsub(rt, [x / FT for x in tt[0]])) > 8000.0:
-                for k in [k for k in out if k.startswith("pass_")]:
-                    del out[k]
-                out.update(getattr(self, "_last_good", {}))
-                return out
+            # A turnover is told by PASS's own consistency, not by the error
+            # against the truth (an 8,000 ft test on that refused every cycle
+            # once a flown-size onboard error was uplinked -- --onboard-error,
+            # 5l -- and the line silently repeated a stale comparison): the
+            # target state carried from the last cycle's along its velocity
+            # lands within a few hundred feet of this one's, unless a 1 s
+            # turnover put them ~24 kft apart.
+            prev = getattr(self, "_prev_cyc", None)
+            self._prev_cyc = (ts, rt, vt)
+            if prev and 0.0 < ts - prev[0] < 60.0:
+                dtc = ts - prev[0]
+                pred = [prev[1][k] + prev[2][k] * dtc for k in range(3)]
+                if vnorm(vsub(rt, pred)) > 4000.0:
+                    for k in [k for k in out if k.startswith("pass_")]:
+                        del out[k]
+                    out.update(getattr(self, "_last_good", {}))
+                    out["stale"] = True
+                    return out
             if to and tt:
                 trng, trdot = range_rate(to[0], to[1], tt[0], tt[1])
                 out.update(truth_rng_at_ts_ft=trng / FT, truth_rdot_at_ts_fts=trdot / FT,
@@ -1633,9 +1650,10 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                     % (c["gmt"], (c["gmt"] - self.ti_gmt) / 60.0, c["true_rng_ft"], c["true_rdot_fts"],
                        c["minusZ_to_iss_deg"]))
             if "truth_rng_at_ts_ft" in c:
-                line += ("\n      at PASS's T_STATE %.2f: PASS RNG %.1f RDOT %+.4f, truth RNG %.1f RDOT %+.4f "
+                line += ("\n      %sat PASS's T_STATE %.2f: PASS RNG %.1f RDOT %+.4f, truth RNG %.1f RDOT %+.4f "
                          "(diff %+.1f ft %+.4f ft/s); |PASS - truth| orbiter %.0f ft, target %.0f ft"
-                         % (c["pass_t_state"], c["pass_rng_ft"], c["pass_rdot_fts"], c["truth_rng_at_ts_ft"],
+                         % ("STALE (a turnover; the last good one) " if c.get("stale") else "",
+                            c["pass_t_state"], c["pass_rng_ft"], c["pass_rdot_fts"], c["truth_rng_at_ts_ft"],
                             c["truth_rdot_at_ts_fts"], c["pass_rng_ft"] - c["truth_rng_at_ts_ft"],
                             c["pass_rdot_fts"] - c["truth_rdot_at_ts_fts"], c["orb_err_ft"], c["tgt_err_ft"]))
                 line += ("\n      orbiter nav error LVLH: %+.1f %+.1f %+.1f ft, %+.4f %+.4f %+.4f ft/s"
@@ -2186,6 +2204,12 @@ wait crt 1 title 2011/ timeout 600
         # targeting is TIBURN's, in OPS 202, as the checklist has it
         burn = not self.a.to or PHASES.index(self.a.to) >= PHASES.index("TIBURN")
         for label, before in (("preliminary", 55 * 60.0),) + ((() if burn else (("final", 17 * 60.0),))):
+            # The flight's order: KU OPS and RR NAVIGATION [13B] (135 kft, about
+            # Ti - 40) come BEFORE the final targeting.  When the burn is flown
+            # TIBURN does the final, after RRNAV; when the run stops at TI the
+            # radar is brought in here, ahead of it
+            if label == "final" and self.rr_on():
+                self.rrnav()
             if self.truth()["gmt"] < self.ti_gmt - before:
                 self.wait_gmt(self.ti_gmt - before)
             self.say("== TARGET Ti BURN (%s), Ti %+.1f min" % (label, (self.truth()["gmt"] - self.ti_gmt) / 60.0))

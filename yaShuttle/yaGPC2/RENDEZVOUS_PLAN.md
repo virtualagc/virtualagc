@@ -2012,7 +2012,7 @@ on 49700):
 | FLTR at TRACK, mean / max ft | 27,293 / 28,031 | 16,409 / 17,390 |
 | FLTR at STRKNAV | 26,101 / 26,807 | 18,040 / 19,707 |
 | FLTR at Ti -55 (preliminary) | 15,414 | 4,155 |
-| FLTR at Ti -16 (final) | **2,133** | **14,236** |
+| FLTR at Ti -16 (final; no radar before it in this run) | **2,133** | **14,236** |
 | marks accepted, by Ti -16 | 123 (34 after sunrise) | 72 (none after sunrise) |
 | Ti, PASS final, ft/s | +8.98 -0.76 +3.25 (DVT 9.58) | +6.50 -0.64 -2.30 (DVT 6.92) |
 | Ti, the truth's precision Lambert | +9.51 -0.65 +3.54 (DVT 10.17) | (PASS's own relative state at T1 off by about 30 kft) |
@@ -2036,10 +2036,51 @@ Against 5k's e3 (all but #PCGEIPD, truth start): 18/27 ft at STRKNAV, 43/54 ft a
   alone converges or not depending on the draw and the night pass.  That is
   realistic, and it is why the checklist has the radar and the ground's Ti.
 
-**Not done.**  Bringing RR NAVIGATION ahead of final Ti targeting in the
-driver (the flight's order) and flying the trial through MC4 with it; a
-full-field star tracker search when the S TRK finds nothing (the checklist's
-contingency); more seeds.
+**The radar ahead of the final Ti, as flown.**  With the run stopped at TI
+the driver had done the final targeting at Ti - 17 before RRNAV; in the
+flight's order KU OPS (NAV RNG < 150 kft) and RR NAVIGATION [13B] (RR RNG <
+135 kft, about Ti - 40) come first.  TI now brings RRNAV in ahead of the final
+when the run stops there; flying on through the burn, TIBURN's final already
+came after RRNAV.  Re-flown through MC1 (oe2-run1/2, same seeds, ports
+49900/49700):
+
+| FLTR error, ft | Ti-69 | -55 | -45 | -41 (RR < 135 kft) | -38 | -36 | -30 | -20 | -17 | +5 | +19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| seed 1 | 26,497 | 15,060 | 11,429 | 10,165 | 585 | 236 | 105 | 18 | 105 | 52 | 78 |
+| seed 2 | 17,830 | 4,675 | 3,052 | 3,250 | 952 | 888 | 323 | 68 | 45 | 94 | 47 |
+
+RR NAV converged (RNG ACPT 10, SV UPDATE POS < 0.02 kft) at Ti - 36.8 in both.
+
+| | seed 1 | seed 2 |
+|---|---|---|
+| Ti final, PASS | +9.48 -0.67 +3.64 (10.17) | +9.61 -0.63 +3.49 (10.24) |
+| Ti, the truth's precision Lambert | +9.55 -0.65 +3.59 (10.22) | +9.49 -0.67 +3.54 (10.15) |
+| Ti flown (sensed) | 10.23 ft/s | 10.31 ft/s |
+| MC1 onboard / ground / flown | +0.12 +0.01 -0.11 / +0.11 +0.12 -0.07 / 0.17 | +0.09 -0.03 -0.08 / +0.05 -0.02 +0.05 / 0.14 |
+
+Both Ti solutions are within 0.12 ft/s per axis of the truth's, and both MCs
+burn onboard within limits: the radar recovers a flown-size error, seed 2's
+unconverged night pass included, as on the flight.
+
+**The other error figure, corrected.**  The "check" lines' |PASS - truth|
+target error read ~2.8 kft while the strk lines' relative error read 26 kft at
+the same time (oe-run1).  The check refused any cycle whose PASS target state
+was more than 8,000 ft off the truth -- a guard against the downlist's 1 s
+turnover between frames 0 and 5 (~24 kft) -- and silently repeated the last
+good comparison, which with an uplinked 29 kft error was from before the
+uplink: stale.  The strk lines (the tables above, and 5k's) were right.  The
+check now tells a turnover by PASS's own consistency -- this cycle's target
+state against the last one's carried along its velocity, more than 4,000 ft
+apart -- and labels a repeated line STALE.  In oe2-run1 at Ti - 69 the two
+agree: target 26,604 ft, relative 26,639 ft.
+
+**The star tracker's search.**  PASS itself already falls back from the offset
+box to a 20 s full-field scan and starts over (GY3STT, 5b), and the driver
+breaks track and retries at acquisition ([10A]'s BREAK TRK).  Neither can find
+a target 11 deg off the -Z axis, outside the tracker's field: the recovery is
+the radar (above) or MCC.  No further search was added.
+
+**Not done.**  More seeds; the trial on through MC2-MC4 and the manual phase.
 
 ## 6. The stages
 
