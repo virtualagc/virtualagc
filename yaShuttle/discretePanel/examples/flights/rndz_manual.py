@@ -478,6 +478,7 @@ class ManualPhase(object):
         1,000 ft, so that the up-firing jets do not plume the ISS); DAP
         A/AUTO/VERN, TRANS PULSE."""
         self.man_start()
+        self.rr_inhibit_650()
         self.dap_pulse_modes()
         self.say("crew: DAP A/AUTO/VERN, TRANS PULSE%s; stationkeep on the R-bar at %.0f ft"
                  % (", LOW Z" if getattr(self.a, "low_z", False) else " (NOT LOW Z: --low-z not given)",
@@ -494,6 +495,24 @@ class ManualPhase(object):
                          tau=150.0, vmax=0.3, dead=0.08, every=10.0, limit=1800.0)
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
         self.man_record("RBAR", report=rep, pulses=dict(self.pulses))
+
+    def rr_inhibit_650(self):
+        """APPROACH, CC 9-7 (JSC-48072-134 p. 305), at "650 ft / Report to
+        ISS: Range 650 ft / If Go for RPM": GNC 33 REL NAV: INH RNG, RDOT,
+        ANGLES -- the radar out of PASS's navigation for the rest of the
+        approach (it stays on for the A2 range display, to STBY through the
+        RPM).  Arrival after MC4 is already inside 650 ft, so here at the
+        manual phase's start; once."""
+        if getattr(self, "rr_inh650", False) or not (hasattr(self, "rr_on") and self.rr_on()):
+            return
+        self.rr_inh650 = True
+        self.play("+1     keys SPEC 3 3 PRO\n"
+                  "+5     keys ITEM 1 8 EXEC\n"
+                  "+3     keys ITEM 2 1 EXEC\n"
+                  "+3     keys ITEM 2 4 EXEC\n"
+                  "+3     keys RESUME\n", "rr-inh-650")
+        self.script_done("rr-inh-650", 120)
+        self.say("crew: [CC 9-7, 650 ft] GNC 33 REL NAV: INH RNG - ITEM 18, RDOT - ITEM 21, ANGLES - ITEM 24")
 
     # --- the RPM, as the cue card flies it -----------------------------------
     def iss_pitch(self):

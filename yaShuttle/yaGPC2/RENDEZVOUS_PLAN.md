@@ -1649,6 +1649,19 @@ and [10B] reselected it (-> 7), each read back; with the thresholds seeded the t
 raised nothing.  The C&W watcher saw one SM ALERT TONE (4 s, acknowledged); nothing lit at the
 capture.
 
+**Re-flown 2026-10-10 (optA-run650, 5n):**
+- **Build:** review/flight-gnc-2 (CC 9-7's 650 ft RR inhibit, the RR FORCE
+  logic, mdmdev.c's INJ_WARM 20000).
+- **Command:** the e2e-run1 command on port 49700, headless.
+- **Navigation:** the RR never forced (initial RESID RANGE -0.01). Every Ti
+  and midcourse burned onboard.
+- **Manual phase:** RBAR rms 3.6/3.1/4.2 ft; TORVA 7.7/2.2/22.3; VBAR
+  1.9/2.6/9.8; HOLD 2.8/1.8/1.2 ft over 22.7 min.
+- **Propellant:** 316/53/672/996/725 lb by leg.
+- **Errors:** 0 tracebacks, 0 ILLEGAL ENTRY.
+
+The 650 ft inhibit costs option A nothing.
+
 **ILLEGAL ENTRY** (7 in e2e-run1): not dropped keys.  Bisected on a resumed copy (port 49900): after
 `OPS 2 0 2 PRO` the SPEC 34 ORBIT TGT page left up from targeting stays over the MNVR display, and
 its title "2021/034/" satisfied the script's `wait crt 1 title 2021/`; `ITEM 4 EXEC` (RCS SEL) then
@@ -2212,6 +2225,99 @@ default: (a) the driver's RR FORCE per [13B]; (b) find what in #PCGCMFR /
 #DGF* makes VERN AUTO lose attitude with vehdyn's jets -- bisect those two
 groups from gnc-run1's arrival capture; (c) fly B to the hold again.
 Runs: `~/sts134-runs/rendezvous/gnc-run1`, `gnc-rbar-nolowz`.
+
+**Follow-ups (review/flight-gnc-2, 2026-10-10, macOS).**
+
+*The attitude hold: the verniers were deselected, not a DAP or I-load
+fault.*  Bisected from gnc-run1's arrival capture:
+- On option A's arrival with `--dass-iloads` (all of B's csects but
+  #PCGGCOM; then #PCGCMFR alone), attitude held, with -Z 2-4 deg off the ISS.
+- On B's arrival, it swung with the flown star-tracker mounting and without
+  it, and with the true state vectors uplinked at the resume.
+- So it was not the mounting and not PASS's state.
+
+A new check-line probe settled it:
+- PASS's attitude (CGNV_Q_BI_HFE) agreed with the truth to 0.07 deg.
+- After a UNIV PTG maneuver in DAP A/AUTO/VERN, the DAP's own
+  CGCV_ATTITUDE_ERROR grew steadily (0 -> 13 deg) and nothing fired.
+- CGRB_JET_AVAILABLE read FWD X'FFCF' and AFT X'FCFFFCFF': all six
+  verniers deselected.
+
+The mechanism:
+- #DGRRRCS's flown vernier leak limits in orbit
+  (CGRS_{F,L,R}VRCS_{OX,FU}_LEAK_TEMP_LT_ORB) are X'4100' = 16640 counts,
+  2.6 V, against the source's 1.3 V.
+- GRRRCS.hal (1.12) copies them into the working limits when VERN is first
+  selected in OPS 2.
+- mdmdev.c reported every injector at 2.5 V (16000).
+- Every vernier therefore read as leaking, and RM deselected it.
+
+Why the earlier bisects missed it:
+- A `--dass-iloads` resume patches the I-load, but not the working limit
+  already copied, so no resume can show it.
+- Option A's rndz2 volume doesn't carry #DGRRRCS.
+
+The fix is in mdmdev.c (yaGPC2, not vehdyn): INJ_WARM is now 20000 (3.125 V),
+clear of both limits. test_mdmdev now checks that the injectors are above the
+flown limit, and `make test` is clean.
+
+With it, in gnc-run2:
+- the verniers stayed selected (FWD X'FFFF', AFT X'FFFFFFFF');
+- −Z was 1.2 deg off the ISS at arrival, where gnc-run1 was 21 deg off.
+
+A checklist R-bar attitude ([20B]/[20C], TGT ID 2, BV 5, P 270) was tried
+while this was open. It is not kept: the -Z track holds once the verniers
+fire.
+
+*RR FORCE.*
+- **The checklist:** RNDZ/134 [13B] has none; it says that if RESID RANGE
+  > 5.0 or RDOT > 3.0, go SV SEL PROP, take data, and call MCC.
+- **What the driver does:** `rr_converge` logs [13B]'s initial residuals and
+  plays "this driver's MCC". When range rejects outrun accepts by 10 and the
+  last six residuals have one sign, it keys FORCE RNG (ITEM 19) and RDOT
+  (ITEM 22). It returns to AUTO (17, 20) after 10 forced marks or
+  |resid| < 1.
+- **Opting out:** `--no-rr-force`.
+- **gnc-run2:** the initial RESID RANGE was 9.07, RDOT 0.79. FORCE came at
+  80 rejected against 7 accepted. After 4 forced marks the residual was 0.03,
+  and the driver went back to AUTO.
+
+*CC 9-7's 650 ft RR inhibit.*
+- **What the driver keys:** GNC 33 INH RNG, RDOT, ANGLES (ITEMs 18, 21,
+  24), at the manual phase's start. Arrival is already inside 650 ft.
+- **KU power:** the continuous RPM's KU PWR STBY at 10 deg and ON at 330 deg
+  were already there, and both runs logged them.
+
+**gnc-run2** (B, IPL to HOLD in one process, port 49900, rate 2,
+`--flight-gnc --low-z`, headless) and **optA-run650** (A, the same on the
+rndz2 tape, port 49700):
+
+| | Option A (optA-run650) | Option B (gnc-run2) |
+|---|---|---|
+| Ti final, onboard / ground | +9.52 -0.68 +3.54 / +9.49 -0.66 +3.54, onboard | +10.31 -0.27 +5.50 / +9.51 -0.67 +3.59, ground's burned |
+| MC1 | onboard | onboard |
+| MC2 | onboard | onboard outside the limits; ground's burned |
+| MC3 / MC4 | onboard | onboard |
+| Manual phase start (CG from the ISS) | X +26 Y +31 Z +531 ft | X -59 Y +210 Z +462 ft |
+| RBAR, last 3 min | rms 3.6/3.1/4.2 ft, 316 lb | rms 3.7/11.4/1.5 ft, 327 lb |
+| RPM (continuous) | 9.5 min, -Z 6.1 deg off at the end, 53 lb | 9.6 min, -Z 26.1 deg off, 57 lb |
+| TORVA | rms 7.7/2.2/22.3 ft, 672 lb | rms 10.0/4.2/14.0 ft, 1,429 lb |
+| VBAR | rms 1.9/2.6/9.8 ft, 996 lb | rms 1.7/1.3/11.6 ft, 1,570 lb |
+| HOLD | 22.7 min, rms 2.8/1.8/1.2 ft, 725 lb | 26.9 min, rms 3.3/2.6/2.2 ft, 622 lb |
+| Tracebacks / ILLEGAL ENTRY | 0 / 0 | 0 / 0 |
+
+**B now flies to the hold.** Its TORVA and VBAR cost 2.1x and 1.6x A's
+propellant. B starts the manual phase 210 ft out of plane, where A starts
+31 ft out, and ends the RPM 26 deg off the ISS against A's 6.
+
+**Recommendation:** B is flyable end to end. Before it becomes the default:
+- PASS-IDLE reviews the mdmdev.c change. It affects every volume that
+  carries the flown #DGRRRCS.
+- Fly a second B run. The open item is B's out-of-plane arrival and its
+  TORVA/VBAR propellant.
+
+Runs: `gnc-run2`, `optA-run650`; the bisect probes `bisA-full`, `bisA-a`,
+`bisB-repro`, `bisB-tapemount`, `bisB-fresh`, `bisB-rbaratt`, `bisB-att`.
 
 ## 6. The stages
 
