@@ -611,6 +611,24 @@ static uint16_t pc_word(int m, int k) {
  * (GRRRCS.hal 11500-15800). */
 #define INJ_VERN 21120u
 
+/* THE ET LOW-LEVEL SENSORS, four on each propellant, read by PASS on every
+ * FA MDM's HFE read, bit ON = DRY: LO2 in DSCRT6 (word 23) 0x0080, DIH card
+ * 11 ch 1 (V41X1555-1558X, the LO2 LOW LEVEL LIQ SNSRs in the orbiter's LO2
+ * feed manifold, Orbiter MPS Handbook), LH2 in DSCRT1 (word 18) 0x0040, DIH
+ * card 3 ch 0 (CGBIH1.hal 946-993, 2149).  PASS arms them in second stage
+ * (mass below CGGS_ET_LEVEL_SENSOR_MASS, or fewer than two engines), DISABLES
+ * any already dry when armed, latches each on a single dry sample, and on 2
+ * of 4 on either propellant commands MECO after its DT_DRY delays
+ * (GSSSSM.hal 717-1004; traced by Mac-portview's ascent agent, 10-10).  So
+ * they read wet until the tank is nearly empty and go dry together.  The
+ * trip quantities are ESTIMATES -- no source gives them: the LO2 sensors sit
+ * in the orbiter's manifold, below the ET's 17-in. feedline, so they go dry
+ * only with that line emptied; LH2's at the bottom of the tank.  Each is set
+ * a little over a second of three-engine flow ahead of vehdyn's depletion,
+ * which ends the engines' thrust at zero. */
+#define ET_LO2_DRY_KG (1500.0 * 0.45359237)
+#define ET_LH2_DRY_KG (1000.0 * 0.45359237)
+
 /* ---------------------------------------------------------------------
  * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
  *
@@ -1388,6 +1406,12 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     b[25] = 0xA000u;
     if (k == 2) b[20] |= 0x000Cu;
     if (k == 1) b[25] |= 0x000Cu;
+    /* the ET's low-level sensors (above), one of each on every FA */
+    double lo2, lh2;
+    if (vehdyn_enabled() && vehdyn_et_propellant(&lo2, &lh2)) {
+        if (lh2 < ET_LH2_DRY_KG) b[18] |= 0x0040u;
+        if (lo2 < ET_LO2_DRY_KG) b[23] |= 0x0080u;
+    }
     /* Chamber pressure and driver output follow the fire command, as
      * forward; bits 9-11 of the Pc word are the rate gyros' spin-motor
      * rotation detectors, which must read running (GQRORB.hal:139-270). */

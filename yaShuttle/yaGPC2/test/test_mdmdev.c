@@ -159,6 +159,9 @@ int main(void) {
     /* a primary (word 2, R1A fuel) at 2.5 V; a vernier (word 17, L5D
      * oxidizer) at 3.3 V, above STS-134's flown 2.6 V (16640) leak limit */
     check(w[2] == 16000 && w[17] == 21120 && w[17] > 16640, "fa1 injector temperatures warm");
+    /* the ET's low-level sensors read WET with the tank full (PASS disables
+     * any already dry when it arms them) */
+    check((w[18] & 0x0040u) == 0 && (w[23] & 0x0080u) == 0, "fa1 ET low-level sensors wet");
     check(w[20] == 0xA000u, "fa1 right manifolds 1-4 open");
     check(w[25] == 0xA00Cu, "fa1 left manifolds 1-4 and 5 open");
     check(w[21] == 0x00E0u, "fa1 no chamber pressure, rate gyros spinning");

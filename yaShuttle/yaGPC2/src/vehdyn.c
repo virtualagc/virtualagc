@@ -816,6 +816,13 @@ static void us1976(double h, double *rho, double *temp) {
  * puts the 50 psia separation cue (GSESRB) in the tail-off, near 123 s.
  * Ambient before ignition; negative once the boosters have gone (no
  * signal -- the words read zero). */
+bool vehdyn_et_propellant(double *lo2Kg, double *lh2Kg) {
+    if (asc != ASC_PAD && asc != ASC_STACK && asc != ASC_ORB_ET) return false;
+    if (lo2Kg) *lo2Kg = etLo2;
+    if (lh2Kg) *lh2Kg = etLh2;
+    return true;
+}
+
 double vehdyn_srb_pc_psia(void) {
     if (asc == ASC_PAD || (asc == ASC_STACK && srbIgnT < 0.0)) return 14.7;
     if (asc != ASC_STACK) return -1.0;
