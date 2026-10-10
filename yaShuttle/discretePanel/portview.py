@@ -546,7 +546,7 @@ class Target(object):
     """One TGT1 datagram: another vehicle (the ISS), from yaGPC2's vehicle
     dynamics: vehicle t, NORAD id, M50 position (m) and velocity (m/s) of its
     centre of mass, and its attitude, quaternion body -> M50 (w x y z)."""
-    __slots__ = ('t', 'id', 'r', 'v', 'q', 'a', 'v_seen', 'w')
+    __slots__ = ('t', 'id', 'r', 'v', 'q', 'a', 'v_seen', 'w', 'rel_b', 'rel_q', 'rel_vb', 'rel_w')
 
     @classmethod
     def parse(cls, d):
@@ -557,6 +557,7 @@ class Target(object):
         s.t, s.id = v[0], int(v[1])
         s.r, s.v, s.q = np.array(v[2:5]), np.array(v[5:8]), np.array(v[8:12])
         s.a = s.v_seen = s.w = None
+        s.rel_b = s.rel_q = s.rel_vb = s.rel_w = None
         return s
 
     def at(self, t):
@@ -652,6 +653,8 @@ class TruthFeed(QtCore.QObject):
             self.sock.fileno(), QtCore.QSocketNotifier.Type.Read, self)
         self.notifier.activated.connect(self._read)
         self.targets = {}                 # id -> (Target, wall time received)
+        self.truthAt = {}                 # recent TRU1s by vehicle time, to pair with TGT1s
+        self.relPrev = {}                 # id -> the last Target placed against a TRU1
         self.tsock = mcast_socket(port_base + TARGET_OFFSET)
         self.tnotifier = QtCore.QSocketNotifier(
             self.tsock.fileno(), QtCore.QSocketNotifier.Type.Read, self)
@@ -666,6 +669,8 @@ class TruthFeed(QtCore.QObject):
             g = Target.parse(d)
             if g is not None:
                 prev = self.targets.get(g.id)
+                if prev is not None and prev[0].t - 10.0 < g.t <= prev[0].t:
+                    continue                  # a repeat or a late one (a restore jumps back further)
                 if prev is not None and 0.0 < g.t - prev[0].t < 1.0:
                     h = g.t - prev[0].t
                     g.a = (g.v - prev[0].v) / h
@@ -680,10 +685,50 @@ class TruthFeed(QtCore.QObject):
                     g.w = (dq[1:] / sn * ang / h) if sn > 1e-15 else np.zeros(3)
                 self.targets[g.id] = (g, time.monotonic())
 
+    def _relate(self, g):
+        """g's pose in the Orbiter's body frame, from the TRU1 of the same
+        vehicle time (yaGPC2 sends both on the same tick), and its rates
+        from the previous one's.  False until that TRU1 is here."""
+        if g.rel_b is not None:
+            return True
+        tr = getattr(self, "truthAt", {}).get(round(g.t, 6))     # (TestFeed has none)
+        if tr is None:
+            return False
+        if not hasattr(self, "relPrev"):
+            self.relPrev = {}
+        Co = quat_to_matrix(unit(tr.q))
+        g.rel_b = Co.T @ (g.r - tr.r)
+        g.rel_q = unit(matrix_to_quat(Co.T @ quat_to_matrix(unit(g.q))))
+        p = self.relPrev.get(g.id)
+        if p is not None and 0.0 < g.t - p.t < 1.0:
+            h = g.t - p.t
+            g.rel_vb = (g.rel_b - p.rel_b) / h
+            q0 = p.rel_q
+            dq = quat_mul(np.array([q0[0], -q0[1], -q0[2], -q0[3]]), g.rel_q)
+            if dq[0] < 0:
+                dq = -dq
+            sn = float(np.linalg.norm(dq[1:]))
+            g.rel_w = (dq[1:] / sn * 2.0 * math.atan2(sn, float(dq[0])) / h) if sn > 1e-15 else np.zeros(3)
+        self.relPrev[g.id] = g
+        return True
+
     def _target_states(self, fs, wall):
+        # Each vehicle is placed RELATIVE TO THE ORBITER as it was at the
+        # same vehicle time, carried forward by the relative rates, and only
+        # the Orbiter is extrapolated: whatever extrapolating the Orbiter
+        # gets wrong, the other vehicle shares, so two vehicles fixed to each
+        # other (docked) are fixed on the screen -- extrapolating each from
+        # its own v, a and w did not hold MON1's target still docked, where
+        # the Orbiter's published rates are not those of its constrained
+        # pose.  A vehicle with no TRU1 of its time yet is carried on its own.
         for k, (g, at) in list(self.targets.items()):
             if wall - at > STALE_S:
                 del self.targets[k]
+            elif fs.ok and self._relate(g):
+                dt = fs.t - g.t
+                rb = g.rel_b + (g.rel_vb * dt if g.rel_vb is not None else 0.0)
+                rq = g.rel_q if g.rel_w is None else quat_advance(g.rel_q, g.rel_w, dt)
+                fs.targets[k] = (fs.r + fs.C @ rb, fs.C @ quat_to_matrix(unit(rq)))
             else:
                 fs.targets[k] = g.at(fs.t)
 
@@ -697,6 +742,12 @@ class TruthFeed(QtCore.QObject):
             if s is not None:
                 wall = time.monotonic()
                 prev = self.latest
+                if prev is not None and s.t <= prev.t and s.t > prev.t - 10.0:
+                    continue                  # a repeat or a late one (a restore jumps back further)
+                self.truthAt[round(s.t, 6)] = s
+                if len(self.truthAt) > 64:
+                    for key in sorted(self.truthAt)[:-64]:
+                        del self.truthAt[key]
                 if prev is not None and 0.0 < s.t - prev.t < 1.0:
                     h = s.t - prev.t
                     s.a = (s.v - prev.v) / h
