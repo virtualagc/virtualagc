@@ -350,7 +350,9 @@ The test-only build was origin/master plus PASS-IDLE's review/vern-ssme
 then e048a6b).  Every run was a fresh `--from COUNT`, headless, at rate 1,
 with `fly_sts134.py --abort MODE`: the crew's ABORT MODE and ABORT pb 5 s
 after the failure.  Times are after SRB ignition.  Logs are in
-`~/sts134-runs/ascent/abort2-rtls`, `abort3-ato` and `abort4-tal`; the DAP
+`~/sts134-runs/ascent/abort2-rtls`, `abort3-ato` and `abort4-tal` (TAL resumed
+from abort3-ato's T-8 s capture: three fresh `--from COUNT` TALs hung at
+OPS 101, GNC OPS 0 after the fourth mass-memory read; see below); the DAP
 CSVs are in the dropbox, `ascent-aborts/`.
 
 | | RTLS: ME2 at +150 | TAL: ME2 at +265 | ATO: ME2 at +330 |
@@ -358,7 +360,7 @@ CSVs are in the dropbox, `ascent-aborts/`.
 | MECO | +671.2, guided (PPA) | +595.8, guided | +574.4, **low level** |
 | ET left at SEP | 12,851 kg LO2, 2,575 kg LH2 (~2.1%) | 10,467 kg LO2, 2,177 kg LH2 | 815 kg LO2, 569 kg LH2 |
 | ET SEP | +688.5 | +617.0 | +595.6 |
-| After | glide RTLS to KSC; touchdown 262 kt, 11 ft/s, gear locked 0.3 s before | see below | 57 × −106 nmi: underspeed |
+| After | glide RTLS to KSC; touchdown 262 kt, 11 ft/s, gear locked 0.3 s before | OPS 3 → MM 304, controlled entry; came down short, near 34.1 N 9.4 W (about 260 km NW of Ben Guerir), stalled from 12.8 kft, no gear | 57 × −106 nmi: underspeed |
 
 - **Low-level cutoff (ATO, e048a6b).**  The LO2 trip came at 3,500 lb, then
   PASS's MECO 92 ms later: the K_CMD > 67 immediate path, GSSSSM.hal 127K.
@@ -371,7 +373,24 @@ CSVs are in the dropbox, `ascent-aborts/`.
   2% residual, ET SEP, glide RTLS (MM 602/603), TAEM and approach to KSC.  It
   came in fast, at 330 kt at 800 ft, and touched down hard with the gear just
   locking (the driver puts the gear down at 300 ft wheel height).
-- **TAL** needs the crew's post-MECO OPS 304 PRO.  PASS stays in OPS 1 (MM
-  104) after ET SEP, and OPS 1 flies no aerosurfaces: without OPS 304 the
-  orbiter tumbled at about 220 kft.  The driver now keys it, and G3's
-  landing-site table now has the TAL runways.
+- **TAL** needs the crew's OPS 3 straight after ET SEP.  PASS stays in OPS 1
+  (MM 104), which flies no aerosurfaces: without OPS 3 the orbiter tumbled
+  at about 220 kft, 4-5 minutes after ET SEP.
+  - From MM 104, OPS 3 0 1 PRO goes straight to MM 304 (ENTRY TRAJ).
+  - The OPS 301 GPC MEMORY table followed by OPS 3 0 4 PRO stayed on 1041.
+  - G3 has to come from mass memory (G3_FROM_MM).  The upper-memory archive
+    holds the G3 of the volume the capture was taken on, without the TAL
+    runways.
+  - With all three in place, MM 304 came up 40 s after ET SEP.  Entry pulled
+    out at about 210 kft at alpha 40-50, and PASS flew toward Morocco.  It
+    arrived low on energy: 390 kt at 12.8 kft about 260 km short (the
+    position is approximate, from the M50 state), then slowed and fell.
+  - Still open: which TAL site PASS chose, the energy shortfall, and the
+    runway height.  vehdyn's ground is KSC's 8.3 ft unless
+    YAGPC_GROUND_ALT_FT is set, and setting it (1,034 ft for Zaragoza) did
+    not get past the OPS 101 hang.
+- **The OPS 101 hang.**  Three fresh-COUNT TALs, one ATO and two short tests
+  stopped at vehicle t ≈ 57 s, on both test builds and on both -full2
+  versions.  The panels went to GNC OPS 0 after the fourth MM read.  A
+  repeat of a configuration that had worked minutes earlier also hung, so
+  the cause is not one volume or setting.  Not investigated further.
