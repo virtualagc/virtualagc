@@ -210,9 +210,14 @@ AIR_DATA = ("+1     switch adp_l DEPLOY\n"
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
-# A TAL's post-MECO OPS 3: after ET SEP, OPS 304 PRO -- for this single GPC
-# the OPS 301 GPC MEMORY table (configuration 3) first, then OPS 3 0 4.
-TAL_OPS304 = OPS301.replace("OPS 3 0 1 PRO", "OPS 3 0 4 PRO").replace("title 3011/", "title 3041/")
+# A TAL's post-MECO OPS 3, keyed at once after ET SEP: entry is close (the
+# stack tumbled at ~220 kft, 4-5 min after ET SEP, still in MM 104).  From MM
+# 104 in a TAL, OPS 3 0 1 PRO comes up straight in MM 304 (ENTRY TRAJ); the
+# OPS 301 GPC MEMORY table first (19 ITEMs, 2.5 min) left OPS 3 0 4 PRO
+# rejected on the 1041 GPC MEMORY page (2026-10-10).  G3 from mass memory
+# (G3_FROM_MM, below): the upper-memory G3 archive was stored from the volume
+# the run's capture was taken on, and a TAL needs the volume's G3 runway table.
+TAL_OPS3 = "+1     keys OPS 3 0 1 PRO\nwait crt 1 title 3041/ timeout 180\n"
 
 
 def keys_signed(x, fmt):
@@ -453,13 +458,14 @@ class Flight:
         with open(os.path.join(self.a.logs, "etsep.gmt"), "w") as fh:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
-        self.wait_sim(20)
-        if self.a.abort == "TAL":
+        if self.a.abort != "TAL":
+            self.wait_sim(20)
+        else:
             # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
             # keys it, and OPS 1 flies no aerosurfaces
-            self.play(TAL_OPS304, "tal-ops304")
-            self.script_done("tal-ops304", 900)
-            self.say("crew: TAL, OPS 304 PRO after ET SEP")
+            self.play(G3_FROM_MM + TAL_OPS3, "tal-ops3")
+            self.script_done("tal-ops3", 300)
+            self.say("crew: TAL, G3 from mass memory, OPS 3 PRO after ET SEP: MM 304")
 
     def oms2_targets(self):
         """THE GROUND'S OMS-2 TARGETS from the actual insertion: the truth
