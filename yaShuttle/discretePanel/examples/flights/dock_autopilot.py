@@ -46,6 +46,7 @@ With a yaGPC2 that does not send them, the leg ends at CONTACT_FT by the
 truth, as before.
 """
 import os
+import re
 import socket
 import struct
 import sys
@@ -158,9 +159,23 @@ def thc_pulses_aft(self, dv_lvlh, axes, q, label, nmax=4):
     if lines:
         name = "man-%s-%d" % (label, int(time.time() * 10) % 100000)
         self.play("\n".join(lines) + "\n", name)
+        since = self.played_at
         self.script_done(name, 120)
         try:
             os.remove(os.path.join(self.a.logs, name + ".script"))
+        except OSError:
+            pass
+        # PULSES THAT REACHED NOTHING STOP THE RUN.  With the hand-controller
+        # window gone the panel logs "moved nothing" for every pulse while
+        # the autopilot, believing it was flying, watched the Orbiter drift
+        # from 133 ft to 1,800 ft (post1, 2026-10-10).
+        try:
+            with open(os.path.join(self.a.logs, "logs", "panel.log"), errors="replace") as fh:
+                fh.seek(since)
+                if "moved nothing -- no hand-controller window" in fh.read():
+                    self.say("%s: the THC pulses moved nothing -- the hand-controller window is not "
+                             "running (see logs/handcontrollers.log); stopping rather than drifting" % label)
+                    raise SystemExit(2)
         except OSError:
             pass
     return flown
@@ -477,11 +492,17 @@ def orbit_pfd_on_crt2(self):
                   "+15    edgekey afd1 1\n"         # UP: the main menu
                   "+2     edgekey afd1 2\n"         # FLT INST
                   "+2     edgekey afd1 3\n"         # ORBIT PFD
-                  "+5     keys KB3 SPEC 3 3 PRO\n",  # REL NAV on CRT 4
+                  "+5     keys KB3 SPEC 3 3 PRO\n"   # REL NAV on CRT 4
+                  # the radar inhibited to NAV, as it had been since 650 ft
+                  # (APPROACH CC 9-7: "GNC 33 REL NAV: INH RNG, RDOT,
+                  # ANGLES"); the hold capture was flown without it
+                  "+3     keys KB3 ITEM 1 8 EXEC\n"
+                  "+2     keys KB3 ITEM 2 1 EXEC\n"
+                  "+2     keys KB3 ITEM 2 4 EXEC\n",
                   "dock-aft-displays")
         self.script_done("dock-aft-displays", 120)
         self.pfd_up = True
-        self.say("crew: ORBIT PFD on AFD 1, SPEC 33 REL NAV on CRT 4")
+        self.say("crew: ORBIT PFD on AFD 1, SPEC 33 REL NAV on CRT 4 (RR inhibited to NAV)")
         return
     self.play("+1     idppower 2 on\n"
               "+10    edgekey crt2 1\n"
@@ -647,9 +668,45 @@ def dock(self):
             dk = tru_dock(self)
             self.say("DOCK: %s -- %s" % ("HARD MATE" if dk and dk[0] == 2 else "NOT MATED: %s" % (dk,),
                                           self.readings()))
+            if dk and dk[0] == 2:
+                post_docking(self)
         else:
             self.say("DOCK: the APDS sequence stopped -- see the A7L lines above")
     self.manual_summary()
+
+
+def post_docking(self):
+    """The radar and rendezvous navigation shut down once hard-mated.
+
+    KU OPS step 4, CONFIGURE KU FOR COMM (CC 9-5, RNDZ/134/FIN A): GNC 33
+    REL NAV INH RNG, RDOT, Angles - ITEM 18, 21, 24 (*); KU ANT ENA - ITEM 2
+    (no *); A1U KU PWR - STBY, MODE - COMM, sel - GPC, CNTL - CMD.  Then
+    TERMINATE RNDZ OPS [22A] (p. 4-22)'s GNC 33 REL NAV: RNDZ NAV ENA -
+    ITEM 1 EXEC (no *).  Without it the radar went on "tracking" the
+    station from tens of feet, and CRT 4's RR column (EL, AZ, the angular
+    rates) swung wildly after hard mate (owner, 2026-10-10).
+
+    Only these of [22A]: its RJD and DDU breakers, FLT CNTLR PWR, the GNC 23
+    forward-jet deselection, the A12/B12 DAP, SM 167, the lights, RPOP and
+    the HHL stow, and the star trackers are not done here.  ITEMs 1 and 2
+    are toggles, so each is keyed only while CRT 4 shows it on."""
+    page = self.ears.screen("crt4")
+    ku_on = bool(re.search(r"KU ANT\s+ENA\s+2\*", page))
+    nav_on = bool(re.search(r"RNDZ NAV ENA\s+1\*", page))
+    keys = ("+1     keys KB3 ITEM 1 8 EXEC\n"
+            "+2     keys KB3 ITEM 2 1 EXEC\n"
+            "+2     keys KB3 ITEM 2 4 EXEC\n")
+    if ku_on:
+        keys += "+2     keys KB3 ITEM 2 EXEC\n"
+    self.play(keys, "dock-ku-comm-1")
+    self.script_done("dock-ku-comm-1", 60)
+    self.ku_switches("dock-ku-comm-2", power="STBY", mode="COMM", steering="GPC", control="CMD")
+    if nav_on:
+        self.play("+1     keys KB3 ITEM 1 EXEC\n", "dock-rndz-nav-dsbl")
+        self.script_done("dock-rndz-nav-dsbl", 60)
+    if not page:
+        self.say("POST DOCKING: CRT 4's page not heard; KU ANT ENA and RNDZ NAV ENA left as they were")
+    self.say("POST DOCKING: KU for COMM (CC 9-5 step 4), RNDZ NAV disabled ([22A])")
 
 
 def stay(self):

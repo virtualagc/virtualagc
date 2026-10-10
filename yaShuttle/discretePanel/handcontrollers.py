@@ -817,8 +817,28 @@ def run_virtual(pg, args, pub, rp, status, script=None):
     log("virtual hand controllers, style %s, window '%s'"
         % (style, window_title(args.thc, args.rhc)))
     clock = pg.time.Clock()
+    # THE EVENT LOOP MUST NOT DIE.  pygame 2.6.1 (SDL 2.28.4) once raised
+    # "KeyError: 0" out of event.get() -- seemingly converting a joystick
+    # hot-plug event for a device it had no record of -- and the window went
+    # with it: a docking autopilot's pulses then reached nothing, and the
+    # Orbiter drifted from 133 ft to 1,800 ft while "pulsing" (post1,
+    # 2026-10-10).  The virtual controls use no joystick, so its device
+    # events are not even queued; any other failure of event.get() is
+    # logged and the loop carries on.
+    try:
+        pg.event.set_blocked([pg.JOYDEVICEADDED, pg.JOYDEVICEREMOVED])
+    except (AttributeError, pg.error):
+        pass
+    event_errors = 0
     while True:
-        for e in pg.event.get():
+        try:
+            events = pg.event.get()
+        except (SystemError, KeyError) as e:
+            event_errors += 1
+            if event_errors <= 5 or event_errors % 1000 == 0:
+                log("pygame event.get() failed (%d so far): %r -- carrying on" % (event_errors, e))
+            events = []
+        for e in events:
             if e.type == pg.QUIT:
                 return 0
             vc.handle(e)
