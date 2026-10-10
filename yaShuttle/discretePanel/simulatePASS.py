@@ -1877,13 +1877,22 @@ def main():
                         [py, "MEDS2.py"] + meds_extra
                         + ["--port-base", str(args.port_base), "--size", str(size),
                            "--scale", str(args.scale)] + title_arg
-                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)]
-                        # AFD 1, the aft station's other display, beside CRT 4
-                        # and fed by the same IDP 4 (SCOM p261, p310): it is
-                        # where the aft crew's ORBIT PFD goes, leaving CRT 4
-                        # to PASS's pages
-                        + (["afd1"] if k == 3 else []), HERE, e)
+                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
                 time.sleep(1)
+            if args.crts >= 4:
+                # AFD 1, the aft station's other display, fed by IDP 4 like
+                # CRT 4 (SCOM p261, p310): where the aft crew's ORBIT PFD
+                # goes, leaving CRT 4 to PASS's pages.  IN A PROCESS OF ITS
+                # OWN, talking to IDP 4 over the MEDS bus: drawn in CRT 4's,
+                # the PFD took that process to 200% CPU and IDP 4's replies
+                # to PASS's polls came late -- "I/O ERROR CRT4" (post3,
+                # 2026-10-10).
+                e = dict(env)
+                e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[3]
+                L.start("meds-afd1",
+                        [py, "MEDS2.py"]
+                        + ["--port-base", str(args.port_base), "--size", str(size),
+                           "--scale", str(args.scale)] + title_arg + ["afd1"], HERE, e)
             if args.keyboards:
                 for k in range(args.keyboards):
                     kx, ky = kb_geom.lstrip("+").split("+")
