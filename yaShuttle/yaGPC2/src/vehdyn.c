@@ -1943,7 +1943,8 @@ void vehdyn_reset(double t) {
  * [AX AY AZ UX UY UZ]", a docking port the Orbiter's ODS can capture (see
  * THE DOCKING below): its face's centre in the vehicle's body (m), the axis
  * out of it (default +X) and where the Orbiter's +X points when mated
- * (default -Z).  PMA-2 on Node 2, May 2011: "port 15.66 0 5.48".  A target's state
+ * (default -Z).  PMA-2 on Node 2, May 2011: "port 15.655 0 5.562", the face of
+ * the PMA-2 in portview's ISS model, which is what MON1 shows the crew.  A target's state
  * is kept as an epoch in Unix time and an M50 state then, so a snapshot
  * (vehdyn_targets_save) restores it at any later clock by propagating, the
  * halt gap included. */
@@ -2395,20 +2396,27 @@ void vehdyn_targets_load(const double *b, int n) {
             }
         }
     }
-    /* A vehicle captured without a port (before ports existed) takes the
-     * targets file's, matched by its id: the state is the capture's, the
-     * port is a fact about the vehicle. */
+    /* The state is the capture's, but the port is a fact about the vehicle,
+     * so the targets file's wins, matched by id: a capture from before ports
+     * existed gets one, and one taken before the port was corrected (PMA-2
+     * moved onto the ISS model's own, 2026-10-09) gets the correction.  The
+     * saved port serves only when the file gives none. */
     struct Tgt file[TGT_MAX];
     int nf = targets_parse(file, TGT_MAX);
     for (int k = 0; k < tgtN; k++) {
-        if (tgt[k].port) continue;
         for (int j = 0; j < nf; j++)
             if (file[j].norad == tgt[k].norad && file[j].port) {
+                bool same = tgt[k].port
+                    && !memcmp(tgt[k].portB, file[j].portB, sizeof file[j].portB)
+                    && !memcmp(tgt[k].portAx, file[j].portAx, sizeof file[j].portAx)
+                    && !memcmp(tgt[k].portUp, file[j].portUp, sizeof file[j].portUp);
+                if (!same)
+                    fprintf(stderr, "vehdyn: vehicle %d's docking port from the targets file%s\n",
+                            tgt[k].norad, tgt[k].port ? ", not the capture's" : "");
                 tgt[k].port = true;
                 memcpy(tgt[k].portB, file[j].portB, sizeof file[j].portB);
                 memcpy(tgt[k].portAx, file[j].portAx, sizeof file[j].portAx);
                 memcpy(tgt[k].portUp, file[j].portUp, sizeof file[j].portUp);
-                fprintf(stderr, "vehdyn: vehicle %d's docking port from the targets file\n", tgt[k].norad);
                 break;
             }
     }
