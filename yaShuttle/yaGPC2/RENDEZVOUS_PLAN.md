@@ -1600,6 +1600,75 @@ and [31] the contact count.
 
 **Before the jet-geometry change.** full-run1 is recorded in 5f.
 
+## 5h. End-to-end verification run (2026-10-09, macOS)
+
+**e2e-run1**: one process from IPL (06:10 UTC) to the 100 ft HOLD capture, no resumes, no run-only
+patches; review/rndz-clean c741f73 plus 6cdb438 (the HOLD restructure below), i.e. yaGPC2 with
+the new RCS jet geometry and the Ku antenna fix; tape `-rndz2.mmv` (flown I-loads, CG/MOI, jet
+map); `--low-z`; port base 48800, rate 2.  Logs in `~/sts134-runs/rendezvous/e2e-run1`.
+
+    python3 examples/flights/fly_rndz134.py --logs DIR --port-base 48800 --rate 2 --start-utc 2011-05-18T06:10:00 --to HOLD --low-z --tape ~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv
+
+**Burns** (ft/s, LVLH; every one PASS's own FLTR solution, burned onboard; "ground" = the truth's
+precision Lambert):
+
+| Burn | PASS final | Ground | Flown (truth sensed) |
+|---|---|---|---|
+| Ti | +8.92 -0.67 +2.83 | +8.92 -0.67 +2.87 | 9.45 ft/s, L OMS 12.5 s |
+| MC1 | +0.18 +0.13 -0.53 | +0.11 +0.20 -0.32 | +0.14 +0.10 -0.49 |
+| MC2 | +0.13 +0.05 +0.72 | +0.11 -0.00 +0.69 | +0.15 +0.11 +0.71 |
+| MC3 | -0.05 -0.07 -0.07 | -0.08 -0.10 -0.02 | 0 (every axis under a pulse) |
+| MC4 | +1.40 -0.06 +0.38 | +1.40 -0.09 +0.36 | +1.46 -0.08 +0.27 |
+
+Arrival, MC4 + 13 min: X +11, Y +42, Z +560 ft (aim 0, 0, +600), closing ZD -0.81 ft/s.
+
+**The manual phase** (truth; RCS from the phase captures):
+
+| Leg | Time | rms error ft (x y z) | max ft | RCS lb |
+|---|---|---|---|---|
+| RBAR (last 3 min) | settled ~11 min | 3.8 / 1.1 / 2.4 | 5.0 / 2.0 / 5.2 | 411 |
+| RPM | 16.3 min (quarter turns 2.5-3.6 min, stops 1.4-5.4 deg from the ISS) | -- | -- | 2,219 |
+| TORVA | 16.2 min | 9.9 / 1.2 / 5.5 | 41.7 / 3.9 / 23.0 | 863 |
+| VBAR, to 100 ft | 20.9 min | 2.4 / 1.3 / 10.2 | 5.9 / 5.0 / 53.5 | 1,077 |
+| HOLD | 26.2 min, 53 pulses | 2.1 / 2.4 / 1.7 | 5.5 / 4.8 / 7.0 | 660 |
+
+The RPM's propellant (2,219 lb, FRCS 1,180) cannot be split into rotation and position hold from
+these logs: only the phase captures carry propellant.  It is high against the other legs and
+against clean-run1's 1,552 lb; the position hold through each quarter turn (added after
+manual-run2's 1,640 ft drift) fires translation pulses against the rotation's own jet
+cross-coupling.  Open.
+
+**PASS's FLTR against the truth**, |relative position error| ft, mean / max by phase: TRACK 3 / 8,
+STRKNAV 12 / 17, TI 30 / 41, RRNAV 54 / 73, TIBURN 50 / 178, MC1 116 / 195, MC2 48 / 66, MC3 15 / 22,
+MC4 8 / 12, ARRIVAL 15 / 43, RBAR 75 / 117, RPM 84 / 146, TORVA 68 / 145, VBAR 154 / 250, HOLD 109 /
+265.  Good to MC4; inside 600 ft it runs 70-150 ft off, mostly along the line of sight, with the flown
+VAR_RR_RNG_MIN.  Open (the crew instruments, not REL NAV, fly the manual phase and the docking).
+
+**IMU and C&W.** RM thresholds seeded at UPLINK; [10A] deselected IMU 1 (CGUB_IMU_SEL_MFE 7 -> 3)
+and [10B] reselected it (-> 7), each read back; with the thresholds seeded the two-IMU interval
+raised nothing.  The C&W watcher saw one SM ALERT TONE (4 s, acknowledged); nothing lit at the
+capture.
+
+**ILLEGAL ENTRY** (7 in e2e-run1): not dropped keys.  Bisected on a resumed copy (port 49900): after
+`OPS 2 0 2 PRO` the SPEC 34 ORBIT TGT page left up from targeting stays over the MNVR display, and
+its title "2021/034/" satisfied the script's `wait crt 1 title 2021/`; `ITEM 4 EXEC` (RCS SEL) then
+went to SPEC 34 -- ILLEGAL ENTRY -- and `ITEM 9 +WT EXEC` keyed SPEC 34's item 9 (DZ), overwritten at
+the next TGT load.  So RCS SEL and WT were never entered for MC1-MC4 (the burns, flown by THC on
+VGO, were unaffected).  Fix (b4f1645): RESUME after the transition and wait for `title MNVR EXEC`
+(RESUME on the MNVR display itself checked harmless).  e2e-run2 confirms it: IPL to ARRIVAL in one process with b4f1645, **no ILLEGAL ENTRY**; RCS SEL and
+WT entered for every midcourse; MC1-MC4 burned onboard (MC1 -0.26 +0.02 +0.83, MC2 -0.05 -0.04 +0.23,
+MC3 +0.29 -0.08 +0.58, MC4 +0.91 +0.06 -0.16 ft/s against the truth's Lambert within 0.1 per axis);
+arrival at MC4 + 13 min about X +20, Y +19, Z +585 ft.
+
+**The HOLD capture.**  rndz-hold-v2's capture had restored drifting (ring X +75.2 Z +36.2 ft, ZD
++0.18 ft/s) after unpiloted chores at the END of HOLD.  HOLD now does every chore first -- IMU 1,
+MSG RESET x2, DAP A10/B10 store, pulse modes -- noting the truth around each, then station-keeps,
+and captures only after every truth rate has stayed under 0.02 ft/s for 120 s, with nothing in
+between (the run loop's later capture is skipped).  The chores here moved ZD only +0.030 ->
++0.043 ft/s, so v2's 0.18 ft/s was not reproduced; the capture is at ring X +99.1 Y +0.5 Z -2.5 ft,
+XD +0.001 YD -0.019 ZD +0.001 ft/s.  Published as `forClaude/rndz-hold-v3/` with the volume and a
+README; it supersedes v2.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the
