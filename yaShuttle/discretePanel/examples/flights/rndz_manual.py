@@ -11,6 +11,8 @@ station-keeping 100 ft out on the +V-bar.
            four quarter turns of UNIV PTG's body vector (P 180, 270, 0, 90:
            -X, +Z, +X and back to -Z on the ISS, TGT ID 1, BODY VECT 5),
            a full 360 deg of pitch with the ISS tracked; the rates put back.
+           The R-bar point held with THC pulses through the turn;
+           --rpm-cue-card flies it as cue card B instead (no THC, Ku STBY).
     TORVA  the twice-orbital-rate fly-around from the R-bar to the +V-bar,
            -Z target track throughout, 600 ft below to 400 ft ahead.
     VBAR   the docking attitude (UNIV PTG TGT ID 2, BODY VECT 5 P 180: the
@@ -518,6 +520,19 @@ class ManualPhase(object):
         t0 = self.ears.snap()[0]["t"]
         times, stats = [], []
         hold = lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0])
+        # THE R-BAR POINT THROUGH THE TURN.  The RBAR PITCH MNVR cue card (B,
+        # CC 9-8, p. 306) has FLT CNTLR PWR OFF and KU PWR STBY from P = 100
+        # to P = 60: no translation and no radar (--rpm-cue-card).  But on
+        # this vehicle the verniers that turn the Orbiter push it ~2.9 ft/s
+        # over the RPM (rpm-cue-test, 2026-10-09: 1,446 ft ahead and 1,669 ft
+        # below at the end, 145 lb), so by default the point is held with THC
+        # pulses -- which cost clean-run1 1,552 lb: 67 pulses, 30 of them
+        # LOW Z +Z at ~40 lb each (RENDEZVOUS_PLAN 5h).
+        hold_pos = not getattr(self.a, "rpm_cue_card", False)
+        if not hold_pos:
+            self.play("+1     switch ku_power STBY\n", "rpm-ku-stby")
+            self.script_done("rpm-ku-stby", 60)
+            self.say("crew: FLT CNTLR PWR OFF (no THC through the RPM), KU PWR STBY")
         for p in RPM_STEPS:
             self.univ_ptg("rpm-p%03d" % p, 1, p)
             # THE R-BAR POINT HELD THROUGH THE TURN: the verniers that turn
@@ -539,7 +554,8 @@ class ManualPhase(object):
 
             off = stats[-1][0] + 8.0 if stats else 0.0     # the quarter turns end to end
             stats += [(x[0] + off,) + tuple(x[1:])
-                      for x in self.fly("RPM P %d" % p, hold, turned, tau=120.0, vmax=0.3, dead=0.08,
+                      for x in self.fly("RPM P %d" % p, hold, turned, tau=120.0, vmax=0.3,
+                                        dead=0.08 if hold_pos else 1e9,
                                         every=8.0, limit=480.0, log_every=120.0)]
             times.append((p, w.get("e", self.body_vec_err(p, "iss")), w.get("t", 480.0)))
             self.say("RPM: BODY VECT P %d %.1f deg from the ISS after %.1f min%s"
@@ -548,6 +564,12 @@ class ManualPhase(object):
         t = self.ears.snap()[0]["t"] - t0
         self.say("RPM: 360 deg of pitch in %.1f min (the flight's 0.75 deg/s: 8.0 min); quarter turns %s"
                  % (t / 60.0, ", ".join("P %d %.1f deg in %.1f min" % (p, e, d / 60.0) for p, e, d in times)))
+        if not hold_pos:
+            self.play("+1     switch ku_power ON\n", "rpm-ku-on")
+            self.script_done("rpm-ku-on", 60)
+            st = self.rel("cg", noisy=False)
+            self.say("crew: KU PWR ON, FLT CNTLR PWR ON; after the RPM the CG is at X %+.1f Y %+.1f Z %+.1f ft, "
+                     "XD %+.3f YD %+.3f ZD %+.3f ft/s from the ISS's (truth)" % (*st["r"], *st["v"]))
         self.spec20_rates("rpm-end", 0.200, 0.016)
         self.play("+1     keys RESUME\n" + self.TRACK_KEYS.replace("dap c3 b", "dap c3 a")
                   .replace("dap c3 alt", "dap c3 vern"), "rpm-track")
