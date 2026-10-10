@@ -597,6 +597,42 @@ static uint16_t pc_word(int m, int k) {
  * limit and no rate check.  2.5 V clears every one. */
 #define INJ_WARM 16000u
 
+/* THE VERNIERS RUN HOTTER.  Each vernier injector has its own 10 W heater,
+ * on at about 140-150 F and off at about 184-194 F, where the primaries'
+ * heaters hold 66-109 F (SCOM OI-29 2.23-11).  The vernier leak limit in
+ * orbit is the OI-34 source's 1.3 V on the tape but STS-134 flew 2.6 V
+ * (16640 counts, #DGRRRCS CGRS_*VRCS_*_LEAK_TEMP_LT_ORB, DASS_G2): at 2.5 V
+ * every vernier read as leaking, RM deselected them ("L RCS DJET"), and the
+ * DAP in VERN lost attitude from ESTABLISH RBAR on (--flight-gnc, 10-10).
+ * 3.3 V is an estimate -- no transducer scaling was found -- clear of the
+ * flown limit as the heaters keep the real ones.  The vernier channels:
+ * F5L/F5R in FF3's words (GRRRCS.hal 5700-7400: SEG3 3,4 oxidizer, 7,8
+ * fuel), L5L/L5D on FA1 and R5R/R5D on FA2 at words 8-9 and 16-17
+ * (GRRRCS.hal 11500-15800). */
+#define INJ_VERN 21120u
+
+/* THE ET LOW-LEVEL SENSORS, four on each propellant, read by PASS on every
+ * FA MDM's HFE read, bit ON = DRY: LO2 in DSCRT6 (word 23) 0x0080, DIH card
+ * 11 ch 1 (V41X1555-1558X, the LO2 LOW LEVEL LIQ SNSRs in the orbiter's LO2
+ * feed manifold, Orbiter MPS Handbook), LH2 in DSCRT1 (word 18) 0x0040, DIH
+ * card 3 ch 0 (CGBIH1.hal 946-993, 2149).  PASS arms them in second stage
+ * (mass below CGGS_ET_LEVEL_SENSOR_MASS, or fewer than two engines), DISABLES
+ * any already dry when armed, latches each on a single dry sample, and on 2
+ * of 4 on either propellant commands MECO after its DT_DRY delays
+ * (GSSSSM.hal 717-1004; traced by Mac-portview's ascent agent, 10-10).  So
+ * they read wet until the tank is nearly empty and go dry together.  The
+ * trip quantities are ESTIMATES -- no source gives them: the LO2 sensors sit
+ * in the orbiter's manifold, below the ET's 17-in. feedline, so they go dry
+ * only with that line emptied; LH2's at the bottom of the tank.  The trips
+ * are where the engines still stop with propellant in the line: a shutdown
+ * after PASS's MECO command used ~800 kg LO2 at two engines 91% in vehdyn,
+ * ~1,400 kg scaled to three at 104.5% (the immediate-MECO path), plus
+ * DT_DRY 0.238 s x ~1,100 kg/s on the no-failure path -- at 1,500 lb the
+ * ATO's LO2 ran dry in the shutdown (Mac-portview's abort2-ato, 10-10).  So
+ * LO2 3,500 lb; LH2 1,500 lb, near the 6:1 mixture's share of that. */
+#define ET_LO2_DRY_KG (3500.0 * 0.45359237)
+#define ET_LH2_DRY_KG (1500.0 * 0.45359237)
+
 /* ---------------------------------------------------------------------
  * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
  *
@@ -1191,6 +1227,8 @@ static void ff_hfe(int k, uint16_t *w, int n) {
     /* Words 13-20: the four jets' oxidizer then fuel injector temperatures
      * (GRRRCS.hal:184-215). */
     for (int i = 13; i <= 20; i++) b[i] = INJ_WARM;
+    if (k == 3)                                /* F5L, F5R: oxidizer 15-16, fuel 19-20 */
+        b[15] = b[16] = b[19] = b[20] = INJ_VERN;
     crew_aid_hfe(k, b, 36);
     /* Words 34-35, ACCELEROMETER ASSEMBLY k: lateral and normal specific
      * force, 0.2/6400 and 0.8/6400 g a count (GPFORB.hal:112-113,
@@ -1359,8 +1397,11 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     memset(b, 0, sizeof b);
     /* Words 2-17, injector temperatures (GRRRCS.hal:302-357).  On FA3 and
      * FA4 words 8-9 and 16-17 are not RCS channels and stay zero. */
-    for (int i = 2; i <= 17; i++)
-        if (k <= 2 || !(i == 8 || i == 9 || i == 16 || i == 17)) b[i] = INJ_WARM;
+    for (int i = 2; i <= 17; i++) {
+        bool vern = (i == 8 || i == 9 || i == 16 || i == 17);
+        if (k <= 2) b[i] = vern ? INJ_VERN : INJ_WARM;     /* FA1 L5L/L5D, FA2 R5R/R5D */
+        else if (!vern) b[i] = INJ_WARM;
+    }
     /* Manifolds OPEN: right 1-4 in word 20 and left 1-4 in word 25, the top
      * nibble fuel-open, fuel-closed, oxidizer-open, oxidizer-closed = 1010;
      * manifold 5 in FA2's word 20 (right) and FA1's word 25 (left), bits 13
@@ -1369,6 +1410,27 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     b[25] = 0xA000u;
     if (k == 2) b[20] |= 0x000Cu;
     if (k == 1) b[25] |= 0x000Cu;
+    /* the ET's low-level sensors (above), one of each on every FA */
+    double lo2, lh2;
+    if (vehdyn_enabled() && vehdyn_et_propellant(&lo2, &lh2)) {
+        static bool saidLh2, saidLo2;          /* the trips, once each, for timing */
+        if (lh2 < ET_LH2_DRY_KG) {
+            b[18] |= 0x0040u;
+            if (!saidLh2) {
+                saidLh2 = true;
+                fprintf(stderr, "mdmdev: ET LH2 LOW LEVEL DRY at t=%.3f (%.0f kg LH2, %.0f kg LO2)\n",
+                        vehdyn_state()->t, lh2, lo2);
+            }
+        }
+        if (lo2 < ET_LO2_DRY_KG) {
+            b[23] |= 0x0080u;
+            if (!saidLo2) {
+                saidLo2 = true;
+                fprintf(stderr, "mdmdev: ET LO2 LOW LEVEL DRY at t=%.3f (%.0f kg LO2, %.0f kg LH2)\n",
+                        vehdyn_state()->t, lo2, lh2);
+            }
+        }
+    }
     /* Chamber pressure and driver output follow the fire command, as
      * forward; bits 9-11 of the Pc word are the rate gyros' spin-motor
      * rotation detectors, which must read running (GQRORB.hal:139-270). */

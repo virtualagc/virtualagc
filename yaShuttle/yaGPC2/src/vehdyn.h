@@ -118,6 +118,10 @@ void vehdyn_specific_force(double out[3]);
 /* An SRB's chamber pressure, psia (< 0: the boosters have gone). */
 double vehdyn_srb_pc_psia(void);
 
+/* The external tank's LO2 and LH2 (kg), or false when there is no tank
+ * attached (before the pad, after ET separation, in orbit). */
+bool vehdyn_et_propellant(double *lo2Kg, double *lh2Kg);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);

@@ -37,12 +37,26 @@
  *     engine is shut down; SRB ignition 6.6 s after the first start.
  *   - Nothing in phase 5 or 6 before MECO, or the engine is declared failed.
  *   - MECO: SHUTDOWN ENABLE and SHUTDOWN, then all three below 30%.
+ *
+ * AN ENGINE FAILURE, for aborts (YAGPC_SSME_FAIL=E@T[,E@T...]: engine E,
+ * 1-3, at T seconds after SRB ignition -- the first engine's start plus
+ * 6.6 s, the launch sequence's).  The engine goes to the shutdown phase on
+ * its own, exactly as a SHUTDOWN command takes it there: chamber pressure
+ * decaying from where it was, the time word restarting at 0, post-shutdown
+ * at 2 s.  That is the path PASS detects an engine out by (GPTSSM: phase 5
+ * after SRB ignition with the time word under 74 counts, 1.48 s, on three
+ * consecutive 25 Hz reads, sets CGPB_ME_PHASE; GSSSSM then sets
+ * CGSB_SSME_I_FAIL and closes the prevalves; guidance, the DAP and the MPS
+ * lights follow), and vehdyn's thrust comes from this chamber pressure.
+ * Found by Mac-portview's ascent agent from OI340600 APPLSRC, 2026-10-10.
  * ------------------------------------------------------------------- */
 #include "eiumodel.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "envcache.h"
 
 #define EIU_READ_HFE  0x04005u     /* FIOHI1EI: 6 words  */
 #define EIU_READ_MFE  0x0401Fu     /* FIOFAIC5: 32 words */
@@ -67,6 +81,38 @@ typedef struct {
 
 static Eng eng[4];
 static bool inited;
+
+/* YAGPC_SSME_FAIL: per engine, seconds after SRB ignition (< 0: none). */
+static double failAt[4] = { -1, -1, -1, -1 };
+static bool failDone[4];
+
+static void fail_parse(void) {
+    static bool parsed;
+    if (parsed) return;
+    parsed = true;
+    const char *p = yagpc_getenv("YAGPC_SSME_FAIL");
+    while (p != NULL && *p) {
+        int e = 0;
+        double at = 0.0;
+        if (sscanf(p, "%d@%lf", &e, &at) == 2 && e >= 1 && e <= 3 && at >= 0.0) {
+            failAt[e] = at;
+            fprintf(stderr, "eiu: ME%d will fail %.2f s after SRB ignition (YAGPC_SSME_FAIL)\n", e, at);
+        } else {
+            fprintf(stderr, "eiu: YAGPC_SSME_FAIL entry not understood near '%s' (want E@SECONDS)\n", p);
+        }
+        const char *c = strchr(p, ',');
+        p = c ? c + 1 : NULL;
+    }
+}
+
+/* SRB ignition: the first engine's start plus 6.6 s, or a huge negative
+ * number when no engine has started. */
+static double srb_ignition(void) {
+    double t0 = 1e300;
+    for (int e = 1; e <= 3; e++)
+        if (eng[e].started && eng[e].startT < t0) t0 = eng[e].startT;
+    return t0 < 1e299 ? t0 + 6.6 : -1e300;
+}
 
 static void init(void) {
     if (inited) return;
@@ -134,6 +180,20 @@ static void update(int e, double t) {
         }
     } else {
         s->pc = 0.0;
+    }
+    /* YAGPC_SSME_FAIL: the engine shuts itself down, at the chamber pressure
+     * it had just reached */
+    fail_parse();
+    if (failAt[e] >= 0.0 && !failDone[e] && (s->phase == PH_START || s->phase == PH_MAIN)) {
+        double t0 = srb_ignition();
+        if (t0 > -1e299 && t >= t0 + failAt[e]) {
+            failDone[e] = true;
+            s->shutT = t;
+            s->shutPc = s->pc;
+            set_phase(s, PH_SHUT, 1, t);
+            fprintf(stderr, "eiu: ME%d FAILED at t=%.3f, %.2f s after SRB ignition, from %.1f%% "
+                            "(YAGPC_SSME_FAIL)\n", e, t, t - t0, s->pc);
+        }
     }
     s->pcAt = t;
 }
