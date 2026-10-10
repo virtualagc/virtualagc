@@ -1829,6 +1829,81 @@ default.
 **Not done.** The photo window calls; PRI Y OPTION ALL (a toggle on SPEC 20:
 left as it is).
 
+## 5k. Applying all of STS-134's GNC I-loads: a trial (2026-10-09, macOS)
+
+**Question** (Ron's, open): should the rest of STS-134's flown GNC I-loads -- `--dass-iloads all`,
+DASS_G2.ASC's PATCH SUMMARY for every `#PCG`/`#DG` csect -- go on top of the rndz2 volume (which
+already carries the rendezvous set, tools/sites/sts134-rndz-iloads.json)?  No default changed here.
+
+**What it would change.**  Against the rndz2 volume's UPLINK memory: 1,453 halfwords still at the load
+module's (LM) value would take the flight's (MM); 469 already hold MM; 2 hold neither (#PCGGCOM,
+left).  By csect, with the named cells (DASS_G2.ASC's symbol listing):
+
+| Csect | Words | What | Rendezvous? |
+|---|---|---|---|
+| #PCGCMFR | 618 | the DAP's stored A/B configurations (rates, deadbands, pulses, ALT jet options, notch-filter frequencies), CGCS_CG/MOI/POI_ARRAY | yes: the DAP |
+| #PCGGCOM | 495 | ascent/insertion/abort guidance: THET/PSI/PPOLY, targets, MECO, OMS dump times, wind tables | no |
+| #DGFTREB | 67 | RCS jet reboost/rotation-translation timing (CGCS_RBST_*) | yes: jet selection |
+| #PCGMCOM | 61 | **CGYS_I_COAS**, IMU RM constants (CGRS_A_CONS/A_RAMP -- the sources of the seeded thresholds), CGRS_TH_ATT_DG* | yes |
+| #PCGYSTA | 42 | **CGYS_TNBST** (star tracker mounting), CGYV_I_CO, star-tracker tolerances | **yes: star-tracker nav** |
+| #PCGNREM | 40 | GPS antenna positions and boresights | no (GPS) |
+| #DGFFORB, #DGFDORB | 40 | ALT delay factors, jet thresholds, min impulse, pulse phases | yes: DAP |
+| #DGPBGPS, #PCGBGPS, #PCGNFLT | 17 | GPS processing | no |
+| #DGRRRCS, #DGR8RCS, #PCGRRMC | 14 | RCS leak limits, dilemma counter, FDI tolerance | RM |
+| others (#PCGEIPD, #PCGYCAT, #PCGCCOM, #DGRJIMU, #PCGSGNC, #PCGBOBF, ...) | 59 | LFE covariance, COAS LOS, filter count, IMU RM, OMS/RCS gauging, discrete output masks | mixed |
+
+Flagged before flying: CGYS_TNBST / CGYS_I_COAS / CGYV_I_CO (the trackers' and COAS's mounting --
+yaGPC2's startrk.c models the TAPE's TNBST as the hardware), CGBV_OUT12_HFF_* (discrete output
+words), the RM limits.
+
+**Flown.**  dass-all-run1: IPL (06:10) to HOLD in one process, `--dass-iloads all --low-z
+--rpm-mode quarters` (the RPM as e2e-run1 flew it), tape -rndz2.mmv, port base 49900, master
+2f123bc.  For a like-for-like baseline, dass-base-run1: the same build and options without
+`--dass-iloads`, port 49700, flown alongside.  (e2e-run1, §5h, is an older build; its numbers agree
+with the baseline's within run-to-run scatter.)
+
+| | baseline | all I-loads |
+|---|---|---|
+| FLTR error, ft mean / max: STRKNAV | 11 / 18 | **346 / 945** |
+| TI (targeting) | 31 / 39 | **1,109 / 1,301** |
+| MC1 / MC2 / MC3 / MC4 | 88 / 76 / 33 / 6 | 252 / 192 / 36 / 12 |
+| Ti (TGT 10) PASS solution | +8.93 -0.65 +2.82 (9.39), miss 3.5 | +9.50 -1.64 +3.40 (10.22), miss 12.7 |
+| MC1 PASS vs truth's Lambert | -0.15 -0.23 +0.19 vs -0.18 -0.22 +0.35 | -0.21 +0.62 +0.95 vs -0.23 **+1.51** +0.95 |
+| MC2 | +0.08 +0.02 -0.03 vs +0.10 +0.01 +0.22 | -0.08 +0.04 -0.45 vs -0.08 **-0.43** -0.18 |
+| MC3 | +0.57 +0.04 +1.07 vs +0.61 +0.02 +1.22 | +0.56 -0.31 +1.02 vs +0.59 -0.62 +0.99 |
+| MC4 | +0.98 -0.06 +1.06 vs +0.97 -0.11 +1.06 | +0.62 +0.27 +0.36 vs +0.62 +0.22 +0.34 |
+| Arrival, MC4 + 13 min | X -34 Y +76 Z +417 | X +31 Y +31 Z +571 |
+| Coast RCS, kg/min (post-Ti → MC1, MC1 → MC2, MC2 → MC3, MC3 → MC4) | 0.97, 0.38, 1.49, 2.47 | 2.03, 1.19, 1.80, 1.63 |
+| RBAR / RPM / TORVA / VBAR / HOLD RCS, kg | 233 / 1,105 / 372 / 443 / 593 | 135 / 978 / 466 / 431 / 491 |
+| HOLD rms (x y z), ft | 3.5 / 2.0 / 2.8 | 2.7 / 2.4 / 1.7 |
+| Close in FLTR (RBAR ... HOLD), mean ft | 81 / 176 / 122 / 77 / 61 | 54 / 189 / 126 / 81 / 71 |
+| ILLEGAL ENTRY, C&W | 0; 4 SM ALERT TONEs, acknowledged | 0; 8 SM ALERT TONEs, acknowledged |
+
+**The cause of the nav error: the trackers' mounting.**  With all I-loads, star-tracker marks are
+accepted with residuals as small as the baseline's (H/V under 0.005 deg), yet FLTR lands 1,000 ft
+off: PASS fits the angles exactly with a misplaced target, because the angles it is given and the
+geometry it assumes disagree by a constant rotation.  CGYS_TNBST read from the two runs' STRKNAV
+captures: the flown matrix differs from the tape's by **0.347 deg (-Z tracker)** and 0.222 deg
+(-Y).  0.35 deg at the pass's ~240 kft is ~1,450 ft -- the error seen.  yaGPC2's startrk.c builds
+the trackers' pictures from the TAPE's TNBST (as in memory on this tape); the flown TNBST is
+STS-134's own alignment (its trackers' calibrated mounting).  So `all` makes PASS's model of the
+trackers right for STS-134 and the simulated hardware wrong for it.  The radar then rescues the
+state (MC4 onward agrees), but Ti and MC1-MC2 are targeted on a bad state (MC1's Y off 0.9 ft/s).
+
+Everything else changed by `all` looks benign for rendezvous: the flown DAP configurations fly the
+manual phase as well (HOLD a little tighter, the per-leg propellant within the run-to-run scatter,
+coasts somewhat costlier), and nothing raised a C&W beyond SM alert tones.
+
+**Recommendation.**  Not `all` as it stands.  Either
+1. apply `all` **without #PCGYSTA (and CGYS_I_COAS, CGYV_I_CO in #PCGMCOM)** -- i.e. keep the
+   tape's tracker/COAS mounting, which is what startrk.c models; or, better,
+2. apply `all` **and** change yaGPC2's startrk.c TNBST (and the COAS's) to the flown values, so the
+   simulated trackers are mounted as STS-134's were -- a C change (startrk.c's TNBST table, its
+   test), for the peer pass.  Option 2 makes everything STS-134's own.
+In either case the ascent/abort guidance words (#PCGGCOM, 495) and the GPS ones are irrelevant to
+the rendezvous but matter to any ascent run from this volume: worth their own trial before going on
+a default volume.  Runs: ~/sts134-runs/rendezvous/dass-all-run1, dass-base-run1.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the
