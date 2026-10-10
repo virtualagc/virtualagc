@@ -553,71 +553,6 @@ class Manager(object):
         elif got:
             self.snapshot.set(got)
 
-    def _place_dialog(self, top, W, H):
-        """Put a dialog beside the manager, but ON THE SCREEN.
-
-        A GUARD, NOT THE CURE FOR THE FREEZE THAT PROMPTED IT.  These
-        centred on the parent and clamped only at zero, so a manager far to
-        the right could in principle place a dialog past the edge, where a
-        window manager need not map it -- and an unmapped dialog holding a
-        modal grab is a frozen application with nothing to click.  That
-        failure did happen (2026-09-24: the snapshot chooser alive at
-        6104,1416, Map State IsUnMapped, every control dead, and the owner
-        unable to find the window because it was never drawn) -- but the
-        position was NOT the reason.  The desktop is two 3840 monitors and
-        Tk reports the screen as 7680 wide, so 6104 was a legal place for it
-        and this clamp would have left it exactly there.  Why it was never
-        mapped is unknown.  _grab_dialog is what actually stops the freeze;
-        this only removes one way of reaching it.
-        """
-        self.root.update_idletasks()
-        sw, sh = top.winfo_screenwidth(), top.winfo_screenheight()
-        x = self.root.winfo_rootx() + (self.root.winfo_width() - W) // 2
-        y = self.root.winfo_rooty() + (self.root.winfo_height() - H) // 3
-        top.geometry("%dx%d+%d+%d" % (W, H,
-                                      max(0, min(x, max(0, sw - W))),
-                                      max(0, min(y, max(0, sh - H)))))
-
-    def _grab_dialog(self, top, tries=10):
-        """Make a dialog modal, once it can be seen.
-
-        A grab held by a window that is not visible is a frozen application
-        with nothing to click -- which is what _place_dialog's comment
-        describes.  Tk refuses a grab on a window that is not yet viewable,
-        so this retries briefly rather than grabbing blind.
-
-        AND IT NEVER WAITS UNBOUNDED.  wait_visibility() is the usual idiom
-        and is exactly the wrong one here: if the window never maps, it does
-        not return, and the application is frozen again by the cure.  Ten
-        tries at 50 ms is half a second, after which the dialog is simply
-        not modal -- worse behaviour, but working controls.
-        """
-        if not top.winfo_exists():
-            return
-        try:
-            top.update_idletasks()
-            # AND IN FRONT.  A modal dialog that is behind something is the
-            # same as one that is not there: the controls do not answer and
-            # there is nothing visible to answer them with.  transient()
-            # alone only promises to stay above its OWN parent.
-            top.deiconify()
-            top.lift()
-            top.attributes("-topmost", True)
-            # NOT VIEWABLE, NOT MODAL.  Tk does NOT always refuse a grab on
-            # a window that is not on screen -- measured: grab_set() on a
-            # withdrawn Toplevel succeeds and takes every control with it,
-            # which is the freeze this whole helper exists to prevent.  So
-            # ask, rather than relying on it to raise.
-            if not top.winfo_viewable():
-                raise tk.TclError("window not viewable")
-            top.grab_set()
-            top.focus_force()
-        except tk.TclError as e:
-            if tries > 0:
-                top.after(50, lambda: self._grab_dialog(top, tries - 1))
-            else:
-                self.say("dialog: no modal grab (%s)" % e)
-
     def play(self):
         path = self.script.get().strip()
         if not path:
@@ -1099,22 +1034,34 @@ class Manager(object):
         if self._busy is not None:
             self._busy.destroy()
         base = tkfont.nametofont("TkDefaultFont", self.root)
-        W, H = 620, 260
-        top = tk.Toplevel(self.root, bg=C_BG)
-        top.title(title)
-        top.transient(self.root)
-        self._place_dialog(top, W, H)
+        head = tkfont.Font(family=base.cget("family"), size=abs(base.cget("size")),
+                           weight="bold")
+        # IN THE MANAGER'S OWN WINDOW, as _dialog's questions are: a separate
+        # window can be drawn behind the others by the owner's compositor.
+        try:
+            self.root.deiconify()
+            self.root.lift()
+        except tk.TclError:
+            pass
+        self.root.update_idletasks()
+        W = max(300, self.root.winfo_width())
+        top = tk.Frame(self.root, bg=C_BG, highlightthickness=2,
+                       highlightbackground=C_NOTE)
+        top.place(x=0, y=0, relwidth=1, relheight=1)
+        top.lift()
         pad = 24
+        tk.Label(top, text=title.upper(), bg=C_BG, fg=C_NOTE, font=head, anchor="w"
+                 ).pack(fill="x", padx=pad, pady=(pad, 8))
         tk.Label(top, text=lead, bg=C_BG, fg=C_FG, font=base, anchor="w",
                  justify="left", wraplength=W - 2 * pad
-                 ).pack(fill="x", padx=pad, pady=(pad, 6))
+                 ).pack(fill="x", padx=pad, pady=(0, 6))
         tk.Label(top, text="Do not touch the simulation until this finishes.",
                  bg=C_BG, fg="#e0c070", font=base, anchor="w", justify="left",
                  wraplength=W - 2 * pad).pack(fill="x", padx=pad, pady=(0, 12))
         prog = tk.StringVar(value="Starting ...")
         box = tk.Frame(top, bg="#1b1b1b", highlightthickness=1,
                        highlightbackground="#4a4a4a")
-        box.pack(fill="both", expand=True, padx=pad)
+        box.pack(fill="x", padx=pad)
         tk.Label(box, textvariable=prog, bg="#1b1b1b", fg=C_FG, font=base,
                  anchor="w", justify="left", wraplength=W - 2 * pad - 24
                  ).pack(fill="both", expand=True, padx=12, pady=12)
@@ -1129,11 +1076,14 @@ class Manager(object):
                           bg="#3c3c3c", fg=C_FG, activebackground="#505050",
                           activeforeground=C_FG, highlightbackground=C_BG, font=base
                           ).pack(side="right")
-        # NO OK, and the window manager's close button does nothing: the only
-        # way out is Cancel or the operation finishing.  Half-answering a
-        # modal that exists to stop meddling would defeat it.
-        top.protocol("WM_DELETE_WINDOW", lambda: None)
-        self._grab_dialog(top)
+        # NO OK: the only way out is Cancel or the operation finishing.
+        # Half-answering a modal that exists to stop meddling would defeat it.
+        # The panel covers the Manager's controls, and a grab on it keeps a
+        # click from reaching them anyway.
+        try:
+            top.grab_set()
+        except tk.TclError:
+            pass
         self._busy, self._busyText = top, prog
         return top
 

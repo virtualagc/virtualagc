@@ -373,6 +373,7 @@ class ScriptInput:
         self.lock = threading.Lock()
         self.thc = {}          # "+X" -> monotonic time it is released
         self.rhc = {}          # "roll" -> (fraction, monotonic time it ends)
+        self.last_cmd = None   # monotonic time of the last command taken
         try:
             self.sock = crewscript.hc_receiver(D.PORT_BASE)
         except OSError as e:
@@ -401,6 +402,7 @@ class ScriptInput:
                     continue
             except ValueError:
                 continue
+            self.last_cmd = now
             log("crew script: %s" % " ".join(w))
             self.cs.send_hc_ack("ok " + " ".join(w), D.PORT_BASE)
 
@@ -484,6 +486,7 @@ class VirtualControls:
         # no red border at start-up from a terminal that kept the keyboard
         # (Mac-integrate, 2026-10-01).  sync_focus() re-reads it every frame.
         self.focused = bool(pg.key.get_focused())
+        self.scripted = False      # a crew script drove the controls lately
 
     def _sync_surface(self):
         """The drawing surface, re-read every frame, and the scale and
@@ -753,7 +756,7 @@ class VirtualControls:
 
         # Unfocused, the warning takes the headings' band: anywhere lower it
         # ran over the dial and the THC column (Mac-integrate, 2026-10-01).
-        if self.focused:
+        if self.focused or self.scripted:
             text("RHC %s" % self.rhc_name.upper(), int(10 * k), int(6 * k), self.font)
         # UPPER CASE ONLY: lower case at these sizes was too small to read
         # (Ron, via Mac-integrate, 2026-10-01).
@@ -769,7 +772,7 @@ class VirtualControls:
         # and the aft station; the PLT has none.
         x0, y0 = int(330 * k), int(40 * k)
         if self.thc_name:
-            if self.focused:
+            if self.focused or self.scripted:
                 text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
         for i, (name, d) in enumerate(THC_KEYS if self.thc_name else ()):
             on = bool(bits & THC_BITS[d])
@@ -778,7 +781,7 @@ class VirtualControls:
             label = "%s   %s" % (d, name.upper() if name != "space" else "SPACE")
             text(label, r.x + int(10 * k), r.y + (r.h - self.font.get_height()) // 2,
                  self.font, (20, 20, 20) if on else ink)
-        if not self.focused:
+        if not self.focused and not self.scripted:
             # Inside the area above the macOS bottom margin, so the rounded
             # corners do not cut the frame (Ron, via Mac-integrate).
             pg.draw.rect(full, (200, 40, 40),
@@ -843,6 +846,12 @@ def run_virtual(pg, args, pub, rp, status, script=None):
                 return 0
             vc.handle(e)
         vc.sync_focus()
+        # A SCRIPT AT THE CONTROLS: no "NO KEYBOARD FOCUS" warning while a
+        # crew script has moved them in the last two minutes -- the window
+        # visibly answering while it said "keys inactive" read as a fault
+        # (owner, 2026-10-09).  The keyboard still needs focus.
+        vc.scripted = (script is not None and script.last_cmd is not None
+                       and time.monotonic() - script.last_cmd < 120.0)
         defl = vc.deflection()
         rp.counts = dict((a, round(defl[a] * RHC_FULL)) for a in RHC_AXES)
         pub.bits = vc.thc_bits()
