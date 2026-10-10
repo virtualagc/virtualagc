@@ -121,6 +121,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "envcache.h"
 #include "vehdyn.h"
 #include "startable.h"
 
@@ -158,8 +159,13 @@ static const double THRESHOLD_MAG[4] = { 3.5, 2.4, 2.0, 1.0 };
 #define LOCK_TARGET0 (-10)          /* locked: -10 - k for vehdyn target k */
 
 /* CGYS_TNBST (nav base -> tracker), 1 = -Z, 2 = -Y, and CGMS_TNBBODY (nav
- * base -> body), as in memory on this tape (tools/pasvar.py). */
-static const double TNBST[3][3][3] = {
+ * base -> body), as in memory on this tape (tools/pasvar.py).  The trackers
+ * are mounted this way unless YAGPC_STARTRK_MOUNT=flown, which mounts them
+ * as STS-134's own I-load says they were (TNBST_FLOWN below): the volume's
+ * PASS and the simulated hardware must agree, or star marks are fitted with
+ * the difference (RENDEZVOUS_PLAN 5k: with --dass-iloads all and the tape's
+ * mounting, FLTR ~1,000 ft off at Ti). */
+static const double TNBST_TAPE[3][3][3] = {
     { { 0 } },
     { { -0.00651344657, 0.999492586, -0.0311769098 },
       { 0.989126801, 0.00185892172, -0.147052646 },
@@ -168,6 +174,37 @@ static const double TNBST[3][3][3] = {
       { -0.186074317, 0.00279755401, -0.982531488 },
       { 0.180859327, -0.982810736, -0.0370500423 } },
 };
+/* STS-134's CGYS_TNBST, DASS_G2.ASC (STS134/OI034/C2 MDD 134.09) memory map
+ * p. 362-363, #PCGYSTA+0076, X'BCD6'-X'BCF9' (the patched words starred):
+ * the -Z tracker turned 0.347 deg from the tape's (boresight 0.238 deg), the
+ * -Y 0.222 deg (boresight 0.218 deg).  The COAS needs nothing: CGYV_I_CO's
+ * line of sight (#PCGYSTA+00C0) is the tape's, body -Z exactly. */
+static const double TNBST_FLOWN[3][3][3] = {
+    { { 0 } },
+    { { -0.003824408, 0.99936384, -0.035458326 },
+      { 0.989167929, -0.001422535, -0.146781087 },
+      { -0.146738112, -0.035635591, -0.988533258 } },
+    { { -0.966022253, -0.183148861, 0.182366192 },
+      { -0.18538624, -0.00064284, -0.982665479 },
+      { 0.180091262, -0.983084977, -0.033332285 } },
+};
+static const double (*TNBST)[3][3] = TNBST_TAPE;
+
+/* The mounting chosen by YAGPC_STARTRK_MOUNT ("flown" or "tape", the
+ * default), once. */
+static void mount_choose(void) {
+    static bool done = false;
+    if (done) return;
+    done = true;
+    const char *m = yagpc_getenv("YAGPC_STARTRK_MOUNT");
+    if (m != NULL && strcmp(m, "flown") == 0) {
+        TNBST = TNBST_FLOWN;
+        fprintf(stderr, "startrk: trackers mounted as STS-134's I-load (CGYS_TNBST, flown)\n");
+    } else if (m != NULL && *m && strcmp(m, "tape") != 0) {
+        fprintf(stderr, "startrk: YAGPC_STARTRK_MOUNT=%s? (tape or flown); the tape's mounting\n", m);
+    }
+}
+
 static const double TNBBODY[3][3] = {
     { 0.98293535, 0.0, -0.18395135 },
     { 0.0,        1.0,  0.0        },
@@ -217,6 +254,7 @@ static void qmat(const double q[4], double R[3][3]) {
 /* C(tracker k <- M50) at the truth attitude. */
 static void c_st_m50(int k, double M[3][3]) {
     double R[3][3], A[3][3];
+    mount_choose();
     qmat(vehdyn_state()->q, R);                    /* body -> M50 */
     for (int i = 0; i < 3; i++)                    /* A = TNBST TNBBODY^T */
         for (int j = 0; j < 3; j++)
@@ -792,6 +830,15 @@ int startrk_test_target(int k, double t, double hv[2], double *mag, double *rang
 }
 
 double startrk_test_centroid(double phaseDeg) { return photo_centroid(phaseDeg); }
+
+/* Tests: tracker k's axes in body (row i = tracker axis i), as mounted. */
+void startrk_test_mount(int k, double M[3][3]) {
+    mount_choose();
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            M[i][j] = TNBST[k][i][0] * TNBBODY[j][0] + TNBST[k][i][1] * TNBBODY[j][1] +
+                      TNBST[k][i][2] * TNBBODY[j][2];
+}
 
 void startrk_test_sun(double t, double u[3]) {
     double lam, eps;

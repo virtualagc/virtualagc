@@ -49,5 +49,6 @@ void startrk_test_sun(double t, double u[3]);
  * radii from its centre toward the Sun. */
 int startrk_test_target(int k, double t, double hv[2], double *mag, double *rangeM, double *phaseDeg);
 double startrk_test_centroid(double phaseDeg);
+void startrk_test_mount(int k, double M[3][3]);
 
 #endif
