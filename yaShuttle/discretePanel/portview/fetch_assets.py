@@ -1131,6 +1131,111 @@ def _cl_target_tris():
             for name, (rgb, P, N, T) in out.items()]
 
 
+# THE S1 RADIATOR'S DAMAGE.  IGOAL models the face sheet peeled up off a
+# starboard (S1) heat-rejection radiator panel -- found in 2008 and there for
+# STS-134 (NASA photo S1 Radiator Damage, commons.wikimedia.org/wiki/File:
+# S1_Radiator_Damage.jpg) -- but maps it, like the panels' edges, onto the
+# Truss texture's near-white edge texel (u 0.804, v 1.0), so in sunlight it
+# shone white, "like a mouse cursor".  It is the panel's own skin: given the
+# panels' texture strip (u 0.128, v 0.662-1.0) the way the panel beside it
+# has it.  Found by shape, not index: of the white-texel triangles over the
+# S1 radiators, the one connected piece that rises well clear of its panel's
+# plane (1.7 m; the panels' edge strips measure ~0.6 m by this test).
+RAD_REGION = ((-24.0, 4.0, -3.0), (-4.0, 21.0, 3.0))    # S1's radiators, ISS frame (m)
+RAD_EDGE_UV, RAD_FACE_U, RAD_FACE_V = (0.804, 1.0), 0.128, (0.662, 1.0)
+
+
+def _radiator_damage(P, I, UV):
+    """The peeled sheet's triangles (indices into I), or an empty array."""
+    from collections import defaultdict
+    T = P[I]
+    c = T.mean(1)
+    lo, hi = np.array(RAD_REGION[0]), np.array(RAD_REGION[1])
+    inside = np.all((c > lo) & (c < hi), axis=1)
+    white = np.all(np.abs(UV[I] - RAD_EDGE_UV).max(2) < 0.002, axis=1)
+    cand = np.where(inside & white)[0]
+    face = np.where(inside & np.all(np.abs(UV[I][:, :, 0] - RAD_FACE_U) < 0.002, axis=1))[0]
+    if not len(cand) or not len(face):
+        return np.zeros(0, int), face
+    vt = defaultdict(list)
+    for t in cand:
+        for j in range(3):
+            vt[tuple(np.round(P[I[t, j]], 4))].append(t)
+    n = np.cross(T[face, 1] - T[face, 0], T[face, 2] - T[face, 0])
+    n /= np.maximum(np.linalg.norm(n, axis=1), 1e-12)[:, None]
+    seen, best, best_h = set(), np.zeros(0, int), 1.0
+    for t in cand:
+        if t in seen:
+            continue
+        comp, stack = [t], [t]
+        seen.add(t)
+        while stack:
+            u = stack.pop()
+            for j in range(3):
+                for w in vt[tuple(np.round(P[I[u, j]], 4))]:
+                    if w not in seen:
+                        seen.add(w)
+                        comp.append(w)
+                        stack.append(w)
+        comp = np.array(comp)
+        # each vertex's height off the plane of the panel face nearest it
+        v = P[I[comp]].reshape(-1, 3)
+        k = np.argmin(np.linalg.norm(v[:, None, :] - c[face][None], axis=2), axis=1)
+        h = np.abs(((v - c[face[k]]) * n[k]).sum(1)).max()
+        if h > best_h:              # the edge strips reach ~0.6 m (big faces' centroids), the sheet 1.7
+            best, best_h = comp, h
+    return best, face
+
+
+def prepare_iss_radiator_damage():
+    """Give the S1 radiator's peeled face sheet the panels' own texture."""
+    import json
+    out_dir = os.path.join(CACHE, "models", "iss")
+    meta_path = os.path.join(out_dir, "model.json")
+    if not os.path.exists(meta_path):
+        return
+    with open(meta_path) as f:
+        meta = json.load(f)
+    if meta.get('radiator_damage'):
+        return
+    names = [m.get('name') for m in meta['materials']]
+    if 'Truss' not in names:
+        return
+    k = names.index('Truss')
+    z = dict(np.load(os.path.join(out_dir, "model.npz")))
+    P, UV = z['pos%d' % k], z['uv%d' % k].copy()
+    I = z['idx%d' % k].reshape(-1, 3).copy()
+    sheet, face = _radiator_damage(P, I, UV)
+    if not len(sheet):
+        print("  the S1 radiator's damage: not found; left as it is")
+        return
+    # the panels' v runs across them: fitted from the panel faces nearby, so
+    # the sheet takes the strip where the panel it came off has it
+    near = face[np.linalg.norm(P[I[face]].mean(1) - P[I[sheet]].reshape(-1, 3).mean(0), axis=1) < 4.0]
+    pv = P[I[near]].reshape(-1, 3)
+    vv = UV[I[near]].reshape(-1, 2)[:, 1]
+    A = np.hstack([pv, np.ones((len(pv), 1))])
+    g = np.linalg.lstsq(A, vv, rcond=None)[0]
+    # its own vertices (the white edge strips keep theirs), with the new UVs
+    old = np.unique(I[sheet])
+    newi = np.arange(len(P), len(P) + len(old))
+    remap = dict(zip(old.tolist(), newi.tolist()))
+    sv = P[old]
+    uvn = np.column_stack([np.full(len(old), RAD_FACE_U),
+                           np.clip(np.hstack([sv, np.ones((len(old), 1))]) @ g, *RAD_FACE_V)])
+    z['pos%d' % k] = np.vstack([P, sv]).astype(P.dtype)
+    z['nrm%d' % k] = np.vstack([z['nrm%d' % k], z['nrm%d' % k][old]]).astype(z['nrm%d' % k].dtype)
+    z['uv%d' % k] = np.vstack([UV, uvn]).astype(UV.dtype)
+    I[sheet] = np.vectorize(remap.get)(I[sheet])
+    z['idx%d' % k] = I.ravel().astype(z['idx%d' % k].dtype)
+    np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
+    meta['radiator_damage'] = True
+    meta['source'] += "; the S1 radiator's peeled face sheet given the panels' texture"
+    with open(meta_path, "w") as f:
+        json.dump(meta, f, indent=1)
+    print("  the S1 radiator's damage: %d triangles given the panels' texture" % len(sheet))
+
+
 def prepare_iss_cl_target():
     """Add the Shuttle centerline target to the prepared ISS model's PMA-2."""
     import json
@@ -1402,6 +1507,7 @@ def main():
         prepare_model(key, args.keep_downloads)
     prepare_iss_visitors(args.keep_downloads)
     prepare_iss_cl_target()
+    prepare_iss_radiator_damage()
     prepare_vehicles()
     for key in [k.strip() for k in args.sites.split(",") if k.strip()]:
         if key not in SITES:
