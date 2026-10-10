@@ -492,17 +492,11 @@ def orbit_pfd_on_crt2(self):
                   "+15    edgekey afd1 1\n"         # UP: the main menu
                   "+2     edgekey afd1 2\n"         # FLT INST
                   "+2     edgekey afd1 3\n"         # ORBIT PFD
-                  "+5     keys KB3 SPEC 3 3 PRO\n"   # REL NAV on CRT 4
-                  # the radar inhibited to NAV, as it had been since 650 ft
-                  # (APPROACH CC 9-7: "GNC 33 REL NAV: INH RNG, RDOT,
-                  # ANGLES"); the hold capture was flown without it
-                  "+3     keys KB3 ITEM 1 8 EXEC\n"
-                  "+2     keys KB3 ITEM 2 1 EXEC\n"
-                  "+2     keys KB3 ITEM 2 4 EXEC\n",
+                  "+5     keys KB3 SPEC 3 3 PRO\n",  # REL NAV on CRT 4
                   "dock-aft-displays")
         self.script_done("dock-aft-displays", 120)
         self.pfd_up = True
-        self.say("crew: ORBIT PFD on AFD 1, SPEC 33 REL NAV on CRT 4 (RR inhibited to NAV)")
+        self.say("crew: ORBIT PFD on AFD 1, SPEC 33 REL NAV on CRT 4")
         return
     self.play("+1     idppower 2 on\n"
               "+10    edgekey crt2 1\n"
@@ -527,6 +521,7 @@ def dock30(self):
     self.man_start()
     aft_station(self)
     orbit_pfd_on_crt2(self)
+    ku_for_comm(self)
     # Lamps latched from before the capture -- rndz-hold-v2's IMU caution and
     # B/U C&W, whose dilemma the RM-threshold seeding had already cleared --
     # reset as the crew would: MSG RESET twice (a pending class-5 ILLEGAL
@@ -548,6 +543,7 @@ def dock30(self):
     switched = {"b": d0 <= NORM_Z_FT}
     if switched["b"]:
         dap_modes(self, "B", low_z=False)
+        deselect_fwd_jets(self)
         for ax in "xyz":
             self.pulse_est[ax] = 0.02
     settled = settled_at(0.0)
@@ -560,6 +556,7 @@ def dock30(self):
             for ax in "xyz":
                 self.pulse_est[ax] = 0.02     # B10's 0.01, as it comes out: learned from here
             self.say("DOCK30: 75 ft -- DAP B, NORM Z; %s" % self.readings())
+            deselect_fwd_jets(self)
         return goal.x <= DOCK30_FT + 1e-6 and settled(t, s, err)
 
     # tau 40 s, every 5 s: dock2 (tau 60, every 8, two pulses) let a sub-foot
@@ -576,6 +573,8 @@ def dock(self):
     stack in free drift until hard mate) or none."""
     self.man_start()
     aft_station(self)
+    ku_for_comm(self)
+    deselect_fwd_jets(self)
     dap_modes(self, "B", low_z=False)
     # B10's 0.01 ft/s pulse, as it comes out (0.02-0.04 in dock4): unless
     # this process has learned it already (DOCK30), from there.  A fresh
@@ -675,14 +674,21 @@ def dock(self):
     self.manual_summary()
 
 
+def _kb(self):
+    """The keyboard the aft crew keys on: 3 (CRT 4) with the aft displays,
+    else 1 (CRT 1)."""
+    return "KB3" if getattr(self.a, "crts", 1) >= 4 else "KB1"
+
+
 def _crt4_page(self, keys, spec, name):
-    """Key a page onto CRT 4 from keyboard 3 and return its text once CRT 4
-    shows it ("/0NN/" in its title); '' if it never does."""
-    self.play("+1     keys KB3 %s\n" % keys, name)
+    """Key a page from the aft keyboard (_kb) and return its text once its
+    CRT shows it ("/0NN/" in its title); '' if it never does."""
+    kb = _kb(self)
+    self.play("+1     keys %s %s\n" % (kb, keys), name)
     self.script_done(name, 60)
     tag = "/%03d/" % spec
     for _ in range(20):
-        page = self.ears.screen("crt4")
+        page = self.ears.screen("crt4" if kb == "KB3" else "crt1")
         if tag in page.splitlines()[0] if page else False:
             return page
         self.wait_sim(1)
@@ -713,15 +719,59 @@ def _exit_rpop(self):
     return gone
 
 
-def post_docking(self):
-    """Once hard-mated: the radar to COMM, then TERMINATE RNDZ OPS [22A]
-    (RNDZ/134/FIN A p. 4-22) in its order, on CRT 4 from keyboard 3.
+def ku_for_comm(self):
+    """CONFIGURE KU FOR COMM (KU OPS CC 9-5 step 4), which VBAR APPROACH (CC
+    9-8) calls for at 110 ft -- so at the start of this leg, from the 100 ft
+    hold: GNC 33 REL NAV INH RNG, RDOT, Angles - ITEM 18, 21, 24 (*); KU ANT
+    ENA - ITEM 2 (no *); A1U KU PWR - STBY, MODE - COMM, sel - GPC, CNTL -
+    CMD.  Without it the radar "tracked" the station from tens of feet and
+    CRT 4's RR column swung wildly (owner, 2026-10-10).  KU ANT ENA toggles,
+    so it is keyed only while shown on."""
+    if getattr(self, "ku_comm_done", False):
+        return
+    self.ku_comm_done = True
+    page = _crt4_page(self, "SPEC 3 3 PRO", 33, "dock-spec33")
+    kb = _kb(self)
+    keys = ("+1     keys %s ITEM 1 8 EXEC\n"
+            "+2     keys %s ITEM 2 1 EXEC\n"
+            "+2     keys %s ITEM 2 4 EXEC\n" % (kb, kb, kb))
+    if re.search(r"KU ANT\s+ENA\s+2\*", page):
+        keys += "+2     keys %s ITEM 2 EXEC\n" % kb
+    self.play(keys, "dock-ku-comm-1")
+    self.script_done("dock-ku-comm-1", 60)
+    self.ku_switches("dock-ku-comm-2", power="STBY", mode="COMM", steering="GPC", control="CMD")
+    self.say("crew: CONFIGURE KU FOR COMM (CC 9-5 step 4, at 110 ft per CC 9-8): RR INH, "
+             "KU ANT ENA off, KU STBY/COMM/GPC/CMD")
 
-    First KU OPS step 4, CONFIGURE KU FOR COMM (CC 9-5): GNC 33 REL NAV INH
-    RNG, RDOT, Angles - ITEM 18, 21, 24 (*); KU ANT ENA - ITEM 2 (no *); A1U
-    KU PWR - STBY, MODE - COMM, sel - GPC, CNTL - CMD.  Without it the radar
-    went on "tracking" the station from tens of feet, and CRT 4's RR column
-    swung wildly after hard mate (owner, 2026-10-10).
+
+def deselect_fwd_jets(self):
+    """VBAR APPROACH (CC 9-8) at 75 ft, maintained through contact: GNC 23
+    RCS, RCS FWD - ITEM 1 EXEC (*); JET DES F2F - ITEM 35 EXEC (*), F1F -
+    ITEM 31 EXEC (*) -- the two forward-firing jets that would plume the
+    station.  JET DES toggles, so each is keyed only while not deselected."""
+    if getattr(self, "fwd_jets_done", False):
+        return
+    self.fwd_jets_done = True
+    page = _crt4_page(self, "SPEC 2 3 PRO", 23, "dock-spec23")
+    if not page:
+        self.say("crew: GNC 23 never appeared -- F1F/F2F NOT deselected")
+        return
+    kb = _kb(self)
+    keys = "" if _starred(page, 1) else "+2     keys %s ITEM 1 EXEC\n" % kb
+    for item in (35, 31):
+        if not _starred(page, item):
+            keys += "+2     keys %s ITEM %s EXEC\n" % (kb, " ".join(str(item)))
+    if keys:
+        self.play("+1" + keys[2:], "dock-fwd-jets")
+        self.script_done("dock-fwd-jets", 60)
+    self.say("crew: GNC 23 RCS FWD, JET DES F2F and F1F (CC 9-8 at 75 ft)")
+
+
+def post_docking(self):
+    """Once hard-mated: TERMINATE RNDZ OPS [22A] (RNDZ/134/FIN A p. 4-22) in
+    its order, on CRT 4 from keyboard 3 (CRT 1 from keyboard 1 without the
+    aft displays).  The Ku is already configured for comm (ku_for_comm, at
+    110 ft per CC 9-8); it is checked again first.
 
     Then [22A].  1. ORBITER CONFIG FOR MATED ATTITUDE CONTROL: GNC 23 RCS
     (RCS F - ITEM 1; JET DES F1L, F3L, F2R, F4R, F1U, F3U, F2U - ITEMs 9-21
@@ -742,18 +792,11 @@ def post_docking(self):
     Items that toggle (JET DES, X JET ROT ENA, DES RCVR, KU ANT ENA, RNDZ
     NAV ENA) are keyed only while the page shows them other than the
     checklist wants; a page that never appears skips its items, said."""
-    # --- KU OPS step 4: CONFIGURE KU FOR COMM ---------------------------------
-    page = _crt4_page(self, "SPEC 3 3 PRO", 33, "pd-spec33")
-    keys = ("+1     keys KB3 ITEM 1 8 EXEC\n"
-            "+2     keys KB3 ITEM 2 1 EXEC\n"
-            "+2     keys KB3 ITEM 2 4 EXEC\n")
-    if re.search(r"KU ANT\s+ENA\s+2\*", page):
-        keys += "+2     keys KB3 ITEM 2 EXEC\n"
-    self.play(keys, "pd-ku-comm-1")
-    self.script_done("pd-ku-comm-1", 60)
-    self.ku_switches("pd-ku-comm-2", power="STBY", mode="COMM", steering="GPC", control="CMD")
-    self.say("POST DOCKING: KU for COMM (CC 9-5 step 4)")
+    kb = _kb(self)
 
+    def play(text, name):                # the aft keyboard, or CRT 1's without it
+        self.play(text.replace("keys KB3 ", "keys %s " % kb), name)
+    ku_for_comm(self)                    # done at 110 ft; again, harmlessly
     # --- [22A] 1. ORBITER CONFIG FOR MATED ATTITUDE CONTROL -------------------
     page = _crt4_page(self, "SPEC 2 3 PRO", 23, "pd-spec23")
     if page:
@@ -761,7 +804,7 @@ def post_docking(self):
         des = [i for i in (9, 11, 13, 15, 17, 19, 21) if not _starred(page, i)]
         keys += "".join("+2     keys KB3 ITEM %s EXEC\n" % " ".join(str(i)) for i in des)
         if keys:
-            self.play("+1" + keys[2:], "pd-rcs")
+            play("+1" + keys[2:], "pd-rcs")
             self.script_done("pd-rcs", 120)
         self.say("POST DOCKING: GNC 23 RCS F, forward jets F1L F3L F2R F4R F1U F3U F2U deselected "
                  "(%d keyed)" % len(des))
@@ -778,24 +821,24 @@ def post_docking(self):
         keys += ("+3     keys KB3 ITEM %d + 9 EXEC\n"
                  "+3     keys KB3 ITEM 5 2 %s EXEC\n"
                  "+3     keys KB3 ITEM 5 EXEC\n" % (edit, rdb))
-    self.play(keys, "pd-dap-config")
+    play(keys, "pd-dap-config")
     self.script_done("pd-dap-config", 180)
     self.say("POST DOCKING: GNC 20 DAP A,B to A12,B12, X JET ROT ENA, A9/B9 PRI RATE DB 0.2 LOADed")
 
     from dap_lamps import set_low_z
 
     def press():
-        self.play("+1     dap %s low_z\n" % DAP_PANEL, "pd-lowz")
+        play("+1     dap %s low_z\n" % DAP_PANEL, "pd-lowz")
         self.script_done("pd-lowz", 60)
 
     ok, _n = set_low_z(self.lamps(), press, True)
-    self.play("+1     dap %s lvlh\n" % DAP_PANEL, "pd-lvlh")
+    play("+1     dap %s lvlh\n" % DAP_PANEL, "pd-lvlh")
     self.script_done("pd-lvlh", 60)
     self.say("POST DOCKING: DAP LO Z%s, LVLH (verniers available)" % ("" if ok else " (LAMP DID NOT FOLLOW)"))
 
     # --- [22A] 2. ORBITER CONFIG FOR MATED OPS --------------------------------
     sw = ("ds_a", "ds_b", "ds_c", "cpp_a", "cpp_b", "cpp_c", "htr_1", "htr_2", "htr_3")
-    self.play("".join("+%d     switch a7l_%s OFF\n" % (1 if i == 0 else 2, k) for i, k in enumerate(sw)),
+    play("".join("+%d     switch a7l_%s OFF\n" % (1 if i == 0 else 2, k) for i, k in enumerate(sw)),
               "pd-apds-powerdown")
     self.script_done("pd-apds-powerdown", 120)
     self.say("POST DOCKING: DOCKING MECHANISM POWERDOWN (8-6) -- A7L APDS, CONTROL PANEL and "
@@ -809,13 +852,13 @@ def post_docking(self):
         keys += "+2     keys KB3 ITEM 4 EXEC\n"
     keys += ("+2     keys KB3 ITEM 1 3 + 0 EXEC\n"
              "+2     keys KB3 ITEM 1 4 + 0 EXEC\n")
-    self.play("+1" + keys[2:], "pd-strk")
+    play("+1" + keys[2:], "pd-strk")
     self.script_done("pd-strk", 60)
     self.say("POST DOCKING: GNC 22 -Z STAR TRK, -Y/-Z THOLD 0")
 
     page = _crt4_page(self, "SPEC 5 5 PRO", 55, "pd-spec55")
     if page and re.search(r"DES RCVR\s+26\*?\s+27\*", page):
-        self.play("+1     keys KB3 ITEM 2 7 EXEC\n", "pd-gps")
+        play("+1     keys KB3 ITEM 2 7 EXEC\n", "pd-gps")
         self.script_done("pd-gps", 60)
         self.say("POST DOCKING: GNC 55 GPS 2 reselected")
 
@@ -823,7 +866,7 @@ def post_docking(self):
     if not page:
         self.say("POST DOCKING: CRT 4's REL NAV not heard; RNDZ NAV ENA left as it was")
     elif re.search(r"RNDZ NAV ENA\s+1\*", page):
-        self.play("+1     keys KB3 ITEM 1 EXEC\n", "pd-rndz-nav-dsbl")
+        play("+1     keys KB3 ITEM 1 EXEC\n", "pd-rndz-nav-dsbl")
         self.script_done("pd-rndz-nav-dsbl", 60)
     self.say("POST DOCKING: [22A] done as far as modelled -- RNDZ NAV disabled; not modelled: "
              "O14-O16 RJD/DDU, FLT CNTLR PWR, SM 167, A6L PSU and lights, HHL stow, -Z COAS")
