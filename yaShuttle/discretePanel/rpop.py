@@ -494,9 +494,9 @@ class Rpop(QtCore.QObject):
     def hhl_reading(self, s, tgt, geo):
         """The HHL's range and range rate as the STS-134 cue cards read it.
 
-        rndz_instruments' HHL ranges to a 25 m sphere about the ISS's CG
-        (CG range less ~82 ft), which close in reads well short of what the
-        crew saw: 22 ft at 29 ft DP-DP.  The cards give the HHL against the
+        (rndz_instruments' read() now uses this same model; it had ranged to
+        a 25 m sphere about the ISS's CG, 82 ft short close in.)  The cards
+        give the HHL against the
         other ranges directly, and are followed here: on the approach the
         crew aims at the ISS CG and reads the CG-CG range less 10 ft
         (APPROACH, CC 9-7: 2000 -> 1990, 1000 -> 990, 400 -> 390); once on the
