@@ -103,10 +103,9 @@ targeting, all idle unless an engine fails.
 - **The engine-out constants** (P_INT, P_SLP, DEL_CST, V_EO_SW, V_KMAX) **and
   the RTLS targets** matter as soon as an abort is flown.  Fly the abort tests
   on this tape.
-- **Not covered:** the OPS 1 overlay csects with their own flown changes
-  (#PCGG01R, #PCGGC01, #PCGGD01, #PCGGC13, #PCGCUN1, #PCGN13R, …).
-  `sts134-reconfig.json` covers part of CGGC01 and GSE.  The rest is still the
-  generic tape.
+- **The OPS 1 overlays** (#PCGG01R, #PCGGC01, #PCGGD01, #PCGGC13, #PCGN13R)
+  and the abort D-csects are on `-full2`: see "The OPS 1 abort I-loads" below.
+  Still generic: the flight-control overlays #PCGCFL1 and #PCGCUN1.
 
 ## Volumes
 
@@ -127,6 +126,116 @@ halfword address, with the "was" values checked first.  It also needs
 `vehicle.json`'s tape and tapeSha256 changed, or simulatePASS refuses the
 restore.  The pad62 IMU, COUNT and TERMINAL captures all held the tape ("was")
 values.
+
+## The OPS 1 abort I-loads (-full2, 2026-10-10)
+
+`tools/sites/sts134-abort-iloads.json` puts STS-134's flown values on 5,762
+halfwords in 2,210 cells.  The source is DASS_G16.ASC's PATCH SUMMARY: every
+word whose tape value is the generic one and whose flown value differs.  The
+cells sit in seven load blocks: six in the G1/G16 loads, one in G3.
+
+```
+python3 mission_reconfig.py sites/sts134-abort-iloads.json …-ksc6-full.mmv --out …-ksc6-full2.mmv
+```
+
+| Volume | Built from | SHA-256 |
+|---|---|---|
+| `~/sts134-runs/ascent/OI340700-v44boot-sts134-ksc6-full2.mmv` | full + abort | `a4c7670355f9b5840b8ce561fada8322e63b20af97f7abe433b266e531509bc8` |
+
+**The landing-site table #PCGN13R was blank on the tape.**  Its slots held
+spaces and zeros: no runway had a latitude, longitude or azimuth, so a TAL or
+RTLS had nowhere to go.  The flown table has 90 runways (lat/lon in degrees,
+heading in degrees, length in feet):
+
+| Slots | Site | Runways | Lat | Lon | Length |
+|---|---|---|---|---|---|
+| 1-2 | Kennedy (KSC) | 15, 33 | 28.6 N | 80.7 W | 15,000 |
+| 3-4, 23-24 | Ben Guerir (BEN) | 36, 18 | 32.1 N | 7.9 W | 13,720 / 13,220 |
+| 5-6, 25-26 | Morón (MRN) | 20, 02 | 37.2 N | 5.6 W | 11,729 |
+| 7-8, 27-28 | Zaragoza (ZZA) | 30, 12 | 41.7 N | 1.1 W | 12,197 |
+| 9-22, 29-44 | East Coast abort landing sites | MYR ILM NKT NTU WAL DOV ACY FOK FMH PSM YHZ YJT YYT YQX YYR | | | |
+| 45-60 | Other overseas sites | Lajes (LAJ), Beja (BEJ), Keflavik (IKF), Shannon (INN), Fairford (FFA), Köln-Bonn (KBO), Istres (FMI), Esenboğa (ESN) | | | |
+| 61-90 | Pacific and western sites | KKI JDG AMB PTN JTY GUA WAK HNL EDF HAO EDT HAW NOR EDW | | | |
+
+The TAL sites for STS-134's 51.6° flight are therefore Zaragoza, Morón and
+Ben Guerir.  The table also carries the MLS and TACAN tables, and these
+indexes:
+
+- CGGS_TARGET_INDEX: 0x000A.
+- CGNS_ALTERNATE_SITE_1: 0x0013 and 0x002A.
+- CGNS_ALTERNATE_SITE_2: 0x0015.
+
+Both copies are patched.  G16's copy is at load block @1087488 (flat =
+address + 890,078).  G3's is entry's (flat = address + 1,130,718): a TAL's
+OPS 304 keeps the OPS 1 site index, so the runway has to be in G3 as well.
+
+For the G3 copy, the values come from DASS_G3's own patch summary, and only
+words that still hold the blank tape value are written.  The 82 words
+landing_sites.py wrote from ksc.json are left alone: KSC 15/33 in slots 1-2
+and their MLS and TACAN entries.  Outside those, G3's flown table differs from
+G16's in only 9 words.
+
+landing_sites.py's docstring says the tables are blank in the DASS dumps.
+They are blank in the listings' symbol sections, but each listing's PATCH
+SUMMARY carries the flown table.
+
+**The guidance overlays.**  The cells cover the RTLS PPA and fuel-dissipation
+constants, the RTLS targets in #PCGG01R, and the ATO OMS-1/2 targets and
+switch velocities (#PCGGD01).  They also cover the TAL g-limits,
+CGGS_V_RHO_TAL, the yaw-steering velocities and the contingency constants
+(#PCGGC01), and the second-stage and engine-out limits (#PCGGC13).
+
+Left out:
+
+- The cells sts134-reconfig.json already sets, and the ones the launch day
+  replaced.
+- CGGS_P_Y_INDEX_CHG_LIMIT, which belongs with the 2011 first-stage tables.
+- **CGGB_EF_PLANE_SW.**  It flew OFF: an inertial target plane, rotated for
+  nodal regression from #PCGGCOM's CGGS_T_GMTLO_REF (flown 18,186,605 s, day
+  210, which is the 2010 build's launch date).  That plane is a launch-day
+  product.  The tape's ON flies to the earth-fixed plane, which is the ISS's.
+  A first -full2 that had the flown OFF went wrong in all three aborts: just
+  after SRB SEP, second stage pitched up 25° and the stack fell back, with
+  hdot -250 ft/s at MET 215 against +1,000 nominal.  The cause was bisected
+  from the T-8 capture in three rounds: all of C01 (99 cells), then the
+  quarters, then this one cell.
+- #PCGGC13's second copy, in G3 (flat = address + 1,135,264).
+
+**The D-csects** (G1):
+
+| Cell | Tape | Flown |
+|---|---|---|
+| GSS_DT_DRY (LO2 low-level cutoff delay, no engine out) | 1.918 s | 0.238 s |
+| GSS_RTLS_DT_DRY, GSS_PTM_DT_DRY | 2.6, 2.598 s | 0 |
+| GSS_RTLS_LH2_LL_DELAY, GSS_NOM_LH2_LL_DELAY | 2.3, 1.1 s | 0 |
+| GSS_FS_ZERO_THRUST_DLY | 5.7 s | 3 s |
+| GSS_PRVL_CL_DELAY_TIME | 4.9 s | 4.442 s |
+| CGSS_RTLS_{SIDESLIP,ROLL,YAW,PITCH}_LO/HI (ET SEP inhibit) | ±2, ±5, ±0.5, −5 | ±20 |
+| CGSS_RTLS_ANG_ATK_HI | −2° | −2.8° |
+| CGSS_ETSEP_INH_TIME | 1.7 s | 2.19 s |
+| CGGS_TAL_MASS_SSME_TRIM | 19,500 | 14,700 |
+| CGGS_K_CMD_STG2 | 106 | 104 |
+| CGNS_DRAG_CONST_RTLS | 0.2226 | 0.1822 |
+| GSQ_STP_VENT_CMDS_DELAY | 4.96 s | 2.56 s |
+| #DGG9GLI, #DGHHPHA | glide-RTLS alpha and Nz-hold constants | |
+
+Left out:
+
+- #DGG31ST: first stage, coupled to the launch day.
+- #DGSRRSL: RSLS countdown timing.
+- #DGSESRB: already holds the flown values.
+
+**Placement.**  Every cell is placed by its flat position on the volume, and
+each position is checked against the tape value before it is written.  Each
+csect's single copy was found from a ±32-halfword context and then checked
+over the csect's whole range against the OPS 1 terminal capture.  A context
+search (`--mem`) does not work here: blank neighbourhoods matched zeros all
+over the volume, and a dry run would have written into some 200 blocks.
+
+**Captures.**  An OPS 9 capture made before OPS 101 can fly on -full2 once its
+`vehicle.json` is retagged, because OPS 101 reads G1/G16 from the volume.  The
+abort re-flights below start from a copy of asc-C's `sts134-imu`, retagged
+(the copies carry `RETAGGED.txt`).
 
 ## A/B (2026-10-10)
 
@@ -233,3 +342,55 @@ order I would check them:
 
 Logs: `~/sts134-runs/ascent/abort-{rtls,tal,ato}/` (the failure line is
 `eiu: ME2 FAILED`; the crew script is `abort.script`).
+
+## Aborts on -full2 (2026-10-10)
+
+The test-only build was origin/master plus PASS-IDLE's review/vern-ssme
+(YAGPC_SSME_FAIL) and review/et-lowlevel (the ET low-level sensors; 2476016,
+then e048a6b).  Every run was a fresh `--from COUNT`, headless, at rate 1,
+with `fly_sts134.py --abort MODE`: the crew's ABORT MODE and ABORT pb 5 s
+after the failure.  Times are after SRB ignition.  Logs are in
+`~/sts134-runs/ascent/abort2-rtls`, `abort3-ato` and `abort4-tal` (TAL resumed
+from abort3-ato's T-8 s capture: three fresh `--from COUNT` TALs hung at
+OPS 101, GNC OPS 0 after the fourth mass-memory read; see below); the DAP
+CSVs are in the dropbox, `ascent-aborts/`.
+
+| | RTLS: ME2 at +150 | TAL: ME2 at +265 | ATO: ME2 at +330 |
+|---|---|---|---|
+| MECO | +671.2, guided (PPA) | +595.8, guided | +574.4, **low level** |
+| ET left at SEP | 12,851 kg LO2, 2,575 kg LH2 (~2.1%) | 10,467 kg LO2, 2,177 kg LH2 | 815 kg LO2, 569 kg LH2 |
+| ET SEP | +688.5 | +617.0 | +595.6 |
+| After | glide RTLS to KSC; touchdown 262 kt, 11 ft/s, gear locked 0.3 s before | OPS 3 → MM 304, controlled entry; came down short, near 34.1 N 9.4 W (about 260 km NW of Ben Guerir), stalled from 12.8 kft, no gear | 57 × −106 nmi: underspeed |
+
+- **Low-level cutoff (ATO, e048a6b).**  The LO2 trip came at 3,500 lb, then
+  PASS's MECO 92 ms later: the K_CMD > 67 immediate path, GSSSSM.hal 127K.
+  The engines stopped with 815 kg of LO2 left.  On 2476016, with the trip at
+  1,500 lb, the shutdown ran the LO2 dry.
+- **ATO is short of propellant.**  It is the only abort here that ends at a
+  low-level MECO instead of guidance's target.  The open question is
+  performance: the ATO targets, the OMS dump/assist, and vehdyn's propellant.
+- **RTLS** flies the whole profile: powered pitch-around, PPA, MECO with RTLS's
+  2% residual, ET SEP, glide RTLS (MM 602/603), TAEM and approach to KSC.  It
+  came in fast, at 330 kt at 800 ft, and touched down hard with the gear just
+  locking (the driver puts the gear down at 300 ft wheel height).
+- **TAL** needs the crew's OPS 3 straight after ET SEP.  PASS stays in OPS 1
+  (MM 104), which flies no aerosurfaces: without OPS 3 the orbiter tumbled
+  at about 220 kft, 4-5 minutes after ET SEP.
+  - From MM 104, OPS 3 0 1 PRO goes straight to MM 304 (ENTRY TRAJ).
+  - The OPS 301 GPC MEMORY table followed by OPS 3 0 4 PRO stayed on 1041.
+  - G3 has to come from mass memory (G3_FROM_MM).  The upper-memory archive
+    holds the G3 of the volume the capture was taken on, without the TAL
+    runways.
+  - With all three in place, MM 304 came up 40 s after ET SEP.  Entry pulled
+    out at about 210 kft at alpha 40-50, and PASS flew toward Morocco.  It
+    arrived low on energy: 390 kt at 12.8 kft about 260 km short (the
+    position is approximate, from the M50 state), then slowed and fell.
+  - Still open: which TAL site PASS chose, the energy shortfall, and the
+    runway height.  vehdyn's ground is KSC's 8.3 ft unless
+    YAGPC_GROUND_ALT_FT is set, and setting it (1,034 ft for Zaragoza) did
+    not get past the OPS 101 hang.
+- **The OPS 101 hang.**  Three fresh-COUNT TALs, one ATO and two short tests
+  stopped at vehicle t ≈ 57 s, on both test builds and on both -full2
+  versions.  The panels went to GNC OPS 0 after the fourth MM read.  A
+  repeat of a configuration that had worked minutes earlier also hung, so
+  the cause is not one volume or setting.  Not investigated further.

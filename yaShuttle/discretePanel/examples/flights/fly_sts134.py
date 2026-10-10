@@ -210,6 +210,14 @@ AIR_DATA = ("+1     switch adp_l DEPLOY\n"
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
+# A TAL's post-MECO OPS 3, keyed at once after ET SEP: entry is close (the
+# stack tumbled at ~220 kft, 4-5 min after ET SEP, still in MM 104).  From MM
+# 104 in a TAL, OPS 3 0 1 PRO comes up straight in MM 304 (ENTRY TRAJ); the
+# OPS 301 GPC MEMORY table first (19 ITEMs, 2.5 min) left OPS 3 0 4 PRO
+# rejected on the 1041 GPC MEMORY page (2026-10-10).  G3 from mass memory
+# (G3_FROM_MM, below): the upper-memory G3 archive was stored from the volume
+# the run's capture was taken on, and a TAL needs the volume's G3 runway table.
+TAL_OPS3 = "+1     keys OPS 3 0 1 PRO\nwait crt 1 title 3041/ timeout 180\n"
 
 
 def keys_signed(x, fmt):
@@ -233,7 +241,7 @@ class Flight:
                 for k, v in FL["env"].items()}
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
                    YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
-                   YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG="5",
+                   YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG=os.environ.get("FLY_STATELOG", "5"),
                    PYTHONUNBUFFERED="1", **fenv)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
@@ -426,8 +434,20 @@ class Flight:
         self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
+        aborted = not self.a.abort
         while "ET SEPARATION at" not in self.log_text():
-            time.sleep(5)
+            if not aborted:
+                m = re.search(r"eiu: ME\d FAILED at t=[\d.]+", self.log_text())
+                if m:
+                    # the crew's minimum (ASC/134 cue cards' boundaries are
+                    # the caller's: it picks the failure time and the mode):
+                    # ABORT MODE rotary to the mode, ABORT pb, rotary OFF
+                    self.wait_sim(self.a.abort_react)
+                    self.play("+0     switch abort_mode %s\n+1     press abort_pb\n"
+                              "+3     switch abort_mode OFF\n" % self.a.abort, "abort")
+                    self.say("crew: %s seen; ABORT MODE %s, ABORT pb" % (m.group(0), self.a.abort))
+                    aborted = True
+            time.sleep(1 if not aborted else 5)
         # ET separation in the vehicle's GMT, from the time-tagged state lines
         # around it, kept for OMS 2 (which may start from a capture)
         text = self.log_text()
@@ -438,7 +458,14 @@ class Flight:
         with open(os.path.join(self.a.logs, "etsep.gmt"), "w") as fh:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
-        self.wait_sim(20)
+        if self.a.abort != "TAL":
+            self.wait_sim(20)
+        else:
+            # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
+            # keys it, and OPS 1 flies no aerosurfaces
+            self.play(G3_FROM_MM + TAL_OPS3, "tal-ops3")
+            self.script_done("tal-ops3", 300)
+            self.say("crew: TAL, G3 from mass memory, OPS 3 PRO after ET SEP: MM 304")
 
     def oms2_targets(self):
         """THE GROUND'S OMS-2 TARGETS from the actual insertion: the truth
@@ -677,6 +704,11 @@ class Flight:
         itself, autoland in A/L); the crew deploys the gear and the drag
         chute and brakes; until the wheels stop or the time runs out."""
         self.pfd_on_crt2()
+        if self.a.abort in ("RTLS", "TAL"):
+            # an abort's entry flies itself (MM 304 after a TAL's ET SEP; RTLS
+            # MM 601-603 then 305): the air data probes at Mach 5, not before
+            while (self.last_entry_state() or {}).get("M", 99.0) > 5.0:
+                time.sleep(2.0)
         if not getattr(self, "air_data_done", False):    # resumed past V = 7K
             self.play(AIR_DATA, "air-data")
             self.script_done("air-data", 60)
@@ -747,7 +779,11 @@ class Flight:
         else:
             self.start(resume)
         stop = PHASES.index(self.a.to) + 1 if self.a.to else len(PHASES)
-        for ph in PHASES[start:stop]:
+        phases = PHASES[start:stop]
+        if self.a.abort in ("RTLS", "TAL") and "ASCENT" in phases:
+            # no orbit: from the abort's ET SEP straight to the landing
+            phases = phases[:phases.index("ASCENT") + 1] + (["LAND"] if "LAND" in phases else [])
+        for ph in phases:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
             self.snapshot(ph.lower())
@@ -793,6 +829,12 @@ def main():
     ap.add_argument("--attach", action="store_true",
                     help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
                          "(a driver that stopped after sending OPS 301) instead of starting one")
+    ap.add_argument("--abort", choices=["RTLS", "TAL", "ATO"],
+                    help="ASCENT: on the first engine failure (YAGPC_SSME_FAIL), the crew's "
+                         "ABORT MODE rotary and ABORT pb; RTLS and TAL then go from ET SEP "
+                         "straight to LAND (give --land-time for the whole entry)")
+    ap.add_argument("--abort-react", type=float, default=5.0,
+                    help="with --abort: simulated seconds from the failure to the ABORT pb")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
     a = ap.parse_args()
     if a.flight:
