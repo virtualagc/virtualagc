@@ -210,6 +210,9 @@ AIR_DATA = ("+1     switch adp_l DEPLOY\n"
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
+# A TAL's post-MECO OPS 3: after ET SEP, OPS 304 PRO -- for this single GPC
+# the OPS 301 GPC MEMORY table (configuration 3) first, then OPS 3 0 4.
+TAL_OPS304 = OPS301.replace("OPS 3 0 1 PRO", "OPS 3 0 4 PRO").replace("title 3011/", "title 3041/")
 
 
 def keys_signed(x, fmt):
@@ -451,6 +454,12 @@ class Flight:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
         self.wait_sim(20)
+        if self.a.abort == "TAL":
+            # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
+            # keys it, and OPS 1 flies no aerosurfaces
+            self.play(TAL_OPS304, "tal-ops304")
+            self.script_done("tal-ops304", 900)
+            self.say("crew: TAL, OPS 304 PRO after ET SEP")
 
     def oms2_targets(self):
         """THE GROUND'S OMS-2 TARGETS from the actual insertion: the truth
