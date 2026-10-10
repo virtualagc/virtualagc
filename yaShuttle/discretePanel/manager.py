@@ -77,6 +77,30 @@ BUTTON_GAP = 2
 MAC = sys.platform == "darwin"
 
 
+def _client_window(top):
+    """The X window the window manager knows a Tk toplevel by: Tk's wrapper,
+    the PARENT of winfo_id() -- not wm_frame(), which under a reparenting
+    window manager is the manager's own decoration."""
+    try:
+        out = subprocess.run(["xwininfo", "-id", str(top.winfo_id()), "-tree"],
+                             capture_output=True, text=True, timeout=2).stdout
+        m = re.search(r"Parent window id: (0x[0-9a-f]+)", out)
+        return int(m.group(1), 16) if m else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def _active_window_id():
+    """The X window the window manager says is active (_NET_ACTIVE_WINDOW),
+    or None."""
+    try:
+        out = subprocess.run(["xprop", "-root", "_NET_ACTIVE_WINDOW"], capture_output=True,
+                             text=True, timeout=2).stdout
+        return int(out.rsplit("#", 1)[1].split(",")[0].strip(), 16)
+    except (OSError, subprocess.SubprocessError, IndexError, ValueError):
+        return None
+
+
 def pad(n):
     return int(round(n / 2.0)) if MAC else n
 
@@ -1000,6 +1024,31 @@ class Manager(object):
             pass
         top.lift()
         top.after(50, top.focus_force)
+
+        # AND PUT BACK IN FRONT WHILE IT IS OPEN.  Marked always-above and
+        # raised once, it still ended up behind the simulation's windows on the
+        # owner's desktop (2026-10-09).  A question nobody can see is a frozen
+        # Manager, so until it is answered it is re-activated every second.
+        # NOT BY lift(): Marco ignores a raise asked for by an application
+        # that is not in focus -- measured, an always-above window activated
+        # over it stayed there through lift() and -topmost.  An activation
+        # request (_NET_ACTIVE_WINDOW, what wmctrl -a sends) is honoured.
+        def keep_in_front():
+            if not top.winfo_exists():
+                return
+            try:
+                top.attributes("-topmost", True)
+                top.lift()
+                if sys.platform.startswith("linux"):
+                    frame = _client_window(top)
+                    if frame and _active_window_id() != frame:
+                        subprocess.run(["wmctrl", "-i", "-a", "0x%x" % frame],
+                                       check=False, stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.DEVNULL, timeout=2)
+            except (tk.TclError, ValueError, OSError, subprocess.SubprocessError):
+                pass
+            top.after(1000, keep_in_front)
+        top.after(500, keep_in_front)
         # Over the window it belongs to, not wherever the pointer happens to be.
         self._place_dialog(top, W, H)
 
