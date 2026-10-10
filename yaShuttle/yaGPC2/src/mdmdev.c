@@ -623,11 +623,15 @@ static uint16_t pc_word(int m, int k) {
  * they read wet until the tank is nearly empty and go dry together.  The
  * trip quantities are ESTIMATES -- no source gives them: the LO2 sensors sit
  * in the orbiter's manifold, below the ET's 17-in. feedline, so they go dry
- * only with that line emptied; LH2's at the bottom of the tank.  Each is set
- * a little over a second of three-engine flow ahead of vehdyn's depletion,
- * which ends the engines' thrust at zero. */
-#define ET_LO2_DRY_KG (1500.0 * 0.45359237)
-#define ET_LH2_DRY_KG (1000.0 * 0.45359237)
+ * only with that line emptied; LH2's at the bottom of the tank.  The trips
+ * are where the engines still stop with propellant in the line: a shutdown
+ * after PASS's MECO command used ~800 kg LO2 at two engines 91% in vehdyn,
+ * ~1,400 kg scaled to three at 104.5% (the immediate-MECO path), plus
+ * DT_DRY 0.238 s x ~1,100 kg/s on the no-failure path -- at 1,500 lb the
+ * ATO's LO2 ran dry in the shutdown (Mac-portview's abort2-ato, 10-10).  So
+ * LO2 3,500 lb; LH2 1,500 lb, near the 6:1 mixture's share of that. */
+#define ET_LO2_DRY_KG (3500.0 * 0.45359237)
+#define ET_LH2_DRY_KG (1500.0 * 0.45359237)
 
 /* ---------------------------------------------------------------------
  * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
@@ -1409,8 +1413,23 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     /* the ET's low-level sensors (above), one of each on every FA */
     double lo2, lh2;
     if (vehdyn_enabled() && vehdyn_et_propellant(&lo2, &lh2)) {
-        if (lh2 < ET_LH2_DRY_KG) b[18] |= 0x0040u;
-        if (lo2 < ET_LO2_DRY_KG) b[23] |= 0x0080u;
+        static bool saidLh2, saidLo2;          /* the trips, once each, for timing */
+        if (lh2 < ET_LH2_DRY_KG) {
+            b[18] |= 0x0040u;
+            if (!saidLh2) {
+                saidLh2 = true;
+                fprintf(stderr, "mdmdev: ET LH2 LOW LEVEL DRY at t=%.3f (%.0f kg LH2, %.0f kg LO2)\n",
+                        vehdyn_state()->t, lh2, lo2);
+            }
+        }
+        if (lo2 < ET_LO2_DRY_KG) {
+            b[23] |= 0x0080u;
+            if (!saidLo2) {
+                saidLo2 = true;
+                fprintf(stderr, "mdmdev: ET LO2 LOW LEVEL DRY at t=%.3f (%.0f kg LO2, %.0f kg LH2)\n",
+                        vehdyn_state()->t, lo2, lh2);
+            }
+        }
     }
     /* Chamber pressure and driver output follow the fire command, as
      * forward; bits 9-11 of the Pc word are the rate gyros' spin-motor
