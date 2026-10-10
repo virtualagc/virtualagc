@@ -69,11 +69,11 @@ I mention this for the sake of completeness.  There are many examples given late
 * For `specifyAGC.py` alone:  `--min`, `--invent`.
 * For `disassemblerAGC.py --find` alone:  All others. 
 
-# Envisaged Workflow<a name="Envisaged"></a>
+# Envisaged Workflow</a>
 
 ## In a Nutshell
 
-Without further ado, I'll describe the workflow in the tersest possible terms here.  If you like, the remaining subsections under this "Envisage Workflow" section flesh out the topic much more, and [a later section](#Comanche072B2) provides a still-more-detailed example.
+Without further ado, I'll describe the workflow in the tersest possible terms here.  If you like, the remaining subsections under this "Envisage Workflow" section flesh out the topic much more, and [a later section](#example-comanche-72-module-b2) provides a still-more-detailed example.
 
 The task at hand is this:  Given an octal dump of a set of physical rope-memory modules, we want to reconstruct the AGC source code that would assemble to give that identical rope.  I'll refer to this dump "the Rope".  This reconstruction is to be performed with the aid of the already-known source code of a similar AGC software version (or versions), which I'll call "the Baseline(s)".  In short, we want to reconstruct source code for the Rope by using the Baseline(s).
 
@@ -120,7 +120,7 @@ Whereas with `--min=12` (the default) you need only the simpler combination of o
 
 Unfortunately, applying the same switches when trying to match the ROPE against the BASELINE may not work equally well as when matching the BASELINE vs the BASELINE, since some of the problematic chunks of code may have been moved around between versions.  But life isn't perfect, is it? 
 
-The next few subsections are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#Comanche072B2).
+The next few subsections are some worked examples of generating match-patterns using workflow.sh, as of *this* writing.  I find that as I find and fix bugs in disassemblerAGC.py and specifyAGC.py, the command-line switches for workflow.sh sometimes change slightly, so that may be true of the worked examples as well. A more fully-worked-out example involving comparison of BASELINE vs ROPE appears later, in [a later section](#example-comanche-72-module-b2).
 
 *After* the match-patterns are generated is when the final command (of the four listed above) comes into play
 
@@ -154,7 +154,7 @@ Retread 44 can be processed using the same switches as for DAP Aurora 12.  So ca
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ \
                             --hint='NEWJ(S)@PCOPYCYC' --hint='NEWY(S)@NEWJ(S)'
 
-### Baseline Comanche 55<a name="Comanche055"></a>
+### Baseline Comanche 55</a>
 
     workflow.sh Comanche055 --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
                             --hint=TABYCOM@TABPCOM --hint=ASMBLWY@ASMBLWP --skip=9DWTESTJ
@@ -587,7 +587,7 @@ You'll notice that all four of the subroutines I mentioned now appear among the 
 
 By the way, I should mention that *only* special subroutines that are in fixed-fixed memory can be used as labels in flexible operands at the present time.  Thus although `BLANKDSP` and `NVSUB` are shown here as having been found, the disassembler doesn't actually treat them as being special.  On the other hand, `JAMPROC` and `JAMTERM` are in fixed-fixed memory, and the disassembler treats them just like any other special subroutine.
 
-#Example: Comanche 72 Module B2<a name="Comanche072B2"></a>
+#Example: Comanche 72 Module B2</a>
 
 Here's a worked-out example for the following scenario:  We have the dump of rope module B2 for Comanche 72 (Apollo 13 CM), in the form of a partial `--bin --hardware` file.  There are a total of 6 rope modules, B1 through B6, each of which contains 6 memory banks:
 
@@ -630,7 +630,7 @@ Altogether, Comanche072-partial.bin is produced, having just banks 00, 02, 03, 0
 
 Recall that Comanche 72 was for the Apollo 13 Command Module.  I've already said that Comanche 55 (Apollo 11 CM) is *the* baseline to use, but at the same time, it would also make sense to do matches vs the Comanche 67 (Apollo 12 CM) reconstruction, Artemis 72 (Apollo 14 CM), and Luminary 131 (Apollo 13 LM).
 
-Now that we have our ROPE.bin (Comanche072-partial.bin), the next step is to match to our BASELINE.patterns (any or all of Comanche055.patterns, Comanche067.patterns, Artemis072.patterns, or Luminary131.patterns), most of which we showed earlier how to derive using workflow.sh.  For example, [Comanche 55](#Comanche055).  The matching would go something like this, modulo any changes to the command-line switches that we feel have to be made, though I've assumed here that the same switches as were used for Comanche 55 will be fine:
+Now that we have our ROPE.bin (Comanche072-partial.bin), the next step is to match to our BASELINE.patterns (any or all of Comanche055.patterns, Comanche067.patterns, Artemis072.patterns, or Luminary131.patterns), most of which we showed earlier how to derive using workflow.sh.  For example, [Comanche 55](#baseline-comanche-55).  The matching would go something like this, modulo any changes to the command-line switches that we feel have to be made, though I've assumed here that the same switches as were used for Comanche 55 will be fine:
 
     disassemblerAGC.py --find=Comanche055-autogenerated.patterns <Comanche072-partial.bin >Comanche072vs055-partial.matches \
                        --parity --hardware --hint=MISCJUMP@UNAJUMP --hint=MISCJUMP@INDJUMP --hint=-TORQUE@+TORQUE \
