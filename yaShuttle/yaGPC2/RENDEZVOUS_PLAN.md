@@ -1904,6 +1904,29 @@ In either case the ascent/abort guidance words (#PCGGCOM, 495) and the GPS ones 
 the rendezvous but matter to any ascent run from this volume: worth their own trial before going on
 a default volume.  Runs: ~/sts134-runs/rendezvous/dass-all-run1, dass-base-run1.
 
+**Option 2 prepared, opt-in (2026-10-10, review/startrk-mount).**  `YAGPC_STARTRK_MOUNT=flown`
+mounts startrk.c's -Z/-Y trackers with STS-134's CGYS_TNBST (DASS_G2.ASC #PCGYSTA+0076,
+X'BCD6'-X'BCF9'): -Z turned 0.347 deg from the tape's (boresight 0.238), -Y 0.222 deg (0.218);
+test_startrk_mount checks both.  The default stays the tape's.  The COAS needs nothing: the flown
+CGYV_I_CO line of sight is the tape's, body -Z (only its second vector, the reticle reference,
+was patched), and rndz_instruments' COAS already sights along body -Z.
+
+Verified IPL to Ti targeting (stm-run1, port 49900, `--dass-iloads all`, flown mounting) -- it
+**helps but does not fully restore** star-tracker navigation:
+
+| FLTR \|error\| ft, mean / max | baseline (no `all`) | `all`, tape mounting | `all`, flown mounting |
+|---|---|---|---|
+| STRKNAV | 11 / 18 | 346 / 945 | 74 / 192 |
+| Ti targeting | 31 / 39 | 1,109 / 1,301 | 453 / 539 |
+
+Ti (final, FLTR): precision Lambert DVT 10.15 ft/s.  So something else in `all` also costs
+star-tracker navigation.  The other patched words near it are not geometric: #PCGYSTA's
+CGYS_TOL6/10/12/14 and T_LIM1/2 (mark acceptance), #PCGMCOM's IMU RM thresholds and VEL/ATT
+constants, CGMS_GINV and CGMS_OMEGA.  Next to try: `all` less #PCGYSTA's tolerances, or
+`all` less #PCGCMFR (the DAP's stored configurations, which change the attitude hold during the
+pass and so how steady the marks are).  Until that is found, option 1 (keep the tape's
+#PCGYSTA) is the safer way to take the rest of `all`.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the
