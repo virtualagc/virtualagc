@@ -1080,9 +1080,47 @@ class RadarNav(object):
         """SV SEL - ITEM 4 (FLTR) when SV UPDATE POS < 1.0 kft with RNG ACPT
         > 9 -- [10A]'s rule, applied to the radar's marks."""
         w = self.strk_watch()
+        g = w.get
+        # [13B] (p. 4-13): "Record Initial RESID RANGE / RDOT ... IF RESID
+        # RANGE > 5.0 or RDOT > 3.0: SV SEL - ITEM 4 EXEC (PROP); Proceed with
+        # taking data and contact MCC as soon as practical".  What MCC then
+        # does is not in this book (the GPO handbook is not to hand); the
+        # SPEC 33 tool for it is FORCE (RNG ITEM 19, RDOT ITEM 22, GKVREL),
+        # which takes the marks the edit test is refusing.  Played here as
+        # this driver's MCC: when the range marks are all being refused --
+        # 10 more REJ than ACPT since the pass began, the residual one sign --
+        # FORCE RNG and RDOT; back to AUTO (ITEM 17, 20) once 10 forced marks
+        # are in or the residual is under 1 kft.
+        rej0, acc0 = g("CGNV_N_REJECT$3") or 0, g("CGNV_N_ACCEPT$3") or 0
+        r0 = g("CGNV_DISP_DELQ$3")
+        if isinstance(r0, float) or isinstance(g("CGNV_DISP_DELQ$4"), float):
+            self.say("%s: [13B] initial RESID RANGE %s RDOT %s%s" % (
+                what, _f(r0), _f(g("CGNV_DISP_DELQ$4")),
+                " -- over [13B]'s 5.0/3.0: SV SEL PROP (as it is), taking data, MCC" if
+                (isinstance(r0, float) and abs(r0) > 5.0) or
+                (isinstance(g("CGNV_DISP_DELQ$4"), float) and abs(g("CGNV_DISP_DELQ$4")) > 3.0) else ""))
+        forced, signs, facc0 = False, [], 0
         while self.truth()["gmt"] < until_gmt:
+            rej, acc, res = g("CGNV_N_REJECT$3") or 0, g("CGNV_N_ACCEPT$3") or 0, g("CGNV_DISP_DELQ$3")
+            if isinstance(res, float) and res != 0.0:
+                signs = (signs + [res > 0])[-6:]
+            if (not forced and getattr(self.a, "rr_force", True) and (rej - rej0) - (acc - acc0) >= 10
+                    and len(signs) >= 6 and len(set(signs)) == 1):
+                self.strk_keys("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 1 9 EXEC\n+3     keys ITEM 2 2 EXEC\n"
+                               "+3     keys RESUME\n", "rr-force-%s" % what.replace(" ", "-").lower())
+                forced, facc0 = True, acc
+                self.say("MCC (this driver's; not in RNDZ/134 FIN A): FORCE RNG - ITEM 19, RDOT - ITEM 22 "
+                         "-- %d range marks refused against %d taken, RESID rng %s one sign; %s"
+                         % (rej - rej0, acc - acc0, _f(res), self.rr_summary()))
+            elif forced and (acc - facc0 >= 10 or (isinstance(res, float) and abs(res) < 1.0)):
+                self.strk_keys("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 1 7 EXEC\n+3     keys ITEM 2 0 EXEC\n"
+                               "+3     keys RESUME\n", "rr-auto-%s" % what.replace(" ", "-").lower())
+                forced = False
+                rej0, acc0 = g("CGNV_N_REJECT$3") or 0, g("CGNV_N_ACCEPT$3") or 0
+                self.say("MCC: back to AUTO RNG - ITEM 17, RDOT - ITEM 20 (%d forced marks in); %s"
+                         % (acc - facc0, self.rr_summary()))
             ok, n, pos = self.rr_converged()
-            if ok:
+            if ok and not forced:
                 self.strk_keys("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 4 EXEC\n+3     keys RESUME\n",
                                "rr-sv-sel-fltr-%s" % what.replace(" ", "-").lower())
                 self.wait_sim(8)
@@ -1335,8 +1373,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         alone.  The tape is not touched.  A range/range-rate bias pair
         already copied into CGNV_SENSOR_BIAS (RNDZ NAV ENA) as the LM's 1.0,
         1.0 goes to the MM's 0 with it, as --zero-sensor-bias does."""
-        prefixes = []
+        prefixes, ranges = [], []
         for g in self.a.dass_iloads.split(","):
+            if g.startswith("@"):            # @AAAAA-BBBBB: halfword addresses (hex), for bisecting a csect
+                lo, _, hi = g[1:].partition("-")
+                ranges.append((int(lo, 16), int(hi or lo, 16)))
+                continue
             prefixes += DASS_GROUPS.get(g, (g if g.startswith("#") else "#" + g,))
         p = os.path.join(capdir, "gpc1.mem.bin")
         m = bytearray(open(p, "rb").read())
@@ -1344,7 +1386,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         rrdot_init = 2 * 0xB47A
         rrdot_was = bytes(m[rrdot_init:rrdot_init + 8])
         for a, cs, lm, mm in dass_patches(self.a.dass):
-            if not any(cs.startswith(x) for x in prefixes):
+            if not (any(cs.startswith(x) for x in prefixes) or any(lo <= a <= hi for lo, hi in ranges)):
                 continue
             t = struct.unpack(">H", bytes(m[2 * a:2 * a + 2]))[0]
             if t == mm:
@@ -1580,6 +1622,21 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         los = vsub(tgt["r"], tru["r"])
         mz = [-c for c in body_axis(tru["q"], 2)]
         out["minusZ_to_iss_deg"] = math.degrees(math.acos(max(-1, min(1, vdot(mz, los) / vnorm(los)))))
+        # PASS's own attitude (CGNV_Q_BI_HFE, body -> M50) against the truth's:
+        # the angle of the rotation between them, for the quaternion and for
+        # its conjugate (the convention is checked here, not assumed)
+        qs, qv = dl.get("CGNV_Q_BI_HFE.QS"), [dl.get("CGNV_Q_BI_HFE.QV$%d" % i) for i in (1, 2, 3)]
+        if isinstance(qs, float) and all(isinstance(c, float) for c in qv):
+            def ang(qa, qb):
+                d = abs(sum(a * b for a, b in zip(qa, qb))) / math.sqrt(sum(a * a for a in qa) * sum(b * b for b in qb))
+                return math.degrees(2.0 * math.acos(min(1.0, d)))
+            out["pass_att_err_deg"] = (ang([qs] + qv, tru["q"]), ang([qs] + [-c for c in qv], tru["q"]))
+            out["dap_att_err"] = [dl.get("CGCV_ATTITUDE_ERROR$%d" % i) for i in (1, 2, 3)]
+            # the jets RM leaves the DAP (a deselected vernier is a 0 bit):
+            # FWD X'FFFF' and AFT X'FFFFFFFF' with everything selected
+            fa, aa = dl.get("CGRB_JET_AVAILABLE_FWD"), dl.get("CGRB_JET_AVAILABLE_AFT")
+            out["dap_state"] = ("jets available FWD %04X AFT %08X" % (fa, aa)
+                                if isinstance(fa, int) and isinstance(aa, int) else "jets available ?")
         cyc = self.ears.cycle
         if cyc and cyc.get("t_state"):
             ts = cyc["t_state"]
@@ -1662,6 +1719,11 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                             c["pass_rdot_fts"] - c["truth_rdot_at_ts_fts"], c["orb_err_ft"], c["tgt_err_ft"]))
                 line += ("\n      orbiter nav error LVLH: %+.1f %+.1f %+.1f ft, %+.4f %+.4f %+.4f ft/s"
                          % tuple(c["orb_dr_lvlh"] + c["orb_dv_lvlh"]))
+            if "pass_att_err_deg" in c:
+                line += ("\n      PASS's attitude vs the truth: %.2f deg (q) / %.2f deg (q*); DAP attitude error %s"
+                         % (c["pass_att_err_deg"] + (" ".join("%+.2f" % x if isinstance(x, float) else "?"
+                                                              for x in c["dap_att_err"]),)))
+                line += "; " + c["dap_state"]
             self.say("check: " + line)
 
     def snapshot(self, name):
@@ -2975,6 +3037,8 @@ def main():
                          "properties and jet map, i.e. the KSC6 volume with yaGPC2/tools/sites/"
                          "sts134-rndz-iloads.json applied by tools/mission_reconfig.py; the owner's choice, "
                          "2026-10-10).  The unpatched volume is " + BASE_VOLUME)
+    ap.add_argument("--no-rr-force", dest="rr_force", action="store_false",
+                    help="don't play MCC's FORCE of the radar's refused range marks (see rr_converge)")
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
