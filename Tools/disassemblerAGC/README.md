@@ -587,7 +587,7 @@ You'll notice that all four of the subroutines I mentioned now appear among the 
 
 By the way, I should mention that *only* special subroutines that are in fixed-fixed memory can be used as labels in flexible operands at the present time.  Thus although `BLANKDSP` and `NVSUB` are shown here as having been found, the disassembler doesn't actually treat them as being special.  On the other hand, `JAMPROC` and `JAMTERM` are in fixed-fixed memory, and the disassembler treats them just like any other special subroutine.
 
-#Example: Comanche 72 Module B2</a>
+# Example: Comanche 72 Module B2</a>
 
 Here's a worked-out example for the following scenario:  We have the dump of rope module B2 for Comanche 72 (Apollo 13 CM), in the form of a partial `--bin --hardware` file.  There are a total of 6 rope modules, B1 through B6, each of which contains 6 memory banks:
 
