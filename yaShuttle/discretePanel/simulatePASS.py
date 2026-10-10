@@ -925,8 +925,16 @@ def running_programs(port_base):
     panel.json comes up with its DEFAULTS -- POWER OFF and MODE HALT -- and
     halts the vehicle it was restored beside.
     """
+    # EVERY PROGRAM a run starts, the manager and the hand controllers among
+    # them: a stray manager.py left on a port base by a kill that matched only
+    # the run directory (its command line has none) went unnoticed here, and a
+    # fresh run started beside it hung at OPS 101 -- GNC OPS 0 after the 4th
+    # mass-memory read, yaGPC2 alive -- in 1 of 3 tries (Mac-portview's hang
+    # test, forClaude/ascent-hang/RATE.md, 2026-10-10; 0 of 15 on clean port
+    # bases).  How it interferes is not yet known.
     names = ("yaGPC2", "MEDS2.py", "panelO6.py", "discretePanel.py", "cam.py", "stsKeyboard.py",
-             "portview.py")
+             "portview.py", "manager.py", "handcontrollers.py", "rpop.py", "subtitles.py",
+             "truthball.py")
     found = []
     for entry, argv in _argvs():
         if not argv:
