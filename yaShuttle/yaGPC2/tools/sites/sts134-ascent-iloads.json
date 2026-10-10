@@ -1,0 +1,142 @@
+{
+ "flight": "STS-134",
+ "notes": "#PCGGCOM, the ascent/abort guidance compool (resident: one copy on the volume, flat = halfword + 109968). STS-134's flown load changed 506 words (DASS_G16.ASC and DASS_G2.ASC PATCH SUMMARY agree).  Patched here: only the words that the KSC6 tape still holds at the generic load-module value AND that no launch-day path sets -- not the variables the tape already carries launch-day values for (THET/PSI/PHI, winds, throttles, masses, launch year, RNP day, plane, MECO targets: the DASS values for these are the 2010 tape build's, superseded on the day), not the ranges examples/flights/sts134-dolilu.json uplinks (GMESTA ops 15, 25, 37, 96: DOLILU stays authoritative), and not CGGS_PPOLY/CGGS_DELPLO, the first-stage attitude-table velocity breakpoints and limit that the DOLILU THET/PSI/PHI tables were shaped against.  What is left: CGES_OMS_ASSIST_DELAY (nominal OMS assist), the engine-out/abort steering constants (GGNSSM), the RTLS targets (CGGS_TARGETn, GMESTA op 88, which the DOLILU file does not send), CGGS_V_KMAX_DOWN/UP (op 89), CGGS_NZSW1 and CGGS_GRNZC1.  Apply on top of the KSC6 volume (or sts134-gnc-iloads.json).  See yaGPC2/ASCENT_ILOADS.md.",
+ "cells": [
+  {
+   "name": "#PCGGCOM CGGS_P_INT",
+   "config": "G1",
+   "addr": "04ea8",
+   "flat": 130104,
+   "H": "3FCCCCCC3FB851EB",
+   "was": "40141B324011DF11"
+  },
+  {
+   "name": "#PCGGCOM CGGS_P_SLP",
+   "config": "G1",
+   "addr": "04eac",
+   "flat": 130108,
+   "H": "BD3A322ABD346DC5",
+   "was": "BD1C277DBD2A3C94"
+  },
+  {
+   "name": "#PCGGCOM CGGS_DEL_CST",
+   "config": "G1",
+   "addr": "04eb0",
+   "flat": 130112,
+   "H": "3F3D70A33F3D70A3",
+   "was": "40141B324012FCCE"
+  },
+  {
+   "name": "#PCGGCOM CGGS_V_EO_SW",
+   "config": "G1",
+   "addr": "04eb4",
+   "flat": 130116,
+   "H": "4338",
+   "was": "4315"
+  },
+  {
+   "name": "#PCGGCOM CGGS_V_KMAX_DOWN",
+   "config": "G1",
+   "addr": "04f5e",
+   "flat": 130286,
+   "H": "00000000",
+   "was": "4430D400"
+  },
+  {
+   "name": "#PCGGCOM CGGS_V_KMAX_UP",
+   "config": "G1",
+   "addr": "04f60",
+   "flat": 130288,
+   "H": "44753000",
+   "was": "44196400"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET2_1",
+   "config": "G1",
+   "addr": "04f6a",
+   "flat": 130298,
+   "H": "43365D84",
+   "was": "433DD2EB"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET4_1",
+   "config": "G1",
+   "addr": "04f6c",
+   "flat": 130300,
+   "H": "431A4AF8",
+   "was": "4320DA2E"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET6_1",
+   "config": "G1",
+   "addr": "04f6e",
+   "flat": 130302,
+   "H": "438838ED",
+   "was": "438F78D1"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET9_1",
+   "config": "G1",
+   "addr": "04f70",
+   "flat": 130304,
+   "H": "402CA9F7",
+   "was": "402D1E6A"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET10_1",
+   "config": "G1",
+   "addr": "04f72",
+   "flat": 130306,
+   "H": "4029124D",
+   "was": "402872C8"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET11_1",
+   "config": "G1",
+   "addr": "04f74",
+   "flat": 130308,
+   "H": "402C3476",
+   "was": "402B8B58"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET12_1+1",
+   "config": "G1",
+   "addr": "04f77",
+   "flat": 130311,
+   "H": "1EA9",
+   "was": "2042"
+  },
+  {
+   "name": "#PCGGCOM CGGS_TARGET14_1",
+   "config": "G1",
+   "addr": "04f78",
+   "flat": 130312,
+   "H": "441A96B6",
+   "was": "00000000"
+  },
+  {
+   "name": "#PCGGCOM CGGS_GRNZC1+1",
+   "config": "G1",
+   "addr": "04f7b",
+   "flat": 130315,
+   "H": "F5C2",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGGCOM CGGS_NZSW1",
+   "config": "G1",
+   "addr": "04f7c",
+   "flat": 130316,
+   "H": "411B5C28",
+   "was": "411A6666"
+  },
+  {
+   "name": "#PCGGCOM CGES_OMS_ASSIST_DELAY",
+   "config": "G1",
+   "addr": "050b2",
+   "flat": 130626,
+   "H": "41A0",
+   "was": "41F0"
+  }
+ ]
+}
