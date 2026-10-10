@@ -266,7 +266,8 @@ LAMBERT_MC_SETS = (11, 12, 13, 14, 19)
 DASS_G2 = os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC")
 # the same values made permanent on a volume (yaGPC2/tools/sites/
 # sts134-rndz-iloads.json through tools/mission_reconfig.py, 2026-10-09)
-RNDZ_VOLUME = os.path.expanduser("~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz.mmv")
+RNDZ_VOLUME = os.path.expanduser("~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv")
+BASE_VOLUME = os.path.expanduser("~/dropbox-copy/sts134-ksc6-entry/OI340700-v44boot-sts134-ksc6.mmv")
 DASS_GROUPS = {
     # orbit targeting (CGZ compools, GW*) and relative navigation (CGN
     # compools, GL*): what SPEC 33 and 34 run on
@@ -2966,12 +2967,11 @@ def main():
     ap.add_argument("--logs", required=True)
     ap.add_argument("--port-base", type=int, default=48600)
     ap.add_argument("--rate", type=float, default=1.0)
-    ap.add_argument("--tape", default=os.path.expanduser(
-        "~/dropbox-copy/sts134-ksc6-entry/OI340700-v44boot-sts134-ksc6.mmv"),
-                    help="the mass-memory volume (default %(default)s); for STS-134's own rendezvous I-loads "
-                         "from the IPL on, a copy with yaGPC2/tools/sites/sts134-rndz-iloads.json applied "
-                         "(tools/mission_reconfig.py), e.g. " + RNDZ_VOLUME + " -- then no --dass-iloads, "
-                         "--zero-sensor-bias or --lambert-mc is needed on a fresh run")
+    ap.add_argument("--tape", default=RNDZ_VOLUME,
+                    help="the mass-memory volume (default %(default)s: STS-134's own rendezvous I-loads, mass "
+                         "properties and jet map, i.e. the KSC6 volume with yaGPC2/tools/sites/"
+                         "sts134-rndz-iloads.json applied by tools/mission_reconfig.py; the owner's choice, "
+                         "2026-10-10).  The unpatched volume is " + BASE_VOLUME)
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
@@ -3072,6 +3072,11 @@ def main():
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()
+    if not os.path.exists(a.tape):
+        sys.exit("fly_rndz134: no volume %s%s" % (a.tape, "" if a.tape != RNDZ_VOLUME else
+                 "\n  make it once from the KSC6 volume (yaGPC2/tools): python3 mission_reconfig.py "
+                 "sites/sts134-rndz-iloads.json %s --out %s\n  (or copy it from forClaude/volumes/)"
+                 % (BASE_VOLUME, RNDZ_VOLUME)))
     if a.start_utc:
         globals()["EPOCH"] = a.start_utc
     a.attach = a.attach_running
