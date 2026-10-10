@@ -86,6 +86,7 @@ TITLE_ROLES = [
     (re.compile(r"^RHC RH$"), "hc_rh"),
     # truthball.py, the debugging attitude indicator driven by the truth.
     (re.compile(r"^Truth ADI$"), "truthball"),
+    (re.compile(r"^RPOP$"), "rpop"),
     (re.compile(r"^([123])$"), lambda m: "kybd%s" % m.group(1)),
     # A DISPLAY BY ITS OWN NAME, now that its title is just "CRT1".  The
     # command line is tried first and normally answers; this is the fallback
@@ -118,6 +119,8 @@ ROLE_PATTERNS = [
      lambda m: _hc_role(m.group(1))),
     # truthball.py's window (simulatePASS --truth-ball).
     (re.compile(r"truthball\.py"), lambda m: "truthball"),
+    # rpop.py, the aft-station PGSC's RPOP display.
+    (re.compile(r"\brpop\.py"), lambda m: "rpop"),
 ]
 
 
