@@ -219,6 +219,21 @@ ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
 # the run's capture was taken on, and a TAL needs the volume's G3 runway table.
 TAL_OPS3 = "+1     keys OPS 3 0 1 PRO\nwait crt 1 title 3041/ timeout 180\n"
 
+# A TAL's runway height, for vehdyn's ground (YAGPC_GROUND_ALT_FT, read once
+# at start-up; unset is KSC SLF's 8.3 ft, which RTLS and ATO keep).  The flown
+# #PCGN13R, tools/sites/sts134-abort-iloads.json (G16 and G3 agree): area N is
+# runway slots 2N-1 (primary) and 2N; CGNS_RUNWAY_ALT is ft above PASS's
+# ellipsoid (a 20925646.3 ft, f 1/298.3 -- vehdyn's geodetic_h_ft too), DELH
+# the MSL above it.  The primary runway's height (the other end's in comment):
+#   BEN area 2, slot 3 BEN36 1449 (slot 4 BEN18 1494), DELH 64 -> 1385 ft MSL
+#   MRN area 3, slot 5 MRN20  326 (slot 6 MRN02  341), DELH 57 ->  269 ft MSL
+#   ZZA area 4, slot 7 ZZA30  927 (slot 8 ZZA12  899), DELH 65 ->  862 ft MSL
+# (areas 12-14, slots 23-28, repeat them).  PASS flies CGNS_TAL_PRIME_AREA:
+# flown 4 (Zaragoza, DASS_G3 patch summary 0002 -> 0004), but #PCGNFL1 is not
+# among the abort I-loads, so the -full2 volume keeps the tape's 2: Ben Guerir.
+TAL_SITES = {"BEN": 1449.0, "MRN": 326.0, "ZZA": 927.0}
+TAL_DEFAULT = "BEN"
+
 
 def keys_signed(x, fmt):
     """A number as DEORB MNVR keystrokes: its sign, then digit by digit."""
@@ -833,10 +848,19 @@ def main():
                     help="ASCENT: on the first engine failure (YAGPC_SSME_FAIL), the crew's "
                          "ABORT MODE rotary and ABORT pb; RTLS and TAL then go from ET SEP "
                          "straight to LAND (give --land-time for the whole entry)")
+    ap.add_argument("--abort-site", choices=sorted(TAL_SITES), type=str.upper,
+                    help="with --abort TAL: the ground at this TAL site's runway height "
+                         "(default %s, the site PASS flies on this tape; the crew's site "
+                         "selection is not changed)" % TAL_DEFAULT)
     ap.add_argument("--abort-react", type=float, default=5.0,
                     help="with --abort: simulated seconds from the failure to the ABORT pb")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
     a = ap.parse_args()
+    if a.abort == "TAL":                    # vehdyn's ground at the TAL runway
+        site = a.abort_site or TAL_DEFAULT
+        os.environ["YAGPC_GROUND_ALT_FT"] = "%g" % TAL_SITES[site]
+        print("fly_sts134: TAL to %s: ground at %g ft above the ellipsoid"
+              % (site, TAL_SITES[site]), flush=True)
     if a.flight:
         global EPOCH, T0, GMTLO, OMS2_DTIG
         f = json.load(open(a.flight))
