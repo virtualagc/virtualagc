@@ -1404,6 +1404,9 @@ class Manager(object):
             return
         argv = [sys.executable, script, "--port-base", str(self.args.port_base),
                 "--size", str(self.args.portview_size)]
+        # the run's own views unless a station asked for others: Start gave
+        # only the forward view to a run begun with "aft,cctv" (owner)
+        views = views or self.args.portview_views
         if views:
             argv += ["--views", views]
         try:
@@ -1546,6 +1549,9 @@ def main(argv=None):
     ap.add_argument("--gpcs", metavar="LIST", default="",
                     help="which GPCs this run has, for the status line")
     ap.add_argument("--crts", type=int, metavar="N", default=0)
+    ap.add_argument("--portview-views", default="", metavar="LIST",
+                    help="the run's portview views, for Start under WINDOW VIEWS (simulatePASS "
+                         "--portview-views; empty: portview's default)")
     ap.add_argument("--portview-size", type=int, metavar="N", default=368,
                     help="portview.py's --size for Start under WINDOW VIEWS (default 368)")
     ap.add_argument("--hc-size", type=int, metavar="N", default=384,

@@ -2083,6 +2083,7 @@ def main():
                             "--crts", str(args.crts),
                             "--hc-size", str(tk_px(size)),
                             "--portview-size", str(args.portview_size),
+                            "--portview-views", args.portview_views or "",
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.
