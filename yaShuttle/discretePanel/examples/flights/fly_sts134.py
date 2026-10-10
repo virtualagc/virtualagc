@@ -233,7 +233,7 @@ class Flight:
                 for k, v in FL["env"].items()}
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
                    YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
-                   YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG="5",
+                   YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG=os.environ.get("FLY_STATELOG", "5"),
                    PYTHONUNBUFFERED="1", **fenv)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
@@ -426,8 +426,20 @@ class Flight:
         self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
+        aborted = not self.a.abort
         while "ET SEPARATION at" not in self.log_text():
-            time.sleep(5)
+            if not aborted:
+                m = re.search(r"eiu: ME\d FAILED at t=[\d.]+", self.log_text())
+                if m:
+                    # the crew's minimum (ASC/134 cue cards' boundaries are
+                    # the caller's: it picks the failure time and the mode):
+                    # ABORT MODE rotary to the mode, ABORT pb, rotary OFF
+                    self.wait_sim(self.a.abort_react)
+                    self.play("+0     switch abort_mode %s\n+1     press abort_pb\n"
+                              "+3     switch abort_mode OFF\n" % self.a.abort, "abort")
+                    self.say("crew: %s seen; ABORT MODE %s, ABORT pb" % (m.group(0), self.a.abort))
+                    aborted = True
+            time.sleep(1 if not aborted else 5)
         # ET separation in the vehicle's GMT, from the time-tagged state lines
         # around it, kept for OMS 2 (which may start from a capture)
         text = self.log_text()
@@ -677,6 +689,11 @@ class Flight:
         itself, autoland in A/L); the crew deploys the gear and the drag
         chute and brakes; until the wheels stop or the time runs out."""
         self.pfd_on_crt2()
+        if self.a.abort in ("RTLS", "TAL"):
+            # an abort's entry flies itself (MM 304 after a TAL's ET SEP; RTLS
+            # MM 601-603 then 305): the air data probes at Mach 5, not before
+            while (self.last_entry_state() or {}).get("M", 99.0) > 5.0:
+                time.sleep(2.0)
         if not getattr(self, "air_data_done", False):    # resumed past V = 7K
             self.play(AIR_DATA, "air-data")
             self.script_done("air-data", 60)
@@ -747,7 +764,11 @@ class Flight:
         else:
             self.start(resume)
         stop = PHASES.index(self.a.to) + 1 if self.a.to else len(PHASES)
-        for ph in PHASES[start:stop]:
+        phases = PHASES[start:stop]
+        if self.a.abort in ("RTLS", "TAL") and "ASCENT" in phases:
+            # no orbit: from the abort's ET SEP straight to the landing
+            phases = phases[:phases.index("ASCENT") + 1] + (["LAND"] if "LAND" in phases else [])
+        for ph in phases:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
             self.snapshot(ph.lower())
@@ -793,6 +814,12 @@ def main():
     ap.add_argument("--attach", action="store_true",
                     help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
                          "(a driver that stopped after sending OPS 301) instead of starting one")
+    ap.add_argument("--abort", choices=["RTLS", "TAL", "ATO"],
+                    help="ASCENT: on the first engine failure (YAGPC_SSME_FAIL), the crew's "
+                         "ABORT MODE rotary and ABORT pb; RTLS and TAL then go from ET SEP "
+                         "straight to LAND (give --land-time for the whole entry)")
+    ap.add_argument("--abort-react", type=float, default=5.0,
+                    help="with --abort: simulated seconds from the failure to the ABORT pb")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
     a = ap.parse_args()
     if a.flight:
