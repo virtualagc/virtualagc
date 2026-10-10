@@ -14495,16 +14495,17 @@ class MedsRunner(object):
                 words = data.decode("utf-8", errors="replace").split()
                 if len(words) == 2 and words[0].lower() == "station" and \
                         words[1].lower() in ("fwd", "aft", "all"):
-                    # THE MANAGER'S STATION: CRT 4 is the aft flight deck's,
-                    # CRTs 1-3 the forward station's; one station's are shown
+                    # THE MANAGER'S STATION: CRT 4 and AFD 1 are the aft
+                    # flight deck's, CRTs 1-3 the forward station's; one
+                    # station's are shown
                     st = words[1].lower()
                     for w in QtWidgets.QApplication.topLevelWidgets():
                         if not isinstance(w, MDUWindow):
                             continue
-                        n = re.match(r"crt(\d)$", str(w.lruName).lower())
-                        if not n:
+                        name = str(w.lruName).lower()
+                        if not re.match(r"(crt\d|afd1)$", name):
                             continue
-                        if st == "all" or (int(n.group(1)) == 4) == (st == "aft"):
+                        if st == "all" or (name in ("crt4", "afd1")) == (st == "aft"):
                             w.show()
                         else:
                             w.hide()

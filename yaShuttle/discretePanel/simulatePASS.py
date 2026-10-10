@@ -1873,7 +1873,12 @@ def main():
                         [py, "MEDS2.py"] + meds_extra
                         + ["--port-base", str(args.port_base), "--size", str(size),
                            "--scale", str(args.scale)] + title_arg
-                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)]
+                        # AFD 1, the aft station's other display, beside CRT 4
+                        # and fed by the same IDP 4 (SCOM p261, p310): it is
+                        # where the aft crew's ORBIT PFD goes, leaving CRT 4
+                        # to PASS's pages
+                        + (["afd1"] if k == 3 else []), HERE, e)
                 time.sleep(1)
             if args.keyboards:
                 for k in range(args.keyboards):

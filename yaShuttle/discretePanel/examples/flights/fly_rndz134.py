@@ -118,6 +118,7 @@ import argparse
 import calendar
 import datetime
 import json
+import shutil
 import math
 import os
 import re
@@ -1200,6 +1201,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.dass_iloads(resume)
         if resume:
             self.seed_imu_rm(resume)
+        if resume and getattr(self.a, "crts", 1) >= 4:
+            self.seed_idp4(resume)
         cmd +=["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -1454,6 +1457,42 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def wait_sim(self, dt):
         self.cw_ack()
         fly_sts134.Flight.wait_sim(self, dt)
+
+    def seed_idp4(self, capdir):
+        """IDP 4 LOADED AND POWERED in a capture that has it off, so CRT 4 and
+        AFD 1 can serve the aft station.
+
+        PASS LOADS AN IDP ONLY IN OPS 0 AFTER ITS IPL, IN PAYLOAD OPS 9, OR
+        IN SM2/SM4 (OI340600 SSSRC/DMIMCD.hal 508-530: anything else logs
+        "IDP IPL attempt invalid, improper memory configuration").  So a GNC
+        computer in OPS 2 polls a freshly powered IDP 4 for ever and never
+        loads it (gpc-causes #294).  On the vehicle that never arose: every
+        IDP was loaded before launch or by the SM computer on orbit, and an
+        IDP keeps its load.  These captures were flown with IDP 4 off, so it
+        is given the state it would have had -- IDP 1's loaded state, which
+        is the same IDP software and formats; PASS repaints the page the
+        moment one is called up on CRT 4.  A capture with IDP 4 already on
+        is left alone."""
+        pj = os.path.join(capdir, "panel.json")
+        src = os.path.join(capdir, "idp1.json")
+        if not (os.path.isfile(pj) and os.path.isfile(src)):
+            return
+        panel = json.load(open(pj))
+        power = panel.get("idp_power") or []
+        if (len(power) >= 4 and power[3] == "ON"
+                and os.path.isfile(os.path.join(capdir, "idp4.json"))):
+            return
+        st = json.load(open(src))
+        st.update(id="IDP4", deuId=4, kybdSel=0)   # keyboard 3 is wired to IDP 4 alone
+        json.dump(st, open(os.path.join(capdir, "idp4.json"), "w"))
+        shutil.copyfile(os.path.join(capdir, "idp1.mem.bin"),
+                        os.path.join(capdir, "idp4.mem.bin"))
+        while len(power) < 4:
+            power.append("OFF")
+        power[3] = "ON"
+        panel["idp_power"] = power
+        json.dump(panel, open(pj, "w"))
+        self.say("IDP 4: loaded and powered in the capture (PASS in OPS 2 does not load an IDP)")
 
     def seed_imu_rm(self, capdir):
         """PASS's IMU attitude RM thresholds seeded in a capture's memory

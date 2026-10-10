@@ -17,7 +17,7 @@ WHAT A WINDOW IS CALLED.  Not its title -- two keyboards are titled "1" and
 Each window is named for the program that made it, from that process's own
 command line, so the same name matches the same window in a later run:
 
-    crt1 crt2 crt3 crt4     the MEDS2.py displays
+    crt1 crt2 crt3 crt4     the MEDS2.py displays (afd1: the aft one beside crt4)
     kybd1 kybd2 kybd3       the DPS keyboards
     panel                   panelO6.py
     cam                     cam.py
@@ -506,6 +506,11 @@ def role_of(pid, title):
     # portview.py's four windows, one process: told apart by title.
     if title.strip() in PORTVIEW_ROLES and (not cmd or "portview.py" in cmd):
         return PORTVIEW_ROLES[title.strip()], cmd
+    # MEDS2.py's displays by their own name when the title is one: CRT 4's
+    # process also holds AFD 1, and its command line names only crt4
+    m = re.match(r"^(CRT|CDR|PLT|MFD|AFD)(\d)$", title.strip(), re.I)
+    if m and "MEDS2.py" in cmd:
+        return m.group(0).lower(), cmd
     for pattern, name in ROLE_PATTERNS:
         m = pattern.search(cmd)
         if m:

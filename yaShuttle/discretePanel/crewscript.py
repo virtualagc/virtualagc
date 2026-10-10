@@ -150,7 +150,7 @@ PANEL_ARGS = {
     "gpcid": r"[1-5]",
     "bit": r"[ab]\s+\d+\s+" + _ON_OFF,
     # An MDU edgekey, by position under the display, 1-6 left to right.
-    "edgekey": r"crt[1-4]\s+[1-6]",
+    "edgekey": r"(crt[1-4]|afd1)\s+[1-6]",
     # The GROUND: a launch-sequence command from the Launch Processing System
     # over the launch data bus (yaGPC2's lpsmodel.c).
     "lps": r"(hold|resume|recycle|go_auto|go_engine|bypass_a|bypass_b|pogo"
@@ -180,7 +180,7 @@ PANEL_USAGE = {
     "circle": "circle FEATURE [COLOR] [DIAMETER] -- see 'circle' in the help for FEATURE names",
     "nocircle": "nocircle (no argument)",
     "autocircle": "autocircle [SECONDS] [COLOR] [DIAMETER] -- SECONDS 1 unless given; 0 turns it off",
-    "edgekey": "edgekey crt1-4 1-6 -- the MDU edgekey under that display, 1 = leftmost",
+    "edgekey": "edgekey crt1-4|afd1 1-6 -- the MDU edgekey under that display, 1 = leftmost",
     "lps": "lps hold|resume|recycle|go_auto|go_engine|gmtlo +S|gmtlo =S|bypass_a|bypass_b|pogo"
            "|code N [hex ...]",
     "thc": "thc fwd|aft +x|-x|+y|-y|+z|-z SECONDS",
@@ -387,8 +387,9 @@ HELP = """\
     kybdsel left 1|3    LEFT IDP/CRT SEL
     kybdsel right 2|3   RIGHT IDP/CRT SEL
    The MDUs (MEDS2), not a crew panel:
-    edgekey crtN K      press edgekey K (1-6, left to right) under CRT N; the
-                        MDU runs it itself, as a click would
+    edgekey crtN K      press edgekey K (1-6, left to right) under CRT N (or
+                        afd1, the aft station's AFD 1); the MDU runs it
+                        itself, as a click would
    The ground, not the crew -- the Launch Processing System's launch-sequence
    commands over the launch data bus (yaGPC2's lpsmodel.c; polling must be on:
    DPS UTILITY SPEC 1 ITEM 50 in OPS 9):

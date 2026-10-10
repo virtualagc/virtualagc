@@ -447,24 +447,50 @@ def settled_at(t_run, n_needed=6, lat_ft=0.5, x_ft=1.0, rate=0.04):
 
 
 def orbit_pfd_on_crt2(self):
-    """The ORBIT PFD (MEDS FLT INST menu: edgekey 2 FLT INST, then edgekey 3
-    ORBIT PFD), the attitude and rates beside the DPS display the driver
-    keys on CRT 1: with --crts 4 on CRT 4, the aft station's display -- a
-    stand-in for the aft station's AFD 1, which is not simulated (and what
-    AFD 1 showed during docking is not documented: apds-cctv-aft-findings.md)
-    -- else on CRT 2 with --crts 2.  PASS loads the IDP itself once it is
-    powered, in about 5 s (fly_sts134.PFD_ON_CRT2)."""
+    """The aft station's displays (with --crts 4), else the ORBIT PFD on CRT 2.
+
+    THE AFT STATION HAD TWO: AFD 1 and CRT 4 on panel R12, both fed by IDP 4,
+    with keyboard 3 wired to IDP 4 alone (SCOM p261, p277, p310).  What AFD 1
+    showed during docking is not documented (apds-cctv-aft-findings.md); the
+    checklist names DPS pages for "CRT", so the inference is the ORBIT PFD on
+    AFD 1 and PASS on CRT 4.  So: CRT 3 released and CRT 4 given to GPC 1
+    from keyboard 1 ("all GPC/CRT key entries ... should be made to a
+    PASS-commanded CRT", DPS Workbook USA005350 Rev B), then IDP 4
+    powered; the ORBIT PFD on AFD 1
+    (MEDS menu: edgekey 1 UP, 2 FLT INST, 3 ORBIT PFD); and SPEC 33 REL NAV,
+    the radar's range and rate, keyed on keyboard 3.
+
+    With --crts 2 (no aft displays) the PFD goes on CRT 2, beside the DPS
+    display the driver keys on CRT 1 (fly_sts134.PFD_ON_CRT2)."""
     if self.a.crts < 2 or getattr(self, "pfd_up", False):
         return
-    n = 4 if self.a.crts >= 4 else 2
-    self.play("+1     idppower %d on\n"
-              "+10    edgekey crt%d 1\n"          # UP: the main menu
-              "+2     edgekey crt%d 2\n"          # FLT INST
-              "+2     edgekey crt%d 3\n" % (n, n, n, n),  # ORBIT PFD
-              "dock-pfd-crt%d" % n)
-    self.script_done("dock-pfd-crt%d" % n, 120)
+    if self.a.crts >= 4:
+        # THREE IDPS A GPC AT MOST ('>3 DEU', gpc-causes #99): GPC 1 took
+        # IDPs 1-3 on going to RUN, so IDP 3 (CRT 3, powered off in this run)
+        # is released before IDP 4 is assigned.  IDP 4 must already be LOADED:
+        # PASS in OPS 2 never loads one (#294), so the restore gives the
+        # capture a loaded IDP 4 (fly_rndz134.seed_idp4) and its power switch
+        # is already on; "idppower 4 on" is for a run where it is not.
+        self.play("+1     idppower 4 on\n"
+                  "+5     keys KB1 GPC/CRT 0 3 EXEC\n"
+                  "+3     keys KB1 GPC/CRT 1 4 EXEC\n"
+                  "+15    edgekey afd1 1\n"         # UP: the main menu
+                  "+2     edgekey afd1 2\n"         # FLT INST
+                  "+2     edgekey afd1 3\n"         # ORBIT PFD
+                  "+5     keys KB3 SPEC 3 3 PRO\n",  # REL NAV on CRT 4
+                  "dock-aft-displays")
+        self.script_done("dock-aft-displays", 120)
+        self.pfd_up = True
+        self.say("crew: ORBIT PFD on AFD 1, SPEC 33 REL NAV on CRT 4")
+        return
+    self.play("+1     idppower 2 on\n"
+              "+10    edgekey crt2 1\n"
+              "+2     edgekey crt2 2\n"
+              "+2     edgekey crt2 3\n",
+              "dock-pfd-crt2")
+    self.script_done("dock-pfd-crt2", 120)
     self.pfd_up = True
-    self.say("crew: ORBIT PFD on CRT %d" % n)
+    self.say("crew: ORBIT PFD on CRT 2")
 
 
 def dock30(self):
