@@ -1320,6 +1320,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         self.ears = Ears(self.base)
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
+        self.leave_nothing_running()
         self.wait_file(outp, "session commands on port", 180)
         if self.a.hold_start:
             # --hold-start: every window up and placed, the vehicle not yet

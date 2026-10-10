@@ -278,8 +278,39 @@ class Flight:
         self.out = open(outp, "w")
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
+        self.leave_nothing_running()
         self.wait_file(outp, "session commands on port", 180)
         time.sleep(5)
+
+    def leave_nothing_running(self):
+        """When this driver exits with its simulation still up -- an error,
+        Ctrl-C, a terminate signal -- the simulation is asked to quit, which
+        closes every program it started.  Left behind, they sat on the port
+        base: a fresh run beside a stray manager hung at OPS 101 (gpc-causes
+        #295), and on Windows taskkill /T /F on the driver left all 30 of a
+        run's processes up (Win11-native, 2026-10-10).  A hard kill gives no
+        chance to do this; simulatePASS then refuses a start beside the
+        strays, naming them."""
+        import atexit
+        import signal
+
+        def quit_sim():
+            p = getattr(self, "proc", None)
+            if p is not None and p.poll() is None:
+                try:
+                    crewscript.send_session("quit", self.base)
+                    print("fly: the simulation was still running; asked it to quit", flush=True)
+                except OSError:
+                    pass
+
+        atexit.register(quit_sim)
+        for name in ("SIGTERM", "SIGBREAK", "SIGHUP"):
+            sig = getattr(signal, name, None)
+            if sig is not None:
+                try:
+                    signal.signal(sig, lambda *_a: sys.exit(1))    # so atexit runs
+                except (ValueError, OSError):
+                    pass
 
     def wait_file(self, path, text, timeout, after=0):
         """text in path, looking only past byte offset after."""
@@ -449,7 +480,7 @@ class Flight:
         self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
-        aborted = not self.a.abort
+        aborted = not getattr(self.a, "abort", None)
         while "ET SEPARATION at" not in self.log_text():
             if not aborted:
                 m = re.search(r"eiu: ME\d FAILED at t=[\d.]+", self.log_text())
@@ -457,10 +488,10 @@ class Flight:
                     # the crew's minimum (ASC/134 cue cards' boundaries are
                     # the caller's: it picks the failure time and the mode):
                     # ABORT MODE rotary to the mode, ABORT pb, rotary OFF
-                    self.wait_sim(self.a.abort_react)
+                    self.wait_sim(getattr(self.a, "abort_react", 5.0))
                     self.play("+0     switch abort_mode %s\n+1     press abort_pb\n"
-                              "+3     switch abort_mode OFF\n" % self.a.abort, "abort")
-                    self.say("crew: %s seen; ABORT MODE %s, ABORT pb" % (m.group(0), self.a.abort))
+                              "+3     switch abort_mode OFF\n" % getattr(self.a, "abort", None), "abort")
+                    self.say("crew: %s seen; ABORT MODE %s, ABORT pb" % (m.group(0), getattr(self.a, "abort", None)))
                     aborted = True
             time.sleep(1 if not aborted else 5)
         # ET separation in the vehicle's GMT, from the time-tagged state lines
@@ -473,7 +504,7 @@ class Flight:
         with open(os.path.join(self.a.logs, "etsep.gmt"), "w") as fh:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
-        if self.a.abort != "TAL":
+        if getattr(self.a, "abort", None) != "TAL":
             self.wait_sim(20)
         else:
             # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
@@ -719,7 +750,7 @@ class Flight:
         itself, autoland in A/L); the crew deploys the gear and the drag
         chute and brakes; until the wheels stop or the time runs out."""
         self.pfd_on_crt2()
-        if self.a.abort in ("RTLS", "TAL"):
+        if getattr(self.a, "abort", None) in ("RTLS", "TAL"):
             # an abort's entry flies itself (MM 304 after a TAL's ET SEP; RTLS
             # MM 601-603 then 305): the air data probes at Mach 5, not before
             while (self.last_entry_state() or {}).get("M", 99.0) > 5.0:
@@ -795,7 +826,7 @@ class Flight:
             self.start(resume)
         stop = PHASES.index(self.a.to) + 1 if self.a.to else len(PHASES)
         phases = PHASES[start:stop]
-        if self.a.abort in ("RTLS", "TAL") and "ASCENT" in phases:
+        if getattr(self.a, "abort", None) in ("RTLS", "TAL") and "ASCENT" in phases:
             # no orbit: from the abort's ET SEP straight to the landing
             phases = phases[:phases.index("ASCENT") + 1] + (["LAND"] if "LAND" in phases else [])
         for ph in phases:
