@@ -97,7 +97,7 @@ def tru_dock(self, timeout=3.0):
         end = time.monotonic() + timeout
         while time.monotonic() < end:
             try:
-                d = s.recv(512)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             if d[:4] != b"TRU1":
@@ -309,7 +309,7 @@ def a7l_lights(self, timeout=6.0):
         end = time.monotonic() + timeout
         while time.monotonic() < end and len(w) < 2:
             try:
-                d = s.recv(512)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             if len(d) < 10:

@@ -300,7 +300,7 @@ def truth_state(base, timeout=5.0):
     end = time.time() + timeout
     while time.time() < end:
         try:
-            d = s.recv(256)
+            d = s.recv(65536)
         except socket.timeout:
             break
         if len(d) >= 4 + 8 * 15 and d[:4] == b"TRU1":
@@ -324,7 +324,7 @@ def target_state(base, norad=None, timeout=5.0):
     end = time.time() + timeout
     while time.time() < end:
         try:
-            d = s.recv(256)
+            d = s.recv(65536)
         except socket.timeout:
             break
         if len(d) >= 4 + 8 * 8 and d[:4] == b"TGT1":
@@ -396,7 +396,7 @@ def downlink(base, log=None, show=0, seconds=0, decode=None, match=None,
     try:
         while not seconds or time.time() - t0 < seconds:
             try:
-                d = s.recv(512)
+                d = s.recv(65536)
             except socket.timeout:
                 if view:
                     view.tick()

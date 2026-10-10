@@ -410,7 +410,7 @@ class Ears(object):
     def _truth(self, s):
         while True:
             try:
-                d = s.recv(512)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             if d[:4] == b"TRU1" and len(d) >= 4 + 8 * 15:
@@ -425,7 +425,7 @@ class Ears(object):
     def _target(self, s):
         while True:
             try:
-                d = s.recv(512)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             if d[:4] == b"TGT1" and len(d) >= 4 + 8 * 8:
@@ -442,7 +442,7 @@ class Ears(object):
     def _downlist(self, s):
         while True:
             try:
-                d = s.recv(1024)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             f = groundstation.parse_downlist(d)
@@ -852,7 +852,7 @@ class StrkWatch(object):
     def _run(self, s):
         while True:
             try:
-                d = s.recv(1024)
+                d = s.recv(65536)
             except socket.timeout:
                 continue
             f = groundstation.parse_downlist(d)

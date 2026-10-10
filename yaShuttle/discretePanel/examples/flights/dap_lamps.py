@@ -76,7 +76,7 @@ class MdmLamps(object):
                 return
             for sk in ready:
                 try:
-                    data = sk.recv(512)
+                    data = sk.recv(65536)
                 except OSError:
                     continue
                 if len(data) < 10:

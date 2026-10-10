@@ -7869,7 +7869,7 @@ class FCInstrumentFeed(object):
     def _readable(self, *_):
         while True:
             try:
-                d = self.sock.recv(256)
+                d = self.sock.recv(65536)
             except (BlockingIOError, OSError):
                 return
             if len(d) < 10 or len(d) % 2:

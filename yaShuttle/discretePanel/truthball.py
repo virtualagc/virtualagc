@@ -134,7 +134,7 @@ class Feeds(object):
     def poll(self):
         while True:
             try:
-                d = self.truthSock.recv(256)
+                d = self.truthSock.recv(65536)
             except (BlockingIOError, OSError):
                 break
             if len(d) >= 4 + 8 * 15 and d[:4] == b"TRU1":
@@ -144,7 +144,7 @@ class Feeds(object):
                 self.truthAt = time.monotonic()
         while True:
             try:
-                d = self.fcSock.recv(256)
+                d = self.fcSock.recv(65536)
             except (BlockingIOError, OSError):
                 break
             if len(d) < 10 or len(d) % 2:

@@ -663,7 +663,7 @@ class TruthFeed(QtCore.QObject):
     def _read_targets(self, *_):
         while True:
             try:
-                d = self.tsock.recv(1024)
+                d = self.tsock.recv(65536)
             except (BlockingIOError, OSError):
                 break
             g = Target.parse(d)
@@ -735,7 +735,7 @@ class TruthFeed(QtCore.QObject):
     def _read(self, *_):
         while True:
             try:
-                d = self.sock.recv(1024)
+                d = self.sock.recv(65536)
             except (BlockingIOError, OSError):
                 break
             s = Truth.parse(d)
