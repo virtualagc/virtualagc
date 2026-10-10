@@ -1927,6 +1927,61 @@ constants, CGMS_GINV and CGMS_OMEGA.  Next to try: `all` less #PCGYSTA's toleran
 pass and so how steady the marks are).  Until that is found, option 1 (keep the tape's
 #PCGYSTA) is the safer way to take the rest of `all`.
 
+**The rest found: the rendezvous filter's initial covariance (#PCGEIPD; bisected 2026-10-10).**
+Short runs from dass-base-run1's UPLINK capture (`--from RNDZNAV`, rndz2 volume, each adding one
+group of csects to `rndz`; ports 49900/49700/49500), FLTR |error| ft mean / max:
+
+| run | added to `rndz` | mounting | STRKNAV | Ti targeting |
+|---|---|---|---|---|
+| dass-base-run1 | -- | tape | 11 / 18 | 31 / 39 |
+| bis-a | #PCGYSTA, #PCGYCAT | flown | 13 / 21 | 36 / 49 |
+| bis-b | #PCGCMFR (DAP configs) | tape | 13 / 21 | 38 / 52 |
+| bis-c | #PCGMCOM, #PCGGCOM, the jet/RCS/GPS/misc csects | tape | 56 / 170 | 450 / 518 |
+| bis-c1 / c2 / c3 | #PCGMCOM / the IMU RM csects / #DGFTREB, #DGFFORB, #DGFDORB | tape | 19 / 28 | 44-47 / 55-62 |
+| bis-d1 / d2 | #PCGGCOM / GPS and small ones | tape | 19 / 28 | -- |
+| bis-d3 | #PCGEIPD, #PCGEIPB, the RCS RM, DAP filter counts, ... | tape | 65 / 199 | -- |
+| **bis-e1** | **#PCGEIPD alone** | tape | **52 / 142** | -- |
+| bis-e2 | d3 less #PCGEIPD | tape | 19 / 29 | -- |
+| **bis-e3** | **all of `all` but #PCGEIPD** | flown | **18 / 27** | **43 / 54** |
+
+bis-e3's Ti (TGT 10 final, FLTR) is +8.93 -0.81 +2.77 (9.38 ft/s, miss 3.3) against the
+baseline's +8.93 -0.65 +2.82 (9.39, miss 3.5).
+
+The words: **CGNV_SIG_UPDATE_LFE** (#PCGEIPD+00B4, X'BFFC'-X'C007') and
+**CGNV_COV_COR_UPDATE_LFE** (X'C008'-X'C015').  The tape holds the source's INITIAL(0) for both;
+STS-134 flew sigmas (2000, 20000, 2000) ft and (21, 2, 6) ft/s with correlations of -0.9
+(DASS_G2.ASC's PATCH SUMMARY).  GLLREN.hal's GLL_REND_COV_INIT (steps 120-160, lines 163-176)
+builds the rendezvous filter's covariance from exactly these when RNDZ NAV is enabled:
+E(i,i) = SIG(i)^2, the off-diagonals from the correlations, rotated from UVW to M50.
+
+**The mechanism.**  With the tape's zeros the filter starts certain of its state, so the marks
+barely move it.  FLTR then simply rides PROP (compare bis-a, where FLTR and PROP agree to a few
+feet), and PROP is excellent because yaVEHDYN_START_REL hands PASS the true relative state.  With
+the flown values the filter starts as uncertain as a real flight's ground-tracked state was:
+20,000 ft downtrack, -0.9 correlated with the velocity.  The first star-tracker marks then move it
+hundreds of feet.  bis-c shows FLTR jumping +280 ft at the first seven accepts while PROP stayed
+within 20.  Angles alone don't observe range, so any systematic angle error moves the state along
+the line of sight.  Here that is the target's light centroid offset toward the Sun, about 0.2-0.3
+mrad (5b), which at 240 kft is 50-70 ft lateral and maps through the correlated, range-uncertain
+covariance into a few hundred feet downtrack.
+
+**So the flown value is the right one, and the baseline's tens of feet are an artefact** of
+starting PASS with a perfect state and a zero covariance.  A flight started where STS-134 was --
+its onboard state a few thousand feet off the truth, as the flown covariance assumes -- is the
+fair test of star-tracker navigation; a few hundred feet at Ti is within the checklist's SV UPDATE
+gates.
+
+**Recommendation.**
+1. Take `all` (with `YAGPC_STARTRK_MOUNT=flown`) less #PCGEIPD for any run that starts PASS with
+   the true state, as these do: it reproduces the baseline's navigation and Ti and carries every
+   other flown value.
+2. Before #PCGEIPD goes on a default volume, give the start a realistic onboard state: an option
+   in the driver (or vehdyn's START_REL) to offset PASS's relative state at UPLINK by an error drawn
+   from the flown sigmas.  Then the flown covariance is consistent with the state it describes, and
+   FLTR's convergence is a real test.  That is driver or yaVEHDYN work, not a reason to keep the
+   tape's zeros.
+Runs: ~/sts134-runs/rendezvous/bis-{a,b,c,c1,c2,c3,d1,d2,d3,e1,e2,e3}.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the
