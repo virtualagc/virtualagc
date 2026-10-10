@@ -56,6 +56,8 @@ PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
 TORVA_END_FT = 400.0             # the +V-bar point TORVA ends at (CG range, "400-310 ft")
 HOLD_FT = 100.0                  # ODS ring to PMA-2's face
+STEADY_FPS = 0.02                # HOLD: steady when every rate is under this
+STEADY_S = 120.0                 # ... for this long before the capture
 RPM_RATE = 0.75                  # deg/s, RPM SETUP's PRI and VERN ROT RATE
 RPM_STEPS = (180, 270, 0, 90)    # UNIV PTG BODY VECT 5 P: -X, +Z, +X, -Z on the ISS
 # DAP A10 and B10, the DOCKING configurations, as JSC-48072-134 p. 6-2's
@@ -761,16 +763,35 @@ class ManualPhase(object):
         rep = self.leg_report("VBAR (whole)", stats)
         self.man_record("VBAR", om=om, start_ft=d0, report=rep, pulses=dict(self.pulses))
 
+    def truth_note(self, label):
+        """The truth's ODS ring against PMA-2's face (no noise) into the log:
+        to see which crew step, if any, moves the Orbiter."""
+        st = self.rel("ods", noisy=False)
+        if st is None:
+            self.say("truth %s: no state" % label)
+            return None
+        self.say("truth %s: ring X %+.1f Y %+.1f Z %+.1f ft, XD %+.3f YD %+.3f ZD %+.3f ft/s"
+                 % ((label,) + tuple(st["r"]) + tuple(st["v"])))
+        return st
+
     def hold(self):
         """Station-keeping 100 ft out on the +V-bar, the ring on PMA-2's
         axis, for --hold-min minutes; the truth's errors, the pulses and the
-        propellant over the hold."""
+        propellant over the hold.  Everything that is not station-keeping --
+        IMU 1's selection, MSG RESET, DAP A10/B10 checked and finished, the
+        pulse modes -- comes FIRST, with the truth noted around each step
+        (rndz-hold-v2: that work after the hold, unpiloted, left the ring
+        drifting at ZD +0.18 ft/s by the capture); then the hold, which ends
+        only once it has been steady (every rate under STEADY_FPS) for
+        STEADY_S; and the capture is taken there, with nothing in between."""
         self.man_start()
+        self.truth_note("HOLD start")
         # the docking start point clean: IMU 1 selected (a capture flown
         # before the [10A]/[10B] fix has it deselected), the latched class-2
         # messages and lamps reset, the tone acknowledged
         if hasattr(self, "imu1_select"):
             self.imu1_select(True, "hold")
+            self.truth_note("after IMU 1 select")
             # MSG RESET twice: with a class-5 message pending (an ILLEGAL
             # ENTRY on the IDP), the first press only clears that and brings
             # back the queued fault message -- CDL_MSG is not set
@@ -780,29 +801,57 @@ class ManualPhase(object):
                       "hold-msg-reset")
             self.script_done("hold-msg-reset", 60)
             self.say("crew: MSG RESET, MASTER ALARM")
+            self.truth_note("after MSG RESET")
+        # p. 6-2's DOCKING A10/B10 checked (and finished) in the stored
+        # configurations and A7/B7 selected, so that the capture carries them
+        dock_left = self.dap_dock_store()
+        self.truth_note("after DAP A10/B10")
+        self.dap_pulse_modes()
+        self.truth_note("after pulse modes")
         p0 = dict(self.pulses)
         prop0 = self.propellant("vbar")
         mins = getattr(self.a, "hold_min", 20.0)
-        stats = self.fly("HOLD", lambda t: ([HOLD_FT, 0.0, 0.0], [0.0, 0.0, 0.0]),
-                         lambda t, s, e: t >= mins * 60.0, point="ods", tau=90.0, vmax=0.2, dead=0.05,
-                         every=10.0, limit=mins * 60.0 + 60.0, nmax=2, log_every=120.0)
+        steady = {"since": None}
+
+        def done(t, s, e):
+            # steady by the truth (the TCS's own noise is of this order)
+            tr = self.rel("ods", noisy=False)
+            terr = [[HOLD_FT, 0.0, 0.0][i] - tr["r"][i] for i in range(3)]
+            if max(abs(x) for x in tr["v"]) < STEADY_FPS and all(abs(x) < 5.0 for x in terr):
+                if steady["since"] is None:
+                    steady["since"] = t
+            else:
+                steady["since"] = None
+            steady["t"] = t
+            return t >= mins * 60.0 and steady["since"] is not None and t - steady["since"] >= STEADY_S
+
+        stats = self.fly("HOLD", lambda t: ([HOLD_FT, 0.0, 0.0], [0.0, 0.0, 0.0]), done,
+                         point="ods", tau=90.0, vmax=0.2, dead=0.05, every=10.0,
+                         limit=mins * 60.0 + 1200.0, nmax=2, log_every=120.0)
+        # the capture now, during the steady hold: nothing between
+        st = self.truth_note("capture")
+        self.snapshot("hold")
+        self._hold_captured = True
+        self.hold_capture_state = st
+        if steady["since"] is not None:
+            self.say("HOLD: captured while steady, %.0f s steady after %.1f min"
+                     % (steady["t"] - steady["since"], steady["t"] / 60.0))
+        else:
+            self.say("HOLD: captured at the leg's limit, NOT steady")
+        self.truth_note("after capture")
         rep = self.leg_report("HOLD", stats)
         dp = {k: self.pulses[k] - p0.get(k, 0) for k in self.pulses}
         self.say("HOLD: %d THC pulses (%s) in %.0f min, about %.2f ft/s of translation; %s"
                  % (sum(dp.values()), ", ".join("%s %d" % kv for kv in dp.items() if kv[1]), mins,
                     sum(n * self.pulse_est[k[1]] for k, n in dp.items()), self.readings()))
-        # p. 6-2's DOCKING A10/B10 checked (and finished) in the stored configurations
-        # and A7/B7 selected, so that the capture after the hold carries them
-        dock_left = self.dap_dock_store()
-        self.dap_pulse_modes()
         self.man_record("HOLD", minutes=mins, report=rep, pulses=dp, prop_before=prop0,
+                        capture_truth=(dict(r=list(st["r"]), v=list(st["v"])) if st else None),
                         dap_dock_left={k: {str(i): v for i, v in d.items()} for k, d in dock_left.items()})
-        self.snapshot("hold-end")
         self.manual_summary()
 
     def manual_summary(self):
         """The propellant over the manual phase, from the phase captures."""
-        names = ["arrival", "rbar", "rpm", "torva", "vbar", "hold-end"]
+        names = ["arrival", "rbar", "rpm", "torva", "vbar", "hold"]
         prev, lines = None, []
         for nm in names:
             p = self.propellant(nm)

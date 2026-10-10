@@ -1604,6 +1604,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             self.say("check: " + line)
 
     def snapshot(self, name):
+        if name == "hold" and getattr(self, "_hold_captured", False):
+            # HOLD takes its own capture during the steady hold
+            # (rndz_manual.hold); the run loop's later one would be of an
+            # unpiloted vehicle
+            self._hold_captured = False
+            return None
         if name.upper() in PHASES:
             self.save_state()
         return self._snapshot(name)
@@ -2134,6 +2140,13 @@ wait crt 1 title 2011/ timeout 600
         trims = self.one_engine_trims()
         self.play("+1     keys OPS 2 0 2 PRO\n"
                   "wait crt 1 title 2021/ timeout 180\n"
+                  # a SPEC up before the transition (ORBIT TGT, "2021/034/")
+                  # stays over the MNVR display, and its title matched
+                  # "2021/": ITEM 4 and ITEM 9 went to SPEC 34 -- ILLEGAL
+                  # ENTRY, and WT keyed as TGT ITEM 9 (e2e-run1).  RESUME, and
+                  # wait for the MNVR display itself
+                  "+3     keys RESUME\n"
+                  "wait crt 1 title MNVR EXEC timeout 60\n"
                   "+3     keys ITEM 2 EXEC\n" + trims +
                   "+4     keys ITEM 9 + %s EXEC\n"
                   "+4     keys ITEM 2 2 EXEC\n" % " ".join("%d" % round(wt)), "ops202")
@@ -2162,7 +2175,7 @@ wait crt 1 title 2011/ timeout 600
                          % (d, " ".join("%d" % h), " ".join("%d" % m_), " ".join("%.1f" % sx),
                             keys_num(gnd[0], "%.1f"), keys_num(gnd[1], "%.1f"), keys_num(gnd[2], "%.1f")))
         self.play("+1     keys RESUME\n"
-                  "wait crt 1 title 2021/ timeout 60\n"
+                  "wait crt 1 title MNVR EXEC timeout 60\n"
                   # 5-4 step 2, "Eng sel ... per Burn Pad": checked again after
                   # COMPUTE T1, which in MM 202 re-initialises the MNVR display
                   # -- the first run's L OMS did not survive it, and both
@@ -2651,6 +2664,13 @@ wait crt 1 title 2011/ timeout 600
         wtk = "+4     keys ITEM 9 + %s EXEC\n" % " ".join("%d" % round(wt))
         self.play("+1     keys OPS 2 0 2 PRO\n"
                   "wait crt 1 title 2021/ timeout 180\n"
+                  # a SPEC up before the transition (ORBIT TGT, "2021/034/")
+                  # stays over the MNVR display, and its title matched
+                  # "2021/": ITEM 4 and ITEM 9 went to SPEC 34 -- ILLEGAL
+                  # ENTRY, and WT keyed as TGT ITEM 9 (e2e-run1).  RESUME, and
+                  # wait for the MNVR display itself
+                  "+3     keys RESUME\n"
+                  "wait crt 1 title MNVR EXEC timeout 60\n"
                   "+3     keys ITEM 4 EXEC\n" + wtk, name.lower() + "-ops202")
         self.script_done(name.lower() + "-ops202", 300)
         self.say("crew: OPS 202, RCS SEL, WT %d lb" % round(wt))
@@ -2683,7 +2703,7 @@ wait crt 1 title 2011/ timeout 600
             self.ops201_track(name.lower() + "-post")
             return sol
         self.play("+1     keys RESUME\n"
-                  "wait crt 1 title 2021/ timeout 60\n"
+                  "wait crt 1 title MNVR EXEC timeout 60\n"
                   "+3     keys ITEM 4 EXEC\n" + wtk + keyed +
                   "+3     keys ITEM 2 2 EXEC\n"
                   "+4     keys ITEM 2 3 EXEC\n", name.lower() + "-load")
