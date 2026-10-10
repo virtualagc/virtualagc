@@ -1,11 +1,11 @@
 # Contents
 
-  * [Introduction](#Introduction)
-  * [Target-Specific Differences](#Target)
-  * [Stuck Bits, Parity-Based Fixes, and CCSHOLEs](#Stuck)
-  * [Inventory of Dumped Rope-Memory Modules](#Inventory)
+  * [Introduction](#introduction)
+  * [Target-Specific Differences](#target-specific-differences)
+  * [Stuck Bits, Parity-Based Fixes, and CCSHOLEs](#stuck-bits-parity-based-fixes-and-ccsholes)
+  * [Inventory of Dumped Rope-Memory Modules](#inventory)
 
-# <a name="Introduction">Introduction</a>
+# <a>Introduction</a>
 
 In general terms, to date, three methods of recovering Apollo Guidance Computer software have presented themselves to us:
 
@@ -35,7 +35,7 @@ For example, for file 1003133-20-Sunrise45+-B28-BadStrand7_BrokenCore167.bin,
 
 In general, for the convenience of the software used to transform and/or combine these module dumps into complete AGC executables, the use of commas and hyphens in the filenames (other than those indicated in the template filename pattern above) should be avoided.
 
-# <a name="Target">Target-Specific Differences</a>
+# <a>Target-Specific Differences</a>
 
 The principal target-related differences &mdash; i.e., Block I vs BLK2 vs Block II &mdash; between these dumps are these:
 
@@ -62,7 +62,7 @@ For BLK2 or AGC targets:  There are up to 6 rope-memory modules per AGC, with 6 
   * B5 &mdash; 30, 31, 32, 33, 34, 35
   * B6 &mdash; 36, 37, 40, 41, 42, 43
 
-# <a name="Stuck">Stuck Bits, Parity-Based Fixes, and CCSHOLEs</a>
+# <a>Stuck Bits, Parity-Based Fixes, and CCSHOLEs</a>
 
 ## The Simplified Explanation
 
@@ -126,7 +126,7 @@ Now, if you knew in advance that the variable `x` was constrained in certain way
 
 But in early software versions like Sunrise and Retread, these holes were sometimes treated simply as unused memory locations, and that's a problem that must be dealt with for those versions.
 
-# <a name="Inventory">Inventory of Dumped Rope-Memory Modules</a>
+# <a>Inventory of Dumped Rope-Memory Modules</a>
 
 Unless otherwise stated, all dumps of physical rope-memory modules &mdash; and corrections to that data, where appropriate &mdash; were performed by **Mike Stewart**, so even though Mike performed all or all of the actual work, I won't keep mentioning him over and over again.  Mike is the default.
 
@@ -172,7 +172,7 @@ Flaws in the raw dump, due to a defective module:
 
 ### Repairs to 1003133-20
 
-Since [the fix for stuck bits has already been described in some detail](#Stuck), I won't discuss that here.  As far as the 8 words affected by the defective core 167, there are tentative fixes which I'll describe here ... though I'm basically cut-and-pasting from Mike's description of his thinking.  I describe the fixes as "tentative" because the Sunrise software precedes the inclusion of memory-bank checksums ("banksums"), and hence we don't have any way to directly double-check these fixes.  In other words, perhaps the repaired dump for this module might need to be updated at some point in the future.
+Since [the fix for stuck bits has already been described in some detail](#stuck-bits-parity-based-fixes-and-ccsholes), I won't discuss that here.  As far as the 8 words affected by the defective core 167, there are tentative fixes which I'll describe here ... though I'm basically cut-and-pasting from Mike's description of his thinking.  I describe the fixes as "tentative" because the Sunrise software precedes the inclusion of memory-bank checksums ("banksums"), and hence we don't have any way to directly double-check these fixes.  In other words, perhaps the repaired dump for this module might need to be updated at some point in the future.
 
 By the way, heavy reliance is made on the hopefully-similar code from Solarium 55.  That's because Sunrise and Solarium are both software for the Block I AGC, and are the only samples of Block I code as of this writing.
 
@@ -339,7 +339,7 @@ Flaws:  This module had three bad diodes:
   * Strand 41 (31,6400 - 31,6777 and 34,6400 - 34,6777) had a bad diode on bit 15 (the parity bit).
   * Strand 42 (31,7000 - 31,7377 and 34,7000 - 34,7377) had a bad diode on bit 4.
 
-Each of these was correctable by the [stuck-bit parity fix](#Stuck) described earlier, and the fixes could be double-checked via memory-bank checksums.
+Each of these was correctable by the [stuck-bit parity fix](#stuck-bits-parity-based-fixes-and-ccsholes) described earlier, and the fixes could be double-checked via memory-bank checksums.
 
 ## 1003733-211-BlockI-Corona261-B24-SomeDefects.bin, 1003733-211-BlockI-Corona261-B24-TentativelyRepaired.bin
 
@@ -352,7 +352,7 @@ Flaws:  This module had so many problems that it was at the limit of what's fixa
   * Strand 46 (32,7000 - 32,7377 and 33,7000 - 33,7377) had one bad diode on bit 3.
   * Strand 47 (32,7400 - 32,7777 and 33,7400 - 33,7777) had one bad diode on bit 7.
 
-These strands were both correctable via the [stuck-bit parity fix](#Stuck).
+These strands were both correctable via the [stuck-bit parity fix](#stuck-bits-parity-based-fixes-and-ccsholes).
 
 However, each of the two remaining "difficult" strands, on the other hand, had *two* bad diodes, which made the stuck-bit parity fix inapplicable.  Fortunately, some workarounds were available:
 
@@ -375,7 +375,7 @@ First, consider the bad diode
 
   * Strand 27 (21,7400 - 21,7777 and 24,7400 - 24,7777) had a bad diode on bit 11.
 
-This was correctable via the [stuck-bit parity fix](#Stuck).
+This was correctable via the [stuck-bit parity fix](#stuck-bits-parity-based-fixes-and-ccsholes).
 
 Second, core 62 was broken. This resulted in the total loss of data from 8 words, 4 of them in each of two memory banks. In each of 8 cases, the missing word appeared in a section of code otherwise identical to corresponding code in the Solarium 55 program.  Note that Solarium 55 was the successor program to Corona 261, used on the very next mission (Apollo 4 vs AS-202), and that in spite of the different program name is understood to be very similar.  Indeed, a number of reports from the time refer to the software from Apollo 4 (and Apollo 6) as being "Corona" rather than as being "Solarium".  Besides which, we have a document titled ["Programming Changes from AS-202 to AS-501"](http://www.ibiblio.org/apollo/Documents/Programming%20Changes%20from%20AS-202%20to%20AS-501.pdf) which purports (and actually seems) to outline all of the differences between the two.  What you see below is a list of each of the 8 chunks of code, with the missing data due to the broken core shown as `OCT 00000` and accompanied by a comment as to octal value the location *should* have if corresponding to Solarium:
 
@@ -490,7 +490,7 @@ Flaws: This module had a single bad diode:
 
   * Strand 04 (4000 - 4377 and 03,6000 - 03,6377) has a bad diode on bit 4.
 
-This was correctable by the [stuck-bit parity fix](#Stuck) described earlier, and the fix could be double-checked via memory-bank checksums.
+This was correctable by the [stuck-bit parity fix](#stuck-bits-parity-based-fixes-and-ccsholes) described earlier, and the fix could be double-checked via memory-bank checksums.
 
 ## 1003733-241-BlockI-Corona261-B24.bin
 
