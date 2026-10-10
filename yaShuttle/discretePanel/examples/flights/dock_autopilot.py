@@ -675,38 +675,158 @@ def dock(self):
     self.manual_summary()
 
 
+def _crt4_page(self, keys, spec, name):
+    """Key a page onto CRT 4 from keyboard 3 and return its text once CRT 4
+    shows it ("/0NN/" in its title); '' if it never does."""
+    self.play("+1     keys KB3 %s\n" % keys, name)
+    self.script_done(name, 60)
+    tag = "/%03d/" % spec
+    for _ in range(20):
+        page = self.ears.screen("crt4")
+        if tag in page.splitlines()[0] if page else False:
+            return page
+        self.wait_sim(1)
+    return ""
+
+
+def _starred(page, item):
+    """True if ITEM `item` shows its star (a digit before it is another item)."""
+    return bool(re.search(r"(?<![\d.])%d\*" % item, page))
+
+
+def _exit_rpop(self):
+    """'Exit RPOP - [Shift]/[F10]': the program closes on the PGSC."""
+    gone = 0
+    for d in os.listdir("/proc"):
+        if not d.isdigit():
+            continue
+        try:
+            argv = open("/proc/%s/cmdline" % d, "rb").read().split(b"\0")
+        except OSError:
+            continue
+        if any(a.endswith(b"rpop.py") for a in argv) and str(self.base).encode() in argv:
+            try:
+                os.kill(int(d), 15)
+                gone += 1
+            except OSError:
+                pass
+    return gone
+
+
 def post_docking(self):
-    """The radar and rendezvous navigation shut down once hard-mated.
+    """Once hard-mated: the radar to COMM, then TERMINATE RNDZ OPS [22A]
+    (RNDZ/134/FIN A p. 4-22) in its order, on CRT 4 from keyboard 3.
 
-    KU OPS step 4, CONFIGURE KU FOR COMM (CC 9-5, RNDZ/134/FIN A): GNC 33
-    REL NAV INH RNG, RDOT, Angles - ITEM 18, 21, 24 (*); KU ANT ENA - ITEM 2
-    (no *); A1U KU PWR - STBY, MODE - COMM, sel - GPC, CNTL - CMD.  Then
-    TERMINATE RNDZ OPS [22A] (p. 4-22)'s GNC 33 REL NAV: RNDZ NAV ENA -
-    ITEM 1 EXEC (no *).  Without it the radar went on "tracking" the
-    station from tens of feet, and CRT 4's RR column (EL, AZ, the angular
-    rates) swung wildly after hard mate (owner, 2026-10-10).
+    First KU OPS step 4, CONFIGURE KU FOR COMM (CC 9-5): GNC 33 REL NAV INH
+    RNG, RDOT, Angles - ITEM 18, 21, 24 (*); KU ANT ENA - ITEM 2 (no *); A1U
+    KU PWR - STBY, MODE - COMM, sel - GPC, CNTL - CMD.  Without it the radar
+    went on "tracking" the station from tens of feet, and CRT 4's RR column
+    swung wildly after hard mate (owner, 2026-10-10).
 
-    Only these of [22A]: its RJD and DDU breakers, FLT CNTLR PWR, the GNC 23
-    forward-jet deselection, the A12/B12 DAP, SM 167, the lights, RPOP and
-    the HHL stow, and the star trackers are not done here.  ITEMs 1 and 2
-    are toggles, so each is keyed only while CRT 4 shows it on."""
-    page = self.ears.screen("crt4")
-    ku_on = bool(re.search(r"KU ANT\s+ENA\s+2\*", page))
-    nav_on = bool(re.search(r"RNDZ NAV ENA\s+1\*", page))
+    Then [22A].  1. ORBITER CONFIG FOR MATED ATTITUDE CONTROL: GNC 23 RCS
+    (RCS F - ITEM 1; JET DES F1L, F3L, F2R, F4R, F1U, F3U, F2U - ITEMs 9-21
+    odd); GNC 20 DAP CONFIG (A,B to A12,B12; X JET ROT ENA - ITEM 7; A9 and
+    B9's PRI RATE DB to 0.2, each LOADed); DAP LO Z; and, with the verniers,
+    DAP LVLH.  2. ORBITER CONFIG FOR MATED OPS: DOCKING MECHANISM POWERDOWN
+    (APDS, p. 8-6: A7L APDS POWER ADS/BDS/CDS, CONTROL PANEL POWER A/B/C,
+    HEATERS/DCU POWER, all OFF); exit RPOP; GNC 22 (-Z STAR TRK - ITEM 4;
+    -Y, -Z THOLD - ITEMs 13, 14 + 0); GNC 55 DES RCVR - ITEM 27 (no *); GNC
+    33 RNDZ NAV ENA - ITEM 1 (no *).
+
+    NOT DONE, NOT MODELLED: O14-O16's primary RJD logic and drivers, RJDA 1A
+    L2/R2 manifold drivers and DDU breakers; A6U FLT CNTLR PWR; SM 167
+    DOCKING STATUS (no SM computer here); 8-6's A6L PSU PWR MN A/B; A6L's
+    truss and vestibule lights; the HHL stow; the -Z COAS.  The conditional
+    ISS handover (3.111) is not asked for.
+
+    Items that toggle (JET DES, X JET ROT ENA, DES RCVR, KU ANT ENA, RNDZ
+    NAV ENA) are keyed only while the page shows them other than the
+    checklist wants; a page that never appears skips its items, said."""
+    # --- KU OPS step 4: CONFIGURE KU FOR COMM ---------------------------------
+    page = _crt4_page(self, "SPEC 3 3 PRO", 33, "pd-spec33")
     keys = ("+1     keys KB3 ITEM 1 8 EXEC\n"
             "+2     keys KB3 ITEM 2 1 EXEC\n"
             "+2     keys KB3 ITEM 2 4 EXEC\n")
-    if ku_on:
+    if re.search(r"KU ANT\s+ENA\s+2\*", page):
         keys += "+2     keys KB3 ITEM 2 EXEC\n"
-    self.play(keys, "dock-ku-comm-1")
-    self.script_done("dock-ku-comm-1", 60)
-    self.ku_switches("dock-ku-comm-2", power="STBY", mode="COMM", steering="GPC", control="CMD")
-    if nav_on:
-        self.play("+1     keys KB3 ITEM 1 EXEC\n", "dock-rndz-nav-dsbl")
-        self.script_done("dock-rndz-nav-dsbl", 60)
+    self.play(keys, "pd-ku-comm-1")
+    self.script_done("pd-ku-comm-1", 60)
+    self.ku_switches("pd-ku-comm-2", power="STBY", mode="COMM", steering="GPC", control="CMD")
+    self.say("POST DOCKING: KU for COMM (CC 9-5 step 4)")
+
+    # --- [22A] 1. ORBITER CONFIG FOR MATED ATTITUDE CONTROL -------------------
+    page = _crt4_page(self, "SPEC 2 3 PRO", 23, "pd-spec23")
+    if page:
+        keys = "" if _starred(page, 1) else "+2     keys KB3 ITEM 1 EXEC\n"
+        des = [i for i in (9, 11, 13, 15, 17, 19, 21) if not _starred(page, i)]
+        keys += "".join("+2     keys KB3 ITEM %s EXEC\n" % " ".join(str(i)) for i in des)
+        if keys:
+            self.play("+1" + keys[2:], "pd-rcs")
+            self.script_done("pd-rcs", 120)
+        self.say("POST DOCKING: GNC 23 RCS F, forward jets F1L F3L F2R F4R F1U F3U F2U deselected "
+                 "(%d keyed)" % len(des))
+    else:
+        self.say("POST DOCKING: GNC 23 never appeared on CRT 4 -- the jet deselection not done")
+
+    page = _crt4_page(self, "SPEC 2 0 PRO", 20, "pd-spec20")
+    rdb = R.keys_short(0.2, R.DAP_FMT[R.DAP_ROWS.index("PRI RATE DB")])
+    keys = ("+1     keys KB3 ITEM 1 + 1 2 EXEC\n"
+            "+3     keys KB3 ITEM 2 + 1 2 EXEC\n")
+    if page and not re.search(r"ENA\s+7\*", page):
+        keys += "+3     keys KB3 ITEM 7 EXEC\n"
+    for edit in (3, 4):                                  # A9, then B9
+        keys += ("+3     keys KB3 ITEM %d + 9 EXEC\n"
+                 "+3     keys KB3 ITEM 5 2 %s EXEC\n"
+                 "+3     keys KB3 ITEM 5 EXEC\n" % (edit, rdb))
+    self.play(keys, "pd-dap-config")
+    self.script_done("pd-dap-config", 180)
+    self.say("POST DOCKING: GNC 20 DAP A,B to A12,B12, X JET ROT ENA, A9/B9 PRI RATE DB 0.2 LOADed")
+
+    from dap_lamps import set_low_z
+
+    def press():
+        self.play("+1     dap %s low_z\n" % DAP_PANEL, "pd-lowz")
+        self.script_done("pd-lowz", 60)
+
+    ok, _n = set_low_z(self.lamps(), press, True)
+    self.play("+1     dap %s lvlh\n" % DAP_PANEL, "pd-lvlh")
+    self.script_done("pd-lvlh", 60)
+    self.say("POST DOCKING: DAP LO Z%s, LVLH (verniers available)" % ("" if ok else " (LAMP DID NOT FOLLOW)"))
+
+    # --- [22A] 2. ORBITER CONFIG FOR MATED OPS --------------------------------
+    sw = ("ds_a", "ds_b", "ds_c", "cpp_a", "cpp_b", "cpp_c", "htr_1", "htr_2", "htr_3")
+    self.play("".join("+%d     switch a7l_%s OFF\n" % (1 if i == 0 else 2, k) for i, k in enumerate(sw)),
+              "pd-apds-powerdown")
+    self.script_done("pd-apds-powerdown", 120)
+    self.say("POST DOCKING: DOCKING MECHANISM POWERDOWN (8-6) -- A7L APDS, CONTROL PANEL and "
+             "HEATERS/DCU POWER off")
+    n = _exit_rpop(self)
+    self.say("POST DOCKING: RPOP exited%s" % ("" if n else " (it was not running)"))
+
+    page = _crt4_page(self, "SPEC 2 2 PRO", 22, "pd-spec22")
+    keys = ""
+    if page and not re.search(r"STAR TRK\s+3\*?\s+4\*", page):
+        keys += "+2     keys KB3 ITEM 4 EXEC\n"
+    keys += ("+2     keys KB3 ITEM 1 3 + 0 EXEC\n"
+             "+2     keys KB3 ITEM 1 4 + 0 EXEC\n")
+    self.play("+1" + keys[2:], "pd-strk")
+    self.script_done("pd-strk", 60)
+    self.say("POST DOCKING: GNC 22 -Z STAR TRK, -Y/-Z THOLD 0")
+
+    page = _crt4_page(self, "SPEC 5 5 PRO", 55, "pd-spec55")
+    if page and re.search(r"DES RCVR\s+26\*?\s+27\*", page):
+        self.play("+1     keys KB3 ITEM 2 7 EXEC\n", "pd-gps")
+        self.script_done("pd-gps", 60)
+        self.say("POST DOCKING: GNC 55 GPS 2 reselected")
+
+    page = _crt4_page(self, "SPEC 3 3 PRO", 33, "pd-spec33-end")
     if not page:
-        self.say("POST DOCKING: CRT 4's page not heard; KU ANT ENA and RNDZ NAV ENA left as they were")
-    self.say("POST DOCKING: KU for COMM (CC 9-5 step 4), RNDZ NAV disabled ([22A])")
+        self.say("POST DOCKING: CRT 4's REL NAV not heard; RNDZ NAV ENA left as it was")
+    elif re.search(r"RNDZ NAV ENA\s+1\*", page):
+        self.play("+1     keys KB3 ITEM 1 EXEC\n", "pd-rndz-nav-dsbl")
+        self.script_done("pd-rndz-nav-dsbl", 60)
+    self.say("POST DOCKING: [22A] done as far as modelled -- RNDZ NAV disabled; not modelled: "
+             "O14-O16 RJD/DDU, FLT CNTLR PWR, SM 167, A6L PSU and lights, HHL stow, -Z COAS")
 
 
 def stay(self):
@@ -717,8 +837,13 @@ def stay(self):
     DOCK capture) and does only this."""
     self.say("STAY: the docked stack is yours -- End Simulation in the manager, or Ctrl-C here, "
              "to finish")
+    t0 = time.time()
     try:
         while getattr(self, "proc", None) is not None and self.proc.poll() is None:
+            # --record: the docked stack recorded for --record-tail seconds,
+            # then the recording saved while the simulation runs on
+            if getattr(self.a, "record", None) and time.time() - t0 >= self.a.record_tail:
+                self.record_stop()
             time.sleep(2.0)
     except KeyboardInterrupt:
         pass

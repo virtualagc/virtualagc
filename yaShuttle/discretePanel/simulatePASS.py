@@ -1482,6 +1482,10 @@ def main():
                          "caption box (the default)")
     ap.add_argument("--no-manager", dest="manager", action="store_false",
                     help="no control window")
+    ap.add_argument("--layout-aft", metavar="FILE", default=None,
+                    help="the aft station's layout: the manager applies it when the station "
+                         "changes to aft -- a flight script's handover (fly_rndz134 --handover) "
+                         "or its STATION row -- and --layout when it changes back to forward")
     ap.add_argument("--layout", metavar="FILE",
                     help="put the windows where this layout file says once they are up "
                          "(windowLayout.py save FILE writes one).  If it names the caption "
@@ -2110,6 +2114,11 @@ def main():
                 manager_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.layout:
                 manager_argv += ["--layout", os.path.abspath(args.layout)]
+            # the aft station's own layout, which the manager applies when the
+            # station changes to aft (a flight script's handover, or its row)
+            if args.layout_aft:
+                manager_argv += ["--layout-aft", os.path.abspath(args.layout_aft)]
+            manager_argv += ["--station", args.station]
             # Forwarded, or the manager's own --debug could never be reached
             # in the ordinary case: the manager is started by this program,
             # not by hand.

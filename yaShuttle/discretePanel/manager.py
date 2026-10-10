@@ -406,6 +406,7 @@ class Manager(object):
         # and the log is where it is wanted afterwards anyway.
         print("manager: %s" % self._what_run(), flush=True)
         self.start_results()
+        self._start_station_listener()
         self._poll()
 
     # -- the furniture ------------------------------------------------------
@@ -727,8 +728,15 @@ class Manager(object):
                 self.say("Added %d windows to %s" % (n, os.path.basename(path)))
         self._window_work(work, done)
 
-    def restore_layout(self, only_roles=None):
-        path = self.layout.get().strip()
+    def station_layout(self):
+        """The layout for the station showing now: --layout-aft at the aft
+        station when there is one, else the LAYOUT box's."""
+        if getattr(self, "station", "all") == "aft" and getattr(self.args, "layout_aft", None):
+            return self.args.layout_aft
+        return self.layout.get().strip()
+
+    def restore_layout(self, only_roles=None, path=None):
+        path = path or self.layout.get().strip()
         if not os.path.isfile(path):
             self.say("No such layout file: %s" % path)
             return
@@ -1330,10 +1338,10 @@ class Manager(object):
         # PLACE IT, AND ONLY IT, where the layout says.  Restoring the whole
         # layout here moved every other window back as well, undoing what
         # the owner had just arranged by hand (2026-10-01).
-        path = self.layout.get().strip()
+        path = self.station_layout()
         if os.path.isfile(path):
             self.root.after(2500, lambda: self.restore_layout(
-                only_roles={windowLayout._hc_role(rhc)}))
+                only_roles={windowLayout._hc_role(rhc)}, path=path))
 
     # What can be seen from each station: the forward station's windows, or
     # the aft flight deck's overhead window and its A3 monitor's centerline
@@ -1342,8 +1350,45 @@ class Manager(object):
     STATION_HANDS = {"fwd": "lh", "aft": "aft", "all": None}
 
     def set_station(self, st):
+        """The STATION row: tell the panel and the displays, then follow."""
         crewscript.send_control("station %s" % st, self.args.port_base)
         crewscript.send_meds("station %s" % st, self.args.port_base)
+        self._station_changed(st)
+
+    def _start_station_listener(self):
+        """A station change from anyone -- a flight script's handover (the
+        CDR to the aft station at ESTABLISH RBAR), simulatePASS --station,
+        or this window's own row -- arrives as 'station fwd|aft|all' on the
+        panel's control port.  The Manager follows one it did not make:
+        that station's hand controllers, views and layout.  The socket is
+        read on a thread; the Tk work is done from _poll's queue."""
+        import queue
+        self._stationQ = queue.Queue()
+        self.station = getattr(self.args, "station", "all")
+        try:
+            sock = crewscript.control_receiver(self.args.port_base)
+        except OSError as e:
+            print("manager: no station listener (%s)" % e, flush=True)
+            return
+
+        def listen():
+            while True:
+                try:
+                    data, _a = sock.recvfrom(4096)
+                except OSError:
+                    return
+                w = data.decode("utf-8", errors="replace").split()
+                if len(w) == 2 and w[0] == "station" and w[1] in ("fwd", "aft", "all"):
+                    self._stationQ.put(w[1])
+
+        threading.Thread(target=listen, daemon=True).start()
+
+    def _station_changed(self, st):
+        """Follow a station change: its hand controllers and window views
+        restarted, then -- with a layout for it -- its windows placed."""
+        if st == self.station:
+            return
+        self.station = st
         self.say("Station: %s" % {"fwd": "forward", "aft": "aft flight deck", "all": "both"}[st])
         hands, views = self.STATION_HANDS[st], self.STATION_VIEWS[st]
         if hands:
@@ -1358,6 +1403,13 @@ class Manager(object):
                 self.start_views(views)
         # the stopped programs' ports and windows released first
         self.root.after(2500, restart)
+        # A LAYOUT PER STATION (--layout for forward, --layout-aft for aft),
+        # so a recording changes from one to the other by itself at the
+        # handover.  Once the restarted windows are up: the views take ~8 s.
+        path = (getattr(self.args, "layout_aft", None) if st == "aft"
+                else self.layout.get().strip() if st == "fwd" else None)
+        if path and os.path.isfile(path):
+            self.root.after(14000, lambda: self.restore_layout(path=path))
 
     def start_views(self, views=None):
         # "rpop": rpop.py, the aft PGSC's RPOP display, a program of its own
@@ -1398,10 +1450,14 @@ class Manager(object):
         # PLACE THEM, AND ONLY THEM, where the layout says (as the hand
         # controllers): restoring the whole layout would undo what was
         # arranged by hand.  They take a few seconds to load their textures.
-        path = self.layout.get().strip()
+        # The station's layout, tried until they are up: on a slow machine
+        # the views took longer than 25 s to open (a software-rendered
+        # display); a try after they are placed moves nothing.
+        path = self.station_layout()
         if os.path.isfile(path):
-            self.root.after(8000, lambda: self.restore_layout(
-                only_roles=set(windowLayout.PORTVIEW_ROLES.values())))
+            for ms in (8000, 20000, 40000, 60000):
+                self.root.after(ms, lambda: self.restore_layout(
+                    only_roles=set(windowLayout.PORTVIEW_ROLES.values()), path=path))
 
     def start_rpop(self):
         if any(n == "rpop.py" for n, _ in running(self.args.port_base)):
@@ -1416,9 +1472,9 @@ class Manager(object):
             self.say("Cannot start RPOP: %s" % e)
             return
         self.say("RPOP started")
-        path = self.layout.get().strip()
+        path = self.station_layout()
         if os.path.isfile(path):
-            self.root.after(5000, lambda: self.restore_layout(only_roles={"rpop"}))
+            self.root.after(5000, lambda: self.restore_layout(only_roles={"rpop"}, path=path))
 
     def stop_rpop(self):
         for pid in [pid for n, pid in running(self.args.port_base) if n == "rpop.py"]:
@@ -1505,6 +1561,9 @@ class Manager(object):
         return "  \u00b7  ".join(bits) if bits else "Simulation"
 
     def _poll(self):
+        q = getattr(self, "_stationQ", None)
+        while q is not None and not q.empty():
+            self._station_changed(q.get_nowait())
         up = running(self.args.port_base)
         if up:
             counts = {}
@@ -1537,6 +1596,11 @@ def main(argv=None):
     ap.add_argument("--script", metavar="FILE", help="crew script to start with in the box")
     ap.add_argument("--layout", metavar="FILE", default=os.path.join(HERE, "demo.layout"),
                     help="layout file to save to and restore from (default demo.layout here)")
+    ap.add_argument("--layout-aft", metavar="FILE", default=None,
+                    help="the aft station's layout, applied when the station changes to aft "
+                         "(--layout is then the forward station's)")
+    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+                    help="the station the run starts at (simulatePASS --station)")
     ap.add_argument("--geometry", metavar="SPEC", help="Tk geometry for this window")
     ap.add_argument("--debug", action="store_true",
                     help="put each script step on the status line as it runs. "

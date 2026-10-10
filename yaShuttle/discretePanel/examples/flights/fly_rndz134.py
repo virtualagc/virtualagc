@@ -1166,6 +1166,52 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         print("fly_rndz134: %s" % text, flush=True)
         self.checklog.write("%s %s\n" % (time.strftime("%H:%M:%S"), text))
         self.checklog.flush()
+        tl = getattr(self, "_timeline", None)
+        if tl is not None:
+            dt = time.time() - self._rec_t0
+            tl.write("%d:%02d:%04.1f  %s\n" % (dt // 3600, dt % 3600 // 60, dt % 60, text))
+            tl.flush()
+
+    # --- the recording (--record) --------------------------------------------
+    # SimpleScreenRecorder takes commands on its stdin; the driver appends them
+    # to a file the recorder's stdin follows (tail -F), so it neither blocks on
+    # a pipe nor needs the recorder started by it.  The timeline is the video
+    # time of every driver line, for cutting the recording afterwards.
+    def _record_cmd(self, cmd):
+        with open(os.path.expanduser(self.a.record), "a") as fh:
+            fh.write(cmd + "\n")
+
+    def record_start(self):
+        if not getattr(self.a, "record", None) or getattr(self, "_rec_t0", None):
+            return
+        self._record_cmd("record-start")
+        self._rec_t0 = time.time()
+        self._timeline = open(os.path.expanduser(self.a.record) + ".timeline", "a")
+        self._timeline.write("# %s: recording started (video time 0:00:00.0)\n"
+                             % time.strftime("%Y-%m-%d %H:%M:%S"))
+        import atexit
+        atexit.register(self.record_stop)
+        self.say("recording: 'record-start' sent (%s)" % self.a.record)
+
+    def record_stop(self):
+        if not getattr(self, "_rec_t0", None) or getattr(self, "_rec_saved", False):
+            return
+        self._rec_saved = True
+        self.say("recording: 'record-save' sent")
+        self._record_cmd("record-save")
+
+    # --- the handover (--handover) -------------------------------------------
+    def rbar(self):
+        """ESTABLISH RBAR [20C] begins at the aft station ('A6U FLT CNTLR PWR -
+        ON', RNDZ/134/FIN A p. 4-20): with --handover the station changes to
+        aft first -- the panel and displays, and the manager, which restarts
+        the aft hand controllers and views and applies --layout-aft."""
+        if getattr(self.a, "handover", False):
+            fly_sts134.crewscript.send_control("station aft", self.base)
+            fly_sts134.crewscript.send_meds("station aft", self.base)
+            self.say("crew: the CDR to the aft flight station (ESTABLISH RBAR [20C])")
+            self.wait_sim(15)
+        return super().rbar()
 
     # --- the vehicle ------------------------------------------------------
     def start(self, resume=None):
@@ -1226,6 +1272,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             cmd += ["--input", self.a.input]
         if self.a.layout:
             cmd += ["--layout", os.path.abspath(os.path.expanduser(self.a.layout))]
+        if getattr(self.a, "layout_aft", None):
+            cmd += ["--layout-aft", os.path.abspath(os.path.expanduser(self.a.layout_aft))]
         os.makedirs(self.a.logs, exist_ok=True)
         outp = os.path.join(self.a.logs, "simulatePASS.out")
         if os.path.exists(outp):
@@ -1263,6 +1311,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                         fly_sts134.crewscript.send_session("go", self.base)
             self.wait_file(outp, "released: the vehicle is running", 120)
             self.say("released by the user; the vehicle is running")
+        self.record_start()
         time.sleep(5)
         threading.Thread(target=self.monitor, daemon=True).start()
         self.cw_start()
@@ -3009,6 +3058,23 @@ def main():
     ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
                     help="the flight station whose windows are shown (simulatePASS --station; "
                          "dock_autopilot.py uses aft)")
+    ap.add_argument("--layout-aft", default=None, metavar="FILE",
+                    help="simulatePASS --layout-aft: the aft station's layout, applied by the "
+                         "manager when the station changes to aft (with --handover, at ESTABLISH "
+                         "RBAR); --layout is then the forward station's")
+    ap.add_argument("--handover", action="store_true",
+                    help="the CDR moves to the aft flight station as the RBAR phase begins -- "
+                         "ESTABLISH RBAR [20C], 'A6U FLT CNTLR PWR - ON' (RNDZ/134/FIN A p. 4-20): "
+                         "the displays, hand controllers, views and layout follow (start with "
+                         "--station fwd)")
+    ap.add_argument("--record", default=None, metavar="FILE",
+                    help="drive SimpleScreenRecorder through FILE: 'record-start' is appended "
+                         "when the vehicle is released, 'record-save' when the run ends; run the "
+                         "recorder as  touch FILE; tail -n0 -F FILE | simplescreenrecorder  "
+                         "and FILE.timeline gets every driver line at its video time")
+    ap.add_argument("--record-tail", type=float, default=60.0, metavar="S",
+                    help="with --record, how long a docking's STAY is recorded before "
+                         "'record-save' (default 60 s)")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring the windows up with the vehicle held, and start it when Enter "
                          "is pressed here -- time to arrange the windows first")
