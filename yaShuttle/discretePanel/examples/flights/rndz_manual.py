@@ -643,7 +643,15 @@ class ManualPhase(object):
         self.man_start()
         if getattr(self.a, "rpm_mode", "continuous") == "continuous":
             t, e, kg, log = self.rpm_continuous()
-            self.rpm_recover()
+            # as the card: TORVA from wherever the turn left the Orbiter
+            # (TORVA's arc starts at the current angle and radius); or, with
+            # --rpm-return, back to the R-bar point first
+            if getattr(self.a, "rpm_return", False):
+                self.rpm_recover()
+            else:
+                st = self.rel("cg", noisy=False)
+                self.say("RPM: TORVA from here, as the card (no return to the R-bar point): X %+.0f Z %+.0f ft, "
+                         "XD %+.2f ZD %+.2f ft/s" % (st["r"][0], st["r"][2], st["v"][0], st["v"][2]))
             self.spec20_rates("rpm-end", 0.200, 0.016)
             self.play("+1     keys RESUME\n" + self.TRACK_KEYS.replace("dap c3 b", "dap c3 a")
                       .replace("dap c3 alt", "dap c3 vern"), "rpm-track")
@@ -762,9 +770,15 @@ class ManualPhase(object):
             settled["n"] = settled["n"] + 1 if (t > T and ok) else 0
             return settled["n"] >= 9
 
+        m0, p0 = self.orbiter_kg(), dict(self.pulses)
         stats = self.fly("TORVA", goal, done, tau=60.0, vmax=0.6, dead=0.08, every=10.0, limit=T + 900.0)
         rep = self.leg_report("TORVA (whole)", stats)
-        self.man_record("TORVA", minutes=T / 60.0, report=rep, pulses=dict(self.pulses))
+        m1 = self.orbiter_kg()
+        n_p = sum(self.pulses[k] - p0.get(k, 0) for k in self.pulses)
+        kg = (m0 - m1) if (m0 and m1) else None
+        self.say("TORVA: %s kg of RCS in %d THC pulses" % ("%.1f" % kg if kg is not None else "?", n_p))
+        self.man_record("TORVA", minutes=T / 60.0, report=rep, pulses=dict(self.pulses), rcs_kg=kg,
+                        start=[st["r"][0], st["r"][2]])
 
     def docking_attitude(self):
         """ESTABLISH VBAR: the attitude held in LVLH -- UNIV PTG TGT ID 2
