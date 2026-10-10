@@ -1058,7 +1058,7 @@ def prepare_iss_visitors(keep):
 # markings and a black cross and stalk -- as the target looks in docking
 # video; not from a document.  Sizes not on the drawing (the plate's 8 in.
 # radius, the cross's 1 in. arms, line widths) are choices.
-CL_TARGET_FACE = (15.656, 0.0, 5.48)      # PMA-2's face on its axis, ISS frame (m); portview's ISS_PMA2
+CL_TARGET_FACE = (15.655, 0.0, 5.562)     # PMA-2's face on its axis, ISS frame (m); portview's ISS_PMA2
 
 
 def _cl_target_tris():
@@ -1140,18 +1140,29 @@ def prepare_iss_cl_target():
         return
     with open(meta_path) as f:
         meta = json.load(f)
-    if meta.get('cl_target'):
+    if meta.get('cl_target') == list(CL_TARGET_FACE):
         return
     z = dict(np.load(os.path.join(out_dir, "model.npz")))
     mats = meta['materials']
-    for name, rgb, pos, nrm, tris in _cl_target_tris():
+    made = _cl_target_tris()
+    if meta.get('cl_target'):
+        # one placed before (at an older face): the target's materials are the
+        # last ones; take them off before putting it at the face now
+        names = {m[0] for m in made}
+        while mats and mats[-1].get('name') in names:
+            k = len(mats) - 1
+            for a in ('pos', 'nrm', 'uv', 'idx'):
+                z.pop('%s%d' % (a, k), None)
+            mats.pop()
+        meta['source'] = meta['source'].replace("; the centerline target at PMA-2: STS-134 RNDZ checklist p149", "")
+    for name, rgb, pos, nrm, tris in made:
         k = len(mats)
         z['pos%d' % k], z['nrm%d' % k] = pos, nrm
         z['uv%d' % k] = np.zeros((len(pos), 2), np.float32)
         z['idx%d' % k] = tris.ravel()
         mats.append(dict(name=name, color=[float(c) for c in rgb] + [1.0], metallic=0.0, texture=None))
     np.savez_compressed(os.path.join(out_dir, "model.npz"), **z)
-    meta['cl_target'] = True
+    meta['cl_target'] = list(CL_TARGET_FACE)
     meta['triangles'] = sum(len(z['idx%d' % k]) // 3 for k in range(len(mats)))
     meta['source'] += "; the centerline target at PMA-2: STS-134 RNDZ checklist p149"
     with open(meta_path, "w") as f:

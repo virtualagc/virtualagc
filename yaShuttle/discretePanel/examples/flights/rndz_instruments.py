@@ -66,7 +66,7 @@ ODS_BODY = structural(ODS_XO, 0.0, ODS_ZO)
 ODS_HARDMATE_BODY = structural(ODS_XO, 0.0, ODS_HARDMATE_ZO)
 CLCAM_BODY = structural(CLCAM_XO, 0.0, CLCAM_ZO)
 TCS_BODY = structural(TCS_XO, TCS_YO, TCS_ZO)
-PMA2 = (15.66, 0.0, 5.48)                  # ISS frame, m: portview.ISS_PMA2
+PMA2 = (15.655, 0.0, 5.562)                # ISS frame, m: portview.ISS_PMA2 (the model's own PMA-2)
 HHL_SPHERE_M = 25.0
 TCS_MAX_FT, HHL_MAX_FT = 10000.0, 5000.0
 
