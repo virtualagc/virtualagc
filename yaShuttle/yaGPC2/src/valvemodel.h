@@ -23,4 +23,7 @@ int valve_save(double *b, int max);
 void valve_load(const double *b, int n);
 void valve_report(void);
 
+/* A valve's position, 0 closed .. 1 open, by its table name; -1 if unknown. */
+double valve_open_fraction(const char *name);
+
 #endif
