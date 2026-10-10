@@ -163,9 +163,9 @@ int main(void) {
 
     /* AFT, AT REST: FA1 (bus 14), FIOHI1C1. */
     check(read_words(14, FA(0x0836Eu), 54, w) == 54, "fa1 hfe length");
-    /* a primary (word 2, R1A fuel) at 2.5 V; a vernier (word 17, L5D
+    /* a primary (word 2, R1A fuel) at 3.125 V; a vernier (word 17, L5D
      * oxidizer) at 3.3 V, above STS-134's flown 2.6 V (16640) leak limit */
-    check(w[2] == 16000 && w[17] == 21120 && w[17] > 16640, "fa1 injector temperatures warm");
+    check(w[2] == 20000 && w[17] == 21120 && w[17] > 16640, "fa1 injector temperatures warm");
     /* the ET's low-level sensors read WET with the tank full (PASS disables
      * any already dry when it arms them) */
     check((w[18] & 0x0040u) == 0 && (w[23] & 0x0080u) == 0, "fa1 ET low-level sensors wet");
@@ -218,7 +218,7 @@ int main(void) {
     check(w[0] == 0x0110u && w[8] == (0x0110u | 0x0006u), "ff3 manifolds 3 and 5 open");
     check(w[11] == 0xFC00u, "ff3 imu discretes good");
     /* word 13 a primary (F3F oxidizer), word 20 a vernier (F5R fuel) */
-    check(w[13] == 16000 && w[20] == 21120 && w[20] > 16640, "ff3 injector temperatures warm");
+    check(w[13] == 20000 && w[20] == 21120 && w[20] > 16640, "ff3 injector temperatures warm");
     check(read_words(23, FF(0x082E8u), 36, w) == 36 && w[11] == 0,
           "ff4 has no imu");
     /* The MFE read: eight analog words, then the same thirteen discretes. */
