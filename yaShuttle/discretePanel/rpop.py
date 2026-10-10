@@ -44,8 +44,11 @@ WHAT IS APPROXIMATED (said again in the findings):
     extended Kalman filter on the [NESC] description -- Clohessy-Wiltshire
     propagation about the target's orbit; the IMU's sensed delta-V (the
     truth's velocity change relative to the target's, less the difference
-    in gravity) at every mark, WITHOUT [NESC]'s 0.01829 m/s threshold, which
-    guards a real IMU's bias and here only hid the docking's jet pulses; the
+    in gravity) in the IMU's 0.01049 m/s counts, taken once it passes
+    [NESC]'s 0.01829 m/s threshold (held until then, not dropped: dropped,
+    the docking's jet pulses went unmodelled); HPH' underweighted x 1.2
+    while sqrt(Pxx+Pyy+Pzz) > 10 ft, as [NESC] says; process noise
+    1e-2 ft/s^2, our choice (examples/rpop_filtercheck.py); the
     four TCS measurements processed one at a time with exactly
     rndz_instruments' geometry (the TCS head's lever arm, the reflector at
     PMA-2's face in the target's own attitude, the same bearing signs); an
@@ -86,10 +89,16 @@ WHAT IS APPROXIMATED (said again in the findings):
     radar R-dot, which this simulator does not feed RPOP).
 
 KEYS, from the checklist's RPOP FUNCTION KEY SUMMARY: F5 Rdot window,
-F7 view (XZ, XY, YZ), Ctrl+F8 point of reference (CG-CG / DP-DP),
-Shift+F9 clear trajectory, Ctrl+F9 back 1, Shift+F10 exit, Ctrl+PgUp /
-Ctrl+PgDn zoom, Ctrl+Home the default scale and axes, Ctrl+arrows move the axes, Space the
-function-key menu.
+F7 view (XZ, XY, YZ), Shift+F7 overlay, F8 target / orbiter centred,
+Ctrl+F8 point of reference (CG-CG / DP-DP), F9 THC clear, Shift+F9 clear
+trajectory, Ctrl+F9 back 1, Shift+F10 exit, Ctrl+F10 RPOP Configuration,
+Ctrl+PgUp / Ctrl+PgDn zoom (with X, Y or Z held, that axis only),
+Ctrl+Home the default scale and axes (the real one also resumed
+autoscaling, which this does not do), Ctrl+arrows move the axes, Space
+the function-key menu, arrows the THC "What if" pulses (-Z sense: Right
+Z IN, Left Z OUT, Up X UP, Down X DOWN; plain DAP B8, Shift DAP A8).
+The menus hold the same functions with their keys; the undescribed ones
+are greyed, and so is Help.
 
 DATA.  TRU1 (port base + 98) and TGT1 (port base + 109), multicast on
 239.255.1.1 on the interface NSTS_BUS_IFACE (default 127.0.0.1), as
@@ -120,6 +129,13 @@ RE = 6378137.0
 J2 = 1.08262668e-3
 DESIGN_W, DESIGN_H = 1024, 768          # --size 768: the PGSC's 1024 x 768 screen
 TCS_PERIOD_S = 1.0                      # TCS marks to the filter (vehicle s)
+# [NESC] 6.1: the IMU's sensed velocity comes in counts of 0.01049 m/s per
+# axis, and RPOP takes a delta-V into its propagation only when its
+# magnitude exceeds 0.01829 m/s (the REL NAV software's own threshold)
+IMU_LSB_MPS = 0.01049
+DV_THRESH_MPS = 0.01829
+UNDERWEIGHT_FT = 10.0                   # [NESC]: HPH' x 1.2 while sqrt(Pxx+Pyy+Pzz) > 10
+UNDERWEIGHT_K = 1.2
 HHL_PERIOD_S = 5.0
 # The plot's frame, from JSC-63400 Fig 20.4 (1770 px wide): the target's
 # point at x 1605 (91 %), y 43 % down the plot; 50 ft ticks 185 px apart.
@@ -255,9 +271,11 @@ class TcsNav(object):
     SIG = (lambda r: 1.0 + 0.002 * r, lambda r: 0.03, lambda r: math.radians(0.1),
            lambda r: math.radians(0.1))
     FORCE_AFTER = 5                 # then take it anyway (RNDZ 7-27's "Force Measurements")
-    Q_ACC = 1e-3                    # ft/s^2: what the delta-V and CW miss
+    Q_ACC = 1e-2                    # ft/s^2: what the delta-V and CW miss -- chiefly the IMU's
+                                    # sub-count remainder (rpop_filtercheck.py: 1e-2 best of 1e-3..1e-1)
 
     def __init__(self):
+        self.force = True           # the TCS options' "Force Measurements" (RNDZ 7-27)
         self.reset()
 
     def reset(self):
@@ -286,7 +304,7 @@ class TcsNav(object):
         elv = math.atan2(-tb[0], -tb[2])
         return np.array([rng, rdot, elv, azi])
 
-    def init_from(self, z, geo):
+    def init_from(self, z, geo, quiet=False):
         rng, rdot, elv, azi = z
         # the boresight -Z with the two bearings off it
         d = np.array([-math.tan(elv), math.tan(azi), -1.0])
@@ -298,7 +316,8 @@ class TcsNav(object):
         x[3:] = -rdot * los / rng                  # the range rate, along the line of sight
         self.x = x
         self.P = np.diag([(0.02 * rng + 2.0) ** 2] * 3 + [0.5 ** 2] * 3)
-        log("TCS NAV initialised at %.0f ft" % rng)
+        if not quiet:
+            log("TCS NAV initialised at %.0f ft" % rng)
 
     def propagate(self, t, n, dv_lvlh):
         if self.x is None:
@@ -332,14 +351,17 @@ class TcsNav(object):
                 e[j] = 1e-3
                 H[j] = (self.predict(self.x + e, geo)[i] - h0[i]) / 1e-3
             sig = TcsNav.SIG[i](z[0])
-            S = float(H @ self.P @ H) + sig * sig
+            HPH = float(H @ self.P @ H)
+            if math.sqrt(max(0.0, self.P[0, 0] + self.P[1, 1] + self.P[2, 2])) > UNDERWEIGHT_FT:
+                HPH *= UNDERWEIGHT_K               # [NESC]: Kalman filter underweighting
+            S = HPH + sig * sig
             res = z[i] - h0[i]
             if i >= 2:
                 res = (res + math.pi) % (2 * math.pi) - math.pi
             ratio = abs(res) / (3.0 * math.sqrt(S))
             self.resid[i] = math.degrees(res) if i >= 2 else res
             self.ratio[i] = ratio
-            if ratio > 1.0 and self.acpt[i] > 5 and self.run[i] < self.FORCE_AFTER:
+            if ratio > 1.0 and self.acpt[i] > 5 and (not self.force or self.run[i] < self.FORCE_AFTER):
                 self.rej[i] += 1
                 self.run[i] += 1
                 continue
@@ -391,7 +413,14 @@ class Rpop(QtCore.QObject):
         self.hhl = []                  # (t, range, rdot) marks
         self.hhl_flt = None            # (t, range, rdot)
         self.last_v = None             # (t, v, r) for IMU delta-V
-        self.dv_acc = np.zeros(3)
+        self.dv_acc = np.zeros(3)      # delta-V for the filter's next propagation, M50 m/s
+        self.imu_acc = np.zeros(3)     # the IMU's sub-count remainder
+        self.dv_pend = np.zeros(3)     # counted, under the threshold
+        # the TCS trajectory's options (RNDZ 7-27): "nav" (TCS NAV, Kalman
+        # filtering), "auto" (each raw mark taken as it is), "none"
+        self.tcs_mode = "nav"
+        self.tcs_period = TCS_PERIOD_S   # RPOP Configuration's "Data Freq..." (RNDZ 7-24)
+        self.auto = None               # (t, x) from the raw marks, TCS Auto
         self.socks = []
         for off, fn in ((TRUTH_OFFSET, self._tru), (TARGET_OFFSET, self._tgt)):
             s = mcast_socket(port_base + off)
@@ -474,21 +503,27 @@ class Rpop(QtCore.QObject):
         # propagated by the same gravity: the change in the two velocities'
         # difference less the difference of gravity at the two (point mass
         # and J2 suffice for that difference; vehdyn's full field drops out).
-        # Handed to the filter at every mark.  [NESC]'s 0.01829 m/s threshold
-        # is not applied: it guards against a real IMU's bias, which this
-        # truth has none of, and with it every jet pulse of a docking (each
-        # under it) went unmodelled -- 0.06 ft/s of unseen velocity is a
-        # degree of TCS elevation at 60 ft, and the filter rejected its own
-        # measurements and drifted away (Ron's live docking, 2026-10-09).
+        # Handed to the filter at the next mark.
         dv = np.array(s["v"]) - tgt["v"]
         dg = gravity(s["r"]) - gravity(tgt["r"])
         if self.last_v is not None and 0.0 < t - self.last_v[0] < 5.0:
             h = t - self.last_v[0]
-            self.dv_acc += dv - self.last_v[1] - 0.5 * (dg + self.last_v[2]) * h
+            # the IMU's counts: the stable member is inertial, so M50 axes;
+            # whole counts go out, the remainder stays in the accumulator
+            self.imu_acc += dv - self.last_v[1] - 0.5 * (dg + self.last_v[2]) * h
+            counts = np.trunc(self.imu_acc / IMU_LSB_MPS)
+            self.imu_acc -= counts * IMU_LSB_MPS
+            self.dv_pend += counts * IMU_LSB_MPS
+            # [NESC]'s threshold: the sensed delta-V is taken only once it
+            # exceeds 0.01829 m/s (held until then, not dropped -- see the
+            # findings: dropped, a docking's small pulses went unmodelled)
+            if np.linalg.norm(self.dv_pend) > DV_THRESH_MPS:
+                self.dv_acc += self.dv_pend
+                self.dv_pend = np.zeros(3)
         self.last_v = (t, dv, dg)
         self.s_used = s
-        if self.next_tcs is None or t >= self.next_tcs or t < self.next_tcs - 2 * TCS_PERIOD_S:
-            self.next_tcs = t + TCS_PERIOD_S
+        if self.next_tcs is None or t >= self.next_tcs or t < self.next_tcs - 2 * self.tcs_period:
+            self.next_tcs = t + self.tcs_period
             self._mark(t, s, tgt)
 
     def geometry(self, s, tgt):
@@ -525,11 +560,21 @@ class Rpop(QtCore.QObject):
             if self.raw_tcs is None:
                 log("TCS: track at %.0f ft" % z[0])
             self.raw_tcs = (t, z[0], z[1], math.degrees(elv), math.degrees(azi))
-            self.nav.update(t, z, geo, geo["n"], dv_use)
-        elif self.nav.x is not None:
+            if self.tcs_mode == "nav":
+                self.nav.update(t, z, geo, geo["n"], dv_use)
+            elif self.tcs_mode == "auto":
+                # TCS Auto: the mark itself, its position as TCS NAV would
+                # start from it; the velocity from this mark and the last
+                tmp = TcsNav()
+                tmp.init_from(z, geo, quiet=True)
+                x = tmp.x
+                if self.auto is not None and 0.0 < t - self.auto[0] < 10.0:
+                    x[3:] = (x[:3] - self.auto[1][:3]) / (t - self.auto[0])
+                self.auto = (t, x)
+        elif self.nav.x is not None and self.tcs_mode == "nav":
             self.nav.propagate(t, geo["n"], dv_use)
-        if self.nav.x is not None:
-            x = self.nav.x
+        x = self.prime_x()
+        if x is not None:
             if not self.hist or t - self.hist[-1][0] >= 1.0:
                 self.hist.append((t, x[:3].copy(), dp_of(x, geo, s["cg"])[0]))
                 del self.hist[:-20000]
@@ -542,6 +587,15 @@ class Rpop(QtCore.QObject):
         if "hhl_range_ft" in rd and (self.next_hhl is None or t >= self.next_hhl):
             self.next_hhl = t + HHL_PERIOD_S
             self._hhl_mark(t, rd["hhl_range_ft"], rd["hhl_rdot_fps"])
+
+    def prime_x(self):
+        """The prime trajectory's state (CG, target LVLH ft, ft/s): TCS NAV's
+        or TCS Auto's, or None."""
+        if self.tcs_mode == "nav":
+            return self.nav.x
+        if self.tcs_mode == "auto" and self.auto is not None:
+            return self.auto[1]
+        return None
 
     def _hhl_mark(self, t, rng, rdot):
         self.hhl.append((t, rng, rdot))
@@ -565,6 +619,9 @@ class Rpop(QtCore.QObject):
         self.next_tcs = self.next_hhl = None
         self.last_v = None
         self.dv_acc = np.zeros(3)
+        self.imu_acc = np.zeros(3)
+        self.dv_pend = np.zeros(3)
+        self.auto = None
         self.pending = []
         self.tgts = []
         self.geo = None
@@ -606,8 +663,16 @@ class View(QtWidgets.QWidget):
         self.por = args.por
         self.show_rdot = True
         self.fkeys = False
-        self.zoom = 1.0
+        self.zoom = [1.0, 1.0, 1.0]     # per LVLH axis (RNDZ 7-25: Ctrl+X/Y/Z with PgUp/PgDn)
         self.pan = [0.0, 0.0]
+        self.held = set()               # X, Y, Z held with Ctrl, for those
+        self.orb_centered = False       # F8, Tgt/Orb (RNDZ 7-23)
+        self.overlay = True             # Shift+F7, Ovrlay
+        self.show_resids = True         # the TCS options' "Display Resids and Ratios" (7-27)
+        self.whatif = np.zeros(3)       # THC "What if" delta-V, LVLH ft/s (7-25)
+        self.whatif_dap = "prox"        # RPOP Configuration's THC "What if"... (7-24)
+        self.whatif_user = (0.10, 0.05)
+        self.n_pred, self.dt_pred = 9, 60.0   # Predictors... (7-24); [JSC]'s 1-9, a minute apart
         fams = set(QtGui.QFontDatabase.families())
         fam = next((f for f in ("Courier New", "Menlo", "DejaVu Sans Mono", "Courier") if f in fams),
                    "Monospace")
@@ -631,15 +696,14 @@ class View(QtWidgets.QWidget):
             return True
         if self.por == "cg":
             return False
-        x = self.rp.nav.x
+        x = self.rp.prime_x()
         return x is not None and np.linalg.norm(x[:3]) < 400.0     # the APPROACH card's switch
 
     def state_shown(self):
         """(pos, vel) of the point of reference, LVLH ft, ft/s; and the CG."""
-        nav = self.rp.nav
-        if nav.x is None or getattr(self.rp, "geo", None) is None:
+        x = self.rp.prime_x()
+        if x is None or getattr(self.rp, "geo", None) is None:
             return None
-        x = nav.x
         cg = x[:3].copy()
         if not self.por_dp():
             return x[:3], x[3:], cg
@@ -647,42 +711,130 @@ class View(QtWidgets.QWidget):
         return p, v, cg
 
     # --- keys -------------------------------------------------------------
+    # --- actions: the documented functions (RNDZ 7-22..7-27), from keys and menus
+    def act_exit(self):
+        QtWidgets.QApplication.quit()
+
+    def act_rdot(self):
+        self.show_rdot = not self.show_rdot
+
+    def act_view(self, which=None):
+        self.view = (self.view + 1) % len(self.VIEWS) if which is None else which
+
+    def act_overlay(self):
+        self.overlay = not self.overlay
+
+    def act_tgt_orb(self):
+        self.orb_centered = not self.orb_centered
+
+    def act_por(self):
+        self.por = "cg" if self.por_dp() else "dp"
+
+    def act_thc_clear(self):
+        self.whatif = np.zeros(3)
+
+    def act_traj_clear(self):
+        self.rp.hist = self.rp.hist[-2:]
+
+    def act_back1(self):
+        self.rp.hist = self.rp.hist[:-1]
+
+    def act_fkeys(self):
+        self.fkeys = not self.fkeys
+
+    def act_zoom(self, f, axes=(0, 1, 2)):
+        for a in axes:
+            self.zoom[a] *= f
+
+    def act_reset_scale(self):
+        self.zoom, self.pan = [1.0, 1.0, 1.0], [0.0, 0.0]
+
+    def act_move(self, dx, dy):
+        self.pan[0] += dx
+        self.pan[1] += dy
+
+    def pulse_size(self, big):
+        """The THC "What if" pulse, ft/s: DAP A8 (Shift) or B8 (RNDZ 7-25),
+        or the DAP chosen in RPOP Configuration (7-24); TRANS PLS from the
+        ISS RNDZ OPS DAP CONFIGURATIONS (6-2): A7 0.10 B7 0.05, A8 0.10 B8 0.05."""
+        if self.whatif_dap == "user":
+            return self.whatif_user[0 if big else 1]
+        return 0.10 if big else 0.05
+
+    def act_whatif(self, body_axis, sign, big):
+        """A THC pulse "what if", -Z sense: Z IN / Z OUT along body -Z / +Z,
+        X UP / X DOWN along body +X / -X; the prime trajectory's predictors
+        take it (RNDZ 7-23, 7-25)."""
+        if self.rp.geo is None:
+            return
+        d = np.zeros(3)
+        d[body_axis] = sign * self.pulse_size(big)
+        self.whatif = self.whatif + self.rp.geo["A"] @ d
+
+    def act_tcs_mode(self, mode):
+        rp = self.rp
+        if mode != rp.tcs_mode:
+            rp.tcs_mode = mode
+            rp.auto = None
+            rp.hist = []
+            if mode == "nav":
+                rp.nav.reset()          # TCS NAV starts again from the next mark
+
+    def act_reinit(self):
+        self.rp.nav.reset()             # "Re-Initialize on [OK]" (RNDZ 7-27)
+
+    # --- keys ---------------------------------------------------------------
+    def keyReleaseEvent(self, ev):
+        self.held.discard(ev.key())
+        super().keyReleaseEvent(ev)
+
     def keyPressEvent(self, ev):
         k, m = ev.key(), ev.modifiers()
         K, M = QtCore.Qt.Key, QtCore.Qt.KeyboardModifier
         ctrl, shift = bool(m & M.ControlModifier), bool(m & M.ShiftModifier)
         if sys.platform == "darwin":       # Qt swaps them there; the PGSC's Ctrl is the Ctrl key
             ctrl = bool(m & M.MetaModifier) or ctrl
+        if k in (K.Key_X, K.Key_Y, K.Key_Z):
+            self.held.add(k)
+            return
+        axes = tuple(a for a, key in enumerate((K.Key_X, K.Key_Y, K.Key_Z)) if key in self.held) or (0, 1, 2)
         if k == K.Key_F10 and shift:
-            QtWidgets.QApplication.quit()
+            self.act_exit()
+        elif k == K.Key_F10 and ctrl:
+            self.window().act_config()
         elif k == K.Key_F5 and not (ctrl or shift):
-            self.show_rdot = not self.show_rdot
-        elif k == K.Key_F7 and not (ctrl or shift):
-            self.view = (self.view + 1) % len(self.VIEWS)
+            self.act_rdot()
+        elif k == K.Key_F7 and shift:
+            self.act_overlay()
+        elif k == K.Key_F7 and not ctrl:
+            self.act_view()
         elif k == K.Key_F8 and ctrl:
-            self.por = "cg" if self.por_dp() else "dp"
+            self.act_por()
+        elif k == K.Key_F8 and not shift:
+            self.act_tgt_orb()
         elif k == K.Key_F9 and shift:
-            self.rp.hist = self.rp.hist[-2:]
+            self.act_traj_clear()
         elif k == K.Key_F9 and ctrl:
-            self.rp.hist = self.rp.hist[:-1]
+            self.act_back1()
+        elif k == K.Key_F9:
+            self.act_thc_clear()
         elif k == K.Key_Space:
-            self.fkeys = not self.fkeys
+            self.act_fkeys()
         elif ctrl and k == K.Key_PageUp:
-            self.zoom *= 1.05 if shift else 1.25
+            self.act_zoom(1.05 if shift else 1.25, axes)
         elif ctrl and k == K.Key_PageDown:
-            self.zoom /= 1.05 if shift else 1.25
+            self.act_zoom(1 / (1.05 if shift else 1.25), axes)
         elif ctrl and k == K.Key_Home:
-            self.zoom, self.pan = 1.0, [0.0, 0.0]
+            self.act_reset_scale()
         elif ctrl and k in (K.Key_Left, K.Key_Right, K.Key_Up, K.Key_Down):
             st = 5.0 if shift else 25.0
-            if k == K.Key_Left:
-                self.pan[0] -= st
-            elif k == K.Key_Right:
-                self.pan[0] += st
-            elif k == K.Key_Up:
-                self.pan[1] -= st
-            else:
-                self.pan[1] += st
+            self.act_move(*{K.Key_Left: (-st, 0), K.Key_Right: (st, 0),
+                            K.Key_Up: (0, -st), K.Key_Down: (0, st)}[k])
+        elif k in (K.Key_Right, K.Key_Left, K.Key_Up, K.Key_Down):
+            # THC "What if", -Z sense (RNDZ 7-25): -> Z IN, <- Z OUT, up X UP,
+            # down X DOWN; Shift DAP A8, plain DAP B8
+            ax, sg = {K.Key_Right: (2, -1), K.Key_Left: (2, 1), K.Key_Up: (0, 1), K.Key_Down: (0, -1)}[k]
+            self.act_whatif(ax, sg, shift)
         else:
             super().keyPressEvent(ev)
         self.update()
@@ -792,7 +944,7 @@ class View(QtWidgets.QWidget):
 
     def draw_resids(self, p, H):
         nav = self.rp.nav
-        if nav.x is None:
+        if nav.x is None or self.rp.tcs_mode != "nav" or not self.show_resids:
             return
         y0 = H - 118
         cols = (("RESID", 112), ("RATIO", 172), ("ACPT", 225), ("REJ", 268))
@@ -833,8 +985,12 @@ class View(QtWidgets.QWidget):
             return
         # [GNC], [JSC]: the prime trajectory's key and the PCM status above F6
         r = QtCore.QRectF(242, y - 13, 96, 17)
-        p.fillRect(r, GREEN)
-        self.text(p, 290, y, "TCS NAV", 12, QtGui.QColor(0, 0, 0), align="c")
+        lab = {"nav": "TCS NAV", "auto": "TCS Auto", "none": "TCS"}[self.rp.tcs_mode]
+        if self.rp.tcs_mode != "none":            # the prime trajectory's key, lit
+            p.fillRect(r, GREEN)
+            self.text(p, 290, y, lab, 12, QtGui.QColor(0, 0, 0), align="c")
+        else:
+            self.text(p, 290, y, lab, 12, GREY_TXT, align="c")
         self.text(p, 576, y, "PCM", 12, GREY_TXT, align="c")
 
     def draw_rdot(self, p):
@@ -898,11 +1054,13 @@ class View(QtWidgets.QWidget):
             off = pos - cg                       # the POR's offset from the CG, now
         pts = [h[2] if dp else h[1] for h in hist]
         preds = []
-        if rp.nav.x is not None:
-            s = rp.nav.x.copy()
+        x0 = rp.prime_x()
+        if x0 is not None:
+            s = x0.copy()
+            s[3:] += self.whatif            # THC "What if" inputs, on the prime trajectory only
             n = rp.geo["n"]
-            for k in range(1, 10):
-                s = cw_step(s, n, 60.0)
+            for k in range(self.n_pred):
+                s = cw_step(s, n, self.dt_pred)
                 preds.append(s[:3] + off)
         # A FIXED FRAME, as JSC-63400 Fig 20.4: the target's point at a fixed
         # place on the screen (the figure's, 91 % across and 43 % down the
@@ -910,36 +1068,47 @@ class View(QtWidgets.QWidget):
         # Only Ctrl+PgUp/PgDn (zoom), Ctrl+arrows (move the axes) and
         # Ctrl+Home (back to this) change it (RNDZ 7-25).  The YZ view, seen
         # along the V-bar, has the target in the middle.
-        k = PX_PER_FT * self.zoom
-        ox = (DESIGN_W * (0.5 if ih != 0 else ORIGIN_X)) + self.pan[0]
+        kh, kv = PX_PER_FT * self.zoom[ih], PX_PER_FT * self.zoom[iv]
+        k = kh
+        # F8: target-centred (the target fixed, at [JSC]'s place) or
+        # orbiter-centred (the orbiter's point of reference fixed in the
+        # middle, the target moving)
+        centre = np.zeros(3)
+        if self.orb_centered and st is not None:
+            centre = st[0]
+        ox = (DESIGN_W * (0.5 if (ih != 0 or self.orb_centered) else ORIGIN_X)) + self.pan[0]
         oy = (H - 20) * ORIGIN_Y + self.pan[1]
         right, left = DESIGN_W - 20.0, 20.0
 
         def to_px(q):
-            return QtCore.QPointF(ox + q[ih] * sh * k, oy + q[iv] * sv * k)
+            return QtCore.QPointF(ox + (q[ih] - centre[ih]) * sh * kh, oy + (q[iv] - centre[iv]) * sv * kv)
 
         p.save()
         p.setClipRect(QtCore.QRectF(0, 0, DESIGN_W, H - 20))
         # axes through the target, with ticks
         pen = QtGui.QPen(GREY_TXT, 1)
         p.setPen(pen)
-        p.drawLine(QtCore.QPointF(0, oy), QtCore.QPointF(DESIGN_W, oy))
-        p.drawLine(QtCore.QPointF(ox, 0), QtCore.QPointF(ox, H))
-        step = nice_step((right - left) / k)
+        o = to_px(np.zeros(3))                  # the axes through the target
+        ax_x, ax_y = o.x(), o.y()
+        p.drawLine(QtCore.QPointF(0, ax_y), QtCore.QPointF(DESIGN_W, ax_y))
+        p.drawLine(QtCore.QPointF(ax_x, 0), QtCore.QPointF(ax_x, H))
+        step_h = nice_step((right - left) / kh)
+        step_v = nice_step((right - left) / kv)
         tick = 7
         for i in range(-60, 61):
             if i == 0:
                 continue
-            x = ox + i * step * k
+            x = ax_x + i * step_h * kh
             if -10 < x < DESIGN_W + 10:
-                p.drawLine(QtCore.QPointF(x, oy - tick), QtCore.QPointF(x, oy + tick))
-            y = oy + i * step * k
+                p.drawLine(QtCore.QPointF(x, ax_y - tick), QtCore.QPointF(x, ax_y + tick))
+            y = ax_y + i * step_v * kv
             if -10 < y < H + 10:
-                p.drawLine(QtCore.QPointF(ox - tick, y), QtCore.QPointF(ox + tick, y))
-        self.text(p, ox - step * k, oy - 10, "%d" % step, 13, GREY_TXT, align="c")
-        self.text(p, ox - 12, oy + step * k + 5, "%d" % step, 13, GREY_TXT, align="r")
+                p.drawLine(QtCore.QPointF(ax_x - tick, y), QtCore.QPointF(ax_x + tick, y))
+        self.text(p, ax_x - step_h * kh, ax_y - 10, "%d" % step_h, 13, GREY_TXT, align="c")
+        self.text(p, ax_x - 12, ax_y + step_v * kv + 5, "%d" % step_v, 13, GREY_TXT, align="r")
         refl = rp.geo["refl"] if rp.geo is not None else ri_pma2_ft()
-        self.draw_overlay(p, to_px, ih, iv, np.zeros(3) if dp else refl)
+        if self.overlay:
+            self.draw_overlay(p, to_px, ih, iv, np.zeros(3) if dp else refl)
         self.draw_target(p, to_px, ih, iv, dp)
         # the prime trajectory: its history, the orbiter, the predictors
         tri = QtGui.QPolygonF([QtCore.QPointF(0, -4.5), QtCore.QPointF(4, 3), QtCore.QPointF(-4, 3)])
@@ -1046,21 +1215,152 @@ class View(QtWidgets.QWidget):
 
 
 class Window(QtWidgets.QMainWindow):
+    """RPOP's window: the trajectory display under the menu bar of [GNC]'s
+    screen capture (File Edit Control Views Display Sensors Help).
+
+    WHAT IS IN THE MENUS.  No source shows the menus opened, so their
+    contents are the checklist's documented functions (RNDZ 7-15..7-27),
+    each with its key beside it, filed under the menu whose name fits --
+    the filing is ours.  A function the checklist names but does not
+    describe well enough to build (or that needs a sensor this simulator does
+    not give RPOP) is there, greyed: Guidance, PCMMU mode, the attitude and
+    subtended-angle inputs, Low Z, Declutter, the Range Ruler, Help, and the
+    SV, RR, HHL and CCTV trajectory sources."""
+
     def __init__(self, rpop, args):
         super().__init__()
         self.setWindowTitle("RPOP")
-        mb = self.menuBar()
-        mb.setNativeMenuBar(False)                # in the window, as on the PGSC
-        for name in ("File", "Edit", "Control", "Views", "Display", "Sensors", "Help"):
-            m = mb.addMenu(name)
-            if name == "File":
-                a = m.addAction("Exit\tShift+F10")
-                a.triggered.connect(QtWidgets.QApplication.quit)
+        self.rp = rpop
         self.view = View(rpop, args)
         self.setCentralWidget(self.view)
+        mb = self.menuBar()
+        mb.setNativeMenuBar(False)                # in the window, as on the PGSC
+        v = self.view
+
+        def item(menu, text, key, fn=None, check=None):
+            a = menu.addAction("%s\t%s" % (text, key) if key else text)
+            if fn is None:
+                a.setEnabled(False)
+            else:
+                if check is not None:
+                    a.setCheckable(True)
+                    a.setChecked(bool(check()))
+                    menu.aboutToShow.connect(lambda a=a, c=check: a.setChecked(bool(c())))
+                a.triggered.connect(lambda _x=False, f=fn: (f(), v.update()))
+            return a
+
+        m = mb.addMenu("File")
+        item(m, "Exit (save output files)", "Shift+F10", v.act_exit)
+        m = mb.addMenu("Edit")
+        item(m, "THC Clear (\"What if\" inputs)", "F9", v.act_thc_clear)
+        item(m, "Trajectory Clear", "Shift+F9", v.act_traj_clear)
+        item(m, "Back 1", "Ctrl+F9", v.act_back1)
+        m = mb.addMenu("Control")
+        item(m, "Guidance...", "Ctrl+F5")
+        item(m, "Orbiter Attitude...", "Shift+F5")
+        item(m, "Target Attitude...", "Shift+F6")
+        item(m, "PCMMU Mode (PCM / No PCM)", "Ctrl+F6")
+        item(m, "Low Z (THC \"What if\")", "Shift+F8")
+        m.addSeparator()
+        sub = m.addMenu("THC \"What if\" pulse")
+        item(sub, "Z IN, DAP B8 (A8)", "Right (Shift+Right)", lambda: v.act_whatif(2, -1, False))
+        item(sub, "Z OUT, DAP B8 (A8)", "Left (Shift+Left)", lambda: v.act_whatif(2, 1, False))
+        item(sub, "X UP, DAP B8 (A8)", "Up (Shift+Up)", lambda: v.act_whatif(0, 1, False))
+        item(sub, "X DOWN, DAP B8 (A8)", "Down (Shift+Down)", lambda: v.act_whatif(0, -1, False))
+        m.addSeparator()
+        item(m, "RPOP Configuration...", "Ctrl+F10", self.act_config)
+        m = mb.addMenu("Views")
+        for i, name in enumerate(View.VIEWS):
+            item(m, "View %s" % name, "F7" if i == 0 else "", lambda i=i: v.act_view(i),
+                 check=lambda i=i: v.view == i)
+        item(m, "Orbiter-Centered LVLH", "F8", v.act_tgt_orb, check=lambda: v.orb_centered)
+        m.addSeparator()
+        item(m, "Zoom In", "Ctrl+PgUp", lambda: v.act_zoom(1.25))
+        item(m, "Zoom Out", "Ctrl+PgDn", lambda: v.act_zoom(1 / 1.25))
+        for a, nm in enumerate("XYZ"):
+            item(m, "Zoom In %s Axis" % nm, "Ctrl+%s+PgUp" % nm, lambda a=a: v.act_zoom(1.25, (a,)))
+            item(m, "Zoom Out %s Axis" % nm, "Ctrl+%s+PgDn" % nm, lambda a=a: v.act_zoom(1 / 1.25, (a,)))
+        item(m, "Reset Scale", "Ctrl+Home", v.act_reset_scale)
+        m = mb.addMenu("Display")
+        item(m, "Rdot Window", "F5", v.act_rdot, check=lambda: v.show_rdot)
+        item(m, "Overlay", "Shift+F7", v.act_overlay, check=lambda: v.overlay)
+        item(m, "Point of Reference (CG-CG / DP-DP)", "Ctrl+F8", v.act_por, check=lambda: v.por_dp())
+        item(m, "Function Key Menu", "Space", v.act_fkeys, check=lambda: v.fkeys)
+        m.addSeparator()
+        item(m, "Subtended Angle...", "F6")
+        item(m, "Declutter", "F11")
+        item(m, "Range Ruler Snap", "F12")
+        item(m, "Range Ruler Clear", "Shift+F12")
+        m = mb.addMenu("Sensors")
+        for nm in ("SV (State Vector)", "RR (Rendezvous Radar)", "HHL (Hand-Held Laser)", "CCTV"):
+            item(m, nm, "")
+        tcs = m.addMenu("TCS (Trajectory Control Sensor)")
+        item(tcs, "Nav (Kalman Filtering)", "", lambda: v.act_tcs_mode("nav"),
+             check=lambda: self.rp.tcs_mode == "nav")
+        item(tcs, "Auto", "", lambda: v.act_tcs_mode("auto"), check=lambda: self.rp.tcs_mode == "auto")
+        item(tcs, "Manual", "")
+        item(tcs, "None", "", lambda: v.act_tcs_mode("none"), check=lambda: self.rp.tcs_mode == "none")
+        tcs.addSeparator()
+        item(tcs, "Display Resids and Ratios", "", lambda: setattr(v, "show_resids", not v.show_resids),
+             check=lambda: v.show_resids)
+        item(tcs, "Force Measurements", "", lambda: setattr(self.rp.nav, "force", not self.rp.nav.force),
+             check=lambda: self.rp.nav.force)
+        item(tcs, "Re-Initialize", "", v.act_reinit)
+        m = mb.addMenu("Help")
+        item(m, "Help", "F10")
         h = args.size
         self.resize(int(round(h * DESIGN_W / DESIGN_H)), h)
         self.view.setFocus()
+
+    def act_config(self):
+        """RPOP Configuration (Ctrl+F10, RNDZ 7-24): the options built here
+        are Data Freq, Predictors, Update MET and THC "What if"; Debug, Altitude,
+        Comm Ports, TCS/Refl and Views are shown, greyed."""
+        v, rp = self.view, self.rp
+        d = QtWidgets.QDialog(self)
+        d.setWindowTitle("RPOP Configuration")
+        f = QtWidgets.QFormLayout(d)
+        freq = QtWidgets.QDoubleSpinBox(); freq.setRange(0.5, 60.0); freq.setDecimals(1)
+        freq.setSuffix(" s"); freq.setValue(rp.tcs_period)
+        f.addRow("Data Freq... (TCS)", freq)
+        npred = QtWidgets.QSpinBox(); npred.setRange(0, 20); npred.setValue(v.n_pred)
+        dpred = QtWidgets.QDoubleSpinBox(); dpred.setRange(5.0, 600.0); dpred.setDecimals(0)
+        dpred.setSuffix(" s"); dpred.setValue(v.dt_pred)
+        f.addRow("Predictors... number", npred)
+        f.addRow("Predictors... time increment", dpred)
+        met = QtWidgets.QLineEdit()
+        met.setPlaceholderText("DDD/HH:MM:SS (blank: unchanged)")
+        f.addRow("Update MET...", met)
+        dap = QtWidgets.QComboBox()
+        dap.addItems(["Rndz DAP (A7/B7: 0.10/0.05)", "Prox Ops DAP (A8/B8: 0.10/0.05)",
+                      "User-Configurable DAP"])
+        dap.setCurrentIndex({"rndz": 0, "prox": 1, "user": 2}[v.whatif_dap])
+        ua = QtWidgets.QDoubleSpinBox(); ua.setRange(0.0, 1.0); ua.setDecimals(3); ua.setValue(v.whatif_user[0])
+        ub = QtWidgets.QDoubleSpinBox(); ub.setRange(0.0, 1.0); ub.setDecimals(3); ub.setValue(v.whatif_user[1])
+        f.addRow("THC \"What if\"... DAP", dap)
+        f.addRow("  user pulse, Shift (A) ft/s", ua)
+        f.addRow("  user pulse (B) ft/s", ub)
+        for nm in ("Debug", "Altitude...", "Comm Ports...", "TCS/Refl...", "Views..."):
+            b = QtWidgets.QPushButton(nm); b.setEnabled(False)
+            f.addRow(b)
+        bb = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.StandardButton.Ok
+                                        | QtWidgets.QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(d.accept)
+        bb.rejected.connect(d.reject)
+        f.addRow(bb)
+        if d.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+        rp.tcs_period = freq.value()
+        v.n_pred, v.dt_pred = npred.value(), dpred.value()
+        v.whatif_dap = ("rndz", "prox", "user")[dap.currentIndex()]
+        v.whatif_user = (ua.value(), ub.value())
+        txt = met.text().strip()
+        if txt and rp.tru is not None:
+            try:
+                v.met_zero = rp.tru["gmt"] - parse_dhms(txt)
+            except (ValueError, IndexError):
+                log("Update MET: not DDD/HH:MM:SS: %r" % txt)
+        v.update()
 
 
 def main(argv=None):
