@@ -590,12 +590,17 @@ static uint16_t pc_word(int m, int k) {
     return pc;
 }
 
-/* 2.5 V, as the A/D reports it: 6400 counts a volt (the leak limits are
+/* 3.125 V, as the A/D reports it: 6400 counts a volt (the leak limits are
  * written 6400 x volts, GRRRCS.hal:142-149).  The only check on an injector
  * temperature is a LOW one -- a leak -- at 0.625 V oxidizer and 0.425 V fuel
- * for the primaries and up to 1.3 V for a vernier in orbit; there is no high
- * limit and no rate check.  2.5 V clears every one. */
-#define INJ_WARM 16000u
+ * for the primaries and, for a vernier in orbit, 1.3 V in the source but
+ * 2.6 V (16640, X'4100') in STS-134's flown I-loads (#DGRRRCS,
+ * CGRS_*VRCS_*_LEAK_TEMP_LT_ORB); there is no high limit and no rate check.
+ * 2.5 V cleared the source's limits but not the flown ones: with the flown
+ * load all six verniers read leaking once VERN was first selected
+ * (GRRRCS.hal 1.12), RM deselected them (CGRB_JET_AVAILABLE FWD X'FFCF',
+ * AFT X'FCFFFCFF'), and a DAP in VERN fired nothing.  3.125 V clears both. */
+#define INJ_WARM 20000u
 
 /* ---------------------------------------------------------------------
  * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
