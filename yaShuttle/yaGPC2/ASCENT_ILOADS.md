@@ -103,10 +103,9 @@ targeting, all idle unless an engine fails.
 - **The engine-out constants** (P_INT, P_SLP, DEL_CST, V_EO_SW, V_KMAX) **and
   the RTLS targets** matter as soon as an abort is flown.  Fly the abort tests
   on this tape.
-- **Not covered:** the OPS 1 overlay csects with their own flown changes
-  (#PCGG01R, #PCGGC01, #PCGGD01, #PCGGC13, #PCGCUN1, #PCGN13R, …).
-  `sts134-reconfig.json` covers part of CGGC01 and GSE.  The rest is still the
-  generic tape.
+- **The OPS 1 overlays** (#PCGG01R, #PCGGC01, #PCGGD01, #PCGGC13, #PCGN13R)
+  and the abort D-csects are on `-full2`: see "The OPS 1 abort I-loads" below.
+  Still generic: the flight-control overlays #PCGCFL1 and #PCGCUN1.
 
 ## Volumes
 
@@ -127,6 +126,97 @@ halfword address, with the "was" values checked first.  It also needs
 `vehicle.json`'s tape and tapeSha256 changed, or simulatePASS refuses the
 restore.  The pad62 IMU, COUNT and TERMINAL captures all held the tape ("was")
 values.
+
+## The OPS 1 abort I-loads (-full2, 2026-10-10)
+
+`tools/sites/sts134-abort-iloads.json` puts STS-134's flown values on 3,314
+halfwords in 1,750 cells.  The source is DASS_G16.ASC's PATCH SUMMARY: every
+word whose tape value is the generic one and whose flown value differs.  The
+cells sit in six load blocks of the G1/G16 loads.
+
+```
+python3 mission_reconfig.py sites/sts134-abort-iloads.json …-ksc6-full.mmv --out …-ksc6-full2.mmv
+```
+
+| Volume | Built from | SHA-256 |
+|---|---|---|
+| `~/sts134-runs/ascent/OI340700-v44boot-sts134-ksc6-full2.mmv` | full + abort | `210bb8b0ecd4737a86831044065af3c2d2a68b2e7cf4b9d35fce9e306bcff95f` |
+
+**The landing-site table #PCGN13R was blank on the tape.**  Its slots held
+spaces and zeros: no runway had a latitude, longitude or azimuth, so a TAL or
+RTLS had nowhere to go.  The flown table has 90 runways (lat/lon in degrees,
+heading in degrees, length in feet):
+
+| Slots | Site | Runways | Lat | Lon | Length |
+|---|---|---|---|---|---|
+| 1-2 | Kennedy (KSC) | 15, 33 | 28.6 N | 80.7 W | 15,000 |
+| 3-4, 23-24 | Ben Guerir (BEN) | 36, 18 | 32.1 N | 7.9 W | 13,720 / 13,220 |
+| 5-6, 25-26 | Morón (MRN) | 20, 02 | 37.2 N | 5.6 W | 11,729 |
+| 7-8, 27-28 | Zaragoza (ZZA) | 30, 12 | 41.7 N | 1.1 W | 12,197 |
+| 9-22, 29-44 | East Coast abort landing sites | MYR ILM NKT NTU WAL DOV ACY FOK FMH PSM YHZ YJT YYT YQX YYR | | | |
+| 45-60 | Other overseas sites | Lajes (LAJ), Beja (BEJ), Keflavik (IKF), Shannon (INN), Fairford (FFA), Köln-Bonn (KBO), Istres (FMI), Esenboğa (ESN) | | | |
+| 61-90 | Pacific and western sites | KKI JDG AMB PTN JTY GUA WAK HNL EDF HAO EDT HAW NOR EDW | | | |
+
+The TAL sites for STS-134's 51.6° flight are therefore Zaragoza, Morón and
+Ben Guerir.  The table also carries the MLS and TACAN tables, and these
+indexes:
+
+- CGGS_TARGET_INDEX: 0x000A.
+- CGNS_ALTERNATE_SITE_1: 0x0013 and 0x002A.
+- CGNS_ALTERNATE_SITE_2: 0x0015.
+
+Only the G16 copy is patched (load block @1087488, flat = address + 890,078).
+G3 holds its own copy (flat = address + 1,130,718), which is entry's; that one
+is generated from `tools/sites/*.json` by landing_sites.py and is left alone.
+
+**The guidance overlays.**  The cells cover the RTLS PPA and fuel-dissipation
+constants, the RTLS targets in #PCGG01R, and the ATO OMS-1/2 targets and
+switch velocities (#PCGGD01).  They also cover the TAL g-limits,
+CGGS_V_RHO_TAL, the yaw-steering velocities and the contingency constants
+(#PCGGC01), and the second-stage and engine-out limits (#PCGGC13).
+
+Left out:
+
+- The cells sts134-reconfig.json already sets, and the ones the launch day
+  replaced.
+- CGGS_P_Y_INDEX_CHG_LIMIT, which belongs with the 2011 first-stage tables.
+- #PCGGC13's second copy, in G3 (flat = address + 1,135,264).
+
+**The D-csects** (G1):
+
+| Cell | Tape | Flown |
+|---|---|---|
+| GSS_DT_DRY (LO2 low-level cutoff delay, no engine out) | 1.918 s | 0.238 s |
+| GSS_RTLS_DT_DRY, GSS_PTM_DT_DRY | 2.6, 2.598 s | 0 |
+| GSS_RTLS_LH2_LL_DELAY, GSS_NOM_LH2_LL_DELAY | 2.3, 1.1 s | 0 |
+| GSS_FS_ZERO_THRUST_DLY | 5.7 s | 3 s |
+| GSS_PRVL_CL_DELAY_TIME | 4.9 s | 4.442 s |
+| CGSS_RTLS_{SIDESLIP,ROLL,YAW,PITCH}_LO/HI (ET SEP inhibit) | ±2, ±5, ±0.5, −5 | ±20 |
+| CGSS_RTLS_ANG_ATK_HI | −2° | −2.8° |
+| CGSS_ETSEP_INH_TIME | 1.7 s | 2.19 s |
+| CGGS_TAL_MASS_SSME_TRIM | 19,500 | 14,700 |
+| CGGS_K_CMD_STG2 | 106 | 104 |
+| CGNS_DRAG_CONST_RTLS | 0.2226 | 0.1822 |
+| GSQ_STP_VENT_CMDS_DELAY | 4.96 s | 2.56 s |
+| #DGG9GLI, #DGHHPHA | glide-RTLS alpha and Nz-hold constants | |
+
+Left out:
+
+- #DGG31ST: first stage, coupled to the launch day.
+- #DGSRRSL: RSLS countdown timing.
+- #DGSESRB: already holds the flown values.
+
+**Placement.**  Every cell is placed by its flat position on the volume, and
+each position is checked against the tape value before it is written.  Each
+csect's single copy was found from a ±32-halfword context and then checked
+over the csect's whole range against the OPS 1 terminal capture.  A context
+search (`--mem`) does not work here: blank neighbourhoods matched zeros all
+over the volume, and a dry run would have written into some 200 blocks.
+
+**Captures.**  An OPS 9 capture made before OPS 101 can fly on -full2 once its
+`vehicle.json` is retagged, because OPS 101 reads G1/G16 from the volume.  The
+abort re-flights below start from a copy of asc-C's `sts134-imu`, retagged
+(the copies carry `RETAGGED.txt`).
 
 ## A/B (2026-10-10)
 
