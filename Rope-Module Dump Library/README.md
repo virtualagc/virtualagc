@@ -5,7 +5,7 @@
   * [Stuck Bits, Parity-Based Fixes, and CCSHOLEs](#stuck-bits-parity-based-fixes-and-ccsholes)
   * [Inventory of Dumped Rope-Memory Modules](#inventory-of-dumped-rope-memory-modules)
 
-# <a>Introduction</a>
+# Introduction
 
 In general terms, to date, three methods of recovering Apollo Guidance Computer software have presented themselves to us:
 
@@ -35,7 +35,7 @@ For example, for file 1003133-20-Sunrise45+-B28-BadStrand7_BrokenCore167.bin,
 
 In general, for the convenience of the software used to transform and/or combine these module dumps into complete AGC executables, the use of commas and hyphens in the filenames (other than those indicated in the template filename pattern above) should be avoided.
 
-# <a>Target-Specific Differences</a>
+# Target-Specific Differences
 
 The principal target-related differences &mdash; i.e., Block I vs BLK2 vs Block II &mdash; between these dumps are these:
 
@@ -62,7 +62,7 @@ For BLK2 or AGC targets:  There are up to 6 rope-memory modules per AGC, with 6 
   * B5 &mdash; 30, 31, 32, 33, 34, 35
   * B6 &mdash; 36, 37, 40, 41, 42, 43
 
-# <a>Stuck Bits, Parity-Based Fixes, and CCSHOLEs</a>
+# Stuck Bits, Parity-Based Fixes, and CCSHOLEs
 
 ## The Simplified Explanation
 
@@ -126,7 +126,7 @@ Now, if you knew in advance that the variable `x` was constrained in certain way
 
 But in early software versions like Sunrise and Retread, these holes were sometimes treated simply as unused memory locations, and that's a problem that must be dealt with for those versions.
 
-# <a>Inventory of Dumped Rope-Memory Modules</a>
+# Inventory of Dumped Rope-Memory Modules
 
 Unless otherwise stated, all dumps of physical rope-memory modules &mdash; and corrections to that data, where appropriate &mdash; were performed by **Mike Stewart**, so even though Mike performed all or all of the actual work, I won't keep mentioning him over and over again.  Mike is the default.
 
