@@ -325,13 +325,14 @@ int main(void) {
     {
         static double sb[256], tb[512];
         int n = vehdyn_save(sb, 256), nt = vehdyn_targets_save(tb, 512);
+        tb[1 + 17] += 0.1;      /* a capture whose port is stale: the file's wins */
         vehdyn_load(sb, n);
         vehdyn_targets_load(tb, nt);
         t = 0.0;
         run(&t, 30.0);
         check(vehdyn_docked() == 2, "restored mated, and still mated", vehdyn_docked(), 2);
         geometry(460.0, &gap, &lat, rv, pv);
-        check(fabs(gap) < 1e-3 && lat < 1e-3, "still on the port's face after the restore (m)", gap, 0.0);
+        check(fabs(gap) < 1e-3 && lat < 1e-3, "still on the port's face after the restore, the file's port (m)", gap, 0.0);
     }
 
     remove(path);
