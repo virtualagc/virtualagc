@@ -320,9 +320,23 @@ static void jet_axis(const Jet *j, double u[3]) {
     u[0] = j->fx / m; u[1] = j->fy / m; u[2] = j->fz / m;
 }
 
+/* THE OMS-TO-RCS INTERCONNECT: per aft pod (0 left, 1 right) and manifold
+ * group (0 manifolds 1-2, 1 manifolds 3-5), whether its jets draw from the
+ * OMS tanks -- set from the valves' positions by mdmdev.c (valvemodel.c). */
+static bool aftFromOms[2][2];
+
+void vehdyn_set_aft_rcs_feed(int pod, int group, bool fromOms) {
+    if (pod >= 0 && pod <= 1 && group >= 0 && group <= 1) aftFromOms[pod][group] = fromOms;
+}
+
 static int jet_module(const Jet *j) {
     if (j->mdm == 'F') return 0;
-    return (j->name[0] == 'L') ? 1 : 2;
+    int pod = (j->name[0] == 'L') ? 0 : 1;
+    int group = (j->name[1] >= '3') ? 1 : 0;
+    if (aftFromOms[pod][group])
+        /* both OMS pods, tied by the crossfeed line: drawn from the fuller */
+        return (prop[3] >= prop[4]) ? 3 : 4;
+    return 1 + pod;
 }
 
 /* The force on the vehicle, PASS's effective magnitude (N). */

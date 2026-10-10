@@ -2048,6 +2048,33 @@ static bool readback(char mdm, int k, uint32_t f, int n, uint16_t *out) {
     return true;
 }
 
+/* THE OMS-TO-RCS INTERCONNECT, as the valves stand (valvemodel.c): an aft
+ * pod's manifold group (1-2, or 3-5 with the verniers) draws from the OMS
+ * tanks when its RCS tank isolation valves are closed, its RCS crossfeed is
+ * open, and an OMS crossfeed (A or B, either pod) is open -- the abort dump's
+ * configuration (GSIABT.hal; SCOM OI-32 2.18).  Without it a TAL's 2,000
+ * jet-seconds of dump came out of the RCS tanks, the entry had no aft jets,
+ * and the stack departed at Mach 7 (Mac-portview's abort5-tal, 2026-10-10). */
+static void aft_rcs_feed(void) {
+    static const char *const ISO[2][2] = { { "L RCS TK ISOL 1/2", "L RCS TK ISOL 3/4/5" },
+                                           { "R RCS TK ISOL 1/2", "R RCS TK ISOL 3/4/5" } };
+    static const char *const XFD[2][2] = { { "L RCS XFEED 1/2", "L RCS XFEED 3/4/5" },
+                                           { "R RCS XFEED 1/2", "R RCS XFEED 3/4/5" } };
+    bool omsXfd = valve_open_fraction("L OMS XFEED A") > 0.5 || valve_open_fraction("R OMS XFEED A") > 0.5 ||
+                  valve_open_fraction("L OMS XFEED B") > 0.5 || valve_open_fraction("R OMS XFEED B") > 0.5;
+    static bool was[2][2];
+    for (int p = 0; p < 2; p++)
+        for (int g = 0; g < 2; g++) {
+            bool oms = omsXfd && valve_open_fraction(ISO[p][g]) < 0.5 && valve_open_fraction(XFD[p][g]) > 0.5;
+            if (oms != was[p][g]) {
+                was[p][g] = oms;
+                fprintf(stderr, "mdmdev: %s aft RCS manifolds %s now fed from the %s\n",
+                        p ? "right" : "left", g ? "3-5" : "1-2", oms ? "OMS tanks (interconnect)" : "RCS tanks");
+            }
+            vehdyn_set_aft_rcs_feed(p, g, oms);
+        }
+}
+
 bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs) {
     if (n <= 0) return false;
     if (lps_owns(busID, cmd)) return lps_reply(cmd, n, out);
@@ -2057,6 +2084,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         if (!wired) { wired = true; valve_set_output_source(out_word); }
     }
     valve_update(sharedUs / 1e6);
+    aft_rcs_feed();
     pc_clock(sharedUs);
     crew_poll();
     if (nsp_reply(busID, cmd, n, out)) return true;

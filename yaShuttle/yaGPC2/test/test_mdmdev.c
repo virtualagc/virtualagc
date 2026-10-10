@@ -163,10 +163,15 @@ int main(void) {
      * any already dry when it arms them) */
     check((w[18] & 0x0040u) == 0 && (w[23] & 0x0080u) == 0, "fa1 ET low-level sensors wet");
     check(w[20] == 0xA000u, "fa1 right manifolds 1-4 open");
-    check(w[25] == 0xA00Cu, "fa1 left manifolds 1-4 and 5 open");
+    /* the manifold bits only: the same words carry the interconnect valves'
+     * indications (valvemodel.c), checked next */
+    check((w[25] & 0xF00Fu) == 0xA00Cu, "fa1 left manifolds 1-4 and 5 open");
+    check((w[25] & 0x0F00u) == 0x0A00u, "fa1 L RCS TK ISOL 1/2 reads OPEN (interconnect valves at rest)");
+    check((w[24] & 0x03C0u) == 0x0140u && (w[19] & 0x00F0u) == 0x0050u,
+          "fa1 L and R OMS XFEED A read CLOSED");
     check(w[21] == 0x00E0u, "fa1 no chamber pressure, rate gyros spinning");
     check(w[22] == 0x0000u, "fa1 no jet driver on");
-    check(read_words(15, FA(0x0836Eu), 54, w) == 54 && w[20] == 0xA00Cu,
+    check(read_words(15, FA(0x0836Eu), 54, w) == 54 && (w[20] & 0xF00Fu) == 0xA00Cu,
           "fa2 right manifold 5 open");
 
     /* FIRE L1A (FA1 bit 1) and L5L (bit 8): B is card 10 channel 0, the
@@ -785,17 +790,17 @@ int main(void) {
         ok = false;
         for (int tries = 0; tries < 200 && !ok; tries++) {
             read_words(14, FA(0x0836Eu), 54, a1);
-            ok = a1[19] == 0x0100u && a1[20] == 0xA001u;
+            ok = (a1[19] & 0x0300u) == 0x0100u && a1[20] == 0xA001u;
             if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
         }
-        check(a1[19] == 0x0100u, "crew OMS ENG ARM reaches FA1 DSCRT2 (HFE word 19)");
+        check((a1[19] & 0x0300u) == 0x0100u, "crew OMS ENG ARM reaches FA1 DSCRT2 (HFE word 19)");
         check(a1[20] == 0xA001u, "an FA contact is ORed with the manifold bits");
         crew_send(5, 2, 3, 1, 0x0100u);
         crew_send(5, 2, 3, 2, 0x0001u);
         ok = false;
         for (int tries = 0; tries < 200 && !ok; tries++) {
             read_words(14, FA(0x0836Eu), 54, a1);
-            ok = a1[19] == 0 && a1[20] == 0xA000u;
+            ok = (a1[19] & 0x0300u) == 0 && a1[20] == 0xA000u;
             if (!ok) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
         }
         check(ok, "and RESET clears the FA contacts");

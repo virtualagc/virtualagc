@@ -64,6 +64,27 @@ typedef struct {
 /* The tables.  Unknown A/B/C assignment of a command copy to an MDM is no
  * matter: any copy set drives the valve. */
 static const Valve V[] = {
+    /* THE OMS-TO-RCS INTERCONNECT (abort dumps, GSIABT.hal GSI_ABT_OR_INT):
+     * RCS tank isolation valves closed, RCS crossfeeds open, OMS crossfeed B
+     * open in both pods (A as backup), so every aft RCS jet draws from the
+     * two OMS pods, tied together (SCOM OI-32 2.18).  Command and indication
+     * bits are the masks GSIABT and GSAXFD write and test (several CGBOBF
+     * REPLACE names on card 7/15 ch 2 are stale after CR59394A/CR59112B);
+     * the same word and bit mean different valves on FA1/2 and FA3/4.
+     * Strokes 1.0 s, an estimate: GSI checks each valve 1.5 s after
+     * commanding it.  Positions feed vehdyn's aft jets (mdmdev.c). */
+    { "L RCS TK ISOL 1/2", {{'A',U(1),7,2,0x1400},{'A',U(3),7,2,0x0400}}, {{'A',U(1),7,2,0x2800},{'A',U(3),7,2,0x0800}}, false,false,1.0,1.0, {{'A',U(1),25,0x0A00}}, {{'A',U(1),25,0x0500}} },
+    { "R RCS TK ISOL 1/2", {{'A',U(3),15,2,0x1400},{'A',U(1),15,2,0x0400}}, {{'A',U(3),15,2,0x2800},{'A',U(1),15,2,0x0800}}, false,false,1.0,1.0, {{'A',U(3),20,0x0A00}}, {{'A',U(3),20,0x0500}} },
+    { "L RCS TK ISOL 3/4/5", {{'A',U(2)|U(4),7,2,0x1400}}, {{'A',U(2)|U(4),7,2,0x2800}}, false,false,1.0,1.0, {{'A',U(2)|U(4),25,0x0A00}}, {{'A',U(2)|U(4),25,0x0500}} },
+    { "R RCS TK ISOL 3/4/5", {{'A',U(2)|U(4),15,2,0x1400}}, {{'A',U(2)|U(4),15,2,0x2800}}, false,false,1.0,1.0, {{'A',U(2)|U(4),20,0x0A00}}, {{'A',U(2)|U(4),20,0x0500}} },
+    { "L RCS XFEED 1/2", {{'A',U(3)|U(4),7,2,0x4000},{'A',U(3),15,2,0x0020}}, {{'A',U(3)|U(4),7,2,0x8000},{'A',U(3),15,2,0x0040}}, false,false,1.0,0.0, {{'A',U(3),20,0x00A0},{'A',U(3),19,0x0080}}, {{0}} },
+    { "R RCS XFEED 1/2", {{'A',U(3)|U(4),15,2,0x4000},{'A',U(4),15,2,0x0020}}, {{'A',U(3)|U(4),15,2,0x8000},{'A',U(4),15,2,0x0040}}, false,false,1.0,0.0, {{'A',U(4),25,0x00A0},{'A',U(4),19,0x0080}}, {{0}} },
+    { "L RCS XFEED 3/4/5", {{'A',U(3)|U(4),7,2,0x0040},{'A',U(4),7,2,0x0020}}, {{'A',U(3),7,2,0x0020},{'A',U(4),7,2,0x0018}}, false,false,1.0,0.0, {{'A',U(3),20,0x000A},{'A',U(3),19,0x0040}}, {{0}} },
+    { "R RCS XFEED 3/4/5", {{'A',U(3),15,2,0x0014},{'A',U(4),15,2,0x0010}}, {{'A',U(3),15,2,0x0003},{'A',U(4),15,2,0x0008}}, false,false,1.0,0.0, {{'A',U(4),25,0x000A},{'A',U(4),19,0x0040}}, {{0}} },
+    { "L OMS XFEED A", {{'A',U(1)|U(2),7,1,0x0010},{'A',U(1),7,1,0x0100}}, {{'A',U(1)|U(2),7,1,0x0008},{'A',U(1),7,1,0x0080}}, false,false,1.0,0.0, {{'A',U(1),24,0x0280}}, {{'A',U(1),24,0x0140}} },
+    { "R OMS XFEED A", {{'A',U(1)|U(2),7,1,0x0004},{'A',U(1),7,1,0x0040}}, {{'A',U(1)|U(2),7,1,0x0002},{'A',U(1),7,1,0x0020}}, false,false,1.0,0.0, {{'A',U(1),19,0x00A0}}, {{'A',U(1),19,0x0050}} },
+    { "L OMS XFEED B", {{'A',U(1)|U(2),15,1,0x0010},{'A',U(2),15,1,0x0100}}, {{'A',U(1)|U(2),15,1,0x0008},{'A',U(2),15,1,0x0080}}, false,false,1.0,0.0, {{'A',U(2),24,0x0280}}, {{'A',U(2),24,0x0140}} },
+    { "R OMS XFEED B", {{'A',U(1)|U(2),15,1,0x0004},{'A',U(2),15,1,0x0040}}, {{'A',U(1)|U(2),15,1,0x0002},{'A',U(2),15,1,0x0020}}, false,false,1.0,0.0, {{'A',U(2),19,0x00A0}}, {{'A',U(2),19,0x0050}} },
     { "LO2 POGO RECIRC PV20", {{0}}, { { 'A', U(1)|U(2)|U(3)|U(4), 12, 0, 0x8000 } },
       true, true, 1.0, 0.0, { { 'A', U(3), 22, 0x0200 } }, {{0}} },
     { "LO2 POGO RECIRC PV21", {{0}}, { { 'A', U(1)|U(2)|U(3)|U(4), 12, 0, 0x8000 } },
@@ -201,6 +222,12 @@ void valve_load(const double *b, int n) {
     started = true;
     for (int i = 0; i < NV; i++) pos[i] = b[i];
     lastT = -1.0;
+}
+
+double valve_open_fraction(const char *name) {
+    for (int i = 0; i < NV; i++)
+        if (strcmp(V[i].name, name) == 0) return pos[i];
+    return -1.0;
 }
 
 void valve_report(void) {

@@ -122,6 +122,10 @@ double vehdyn_srb_pc_psia(void);
  * attached (before the pad, after ET separation, in orbit). */
 bool vehdyn_et_propellant(double *lo2Kg, double *lh2Kg);
 
+/* The OMS-to-RCS interconnect: aft pod (0 left, 1 right), manifold group (0
+ * manifolds 1-2, 1 manifolds 3-5) fed from the OMS tanks or its own RCS. */
+void vehdyn_set_aft_rcs_feed(int pod, int group, bool fromOms);
+
 /* For tests: start over at time t with full tanks, a 400 km circular orbit
  * and the vehicle at rest. */
 void vehdyn_reset(double t);
