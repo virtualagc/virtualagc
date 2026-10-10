@@ -1956,7 +1956,7 @@ E(i,i) = SIG(i)^2, the off-diagonals from the correlations, rotated from UVW to 
 
 **The mechanism.**  With the tape's zeros the filter starts certain of its state, so the marks
 barely move it.  FLTR then simply rides PROP (compare bis-a, where FLTR and PROP agree to a few
-feet), and PROP is excellent because yaVEHDYN_START_REL hands PASS the true relative state.  With
+feet), and PROP is excellent because YAGPC_VEHDYN_START_REL hands PASS the true relative state.  With
 the flown values the filter starts as uncertain as a real flight's ground-tracked state was:
 20,000 ft downtrack, -0.9 correlated with the velocity.  The first star-tracker marks then move it
 hundreds of feet.  bis-c shows FLTR jumping +280 ft at the first seven accepts while PROP stayed
@@ -1978,7 +1978,7 @@ gates.
 2. Before #PCGEIPD goes on a default volume, give the start a realistic onboard state: an option
    in the driver (or vehdyn's START_REL) to offset PASS's relative state at UPLINK by an error drawn
    from the flown sigmas.  Then the flown covariance is consistent with the state it describes, and
-   FLTR's convergence is a real test.  That is driver or yaVEHDYN work, not a reason to keep the
+   FLTR's convergence is a real test.  That is driver or vehdyn work, not a reason to keep the
    tape's zeros.
 Runs: ~/sts134-runs/rendezvous/bis-{a,b,c,c1,c2,c3,d1,d2,d3,e1,e2,e3}.
 
