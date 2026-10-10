@@ -2146,6 +2146,73 @@ aft,cctv,rpop`):
   to the aft station, and SimpleScreenRecorder driven through its stdin
   (`record-start`, `record-save`).  Agreed with the owner; not started.
 
+## 5n. Option B: the flight's GNC, as one switch (2026-10-10, macOS)
+
+Ron's decision (2026-10-10): keep **option A** -- the rndz2 volume, the tape's
+star-tracker mounting, PASS started on the true state -- as the default, and
+add **option B** as one switch to try; B becomes the default only once it has
+been flown to the hold.
+
+**Option B** is `fly_rndz134.py --flight-gnc`:
+- the volume `~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-gnc.mmv`
+  (unless `--tape`), built from the KSC6 volume with
+  `tools/sites/sts134-gnc-iloads.json` (`python3 mission_reconfig.py
+  sites/sts134-gnc-iloads.json <KSC6 volume> --out <it>`; SHA-256
+  82fbcfcda355d8d4..., also in forClaude/volumes/);
+- `YAGPC_STARTRK_MOUNT=flown` in yaGPC2's environment (the flown CGYS_TNBST,
+  5k);
+- `--onboard-error flown` (5l; a seed given with `--onboard-error` is kept).
+
+**The spec** is the rndz set (242 cells) plus 277 more: every #PCG*/#DG*
+word the DASS_G2 PATCH SUMMARY changes, except the ascent/abort guidance
+compool #PCGGCOM (495 words, untried), placed only in G2's own load block
+(offsets 109968 resident, 576000, 635804/635808, 643162, 649516, 649900,
+1133994; #PCGCMFR at -75566), 519 copies in 9 load blocks, none refused.  Not
+placed: about 80 words with no reliable anchor (mostly GPS quality tables in
+#DGLJRCV, a few output masks, two DAP filter words).
+
+**gnc-run1** (IPL to HOLD in one process; port 49900, rate 2,
+`--flight-gnc --low-z`, seed 134; RPM continuous, TORVA from where it ends).
+It does NOT yet fly the manual phase.
+
+| | Option A (e2e-run1, 5h) | Option B (gnc-run1) |
+|---|---|---|
+| Onboard error drawn | none | U -1325 V +1326 W +4377 ft, -3.3 +1.2 -11.4 ft/s |
+| FLTR error at Ti | tens of ft | 7.6 kft |
+| RR range marks before Ti | accepted | **all 177 rejected** (residual over the edit limit); rdot and angles accepted |
+| Ti, PASS / truth's Lambert | +8.92 -0.67 +2.83 / +8.92 -0.67 +2.87 | +9.51 -4.26 +0.49 / +8.81 -0.64 +2.72 (flown) |
+| MC1 | onboard | onboard -0.65 -1.09 -0.19 vs truth -0.18 -0.03 +0.34 (outside 3 sigma) |
+| MC2 | onboard | onboard outside limits; ground -0.20 -0.73 -2.77 flown |
+| MC3 / MC4 | onboard | onboard, within 0.2 ft/s of the truth's |
+| Arrival (MC4 + 13 min) | X +11 Y +42 Z +560 | X -30 Y +17 Z +501 ft |
+| RBAR | rms 3.8/1.1/2.4 ft, 411 lb | rms 1.4/1.1/3.7 ft (last 3 min), 329 lb |
+| RPM | 2,219 lb (quarters) | 91 lb, but 300+ ft of drift in X and Y |
+| TORVA / VBAR / HOLD | flown, 863 / 1,077 / 660 lb | **diverged**: TORVA rms 365/239/538 ft; VBAR and HOLD drifted to tens of kft |
+| ILLEGAL ENTRY | 0 | 0 |
+
+**Two findings:**
+1. **RR range marks rejected.**  With FLTR thousands of feet off when the
+   radar locked, every range mark failed PASS's edit test until after Ti; only
+   range rate and angles went in, which cannot fix range.  The flight's
+   remedy is the crew's: RR NAVIGATION [13B]'s FORCE when the residual ratios
+   stay high and steady.  The driver doesn't do that yet.  (The 5l seeds
+   started differently and converged.)
+2. **Attitude hold lost in the manual phase.**  From the start of RBAR
+   (DAP A/AUTO/VERN, -Z target track) the -Z axis swung 30 -> 164 -> 74 deg
+   and kept swinging; position was held but the attitude was not.  A resume
+   from the arrival capture without LOW Z did the same, more slowly (21 ->
+   92 -> 158 deg over 13 min), so it is not LOW Z alone.  Option A's runs
+   held attitude in the same leg, so it comes with the new csects: #PCGCMFR
+   (the stored DAP configurations, notch filters, mass properties) or #DGFFORB
+   / #DGFTREB / #DGRRRCS (jet selection), against vehdyn's jet table.  This
+   needs PASS-IDLE's look (vehdyn's jets) before B can fly the manual phase.
+
+**Recommendation:** keep option A the default.  Before B can become the
+default: (a) the driver's RR FORCE per [13B]; (b) find what in #PCGCMFR /
+#DGF* makes VERN AUTO lose attitude with vehdyn's jets -- bisect those two
+groups from gnc-run1's arrival capture; (c) fly B to the hold again.
+Runs: `~/sts134-runs/rendezvous/gnc-run1`, `gnc-rbar-nolowz`.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

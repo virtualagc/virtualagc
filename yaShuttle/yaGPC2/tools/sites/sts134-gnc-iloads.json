@@ -1,0 +1,4158 @@
+{
+ "flight": "STS-134",
+ "notes": "STS-134's own GNC I-loads in G2 (GNC OPS 2) apart from the ascent/abort guidance compool #PCGGCOM: the rendezvous set of sts134-rndz-iloads.json plus every other #PCG*/#DG* csect word the PATCH SUMMARY of ~/workspace/PFS/mafgen/DASS_G2.ASC (STS-134's GNC2 listing, 'STS134/OI034/C2 MDD 134.09') changes from the load module's value (LM) to the flight's (MM), cross-checked against corrected-G2.fcm.  Includes the DAP's stored A/B configurations, notch filters and mass properties (#PCGCMFR), the star tracker mounting (#PCGYSTA, which needs YAGPC_STARTRK_MOUNT=flown so the simulated trackers match), and the rendezvous filter's initial covariance (#PCGEIPD, meant with fly_rndz134 --onboard-error flown).  #PCGGCOM (495 ascent/abort guidance words) is left out until an ascent trial.  Placed by fixed position on the KSC6 volume: each cell anchored on a distinctive run of a G2 OPS 1 IPL memory image and kept only at G2's own load block (offsets 109968 resident, 576000, 635804/635808, 643162, 649516, 649900, 1133994; #PCGCMFR at -75566).  Not placed (no reliable anchor, mostly GPS quality tables in #DGLJRCV and a few output masks): see RENDEZVOUS_PLAN 5n.  For fly_rndz134 --flight-gnc.",
+ "cells": [
+  {
+   "name": "#DGLCSTA GLC_VAR_ST_HORIZ",
+   "config": "G2",
+   "addr": "0450a",
+   "flat": 667190,
+   "H": "3C10C6F7",
+   "was": "38A4ED3F"
+  },
+  {
+   "name": "#DGLCSTA GLC_VAR_ST_VERT",
+   "config": "G2",
+   "addr": "0450c",
+   "flat": 667192,
+   "H": "3C10C6F7",
+   "was": "38A4ED3F"
+  },
+  {
+   "name": "#DGL5NAV GL5_VEL_THRESH",
+   "config": "G2",
+   "addr": "0453a",
+   "flat": 667238,
+   "H": "3FF5C28F",
+   "was": "40E66666"
+  },
+  {
+   "name": "#DGLBRRA CGNS_K_ANG_COS+1",
+   "config": "G2",
+   "addr": "045e9",
+   "flat": 667413,
+   "H": "0701",
+   "was": "06F4"
+  },
+  {
+   "name": "#DGLBRRA CGNS_K_ANG_SIN+1",
+   "config": "G2",
+   "addr": "045eb",
+   "flat": 667415,
+   "H": "A62F",
+   "was": "A633"
+  },
+  {
+   "name": "#DGLGCOA GLG_VAR_COAS_HORIZ",
+   "config": "G2",
+   "addr": "045fc",
+   "flat": 667432,
+   "H": "3C53E2D6",
+   "was": "3B2AF31D"
+  },
+  {
+   "name": "#DGLGCOA GLG_VAR_COAS_VERT",
+   "config": "G2",
+   "addr": "045fe",
+   "flat": 667434,
+   "H": "3C53E2D6",
+   "was": "3B2AF31D"
+  },
+  {
+   "name": "#DGLGCOA C110+8",
+   "config": "G2",
+   "addr": "04608",
+   "flat": 667444,
+   "H": "4110",
+   "was": "C110"
+  },
+  {
+   "name": "#DGLGCOA C110+6",
+   "config": "G2",
+   "addr": "04616",
+   "flat": 667458,
+   "H": "C110",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_F_FOM_GAX_MSG_CNT_MIN",
+   "config": "G2",
+   "addr": "0480e",
+   "flat": 668346,
+   "H": "7FF8",
+   "was": "0014"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_GAX_MSG_CNT_MIN",
+   "config": "G2",
+   "addr": "0480f",
+   "flat": 668347,
+   "H": "7FF8",
+   "was": "0005"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_GAX_MSG_CNT_MIN",
+   "config": "G2",
+   "addr": "04810",
+   "flat": 668348,
+   "H": "7FF8",
+   "was": "0003"
+  },
+  {
+   "name": "#DGLJRCV ?",
+   "config": "G2",
+   "addr": "04811",
+   "flat": 668349,
+   "H": "7FF8",
+   "was": "0002"
+  },
+  {
+   "name": "#DGLJRCV CGNS_N_RATIOS_ABOVE_LIMIT_MIN",
+   "config": "G2",
+   "addr": "04812",
+   "flat": 668350,
+   "H": "7FF8",
+   "was": "0005"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_IMU_VEL_THRESH_SQ",
+   "config": "G2",
+   "addr": "0481c",
+   "flat": 668360,
+   "H": "3EA3D708",
+   "was": "3E431BDE"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_GAX_OFF_ALERT_RMNDR_DT",
+   "config": "G2",
+   "addr": "04820",
+   "flat": 668364,
+   "H": "461A5E00",
+   "was": "4312C000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_DT_ANNCD_RESET",
+   "config": "G2",
+   "addr": "04822",
+   "flat": 668366,
+   "H": "423C0000",
+   "was": "45151800"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_RTOL_SF_INV",
+   "config": "G2",
+   "addr": "04826",
+   "flat": 668370,
+   "H": "40199999",
+   "was": "40333333"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_VTOL_SF_INV+1",
+   "config": "G2",
+   "addr": "04829",
+   "flat": 668373,
+   "H": "0003",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELR_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "0482a",
+   "flat": 668374,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA2_DELV_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "0482c",
+   "flat": 668376,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELR_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "0482e",
+   "flat": 668378,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA3_DELV_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "04830",
+   "flat": 668380,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELR_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "04832",
+   "flat": 668382,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_QA4_DELV_RATIO_SF_INV",
+   "config": "G2",
+   "addr": "04834",
+   "flat": 668384,
+   "H": "42640001",
+   "was": "41A00000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_UVW_POS_SF_INV",
+   "config": "G2",
+   "addr": "04836",
+   "flat": 668386,
+   "H": "40199999",
+   "was": "40333333"
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_UVW_VEL_SF_INV+1",
+   "config": "G2",
+   "addr": "04839",
+   "flat": 668389,
+   "H": "0003",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELR_SF_INV",
+   "config": "G2",
+   "addr": "0483a",
+   "flat": 668390,
+   "H": "4325F9C8",
+   "was": "40199999"
+  },
+  {
+   "name": "#DGLJRCV CGNS_DELV_SF_INV+1",
+   "config": "G2",
+   "addr": "0483d",
+   "flat": 668393,
+   "H": "0003",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_ANG_SF_INV",
+   "config": "G2",
+   "addr": "0483e",
+   "flat": 668394,
+   "H": "42640001",
+   "was": "42B60960"
+  },
+  {
+   "name": "#DGLJRCV CGNS_ALT_SF_INV",
+   "config": "G2",
+   "addr": "04840",
+   "flat": 668396,
+   "H": "42320000",
+   "was": "4242AAAA"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_RTOL_INV",
+   "config": "G2",
+   "addr": "04842",
+   "flat": 668398,
+   "H": "3F147AE1",
+   "was": "3CA7C5AC"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA3_VTOL_INV",
+   "config": "G2",
+   "addr": "04844",
+   "flat": 668400,
+   "H": "411AAAAA",
+   "was": "3F28F5C2"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_RTOL_INV",
+   "config": "G2",
+   "addr": "04846",
+   "flat": 668402,
+   "H": "3E83126E",
+   "was": "3F147AE1"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA4_VTOL_INV",
+   "config": "G2",
+   "addr": "04848",
+   "flat": 668404,
+   "H": "40333333",
+   "was": "40199999"
+  },
+  {
+   "name": "#DGLJRCV CGNS_METER_DL_SF_INV",
+   "config": "G2",
+   "addr": "0484a",
+   "flat": 668406,
+   "H": "42640001",
+   "was": "40199999"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_A",
+   "config": "G2",
+   "addr": "04888",
+   "flat": 668468,
+   "H": "431F4000431F4000431F4000",
+   "was": "4427100044C35000433E8000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_UVW_B",
+   "config": "G2",
+   "addr": "0488e",
+   "flat": 668474,
+   "H": "40238E4B411E5ED24017B3FA",
+   "was": "4228000041A0000041400000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A",
+   "config": "G2",
+   "addr": "0489a",
+   "flat": 668486,
+   "H": "4120",
+   "was": "4246"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+2",
+   "config": "G2",
+   "addr": "0489c",
+   "flat": 668488,
+   "H": "4110",
+   "was": "4214"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_A+4",
+   "config": "G2",
+   "addr": "0489e",
+   "flat": 668490,
+   "H": "4110",
+   "was": "4150"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_UVW_B",
+   "config": "G2",
+   "addr": "048a0",
+   "flat": 668492,
+   "H": "3E8509BF3D5E5F303D5E5F30",
+   "was": "000000000000000000000000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_RTOL_MAX_UVW",
+   "config": "G2",
+   "addr": "048ac",
+   "flat": 668504,
+   "H": "437D000044520800435DC000",
+   "was": "444E200045186A00437D0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW",
+   "config": "G2",
+   "addr": "048b2",
+   "flat": 668510,
+   "H": "4218",
+   "was": "4264"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+2",
+   "config": "G2",
+   "addr": "048b4",
+   "flat": 668512,
+   "H": "4120",
+   "was": "4214"
+  },
+  {
+   "name": "#DGLJRCV CGNS_GPS_QA2_VTOL_MAX_UVW+4",
+   "config": "G2",
+   "addr": "048b6",
+   "flat": 668514,
+   "H": "4120",
+   "was": "4150"
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM",
+   "config": "G2",
+   "addr": "048b8",
+   "flat": 668516,
+   "H": "423C",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+2",
+   "config": "G2",
+   "addr": "048ba",
+   "flat": 668518,
+   "H": "4228",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+4",
+   "config": "G2",
+   "addr": "048bc",
+   "flat": 668520,
+   "H": "4228",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+6",
+   "config": "G2",
+   "addr": "048be",
+   "flat": 668522,
+   "H": "4110",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLJRCV CGNS_SIG_DIAG_GPS_NOM+8",
+   "config": "G2",
+   "addr": "048c0",
+   "flat": 668524,
+   "H": "4099999940999999",
+   "was": "0000000000000000"
+  },
+  {
+   "name": "#DGC9ORB KH",
+   "config": "G2",
+   "addr": "04afa",
+   "flat": 669094,
+   "H": "4140",
+   "was": "4120"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K4A1",
+   "config": "G2",
+   "addr": "04d20",
+   "flat": 129712,
+   "H": "C1A00000",
+   "was": "C1F170A2"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K4B1",
+   "config": "G2",
+   "addr": "04d24",
+   "flat": 129716,
+   "H": "C1A00000",
+   "was": "C19851EA"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K4C1",
+   "config": "G2",
+   "addr": "04d28",
+   "flat": 129720,
+   "H": "C1A00000",
+   "was": "C1E170A2"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K5A1",
+   "config": "G2",
+   "addr": "04d2c",
+   "flat": 129724,
+   "H": "C1A00000",
+   "was": "C1E11EB7"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K5B1",
+   "config": "G2",
+   "addr": "04d30",
+   "flat": 129728,
+   "H": "C1A00000",
+   "was": "C1F7851D"
+  },
+  {
+   "name": "#PCGCCOM CGPS_K5C1",
+   "config": "G2",
+   "addr": "04d34",
+   "flat": 129732,
+   "H": "C1A00000",
+   "was": "C1EFD709"
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_LAT+1",
+   "config": "G2",
+   "addr": "05b2d",
+   "flat": 133309,
+   "H": "D2DB03C734DD",
+   "was": "D2E0E30446B6"
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_LONG+2",
+   "config": "G2",
+   "addr": "05b32",
+   "flat": 133314,
+   "H": "D0CF0FF3",
+   "was": "D8DCA587"
+  },
+  {
+   "name": "#PCGNCOM CGGS_NAVBASE_ALT+2",
+   "config": "G2",
+   "addr": "05b36",
+   "flat": 133318,
+   "H": "00000000",
+   "was": "66666665"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP",
+   "config": "G2",
+   "addr": "06056",
+   "flat": 134630,
+   "H": "000D",
+   "was": "0001"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+2",
+   "config": "G2",
+   "addr": "06058",
+   "flat": 134632,
+   "H": "0001000E000200090006",
+   "was": "000D0002000E00060009"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+19",
+   "config": "G2",
+   "addr": "06069",
+   "flat": 134649,
+   "H": "0017",
+   "was": "0011"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+21",
+   "config": "G2",
+   "addr": "0606b",
+   "flat": 134651,
+   "H": "0011",
+   "was": "0017"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+23",
+   "config": "G2",
+   "addr": "0606d",
+   "flat": 134653,
+   "H": "001A",
+   "was": "0014"
+  },
+  {
+   "name": "#PCGRRMC CGRS_JET_MAP+25",
+   "config": "G2",
+   "addr": "0606f",
+   "flat": 134655,
+   "H": "00140012001800030015001B0006",
+   "was": "001A00030012001800060015001B"
+  },
+  {
+   "name": "#PCGZCOM CGZV_FUEL_WASTING_DIRECTION",
+   "config": "G2",
+   "addr": "060b0",
+   "flat": 134720,
+   "H": "0001",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_ROLL",
+   "config": "G2",
+   "addr": "060c4",
+   "flat": 134740,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_PITCH",
+   "config": "G2",
+   "addr": "060c6",
+   "flat": 134742,
+   "H": "00000000",
+   "was": "43139000"
+  },
+  {
+   "name": "#PCGZCOM CGZV_BURN_ATT_YAW",
+   "config": "G2",
+   "addr": "060c8",
+   "flat": 134744,
+   "H": "00000000",
+   "was": "43166000"
+  },
+  {
+   "name": "#PCGZCOM CGZV_IMU_NAV_ACC_THRESH+1",
+   "addr": "061fb",
+   "H": "0F00",
+   "was": "04B0",
+   "config": "G2",
+   "flat": 135051
+  },
+  {
+   "name": "#PCGZCOM CGZV_OMS_DUMP_QTY",
+   "addr": "0624a",
+   "H": "424A8E3A",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 135130
+  },
+  {
+   "name": "#DGL6COV CGNS_VAR_IMU_ALIGN",
+   "config": "G2",
+   "addr": "067d4",
+   "flat": 669742,
+   "H": "3C10C6F7",
+   "was": "40199999"
+  },
+  {
+   "name": "#DGL6COV CGNS_VAR_U_A_PWRD_FLT",
+   "config": "G2",
+   "addr": "067d6",
+   "flat": 669744,
+   "H": "3C1421F53C1421F53C1421F5",
+   "was": "3F28F5C23F28F5C23F28F5C2"
+  },
+  {
+   "name": "#DGL6COV CGNS_COV_U_A_PWRD_FLT",
+   "config": "G2",
+   "addr": "067dc",
+   "flat": 669750,
+   "H": "3C1421F53C1421F53C1421F5",
+   "was": "3FDB8BAC3FDB8BAC3FDB8BAC"
+  },
+  {
+   "name": "#DGCQORB CGCS_UNIQUE_FILTER_SEL_VALUE",
+   "config": "G2",
+   "addr": "06cbb",
+   "flat": 670997,
+   "H": "0002",
+   "was": "0006"
+  },
+  {
+   "name": "#DGCQORB CGCS_MIN_ANGLE_JET_SEL_VALUE",
+   "config": "G2",
+   "addr": "06cbd",
+   "flat": 670999,
+   "H": "0002",
+   "was": "0001"
+  },
+  {
+   "name": "#DGCQORB CGCS_CANDIDATE_VERN_THRESHOLD",
+   "config": "G2",
+   "addr": "06cd2",
+   "flat": 671020,
+   "H": "C0333333",
+   "was": "40800000"
+  },
+  {
+   "name": "#DGCQORB CGCS_MOMENTS_OF_INERTIA_NOM",
+   "config": "G2",
+   "addr": "06d30",
+   "flat": 671114,
+   "H": "45E50930466CC8B44671DC9D",
+   "was": "45E85B80466D909446728F91"
+  },
+  {
+   "name": "#DGCQORB CGCS_PRODUCTS_OF_INERTIA_NOM",
+   "config": "G2",
+   "addr": "06d36",
+   "flat": 671120,
+   "H": "C396F0004542D8B0C39B6000",
+   "was": "C39AB33345432100C39EAE66"
+  },
+  {
+   "name": "#DGCQORB CGCS_CG_NOM+1",
+   "config": "G2",
+   "addr": "06d4f",
+   "flat": 671145,
+   "H": "0333",
+   "was": "1333"
+  },
+  {
+   "name": "#DGCQORB CGCS_CG_NOM+5",
+   "config": "G2",
+   "addr": "06d53",
+   "flat": 671149,
+   "H": "3CCC",
+   "was": "8333"
+  },
+  {
+   "name": "#DGLUACC GLU_ALT_L",
+   "config": "G2",
+   "addr": "0753a",
+   "flat": 673172,
+   "H": "45D252F4",
+   "was": "45F04B90"
+  },
+  {
+   "name": "#DGLUACC GLU_CBM2",
+   "config": "G2",
+   "addr": "0753c",
+   "flat": 673174,
+   "H": "40FD3A59",
+   "was": "4048BF5C"
+  },
+  {
+   "name": "#DGLUACC GLU_ABM",
+   "config": "G2",
+   "addr": "0753e",
+   "flat": 673176,
+   "H": "C217907C",
+   "was": "C2184829"
+  },
+  {
+   "name": "#DGLUACC GLU_ABM+3",
+   "config": "G2",
+   "addr": "07541",
+   "flat": 673179,
+   "H": "C512BC5432F3BC5BF196462A3CE646250540",
+   "was": "A512BC4E9871BC5EB274462ED82146247211"
+  },
+  {
+   "name": "#DGLUACC GLU_BM",
+   "config": "G2",
+   "addr": "0754a",
+   "flat": 673188,
+   "H": "BFE41F4D3C1447F9C52E24A3",
+   "was": "C03BC7B13C13505EC515B8F6"
+  },
+  {
+   "name": "#DGLUACC GLU_LOC+1",
+   "config": "G2",
+   "addr": "07551",
+   "flat": 673195,
+   "H": "F07B45A324C1",
+   "was": "F3A378DD0AD9"
+  },
+  {
+   "name": "#DGLUACC GLU_PHASE_C",
+   "config": "G2",
+   "addr": "07558",
+   "flat": 673202,
+   "H": "42D591017F5C00B1",
+   "was": "42BC6F31A08BFC19"
+  },
+  {
+   "name": "#DGLTREF CGNS_I_VENT_GPS_REF",
+   "config": "G2",
+   "addr": "0762f",
+   "flat": 673417,
+   "H": "0001",
+   "was": "0000"
+  },
+  {
+   "name": "#DGLTREF CGNS_ACC_THRESH_GPS_REF",
+   "config": "G2",
+   "addr": "07632",
+   "flat": 673420,
+   "H": "3FCCCCCC",
+   "was": "3F83126E"
+  },
+  {
+   "name": "#DGWYORB CGZV_DU",
+   "config": "G2",
+   "addr": "07bfc",
+   "flat": 674902,
+   "H": "0000",
+   "was": "4120"
+  },
+  {
+   "name": "#DGWYORB CGZV_EPS_U",
+   "config": "G2",
+   "addr": "07bfe",
+   "flat": 674904,
+   "H": "3B1AD7F2",
+   "was": "3C10C6F7"
+  },
+  {
+   "name": "#DGWRORB CGZV_ORB_TGT_DTMIN_LAMB",
+   "config": "G2",
+   "addr": "07d1e",
+   "flat": 675192,
+   "H": "423C",
+   "was": "0000"
+  },
+  {
+   "name": "#DGWGORB CGZV_PROX_DTMIN",
+   "config": "G2",
+   "addr": "0afaa",
+   "flat": 680774,
+   "H": "423C",
+   "was": "0000"
+  },
+  {
+   "name": "#DGWSORB CGZV_EL_DH_TOL",
+   "config": "G2",
+   "addr": "0b038",
+   "flat": 680916,
+   "H": "42640000",
+   "was": "431F4000"
+  },
+  {
+   "name": "#DGWSORB CGZV_EL_TOL",
+   "config": "G2",
+   "addr": "0b03a",
+   "flat": 680918,
+   "H": "3F147AE1",
+   "was": "3E418937"
+  },
+  {
+   "name": "#DGWWORB CGZV_N_MIN",
+   "config": "G2",
+   "addr": "0b058",
+   "flat": 680948,
+   "H": "0003",
+   "was": "000F"
+  },
+  {
+   "name": "#DGWWORB CGZV_R_TOL",
+   "config": "G2",
+   "addr": "0b05e",
+   "flat": 680954,
+   "H": "42FA0000",
+   "was": "444E2000"
+  },
+  {
+   "name": "#DGWXORB CGZV_DEL_T_MAX",
+   "config": "G2",
+   "addr": "0b070",
+   "flat": 680972,
+   "H": "4312C000",
+   "was": "431F4000"
+  },
+  {
+   "name": "#DGLQREN GLQ_BIAS_VAR_RRDOT+2",
+   "config": "G2",
+   "addr": "0b46c",
+   "flat": 681992,
+   "H": "41100000",
+   "was": "401C28F5"
+  },
+  {
+   "name": "#DGLQREN GLQ_COAS_ANGLES_BIAS_INIT",
+   "config": "G2",
+   "addr": "0b472",
+   "flat": 681998,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_COAS_ANGLES_BIAS_INIT+2",
+   "config": "G2",
+   "addr": "0b474",
+   "flat": 682000,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_RR_ANGLES_BIAS_INIT",
+   "config": "G2",
+   "addr": "0b476",
+   "flat": 682002,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_RR_ANGLES_BIAS_INIT+2",
+   "config": "G2",
+   "addr": "0b478",
+   "flat": 682004,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_RRDOT_BIAS_INIT",
+   "config": "G2",
+   "addr": "0b47a",
+   "flat": 682006,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_RRDOT_BIAS_INIT+2",
+   "config": "G2",
+   "addr": "0b47c",
+   "flat": 682008,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_ST_ANGLES_BIAS_INIT",
+   "config": "G2",
+   "addr": "0b47e",
+   "flat": 682010,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_ST_ANGLES_BIAS_INIT+2",
+   "config": "G2",
+   "addr": "0b480",
+   "flat": 682012,
+   "H": "0000",
+   "was": "4110"
+  },
+  {
+   "name": "#DGLQREN GLQ_TAU_RR_ANGLES",
+   "config": "G2",
+   "addr": "0b486",
+   "flat": 682018,
+   "H": "43FA000043FA0000",
+   "was": "4325800043258000"
+  },
+  {
+   "name": "#DGLQREN GLQ_VAR_RRDOT",
+   "config": "G2",
+   "addr": "0b49a",
+   "flat": 682038,
+   "H": "432C7000",
+   "was": "41100000"
+  },
+  {
+   "name": "#DGLQREN GLQ_VAR_ST_ANGLES",
+   "config": "G2",
+   "addr": "0b49e",
+   "flat": 682042,
+   "H": "3C10C6F73C10C6F7",
+   "was": "3C1421F53C1421F5"
+  },
+  {
+   "name": "#DGLRREN GLR_R_OFFSET_BODY",
+   "config": "G2",
+   "addr": "0b4ce",
+   "flat": 682090,
+   "H": "422DBCED41B2147AC15CA3D7",
+   "was": "C1C389A041B32752C11D2AAE"
+  },
+  {
+   "name": "#PCGNFLT CGNS_EXP_SHAPE_FACTOR",
+   "config": "G2",
+   "addr": "0ca1e",
+   "flat": 687550,
+   "H": "408E703AFB7E90FF",
+   "was": "40A965D3996FA82C"
+  },
+  {
+   "name": "#PCGNFLT CGNS_CDA",
+   "config": "G2",
+   "addr": "0ca22",
+   "flat": 687554,
+   "H": "408EDACABC515486",
+   "was": "40A35696E58A32F2"
+  },
+  {
+   "name": "#PCGNFLT CGNS_CDF",
+   "config": "G2",
+   "addr": "0ca26",
+   "flat": 687558,
+   "H": "40F2B020C49BA5E3",
+   "was": "40C8F5C28F5C28E7"
+  },
+  {
+   "name": "#PCGNFLT CGNS_CDN",
+   "config": "G2",
+   "addr": "0ca2a",
+   "flat": 687562,
+   "H": "412BD2F1A9FBE76C",
+   "was": "4126A3D70A3D70A2"
+  },
+  {
+   "name": "#PCGNFLT CGNS_CDS",
+   "config": "G2",
+   "addr": "0ca2e",
+   "flat": 687566,
+   "H": "411D70A3D70A3D70",
+   "was": "411EE147AE147ADF"
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DEL_X_GUESS",
+   "addr": "0de28",
+   "H": "4264000042640000",
+   "was": "431F4000431F4000",
+   "config": "G2",
+   "flat": 692680
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DEL_X_TOL",
+   "addr": "0de2c",
+   "H": "3F28F5C23A2AF31D",
+   "was": "4698968046989680",
+   "config": "G2",
+   "flat": 692684
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ICMAX",
+   "addr": "0de31",
+   "H": "000A",
+   "was": "0032",
+   "config": "G2",
+   "flat": 692689
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+16",
+   "addr": "0deec",
+   "H": "C239B333",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 692876
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+20",
+   "addr": "0def0",
+   "H": "4214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692880
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+22",
+   "addr": "0def2",
+   "H": "4231E6664211",
+   "was": "000000000000",
+   "config": "G2",
+   "flat": 692882
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+26",
+   "addr": "0def6",
+   "H": "421B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692886
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+66",
+   "addr": "0df1e",
+   "H": "C23B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692926
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+68",
+   "addr": "0df20",
+   "H": "C222",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692928
+  },
+  {
+   "name": "#PCGZMC2 CGZV_T1_ILOAD_ARRAY+70",
+   "addr": "0df22",
+   "H": "C214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692930
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+16",
+   "addr": "0df3c",
+   "H": "4239B333424CE6664238E666421B",
+   "was": "0000000000000000000000000000",
+   "config": "G2",
+   "flat": 692956
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+24",
+   "addr": "0df44",
+   "H": "41A0",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692964
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+26",
+   "addr": "0df46",
+   "H": "41D0",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692966
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+36",
+   "addr": "0df50",
+   "H": "421B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 692976
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+66",
+   "addr": "0df6e",
+   "H": "4219",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693006
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+68",
+   "addr": "0df70",
+   "H": "4222",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693008
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+70",
+   "addr": "0df72",
+   "H": "4214",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693010
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+72",
+   "addr": "0df74",
+   "H": "421A",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693012
+  },
+  {
+   "name": "#PCGZMC2 CGZV_DT_ILOAD_ARRAY+76",
+   "addr": "0df78",
+   "H": "421A",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693016
+  },
+  {
+   "name": "#PCGZMC2 CGZV_EL_ILOAD_ARRAY+22",
+   "addr": "0df92",
+   "H": "4081E4F7",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693042
+  },
+  {
+   "name": "#PCGZMC2 CGZV_EL_ILOAD_ARRAY+72",
+   "addr": "0dfc4",
+   "H": "40BBA5E3",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693092
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+96 (with +0269, X'0E02D')",
+   "addr": "0e02c",
+   "H": "C4BDD800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693196
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+104",
+   "addr": "0e034",
+   "H": "434B",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693204
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+108",
+   "addr": "0e038",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693208
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+116",
+   "addr": "0e040",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693216
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+120",
+   "addr": "0e044",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693220
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+128",
+   "addr": "0e04c",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693228
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+132",
+   "addr": "0e050",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693232
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+140",
+   "addr": "0e058",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693240
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+144",
+   "addr": "0e05c",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693244
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+152",
+   "addr": "0e064",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693252
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+164",
+   "addr": "0e070",
+   "H": "43258000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693264
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+216",
+   "addr": "0e0a4",
+   "H": "C3384000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693316
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+224",
+   "addr": "0e0ac",
+   "H": "43708000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693324
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+396",
+   "addr": "0e158",
+   "H": "C452AB00",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693496
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+404",
+   "addr": "0e160",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693504
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+408",
+   "addr": "0e164",
+   "H": "C413E000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693508
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+416",
+   "addr": "0e16c",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693516
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+420",
+   "addr": "0e170",
+   "H": "C413E000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693520
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+428",
+   "addr": "0e178",
+   "H": "4411F800",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693528
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+432",
+   "addr": "0e17c",
+   "H": "C314D000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693532
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+440",
+   "addr": "0e184",
+   "H": "433E8000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693540
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+456",
+   "addr": "0e194",
+   "H": "C314D000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693556
+  },
+  {
+   "name": "#PCGZMC2 CGZV_ROFF_ILOAD_ARRAY+464",
+   "addr": "0e19c",
+   "H": "433E8000",
+   "was": "00000000",
+   "config": "G2",
+   "flat": 693564
+  },
+  {
+   "name": "#PCGZMC2 CGZV_N_MAX",
+   "addr": "0e1ac",
+   "H": "000A",
+   "was": "0032",
+   "config": "G2",
+   "flat": 693580
+  },
+  {
+   "name": "#PCGZMC2 PRED_STEP",
+   "addr": "0e234",
+   "H": "4312C000",
+   "was": "431F4000",
+   "config": "G2",
+   "flat": 693716
+  },
+  {
+   "name": "#PCGZMC2 GMO @X'0E2DD'",
+   "addr": "0e2dd",
+   "H": "0002",
+   "was": "0004",
+   "config": "G2",
+   "flat": 693885
+  },
+  {
+   "name": "#PCGZMC2 GLU_FLAGS",
+   "addr": "0e2df",
+   "H": "0004",
+   "was": "0000",
+   "config": "G2",
+   "flat": 693887
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD",
+   "config": "G2",
+   "addr": "0e34e",
+   "flat": 693998,
+   "H": "00000000000000000000000000000000",
+   "was": "00010001000100010001000100010001"
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+10",
+   "config": "G2",
+   "addr": "0e358",
+   "flat": 694008,
+   "H": "0001000100010001",
+   "was": "0000000000000000"
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+18",
+   "config": "G2",
+   "addr": "0e360",
+   "flat": 694016,
+   "H": "0001",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+24",
+   "config": "G2",
+   "addr": "0e366",
+   "flat": 694022,
+   "H": "000100010001",
+   "was": "000000000000"
+  },
+  {
+   "name": "#PCGZMC2 CGZB_LAMB_ILOAD+28",
+   "config": "G2",
+   "addr": "0e36a",
+   "flat": 694026,
+   "H": "000100010001000100010001000100010001000100010001",
+   "was": "000000000000000000000000000000000000000000000000"
+  },
+  {
+   "name": "#PCGZMC2 CGZV_R_TOL_CW",
+   "config": "G2",
+   "addr": "0e378",
+   "flat": 694040,
+   "H": "3E418937",
+   "was": "3F28F5C2"
+  },
+  {
+   "name": "#PCGZMC2 GMO @X'0E37B'",
+   "config": "G2",
+   "addr": "0e37b",
+   "flat": 694043,
+   "H": "0002",
+   "was": "0004"
+  },
+  {
+   "name": "#PCGZMC2 DM_VM_SOLAR_UV",
+   "config": "G2",
+   "addr": "0e37d",
+   "flat": 694045,
+   "H": "0004",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGZMC2 CGZV_SHUTTLE_PRED_ORB_AREA_I",
+   "addr": "0e37e",
+   "H": "44131B00",
+   "was": "42640000",
+   "config": "G2",
+   "flat": 694046
+  },
+  {
+   "name": "#PCGZMC2 CGZV_CONE",
+   "addr": "0e382",
+   "H": "402B851E",
+   "was": "3E418937",
+   "config": "G2",
+   "flat": 694050
+  },
+  {
+   "name": "#PCGNMC2 CGNV_TAU_UNMOD_ACC_COV",
+   "config": "G2",
+   "addr": "0e8d8",
+   "flat": 695416,
+   "H": "4312C000",
+   "was": "00000000"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_U_A_COAST",
+   "config": "G2",
+   "addr": "0e8e2",
+   "flat": 695426,
+   "H": "3B1828C03B1828C03B1828C0",
+   "was": "39149DA739149DA739149DA7"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_COV_U_A_COAST",
+   "config": "G2",
+   "addr": "0e8e8",
+   "flat": 695432,
+   "H": "3B1828C03B1828C03B1828C0",
+   "was": "3A2AF31D3A2AF31D3A2AF31D"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_SHAFT",
+   "config": "G2",
+   "addr": "0e95c",
+   "flat": 695548,
+   "H": "3D431BDE",
+   "was": "3CB88CA3"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_TRUN",
+   "config": "G2",
+   "addr": "0e95e",
+   "flat": 695550,
+   "H": "3D431BDE",
+   "was": "3CB88CA3"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_VAR_RR_RNG_MIN",
+   "config": "G2",
+   "addr": "0e966",
+   "flat": 695558,
+   "H": "44190000",
+   "was": "432C7000"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_M_BODY_TO_RR+3",
+   "config": "G2",
+   "addr": "0e96d",
+   "flat": 695565,
+   "H": "A634",
+   "was": "A633"
+  },
+  {
+   "name": "#PCGNMC2 CGNS_M_BODY_TO_RR+7",
+   "config": "G2",
+   "addr": "0e971",
+   "flat": 695569,
+   "H": "A634",
+   "was": "A633"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_AF_INH_COUNT",
+   "config": "G2",
+   "addr": "0eb48",
+   "flat": 696040,
+   "H": "0000",
+   "was": "001F"
+  },
+  {
+   "name": "#PCGCFL2 CGCK_MAG_CONTROL_FORCE",
+   "config": "G2",
+   "addr": "0eb5a",
+   "flat": 696058,
+   "H": "436E0000436E0000",
+   "was": "436C5000436CE000"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ATT_GAIN2_TVC",
+   "config": "G2",
+   "addr": "0ebee",
+   "flat": 696206,
+   "H": "4110",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_RATE_GAIN2_TVC",
+   "config": "G2",
+   "addr": "0ebf2",
+   "flat": 696210,
+   "H": "4110",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ACCEL_GAIN_PRIMARY",
+   "config": "G2",
+   "addr": "0ebfe",
+   "flat": 696222,
+   "H": "3C6B5FCA",
+   "was": "3D431BDE"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ACCEL_GAIN_VERNIER",
+   "config": "G2",
+   "addr": "0ec08",
+   "flat": 696232,
+   "H": "3C6B5FCA",
+   "was": "3D431BDE"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_VERN_ROT_MIN_IMPULSE",
+   "config": "G2",
+   "addr": "0ec52",
+   "flat": 696306,
+   "H": "3E83126E",
+   "was": "3E624DD2"
+  },
+  {
+   "name": "#PCGCFL2 CGKV_PRINCIPAL_INERTIA_REF",
+   "config": "G2",
+   "addr": "0ed62",
+   "flat": 696578,
+   "H": "45E50930466CC8B44671DC9D",
+   "was": "45CD1400465D323446602AC0"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ATT_GAIN1_UNIQUE",
+   "config": "G2",
+   "addr": "0ed68",
+   "flat": 696584,
+   "H": "3F83126E",
+   "was": "4010624D"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ATT_GAIN2_UNIQUE",
+   "config": "G2",
+   "addr": "0ed6a",
+   "flat": 696586,
+   "H": "41100000",
+   "was": "3F28F5C2"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_RATE_GAIN1_UNIQUE",
+   "config": "G2",
+   "addr": "0ed6c",
+   "flat": 696588,
+   "H": "3E1A36E2",
+   "was": "3E68DB8B"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_RATE_GAIN2_UNIQUE",
+   "config": "G2",
+   "addr": "0ed6e",
+   "flat": 696590,
+   "H": "3EFF9724",
+   "was": "3F418937"
+  },
+  {
+   "name": "#PCGCFL2 CGCS_ACCEL_GAIN_UNIQUE",
+   "config": "G2",
+   "addr": "0ed70",
+   "flat": 696592,
+   "H": "3C60A302",
+   "was": "3D431BDE"
+  },
+  {
+   "name": "#PCGCFL3 CGPS_DHYS1+4",
+   "config": "G2",
+   "addr": "0efb8",
+   "flat": 697176,
+   "H": "40800000",
+   "was": "40533333"
+  },
+  {
+   "name": "#PCGCFL3 CGPS_DHYS2",
+   "config": "G2",
+   "addr": "0efba",
+   "flat": 697178,
+   "H": "4144A3D74144A3D74127D70A",
+   "was": "411B9999411B999940F99999"
+  },
+  {
+   "name": "#PCGCFL3 CGCS_MAG_CONTROL_ACCL_REF_PRIM",
+   "config": "G2",
+   "addr": "0f018",
+   "flat": 697272,
+   "H": "40CCCCCC40E6666640999999",
+   "was": "40FBA5E34110000040BBA5E3"
+  },
+  {
+   "name": "#PCGZ123 CGNS_K_UND_WGT",
+   "config": "G2",
+   "addr": "0f0ec",
+   "flat": 697484,
+   "H": "40800000",
+   "was": "40333333"
+  },
+  {
+   "name": "#PCGZ123 CGNS_MS_POS_UND_WGT",
+   "config": "G2",
+   "addr": "0f0ee",
+   "flat": 697486,
+   "H": "00000000",
+   "was": "475F5E10"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB2 @X'30323'",
+   "config": "G2",
+   "addr": "30323",
+   "flat": 1331405,
+   "H": "FFF2",
+   "was": "000E"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1 @X'30328'",
+   "config": "G2",
+   "addr": "30328",
+   "flat": 1331410,
+   "H": "03C1",
+   "was": "FC83"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2 @X'30329'",
+   "config": "G2",
+   "addr": "30329",
+   "flat": 1331411,
+   "H": "FFF3",
+   "was": "000E"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3 @X'3032A'",
+   "config": "G2",
+   "addr": "3032a",
+   "flat": 1331412,
+   "H": "FFB4",
+   "was": "0033"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1 @X'3032B'",
+   "config": "G2",
+   "addr": "3032b",
+   "flat": 1331413,
+   "H": "03B8",
+   "was": "FC7A"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2 @X'3032C'",
+   "config": "G2",
+   "addr": "3032c",
+   "flat": 1331414,
+   "H": "0057",
+   "was": "0056"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3 @X'3032D'",
+   "config": "G2",
+   "addr": "3032d",
+   "flat": 1331415,
+   "H": "0069",
+   "was": "00E8"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1 @X'3032E'",
+   "config": "G2",
+   "addr": "3032e",
+   "flat": 1331416,
+   "H": "CFC9",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT2",
+   "config": "G2",
+   "addr": "3032f",
+   "flat": 1331417,
+   "H": "0B69",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT3 @X'30330'",
+   "config": "G2",
+   "addr": "30330",
+   "flat": 1331418,
+   "H": "7603",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT1 @X'30331'",
+   "config": "G2",
+   "addr": "30331",
+   "flat": 1331419,
+   "H": "EBA4",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT2",
+   "config": "G2",
+   "addr": "30332",
+   "flat": 1331420,
+   "H": "BC90",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT3 @X'30333'",
+   "config": "G2",
+   "addr": "30333",
+   "flat": 1331421,
+   "H": "9524",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB1",
+   "config": "G2",
+   "addr": "30334",
+   "flat": 1331422,
+   "H": "FF8B",
+   "was": "FFF4"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_NB1",
+   "config": "G2",
+   "addr": "30337",
+   "flat": 1331425,
+   "H": "FF9D",
+   "was": "FF99"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_NB3",
+   "config": "G2",
+   "addr": "30339",
+   "flat": 1331427,
+   "H": "00BF",
+   "was": "00C1"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1 @X'3033A'",
+   "config": "G2",
+   "addr": "3033a",
+   "flat": 1331428,
+   "H": "032A",
+   "was": "FBE8"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2 @X'3033B'",
+   "config": "G2",
+   "addr": "3033b",
+   "flat": 1331429,
+   "H": "0001",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3 @X'3033C'",
+   "config": "G2",
+   "addr": "3033c",
+   "flat": 1331430,
+   "H": "FF59",
+   "was": "FFD8"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1 @X'3033D'",
+   "config": "G2",
+   "addr": "3033d",
+   "flat": 1331431,
+   "H": "033D",
+   "was": "FBFA"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2 @X'3033E'",
+   "config": "G2",
+   "addr": "3033e",
+   "flat": 1331432,
+   "H": "0001",
+   "was": "0000"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3 @X'3033F'",
+   "config": "G2",
+   "addr": "3033f",
+   "flat": 1331433,
+   "H": "007F",
+   "was": "0101"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1 @X'30340'",
+   "config": "G2",
+   "addr": "30340",
+   "flat": 1331434,
+   "H": "F842",
+   "was": "02F7"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT3 @X'30342'",
+   "config": "G2",
+   "addr": "30342",
+   "flat": 1331436,
+   "H": "7FC2",
+   "was": "7FF7"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT1 @X'30343'",
+   "config": "G2",
+   "addr": "30343",
+   "flat": 1331437,
+   "H": "FD08",
+   "was": "07C2"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANT_BORESIGHT3 @X'30345'",
+   "config": "G2",
+   "addr": "30345",
+   "flat": 1331439,
+   "H": "800C",
+   "was": "803C"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB2 @X'30347'",
+   "config": "G2",
+   "addr": "30347",
+   "flat": 1331441,
+   "H": "000E",
+   "was": "FFF2"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_NB3",
+   "config": "G2",
+   "addr": "30348",
+   "flat": 1331442,
+   "H": "FFF4",
+   "was": "000C"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG1 @X'3034C'",
+   "config": "G2",
+   "addr": "3034c",
+   "flat": 1331446,
+   "H": "03C1",
+   "was": "FC83"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG2 @X'3034D'",
+   "config": "G2",
+   "addr": "3034d",
+   "flat": 1331447,
+   "H": "000F",
+   "was": "FFF2"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANTENNA_CG3 @X'3034E'",
+   "config": "G2",
+   "addr": "3034e",
+   "flat": 1331448,
+   "H": "FFB4",
+   "was": "004C"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG1 @X'3034F'",
+   "config": "G2",
+   "addr": "3034f",
+   "flat": 1331449,
+   "H": "03B8",
+   "was": "FC7A"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG2 @X'30350'",
+   "config": "G2",
+   "addr": "30350",
+   "flat": 1331450,
+   "H": "FFAB",
+   "was": "0056"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_LOWER_ANTENNA_CG3 @X'30351'",
+   "config": "G2",
+   "addr": "30351",
+   "flat": 1331451,
+   "H": "0069",
+   "was": "00E8"
+  },
+  {
+   "name": "#PCGNREM CGNS_GPS_UPPER_ANT_BORESIGHT1 @X'30352'",
+   "config": "G2",
+   "addr": "30352",
+   "flat": 1331452,
+   "H": "CFC9",
+   "was": "0000"
+  },
+  {
+   "name": "#DGC1ORB CGCS_MAX_NUM_CYCLES",
+   "config": "G2",
+   "addr": "38412",
+   "flat": 806418,
+   "H": "0001",
+   "was": "0014"
+  },
+  {
+   "name": "#DGC1ORB CGCS_PCT_DAP_LOAD",
+   "config": "G2",
+   "addr": "38418",
+   "flat": 806424,
+   "H": "00090009",
+   "was": "00020003"
+  },
+  {
+   "name": "#DGC1ORB CGCS_PCT_DAP+8",
+   "config": "G2",
+   "addr": "38422",
+   "flat": 806434,
+   "H": "000100010001",
+   "was": "000000000000"
+  },
+  {
+   "name": "#DGLWRNP CGNS_DETUTCDAYS",
+   "config": "G2",
+   "addr": "38d36",
+   "flat": 808758,
+   "H": "3E3232E100000000",
+   "was": "3E2FEC56D5CFAACD"
+  },
+  {
+   "name": "#DGRSIMU CGRS_VEL_CONS_11",
+   "config": "G2",
+   "addr": "045a6",
+   "H": "407851EB",
+   "was": "40F0A3D7",
+   "flat": 667346
+  },
+  {
+   "name": "#PCGMCOM CGRS_A_CONS_1",
+   "config": "G2",
+   "addr": "05638",
+   "H": "3E896A77",
+   "was": "3E5A708E",
+   "flat": 132040
+  },
+  {
+   "name": "#PCGMCOM CGRS_A_CONS_9",
+   "config": "G2",
+   "addr": "05644",
+   "H": "3E5A708E",
+   "was": "3E1FC8F3",
+   "flat": 132052
+  },
+  {
+   "name": "#PCGMCOM CGRS_A_RAMP_2",
+   "config": "G2",
+   "addr": "05648",
+   "H": "3B38F016",
+   "was": "3B43EA07",
+   "flat": 132056
+  },
+  {
+   "name": "#PCGMCOM CGRS_A_RAMP_5",
+   "config": "G2",
+   "addr": "0564c",
+   "H": "3BB0E622",
+   "was": "3B4BF79C",
+   "flat": 132060
+  },
+  {
+   "name": "#PCGMCOM CGRS_A_RAMP_8",
+   "config": "G2",
+   "addr": "05650",
+   "H": "3B7B7AF5",
+   "was": "3B48358A",
+   "flat": 132064
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_ATT_DG_3",
+   "config": "G2",
+   "addr": "05654",
+   "H": "3E1F212D",
+   "was": "3CFD5601",
+   "flat": 132068
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_ATT_DGA",
+   "config": "G2",
+   "addr": "05658",
+   "H": "3D4FD6AC",
+   "was": "3C1421F5",
+   "flat": 132072
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_2",
+   "config": "G2",
+   "addr": "0565a",
+   "H": "4129C28F",
+   "was": "412D70A3",
+   "flat": 132074
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_3",
+   "config": "G2",
+   "addr": "0565c",
+   "H": "407851EB",
+   "was": "40F0A3D7",
+   "flat": 132076
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_3O",
+   "config": "G2",
+   "addr": "0565e",
+   "H": "407851EB",
+   "was": "409C28F5",
+   "flat": 132078
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_3E",
+   "config": "G2",
+   "addr": "05660",
+   "H": "407851EB",
+   "was": "409C28F5",
+   "flat": 132080
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_6",
+   "config": "G2",
+   "addr": "05662",
+   "H": "4127D70A",
+   "was": "4126B851",
+   "flat": 132082
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_7",
+   "config": "G2",
+   "addr": "05664",
+   "H": "403C28F5",
+   "was": "404E147A",
+   "flat": 132084
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_VEL_DG_HI_ASC",
+   "config": "G2",
+   "addr": "05666",
+   "H": "41296872",
+   "was": "416C1CAC",
+   "flat": 132086
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_VEL_DG_LO_ASC",
+   "config": "G2",
+   "addr": "05668",
+   "H": "401A9FBE",
+   "was": "404538EF",
+   "flat": 132088
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_VEL_MISC_HI_ASC",
+   "config": "G2",
+   "addr": "0566a",
+   "H": "40A5A1CA",
+   "was": "40A2FEC5",
+   "flat": 132090
+  },
+  {
+   "name": "#PCGMCOM CGRS_TH_VEL_MISC_LO",
+   "config": "G2",
+   "addr": "0566c",
+   "H": "3F6A161E",
+   "was": "3F694467",
+   "flat": 132092
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_4_12_8",
+   "config": "G2",
+   "addr": "05790",
+   "H": "41278937414F126E411624DD",
+   "was": "4110CCCC4111EB85411051EB",
+   "flat": 132384
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_10",
+   "config": "G2",
+   "addr": "05798",
+   "H": "4129C28F",
+   "was": "414B0A3D",
+   "flat": 132392
+  },
+  {
+   "name": "#PCGMCOM CGRS_VEL_CONS_14",
+   "config": "G2",
+   "addr": "0579c",
+   "H": "4129C28F",
+   "was": "415D9999",
+   "flat": 132396
+  },
+  {
+   "name": "#PCGRRMC CGRV_FDI_TOLERANCE",
+   "config": "G2",
+   "addr": "05df3",
+   "H": "0025",
+   "was": "0028",
+   "flat": 134019
+  },
+  {
+   "name": "#DGMYRGM GMY_TRGM",
+   "config": "G2",
+   "addr": "0662e",
+   "H": "40FEB8513F147AE1",
+   "was": "40F1B0893FE4ECE9",
+   "flat": 136126
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE1_MAX_PULSES",
+   "config": "G2",
+   "addr": "07c63",
+   "H": "0003",
+   "was": "0005",
+   "flat": 675005
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE1_PULSE_ON",
+   "config": "G2",
+   "addr": "07c64",
+   "H": "0001",
+   "was": "0002",
+   "flat": 675006
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE1_DELAY",
+   "config": "G2",
+   "addr": "07c65",
+   "H": "0002",
+   "was": "0003",
+   "flat": 675007
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE1_DELAY_PHASE2",
+   "config": "G2",
+   "addr": "07c66",
+   "H": "000A",
+   "was": "0001",
+   "flat": 675008
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE2_MAX_PULSES",
+   "config": "G2",
+   "addr": "07c67",
+   "H": "0004",
+   "was": "0003",
+   "flat": 675009
+  },
+  {
+   "name": "#DGFDORB CGCS_PHASE2_PULSE_ON",
+   "config": "G2",
+   "addr": "07c68",
+   "H": "0002",
+   "was": "0003",
+   "flat": 675010
+  },
+  {
+   "name": "#DGFDORB CGCS_CYCLE_PAUSE",
+   "config": "G2",
+   "addr": "07c6a",
+   "H": "0020",
+   "was": "0004",
+   "flat": 675012
+  },
+  {
+   "name": "#DGX4DIS GX4_MAX_TORQ+1",
+   "config": "G2",
+   "addr": "07d89",
+   "H": "1751",
+   "was": "1749",
+   "flat": 675299
+  },
+  {
+   "name": "#DGFFORB CGCS_CNTR_MAX copy 2",
+   "config": "G2",
+   "addr": "0ad60",
+   "H": "000A",
+   "was": "0019",
+   "flat": 680188
+  },
+  {
+   "name": "#DGFFORB CGCS_CNTR_MIN copy 2",
+   "config": "G2",
+   "addr": "0ad61",
+   "H": "0002",
+   "was": "0000",
+   "flat": 680189
+  },
+  {
+   "name": "#DGFFORB CGCS_RBST_PP_SF copy 2",
+   "config": "G2",
+   "addr": "0ad70",
+   "H": "41100000",
+   "was": "40FAE147",
+   "flat": 680204
+  },
+  {
+   "name": "#DGFFORB CGCS_S5_SCALE copy 2",
+   "config": "G2",
+   "addr": "0ad72",
+   "H": "40333333",
+   "was": "40999999",
+   "flat": 680206
+  },
+  {
+   "name": "#DGFFORB CGCS_S4_SCALE copy 2",
+   "config": "G2",
+   "addr": "0ad74",
+   "H": "40999998",
+   "was": "40CCCCCC",
+   "flat": 680208
+  },
+  {
+   "name": "#DGFFORB CGCV_PRI_ROT_MIN_IMPULSE copy 2",
+   "config": "G2",
+   "addr": "0ad76",
+   "H": "401CAC08",
+   "was": "3FF5C28F",
+   "flat": 680210
+  },
+  {
+   "name": "#DGFFORB CGCS_ALT_DELAY_FACTOR copy 2",
+   "config": "G2",
+   "addr": "0adae",
+   "H": "40ECEF884110D9E84110D9E840AB92E140CC4135411D1B7140CC413540AB92E140ECEF884114EF9D",
+   "was": "411000004113333340CCCCCC41166666409999990000000000000000000000000000000000000000",
+   "flat": 680266
+  },
+  {
+   "name": "#DGFFORB CGCS_JET_MAG_THRESHOLD+2",
+   "config": "G2",
+   "addr": "0ae44",
+   "H": "40451EB8404CCCCC",
+   "was": "4059999940599999",
+   "flat": 680416
+  },
+  {
+   "name": "#DGPBGPS GPBS_LEAP_SEC_CORR copy 2",
+   "config": "G2",
+   "addr": "0b2f8",
+   "H": "000F",
+   "was": "000B",
+   "flat": 681620
+  },
+  {
+   "name": "#DGPBGPS GPBS_MAX_FOM_ACCEPT_PFS copy 2",
+   "config": "G2",
+   "addr": "0b2f9",
+   "H": "0002",
+   "was": "0005",
+   "flat": 681621
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_PR_EDIT_MAX_HOLD copy 2",
+   "config": "G2",
+   "addr": "0b2fb",
+   "H": "0000",
+   "was": "0001",
+   "flat": 681623
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_PR_EDIT_MAX_STEP copy 2",
+   "config": "G2",
+   "addr": "0b2fc",
+   "H": "000A",
+   "was": "0002",
+   "flat": 681624
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_PR_EDIT_STEP_SIZE copy 2",
+   "config": "G2",
+   "addr": "0b2fd",
+   "H": "000F",
+   "was": "000A",
+   "flat": 681625
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_PR_EDIT_THRESHOLD copy 2",
+   "config": "G2",
+   "addr": "0b2fe",
+   "H": "000A",
+   "was": "0004",
+   "flat": 681626
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_DR_EDIT_MAX_HOLD copy 2",
+   "config": "G2",
+   "addr": "0b2ff",
+   "H": "0000",
+   "was": "0001",
+   "flat": 681627
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_DR_EDIT_MAX_STEP copy 2",
+   "config": "G2",
+   "addr": "0b300",
+   "H": "000A",
+   "was": "0000",
+   "flat": 681628
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_DR_EDIT_STEP_SIZE",
+   "config": "G2",
+   "addr": "0b301",
+   "H": "000F",
+   "was": "0000",
+   "flat": 681629
+  },
+  {
+   "name": "#DGPBGPS GPBS_GPS_DR_EDIT_THRESHOLD",
+   "config": "G2",
+   "addr": "0b302",
+   "H": "000A",
+   "was": "0004",
+   "flat": 681630
+  },
+  {
+   "name": "#PCGYSTA CGYS_TNBST copy 1",
+   "config": "G2",
+   "addr": "0bcd6",
+   "H": "BEFAA2EC",
+   "was": "BF1AADD8",
+   "flat": 684150
+  },
+  {
+   "name": "#PCGYSTA CGYS_TNBST+3 copy 1",
+   "config": "G2",
+   "addr": "0bcd9",
+   "H": "D64FBF913CC0",
+   "was": "DEBFBF7FB35C",
+   "flat": 684153
+  },
+  {
+   "name": "#PCGYSTA CGYS_TNBST+7 copy 1",
+   "config": "G2",
+   "addr": "0bcdd",
+   "H": "3A1CBE5D3A2D",
+   "was": "376A3E79D388",
+   "flat": 684157
+  },
+  {
+   "name": "#PCGYSTA CGYS_TNBST+11 copy 1",
+   "config": "G2",
+   "addr": "0bce1",
+   "H": "9372",
+   "was": "A53E",
+   "flat": 684161
+  },
+  {
+   "name": "#PCGYSTA CGYS_TNBST+13 copy 1",
+   "config": "G2",
+   "addr": "0bce3",
+   "H": "90A1BF91F6A0",
+   "was": "9C8EBF8101AE",
+   "flat": 684163
+  },
+  {
+   "name": "#PCGYSTA C0FD+1 copy 1",
+   "config": "G2",
+   "addr": "0bce7",
+   "H": "1084",
+   "was": "1752",
+   "flat": 684167
+  },
+  {
+   "name": "#PCGYSTA C0FD+3 copy 1",
+   "config": "G2",
+   "addr": "0bce9",
+   "H": "4D3CC02EE2D8",
+   "was": "3B26C02F418F",
+   "flat": 684169
+  },
+  {
+   "name": "#PCGYSTA C0FD+7 copy 1",
+   "config": "G2",
+   "addr": "0bced",
+   "H": "AF8D",
+   "was": "AFD1",
+   "flat": 684173
+  },
+  {
+   "name": "#PCGYSTA C0FD+9 copy 1",
+   "config": "G2",
+   "addr": "0bcef",
+   "H": "7579BE2A2112",
+   "was": "A2913EB7572B",
+   "flat": 684175
+  },
+  {
+   "name": "#PCGYSTA C0FD+13 copy 1",
+   "config": "G2",
+   "addr": "0bcf3",
+   "H": "8FF7",
+   "was": "872F",
+   "flat": 684179
+  },
+  {
+   "name": "#PCGYSTA C0FD+15 copy 1",
+   "config": "G2",
+   "addr": "0bcf5",
+   "H": "1A76",
+   "was": "4CCC",
+   "flat": 684181
+  },
+  {
+   "name": "#PCGYSTA C0FB+1 copy 1",
+   "config": "G2",
+   "addr": "0bcf7",
+   "H": "AB75BF88876F",
+   "was": "997CBF97C1C9",
+   "flat": 684183
+  },
+  {
+   "name": "#PCGYSTA CGYV_I_CO copy 1",
+   "config": "G2",
+   "addr": "0bd20",
+   "H": "C02F1770",
+   "was": "402F176F",
+   "flat": 684224
+  },
+  {
+   "name": "#PCGYSTA CGYV_I_CO+5 copy 1",
+   "config": "G2",
+   "addr": "0bd25",
+   "H": "A1A540FE85883F628013C01AC627",
+   "was": "A1A440FBA1A400000000402F176F",
+   "flat": 684229
+  },
+  {
+   "name": "#PCGYSTA CGYS_TOL6 copy 1",
+   "config": "G2",
+   "addr": "0bd46",
+   "H": "3F117178",
+   "was": "3EAB92A6",
+   "flat": 684262
+  },
+  {
+   "name": "#PCGYSTA CGYS_TOL10+1 copy 1",
+   "config": "G2",
+   "addr": "0bd4d",
+   "H": "C38A",
+   "was": "C389",
+   "flat": 684269
+  },
+  {
+   "name": "#PCGYSTA CGYS_TOL12 copy 1",
+   "config": "G2",
+   "addr": "0bd4e",
+   "H": "3B537BC1",
+   "was": "3C2EA402",
+   "flat": 684270
+  },
+  {
+   "name": "#PCGYSTA CGYS_TOL14+1 copy 1",
+   "config": "G2",
+   "addr": "0bd53",
+   "H": "ACA6",
+   "was": "ACA5",
+   "flat": 684275
+  },
+  {
+   "name": "#PCGYSTA CGYS_T_LIM1+1 copy 1",
+   "config": "G2",
+   "addr": "0bdb3",
+   "H": "0AC5",
+   "was": "0AC4",
+   "flat": 684371
+  },
+  {
+   "name": "#PCGYSTA CGYS_T_LIM2 copy 1",
+   "config": "G2",
+   "addr": "0bdb4",
+   "H": "3F64158B",
+   "was": "403E8D76",
+   "flat": 684372
+  },
+  {
+   "name": "#PCGEIPD CGNV_SIG_UPDATE_LFE+10",
+   "config": "G2",
+   "addr": "0c006",
+   "H": "4160",
+   "was": "0000",
+   "flat": 684966
+  },
+  {
+   "name": "#PCGEIPD CGNV_COV_COR_UPDATE_LFE+4",
+   "config": "G2",
+   "addr": "0c00c",
+   "H": "C0E66666C0E66666",
+   "was": "0000000000000000",
+   "flat": 684972
+  },
+  {
+   "name": "#PCGYCAT CGYV_LOSK1+1 copy 2",
+   "config": "G2",
+   "addr": "0d25d",
+   "H": "DF1B0F174D8E",
+   "was": "DEE4CB72E4E1",
+   "flat": 689661
+  },
+  {
+   "name": "#PCGYCAT CGYV_LOSK3+1 copy 2",
+   "config": "G2",
+   "addr": "0d261",
+   "H": "D706F2C47568",
+   "was": "D7843FBB0CF9",
+   "flat": 689665
+  },
+  {
+   "name": "#PCGYCAT CGYV_LOS_ZERO copy 2",
+   "config": "G2",
+   "addr": "0d264",
+   "H": "42D43555C1D37486",
+   "was": "42BB13771F1B4E34",
+   "flat": 689668
+  },
+  {
+   "name": "#PCGSGNC CGSS_RCS_10_JET_FU_BIAS copy 2",
+   "config": "G2",
+   "addr": "0d5ee",
+   "H": "40104EA4",
+   "was": "40133333",
+   "flat": 690574
+  },
+  {
+   "name": "#PCGSGNC CGSS_RCS_10_JET_FU_SCALE copy 2",
+   "config": "G2",
+   "addr": "0d5f0",
+   "H": "411CBC6A",
+   "was": "411D70A3",
+   "flat": 690576
+  },
+  {
+   "name": "#PCGSGNC CGSS_RCS_24_JET_FU_SCALE",
+   "config": "G2",
+   "addr": "0d5f4",
+   "H": "412BD70A",
+   "was": "4127AE14",
+   "flat": 690580
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "34377",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138313
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "3437a",
+   "H": "404CCCCC",
+   "was": "41100000",
+   "flat": 138316
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT",
+   "config": "G2",
+   "addr": "3438e",
+   "H": "4011EB85",
+   "was": "40333333",
+   "flat": 138336
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "343bb",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138381
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "343c8",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138394
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "343ce",
+   "H": "3F28F5C2",
+   "was": "3FCCCCCC",
+   "flat": 138400
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT",
+   "config": "G2",
+   "addr": "343d2",
+   "H": "4011EB85",
+   "was": "40333333",
+   "flat": 138404
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "343dc",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138414
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "343dd",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138415
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "343ea",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138428
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 1",
+   "config": "G2",
+   "addr": "343f4",
+   "H": "4011EB85",
+   "was": "40333333",
+   "flat": 138438
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34422",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138484
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3442c",
+   "H": "40199999",
+   "was": "3FCCCCCC",
+   "flat": 138494
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "3442e",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138496
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34434",
+   "H": "3FCCCCCC",
+   "was": "3F28F5C2",
+   "flat": 138502
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT",
+   "config": "G2",
+   "addr": "34438",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138506
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "3443f",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138513
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "34440",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138514
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34442",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138516
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34444",
+   "H": "402147AE",
+   "was": "40333333",
+   "flat": 138518
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "34446",
+   "H": "4120",
+   "was": "4150",
+   "flat": 138520
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_PRIM",
+   "config": "G2",
+   "addr": "34448",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138522
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3444e",
+   "H": "3FCCCCCC",
+   "was": "40199999",
+   "flat": 138528
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "34450",
+   "H": "402147AE",
+   "was": "40333333",
+   "flat": 138530
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34456",
+   "H": "3FCCCCCC",
+   "was": "3F28F5C2",
+   "flat": 138536
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 2",
+   "config": "G2",
+   "addr": "3445a",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138540
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "34461",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138547
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "34462",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138548
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34464",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138550
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34466",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138552
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "34468",
+   "H": "40999999",
+   "was": "41500000",
+   "flat": 138554
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_PRIM",
+   "config": "G2",
+   "addr": "3446a",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138556
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "34470",
+   "H": "3FCCCCCC",
+   "was": "40199999",
+   "flat": 138562
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "34472",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138564
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "34474",
+   "H": "4080",
+   "was": "4110",
+   "flat": 138566
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34478",
+   "H": "3FCCCCCC",
+   "was": "3F28F5C2",
+   "flat": 138570
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 3",
+   "config": "G2",
+   "addr": "3447c",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138574
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "34483",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138581
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "34484",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138582
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "34485",
+   "H": "0002",
+   "was": "0000",
+   "flat": 138583
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34486",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138584
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "34487",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138585
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34488",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138586
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "3448a",
+   "H": "41A0",
+   "was": "4150",
+   "flat": 138588
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "34494",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138598
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "34496",
+   "H": "4150",
+   "was": "4110",
+   "flat": 138600
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_VERN",
+   "config": "G2",
+   "addr": "34498",
+   "H": "3FCCCCCC",
+   "was": "3F51EB85",
+   "flat": 138602
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 4",
+   "config": "G2",
+   "addr": "3449e",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 138608
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 5",
+   "config": "G2",
+   "addr": "344a2",
+   "H": "4150",
+   "was": "0000",
+   "flat": 138612
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "344a5",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138615
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "344a6",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138616
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "344a7",
+   "H": "0002",
+   "was": "0000",
+   "flat": 138617
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "344a8",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138618
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "344a9",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138619
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "344aa",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138620
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_PRIM",
+   "config": "G2",
+   "addr": "344b0",
+   "H": "3FA3D70A",
+   "was": "40199999",
+   "flat": 138626
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "344b4",
+   "H": "3F28F5C2",
+   "was": "40199999",
+   "flat": 138630
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "344b6",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138632
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "344b8",
+   "H": "4130",
+   "was": "4110",
+   "flat": 138634
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "344bc",
+   "H": "3E83126E",
+   "was": "3F28F5C2",
+   "flat": 138638
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 5",
+   "config": "G2",
+   "addr": "344c0",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 138642
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 6",
+   "config": "G2",
+   "addr": "344c4",
+   "H": "4150",
+   "was": "0000",
+   "flat": 138646
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "344c7",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138649
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "344c8",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138650
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "344c9",
+   "H": "0002",
+   "was": "0000",
+   "flat": 138651
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "344ca",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138652
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "344cb",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138653
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "344cc",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138654
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_PRIM",
+   "config": "G2",
+   "addr": "344d2",
+   "H": "3FA3D70A",
+   "was": "40199999",
+   "flat": 138660
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "344d6",
+   "H": "3F28F5C2",
+   "was": "40199999",
+   "flat": 138664
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "344d8",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138666
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "344da",
+   "H": "4130",
+   "was": "4110",
+   "flat": 138668
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "344de",
+   "H": "3E83126E",
+   "was": "3F28F5C2",
+   "flat": 138672
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 6",
+   "config": "G2",
+   "addr": "344e2",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 138676
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 7",
+   "config": "G2",
+   "addr": "344e6",
+   "H": "4150",
+   "was": "0000",
+   "flat": 138680
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "344e9",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138683
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "344ea",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138684
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "344eb",
+   "H": "0001",
+   "was": "0000",
+   "flat": 138685
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "344ec",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138686
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "344ed",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138687
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "344fc",
+   "H": "4130",
+   "was": "4110",
+   "flat": 138702
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_VERN",
+   "config": "G2",
+   "addr": "344fe",
+   "H": "40333333",
+   "was": "3F51EB85",
+   "flat": 138704
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 8",
+   "config": "G2",
+   "addr": "34508",
+   "H": "4160",
+   "was": "0000",
+   "flat": 138714
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "3450b",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138717
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "3450c",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138718
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "3450d",
+   "H": "0003",
+   "was": "0000",
+   "flat": 138719
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "3450e",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138720
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "3450f",
+   "H": "0003",
+   "was": "0002",
+   "flat": 138721
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34510",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138722
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_PRIM",
+   "config": "G2",
+   "addr": "34516",
+   "H": "3FA3D70A",
+   "was": "40199999",
+   "flat": 138728
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3451a",
+   "H": "3F28F5C2",
+   "was": "40199999",
+   "flat": 138732
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "3451c",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138734
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "3451e",
+   "H": "4130",
+   "was": "4110",
+   "flat": 138736
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_VERN",
+   "config": "G2",
+   "addr": "34520",
+   "H": "3FCCCCCC",
+   "was": "3F51EB85",
+   "flat": 138738
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34522",
+   "H": "3E83126E",
+   "was": "3F28F5C2",
+   "flat": 138740
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 8",
+   "config": "G2",
+   "addr": "34526",
+   "H": "3F8F5C28",
+   "was": "40333333",
+   "flat": 138744
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 8",
+   "config": "G2",
+   "addr": "3452a",
+   "H": "41B0A3D7",
+   "was": "00000000",
+   "flat": 138748
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3453c",
+   "H": "40199999",
+   "was": "3F51EB85",
+   "flat": 138766
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34552",
+   "H": "0003",
+   "was": "0001",
+   "flat": 138788
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "34553",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138789
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 1",
+   "config": "G2",
+   "addr": "3456a",
+   "H": "4011EB85",
+   "was": "40333333",
+   "flat": 138812
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "34575",
+   "H": "0001",
+   "was": "0002",
+   "flat": 138823
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 2",
+   "config": "G2",
+   "addr": "3458c",
+   "H": "4011EB85",
+   "was": "40333333",
+   "flat": 138846
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT",
+   "config": "G2",
+   "addr": "345ae",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 138880
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34620",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 138994
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3462a",
+   "H": "3FCCCCCC",
+   "was": "3F28F5C2",
+   "flat": 139004
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "3462c",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 139006
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34632",
+   "H": "3F51EB85",
+   "was": "3E83126E",
+   "flat": 139012
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT",
+   "config": "G2",
+   "addr": "34636",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 139016
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "3463d",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139023
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "3463e",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139024
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34640",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139026
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34642",
+   "H": "402147AE",
+   "was": "40800000",
+   "flat": 139028
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "34644",
+   "H": "4120",
+   "was": "4130",
+   "flat": 139030
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_PRIM",
+   "config": "G2",
+   "addr": "34646",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 139032
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3464c",
+   "H": "3F28F5C2",
+   "was": "3F51EB85",
+   "flat": 139038
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "3464e",
+   "H": "402147AE",
+   "was": "40333333",
+   "flat": 139040
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34654",
+   "H": "3F51EB85",
+   "was": "3E83126E",
+   "flat": 139046
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 3",
+   "config": "G2",
+   "addr": "34658",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 139050
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 4",
+   "config": "G2",
+   "addr": "3465c",
+   "H": "41A0",
+   "was": "0000",
+   "flat": 139054
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "3465f",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139057
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "34660",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139058
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "34662",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139060
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "34664",
+   "H": "3FCCCCCC",
+   "was": "40800000",
+   "flat": 139062
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "34666",
+   "H": "40999999",
+   "was": "41300000",
+   "flat": 139064
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_PRIM",
+   "config": "G2",
+   "addr": "34668",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 139066
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "3466e",
+   "H": "3F28F5C2",
+   "was": "3F51EB85",
+   "flat": 139072
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "34670",
+   "H": "3FCCCCCC",
+   "was": "40333333",
+   "flat": 139074
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "34672",
+   "H": "4080",
+   "was": "4110",
+   "flat": 139076
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34676",
+   "H": "3F51EB85",
+   "was": "3E83126E",
+   "flat": 139080
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 4",
+   "config": "G2",
+   "addr": "3467a",
+   "H": "40199999",
+   "was": "40333333",
+   "flat": 139084
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "346a3",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139125
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "346a4",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139126
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "346a5",
+   "H": "0002",
+   "was": "0000",
+   "flat": 139127
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "346a6",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139128
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "346a7",
+   "H": "0001",
+   "was": "0002",
+   "flat": 139129
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "346a8",
+   "H": "3F28F5C2",
+   "was": "40800000",
+   "flat": 139130
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "346aa",
+   "H": "4110",
+   "was": "4130",
+   "flat": 139132
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "346b2",
+   "H": "3F28F5C2",
+   "was": "3F51EB85",
+   "flat": 139140
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "346b4",
+   "H": "3F28F5C2",
+   "was": "40333333",
+   "flat": 139142
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 6",
+   "config": "G2",
+   "addr": "346be",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 139152
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 7",
+   "config": "G2",
+   "addr": "346c2",
+   "H": "4150",
+   "was": "0000",
+   "flat": 139156
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "346c5",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139159
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "346c6",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139160
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "346c7",
+   "H": "0002",
+   "was": "0000",
+   "flat": 139161
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "346c8",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139162
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_MAX_JETS",
+   "config": "G2",
+   "addr": "346c9",
+   "H": "0001",
+   "was": "0002",
+   "flat": 139163
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "346ca",
+   "H": "3F28F5C2",
+   "was": "40800000",
+   "flat": 139164
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "346cc",
+   "H": "4110",
+   "was": "4130",
+   "flat": 139166
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "346d4",
+   "H": "3F28F5C2",
+   "was": "3F51EB85",
+   "flat": 139174
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "346d6",
+   "H": "3F28F5C2",
+   "was": "40333333",
+   "flat": 139176
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "346d8",
+   "H": "40199999",
+   "was": "41100000",
+   "flat": 139178
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_RATE_LIMIT copy 7",
+   "config": "G2",
+   "addr": "346e0",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 139186
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_DELAY_TIME copy 8",
+   "config": "G2",
+   "addr": "346e4",
+   "H": "4150",
+   "was": "0000",
+   "flat": 139190
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_PITCH",
+   "config": "G2",
+   "addr": "34709",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139227
+  },
+  {
+   "name": "#PCGCMFR CGCS_NNT_YAW",
+   "config": "G2",
+   "addr": "3470a",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139228
+  },
+  {
+   "name": "#PCGCMFR CGCS_PAYLOAD_EXTENDED",
+   "config": "G2",
+   "addr": "3470b",
+   "H": "0007",
+   "was": "0000",
+   "flat": 139229
+  },
+  {
+   "name": "#PCGCMFR CGCS_ALT_JET_OPTION",
+   "config": "G2",
+   "addr": "3470c",
+   "H": "0003",
+   "was": "0001",
+   "flat": 139230
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_PRIM",
+   "config": "G2",
+   "addr": "3470e",
+   "H": "40199999",
+   "was": "40800000",
+   "flat": 139232
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_PRIM",
+   "config": "G2",
+   "addr": "34710",
+   "H": "4228",
+   "was": "4130",
+   "flat": 139234
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_PRIM",
+   "config": "G2",
+   "addr": "34714",
+   "H": "3EC49BA5",
+   "was": "3FA3D70A",
+   "flat": 139238
+  },
+  {
+   "name": "#PCGCMFR CGCS_TRANS_PULSE",
+   "config": "G2",
+   "addr": "34718",
+   "H": "3F28F5C2",
+   "was": "3F51EB85",
+   "flat": 139242
+  },
+  {
+   "name": "#PCGCMFR CGCS_MNVR_RATE_VERN",
+   "config": "G2",
+   "addr": "3471a",
+   "H": "3F51EB85",
+   "was": "40333333",
+   "flat": 139244
+  },
+  {
+   "name": "#PCGCMFR CGCS_DEADBAND_VERN",
+   "config": "G2",
+   "addr": "3471c",
+   "H": "4150",
+   "was": "4110",
+   "flat": 139246
+  },
+  {
+   "name": "#PCGCMFR CGCS_RATE_LIMIT_VERN",
+   "config": "G2",
+   "addr": "3471e",
+   "H": "3FCCCCCC",
+   "was": "3F51EB85",
+   "flat": 139248
+  },
+  {
+   "name": "#PCGCMFR CGCS_ROT_PULSE_VERN",
+   "config": "G2",
+   "addr": "34720",
+   "H": "3E418937",
+   "was": "3E83126E",
+   "flat": 139250
+  },
+  {
+   "name": "#PCGCMFR CGCS_NOTCH_LWR_UPR_FREQS",
+   "config": "G2",
+   "addr": "3472a",
+   "H": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E7964010FFDA40194B384012C52A401E32A040161E4F40228F5C401A36E24028F5C2402A93F24058A86D403A8B6D4079E796",
+   "was": "3FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C23FA3D70A3FF5C28F3FF5C28F40147AE140147AE14019999940199999401EB851401EB8514023D70A4023D70A4028F5C2",
+   "flat": 139260
+  },
+  {
+   "name": "#PCGCMFR CGCS_CG_ARRAY+1",
+   "config": "G2",
+   "addr": "34803",
+   "H": "93334051EB8543179C004329B333C221C000433EB00043284F85C2168F5C433FE66643295CA3C2222B85434053334328811EC21D0F5C43410B334329423DC2212B854341919943286CCCC21C3333434244CC4329623DC219A14743435666432894F5C214B0A343440333",
+   "was": "2B5CC0A3D70A431800F5434460F5C07D70A34318D23D43445F33000000004319D94743440DC200000000431AC1C24341DAB8C0170A3D431A719943442B5CC0A3D70A431800F5434460F5C07D70A34318D23D43445F33000000004319D94743440DC200000000431AC1C2",
+   "flat": 139477
+  },
+  {
+   "name": "#PCGCMFR CGCS_MOMENTS_OF_INERTIA_ARY",
+   "config": "G2",
+   "addr": "34838",
+   "H": "45F0ED804676CA8C467B4AE4478D46FE475499B7476470E4478FBA6F475212BE4768CA2C47964F01475AC8B9476645A44796712F4758AEA3476739C84799C2CB475F4D7647675BF64799CC8F475D18084768501A47A4983B476922104768C06847A47AEF4766CBEB4769B48C",
+   "was": "4611CF284673676246754082461268E746747FD1467609E74619197E467B351946761D20462280E0468506AE46768743461EBE064691E6C24687491A4611CF284673676246754082461268E746747FD1467609E74619197E467B351946761D20462280E0468506AE46768743",
+   "flat": 139530
+  },
+  {
+   "name": "#PCGCMFR CGCS_PRODUCTS_OF_INERTIA_ARY",
+   "config": "G2",
+   "addr": "3486e",
+   "H": "C410B44C45491B0043599000C51A40A0C711B8DD46122A00C5940520C7105A0946105DD845655D60C710483645E50E20C54016E0C6F1DDF84614431C4562F0C0C71121FC4610C750C5416680C6FE7C7046165724454A3580C711AEDB4615C124C5551720C7106350461AD268",
+   "was": "4413B200452D4A60C4133DB34413718045283566C4148F4C4411D8334512516843F6819943AC3666C51D526B4423F880C41EF280C5C98BAE44216F664413B200452D4A60C4133DB34413718045283566C4148F4C4411D8334512516843F6819943AC3666C51D526B4423F880",
+   "flat": 139584
+  },
+  {
+   "name": "#DGR8RCS CGRS_DILEMMA_CTR_LIMIT copy 2",
+   "config": "G2",
+   "addr": "38b17",
+   "H": "0006",
+   "was": "0003",
+   "flat": 808215
+  },
+  {
+   "name": "#DGRRRCS CGRS_FVRCS_FU_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b84",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808324
+  },
+  {
+   "name": "#DGRRRCS CGRS_FVRCS_OX_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b85",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808325
+  },
+  {
+   "name": "#DGRRRCS CGRS_LVRCS_FU_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b86",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808326
+  },
+  {
+   "name": "#DGRRRCS CGRS_LVRCS_OX_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b87",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808327
+  },
+  {
+   "name": "#DGRRRCS CGRS_RVRCS_FU_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b88",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808328
+  },
+  {
+   "name": "#DGRRRCS CGRS_RVRCS_OX_LEAK_TEMP_LT_ORB copy 2",
+   "config": "G2",
+   "addr": "38b89",
+   "H": "4100",
+   "was": "2080",
+   "flat": 808329
+  },
+  {
+   "name": "#DGRRRCS CGRS_FVRCS_FU_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8a",
+   "H": "0AA0",
+   "was": "0550",
+   "flat": 808330
+  },
+  {
+   "name": "#DGRRRCS CGRS_FVRCS_OX_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8b",
+   "H": "0FA0",
+   "was": "07D0",
+   "flat": 808331
+  },
+  {
+   "name": "#DGRRRCS CGRS_LVRCS_FU_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8c",
+   "H": "0AA0",
+   "was": "0550",
+   "flat": 808332
+  },
+  {
+   "name": "#DGRRRCS CGRS_LVRCS_OX_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8d",
+   "H": "0FA0",
+   "was": "07D0",
+   "flat": 808333
+  },
+  {
+   "name": "#DGRRRCS CGRS_RVRCS_FU_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8e",
+   "H": "0AA0",
+   "was": "0550",
+   "flat": 808334
+  },
+  {
+   "name": "#DGRRRCS CGRS_RVRCS_OX_LEAK_TEMP_LT_AE copy 2",
+   "config": "G2",
+   "addr": "38b8f",
+   "H": "0FA0",
+   "was": "07D0",
+   "flat": 808335
+  },
+  {
+   "name": "#DGFTREB CGCS_TRANS_2ROT_DELAY_CYCLES",
+   "config": "G2",
+   "addr": "38c9c",
+   "H": "0096",
+   "was": "007D",
+   "flat": 808604
+  },
+  {
+   "name": "#DGFTREB CGCS_ROT_2TRANS_DELAY_CYCLES",
+   "config": "G2",
+   "addr": "38c9d",
+   "H": "0096",
+   "was": "003E",
+   "flat": 808605
+  },
+  {
+   "name": "#DGFTREB CGCS_JETMIN_COMP+1 copy 2",
+   "config": "G2",
+   "addr": "38cab",
+   "H": "6667",
+   "was": "6666",
+   "flat": 808619
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_GRPS copy 2",
+   "config": "G2",
+   "addr": "38cba",
+   "H": "00050006",
+   "was": "00070008",
+   "flat": 808634
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_GRPS+8 copy 2",
+   "config": "G2",
+   "addr": "38cc2",
+   "H": "0000000000000000000F001000130014",
+   "was": "000D000E0013001400050006000D000E",
+   "flat": 808642
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_GRPS+18 copy 2",
+   "config": "G2",
+   "addr": "38ccc",
+   "H": "0005000600000000",
+   "was": "000F001000130014",
+   "flat": 808652
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_ONTIME_CYCLES copy 2",
+   "config": "G2",
+   "addr": "38cd2",
+   "H": "00010001",
+   "was": "00020002",
+   "flat": 808658
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_ONTIME_CYCLES+6 copy 2",
+   "config": "G2",
+   "addr": "38cd8",
+   "H": "0002000200000000000000000019001900190019",
+   "was": "0001000100010001001900190001000100010001",
+   "flat": 808664
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_ONTIME_CYCLES+18 copy 2",
+   "config": "G2",
+   "addr": "38ce4",
+   "H": "0001000100000000",
+   "was": "0019001900190019",
+   "flat": 808676
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_START_CYCLES+1 copy 2",
+   "config": "G2",
+   "addr": "38ceb",
+   "H": "004B009600E1",
+   "was": "0000003E003E",
+   "flat": 808683
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_START_CYCLES+6 copy 2",
+   "config": "G2",
+   "addr": "38cf0",
+   "H": "0096000000000000",
+   "was": "0002000200010001",
+   "flat": 808688
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_START_CYCLES+12 copy 2",
+   "config": "G2",
+   "addr": "38cf6",
+   "H": "00000000",
+   "was": "00010001",
+   "flat": 808694
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_START_CYCLES+19 copy 2",
+   "config": "G2",
+   "addr": "38cfd",
+   "H": "004B",
+   "was": "0000",
+   "flat": 808701
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_NUMJETS+8 copy 2",
+   "config": "G2",
+   "addr": "38d0a",
+   "H": "0000000000000000",
+   "was": "0001000100010001",
+   "flat": 808714
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_NUMJETS+14 copy 2",
+   "config": "G2",
+   "addr": "38d10",
+   "H": "00010001",
+   "was": "00020002",
+   "flat": 808720
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_NUMJETS+20",
+   "config": "G2",
+   "addr": "38d16",
+   "H": "00000000",
+   "was": "00010001",
+   "flat": 808726
+  },
+  {
+   "name": "#DGFTREB CGCS_RBST_INTVL_FACTOR+2",
+   "config": "G2",
+   "addr": "38d1c",
+   "H": "411000004110000041100000411000004110000041100000411000004110000041100000",
+   "was": "4113333340CCCCCC41166666409999994111999940E666664113333340CCCCCC4114CCCC",
+   "flat": 808732
+  }
+ ]
+}
