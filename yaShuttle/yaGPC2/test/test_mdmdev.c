@@ -156,7 +156,9 @@ int main(void) {
 
     /* AFT, AT REST: FA1 (bus 14), FIOHI1C1. */
     check(read_words(14, FA(0x0836Eu), 54, w) == 54, "fa1 hfe length");
-    check(w[2] == 16000 && w[17] == 16000, "fa1 injector temperatures warm");
+    /* a primary (word 2, R1A fuel) at 2.5 V; a vernier (word 17, L5D
+     * oxidizer) at 3.3 V, above STS-134's flown 2.6 V (16640) leak limit */
+    check(w[2] == 16000 && w[17] == 21120 && w[17] > 16640, "fa1 injector temperatures warm");
     check(w[20] == 0xA000u, "fa1 right manifolds 1-4 open");
     check(w[25] == 0xA00Cu, "fa1 left manifolds 1-4 and 5 open");
     check(w[21] == 0x00E0u, "fa1 no chamber pressure, rate gyros spinning");
@@ -200,7 +202,8 @@ int main(void) {
      * -- the gear stowed, gear_discretes) */
     check(w[0] == 0x0110u && w[8] == (0x0110u | 0x0006u), "ff3 manifolds 3 and 5 open");
     check(w[11] == 0xFC00u, "ff3 imu discretes good");
-    check(w[13] == 16000 && w[20] == 16000, "ff3 injector temperatures warm");
+    /* word 13 a primary (F3F oxidizer), word 20 a vernier (F5R fuel) */
+    check(w[13] == 16000 && w[20] == 21120 && w[20] > 16640, "ff3 injector temperatures warm");
     check(read_words(23, FF(0x082E8u), 36, w) == 36 && w[11] == 0,
           "ff4 has no imu");
     /* The MFE read: eight analog words, then the same thirteen discretes. */

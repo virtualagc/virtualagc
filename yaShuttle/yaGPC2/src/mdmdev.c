@@ -597,6 +597,20 @@ static uint16_t pc_word(int m, int k) {
  * limit and no rate check.  2.5 V clears every one. */
 #define INJ_WARM 16000u
 
+/* THE VERNIERS RUN HOTTER.  Each vernier injector has its own 10 W heater,
+ * on at about 140-150 F and off at about 184-194 F, where the primaries'
+ * heaters hold 66-109 F (SCOM OI-29 2.23-11).  The vernier leak limit in
+ * orbit is the OI-34 source's 1.3 V on the tape but STS-134 flew 2.6 V
+ * (16640 counts, #DGRRRCS CGRS_*VRCS_*_LEAK_TEMP_LT_ORB, DASS_G2): at 2.5 V
+ * every vernier read as leaking, RM deselected them ("L RCS DJET"), and the
+ * DAP in VERN lost attitude from ESTABLISH RBAR on (--flight-gnc, 10-10).
+ * 3.3 V is an estimate -- no transducer scaling was found -- clear of the
+ * flown limit as the heaters keep the real ones.  The vernier channels:
+ * F5L/F5R in FF3's words (GRRRCS.hal 5700-7400: SEG3 3,4 oxidizer, 7,8
+ * fuel), L5L/L5D on FA1 and R5R/R5D on FA2 at words 8-9 and 16-17
+ * (GRRRCS.hal 11500-15800). */
+#define INJ_VERN 21120u
+
 /* ---------------------------------------------------------------------
  * CREW CONTACTS: the panel side of the forward MDMs' discrete input cards.
  *
@@ -1191,6 +1205,8 @@ static void ff_hfe(int k, uint16_t *w, int n) {
     /* Words 13-20: the four jets' oxidizer then fuel injector temperatures
      * (GRRRCS.hal:184-215). */
     for (int i = 13; i <= 20; i++) b[i] = INJ_WARM;
+    if (k == 3)                                /* F5L, F5R: oxidizer 15-16, fuel 19-20 */
+        b[15] = b[16] = b[19] = b[20] = INJ_VERN;
     crew_aid_hfe(k, b, 36);
     /* Words 34-35, ACCELEROMETER ASSEMBLY k: lateral and normal specific
      * force, 0.2/6400 and 0.8/6400 g a count (GPFORB.hal:112-113,
@@ -1359,8 +1375,11 @@ static void fa_hfe(int k, uint16_t *w, int n) {
     memset(b, 0, sizeof b);
     /* Words 2-17, injector temperatures (GRRRCS.hal:302-357).  On FA3 and
      * FA4 words 8-9 and 16-17 are not RCS channels and stay zero. */
-    for (int i = 2; i <= 17; i++)
-        if (k <= 2 || !(i == 8 || i == 9 || i == 16 || i == 17)) b[i] = INJ_WARM;
+    for (int i = 2; i <= 17; i++) {
+        bool vern = (i == 8 || i == 9 || i == 16 || i == 17);
+        if (k <= 2) b[i] = vern ? INJ_VERN : INJ_WARM;     /* FA1 L5L/L5D, FA2 R5R/R5D */
+        else if (!vern) b[i] = INJ_WARM;
+    }
     /* Manifolds OPEN: right 1-4 in word 20 and left 1-4 in word 25, the top
      * nibble fuel-open, fuel-closed, oxidizer-open, oxidizer-closed = 1010;
      * manifold 5 in FA2's word 20 (right) and FA1's word 25 (left), bits 13
