@@ -3,7 +3,7 @@
   * [Introduction](#introduction)
   * [Target-Specific Differences](#target-specific-differences)
   * [Stuck Bits, Parity-Based Fixes, and CCSHOLEs](#stuck-bits-parity-based-fixes-and-ccsholes)
-  * [Inventory of Dumped Rope-Memory Modules](#inventory)
+  * [Inventory of Dumped Rope-Memory Modules](#inventory-of-dumped-rope-memory-modules)
 
 # <a>Introduction</a>
 
