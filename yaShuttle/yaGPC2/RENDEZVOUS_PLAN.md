@@ -1747,6 +1747,71 @@ cue card doesn't.**
     translation, against the ~0.4 ft/s a single start and stop should give;
   - whether VERN rate holding at 0.75 °/s chatters on the canted F5s.
 
+## 5j. The RPM as one turn, cue card B (2026-10-09, macOS)
+
+**Why.** The driver flew the RPM as four separate UNIV PTG quarter turns, with
+the R-bar point held by THC pulses. That cost 1,552 lb (clean-run1) and
+2,219 lb (e2e-run1) over 16-22 min, against 263-1,077 lb for the other legs
+(5i: 67 pulses in clean-run1, 30 of them LOW Z +Z at ~40 lb each; and the
+verniers spin up at only ~0.007 deg/s^2, so each quarter turn spent about 2
+of its 3.3 min accelerating and braking).
+
+**What the card does** (APPROACH, CC 9-7, JSC-48072-134 p. 305; RPM SETUP
+A and RBAR PITCH MNVR B). RPM SETUP: PRI and VERN ROT RATE 0.75, PRI Y
+OPTION ALL, UNIV PTG P 145 loaded. Then one turn, staged by the aft ADI's
+pitch, which starts at 90 in the R-bar attitude (theta below = aft P - 90):
+
+| theta | Card | What it does |
+|---|---|---|
+| 0 | A/AUTO/PRI, TRK (ITEM 19); FLT CNTLR PWR OFF | PRI spins the Orbiter up toward a target 125 deg on, so that the shortest way there is the RPM's way round |
+| 10 | VERN (PRI); KU PWR STBY | vernier hold of the rate |
+| 80 | FREE; P ITEM 15 + 270, TRK | no jets: it coasts at 0.75 deg/s; the target is set back to the start attitude |
+| 145-215 | photos | the ISS crew photographs the TPS |
+| 280 | PRI, A/AUTO | PRI brakes the last 80 deg onto the target |
+| 330 | KU PWR ON | |
+| 360 | VERN (PRI); FLT CNTLR PWR ON | THC: set up for TORVA |
+
+The card's P values are in its BODY VECT convention; the driver flies the
+same stages in its own (P 90 = -Z on the ISS): the intermediate target 125
+deg on (P 215), the final one the start (P 90). The APPROACH card also asks,
+at 620-580 ft, for "-0.2 < Rdot < -0.1 ... Null Xdot to 0 +- 0.1 ft/sec prior
+to mnvr start": the R-bar is no equilibrium -- 600 ft below the ISS with no
+thrust the Orbiter falls away at 3 n^2 z (~0.0024 ft/s^2) -- and closing at
+0.15 ft/s at the start takes part of that back.
+
+**Built** (rndz_manual.py, `--rpm-mode continuous`, now the default;
+`--rpm-mode quarters` keeps the older four quarter turns and `--rpm-cue-card`):
+`rpm_continuous()` flies the stages by theta, measured from the truth as the
+pitch at which the ISS lies in the Orbiter's body (`iss_pitch`); no THC from
+start to end; the vehdyn mass logged every 30 s and at each stage.  Before
+it, the card's start rates (Xdot 0, Rdot -0.15) when they are not already
+so.  After it, `rpm_recover()` flies back to the R-bar point if the turn left
+the Orbiter more than 50 ft off (the card instead goes on into TORVA from
+wherever it is; the driver's TORVA arc starts at the R-bar point), its
+pulses and propellant logged apart from the turn's.
+
+**Flown** from e2e-run1's RBAR capture, rndz2 volume, LOW Z, port 49900
+(~/sts134-runs/rendezvous/rpm-cont-1, -2):
+
+| | four quarter turns, hold (clean-run1 / e2e-run1) | one turn (rpm-cont-1) | one turn, card start rates (rpm-cont-2) |
+|---|---|---|---|
+| Turn | 16.9 / 16.3 min | 9.0 min | 9.8 min |
+| -Z off the ISS at the end | 2-8 deg | 1.2 deg | 2.2 deg |
+| Start rates | -- | -- | 5.7 kg |
+| Turn: PRI spin-up / VERN / FREE / PRI brake | -- | 7.5 / 0.7 / 0.0 / 1.9 kg | 7.4 / 1.1 / 0.0 / 13.6 kg |
+| Position at the end | held within ~10 ft | 273 ft off (0.56 / 0.64 ft/s) | 141 ft off (0.36 / 0.03 ft/s) |
+| Back to the R-bar point | -- | 129.3 kg, 45 pulses, 15 min | 78.9 kg, 26 pulses, 8.7 min |
+| **RCS in all** | **704 / 1,007 kg (1,552 / 2,219 lb)** | **139 kg (307 lb)** | **107 kg (235 lb)** |
+
+So the turn itself costs 10-22 kg -- the verniers coast through 200 deg of
+it -- and almost all the rest is the R-bar's own dynamics, paid either
+continuously (the old hold) or once afterwards (here).  The flight's own
+RPM propellant is not in our sources.
+
+**Not done.** TORVA from wherever the RPM ends (as the card), not from the
+R-bar point; the photo window calls; PRI Y OPTION ALL (a toggle on SPEC 20:
+left as it is).
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

@@ -45,6 +45,7 @@ readings in the logs).
 """
 import json
 import math
+import re
 import os
 import sys
 import time
@@ -494,12 +495,162 @@ class ManualPhase(object):
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
         self.man_record("RBAR", report=rep, pulses=dict(self.pulses))
 
+    # --- the RPM, as the cue card flies it -----------------------------------
+    def iss_pitch(self):
+        """Where the ISS is in the Orbiter's pitch plane: the UNIV PTG body
+        vector pitch P (deg, 0-360; BODY VECT 5 at P is (cos P, 0, -sin P),
+        so 90 is -Z) that would point at it, by the truth."""
+        tru, tgt = self.feeds()
+        R = ins.qmat(tru["q"])
+        d = ins.sub(list(tgt["r"]), list(tru["r"]))
+        db = [sum(R[i][k] * d[i] for i in range(3)) for k in range(3)]      # M50 -> body
+        return math.degrees(math.atan2(-db[2], db[0])) % 360.0
+
+    def orbiter_kg(self):
+        for line in reversed(self.log_text().splitlines()):
+            m = re.search(r"vehdyn-state:.*mass_kg=([\d.]+)", line)
+            if m:
+                return float(m.group(1))
+        return None
+
+    def rpm_continuous(self):
+        """THE RBAR PITCH MNVR as cue card B flies it (APPROACH, CC 9-7,
+        JSC-48072-134 p. 305): ONE turn, its stages by the aft ADI's pitch,
+        which starts at 90 in the R-bar attitude -- here theta, the turn
+        so far (aft ADI P - 90):
+          RPM SETUP   PRI and VERN ROT RATE 0.75, UNIV PTG P 145 (loaded,
+                      not tracked): a target 125 deg on, so that the
+                      shortest way there is the RPM's way round
+          theta 0     A/AUTO/PRI, TRK; FLT CNTLR PWR OFF -- PRI spins it up
+          theta 10    VERN (PRI); KU PWR STBY
+          theta 80    FREE (no jets: it coasts at 0.75 deg/s); P 270 loaded
+                      and TRK -- back to the start attitude, so that when
+                      the jets come back the DAP finishes the turn
+          theta 280   PRI, A/AUTO: PRI brakes it the last 80 deg
+          theta 330   KU PWR ON
+          theta 360   VERN; FLT CNTLR PWR ON
+        The card's P values are its BODY VECT convention; here the same
+        stages are flown in this driver's (P 90 = -Z on the ISS): the
+        intermediate target 125 deg on, the final one the start.  No THC
+        from start to end, as the card has it; the propellant is logged
+        every 30 s, by stage."""
+        P0 = 90.0
+        mid = (P0 + 125.0) % 360.0
+        # APPROACH card, 620-580 ft: "-0.2 < Rdot < -0.1 ... Null Xdot to 0
+        # +- 0.1 ft/sec prior to mnvr start".  The R-bar is no equilibrium:
+        # with no thrust the Orbiter 600 ft below falls away at 3 n^2 z
+        # (0.0024 ft/s^2), ~270 ft over a hands-off RPM; closing at 0.15
+        # ft/s at the start takes ~80 ft of that back
+        st = self.rel("cg", noisy=False)
+        if abs(st["v"][0]) > 0.1 or not (-0.2 < st["v"][2] < -0.1):
+            self.say("RPM: XD %+.2f ZD %+.2f ft/s -- to Xdot 0, Rdot -0.15 before the start (APPROACH card)"
+                     % (st["v"][0], st["v"][2]))
+            self.fly("RPM START RATES", lambda t: ([0.0, 0.0, 0.0], [0.0, 0.0, -0.15]),
+                     lambda t, rel, err: abs(rel["v"][0]) < 0.08 and -0.2 < rel["v"][2] < -0.1
+                     and abs(rel["v"][1]) < 0.08,
+                     tau=1e9, vmax=0.3, dead=0.04, every=8.0, limit=180.0)
+        self.say("crew: RPM SETUP -- PRI and VERN ROT RATE %.2f deg/s; UNIV PTG P %.0f (here %.0f)"
+                 % (RPM_RATE, 145.0, mid))
+        self.spec20_rates("rpm-setup", RPM_RATE, RPM_RATE)
+        log = []
+
+        def mark(stage):
+            log.append((self.ears.snap()[0]["t"], stage, self.orbiter_kg(), dict(self.pulses)))
+            self.say("RPM: %s (theta %.0f deg, mass %s kg)" % (stage, theta["v"], log[-1][2]))
+
+        theta = {"v": 0.0, "last": self.iss_pitch()}
+
+        def update():
+            p = self.iss_pitch()
+            d = (p - theta["last"] + 180.0) % 360.0 - 180.0
+            theta["v"] += d
+            theta["last"] = p
+            return theta["v"]
+
+        t0 = self.ears.snap()[0]["t"]
+        mark("start")
+        self.univ_ptg("rpm-trk-mid", 1, mid, dap="pri")
+        self.say("crew: A/AUTO/PRI, TRK; FLT CNTLR PWR OFF -- initiating RPM")
+        stages = [(10.0, "+1     dap c3 vern\n+1     switch ku_power STBY\n", "VERN (PRI), KU PWR STBY"),
+                  (80.0, "+1     dap c3 free\n+2     keys ITEM 1 5 + %s EXEC\n+3     keys ITEM 1 9 EXEC\n"
+                   % " ".join(str(int(P0))), "FREE; P back to the start, TRK"),
+                  (280.0, "+1     dap c3 pri\n+2     dap c3 auto\n", "PRI, A/AUTO -- braking"),
+                  (330.0, "+1     switch ku_power ON\n", "KU PWR ON")]
+        last_mass_t = -1e9
+        while True:
+            th = update()
+            t = self.ears.snap()[0]["t"]
+            if stages and th >= stages[0][0]:
+                at, script, what = stages.pop(0)
+                self.play(script, "rpm-%03d" % int(at))
+                self.script_done("rpm-%03d" % int(at), 120)
+                mark(what)
+            if t - last_mass_t >= 30.0:
+                last_mass_t = t
+                st = self.rel("cg", noisy=False)
+                self.say("RPM: t %+.0f s theta %.0f deg rate %.2f deg/s mass %s kg; CG X %+.0f Y %+.0f Z %+.0f ft"
+                         % (t - t0, th, self.body_rate_dps(), self.orbiter_kg(), *st["r"]))
+            if not stages and th > 340.0 and self.body_rate_dps() < 0.1:
+                break
+            if t - t0 > 1800.0:
+                self.say("RPM: not finished after 30 min (theta %.0f deg) -- going on" % th)
+                break
+            time.sleep(2.0 / max(self.a.rate, 1.0))
+        self.play("+1     dap c3 vern\n", "rpm-vern")
+        self.script_done("rpm-vern", 60)
+        mark("end, VERN")
+        t = self.ears.snap()[0]["t"] - t0
+        e = self.body_vec_err(P0, "iss")
+        used = [(log[i][1], (log[i - 1][2] or 0) - (log[i][2] or 0)) for i in range(1, len(log))]
+        total = (log[0][2] or 0) - (log[-1][2] or 0)
+        st = self.rel("cg", noisy=False)
+        self.say("RPM: 360 deg in %.1f min (the flight's 0.75 deg/s: 8.0 min + spin-up); -Z %.1f deg from the ISS; "
+                 "RCS %.1f kg (%.0f lb), by stage: %s; THC pulses none; CG X %+.0f Y %+.0f Z %+.0f ft from the ISS "
+                 "(the R-bar point Z %+.0f)"
+                 % (t / 60.0, e, total, total / 0.45359237,
+                    ", ".join("%.1f kg until %s" % (kg, w) for w, kg in used), *st["r"], RBAR_FT))
+        return t, e, total, log
+
+    def rpm_recover(self):
+        """After a hands-off RPM: back to the R-bar point if the turn left
+        the Orbiter more than 50 ft off it -- FLT CNTLR PWR ON, THC pulses,
+        their propellant logged apart from the turn's."""
+        st = self.rel("cg", noisy=False)
+        off = math.sqrt(st["r"][0] ** 2 + st["r"][1] ** 2 + (st["r"][2] - RBAR_FT) ** 2)
+        m0, p0 = self.orbiter_kg(), dict(self.pulses)
+        if off <= 50.0 and max(abs(x) for x in st["v"]) < 0.15:
+            self.say("RPM: %.0f ft from the R-bar point after the turn -- no correction" % off)
+            return
+        self.say("RPM: %.0f ft from the R-bar point after the turn (drifting %.2f %.2f %.2f ft/s) -- back to it"
+                 % (off, *st["v"]))
+        settled = {"n": 0}
+
+        def done(t, rel, err):
+            ok = max(abs(x) for x in err) < 25 and max(abs(x) for x in rel["v"]) < 0.12
+            settled["n"] = settled["n"] + 1 if ok else 0
+            return settled["n"] >= 6
+        self.fly("RPM RECOVER", lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0]), done,
+                 tau=150.0, vmax=0.3, dead=0.08, every=10.0, limit=900.0)
+        m1 = self.orbiter_kg()
+        n = sum(self.pulses.get(k, 0) - p0.get(k, 0) for k in self.pulses)
+        self.say("RPM: recovery used %s kg in %d THC pulses" % ("%.1f" % (m0 - m1) if m0 and m1 else "?", n))
+
     def rpm(self):
         """RPM SETUP and the RPM (cue card RPM): the rates to 0.75 deg/s,
         then a full turn in pitch about the ISS line of sight, the ISS held
         in the track and the R-bar point held; then the rates back (p. 6-2's
         A7: 0.200 and 0.016) and the -Z target track."""
         self.man_start()
+        if getattr(self.a, "rpm_mode", "continuous") == "continuous":
+            t, e, kg, log = self.rpm_continuous()
+            self.rpm_recover()
+            self.spec20_rates("rpm-end", 0.200, 0.016)
+            self.play("+1     keys RESUME\n" + self.TRACK_KEYS.replace("dap c3 b", "dap c3 a")
+                      .replace("dap c3 alt", "dap c3 vern"), "rpm-track")
+            self.script_done("rpm-track", 180)
+            self.man_record("RPM", mode="continuous", minutes=t / 60.0, end_err_deg=e, rotation_kg=kg,
+                            stages=[(w, m) for _, w, m, _ in log], pulses=dict(self.pulses))
+            return
         self.spec20_rates("rpm-setup", RPM_RATE, RPM_RATE)
         self.say("crew: RPM SETUP -- PRI and VERN ROT RATE %.2f deg/s" % RPM_RATE)
         # read them back: full-run1's quarter turns crawled at ~0.07 deg/s
