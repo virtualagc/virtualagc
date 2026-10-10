@@ -62,7 +62,9 @@ WHAT IS APPROXIMATED (said again in the findings):
     face (Courier New, else Menlo / DejaVu Sans Mono) like the figures'.
   - Autoscale: the view fits the target, the orbiter and its predictors, in
     50 / 100 / 500 ... ft ticks; RPOP's own autoscale rule is not published.
-  - HHL: a mark every 5 s; HHL/dt is the range difference over the last
+  - HHL: the range the cue cards read (CG-CG less 10 ft on the approach,
+    DP-DP plus 7 ft to Node 2 on the V-bar; see Rpop.hhl_reading), not
+    rndz_instruments' 25 m sphere; a mark every 5 s; HHL/dt is the range difference over the last
     mark, HHLFlt an alpha-beta filter on the marks (the real one also used
     radar R-dot, which this simulator does not feed RPOP).
 
@@ -482,11 +484,39 @@ class Rpop(QtCore.QObject):
                 tr, _ = self.rel_truth(s, tgt, geo)
                 log("t %.0f nav %.1f %.1f %.1f ft, truth %.1f %.1f %.1f ft"
                     % (t, x[0], x[1], x[2], tr[0], tr[1], tr[2]))
-        # no HHL marks closer than 12 ft ([RNDZ] 7-21, note 9)
-        if ("hhl_range_ft" in rd and rd["hhl_range_ft"] >= 12.0
-                and (self.next_hhl is None or t >= self.next_hhl)):
-            self.next_hhl = t + HHL_PERIOD_S
-            self._hhl_mark(t, rd["hhl_range_ft"], rd["hhl_rdot_fps"])
+        if "hhl_range_ft" in rd and (self.next_hhl is None or t >= self.next_hhl):
+            rng, rdot = self.hhl_reading(s, tgt, geo)
+            # no HHL marks closer than 12 ft ([RNDZ] 7-21, note 9)
+            if rng >= 12.0:
+                self.next_hhl = t + HHL_PERIOD_S
+                self._hhl_mark(t, rng, rdot)
+
+    def hhl_reading(self, s, tgt, geo):
+        """The HHL's range and range rate as the STS-134 cue cards read it.
+
+        (rndz_instruments' read() now uses this same model; it had ranged to
+        a 25 m sphere about the ISS's CG, 82 ft short close in.)  The cards
+        give the HHL against the
+        other ranges directly, and are followed here: on the approach the
+        crew aims at the ISS CG and reads the CG-CG range less 10 ft
+        (APPROACH, CC 9-7: 2000 -> 1990, 1000 -> 990, 400 -> 390); once on the
+        +V-bar (inside 400 ft CG-CG, the card's switch) the aim point is
+        Node 2's forward face (RPOP OPS 7-16's HHL table) and the HHL reads
+        the DP-DP range plus 7 ft (VBAR APPROACH, CC 9-8: 250 -> 257,
+        170 -> 177, 75 -> 82, 30 -> 37, 10 -> 17).  The noise is
+        rndz_instruments' HHL noise."""
+        dr, dv = self.rel_truth(s, tgt, geo)
+        rcg = float(np.linalg.norm(dr))
+        if rcg >= 400.0:
+            rng, rdot = rcg - 10.0, float(dr @ dv) / rcg
+        else:
+            A = geo["A"]
+            ods = (np.array(ri.ODS_BODY) - np.array(s["cg"])) / FT
+            dp = dr + A @ ods - ri_pma2_ft()
+            dpv = dv + np.cross(geo["wrel"], A @ ods)
+            rdp = float(np.linalg.norm(dp))
+            rng, rdot = rdp + 7.0, float(dp @ dpv) / max(rdp, 1e-6)
+        return rng + self.inst.g(0.5 + 0.001 * rng), rdot + self.inst.g(0.02)
 
     def _hhl_mark(self, t, rng, rdot):
         self.hhl.append((t, rng, rdot))
@@ -689,17 +719,17 @@ class View(QtWidgets.QWidget):
         r = float(np.linalg.norm(pos))
         rdot = float(pos @ vel) / r if r > 1e-6 else 0.0
         self.text(p, 262, 34, "R", 28, GREEN, bold=True)
-        self.text(p, 372, 34, "%.0f" % r, 28, GREEN, bold=True, align="r")
-        self.text(p, 400, 34, "R", 28, GREEN, bold=True)
-        self.dot(p, 409, 8, GREEN, 2.5)
+        self.text(p, 358, 34, "%.0f" % r, 28, GREEN, bold=True, align="r")
+        self.text(p, 404, 34, "R", 28, GREEN, bold=True)
+        self.dot(p, 413, 8, GREEN, 2.5)
         self.text(p, 545, 34, ("%.2f" if abs(rdot) < 10 else "%.1f") % rdot, 28, GREEN, bold=True,
                   align="r")
         for i, (nm, y) in enumerate((("X", 72), ("Y", 98), ("Z", 124))):
             self.text(p, 264, y, nm, 19, GREEN)
-            self.text(p, 372, y, "%.0f" % pos[i] if abs(pos[i]) >= 0.5 or pos[i] >= 0 else "-0",
+            self.text(p, 358, y, "%.0f" % pos[i] if abs(pos[i]) >= 0.5 or pos[i] >= 0 else "-0",
                       19, GREEN, align="r")
-            self.text(p, 403, y, nm, 19, GREEN)
-            self.dot(p, 409, y - 17, GREEN, 1.8)
+            self.text(p, 407, y, nm, 19, GREEN)
+            self.dot(p, 413, y - 17, GREEN, 1.8)
             self.text(p, 545, y, "%.2f" % vel[i], 19, GREEN, align="r")
 
     def dot(self, p, x, y, color, rad):

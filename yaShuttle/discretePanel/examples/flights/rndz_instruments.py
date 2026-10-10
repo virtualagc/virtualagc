@@ -31,10 +31,10 @@ X_o/Z_o inches turn into them as portview's _structural does.
   - PMA2: PMA-2's docking face in the ISS frame, portview's ISS_PMA2 (the
     model's), its axis the ISS's +X.  The TCS reflectors sit around it; the
     TCS ranges to their centroid, taken as the face itself.
-  - HHL: the crew aims it at the station's structure; it ranges to the
-    nearest point of a 25 m sphere about the ISS's centre of mass, which is
-    what "range to the ISS" meant to them at a few hundred feet and is the
-    range the cue cards' gates are read against (CG range less ~80 ft).
+  - HHL: the crew aims it at the station -- its centre on the approach,
+    Node 2's forward face on the +V-bar -- and it reads as the STS-134 cue
+    cards give it against the other ranges (see read(); rpop.py's
+    hhl_reading is the same model).
 
 THE NOISE (1 sigma; estimates, no document figures here):
   - HHL: range 0.5 ft + 0.1 %, range rate 0.02 ft/s (from two readings 5 s
@@ -67,7 +67,6 @@ ODS_HARDMATE_BODY = structural(ODS_XO, 0.0, ODS_HARDMATE_ZO)
 CLCAM_BODY = structural(CLCAM_XO, 0.0, CLCAM_ZO)
 TCS_BODY = structural(TCS_XO, TCS_YO, TCS_ZO)
 PMA2 = (15.655, 0.0, 5.562)                # ISS frame, m: portview.ISS_PMA2 (the model's own PMA-2)
-HHL_SPHERE_M = 25.0
 TCS_MAX_FT, HHL_MAX_FT = 10000.0, 5000.0
 
 
@@ -137,15 +136,25 @@ class Instruments(object):
     def read(self, tru, tgt):
         Ro, Rt, ods_r, ods_v, pma_r, pma_v = points(tru, tgt)
         out = {}
-        # HHL: to the station's nearest structure
+        # HHL, as the STS-134 cue cards read it against the other ranges.  On
+        # the approach the crew aims at the ISS's centre and it reads the
+        # CG-CG range less 10 ft (APPROACH, CC 9-7: 2000 -> 1990, 1000 -> 990,
+        # 400 -> 390); on the +V-bar inside 400 ft they aim at Node 2's
+        # forward face and it reads the docking-port range plus 7 ft (VBAR
+        # APPROACH, CC 9-8: 250 -> 257, 170 -> 177, 75 -> 82, 30 -> 37,
+        # 10 -> 17).  No reading inside 12 ft (the TRAD table, RNDZ 7-16).
+        # (It was a 25 m sphere about the ISS's centre: 82 ft short close in.)
         d = sub(list(tgt["r"]), list(tru["r"]))
         dv = sub(list(tgt["v"]), list(tru["v"]))
-        rng_cg = norm(d)
-        rdot_cg = dot(d, dv) / rng_cg
-        hhl = (rng_cg - HHL_SPHERE_M) / FT
-        if hhl < HHL_MAX_FT:
+        rng_cg = norm(d) / FT
+        if rng_cg >= 400.0:
+            hhl, hdot = rng_cg - 10.0, dot(d, dv) / norm(d) / FT
+        else:
+            dp, dpv = sub(pma_r, ods_r), sub(pma_v, ods_v)
+            hhl, hdot = norm(dp) / FT + 7.0, dot(dp, dpv) / max(norm(dp), 1e-6) / FT
+        if 12.0 <= hhl < HHL_MAX_FT:
             out["hhl_range_ft"] = hhl + self.g(0.5 + 0.001 * hhl)
-            out["hhl_rdot_fps"] = rdot_cg / FT + self.g(0.02)
+            out["hhl_rdot_fps"] = hdot + self.g(0.02)
         # TCS: to the reflectors at PMA-2, from its own head in the bay
         tcs_r, tcs_v = body_point(tru, Ro, TCS_BODY)
         tl = sub(pma_r, tcs_r)
