@@ -1907,12 +1907,20 @@ def main():
             if args.truth_ball:
                 L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
                                       "--size", str(tk_px(size))], HERE, env)
-            if start_portview:
+            # "rpop" in the views is rpop.py, the aft PGSC's RPOP display --
+            # a program of its own beside portview, not one of its windows
+            pv_views, want_rpop = windowLayout.split_views(args.portview_views)
+            if start_portview and (pv_views or not want_rpop):
                 pv_argv = [py, "portview.py", "--port-base", str(args.port_base),
                            "--size", str(args.portview_size)]
-                if args.portview_views:
-                    pv_argv += ["--views", args.portview_views]
+                if pv_views:
+                    pv_argv += ["--views", pv_views]
                 L.start("portview", pv_argv, HERE, env)
+            if want_rpop and env.get("YAGPC_VEHDYN") == "1":
+                # at the displays' --size: under the desktop's QT_SCALE_FACTOR 2
+                # its default (768) opened at twice the PGSC's 1024 x 768
+                L.start("rpop", [py, "rpop.py", "--port-base", str(args.port_base),
+                                 "--size", str(size)], HERE, env)
             gpc_argv = [exe, "run"]
             # A RESTORED MACHINE IS PAST ITS IPL, so it is given the snapshot
             # instead of the tape: --resume makes each computer load its own

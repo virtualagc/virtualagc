@@ -490,6 +490,14 @@ PORTVIEW_ROLES = {"CDR/PLT Forward View": "pv_front", "CDR/PLT Overhead View": "
                   "A3 MON 1: Centerline Camera": "pv_cctv"}       # still recognised
 
 
+def split_views(views):
+    """A --views list -> (portview's views, whether rpop.py is wanted).
+    "rpop" is not a portview window but a program of its own, rpop.py, so it
+    is taken out of the list portview is given."""
+    names = [v.strip() for v in (views or "").split(",") if v.strip()]
+    return ",".join(v for v in names if v.lower() != "rpop"), any(v.lower() == "rpop" for v in names)
+
+
 def role_of(pid, title):
     cmd = cmdline(pid) if pid else ""
     m = PANEL_TITLE.match(title.strip())

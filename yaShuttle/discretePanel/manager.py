@@ -1416,7 +1416,7 @@ class Manager(object):
     # What can be seen from each station: the forward station's windows, or
     # the aft flight deck's overhead window and its A3 monitor's centerline
     # camera picture (portview's cctv).
-    STATION_VIEWS = {"fwd": "front,up,left,right", "aft": "aft,cctv", "all": None}
+    STATION_VIEWS = {"fwd": "front,up,left,right", "aft": "aft,cctv,rpop", "all": None}
     STATION_HANDS = {"fwd": "lh", "aft": "aft", "all": None}
 
     def set_station(self, st):
@@ -1438,6 +1438,13 @@ class Manager(object):
         self.root.after(2500, restart)
 
     def start_views(self, views=None):
+        # "rpop": rpop.py, the aft PGSC's RPOP display, a program of its own
+        pv_views, want_rpop = windowLayout.split_views(views or self.args.portview_views)
+        if want_rpop:
+            self.start_rpop()
+            if not pv_views:
+                return
+            views = pv_views
         if any(n == "portview.py" for n, _ in running(self.args.port_base)):
             self.say("The window views are already running on this port base; Stop them first")
             return
@@ -1455,7 +1462,7 @@ class Manager(object):
                 "--size", str(self.args.portview_size)]
         # the run's own views unless a station asked for others: Start gave
         # only the forward view to a run begun with "aft,cctv" (owner)
-        views = views or self.args.portview_views
+        views = views or windowLayout.split_views(self.args.portview_views)[0]
         if views:
             argv += ["--views", views]
         try:
@@ -1474,7 +1481,32 @@ class Manager(object):
             self.root.after(8000, lambda: self.restore_layout(
                 only_roles=set(windowLayout.PORTVIEW_ROLES.values())))
 
+    def start_rpop(self):
+        if any(n == "rpop.py" for n, _ in running(self.args.port_base)):
+            return
+        try:
+            subprocess.Popen([sys.executable, os.path.join(HERE, "rpop.py"),
+                              "--port-base", str(self.args.port_base),
+                              "--size", str(self.args.hc_size)], cwd=HERE,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT,
+                             stdin=subprocess.DEVNULL)
+        except OSError as e:
+            self.say("Cannot start RPOP: %s" % e)
+            return
+        self.say("RPOP started")
+        path = self.layout.get().strip()
+        if os.path.isfile(path):
+            self.root.after(5000, lambda: self.restore_layout(only_roles={"rpop"}))
+
+    def stop_rpop(self):
+        for pid in [pid for n, pid in running(self.args.port_base) if n == "rpop.py"]:
+            try:
+                os.kill(pid, 15)
+            except OSError:
+                pass
+
     def stop_views(self):
+        self.stop_rpop()
         if self.views is not None and self.views.poll() is None:
             self.views.terminate()
             self.views = None
