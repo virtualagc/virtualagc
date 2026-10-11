@@ -476,9 +476,9 @@ def sub1_receiver():
 
 
 def dhms(seconds):
-    """DDD/HH:MM:SS, as the mission time and GMT displays count."""
+    """DDD:HH:MM:SS, as panel O3's mission time and GMT display counts."""
     t = int(max(0.0, seconds))
-    return "%03d/%02d:%02d:%02d" % (t // 86400, t % 86400 // 3600, t % 3600 // 60, t % 60)
+    return "%03d:%02d:%02d:%02d" % (t // 86400, t % 86400 // 3600, t % 3600 // 60, t % 60)
 
 
 def mdm_receiver(k):
@@ -1819,11 +1819,17 @@ class PanelO6:
             return v, (245.0, 255.0)
         return d.get("rcsP_%s%s" % (S, fl)), (235.0, 255.0)
 
+    def o3_width(self, key):
+        """A readout's box: wide enough for its widest text in this host's font."""
+        widest = "000:00:00:00" if key == "o3_met" else "100"
+        return max(self.RO_MET_W if key == "o3_met" else self.RO_W,
+                   self._tw(widest, self.RO_SIZE) + 28)
+
     def o3_text(self, key):
         d = self.sub1
         if key == "o3_met":
             if "gmt" not in d:
-                return "---/--:--:--"
+                return "---:--:--:--"
             return dhms(d["gmt"] if self.ctl["o3_time_sel"] == "GMT" else d.get("met", 0.0))
         S = key.split("_")[2].upper()               # o3_q_l
         sel = self.ctl["o3_qty_sel"]
@@ -3085,7 +3091,7 @@ class PanelO6:
         if k == "meter":
             return max(cap_w, self.METER_W + 8), above, self.METER_H, ls * 1.3
         if k == "readout":
-            return max(cap_w, self.RO_MET_W if key == "o3_met" else self.RO_W), above, self.RO_H, 0
+            return max(cap_w, self.o3_width(key)), above, self.RO_H, 0
         if k == "tb":
             return max(cap_w, self.TB_W + 8), above, self.TB_H, 0
         if k == "ann":
@@ -3195,7 +3201,7 @@ class PanelO6:
             self._text(cx, y + h + ls * 0.65, "---" if v is None else "%d" % int(round(v)),
                        size=SETTING_SIZE)
         elif k == "readout":
-            rw = self.RO_MET_W if key == "o3_met" else self.RO_W
+            rw = self.o3_width(key)
             self._rect(cx - rw / 2.0, y, cx + rw / 2.0, y + body,
                        fill="#140605", outline=C_BEZEL, width=max(1, int(self.s)))
             # centred on the DIGITS: the canvas centres the line, descender
