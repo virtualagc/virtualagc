@@ -2665,6 +2665,23 @@ void iop_recv_from_cpu(IOP *iop, uint32_t cmd, uint32_t data) {
         }
         case 0x87200000: { /* CONFIGURE PROCESSORS ENABLE */
             uint32_t r1 = register_get32(&iop->regHalt);
+            /* "Upon release from the Halt state, the MSC enters the Wait
+             * state" (IBM-6246556A, 2.0 GENERAL MSC OPERATION).  It does
+             * NOT resume the program it was halted in.  FIOSTMSC halts a
+             * busy-but-interruptable MSC (TCVTMSC -1, in its @RAW), enables
+             * it, then checks TCVTIOQ and loads its PC.  Resuming instead let
+             * the old program finish the @RAW and post the completed IOQE
+             * behind FIOSTMSC's check; FIOSTMSC then restarted the monitor
+             * on the same still-flagged IOQE and it was posted TWICE, the
+             * second FIOCMPLT service returned "IOQE 0" to the free pool,
+             * FIOSVC built an IOQE over the low PSA and Clock 2 died -- the
+             * OPS 101 hang (gpc-causes #296/#297).  So an MSC released here
+             * is put in Wait, exactly as its own @WAT leaves it. */
+            if ((data & iop_proc_bit(PROC_MSC)) && !(r1 & iop_proc_bit(PROC_MSC))) {
+                iop_proc_set(&iop->regBusyWait, PROC_MSC, 0);
+                Register *mst = iopls_at(&iop->ls, PROC_MSC, 2, 7);
+                if (mst) register_set32(mst, register_get32(mst) & ~1u);
+            }
             register_set32(&iop->regHalt, r1 | data);
             iop_log_procs(iop, "ENABLE", data);
             break;
