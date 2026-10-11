@@ -3,6 +3,7 @@
  "notes": [
   "STS-134's flown OPS 1 abort I-loads, from DASS_G16.ASC's PATCH SUMMARY (the flown G1/G6 load against the generic tape): every word whose tape value is the generic (LM) one and whose flown (MM) value differs, in these csects. Applied on top of the -full volume (sts134-gnc-iloads + sts134-ascent-iloads) to make -full2. See yaGPC2/ASCENT_ILOADS.md.",
   "#PCGN13R, the OPS 1 landing-site table: blank on the tape (spaces and zeros). Flown: 90 runways -- KSC 15/33; TAL Ben Guerir 36/18, Moron 20/02, Zaragoza 30/12; the East Coast abort sites (MYR ILM NKT NTU WAL DOV ACY FOK FMH PSM YHZ YJT YYT YQX YYR); Lajes, Beja, Keflavik, Shannon, Fairford, Koln-Bonn, Istres, Esenboga, then the Pacific and western sites (KKI JDG AMB PTN JTY GUA WAK HNL EDF HAO EDT HAW NOR EDW); MLS and TACAN tables; CGGS_TARGET_INDEX, ALTERNATE_SITE_1/2. Only the G16 copy (load block @1087488): the G3 copy at flat addr+1130718 is entry's and is left alone.",
+  "KSC IN THE OPS 1 TABLE IS OURS, NOT THE FLOWN ONE (2026-10-10): runway slots 1-2 (KSC 15/33), MLS 1-2 and TACAN 1-2 in the G16 copy carry tools/sites/ksc.json's words, exactly as landing_sites.py writes them into G3 (here relocated to G16's load block, flat 1087488 + offset; 6 cells replacing the 53 flown ones).  The flown entries put KSC at RUNWAY_ALT -187 / DELH -195 and the MSBLS stations ~750 m from ksc.json's, while our world (vehdyn's 8.3 ft ground, landaids' ksc-navaids.txt) is ksc.json's: an RTLS steered onto a glideslope that was not there -- 262 kt and 11 ft/s at touchdown, PASS's wheel altitude 29 ft with the vehicle at rest.  With ksc.json's: 234 kt and 3.8 ft/s, wheel altitude -1.3 ft at rest (rtls-fix run2).",
   "#PCGN13R's G3 copy (entry's; flat = address + 1,130,718, load block @1328128): DASS_G3's flown words where the volume still holds the blank tape value -- slots 3-90 and their MLS/TACAN entries, for a TAL's or ECAL's OPS 3 (OPS 304 keeps the OPS 1 site index, which must find its runway in G3).  The 82 words landing_sites.py already wrote from ksc.json (KSC 15/33 in slots 1-2, their MLS and TACAN) are left as it wrote them.  G3's flown table matches G16's in all but 9 of these words.",
   "#PCGGC01, #PCGGD01, #PCGGC13, #PCGG01R: the RTLS/TAL/ATO guidance and abort-boundary words. Left out: the cells sts134-reconfig.json sets or the launch day superseded (V_MAG_MECO_NOM, RAD_MECO_NOM, CGGV_RAD_MECO, FPA_MECO_NOM, ROLL_CMD_CHANGE_V, ASSUMED_SSME_FAIL_MET, K_CMD_NOM -- none is LM on the volume) CGGS_P_Y_INDEX_CHG_LIMIT (tied to the 2011 first-stage pitch/yaw tables), and CGGB_EF_PLANE_SW: flown OFF (an inertial target plane rotated from #PCGGCOM's T_GMTLO_REF, the 2010 build's day 210 -- a launch-day product), and with it OFF second stage on our KSC6 tape pitched up 25 deg after SRB SEP and fell back (bisected 2026-10-10); the tape's ON (the earth-fixed plane) flies to the ISS plane. #PCGGC13 has a second copy in G3 (flat addr+1135264); only the G1 copy is patched.",
   "D-csects (G1): #DGG42ND (TAL SSME trim mass, K_CMD_STG2 106 -> 104), #DGG9GLI and #DGHHPHA (glide RTLS), #DGDORTL, #DGEHRTL, #DGSTETS (RTLS ET SEP inhibit limits, ETSEP_INH_TIME), #DGSSSSM (the low-level cutoff delays: DT_DRY 1.918 -> 0.238 s, RTLS_DT_DRY, PTM_DT_DRY, both LH2 LL delays -> 0; prevalve close delays), #DGSMMPS, #DGSFABT, #DGSQASC. Left out: #DGG31ST (first stage, launch-day coupled), #DGSRRSL (RSLS countdown timing), #DGSESRB (already the flown values).",
@@ -11,220 +12,78 @@
  ],
  "cells": [
   {
-   "name": "#PCGN13R CGNS_RUNWAY @30323",
+   "name": "RW(1) KSC15 az 149.994 (ksc.json, as G3)",
    "config": "G16",
-   "addr": "30323",
-   "H": "4B5343313520",
-   "was": "202020202020",
-   "flat": 1087489,
+   "addr": "30322",
+   "flat": 1087488,
    "block": [
     1087488,
     4244
-   ]
+   ],
+   "H": "06064B5343313520407FEEB0C11689924129E2D8C01657184184CCCD000000003A980001",
+   "was": "060620202020202000000000000000000000000000000000000000000000000000000000"
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @30326",
+   "name": "RW(2) KSC33 az 329.994 (ksc.json, as G3)",
    "config": "G16",
-   "addr": "30326",
-   "H": "407FEEAA",
-   "was": "00000000",
-   "flat": 1087492,
+   "addr": "30334",
+   "flat": 1087506,
    "block": [
     1087488,
     4244
-   ]
+   ],
+   "H": "06064B5343333320407FC5D2C11687E6415C26CEC01657184184CCCD000000003A980002",
+   "was": "060620202020202000000000000000000000000000000000000000000000000000000000"
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @30328",
+   "name": "MLS(1) for KSC15, bearing 329.994 (ksc.json, as G3)",
    "config": "G16",
-   "addr": "30328",
-   "H": "C1168991",
-   "was": "00000000",
-   "flat": 1087494,
+   "addr": "30976",
+   "flat": 1089108,
    "block": [
     1087488,
     4244
-   ]
+   ],
+   "H": "407FC98AC11688484184CCCD415C26CE407FEC7EC116893C4184CCCD415C26CE00000000000000000000000041D1D2F24115A9FC40E72B02",
+   "was": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @3032A",
+   "name": "MLS(2) for KSC33, bearing 149.994 (ksc.json, as G3)",
    "config": "G16",
-   "addr": "3032a",
-   "H": "4129E282",
-   "was": "00000000",
-   "flat": 1087496,
+   "addr": "30992",
+   "flat": 1089136,
    "block": [
     1087488,
     4244
-   ]
+   ],
+   "H": "407FEC7EC116893C4184CCCD4129E2D8407FC98AC11688484184CCCD4129E2D800000000000000000000000041DA5604411E312740F2F1AA",
+   "was": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @3032C",
+   "name": "TACAN(1) TTS 59Y (ksc.json, as G3)",
    "config": "G16",
-   "addr": "3032c",
-   "H": "C0171758",
-   "was": "00000000",
-   "flat": 1087498,
+   "addr": "30b1a",
+   "flat": 1089528,
    "block": [
     1087488,
     4244
-   ]
+   ],
+   "H": "000000000000000042390000C11688D7407FE727FFC50000",
+   "was": "000000000000000000000000000000000000000000000000",
+   "value": "lat 28.626167 lon -80.695833"
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @3032E",
+   "name": "TACAN(2) COF 97X (ksc.json, as G3)",
    "config": "G16",
-   "addr": "3032e",
-   "H": "C2BB",
-   "was": "0000",
-   "flat": 1087500,
+   "addr": "30b26",
+   "flat": 1089540,
    "block": [
     1087488,
     4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30330",
-   "config": "G16",
-   "addr": "30330",
-   "H": "C2C3",
-   "was": "0000",
-   "flat": 1087502,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30332",
-   "config": "G16",
-   "addr": "30332",
-   "H": "3A98",
-   "was": "0000",
-   "flat": 1087504,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30333",
-   "config": "G16",
-   "addr": "30333",
-   "H": "0001",
-   "was": "0000",
-   "flat": 1087505,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30335",
-   "config": "G16",
-   "addr": "30335",
-   "H": "4B5343333320",
-   "was": "202020202020",
-   "flat": 1087507,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30338",
-   "config": "G16",
-   "addr": "30338",
-   "H": "407FC5CD",
-   "was": "00000000",
-   "flat": 1087510,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3033A",
-   "config": "G16",
-   "addr": "3033a",
-   "H": "C11687E6",
-   "was": "00000000",
-   "flat": 1087512,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3033C",
-   "config": "G16",
-   "addr": "3033c",
-   "H": "415C2752",
-   "was": "00000000",
-   "flat": 1087514,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3033E",
-   "config": "G16",
-   "addr": "3033e",
-   "H": "C0171758",
-   "was": "00000000",
-   "flat": 1087516,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30340",
-   "config": "G16",
-   "addr": "30340",
-   "H": "C2BB",
-   "was": "0000",
-   "flat": 1087518,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30342",
-   "config": "G16",
-   "addr": "30342",
-   "H": "C2C3",
-   "was": "0000",
-   "flat": 1087520,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30344",
-   "config": "G16",
-   "addr": "30344",
-   "H": "3A98",
-   "was": "0000",
-   "flat": 1087522,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30345",
-   "config": "G16",
-   "addr": "30345",
-   "H": "0002",
-   "was": "0000",
-   "flat": 1087523,
-   "block": [
-    1087488,
-    4244
-   ]
+   ],
+   "H": "C01F46BC0000000041500000C11682D4407E2ACC00610000",
+   "was": "000000000000000000000000000000000000000000000000",
+   "value": "lat 28.237683 lon -80.611758"
   },
   {
    "name": "#PCGN13R CGNS_RUNWAY @30347",
@@ -8807,294 +8666,6 @@
    ]
   },
   {
-   "name": "#PCGN13R CGNS_RUNWAY @30976",
-   "config": "G16",
-   "addr": "30976",
-   "H": "407FC1C7",
-   "was": "00000000",
-   "flat": 1089108,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30978",
-   "config": "G16",
-   "addr": "30978",
-   "H": "C11687D0",
-   "was": "00000000",
-   "flat": 1089110,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3097A",
-   "config": "G16",
-   "addr": "3097a",
-   "H": "C2B8",
-   "was": "0000",
-   "flat": 1089112,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3097C",
-   "config": "G16",
-   "addr": "3097c",
-   "H": "415C2752",
-   "was": "00000000",
-   "flat": 1089114,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3097E",
-   "config": "G16",
-   "addr": "3097e",
-   "H": "407FE50E",
-   "was": "00000000",
-   "flat": 1089116,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30980",
-   "config": "G16",
-   "addr": "30980",
-   "H": "C1168941",
-   "was": "00000000",
-   "flat": 1089118,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30982",
-   "config": "G16",
-   "addr": "30982",
-   "H": "C2BA",
-   "was": "0000",
-   "flat": 1089120,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30984",
-   "config": "G16",
-   "addr": "30984",
-   "H": "415C2680",
-   "was": "00000000",
-   "flat": 1089122,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30986",
-   "config": "G16",
-   "addr": "30986",
-   "H": "4220",
-   "was": "0000",
-   "flat": 1089124,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3098C",
-   "config": "G16",
-   "addr": "3098c",
-   "H": "443FAC00",
-   "was": "00000000",
-   "flat": 1089130,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3098E",
-   "config": "G16",
-   "addr": "3098e",
-   "H": "43D16000",
-   "was": "00000000",
-   "flat": 1089132,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30990",
-   "config": "G16",
-   "addr": "30990",
-   "H": "43134000",
-   "was": "00000000",
-   "flat": 1089134,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30992",
-   "config": "G16",
-   "addr": "30992",
-   "H": "407FF1B8",
-   "was": "00000000",
-   "flat": 1089136,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30994",
-   "config": "G16",
-   "addr": "30994",
-   "H": "C11689C6",
-   "was": "00000000",
-   "flat": 1089138,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30996",
-   "config": "G16",
-   "addr": "30996",
-   "H": "C2B8",
-   "was": "0000",
-   "flat": 1089140,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30998",
-   "config": "G16",
-   "addr": "30998",
-   "H": "4129E282",
-   "was": "00000000",
-   "flat": 1089142,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3099A",
-   "config": "G16",
-   "addr": "3099a",
-   "H": "407FCE71",
-   "was": "00000000",
-   "flat": 1089144,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3099C",
-   "config": "G16",
-   "addr": "3099c",
-   "H": "C1168854",
-   "was": "00000000",
-   "flat": 1089146,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @3099E",
-   "config": "G16",
-   "addr": "3099e",
-   "H": "C2BA",
-   "was": "0000",
-   "flat": 1089148,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @309A0",
-   "config": "G16",
-   "addr": "309a0",
-   "H": "4129E2EB",
-   "was": "00000000",
-   "flat": 1089150,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @309A2",
-   "config": "G16",
-   "addr": "309a2",
-   "H": "4220",
-   "was": "0000",
-   "flat": 1089152,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @309A8",
-   "config": "G16",
-   "addr": "309a8",
-   "H": "443FAC00",
-   "was": "00000000",
-   "flat": 1089158,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @309AA",
-   "config": "G16",
-   "addr": "309aa",
-   "H": "43D16000",
-   "was": "00000000",
-   "flat": 1089160,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @309AC",
-   "config": "G16",
-   "addr": "309ac",
-   "H": "C3134000",
-   "was": "00000000",
-   "flat": 1089162,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
    "name": "#PCGN13R CGNS_RUNWAY @309AE",
    "config": "G16",
    "addr": "309ae",
@@ -10961,138 +10532,6 @@
    "H": "431FC000",
    "was": "00000000",
    "flat": 1089526,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B1C",
-   "config": "G16",
-   "addr": "30b1c",
-   "H": "C2C3",
-   "was": "0000",
-   "flat": 1089530,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B1E",
-   "config": "G16",
-   "addr": "30b1e",
-   "H": "C281",
-   "was": "0000",
-   "flat": 1089532,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B20",
-   "config": "G16",
-   "addr": "30b20",
-   "H": "C11688D5",
-   "was": "00000000",
-   "flat": 1089534,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B22",
-   "config": "G16",
-   "addr": "30b22",
-   "H": "407FE73A",
-   "was": "00000000",
-   "flat": 1089536,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B24",
-   "config": "G16",
-   "addr": "30b24",
-   "H": "FFC5",
-   "was": "0000",
-   "flat": 1089538,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B26",
-   "config": "G16",
-   "addr": "30b26",
-   "H": "C011DE69",
-   "was": "00000000",
-   "flat": 1089540,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B28",
-   "config": "G16",
-   "addr": "30b28",
-   "H": "C2C3",
-   "was": "0000",
-   "flat": 1089542,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B2A",
-   "config": "G16",
-   "addr": "30b2a",
-   "H": "C28E",
-   "was": "0000",
-   "flat": 1089544,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B2C",
-   "config": "G16",
-   "addr": "30b2c",
-   "H": "C11682D3",
-   "was": "00000000",
-   "flat": 1089546,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B2E",
-   "config": "G16",
-   "addr": "30b2e",
-   "H": "407E2AC3",
-   "was": "00000000",
-   "flat": 1089548,
-   "block": [
-    1087488,
-    4244
-   ]
-  },
-  {
-   "name": "#PCGN13R CGNS_RUNWAY @30B30",
-   "config": "G16",
-   "addr": "30b30",
-   "H": "0061",
-   "was": "0000",
-   "flat": 1089550,
    "block": [
     1087488,
     4244
