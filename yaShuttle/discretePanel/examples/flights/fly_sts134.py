@@ -322,6 +322,8 @@ class Flight:
             cmd += ["--portview-views", self.a.portview_views]
         if self.a.hold_start:                    # windows up, the vehicle held
             cmd += ["--hold-start"]
+        if self.a.layout:                        # the windows where this file says
+            cmd += ["--layout", os.path.abspath(os.path.expanduser(self.a.layout))]
         if os.environ.get("FLY_YAGPC"):          # another build, for bisecting
             cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         os.makedirs(self.a.logs, exist_ok=True)
@@ -1073,6 +1075,9 @@ def main():
     ap.add_argument("--portview-views", metavar="LIST",
                     help="with --portview: the windows to open, e.g. front,up,left,right "
                          "(portview's default is front alone)")
+    ap.add_argument("--layout", metavar="FILE",
+                    help="simulatePASS's --layout: put the windows where this layout file says "
+                         "once they are up (the Manager's Save then writes to it)")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring every window up, hold the vehicle until Enter is pressed in "
                          "this terminal (time to arrange the windows), then fly")
