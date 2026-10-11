@@ -2257,6 +2257,7 @@ class PanelO6:
         "O6": ("power", "output", "ipl", "mode", "ipl_source", "gpc_out", "_tb_shown",
                "_out_tb_shown", "latch", "term_a", "idp_load", "rhc", "activity", "wired",
                "bfc_display", "bfc_select", "bfc_disengage"),
+        "O3": ("_sub1_shown",),       # the sensor values panel O3 draws
         "C2": ("idp_power", "idp_mf", "kybd_sel"),
         "R11": ("idp_power", "idp_mf"),
         "C3": ("bfc_display", "bfc_select", "dap", "dap_lamp", "fcs_ch", "oms_eng"),
@@ -3029,8 +3030,10 @@ class PanelO6:
     CB_D = 34                                 # a circuit breaker's knob
     METER_W = 30                              # panel O3's meters and numeric indicators
     METER_H = 120
-    RO_W = 104
-    RO_H = 30
+    RO_W = 120                                # a quantity's digits; the mission time is wider
+    RO_H = 50
+    RO_MET_W = 210
+    RO_SIZE = SETTING_SIZE + 10               # the digits
     ANN_W, ANN_H = 84, 40                     # an annunciator of the C&W matrix
     ROT_D = 64                                # a rotary's knob
     CTL_GAP = 28           # between controls in a row: legends of neighbours
@@ -3082,7 +3085,7 @@ class PanelO6:
         if k == "meter":
             return max(cap_w, self.METER_W + 8), above, self.METER_H, ls * 1.3
         if k == "readout":
-            return max(cap_w, self.RO_W), above, self.RO_H, 0
+            return max(cap_w, self.RO_MET_W if key == "o3_met" else self.RO_W), above, self.RO_H, 0
         if k == "tb":
             return max(cap_w, self.TB_W + 8), above, self.TB_H, 0
         if k == "ann":
@@ -3192,9 +3195,13 @@ class PanelO6:
             self._text(cx, y + h + ls * 0.65, "---" if v is None else "%d" % int(round(v)),
                        size=SETTING_SIZE)
         elif k == "readout":
-            self._rect(cx - self.RO_W / 2.0, y, cx + self.RO_W / 2.0, y + body,
+            rw = self.RO_MET_W if key == "o3_met" else self.RO_W
+            self._rect(cx - rw / 2.0, y, cx + rw / 2.0, y + body,
                        fill="#140605", outline=C_BEZEL, width=max(1, int(self.s)))
-            self._text(cx, y + body / 2.0, self.o3_text(key), size=SETTING_SIZE + 3,
+            # centred on the DIGITS: the canvas centres the line, descender
+            # space and all, which put them high
+            drop = 0.12 * self._linespace(self.RO_SIZE) / max(self.s, 0.01)
+            self._text(cx, y + body / 2.0 + drop, self.o3_text(key), size=self.RO_SIZE,
                        fill="#ff5a3c")
         elif k == "ann":
             w, _a, body, _b = self._ctl_size(key)
@@ -3513,7 +3520,10 @@ class PanelO6:
         col_w = max(w for w, _h in sizes)
         y = MARGIN
         for (title, rows, o), (w, hh) in zip(panes, sizes):
-            self._draw_ctl_pane(x0 + (col_w - w) / 2.0, y, title, rows, opts=o)
+            if o.get("full"):                # as wide as the widest, edge to edge
+                self._draw_ctl_pane(x0, y, title, rows, opts=o, w=col_w)
+            else:
+                self._draw_ctl_pane(x0 + (col_w - w) / 2.0, y, title, rows, opts=o)
             y += hh + PANE_GAP
         return x0 + col_w, max(bottom, y - PANE_GAP)
 

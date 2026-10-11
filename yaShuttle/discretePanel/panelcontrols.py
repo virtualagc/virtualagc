@@ -878,8 +878,8 @@ CONTROLS["o3_qty_sel"] = dict(panel="O3", kind="rot", caption="",
 CONTROLS["o3_time_sel"] = dict(panel="O3", kind="t2", caption="",
                                positions=("GMT", "MET"), default="MET", contacts={})
 PANES["O3"] = [("RCS/OMS PRESS", [["o3_p_l_ox", "o3_p_l_fu", "o3_p_f_ox", "o3_p_f_fu",
-                                   "o3_p_r_ox", "o3_p_r_fu"], ["o3_press_sel"]]),
-               ("RCS/OMS PRPLT QTY", [["o3_q_l", "o3_q_f", "o3_q_r"], ["o3_qty_sel"]]),
-               ("MISSION TIME", [["o3_met"], ["o3_time_sel"]])]
+                                   "o3_p_r_ox", "o3_p_r_fu"], ["o3_press_sel"]], {"full": True}),
+               ("RCS/OMS PRPLT QTY", [["o3_q_l", "o3_q_f", "o3_q_r"], ["o3_qty_sel"]], {"full": True}),
+               ("MISSION TIME", [["o3_met"], ["o3_time_sel"]], {"full": True})]
 
 check()
