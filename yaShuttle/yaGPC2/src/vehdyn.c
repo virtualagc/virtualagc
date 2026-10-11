@@ -1495,19 +1495,45 @@ static bool entry_aero(double f[3], double tau[3]) {
     return true;
 }
 
+/* The bank angle (deg, + right wing down): the body's up (-Z) about the
+ * air-relative velocity, from the local vertical's plane through it --
+ * where entry guidance's bank command is measured. */
+static double bank_deg(void) {
+    double va[3], R[3][3], rn = 0.0, vn = 0.0;
+    air_velocity(va);
+    qmat_body(st.q, R);                                 /* body -> inertial */
+    for (int i = 0; i < 3; i++) { rn += st.r[i] * st.r[i]; vn += va[i] * va[i]; }
+    rn = sqrt(rn); vn = sqrt(vn);
+    if (vn < 1.0) return 0.0;
+    double v[3], u[3], zb[3], uv = 0.0, zv = 0.0;
+    for (int i = 0; i < 3; i++) { v[i] = va[i] / vn; u[i] = st.r[i] / rn; zb[i] = -R[i][2]; }
+    for (int i = 0; i < 3; i++) { uv += u[i] * v[i]; zv += zb[i] * v[i]; }
+    double l0[3], zp[3], rt[3], c = 0.0, s = 0.0;
+    for (int i = 0; i < 3; i++) { l0[i] = u[i] - uv * v[i]; zp[i] = zb[i] - zv * v[i]; }
+    rt[0] = v[1] * u[2] - v[2] * u[1];                  /* right: forward x up */
+    rt[1] = v[2] * u[0] - v[0] * u[2];
+    rt[2] = v[0] * u[1] - v[1] * u[0];
+    for (int i = 0; i < 3; i++) { c += zp[i] * l0[i]; s += zp[i] * rt[i]; }
+    return atan2(s, c) * 180.0 / VD_PI;
+}
+
 /* With the state log, every 5 s in the air: Mach, alpha, beta, qbar,
- * the coefficients and the surfaces. */
+ * the coefficients and the surfaces; then the bank angle and the body
+ * rates (deg/s). */
 static void entry_log(void) {
     static double last = -1e9;
     if (!aeroOn || st.t - last < 5.0) return;
     last = st.t;
     double r = aeroAl / (180.0 / VD_PI);
     double cl = eaCN * cos(r) - eaCA * sin(r), cd = eaCN * sin(r) + eaCA * cos(r);
+    const double D2 = 180.0 / VD_PI;
     fprintf(stderr, "vehdyn-entry: t=%.1f h=%.0f ft M=%.3f alpha=%.2f beta=%.2f q=%.1f psf CL=%.4f "
-                    "CD=%.4f L/D=%.3f CM=%+.4f elev=%.2f %.2f %.2f %.2f sb=%.1f rud=%.1f bf=%.2f (drive %+d)\n",
+                    "CD=%.4f L/D=%.3f CM=%+.4f elev=%.2f %.2f %.2f %.2f sb=%.1f rud=%.1f bf=%.2f (drive %+d) "
+                    "bank=%.1f p=%.2f q_b=%.2f r=%.2f\n",
             st.t, height_m(st.r) / 0.3048, eaMach, aeroAl, aeroBe, aeroQ / 47.880259, cl, cd,
             cd != 0.0 ? cl / cd : 0.0, eaCM, surfPos[SURF_LIB], surfPos[SURF_LOB], surfPos[SURF_RIB],
-            surfPos[SURF_ROB], surfPos[SURF_SB], surfPos[SURF_RUD], bfPos, bfDrive);
+            surfPos[SURF_ROB], surfPos[SURF_SB], surfPos[SURF_RUD], bfPos, bfDrive,
+            bank_deg(), st.w[0] * D2, st.w[1] * D2, st.w[2] * D2);
 }
 
 /* The gimbals follow their commands at TVC_RATE_DEG_S, inside their limits. */
