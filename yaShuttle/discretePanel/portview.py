@@ -171,6 +171,21 @@ except ImportError as e:
           "  pip install PyOpenGL" % e.name)
     sys.exit(1)
 
+# Every line this program prints carries the wall seconds since it started
+# ("[  12.34s] portview: ...") once the arguments are read -- not for --check,
+# whose one line is parsed -- so a run's stages (the textures' uploads, the
+# truth's arrival, its date) can be measured from its log instead of inferred.
+import builtins
+_T0 = time.monotonic()
+STAMP = {'on': False}
+
+
+def print(*args, **kw):               # noqa: A001 -- deliberately shadows
+    if STAMP['on'] and args and isinstance(args[0], str):
+        args = ("[%7.2fs] %s" % (time.monotonic() - _T0, args[0]),) + args[1:]
+    builtins.print(*args, **kw)
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, "portview", "cache")
 MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
@@ -1578,6 +1593,7 @@ class Resources(object):
         self.hgtPTex = make_height_array(np.stack(ph) if ph else empty)
         self.earthDayTex = None
         self.earthMonth = None
+        self.preloadMonth = None               # the flight's month, loaded in build()
         self.modelProg = compile_program(MODEL_VS, MODEL_FS)
         self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
@@ -1586,12 +1602,19 @@ class Resources(object):
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
                                  "uCctv", "uSize")
         self.set_star_epoch(2000.0)
+        if self.preloadMonth:
+            # during a hold there is no truth, and so no date, until the
+            # countdown runs: the month's map is loaded now, so that the first
+            # dated frame does not stop to compress and upload it
+            self._load_month(self.preloadMonth)
         self.ready = True
 
     def set_month(self, unix):
         """The Blue Marble month of the flight (loaded on first need, ~1.5 s);
         the nearest prepared month if that one isn't."""
-        month = time.gmtime(unix).tm_mon
+        self._load_month(time.gmtime(unix).tm_mon)
+
+    def _load_month(self, month):
         if month == self.earthMonth:
             return
         have = [m for m in range(1, 13) if os.path.exists(bluemarble_path(m))]
@@ -1605,6 +1628,7 @@ class Resources(object):
             GL.glDeleteTextures([self.earthDayTex])
         self.earthDayTex = upload("Blue Marble", make_earth_texture, load_rgb(bluemarble_path(use)))
         self.earthMonth = month
+        print("portview: Blue Marble month %d loaded" % month)
 
     def set_star_epoch(self, year):
         """Carry the catalogue (epoch J1991.25) to the given year."""
@@ -3171,6 +3195,20 @@ def parse_geometry(specs, names):
     return out
 
 
+def preload_month(arg):
+    """The Blue Marble month to load before any truth arrives: --month, else
+    the flight's own (YAGPC_RNP = year,day-of-year, as fly_sts134 and
+    simulatePASS give yaGPC2), else None."""
+    if arg:
+        return arg if 1 <= arg <= 12 else None
+    try:
+        year, day = (int(x) for x in os.environ.get("YAGPC_RNP", "").split(","))
+        import datetime
+        return (datetime.date(year, 1, 1) + datetime.timedelta(days=day - 1)).month
+    except (ValueError, OverflowError):
+        return None
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="The views out of the Orbiter's windows, from yaGPC2's truth state.")
@@ -3211,6 +3249,11 @@ def main(argv=None):
                     help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
                          "compressed), or auto: reduced on a GPU with under 3 GB of its own "
                          "(default)")
+    ap.add_argument("--month", type=int, metavar="N",
+                    help="the Blue Marble month to load at start-up, during a hold, so that "
+                         "the first dated frame need not (default: the month of the flight "
+                         "date in YAGPC_RNP, year,day, which fly_sts134 sets; none if neither; "
+                         "any other month is still loaded when its date arrives)")
     ap.add_argument("--check", action="store_true",
                     help="only say whether portview can run here (modules, assets), and exit")
     ap.add_argument("--stats", action="store_true",
@@ -3256,6 +3299,7 @@ def main(argv=None):
     ap.add_argument("--snapshot", metavar="PREFIX",
                     help="save each view's first second as PREFIX-VIEW.png and exit")
     args = ap.parse_args(argv)
+    STAMP['on'] = not args.check             # --check's one line is parsed, not read
 
     CCTV['zoom'] = args.cctv_zoom
     VIEWS['cctv']['hfov'] = args.cctv_zoom
@@ -3323,6 +3367,7 @@ def main(argv=None):
     qapp = QtWidgets.QApplication(sys.argv[:1])
     TEXTURES['mode'] = args.textures
     Resources._instance = Resources(milkyway, stars, moon, site)
+    Resources._instance.preloadMonth = preload_month(args.month)
 
     unix0 = None
     if args.test_date:
