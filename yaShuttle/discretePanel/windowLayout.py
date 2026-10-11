@@ -1089,6 +1089,12 @@ def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None
             for k in ("x", "y", "w", "h"):          # where it was before it was minimised
                 if k in was[e["role"]]:
                     e[k] = was[e["role"]][k]
+        elif e.get("min") and (e.get("w", 0) <= 0 or e.get("h", 0) <= 0 or e.get("x", 0) < -20000):
+            # NO PLACE TO SAVE: a first save of a window minimised on Windows
+            # measures its parking spot (-32000) and a 0 x 0 size (Win11-native,
+            # 2026-10-10).  Saved without one; a restore then only minimises it.
+            for k in ("x", "y", "w", "h"):
+                e.pop(k, None)
     kept = 0
     if merge and old:
         now = {e["role"] for e in entries}
@@ -1215,6 +1221,12 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
             log("   %-12s %d windows have this name; taking %s (%s)"
                 % (role, len(got), got[0]["id"], got[0]["title"][:40]))
         w = got.pop(0)
+        if "x" not in want:                       # minimised, and saved without a place
+            if want.get("min"):
+                to_minimize.append(w["id"])
+            log("   %-12s (no saved place; %s)" % (role, "minimised" if want.get("min") else "left"))
+            done += 1
+            continue
         # SIZE AS WELL AS PLACE, for every window.  It used to be the caption
         # box alone; but the windows a layout exists to protect are all
         # resizable by hand, and a layout restored after a stray drag has to
