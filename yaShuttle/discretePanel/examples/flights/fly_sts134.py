@@ -555,6 +555,16 @@ class Flight:
             self.say("ground: GO FOR ENGINE START (T-10 s)")
         self.wait_gmt(T0 - 8.0)
 
+    def orbit_pfd(self):
+        """CRT 2 to the ORBIT PFD (FLT INST menu: UP, FLT INST, ORBIT PFD --
+        MEDS2.py FLT_INST key 2), once, if the A/E PFD is up on it."""
+        if self.a.crts < 2 or not getattr(self, "pfd_up", False) or getattr(self, "orbit_pfd_up", False):
+            return
+        self.play("+1     edgekey crt2 1\n+2     edgekey crt2 2\n+2     edgekey crt2 3\n", "pfd-orbit")
+        self.script_done("pfd-orbit", 60)
+        self.orbit_pfd_up = True
+        self.say("crew: ORBIT PFD on CRT 2")
+
     def ascent(self):
         # THE LAUNCH CONFIGURATION a T-8 capture does not carry: the OMS ENG
         # switches are OFF at power-up and the checklist has them ARM/PRESS
@@ -564,6 +574,11 @@ class Flight:
         self.play("+0     omseng left arm/press\n+1     omseng right arm/press\n", "oms-arm")
         self.say("crew: OMS ENG (two) ARM/PRESS (launch configuration)")
         self.pfd_on_crt2()
+        # A fault line is up from the first seconds of a run resumed from a
+        # capture ("I/O ERROR CRT1 1", stamped 00:00:03: the first transaction
+        # after the resume, seen 2026-10-11): MSG RESET twice, as the crew
+        # would -- a pending class-5 ILLEGAL ENTRY absorbs the first
+        self.play("+3     keys MSG_RESET\n+3     keys MSG_RESET\n", "msg-reset-launch")
         aborted = not getattr(self.a, "abort", None)
         while "ET SEPARATION at" not in self.log_text():
             if not aborted:
@@ -593,6 +608,11 @@ class Flight:
         with open(os.path.join(self.a.logs, "etsep.gmt"), "w") as fh:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
+        # the MPS and ET SEP messages ("MPS CMD C ...") that MECO sets
+        self.play("+8     keys MSG_RESET\n+3     keys MSG_RESET\n", "msg-reset-etsep")
+        # the ascent is over: CRT 2 from the A/E PFD to the ORBIT PFD, ahead of
+        # the OMS burn displays (a run resumed past this does it in ops2)
+        self.orbit_pfd()
         if getattr(self.a, "abort", None) == "ATO":
             self.wait_sim(5)
             self.ato_burn("ato-oms1", ATO_OMS1, g + tsep - t + 84.0)
@@ -769,11 +789,7 @@ class Flight:
         self.play(OPS201, "ops201")
         self.script_done("ops201", 900)
         self.say("OPS 201: GNC UNIV PTG on CRT 1")
-        if self.a.crts >= 2 and getattr(self, "pfd_up", False):
-            # FLT INST MENU: UP, FLT INST, ORBIT PFD (MEDS2.py FLT_INST key 2)
-            self.play("+1     edgekey crt2 1\n+2     edgekey crt2 2\n+2     edgekey crt2 3\n", "pfd-orbit")
-            self.script_done("pfd-orbit", 60)
-            self.say("crew: ORBIT PFD on CRT 2")
+        self.orbit_pfd()
         self.wait_sim(30)
 
     def orbit(self):
