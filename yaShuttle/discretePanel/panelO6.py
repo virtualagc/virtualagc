@@ -783,18 +783,19 @@ PANEL_WINDOWS = (
 # 2026-10-02 survey of every crew control PASS reads, by load (G16 = OPS 1
 # and 6, G2, G3, G8, G9, S2).  O6, C2 and R11 -- FCMBOOT, GPCIPL and OPS 0's
 # -- are always up.  Panels not yet built are listed so that adding one is
-# only adding its window.
+# only adding its window.  O3 (RCS/OMS PRESS and PRPLT QTY, MISSION TIME) is up
+# in every OPS but 9 (owner, 2026-10-11).
 BASE_PANELS = ("O6", "C2", "R11", "A7")    # A7: the aft MASTER ALARM, in every OPS
 OPS_PANELS = {
-    ("GNC", 1): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
-    ("GNC", 6): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
-    ("GNC", 2): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "A7L", "O7"),
-    ("GNC", 3): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2"),
-    ("GNC", 8): ("C3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7", "L2"),
+    ("GNC", 1): ("C3", "O3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
+    ("GNC", 6): ("C3", "O3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
+    ("GNC", 2): ("C3", "O3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "A7L", "O7"),
+    ("GNC", 3): ("C3", "O3", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2"),
+    ("GNC", 8): ("C3", "O3", "F2", "F3", "F4", "F6", "F7", "F8", "A6U", "O7", "L2"),
     ("GNC", 9): ("C3", "F7", "L2"),
-    ("SM", 2): ("C3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L",
+    ("SM", 2): ("C3", "O3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "A8U", "A8L",
                 "L12U", "L12L", "L11U"),
-    ("SM", 4): ("C3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "L12U", "L12L",
+    ("SM", 4): ("C3", "O3", "F7", "L1", "R2", "R11U", "R13L", "A1R", "A1U", "L12U", "L12L",
                 "L11U"),
 }
 OPS_HOLD_S = 3.0       # a panel stays this long after its OPS leaves the screens
