@@ -67,7 +67,8 @@ legends are printed (O6's STAR TRACKER DOOR CONTROL over SYS 1 and SYS 2).
 CONTROLS = {}
 PANES = {}
 
-KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank", "ann")
+KINDS = ("t2", "t3", "h3", "rot", "pb", "pbi", "lamp", "tb", "cb", "blank", "ann",
+         "meter", "readout")
 FF_UNITS = (1, 2, 3, 4)
 # Lamps lit from the VEHICLE's own state rather than a PASS output word: the
 # hardwired landing gear and drag chute indications (yaGPC2 mdmdev.c
@@ -84,7 +85,7 @@ def check():
             raise ValueError("%s: kind %r" % (where, c.get("kind")))
         if not c.get("panel"):
             raise ValueError("%s: no panel" % where)
-        if c["kind"] in ("tb", "blank"):
+        if c["kind"] in ("tb", "blank", "meter", "readout"):
             continue
         if c["kind"] == "ann":
             if c.get("color") not in ("red", "amber", "white", "green", "blue"):
@@ -848,4 +849,37 @@ PANES["A7L"] = [
                                ["a7l_circ_prot_off", "a7l_close_hooks", "a7l_close_latches",
                                 "a7l_fixer_off"]]),
 ]
+# ---------------------------------------------------------------------------
+# PANEL O3: RCS/OMS PRESS meters, RCS/OMS PRPLT QTY LEDs and the MISSION TIME
+# numeric indicators (SCOM SFOC-FL0884 Rev B, 2.19 OMS, 2.23 RCS, 2.15 Lighting,
+# 4.1 Instrument Markings).  Their values are not read by the computers here:
+# yaGPC2 publishes them from the vehicle model (SUB1, mdmdev.c) and panelO6.py
+# draws them.  PROVISIONAL: the regulated pressures are steady 250 psia, the
+# helium falls linearly with the propellant used, and the rotary switches'
+# positions are named after the SCOM text, whose drawing is not text ("RCS He
+# X10", "OMS PRPLT", the QTY switch's RCS/OMS FUEL, OXID and RCS LOWEST).  The
+# meters' scales are not marked on the face here: 0-500 psia, with the normal
+# band (RCS 235-255, OMS 245-255) drawn and the red limits as ticks.
+#   kind "meter"    value from SUB1 by panelO6 (o3_meter), 0-500
+#   kind "readout"  digits: a quantity in % or the mission time
+# ---------------------------------------------------------------------------
+O3_SYS = (("l", "LEFT"), ("f", "FWD"), ("r", "RIGHT"))
+for _s, _n in O3_SYS:
+    for _p, _pn in (("ox", "OXID"), ("fu", "FUEL")):
+        CONTROLS["o3_p_%s_%s" % (_s, _p)] = dict(panel="O3", kind="meter", caption="%s\n%s" % (_n, _pn))
+    CONTROLS["o3_q_%s" % _s] = dict(panel="O3", kind="readout", caption=_n)
+CONTROLS["o3_met"] = dict(panel="O3", kind="readout", caption="")
+CONTROLS["o3_press_sel"] = dict(panel="O3", kind="rot", caption="",
+                                positions=("RCS PRPLT", "RCS He X10", "OMS PRPLT"),
+                                default="RCS PRPLT", contacts={})
+CONTROLS["o3_qty_sel"] = dict(panel="O3", kind="rot", caption="",
+                              positions=("RCS FUEL", "RCS OXID", "RCS LOWEST", "OMS FUEL", "OMS OXID"),
+                              default="RCS FUEL", contacts={})
+CONTROLS["o3_time_sel"] = dict(panel="O3", kind="t2", caption="",
+                               positions=("GMT", "MET"), default="MET", contacts={})
+PANES["O3"] = [("RCS/OMS PRESS", [["o3_p_l_ox", "o3_p_l_fu", "o3_p_f_ox", "o3_p_f_fu",
+                                   "o3_p_r_ox", "o3_p_r_fu"], ["o3_press_sel"]]),
+               ("RCS/OMS PRPLT QTY", [["o3_q_l", "o3_q_f", "o3_q_r"], ["o3_qty_sel"]]),
+               ("MISSION TIME", [["o3_met"], ["o3_time_sel"]])]
+
 check()

@@ -837,6 +837,11 @@ bool vehdyn_et_propellant(double *lo2Kg, double *lh2Kg) {
     return true;
 }
 
+/* The vehicle time of SRB ignition (liftoff), or -1 before it. */
+double vehdyn_srb_ignition_t(void) {
+    return srbIgnT;
+}
+
 double vehdyn_srb_pc_psia(void) {
     if (asc == ASC_PAD || (asc == ASC_STACK && srbIgnT < 0.0)) return 14.7;
     if (asc != ASC_STACK) return -1.0;

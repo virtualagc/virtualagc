@@ -1810,7 +1810,12 @@ static void truth_publish(void) {
  * power) for ME 1, 2, 3 (C, L, R); the four elevons' positions (degrees, +
  * trailing edge down: left outboard, left inboard, right inboard, right
  * outboard), the body flap (% of its travel, 0 full up), the rudder (deg),
- * the speedbrake (% open) and the aileron (deg).  On the real vehicle these
+ * the speedbrake (% open) and the aileron (deg); then, for panel O3, PASS GMT
+ * (s) and mission elapsed time (s, 0 before liftoff); the RCS oxidizer and fuel
+ * pressure for the left, forward and right systems (psia, six values: L ox, L
+ * fu, F ox, F fu, R ox, R fu); the RCS helium tank pressure L, F, R (psia);
+ * the OMS oxidizer and fuel pressure L ox, L fu, R ox, R fu (psia); and the
+ * propellant quantity (% of the load) RCS L, F, R and OMS L, R.  On the real vehicle these
  * are sensors on the MDMs, read by the GPCs and carried to the MDUs on the
  * flight-critical buses; PASS's MEDS3/MEDS4 messages that would carry them
  * are not produced here, so this is a stand-in fed from the vehicle model.
@@ -1819,6 +1824,7 @@ static void truth_publish(void) {
  * (2,400) -- the thrust, surfaces and main engine Pc are the model's own.  */
 #define SUBSYS_OFFSET 110     /* not 81-85, 91, 96-98, 100-109 */
 #define OMS_POD_KG 5897.0     /* vehdyn.c OMS_LOAD_KG, a pod at 100% */
+#define RCS_POD_KG 1460.0     /* vehdyn.c RCS_LOAD_KG, a module at 100% */
 
 static void subsys_publish(void) {
     static double next = -1.0;
@@ -1826,7 +1832,7 @@ static void subsys_publish(void) {
     const PhysState *st = vehdyn_state();
     if (st->t < next && st->t > next - 10.0) return;
     next = st->t + TRUTH_PERIOD_S;
-    double v[1 + 2 + 2 + 2 + 3 + 4 + 4];
+    double v[1 + 2 + 2 + 2 + 3 + 4 + 4 + 2 + 6 + 3 + 4 + 5];
     int n = 0;
     v[n++] = st->t;
     for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_oms_thrust(e);
@@ -1849,7 +1855,21 @@ static void subsys_publish(void) {
     v[n++] = pos[5];                              /* rudder */
     v[n++] = pos[4] / 98.6 * 100.0;               /* speedbrake, % */
     v[n++] = 0.25 * ((pos[0] + pos[1]) - (pos[2] + pos[3]));   /* aileron */
-    uint8_t b[4 + 8 * 24];
+    /* panel O3 */
+    double ign = vehdyn_srb_ignition_t();
+    v[n++] = vehdyn_gmt(st->t);
+    v[n++] = (ign >= 0.0 && st->t >= ign) ? st->t - ign : 0.0;
+    for (int i = 0; i < 6; i++) v[n++] = 250.0;     /* RCS ox/fu regulated, PROVISIONAL */
+    static const int RCS_MOD[3] = { 1, 0, 2 };      /* left pod, forward, right pod */
+    for (int i = 0; i < 3; i++) {
+        double used = 1.0 - vehdyn_propellant(RCS_MOD[i]) / RCS_POD_KG;
+        used = used < 0.0 ? 0.0 : used > 1.0 ? 1.0 : used;
+        v[n++] = 4400.0 - 1100.0 * used;            /* helium tank, PROVISIONAL */
+    }
+    for (int i = 0; i < 4; i++) v[n++] = 250.0;     /* OMS ox/fu regulated, PROVISIONAL */
+    for (int i = 0; i < 3; i++) v[n++] = 100.0 * vehdyn_propellant(RCS_MOD[i]) / RCS_POD_KG;
+    for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_propellant(3 + e) / OMS_POD_KG;
+    uint8_t b[4 + 8 * 48];
     memcpy(b, "SUB1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
     struct sockaddr_in to = {0};

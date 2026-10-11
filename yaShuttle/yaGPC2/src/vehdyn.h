@@ -116,6 +116,7 @@ int vehdyn_ascent_phase(void);
  * (set on the pad and in powered flight). */
 void vehdyn_specific_force(double out[3]);
 /* An SRB's chamber pressure, psia (< 0: the boosters have gone). */
+double vehdyn_srb_ignition_t(void);   /* vehicle time of SRB ignition, -1 before it */
 double vehdyn_srb_pc_psia(void);
 
 /* The external tank's LO2 and LH2 (kg), or false when there is no tank

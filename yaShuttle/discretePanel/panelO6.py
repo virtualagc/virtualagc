@@ -450,6 +450,37 @@ def idp_port(n):
     return D.PORT_BASE + IDP_BUS_OFFSET + int(n)
 
 
+# yaGPC2's SUB1 datagram (mdmdev.c subsys_publish): "SUB1" then these, big-endian
+# doubles, for panel O3 (and MEDS2's OMS/MPS and SPI pages, which take the first 17)
+SUBSYS_OFFSET = 110
+SUB1_NAMES = ("t", "omsPcL", "omsPcR", "omsHeTKP_L", "omsHeTKP_R", "omsN2TKP_L", "omsN2TKP_R",
+              "mpsPc_C", "mpsPc_L", "mpsPc_R", "elLOB", "elLIB", "elRIB", "elROB", "bodyFlapPc",
+              "rudderDeg", "speedbrakePc", "aileronDeg", "gmt", "met",
+              "rcsP_Lox", "rcsP_Lfu", "rcsP_Fox", "rcsP_Ffu", "rcsP_Rox", "rcsP_Rfu",
+              "rcsHe_L", "rcsHe_F", "rcsHe_R", "omsP_Lox", "omsP_Lfu", "omsP_Rox", "omsP_Rfu",
+              "qRcs_L", "qRcs_F", "qRcs_R", "qOms_L", "qOms_R")
+O3_METER_MAX = 500.0
+
+
+def sub1_receiver():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass
+    s.bind(("", D.PORT_BASE + SUBSYS_OFFSET))
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                 struct.pack("4s4s", socket.inet_aton(D.GROUP), socket.inet_aton(D.IFACE)))
+    return s
+
+
+def dhms(seconds):
+    """DDD/HH:MM:SS, as the mission time and GMT displays count."""
+    t = int(max(0.0, seconds))
+    return "%03d/%02d:%02d:%02d" % (t // 86400, t % 86400 // 3600, t % 3600 // 60, t % 60)
+
+
 def mdm_receiver(k):
     """A socket subscribed to FFk's hardware-side bus, for the lamps."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -1048,6 +1079,10 @@ class PanelO6:
         # output cards, waiting in _mdm_out for the Tk side.
         self._mdm_out = {}
         threading.Thread(target=self._listen_mdm, daemon=True).start()
+        # Panel O3's values: the vehicle model's, from yaGPC2's SUB1 datagram
+        self.sub1 = {}
+        self._sub1_shown = None
+        threading.Thread(target=self._listen_sub1, daemon=True).start()
         # NOTHING IS PUBLISHED YET -- see start_bus(), which main() calls.
 
     # ---- the BFC modules --------------------------------------------------
@@ -1734,6 +1769,69 @@ class PanelO6:
             self._mdm_out[(PC.VEH_UNIT, 1, 0)] = 0
         self._lamps_follow()
 
+    def _listen_sub1(self):
+        """Thread: the latest SUB1 datagram, for panel O3."""
+        try:
+            s = sub1_receiver()
+        except OSError as e:
+            log("cannot listen for the subsystem sensors (panel O3): %s" % e)
+            return
+        n = len(SUB1_NAMES)
+        while True:
+            try:
+                data = s.recv(4096)
+            except OSError:
+                return
+            if data[:4] != b"SUB1" or (len(data) - 4) % 8 or (len(data) - 4) // 8 < 20:
+                continue
+            m = (len(data) - 4) // 8
+            v = struct.unpack(">%dd" % m, data[4:])
+            with self._rx_lock:
+                self.sub1 = dict(zip(SUB1_NAMES[:n], v))
+
+    def _sub1_follow(self):
+        """Tk side: redraw panel O3 when what it shows has changed."""
+        with self._rx_lock:
+            d = dict(self.sub1)
+        if not d:
+            return
+        shown = tuple(int(d.get(k, 0)) for k in ("met", "gmt")) + tuple(
+            int(round(d.get(k, 0))) for k in SUB1_NAMES[20:])
+        if shown != self._sub1_shown:
+            self._sub1_shown = shown
+            self.redraw()
+
+    def o3_meter(self, key):
+        """(value, normal band) for one of panel O3's meters, or (None, None)
+        where the selected system has none (FWD with OMS PRPLT)."""
+        d = self.sub1
+        _p, sys_, fl = key.split("_")[1:]            # o3_p_l_ox
+        S = sys_.upper()
+        sel = self.ctl["o3_press_sel"]
+        if sel == "RCS He X10":
+            v = d.get("rcsHe_" + S)
+            return (None if v is None else v / 10.0), None
+        if sel == "OMS PRPLT":
+            if S == "F":
+                return None, None
+            v = d.get("omsP_%s%s" % (S, fl))
+            return v, (245.0, 255.0)
+        return d.get("rcsP_%s%s" % (S, fl)), (235.0, 255.0)
+
+    def o3_text(self, key):
+        d = self.sub1
+        if key == "o3_met":
+            if "gmt" not in d:
+                return "---/--:--:--"
+            return dhms(d["gmt"] if self.ctl["o3_time_sel"] == "GMT" else d.get("met", 0.0))
+        S = key.split("_")[2].upper()               # o3_q_l
+        sel = self.ctl["o3_qty_sel"]
+        if sel.startswith("OMS"):
+            v = None if S == "F" else d.get("qOms_" + S)
+        else:
+            v = d.get("qRcs_" + S)
+        return "---" if v is None else "%3d" % int(round(max(0.0, min(100.0, v))))
+
     def _lamps_follow(self):
         """Light the DAP buttons from the output words heard."""
         with self._rx_lock:
@@ -1816,6 +1914,7 @@ class PanelO6:
         self._talkbacks_follow()
         self._idp_adopt()
         self._lamps_follow()
+        self._sub1_follow()
         self.tone_cw.poll()                  # a player at the end of its file starts again
         self.tone_sm.poll()
         with self._rx_lock:
@@ -2927,6 +3026,10 @@ class PanelO6:
     TGL_W, TGL3_H, TGL2_H = 58, 136, 124      # the panel's paddle guards
     TB_W, TB_H = 50, 34                       # O6's talkback window
     CB_D = 34                                 # a circuit breaker's knob
+    METER_W = 30                              # panel O3's meters and numeric indicators
+    METER_H = 120
+    RO_W = 104
+    RO_H = 30
     ANN_W, ANN_H = 84, 40                     # an annunciator of the C&W matrix
     ROT_D = 64                                # a rotary's knob
     CTL_GAP = 28           # between controls in a row: legends of neighbours
@@ -2975,6 +3078,10 @@ class PanelO6:
             lw = max(self._tw(pos[0]), self._tw(pos[-1]))
             w = max(cap_w, self.TGL3_H + 2 * (lw + 12))
             return w, above + ls, self.TGL_W, 0
+        if k == "meter":
+            return max(cap_w, self.METER_W + 8), above, self.METER_H, ls * 1.3
+        if k == "readout":
+            return max(cap_w, self.RO_W), above, self.RO_H, 0
         if k == "tb":
             return max(cap_w, self.TB_W + 8), above, self.TB_H, 0
         if k == "ann":
@@ -3070,6 +3177,24 @@ class PanelO6:
                        size=SETTING_SIZE)
         elif k == "blank":
             pass
+        elif k == "meter":
+            v, band = self.o3_meter(key)
+            x1, x2, h = cx - self.METER_W / 2.0, cx + self.METER_W / 2.0, self.METER_H
+            self._rect(x1, y, x2, y + h, fill="#0e0e0c", outline=C_BEZEL, width=max(1, int(self.s)))
+            Y = lambda val: y + h - h * max(0.0, min(O3_METER_MAX, val)) / O3_METER_MAX
+            if band:
+                self._rect(x1 + 2, Y(band[1]), x2 - 2, Y(band[0]), fill="#2f7d38", outline="")
+            for tick in (0, 100, 200, 300, 400, 500):
+                self._rect(x1, Y(tick), x1 + 5, Y(tick) + 1, fill="#d8d6c8", outline="")
+            if v is not None:
+                self._rect(x1 + 6, Y(v), x2 - 3, y + h - 1, fill="#d8d6c8", outline="")
+            self._text(cx, y + h + ls * 0.65, "---" if v is None else "%d" % int(round(v)),
+                       size=SETTING_SIZE)
+        elif k == "readout":
+            self._rect(cx - self.RO_W / 2.0, y, cx + self.RO_W / 2.0, y + body,
+                       fill="#140605", outline=C_BEZEL, width=max(1, int(self.s)))
+            self._text(cx, y + body / 2.0, self.o3_text(key), size=SETTING_SIZE + 3,
+                       fill="#ff5a3c")
         elif k == "ann":
             w, _a, body, _b = self._ctl_size(key)
             lit = self.ctl_lamp.get(key, False)
