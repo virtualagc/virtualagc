@@ -538,6 +538,7 @@ class Flight:
     def terminal(self):
         """The ground's last two calls, by the vehicle's own clock; a call
         whose time has already passed (a capture restored later) is skipped."""
+        self.launch_config()
         if self.truth()["gmt"] > T0 - 31.0:
             self.say("terminal: restored after T-31 s; GO FOR AUTO SEQUENCE not sent")
         else:
@@ -567,20 +568,27 @@ class Flight:
         self.orbit_pfd_up = True
         self.say("crew: ORBIT PFD on CRT 2")
 
-    def ascent(self):
-        # THE LAUNCH CONFIGURATION a T-8 capture does not carry: the OMS ENG
-        # switches are OFF at power-up and the checklist has them ARM/PRESS
-        # from T-1:20:00 (ASC/134 1-8) -- the burns need them, and nothing
-        # forces them armed any more -- and CRT 2 on the A/E PFD, as the
-        # video shows it (and no menu or mouse cursor ever appears)
+    def launch_config(self):
+        """THE LAUNCH CONFIGURATION a capture does not carry, once: the OMS ENG
+        switches are OFF at power-up and the checklist has them ARM/PRESS from
+        T-1:20:00 (ASC/134 1-8) -- the burns need them, and nothing forces them
+        armed any more; CRT 2 on the A/E PFD, as the video shows it (powered
+        only once the computer runs, so a T-8 capture shows it only after
+        liftoff: --from TERMINAL, at T-5 min, has it up in time); and the fault
+        line a run resumed from a capture shows from its first seconds
+        ("I/O ERROR CRT1 1", stamped 00:00:03: the first transaction after the
+        resume, seen 2026-10-11) cleared with MSG RESET twice, as the crew
+        would -- a pending class-5 ILLEGAL ENTRY absorbs the first."""
+        if getattr(self, "launch_config_done", False):
+            return
+        self.launch_config_done = True
+        self.pfd_on_crt2()
         self.play("+0     omseng left arm/press\n+1     omseng right arm/press\n", "oms-arm")
         self.say("crew: OMS ENG (two) ARM/PRESS (launch configuration)")
-        self.pfd_on_crt2()
-        # A fault line is up from the first seconds of a run resumed from a
-        # capture ("I/O ERROR CRT1 1", stamped 00:00:03: the first transaction
-        # after the resume, seen 2026-10-11): MSG RESET twice, as the crew
-        # would -- a pending class-5 ILLEGAL ENTRY absorbs the first
         self.play("+3     keys MSG_RESET\n+3     keys MSG_RESET\n", "msg-reset-launch")
+
+    def ascent(self):
+        self.launch_config()
         aborted = not getattr(self.a, "abort", None)
         while "ET SEPARATION at" not in self.log_text():
             if not aborted:
