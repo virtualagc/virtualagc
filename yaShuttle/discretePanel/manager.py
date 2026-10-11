@@ -1482,8 +1482,10 @@ class Manager(object):
         if views:
             argv += ["--views", views]
         try:
-            self.views = subprocess.Popen(argv, cwd=HERE, stdout=subprocess.DEVNULL,
-                                          stderr=subprocess.STDOUT,
+            # its output into this program's own (logs/manager.log under
+            # simulatePASS), not /dev/null: a portview whose texture uploads
+            # failed said nothing anywhere (Ron's empty pad, 2026-10-10)
+            self.views = subprocess.Popen(argv, cwd=HERE, stdout=None, stderr=subprocess.STDOUT,
                                           stdin=subprocess.DEVNULL)
         except OSError as e:
             self.say("Cannot start the window views: %s" % e)

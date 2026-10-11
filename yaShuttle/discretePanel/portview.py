@@ -1273,19 +1273,84 @@ TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
 MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
+# 'full' takes about 1.4 GB of textures: two 16384 x 8192 Earth maps
+# (530 MB each, mipmapped), the site rings and the Milky Way.
+FULL_NEEDS_FREE_KB = 1600 * 1024
 
 
 def gpu_memory_kb():
-    """The GPU's own memory, kB, where the driver says (NVIDIA, AMD); else None."""
+    """The GPU's memory, kB, where the driver says (NVIDIA, AMD): (total,
+    free now), either None if not said; (None, None) for shared memory.
+    The total alone chose 'full' or 'reduced' until a 2 GB NVS 510 with
+    1.4 GB already in use failed its uploads in silence (2026-10-10)."""
     try:
         exts = {GL.glGetStringi(GL.GL_EXTENSIONS, i).decode()
                 for i in range(GL.glGetIntegerv(GL.GL_NUM_EXTENSIONS))}
         if 'GL_NVX_gpu_memory_info' in exts:
-            return int(GL.glGetIntegerv(0x9048))      # TOTAL_AVAILABLE_MEMORY_NVX
+            return (int(GL.glGetIntegerv(0x9048)),     # TOTAL_AVAILABLE_MEMORY_NVX
+                    int(GL.glGetIntegerv(0x9049)))     # CURRENT_AVAILABLE_VIDMEM_NVX
         if 'GL_ATI_meminfo' in exts:
-            return int(np.asarray(GL.glGetIntegerv(0x87FC)).ravel()[0])   # TEXTURE_FREE_MEMORY
+            return None, int(np.asarray(GL.glGetIntegerv(0x87FC)).ravel()[0])   # TEXTURE_FREE_MEMORY
     except GL.GLError:
         pass
+    return None, None
+
+
+GL_ERROR_NAMES = {0x0500: "GL_INVALID_ENUM", 0x0501: "GL_INVALID_VALUE", 0x0502: "GL_INVALID_OPERATION",
+                  0x0505: "GL_OUT_OF_MEMORY", 0x0506: "GL_INVALID_FRAMEBUFFER_OPERATION"}
+
+
+def gl_errors():
+    """Every GL error pending (glGetError until none), as names."""
+    out = []
+    for _ in range(16):
+        e = GL.glGetError()
+        if e == GL.GL_NO_ERROR:
+            break
+        out.append(GL_ERROR_NAMES.get(int(e), "0x%04X" % int(e)))
+    return out
+
+
+def upload(what, make, img, *a, **kw):
+    """make(img, ...), a texture, checked: a failed upload or mipmap pass
+    (out of memory, or a driver refusing to compress on upload) used to leave
+    an incomplete texture that sampled black -- the Earth's mask with no
+    imagery in it, and nothing said.  Now it is said, loudly, and tried again:
+    without on-upload compression if the failure was not for memory, else at
+    half size, down to 1/8."""
+    gl_errors()                                    # not ours: clear them
+    scale = 1
+    for _ in range(5):
+        tid, why = None, None
+        try:
+            tid = make(img, *a, **kw)
+            errs = gl_errors()
+            if errs:
+                why = ", ".join(errs)
+        except GL.GLError as e:
+            why = GL_ERROR_NAMES.get(int(getattr(e, 'err', 0) or 0), "GLError %s" % getattr(e, 'err', '?'))
+            gl_errors()
+        if why is None:
+            if scale > 1:
+                print("portview: %s uploaded at 1/%d size" % (what, scale), file=sys.stderr, flush=True)
+            return tid
+        if tid is not None:
+            GL.glDeleteTextures(1, [tid])
+        if "OUT_OF_MEMORY" not in why and not TEXTURES.get('nocompress'):
+            next_try = "trying again without on-upload compression (from here on)"
+            TEXTURES['nocompress'] = True
+        elif scale < 8:
+            next_try = "trying half size"
+        else:
+            next_try = "giving up: it will draw black"
+        print("portview: TEXTURE UPLOAD FAILED: %s %dx%d (%s); %s" % (
+            what, img.shape[1], img.shape[0], why, next_try), file=sys.stderr, flush=True)
+        if next_try.startswith("giving up"):
+            return None
+        if next_try == "trying half size":
+            img = halve(img).astype(img.dtype) if img.dtype != np.uint8 else \
+                np.clip(halve(img) + 0.5, 0, 255).astype(np.uint8)
+            scale *= 2
     return None
 
 
@@ -1309,7 +1374,8 @@ def make_earth_texture(rgb):
     tid = GL.glGenTextures(1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if reduced else GL.GL_SRGB8,   # DXT1 sRGB
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if reduced and not TEXTURES.get('nocompress')
+                    else GL.GL_SRGB8,                                       # DXT1 sRGB
                     w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
     GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
@@ -1369,7 +1435,7 @@ def make_ring_texture(rgb, compress):
     tid = GL.glGenTextures(1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
-    compress = compress or TEXTURES['mode'] == 'reduced'
+    compress = (compress or TEXTURES['mode'] == 'reduced') and not TEXTURES.get('nocompress')
     GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, 0x8C4C if compress else GL.GL_SRGB8,
                     w, h, 0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, np.ascontiguousarray(rgb))
     GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
@@ -1434,14 +1500,17 @@ class Resources(object):
         self.mwProg = compile_program(FULLSCREEN_VS, MILKYWAY_FS)
         self.mwU = uniforms(self.mwProg, "uMap", "uCamToJ2k", "uTan", "uGain")
         if TEXTURES['mode'] == 'auto':
-            kb = gpu_memory_kb()
-            TEXTURES['mode'] = 'reduced' if kb is not None and kb < REDUCED_BELOW_KB else 'full'
+            kb, free = gpu_memory_kb()
+            TEXTURES['mode'] = ('reduced' if (kb is not None and kb < REDUCED_BELOW_KB)
+                                or (free is not None and free < FULL_NEEDS_FREE_KB) else 'full')
             print("portview: GPU memory %s; textures %s" % (
-                "%.1f GB" % (kb / 1048576.0) if kb is not None else "unreported (shared)",
+                "unreported (shared)" if kb is None and free is None else
+                "%s, %s free" % ("%.1f GB" % (kb / 1048576.0) if kb is not None else "total unreported",
+                                 "%.1f GB" % (free / 1048576.0) if free is not None else "none said"),
                 TEXTURES['mode']))
         if TEXTURES['mode'] == 'reduced':
             self.milkyway = halve(self.milkyway).astype(np.float16)
-        self.mwTex = make_float_texture(self.milkyway)
+        self.mwTex = upload("Milky Way", make_float_texture, self.milkyway)
         self.milkyway = None                   # on the GPU now
         self.starProg = compile_program(STARS_VS, STARS_FS)
         self.starU = uniforms(self.starProg, "uJ2kToCam", "uTan", "uMagRef",
@@ -1455,7 +1524,7 @@ class Resources(object):
         self.moonProg = compile_program(DISK_VS, MOON_FS)
         self.moonU = uniforms(self.moonProg, "uTex", "uDw", "uRw", "uUw", "uMoon", "uSun",
                               "uGain", "uEarthshine", *disk)
-        self.moonTex = make_srgb_texture(self.moon)
+        self.moonTex = upload("Moon", make_srgb_texture, self.moon)
         self.moon = None
         self.earthProg = compile_program(FULLSCREEN_VS, EARTH_FS)
         self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
@@ -1468,13 +1537,13 @@ class Resources(object):
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
-        self.earthNightTex = make_earth_texture(load_rgb(NIGHTLIGHTS))
-        self.waterTex = make_mask_texture(load_gray(WATERMASK))
+        self.earthNightTex = upload("night lights", make_earth_texture, load_rgb(NIGHTLIGHTS))
+        self.waterTex = upload("water mask", make_mask_texture, load_gray(WATERMASK))
         self.ringTex = []
         if self.site is not None:
             for k, img in enumerate(self.site.images):
-                self.ringTex.append(make_ring_texture(img, compress=k > 0))
-            self.patchTex = [make_ring_texture(img, compress=False)
+                self.ringTex.append(upload("site ring %d" % k, make_ring_texture, img, compress=k > 0))
+            self.patchTex = [upload("site patch", make_ring_texture, img, compress=False)
                              for img in self.site.patch_images]
             self.site.images = self.site.patch_images = None
         # The ground's heights; a 1-texel array stands in where there are none
@@ -1522,7 +1591,7 @@ class Resources(object):
             print("portview: Blue Marble month %d not prepared; using %d" % (month, use))
         if self.earthDayTex is not None:
             GL.glDeleteTextures([self.earthDayTex])
-        self.earthDayTex = make_earth_texture(load_rgb(bluemarble_path(use)))
+        self.earthDayTex = upload("Blue Marble", make_earth_texture, load_rgb(bluemarble_path(use)))
         self.earthMonth = month
 
     def set_star_epoch(self, year):
