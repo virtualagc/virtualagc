@@ -207,6 +207,16 @@ AIR_DATA = ("+1     switch adp_l DEPLOY\n"
             "+1     keys SPEC 5 0 PRO\n"
             "+3     keys ITEM 2 8 EXEC\n"
             "+3     keys RESUME\n")
+# THE RTLS RUNWAY: SPEC 50 ITEM 4 selects the landing area's secondary runway
+# (ITEM 3 the primary; mutually exclusive), legal in OPS 1, 3 and 6 -- after
+# an RTLS's powered pitchdown the runway can still change, only the MECO
+# targets no longer follow (DPS Dictionary, SPEC 50 HORIZ SIT).  Area 1 is
+# KSC: primary KSC 15, secondary KSC 33 (tools/sites/ksc.json).  Keyed once
+# OPS 6 is up -- at once after the ABORT pb, OPS 6 sharing OPS 1's memory
+# configuration (G16) -- and back to RTLS TRAJ with RESUME.
+RTLS_RW_SEC = ("+10    keys SPEC 5 0 PRO\n"
+               "+3     keys ITEM 4 EXEC\n"
+               "+3     keys RESUME\n")
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
@@ -267,6 +277,10 @@ class Flight:
             cmd += ["--rt-factor", "%g" % self.a.rate]
         if not self.a.portview:                  # the out-the-window views: opt in
             cmd += ["--no-portview"]
+        elif self.a.portview_views:              # which windows (portview's default: front)
+            cmd += ["--portview-views", self.a.portview_views]
+        if self.a.hold_start:                    # windows up, the vehicle held
+            cmd += ["--hold-start"]
         if os.environ.get("FLY_YAGPC"):          # another build, for bisecting
             cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         os.makedirs(self.a.logs, exist_ok=True)
@@ -280,6 +294,16 @@ class Flight:
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
         self.leave_nothing_running()
         self.wait_file(outp, "session commands on port", 180)
+        if self.a.hold_start:
+            # simulatePASS has every window up and the vehicle not started:
+            # arrange them, then Enter here sends the session command 'go'
+            self.wait_file(outp, "HELD:", 300)
+            self.say("HELD: every window is up and nothing is moving.  Arrange the windows, "
+                     "then press Enter here to start the vehicle.")
+            if sys.stdin is not None and sys.stdin.isatty():
+                sys.stdin.readline()
+            crewscript.send_session("go", self.base)
+            self.say("go: the vehicle starts")
         time.sleep(5)
 
     def leave_nothing_running(self):
@@ -296,6 +320,8 @@ class Flight:
 
         def quit_sim():
             p = getattr(self, "proc", None)
+            if getattr(self, "quit_sent", False):
+                return                          # run() asked already: one quit, not two
             if p is not None and p.poll() is None:
                 try:
                     crewscript.send_session("quit", self.base)
@@ -493,6 +519,11 @@ class Flight:
                               "+3     switch abort_mode OFF\n" % getattr(self.a, "abort", None), "abort")
                     self.say("crew: %s seen; ABORT MODE %s, ABORT pb" % (m.group(0), getattr(self.a, "abort", None)))
                     aborted = True
+                    if getattr(self.a, "abort", None) == "RTLS" and getattr(self.a, "rtls_runway", "15") == "33":
+                        self.script_done("abort", 60)
+                        self.play(RTLS_RW_SEC, "rtls-runway")
+                        self.script_done("rtls-runway", 180)
+                        self.say("crew: SPEC 50 ITEM 4 -- RTLS to KSC 33 (the secondary runway)")
             time.sleep(1 if not aborted else 5)
         # ET separation in the vehicle's GMT, from the time-tagged state lines
         # around it, kept for OMS 2 (which may start from a capture)
@@ -836,6 +867,12 @@ class Flight:
         # every phase captured: end the simulation, which would otherwise run
         # on to its --duration (hours) holding a core
         crewscript.send_session("quit", self.base)
+        self.quit_sent = True
+        try:
+            self.proc.wait(timeout=120)
+        except subprocess.TimeoutExpired:
+            self.say("the simulation has not exited 120 s after 'quit'; see %s"
+                     % os.path.join(self.a.logs, "simulatePASS.out"))
         self.say("done")
 
 
@@ -883,6 +920,15 @@ def main():
                     help="with --abort TAL: the ground at this TAL site's runway height "
                          "(default %s, the site PASS flies on this tape; the crew's site "
                          "selection is not changed)" % TAL_DEFAULT)
+    ap.add_argument("--portview-views", metavar="LIST",
+                    help="with --portview: the windows to open, e.g. front,up,left,right "
+                         "(portview's default is front alone)")
+    ap.add_argument("--hold-start", action="store_true",
+                    help="bring every window up, hold the vehicle until Enter is pressed in "
+                         "this terminal (time to arrange the windows), then fly")
+    ap.add_argument("--rtls-runway", choices=["15", "33"], default="15",
+                    help="with --abort RTLS: KSC 15 (area 1's primary, PASS's default) or KSC 33, "
+                         "which the crew selects on SPEC 50 (ITEM 4) once OPS 6 is up")
     ap.add_argument("--abort-react", type=float, default=5.0,
                     help="with --abort: simulated seconds from the failure to the ABORT pb")
     ap.add_argument("--flight", help="a JSON file of another flight's constants (default STS-134)")
