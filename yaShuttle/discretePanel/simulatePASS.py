@@ -1514,6 +1514,13 @@ def main():
                          "TIG -- which a clock that starts at 'now' makes "
                          "impossible to know in advance")
     args = ap.parse_args()
+    # SIGINT IS HOW 'quit' ARRIVES (session_listener signals this process),
+    # so it must not be inherited as ignored: a run started in the
+    # background from a non-interactive shell (nohup ... &, or a driver
+    # started so) gets SIGINT at SIG_IGN, Python keeps it, and every 'quit'
+    # was logged and did nothing (2026-10-10).
+    if os.name != "nt":
+        signal.signal(signal.SIGINT, signal.default_int_handler)
     gpcs = args.gpcs
     multi = len(gpcs) > 1
     if args.crts is None:
@@ -2404,6 +2411,13 @@ def main():
     except KeyboardInterrupt:
         print()
     finally:
+        # SHUTTING DOWN IS NOT INTERRUPTIBLE.  A second 'quit' -- a driver's
+        # own, then its atexit hook's while this was still closing -- raised
+        # KeyboardInterrupt in here, at the log line, and L.stop() never ran:
+        # MEDS2, the keyboards, yaGPC2, the panel and the manager were left
+        # up on the port base (Mac-portview, 2026-10-10).
+        if os.name != "nt":
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
         stop_event.set()
         log("shutting down")
         L.stop()
