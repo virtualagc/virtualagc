@@ -93,6 +93,24 @@ def _hyp_incr(M, a, de, dbf, dsb):
         out[j] += (s85[j] - s55[j]) / 30.0 * (dsb - 55.0)
     return b, out
 
+# Subsonic speedbrake, from FLIGHT: NASA CP-2283 Pt 1 (Kirsten, Richardson &
+# Wilson), Fig 5, M 0.5 STS-2, corrected to alpha 6 / de 6, increments from
+# speedbrake 0 (aero-docs/transonic-findings.md section 2.7).  CA: predicted to
+# 50 deg, flight about 10 % above that beyond (0.055-0.058 at 87).  CN: flight,
+# about 0 to 30 deg then -0.010..-0.020 at 40-60 and about -0.028 at 80-87.
+# 98.6 is extrapolated at the 87-deg slope.  No source gives a subsonic
+# speedbrake Cm, so it stays 0 (the CN/CA transfer to the c.g. is automatic).
+# This replaces the hypersonic increment faded out, which gave 0.0016 CA at
+# 98.6 -- about 1/35 of flight -- and so left the RTLS/TAEM with no drag
+# authority to dissipate energy.  Held across alpha (flight data are at 6).
+_SB_DEG = [0.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 87.0, 98.6]
+_SB_CA = [0.0, .005, .011, .018, .025, .036, .043, .052, .056, .064]
+_SB_CN = [0.0, 0.0, 0.0, -.010, -.015, -.020, -.024, -.028, -.028, -.032]
+
+def _sub_speedbrake(dsb):
+    d = min(max(dsb, _SB_DEG[0]), _SB_DEG[-1])
+    return [_interp(_SB_DEG, _SB_CN, d), _interp(_SB_DEG, _SB_CA, d), 0.0]
+
 def _sub_incr(a, de):
     b = LA[0.0].at(a)
     els = [-5.0, 0.0, 5.0]
@@ -116,7 +134,8 @@ def shape(M, a, de, dbf, dsb):
         return [(1 - w) * (b5[j] + i5[j]) + w * (b10[j] + i10[j]) for j in range(3)]
     def sub():
         b, i = _sub_incr(a, de)
-        return [b[j] + i[j] for j in range(3)]
+        sb = _sub_speedbrake(dsb)
+        return [b[j] + i[j] + sb[j] for j in range(3)]
     if M >= 5.25: return hyp(M)
     if M <= 0.29: return sub()
     w = (math.log(M) - LOGM_SUB) / (LOGM_HYP - LOGM_SUB)
