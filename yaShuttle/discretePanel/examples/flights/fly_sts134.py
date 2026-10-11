@@ -1065,6 +1065,16 @@ class Flight:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
             self.snapshot(ph.lower())
+        if getattr(self.a, "stay", False) and getattr(self, "proc", None) is not None:
+            # --stay: the phases are done but the vehicle is left to the owner,
+            # who ends it from the Manager (End simulation) or Ctrl-C here
+            self.say("done with the phases; the simulation stays up (End simulation in the "
+                     "Manager, or Ctrl-C here, ends it)")
+            try:
+                self.proc.wait()
+            except KeyboardInterrupt:
+                pass
+            return
         # every phase captured: end the simulation, which would otherwise run
         # on to its --duration (hours) holding a core
         crewscript.send_session("quit", self.base)
@@ -1081,6 +1091,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--logs", required=True, help="directory for the logs, scripts and captures")
     ap.add_argument("--port-base", type=int, default=38000)
+    ap.add_argument("--stay", action="store_true",
+                    help="after the last phase leave the simulation running (the default ends "
+                         "it); end it with the Manager's End simulation or Ctrl-C here")
     ap.add_argument("--rate", type=float, default=1.0,
                     help="simulated seconds per wall second (simulatePASS --rt-factor); 2 is "
                          "measured clean for one GPC on orbit")
