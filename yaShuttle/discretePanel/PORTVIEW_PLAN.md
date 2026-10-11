@@ -255,6 +255,18 @@ which portview follows from TRU1's attitude with no special handling.
   through the roll and downrange; the imagery is NAIP's 2010 (Shuttle-era
   pads).  The FSS is an open lattice in the model; the RSS is solid, as its
   clad walls were.
+- Done: the gantry's colours.  NASA's file has three plain grey materials
+  (Maya's, which do not follow the objects), so it drew flat white.
+  `fetch_assets.recolor_gantry` classes each triangle by its area, normal,
+  height and original material -- cladding (cream-white and beige), roofs,
+  steel, rails, the MLP slab (top, sides, underside), concrete -- varies the
+  tone with a hash of its 6 m cell and sooted it about the stack: 126 colour
+  parts, albedos from Ron's photographs (~/Desktop/PhotosOfSatellites/
+  gantry, never in git).  Rebuild with `--vehicles gantry --rebuild`'s
+  equivalent: delete cache/models/gantry/model.json and run fetch_assets.
+  Still plain: no panel lines, weathering streaks or the red vent hoses, which
+  want a texture with UVs the model does not have, or a better model (the
+  sketchfab/cgtrader pad models Ron found cost money).
 
 ## Phases
 

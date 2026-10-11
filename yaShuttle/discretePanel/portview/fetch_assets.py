@@ -674,6 +674,101 @@ def write_model(key, meta, parts):
     print("  model %s: %d triangles in %d parts" % (key, tris, len(mats)))
 
 
+# THE PAD STRUCTURES' COLOURS.  NASA's Gantry model has three plain grey
+# (0.6) materials -- Maya's, which do not follow the objects -- so it drew
+# flat white.  The real structures (Ron's photographs, ~/Desktop/
+# PhotosOfSatellites/gantry: IMG_3649, the 108-KSC-78 renovation set) are the
+# Fixed Service Structure's cream-white cladding, the Rotating Service
+# Structure's beige panels, mid-grey galvanised and painted steel lattice,
+# the Mobile Launcher Platform's dark grey-brown slab and the pedestals' rust-
+# tan concrete, sooted around the stack.  Albedos (the model's colours are
+# taken as albedo): photo means (dusk, warm) brightened to a daylight surface.
+# Each triangle is classed by its area, its normal, its height and its
+# original material; the tone then varies with a hash of its 6 m cell, so
+# neighbouring panels differ as weathered cladding does.
+GANTRY_TONES = (0.84, 0.92, 1.0, 1.07, 1.14)
+
+
+def recolor_gantry(parts, stack=(8.9, 12.6)):
+    """parts (each pos, nrm, uv, idx, material number by position in the
+    list: the glTF's three) -> new parts, one per (class, tone)."""
+    classes = {
+        'cladding_white': (0.66, 0.63, 0.58), 'cladding_beige': (0.50, 0.44, 0.36),
+        'roof': (0.38, 0.37, 0.35), 'steel': (0.29, 0.28, 0.26),
+        'rail': (0.44, 0.44, 0.42), 'mlp_top': (0.22, 0.21, 0.20),
+        'mlp_under': (0.12, 0.11, 0.11), 'mlp_side': (0.20, 0.20, 0.21),
+        'concrete': (0.42, 0.30, 0.23),
+    }
+    acc = {}
+    for m, p in enumerate(parts):
+        pos = np.asarray(p['pos'], np.float64)
+        nrm = np.asarray(p['nrm'], np.float32)
+        uv = np.asarray(p['uv'], np.float32)
+        idx = np.asarray(p['idx'], np.int64).reshape(-1, 3)
+        a, b, c = pos[idx[:, 0]], pos[idx[:, 1]], pos[idx[:, 2]]
+        cr = np.cross(b - a, c - a)
+        ln = np.linalg.norm(cr, axis=1)
+        area = 0.5 * ln
+        n = cr / np.maximum(ln[:, None], 1e-12)
+        cen = (a + b + c) / 3.0
+        z = cen[:, 2]
+        vert = np.abs(n[:, 2]) < 0.35
+        up, down = n[:, 2] > 0.7, n[:, 2] < -0.7
+        big = area > 0.5
+        cell = np.floor(cen / 6.0).astype(np.int64)
+        h = (cell[:, 0] * 73856093 ^ cell[:, 1] * 19349663 ^ cell[:, 2] * 83492791) & 0x7fffffff
+        tone = np.array(GANTRY_TONES)[h % 5]
+        cls = np.full(len(idx), 'steel', dtype=object)
+        if m == 2:
+            cls[:] = 'rail'
+        cls[big & up & (z >= 12)] = 'roof'
+        clad = big & vert & (z >= 12)
+        cls[clad] = np.where((h[clad] // 5) % 5 < 3, 'cladding_white', 'cladding_beige')
+        mlp = (m == 1) & big & (z >= 5) & (z < 12)
+        cls[mlp & up] = 'mlp_top'
+        cls[mlp & down] = 'mlp_under'
+        cls[mlp & ~up & ~down] = 'mlp_side'
+        cls[(z < 5) & (area > 0.05)] = 'concrete'
+        # soot: the exhaust's reach about the stack, and the flame trench's side
+        r = np.hypot(cen[:, 0] - stack[0], cen[:, 1] - stack[1])
+        soot = np.clip(1.0 - r / 45.0, 0.0, 1.0) * np.clip(1.0 - z / 55.0, 0.0, 1.0)
+        for name in set(cls.tolist()):
+            sel = cls == name
+            for t in range(5):
+                tsel = sel & (tone == GANTRY_TONES[t])
+                if not tsel.any():
+                    continue
+                for sb in (0, 1, 2):                # unsooted, lightly, heavily
+                    q = np.digitize(soot[tsel], (0.15, 0.45))
+                    ss = q == sb
+                    if not ss.any():
+                        continue
+                    base = np.array(classes[name])
+                    k = GANTRY_TONES[t] * (1.0, 0.82, 0.66)[sb]
+                    col = np.clip(base * k, 0.02, 0.95)
+                    if sb:                           # brown soot, not a plain darkening
+                        col = col * np.array([1.0, 0.96, 0.90])
+                    key = (name, t, sb)
+                    acc.setdefault(key, (col, []))[1].append((m, np.where(tsel)[0][ss]))
+    out = []
+    for (name, t, sb), (col, lst) in sorted(acc.items()):
+        pos_l, nrm_l, uv_l, idx_l, off = [], [], [], [], 0
+        for m, tri in lst:
+            p = parts[m]
+            ix = np.asarray(p['idx'], np.int64).reshape(-1, 3)[tri]
+            u, inv = np.unique(ix.ravel(), return_inverse=True)
+            pos_l.append(np.asarray(p['pos'])[u])
+            nrm_l.append(np.asarray(p['nrm'])[u])
+            uv_l.append(np.asarray(p['uv'])[u])
+            idx_l.append((inv.reshape(-1, 3) + off))
+            off += len(u)
+        out.append(dict(name='gantry %s %d%d' % (name, t, sb), color=[float(col[0]), float(col[1]),
+                        float(col[2]), 1.0], metallic=0.0, texture=None,
+                        pos=np.vstack(pos_l), nrm=np.vstack(nrm_l), uv=np.vstack(uv_l),
+                        idx=np.vstack(idx_l).astype(np.int64).ravel()))
+    return out
+
+
 def prepare_model(key, keep):
     spec = MODELS[key]
     out_dir = os.path.join(CACHE, "models", key)
@@ -682,6 +777,8 @@ def prepare_model(key, keep):
     src = download(spec['url'], os.path.join(CACHE, "models", spec['glb']))
     print("converting", os.path.basename(src))
     parts = glb_parts(src, spec['root'], spec['origin'], spec['exclude'])
+    if key == 'gantry':
+        parts = recolor_gantry(parts)
     meta = dict(name=spec['name'], frame=spec['frame'], source=spec['source'])
     if 'mag_1000km' in spec:
         meta['mag_1000km'] = spec['mag_1000km']
