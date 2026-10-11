@@ -129,6 +129,8 @@ IMU_GYROCOMP = """
 OMS2_SETUP = """
 # STS-134 Ascent Checklist (ASC/134/FIN) 3-3..3-7: MAJOR MODE CHANGE, OMS 2 BURN SETUP
 +1     dap c3 auto
++1     omseng left arm/press
++1     omseng right arm/press
 +5     keys OPS 1 0 5 PRO
 +20    keys ITEM 6 + 0 . 4 - 5 . 7 + 5 . 7 EXEC
 +5     keys ITEM 2 2 EXEC
@@ -218,7 +220,8 @@ RTLS_RW_SEC = ("+10    keys SPEC 5 0 PRO\n"
                "+3     keys ITEM 4 EXEC\n"
                "+3     keys RESUME\n")
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
-DEORB_MNVR = "+1     dap c3 auto\n+5     keys ITEM 2 7 EXEC\n"
+DEORB_MNVR = ("+1     dap c3 auto\n+1     omseng left arm/press\n"
+              "+1     omseng right arm/press\n+5     keys ITEM 2 7 EXEC\n")
 ENTRY_OPS304 = "+1     keys OPS 3 0 4 PRO\nwait crt 1 title 3041/ timeout 120\n"
 # A TAL's post-MECO OPS 3, keyed at once after ET SEP: entry is close (the
 # stack tumbled at ~220 kft, 4-5 min after ET SEP, still in MM 104).  From MM
@@ -256,6 +259,8 @@ TAL_DEFAULT = "ZZA"
 ATO_OMS1 = """
 wait crt 1 title 1041/ timeout 120
 +1     dap c3 auto
++1     omseng left arm/press
++1     omseng right arm/press
 +5     keys ITEM 6 + 0 . 4 - 5 . 7 + 5 . 7 EXEC
 +5     keys ITEM 2 2 EXEC
 +5     keys ITEM 2 3 EXEC
@@ -270,6 +275,8 @@ wait crt 1 title 1041/ timeout 120
 # solution takes about 12 s to show (delta-V TOT).
 ATO_OMS2 = """
 +1     dap c3 auto
++1     omseng left arm/press
++1     omseng right arm/press
 +5     keys OPS 1 0 5 PRO
 wait crt 1 title 1051/ timeout 120
 +20    keys ITEM 6 + 0 . 4 - 5 . 7 + 5 . 7 EXEC
@@ -304,7 +311,7 @@ class Flight:
         fenv = {k: (os.path.join(HERE, v) if k == "YAGPC_VEHDYN_SOUNDING" and not os.path.isabs(v) else v)
                 for k, v in FL["env"].items()}
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1", YAGPC_VEHDYN_PAD="1",
-                   YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
+                   YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]),
                    YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG=os.environ.get("FLY_STATELOG", "5"),
                    PYTHONUNBUFFERED="1", **fenv)
         if getattr(self.a, "abort", None) == "ATO":
@@ -549,6 +556,14 @@ class Flight:
         self.wait_gmt(T0 - 8.0)
 
     def ascent(self):
+        # THE LAUNCH CONFIGURATION a T-8 capture does not carry: the OMS ENG
+        # switches are OFF at power-up and the checklist has them ARM/PRESS
+        # from T-1:20:00 (ASC/134 1-8) -- the burns need them, and nothing
+        # forces them armed any more -- and CRT 2 on the A/E PFD, as the
+        # video shows it (and no menu or mouse cursor ever appears)
+        self.play("+0     omseng left arm/press\n+1     omseng right arm/press\n", "oms-arm")
+        self.say("crew: OMS ENG (two) ARM/PRESS (launch configuration)")
+        self.pfd_on_crt2()
         aborted = not getattr(self.a, "abort", None)
         while "ET SEPARATION at" not in self.log_text():
             if not aborted:
@@ -740,6 +755,9 @@ class Flight:
         self.play("+0     keys EXEC\n", "oms2-exec")
         self.say("crew: EXEC at TIG-8 s (TIG GMT %.1f)" % tig)
         self.wait_gmt(tig + 300.0)
+        # ASC/134 FB 2-8, CUTOFF: "+:02 OMS ENG (two) - OFF"
+        self.play("+0     omseng left off\n+1     omseng right off\n", "oms-eng-off")
+        self.say("crew: OMS ENG (two) OFF after the burn")
 
     def ops2(self):
         # PRO to post-OMS-2 coast once the burn is done and checked; the
@@ -751,6 +769,11 @@ class Flight:
         self.play(OPS201, "ops201")
         self.script_done("ops201", 900)
         self.say("OPS 201: GNC UNIV PTG on CRT 1")
+        if self.a.crts >= 2 and getattr(self, "pfd_up", False):
+            # FLT INST MENU: UP, FLT INST, ORBIT PFD (MEDS2.py FLT_INST key 2)
+            self.play("+1     edgekey crt2 1\n+2     edgekey crt2 2\n+2     edgekey crt2 3\n", "pfd-orbit")
+            self.script_done("pfd-orbit", 60)
+            self.say("crew: ORBIT PFD on CRT 2")
         self.wait_sim(30)
 
     def orbit(self):
