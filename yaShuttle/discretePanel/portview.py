@@ -1342,16 +1342,28 @@ def upload(what, make, img, *a, **kw):
         elif scale < 8:
             next_try = "trying half size"
         else:
-            next_try = "giving up: it will draw black"
+            next_try = "giving up: it will draw black (a 1 x 1 black texture in its place)"
         print("portview: TEXTURE UPLOAD FAILED: %s %dx%d (%s); %s" % (
             what, img.shape[1], img.shape[0], why, next_try), file=sys.stderr, flush=True)
         if next_try.startswith("giving up"):
-            return None
+            return black_texture()
         if next_try == "trying half size":
             img = halve(img).astype(img.dtype) if img.dtype != np.uint8 else \
                 np.clip(halve(img) + 0.5, 0, 255).astype(np.uint8)
             scale *= 2
-    return None
+    return black_texture()
+
+
+def black_texture():
+    """A 1 x 1 black texture: what a texture that could not be uploaded
+    becomes, so that every draw path still binds a real id."""
+    tid = GL.glGenTextures(1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+    GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, 1, 1, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE,
+                    np.zeros(4, np.uint8))
+    for p, v in ((GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST), (GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)):
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, p, v)
+    return tid
 
 
 def halve(a):
