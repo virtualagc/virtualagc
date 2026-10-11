@@ -602,7 +602,7 @@ class Flight:
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             s.bind(("", self.base + crewscript.SCREEN_OFFSET))
             s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                         socket.inet_aton("239.255.1.1")
+                         socket.inet_aton(groundstation.MCAST_GROUP)
                          + socket.inet_aton(os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")))
             s.settimeout(1.0)
 
@@ -673,8 +673,8 @@ class Flight:
                 # PASS ends the burn itself; anything keyed meanwhile -- OPS
                 # 105 PRO for the next burn above all -- stops it: OPS 105 at
                 # once cut an ATO OMS 1 off after 17 s (2026-10-10)
-                t0, last = time.time(), kg
-                while time.time() - t0 < 900.0:
+                t0, last = self.truth()["t"], kg
+                while self.truth()["t"] - t0 < 900.0:
                     self.wait_sim(5)
                     kg = self.vehicle_kg()
                     if kg is None:
@@ -683,7 +683,7 @@ class Flight:
                     if kg > last - 5.0:
                         break
                     last = kg
-                self.say("crew: %s done: %.0f kg in %.0f s" % (name, kg0 - kg, time.time() - t0))
+                self.say("crew: %s done: %.0f kg in %.0f s" % (name, kg0 - kg, self.truth()["t"] - t0))
                 return tig
         self.say("crew: %s EXEC pressed %d times; NO BURN seen" % (name, k + 1))
         return tig
