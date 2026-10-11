@@ -243,7 +243,8 @@ def _win_windows():
             continue
         role, cmd = role_of(pid, title)
         entry = {"id": wid, "pid": pid, "x": where[0], "y": where[1],
-                 "w": where[2], "h": where[3], "title": title, "role": role, "cmd": cmd}
+                 "w": where[2], "h": where[3], "title": title, "role": role, "cmd": cmd,
+                 "min": bool(u.IsIconic(hwnd))}
         if role == "subtitles":
             entry["look"] = _mac_look(pid)      # a file there too; see subtitles.py
         out.append(entry)
@@ -575,9 +576,12 @@ function run(argv) {
     try {
       var ws = se.processes.whose({unixId: pids[i]})[0].windows;
       var names = ws.name(), pos = ws.position(), sz = ws.size();
-      for (var j = 0; j < names.length; j++)
+      for (var j = 0; j < names.length; j++) {
+        var mini = false;
+        try { mini = ws[j].attributes.byName("AXMinimized").value(); } catch (e) {}
         out.push({pid: pids[i], title: names[j] || "", x: pos[j][0], y: pos[j][1],
-                  w: sz[j][0], h: sz[j][1]});
+                  w: sz[j][0], h: sz[j][1], min: !!mini});
+      }
     } catch (e) {}
   }
   return JSON.stringify(out);
@@ -622,7 +626,7 @@ def _mac_windows():
         x, y, ww, hh = _mac_to_layout(role, frame)
         entry = {"id": "mac:%d:%s" % (w["pid"], w["title"]), "pid": w["pid"],
                  "x": x, "y": y, "w": ww, "h": hh, "frame": frame,
-                 "title": w["title"], "role": role, "cmd": cmd}
+                 "title": w["title"], "role": role, "cmd": cmd, "min": bool(w.get("min"))}
         if role == "subtitles":
             entry["look"] = _mac_look(w["pid"])
         out.append(entry)
@@ -927,10 +931,57 @@ def windows():
         real = geometry(wid)
         if real is not None:
             entry.update({"x": real[0], "y": real[1], "w": real[2], "h": real[3]})
+        entry["min"] = is_minimized(wid)
         if role == "subtitles":
             entry["look"] = look_of(wid)
         out.append(entry)
     return out
+
+
+# MINIMISED WINDOWS (owner, 2026-10-10): a layout made with the windows a
+# video does not need minimised came back with all of them on the screen,
+# the state not having been saved.  A layout entry now carries "min": true
+# for a window minimised when it was saved, and a restore places it and
+# minimises it again.  A minimised window's place is not always measurable
+# (Windows reports -32000), so a save keeps the file's own place for it when
+# the file has one.  Only minimising is done: a restore leaves alone a window
+# the user has minimised since, whatever the file says.
+_MAC_MINIMIZE = """
+function run(argv) {
+  var se = Application("System Events");
+  var p = se.processes.whose({unixId: parseInt(argv[0])})[0];
+  var w = p.windows.whose({name: argv[1]})[0];
+  w.attributes.byName("AXMinimized").value = true;
+  return "true";
+}
+"""
+
+
+def is_minimized(wid):
+    """Whether the window is minimised (iconified) now."""
+    try:
+        if MAC:
+            return any(w["id"] == wid and w.get("min") for w in _mac_windows())
+        if WIN:
+            return bool(_win()[2].IsIconic(_win_hwnd(wid)))
+        text = run(["xprop", "-id", wid, "_NET_WM_STATE", "WM_STATE"])
+        return "_NET_WM_STATE_HIDDEN" in text or "Iconic" in text
+    except Exception:                            # noqa: not knowing is not minimised
+        return False
+
+
+def minimize(wid):
+    """Minimise the window, without taking the focus."""
+    try:
+        if MAC:
+            pid, title = _mac_id(wid)
+            _osascript(_MAC_MINIMIZE, pid, title)
+        elif WIN:
+            _win()[2].ShowWindow(_win_hwnd(wid), 7)    # SW_SHOWMINNOACTIVE
+        else:
+            run(["xdotool", "windowminimize", wid], timeout=5)
+    except Exception:                            # noqa: a window left up is no harm
+        pass
 
 
 def look_of(wid):
@@ -1022,10 +1073,24 @@ def save_layout(path, everything=False, only_ids=None, log=print, only_pids=None
             and (only_pids is None or w["pid"] in only_pids)]
     entries = [{k: w[k] for k in ("role", "x", "y", "w", "h", "title", "look") if k in w}
                for w in keep]
+    for e, w in zip(entries, keep):
+        if w.get("min"):
+            e["min"] = True
+    old = []
+    if os.path.isfile(path):
+        try:
+            with open(path) as fh:
+                old = json.load(fh).get("windows", [])
+        except (OSError, ValueError):
+            old = []
+    was = {o.get("role"): o for o in old}
+    for e in entries:
+        if e.get("min") and e["role"] in was:
+            for k in ("x", "y", "w", "h"):          # where it was before it was minimised
+                if k in was[e["role"]]:
+                    e[k] = was[e["role"]][k]
     kept = 0
-    if merge and os.path.isfile(path):
-        with open(path) as fh:
-            old = json.load(fh).get("windows", [])
+    if merge and old:
         now = {e["role"] for e in entries}
         rest = [e for e in old if e.get("role") not in now]
         kept = len(rest)
@@ -1136,6 +1201,7 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
     if legacy:
         log("   (an older macOS layout, in points: placed as it was saved)")
     done = missing = failed = 0
+    to_minimize = []
     for want in layout["windows"]:
         role = want["role"]
         if only_roles is not None and role not in only_roles:
@@ -1170,10 +1236,15 @@ def restore_layout(path, with_sizes=True, verbose=False, log=print, only_ids=Non
             # (WSL-integration, 2026-10-01).
             note = ("  (ended %+d,%+d from there -- the window manager moved it: "
                     "off its work area, or across two monitors?)" % (-ok[0], -ok[1]))
+        if want.get("min"):
+            to_minimize.append(w["id"])
+            note += "  (minimised)"
         log("   %-12s -> %d,%d%s%s" % (role, want["x"], want["y"],
                                        " %dx%d" % size if size[0] else "", note))
         done += 1
         failed += 0 if ok is True else 1
+    for wid in to_minimize:
+        minimize(wid)
     log("placed %d window(s)%s%s" % (done,
                                      ", %d not running" % missing if missing else "",
                                      ", %d inexact" % failed if failed else ""))
