@@ -114,6 +114,24 @@ SITES = {
     'edw': dict(name="Edwards AFB", lat=34.9056, lon=-117.8836, alt_ft=2302.0, naip=True),
     'nor': dict(name="White Sands Space Harbor (Northrup Strip)", lat=32.9433, lon=-106.4194,
                 alt_ft=3880.0, naip=True),
+    # STS-134's Transoceanic Abort Landing sites.  No NAIP, 1 m or 3DEP outside
+    # the United States: Sentinel-2's 10 m (EOX s2cloudless) for the imagery,
+    # AWS's terrain tiles (SRTM/EU-DEM, ~30 m) for the heights, and the runway
+    # painted from PASS's own #PCGN13R (sts134-abort-iloads.json: the two
+    # thresholds, ellipsoid heights, DELH) into ring 0, where at 10 m it is
+    # four pixels wide.  alt_ft is the runway's height above PASS's ellipsoid
+    # (the number vehdyn's ground is set to), delh_ft its sea level above it.
+    # ring_px: a ring's pixels, from its source's resolution (RING_PX where
+    # not given).
+    'zza': dict(name="Zaragoza AB (TAL, prime)", lat=41.67180, lon=-1.06305, alt_ft=913.0,
+                delh_ft=65.0, dem='world', ring_px=(2048, 8192, 4096, 4096),
+                runways=((41.6634, -1.0437, 41.6802, -1.0824, 45.0),)),
+    'mrn': dict(name="Moron AB (TAL)", lat=37.17485, lon=-5.61600, alt_ft=333.5,
+                delh_ft=57.0, dem='world', ring_px=(2048, 8192, 4096, 4096),
+                runways=((37.1901, -5.6091, 37.1596, -5.6229, 45.0),)),
+    'ben': dict(name="Ben Guerir AB (TAL)", lat=32.12455, lon=-7.87795, alt_ft=1471.5,
+                delh_ft=64.0, dem='world', ring_px=(2048, 8192, 4096, 4096),
+                runways=((32.1065, -7.8765, 32.1426, -7.8794, 45.0),)),
 }
 RINGS = ((4.0, 'naip'), (40.0, 's2'), (400.0, 's2'), (2000.0, 's2'))   # half-size, km
 RING_PX = 8192
@@ -330,19 +348,20 @@ def fetch_naip_year(b, w, h, year):
     return out.convert("RGB")
 
 
-def fetch_mosaic(source, bounds, n_tiles, year=None):
-    """The bounds as one RING_PX-square image, from n_tiles x n_tiles requests.
-    source 'naip' with a year: that year's NAIP, else the latest."""
+def fetch_mosaic(source, bounds, n_tiles, year=None, px=None):
+    """The bounds as one px-square (RING_PX_) image, from n_tiles x n_tiles
+    requests.  source 'naip' with a year: that year's NAIP, else the latest."""
     Image = _image()
     lon0, lat0, lon1, lat1 = bounds
-    tile = -(-RING_PX // n_tiles)
-    out = Image.new("RGB", (RING_PX, RING_PX))
+    RING_PX_ = px or RING_PX
+    tile = -(-RING_PX_ // n_tiles)
+    out = Image.new("RGB", (RING_PX_, RING_PX_))
     for j in range(n_tiles):                    # rows, north to south
         for i in range(n_tiles):
-            x0, x1 = i * tile, min(RING_PX, (i + 1) * tile)
-            y0, y1 = j * tile, min(RING_PX, (j + 1) * tile)
-            b = (lon0 + (lon1 - lon0) * x0 / RING_PX, lat1 - (lat1 - lat0) * y1 / RING_PX,
-                 lon0 + (lon1 - lon0) * x1 / RING_PX, lat1 - (lat1 - lat0) * y0 / RING_PX)
+            x0, x1 = i * tile, min(RING_PX_, (i + 1) * tile)
+            y0, y1 = j * tile, min(RING_PX_, (j + 1) * tile)
+            b = (lon0 + (lon1 - lon0) * x0 / RING_PX_, lat1 - (lat1 - lat0) * y1 / RING_PX_,
+                 lon0 + (lon1 - lon0) * x1 / RING_PX_, lat1 - (lat1 - lat0) * y0 / RING_PX_)
             w, h = x1 - x0, y1 - y0
             if source == 'naip' and year:
                 print("  tile %d,%d (NAIP %d)" % (i, j, year), flush=True)
@@ -403,6 +422,40 @@ def match_colours(child, cb, parent, pb):
     return Image.fromarray(np.clip(c * gain, 0, 255).astype(np.uint8))
 
 
+def paint_runways(img, bounds, runways):
+    """Runways drawn into a ring: asphalt, edge lines, a dashed centreline
+    and threshold bars, from each runway's two thresholds (lat, lon) and
+    width (m).  A synthetic stand-in where the imagery (10 m) shows a strip
+    four pixels wide; it is where PASS's table puts the runway."""
+    from PIL import ImageDraw
+    W, H = img.size
+    lon0, lat0, lon1, lat1 = bounds
+    d = ImageDraw.Draw(img)
+    X = lambda lon: (lon - lon0) / (lon1 - lon0) * W
+    Y = lambda lat: (lat1 - lat) / (lat1 - lat0) * H
+    for la, lo, lb, lob, width in runways:
+        coslat = np.cos(np.radians(0.5 * (la + lb)))
+        ex, ny = (lob - lo) * 111320.0 * coslat, (lb - la) * 110570.0       # m east, north
+        length = float(np.hypot(ex, ny))
+        ux, uy = ex / length, ny / length                                    # along
+        px_, py_ = -uy, ux                                                   # across (left)
+        def pt(along, across):
+            e, n = ux * along + px_ * across, uy * along + py_ * across
+            return (X(lo + e / (111320.0 * coslat)), Y(la + n / 110570.0))
+        hw = width / 2.0
+        d.polygon([pt(0, -hw), pt(length, -hw), pt(length, hw), pt(0, hw)], fill=(70, 70, 72))
+        d.line([pt(0, -hw + 1.0), pt(length, -hw + 1.0)], fill=(215, 215, 210), width=1)
+        d.line([pt(0, hw - 1.0), pt(length, hw - 1.0)], fill=(215, 215, 210), width=1)
+        a = 150.0
+        while a < length - 150.0:                                            # centreline dashes
+            d.line([pt(a, 0), pt(min(a + 30.0, length - 150.0), 0)], fill=(225, 225, 220), width=1)
+            a += 50.0
+        for end in (0.0, length):                                            # threshold bars
+            sgn = 1.0 if end == 0.0 else -1.0
+            for t in np.linspace(-hw + 3.0, hw - 3.0, 8):
+                d.line([pt(end + sgn * 6.0, t), pt(end + sgn * 36.0, t)], fill=(230, 230, 225), width=1)
+
+
 def prepare_site(key):
     import json
     site = SITES[key]
@@ -418,13 +471,17 @@ def prepare_site(key):
             source = 's2'
         b = ring_bounds(site, half_km)
         print("site %s ring %d: +-%g km from %s" % (key, k, half_km, source))
-        img = fetch_mosaic(source, b, 3 if source == 'naip' else 2, site.get('naip_year'))
+        px = site.get('ring_px', (RING_PX,) * 4)[k]
+        img = fetch_mosaic(source, b, 3 if source == 'naip' else (1 if px <= 4096 else 2),
+                           site.get('naip_year'), px)
         if source == 'naip' and blank(img):
             # NAIP has no imagery over some military installations (Edwards,
             # White Sands): Sentinel-2's 10 m instead.
             print("  NAIP is blank here; Sentinel-2 instead")
             source = 's2'
-            img = fetch_mosaic(source, b, 2)
+            img = fetch_mosaic(source, b, 2, None, px)
+        if k == 0 and site.get('runways'):
+            paint_runways(img, b, site['runways'])
         img.save(os.path.join(d, "ring%d.raw.jpg" % k), quality=95)
         rings.append(dict(file="ring%d.jpg" % k, bounds=b, half_km=half_km, source=source))
     # Colours: the coarsest as fetched; each finer one matched to the next.
@@ -1505,6 +1562,57 @@ def fetch_heights(bounds, n):
     return out
 
 
+TERRAIN_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/%d/%d/%d.png"
+
+
+def fetch_heights_world(bounds, n, delh_m=0.0):
+    """Heights (m) over a box, n x n, rows north first, from the AWS terrain
+    tiles (Mapzen's terrarium encoding; SRTM and EU-DEM, about 30 m), plus
+    delh_m (PASS's sea level above its ellipsoid at the site, so that they
+    sit where PASS's own heights do); 0 for the sea."""
+    import io
+    import certifi
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    Image = _image()
+    lon0, lat0, lon1, lat1 = bounds
+    latm = 0.5 * (lat0 + lat1)
+    target = max(30.0, (lat1 - lat0) * 110570.0 / n)
+    z = 0
+    while z < 14 and 156543.03 * np.cos(np.radians(latm)) / 2 ** z > target:
+        z += 1
+    def gx(lon): return (lon + 180.0) / 360.0 * 2 ** z
+    def gy(lat):
+        r = np.radians(lat)
+        return (1.0 - np.log(np.tan(r) + 1.0 / np.cos(r)) / np.pi) / 2.0 * 2 ** z
+    tx0, tx1 = int(np.floor(gx(lon0))), int(np.floor(gx(lon1)))
+    ty0, ty1 = int(np.floor(gy(lat1))), int(np.floor(gy(lat0)))
+    mosaic = np.zeros(((ty1 - ty0 + 1) * 256, (tx1 - tx0 + 1) * 256), np.float32)
+    print("  terrain z%d: %d x %d tiles" % (z, tx1 - tx0 + 1, ty1 - ty0 + 1), flush=True)
+    for ty in range(ty0, ty1 + 1):
+        for tx in range(tx0, tx1 + 1):
+            for attempt in range(4):
+                try:
+                    with urllib.request.urlopen(TERRAIN_URL % (z, tx, ty), context=ctx, timeout=120) as r:
+                        t = np.asarray(Image.open(io.BytesIO(r.read())).convert("RGB"), np.float32)
+                    break
+                except Exception as e:          # noqa: BLE001
+                    print("  retrying (%s)" % e)
+            else:
+                sys.exit("fetch_assets: could not fetch terrain tile %d/%d/%d" % (z, tx, ty))
+            mosaic[(ty - ty0) * 256:(ty - ty0 + 1) * 256, (tx - tx0) * 256:(tx - tx0 + 1) * 256] = \
+                t[..., 0] * 256.0 + t[..., 1] + t[..., 2] / 256.0 - 32768.0
+    cols = gx(lon0 + (lon1 - lon0) * (np.arange(n) + 0.5) / n) * 256.0 - tx0 * 256.0 - 0.5
+    rows = gy(lat1 - (lat1 - lat0) * (np.arange(n) + 0.5) / n) * 256.0 - ty0 * 256.0 - 0.5
+    c0 = np.clip(np.floor(cols).astype(int), 0, mosaic.shape[1] - 2)
+    r0 = np.clip(np.floor(rows).astype(int), 0, mosaic.shape[0] - 2)
+    fc = np.clip(cols - c0, 0.0, 1.0)[None, :]
+    fr = np.clip(rows - r0, 0.0, 1.0)[:, None]
+    out = (mosaic[r0][:, c0] * (1 - fr) * (1 - fc) + mosaic[r0][:, c0 + 1] * (1 - fr) * fc
+           + mosaic[r0 + 1][:, c0] * fr * (1 - fc) + mosaic[r0 + 1][:, c0 + 1] * fr * fc)
+    out = np.where(out <= 0.0, 0.0, out + delh_m)           # the sea stays at 0
+    return out.astype(np.float32)
+
+
 def prepare_site_heights(key):
     """The ground's heights under a site's rings 0-2 (3DEP), for portview's
     terrain: the launch pads' mounds, and the mountains round Edwards and
@@ -1522,7 +1630,11 @@ def prepare_site_heights(key):
             b = meta['rings'][k]['bounds']
             print("site %s heights %d: +-%g km from 3DEP" % (key, k, meta['rings'][k]['half_km']))
             f = "height%d.npy" % k
-            np.save(os.path.join(d, f), fetch_heights(b, DEM_PX))
+            if SITES[key].get('dem') == 'world':
+                h = fetch_heights_world(b, DEM_PX, SITES[key].get('delh_ft', 0.0) * 0.3048)
+            else:
+                h = fetch_heights(b, DEM_PX)
+            np.save(os.path.join(d, f), h)
             files.append(f)
         meta['heights'] = files
     # And finer under the launch pads (their mounds, ~2 m).

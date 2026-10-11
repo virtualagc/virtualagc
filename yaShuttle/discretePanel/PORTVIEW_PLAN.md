@@ -255,6 +255,16 @@ which portview follows from TRU1's attitude with no special handling.
   through the roll and downrange; the imagery is NAIP's 2010 (Shuttle-era
   pads).  The FSS is an open lattice in the model; the RSS is solid, as its
   clad walls were.
+- Done: the TAL abort sites (zza Zaragoza, mrn Moron, ben Ben Guerir; the
+  runway thresholds and heights from PASS's flown #PCGN13R).  No NAIP or
+  3DEP abroad: Sentinel-2's 10 m (EOX s2cloudless) for the rings, AWS's
+  terrain tiles (SRTM/EU-DEM, ~30 m) for the heights, the runway painted into
+  ring 0 from its thresholds (a 45 m strip is 4 px at 10 m).  `--sites
+  zza,mrn,ben`; `--site zza` in portview.  Per-site `ring_px` keeps the rings
+  to their source's resolution: ~165 MB a site, of which the three float32
+  height maps are 50 MB (they compress well in the tarball).  Other abort
+  sites (the ECAL list, Istres, Lajes, Keflavik, Shannon, ...) are table
+  entries away.
 - Done: the gantry's colours.  NASA's file has three plain grey materials
   (Maya's, which do not follow the objects), so it drew flat white.
   `fetch_assets.recolor_gantry` classes each triangle by its area, normal,
