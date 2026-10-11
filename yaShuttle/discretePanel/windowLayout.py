@@ -1040,7 +1040,9 @@ def place(wid, x, y, w=None, h=None, verbose=False):
         time.sleep(0.15)
     ask_x, ask_y = (int(round(x / float(s))), int(round(y / float(s)))) if s > 1 else (x, y)
     dx = dy = None
-    for attempt in range(5):
+    last = None
+    gain = 1
+    for attempt in range(10):
         run(["xdotool", "windowmove", wid, str(ask_x), str(ask_y)], timeout=5)
         time.sleep(0.25)
         now = geometry(wid)
@@ -1052,8 +1054,16 @@ def place(wid, x, y, w=None, h=None, verbose=False):
                   % (attempt + 1, ask_x, ask_y, now[0], now[1], x, y))
         if abs(dx) < s and abs(dy) < s:
             return True
-        # off by that much: ask for less
-        ask_x, ask_y = ask_x + int(round(dx / float(s))), ask_y + int(round(dy / float(s)))
+        # HELD, NOT MISSED: the same place as the last try means the window
+        # manager is holding the window inside its work area -- marco takes a
+        # move as the FRAME's place, so a first ask near the bottom panel
+        # lands clamped and hides how far off the ask was (some 140 px), and
+        # 16 px a try never got there: three views 16 px low, over the panel
+        # (owner, 2026-10-10).  Then the correction grows until it moves.
+        gain = gain * 4 if now[:2] == last else 1
+        last = now[:2]
+        ask_x += int(round(gain * dx / float(s)))
+        ask_y += int(round(gain * dy / float(s)))
     return (dx, dy)                    # how far out it finished
 
 
