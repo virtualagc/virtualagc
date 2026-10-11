@@ -44,6 +44,7 @@ import argparse
 import glob
 import json
 import os
+import signal
 import re
 import subprocess
 import threading
@@ -1278,8 +1279,49 @@ class Manager(object):
                 "Use Save & Quit instead if you want to come back to this.",
                 confirm="End Simulation"):
             return
+        if self._orphaned():
+            return
         if self._session("quit"):
             self.say("Shutting the simulation down")
+
+    def _orphaned(self):
+        """END A RUN WHOSE simulatePASS HAS GONE.  'quit' goes to simulatePASS,
+        which closes everything it started; when it has died (a traceback in
+        its own shutdown, 2026-10-10) nothing hears the quit and the run's
+        programs sit on the port base -- this window among them.  Then they
+        are closed from here: every program on this port base, this one
+        last.  Only when the process list can be read and simulatePASS is
+        certainly absent; otherwise the quit is sent as before."""
+        base = str(self.args.port_base)
+        mine, sim = [], False
+        names = PROGRAMS + ("rpop.py", "truthball.py", "manager.py")
+        try:
+            for pid, argv in _argvs():
+                if "--port-base" not in argv:
+                    continue
+                try:
+                    if argv[argv.index("--port-base") + 1] != base:
+                        continue
+                except IndexError:
+                    continue
+                bases = [os.path.basename(a) for a in argv]
+                if "simulatePASS.py" in bases:
+                    sim = True
+                elif any(b in names for b in bases) and pid != os.getpid():
+                    mine.append(pid)
+        except Exception:                        # noqa: no process list here
+            return False
+        if sim:
+            return False
+        self.say("simulatePASS is gone; closing the %d program(s) left on port base %s"
+                 % (len(mine), base))
+        for pid in mine:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                pass
+        self.root.after(1500, lambda: os._exit(0))
+        return True
 
     def start_subtitles(self):
         if any(n == "subtitles.py" for n, _ in running(self.args.port_base)):
