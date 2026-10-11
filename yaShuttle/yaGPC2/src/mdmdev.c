@@ -1802,6 +1802,63 @@ static void truth_publish(void) {
     sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
 }
 
+/* THE SUBSYSTEM DISPLAYS, for MEDS2's OMS/MPS and SPI pages: one SUB1
+ * datagram per TRUTH_PERIOD_S of vehicle time on port base + SUBSYS_OFFSET,
+ * "SUB1" then big-endian IEEE doubles -- vehicle time (s); L and R OMS
+ * chamber pressure (%, 0 off, 100 steady); L and R OMS helium tank pressure
+ * and N2 tank pressure (psia); the main engines' chamber pressure (% of rated
+ * power) for ME 1, 2, 3 (C, L, R); the four elevons' positions (degrees, +
+ * trailing edge down: left outboard, left inboard, right inboard, right
+ * outboard), the body flap (% of its travel, 0 full up), the rudder (deg),
+ * the speedbrake (% open) and the aileron (deg).  On the real vehicle these
+ * are sensors on the MDMs, read by the GPCs and carried to the MDUs on the
+ * flight-critical buses; PASS's MEDS3/MEDS4 messages that would carry them
+ * are not produced here, so this is a stand-in fed from the vehicle model.
+ * PROVISIONAL: the helium and N2 pressures are not sourced -- helium falls
+ * linearly with the propellant used (4,500 to 3,500 psia), N2 is steady
+ * (2,400) -- the thrust, surfaces and main engine Pc are the model's own.  */
+#define SUBSYS_OFFSET 110     /* not 81-85, 91, 96-98, 100-109 */
+#define OMS_POD_KG 5897.0     /* vehdyn.c OMS_LOAD_KG, a pod at 100% */
+
+static void subsys_publish(void) {
+    static double next = -1.0;
+    if (!crewOpen || crewFd[1] < 0 || !vehdyn_enabled()) return;
+    const PhysState *st = vehdyn_state();
+    if (st->t < next && st->t > next - 10.0) return;
+    next = st->t + TRUTH_PERIOD_S;
+    double v[1 + 2 + 2 + 2 + 3 + 4 + 4];
+    int n = 0;
+    v[n++] = st->t;
+    for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_oms_thrust(e);
+    for (int e = 0; e < 2; e++) {
+        double used = 1.0 - vehdyn_propellant(3 + e) / OMS_POD_KG;
+        if (used < 0.0) used = 0.0;
+        if (used > 1.0) used = 1.0;
+        v[n++] = 4500.0 - 1000.0 * used;
+    }
+    v[n++] = 2400.0;
+    v[n++] = 2400.0;
+    for (int e = 1; e <= 3; e++) v[n++] = eiu_pc_percent(e, st->t);
+    double pos[7];
+    vehdyn_aerosurf_pos(pos);
+    v[n++] = pos[1];                              /* left outboard */
+    v[n++] = pos[0];                              /* left inboard */
+    v[n++] = pos[2];                              /* right inboard */
+    v[n++] = pos[3];                              /* right outboard */
+    v[n++] = (pos[6] + 11.7) / (22.5 + 11.7) * 100.0;     /* body flap, % of travel */
+    v[n++] = pos[5];                              /* rudder */
+    v[n++] = pos[4] / 98.6 * 100.0;               /* speedbrake, % */
+    v[n++] = 0.25 * ((pos[0] + pos[1]) - (pos[2] + pos[3]));   /* aileron */
+    uint8_t b[4 + 8 * 24];
+    memcpy(b, "SUB1", 4);
+    for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);
+    struct sockaddr_in to = {0};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = inet_addr("239.255.1.1");
+    to.sin_port = htons((uint16_t)(crewPortBase + SUBSYS_OFFSET));
+    sendto(crewFd[1], (const char *)b, (size_t)(4 + 8 * n), 0, (struct sockaddr *)&to, sizeof to);
+}
+
 /* THE OTHER VEHICLES, for portview: one TGT1 datagram per vehicle per
  * TRUTH_PERIOD_S of vehicle time on port base + TARGET_OFFSET: "TGT1", then
  * big-endian IEEE doubles -- vehicle time (s), the NORAD id, M50 position (m)
@@ -2119,6 +2176,7 @@ bool mdmdev_reply(int busID, uint32_t cmd, int n, uint16_t *out, double sharedUs
         vehdyn_advance(sharedUs);                      /* time passes for the vehicle */
         truth_publish();
         targets_publish();
+        subsys_publish();
         veh_status_publish();
     }
     unsigned iua = CMD_IUA(cmd);

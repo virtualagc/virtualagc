@@ -7887,6 +7887,69 @@ class FCInstrumentFeed(object):
                 fn(m)
 
 
+SUBSYS_OFFSET = 110             # yaGPC2 mdmdev.c: "SUB1" subsystem sensors, base + 110
+SUB1_FIELDS = ('omsPcL', 'omsPcR', 'omsHeTKP_L', 'omsHeTKP_R', 'omsN2TKP_L', 'omsN2TKP_R',
+               'mpsPc_C', 'mpsPc_L', 'mpsPc_R',                  # ME 1, 2, 3
+               'elevonDeg_LL', 'elevonDeg_LR', 'elevonDeg_RL', 'elevonDeg_RR',
+               'bodyFlapPc', 'rudderDeg', 'speedbrakePc_ACT', 'aileronDeg')
+
+
+class SubsysFeed(object):
+    """The OMS/MPS and SPI pages' sensor values, from yaGPC2's SUB1 datagram
+    (vehicle model stand-ins for the MDM sensors PASS would put on the
+    flight-critical buses): handed to each MDU as a {field: value} dict."""
+    _the = None
+
+    @classmethod
+    def get(cls):
+        if cls._the is None:
+            cls._the = cls()
+        return cls._the
+
+    def __init__(self):
+        self.listeners = []
+        self.sock = None
+        self._notifier = None
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except (AttributeError, OSError):
+                pass
+            s.bind(('', PORT_BASE + SUBSYS_OFFSET))
+            iface = os.environ.get('NSTS_BUS_IFACE', '127.0.0.1')
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                         socket.inet_aton(MCAST_GROUP) + socket.inet_aton(iface))
+            s.setblocking(False)
+            self.sock = s
+            self._notifier = QSocketNotifier(s.fileno(), QSocketNotifier.Type.Read)
+            self._notifier.activated.connect(self._readable)
+        except OSError as e:
+            print("subsystem sensors: no feed on port %d: %s" % (PORT_BASE + SUBSYS_OFFSET, e))
+
+    def listen(self, fn):
+        self.listeners.append(fn)
+
+    def _readable(self, *_):
+        last = None
+        while True:
+            try:
+                d = self.sock.recv(65536)
+            except (BlockingIOError, OSError):
+                break
+            if d[:4] != b'SUB1' or (len(d) - 4) % 8:
+                continue
+            n = (len(d) - 4) // 8
+            v = struct.unpack('>%dd' % n, d[4:])
+            if n >= 1 + len(SUB1_FIELDS):
+                last = dict(zip(SUB1_FIELDS, v[1:1 + len(SUB1_FIELDS)]))
+                last['speedbrakePc_CMD'] = last['speedbrakePc_ACT']
+        if last is not None:
+            for fn in self.listeners:
+                fn(last)
+
+
 # ===========================================================================
 # meds/mduScreen_AE_PFD.coffee -- the Ascent/Entry Primary Flight Display
 # ===========================================================================
@@ -12121,6 +12184,9 @@ class MDU(LRU):
         self.kybd = KYBD(self.kybdBus(), self)
 
         FCInstrumentFeed.get().listen(self._fcMessage)
+        self.subsysFields = None
+        self._subsysT = 0.0
+        SubsysFeed.get().listen(self._subsysMessage)
         self._fcTimer = QTimer()
         self._fcTimer.timeout.connect(self._fcTick)
         self._fcTimer.start(FC_REFRESH_MS)
@@ -12426,6 +12492,23 @@ class MDU(LRU):
 
     # -- the flight instruments (FCInstrumentFeed) ---------------------------
     PFD_SCREENS = ('AE_PFD', 'ORBIT_PFD')
+
+    def _subsysMessage(self, f):
+        """The OMS/MPS and SPI pages take the vehicle's sensors as they come,
+        at most five times a second, while one of them is the display."""
+        self.subsysFields = f
+        now = time.monotonic()
+        if self.curDisplay not in ('OMS_MPS', 'SPI') or now - self._subsysT < 0.2:
+            return
+        scr = self.screens.get(self.curDisplay)
+        if scr is None or getattr(scr, 'curData', None) is None:
+            return
+        if getattr(scr, '_stTimer', None) is not None:      # SPI's sweep test owns it
+            return
+        self._subsysT = now
+        scr.curData.update(f)
+        scr.refreshFeed()
+        self.redraw()
 
     def _fcMessage(self, m):
         if m['msg'].startswith('MEDS'):
