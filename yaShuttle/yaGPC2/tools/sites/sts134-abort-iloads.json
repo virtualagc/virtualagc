@@ -9,7 +9,8 @@
   "D-csects (G1): #DGG42ND (TAL SSME trim mass, K_CMD_STG2 106 -> 104), #DGG9GLI and #DGHHPHA (glide RTLS), #DGDORTL, #DGEHRTL, #DGSTETS (RTLS ET SEP inhibit limits, ETSEP_INH_TIME), #DGSSSSM (the low-level cutoff delays: DT_DRY 1.918 -> 0.238 s, RTLS_DT_DRY, PTM_DT_DRY, both LH2 LL delays -> 0; prevalve close delays), #DGSMMPS, #DGSFABT, #DGSQASC. Left out: #DGG31ST (first stage, launch-day coupled), #DGSRRSL (RSLS countdown timing), #DGSESRB (already the flown values).",
   "Every cell is placed flat (the csect's one copy, found by a +/-32 hw context and checked over the csect's whole range against an OPS 1 capture), with 'was' the tape's value: a context search with --mem matched blank (zero) neighbourhoods all over the volume.",
   "#PCGNFL1 CGNS_TAL_PRIME_AREA: the tape's 2 (Ben Guerir) -> the flown 4 (Zaragoza), DASS_G3 00D19D and DASS_G16 00D94D; both copies (G16 flat 965433, the overlays' +909804; G3 flat 1192923), each found by its +/-300 hw agreement with an OPS 1 / OPS 3 capture.",
-  "#PCGGCOM's abort OMS dump and interconnect times (resident compool, one copy on the volume at flat = address + 109,968), tape -> flown: CGSS_TAL_OMS_DT 380 -> 442 s, CGSS_ATO_OMS_DT 140 -> 311 s, CGSS_RTLS_OMS_DT 395 -> 500 s, CGZS_MANUAL_OMS_DUMP_TIME 380 -> 498 s, CGZS_ENTRY_OMS_FUEL_BURN_TIME, CGSS_OR_INTERCON_INIT/TERM_FU_TIME, CGSS_CONT_OR_ICNCT_TERM_FU_TIME, CGCS_FWD_RCS_DUMP_TIMER_OPS1/OPS3.  Left out of the first set with the rest of #PCGGCOM (its launch-day words); these are mission constants.  The ATO's 140 s dump left it heavy and underspeed at MECO.  CGSS_ASSIST_OMS_DT reads neither LM nor MM in memory and is left alone."
+  "#PCGGCOM's abort OMS dump and interconnect times (resident compool, one copy on the volume at flat = address + 109,968), tape -> flown: CGSS_TAL_OMS_DT 380 -> 442 s, CGSS_ATO_OMS_DT 140 -> 311 s, CGSS_RTLS_OMS_DT 395 -> 500 s, CGZS_MANUAL_OMS_DUMP_TIME 380 -> 498 s, CGZS_ENTRY_OMS_FUEL_BURN_TIME, CGSS_OR_INTERCON_INIT/TERM_FU_TIME, CGSS_CONT_OR_ICNCT_TERM_FU_TIME, CGCS_FWD_RCS_DUMP_TIMER_OPS1/OPS3.  Left out of the first set with the rest of #PCGGCOM (its launch-day words); these are mission constants.  The ATO's 140 s dump left it heavy and underspeed at MECO.  CGSS_ASSIST_OMS_DT reads neither LM nor MM in memory and is left alone.",
+  "#PCGGCOM's ATO pre-MECO and MECO words, tape -> flown: CGGS_ATO_PREMECO_K2_LOWLIM, CGGS_ATO_OMS_RCS_V, CGGS_ATO_PRE_MECO_OMS_RCS_V, CGGS_V_MSSN_CNTN, and CGGS_V_MAG_MECO_ATO's low halfword.  CGGS_FPA_MECO_ATO is left out: its second halfword reads neither tape nor flown in memory.  IPL-resident like the dump times."
  ],
  "cells": [
   {
@@ -24901,6 +24902,22 @@
    "H": "431BF000",
    "was": "4315E000",
    "flat": 130258
+  },
+  {
+   "name": "#PCGGCOM CGGS_ATO_PREMECO_K2_LOWLIM..V_MSSN_CNTN",
+   "config": "G16",
+   "addr": "04f56",
+   "H": "3FC8B439442AC600443E9E0044300C00",
+   "was": "3F7A0F904417A5004418940044189400",
+   "flat": 130278
+  },
+  {
+   "name": "#PCGGCOM CGGS_V_MAG_MECO_ATO",
+   "config": "G16",
+   "addr": "04f69",
+   "H": "DB00",
+   "was": "4400",
+   "flat": 130297
   }
  ]
 }
