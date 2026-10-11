@@ -556,11 +556,13 @@ class Flight:
         self.wait_gmt(T0 - 8.0)
 
     def orbit_pfd(self):
-        """CRT 2 to the ORBIT PFD (FLT INST menu: UP, FLT INST, ORBIT PFD --
-        MEDS2.py FLT_INST key 2), once, if the A/E PFD is up on it."""
+        """CRT 2 to the ORBIT PFD, once, if the A/E PFD is up on it.  A PFD on
+        screen leaves the FLIGHT INSTRUMENT MENU's edge keys as they were, so
+        ORBIT PFD is key 3 as it stands (the owner, at OMS-1 MNVR EXEC,
+        2026-10-11); MEDS2.py FLT_INST key 2 is the third key."""
         if self.a.crts < 2 or not getattr(self, "pfd_up", False) or getattr(self, "orbit_pfd_up", False):
             return
-        self.play("+1     edgekey crt2 1\n+2     edgekey crt2 2\n+2     edgekey crt2 3\n", "pfd-orbit")
+        self.play("+1     edgekey crt2 3\n", "pfd-orbit")
         self.script_done("pfd-orbit", 60)
         self.orbit_pfd_up = True
         self.say("crew: ORBIT PFD on CRT 2")
