@@ -1,0 +1,811 @@
+{
+ "flight": "STS-134, Endeavour",
+ "notes": [
+  "STS-134's flown entry-guidance I-loads in G3's #PCGGC03, from DASS_G3.ASC's PATCH SUMMARY (the flown G3 load against the generic tape): every word whose value in a G3 memory image (abort11-tal-bank's OPS 3 capture, volume eeaf4636) is the generic (LM) one and whose flown (MM) value differs -- 269 halfwords, the whole csect's flown set but two (CGGS_VYLMAX, CGGS_Y1: neither LM nor MM in memory, left alone).",
+  "Among them: CGGS_ASTART 5.66 -> 4.25 ft/s^2 (the drag that ends pre-entry, GGEENT), VA1, VB1, DF, D230, RPTI, AK, AK1, ZK1, CY0, the alpha table (CALP0/1/2, VALP), the TAL alpha ramp (VALPD1 1600 -> 2000, VALPD2 800 -> 1750, VNOALP2 25000 -> 21000), VNOALP, and the TAEM terms (ENBIAS, X_HAC_LOW/HIGH_MASS, H_DECAY, SB_REF, TAU_GAMMA, QBG2, N_FADER, ...).",
+  "Why: a TAL entry on the generic values held the wings level through the pull-out (a skip to 227 kft) and rolled in to 120 deg at q 40 psf; the yaw jets could not hold the sideslip and ran the aft pods dry (abort9/abort11, 2026-10-10).  G3 is also the NOMINAL entry's: re-fly both.",
+  "Placement: flat = address + 1,139,262, the G3 load block that also holds #PCGNFL1 (CGNS_TAL_PRIME_AREA's G3 copy); 715 of the csect's 831 words in the image match the volume there.  Applied on -full2 to make -full3."
+ ],
+ "cells": [
+  {
+   "name": "#PCGGC03 CGGS_AK",
+   "config": "G3",
+   "addr": "0ed3c",
+   "H": "C1297878",
+   "was": "C1375119",
+   "flat": 1199994
+  },
+  {
+   "name": "#PCGGC03 CGGS_AK1",
+   "config": "G3",
+   "addr": "0ed3e",
+   "H": "C1436DBC",
+   "was": "C14C28F5",
+   "flat": 1199996
+  },
+  {
+   "name": "#PCGGC03 CGGS_ASTART",
+   "config": "G3",
+   "addr": "0ed4c",
+   "H": "41440000",
+   "was": "415A8F5C",
+   "flat": 1200010
+  },
+  {
+   "name": "#PCGGC03 CGGS_CDDOT3",
+   "config": "G3",
+   "addr": "0ed53",
+   "H": "147A",
+   "was": "1479",
+   "flat": 1200017
+  },
+  {
+   "name": "#PCGGC03 CGGS_CDDOT7",
+   "config": "G3",
+   "addr": "0ed5b",
+   "H": "5F30",
+   "was": "5F2F",
+   "flat": 1200025
+  },
+  {
+   "name": "#PCGGC03 CGGS_CY0",
+   "config": "G3",
+   "addr": "0ed73",
+   "H": "82A9",
+   "was": "82A8",
+   "flat": 1200049
+  },
+  {
+   "name": "#PCGGC03 CGGS_DF",
+   "config": "G3",
+   "addr": "0ed7a",
+   "H": "4214",
+   "was": "4215",
+   "flat": 1200056
+  },
+  {
+   "name": "#PCGGC03 CGGS_D230",
+   "config": "G3",
+   "addr": "0ed7c",
+   "H": "42196666",
+   "was": "4213CCCC",
+   "flat": 1200058
+  },
+  {
+   "name": "#PCGGC03 CGGS_ETRAN",
+   "config": "G3",
+   "addr": "0ed87",
+   "H": "2018",
+   "was": "3DF5",
+   "flat": 1200069
+  },
+  {
+   "name": "#PCGGC03 CGGS_GS2",
+   "config": "G3",
+   "addr": "0ed8c",
+   "H": "3CA7C5AC",
+   "was": "00000000",
+   "flat": 1200074
+  },
+  {
+   "name": "#PCGGC03 CGGS_RPTI",
+   "config": "G3",
+   "addr": "0eda6",
+   "H": "421CCA3D",
+   "was": "42166666",
+   "flat": 1200100
+  },
+  {
+   "name": "#PCGGC03 CGGS_VA",
+   "config": "G3",
+   "addr": "0eda9",
+   "H": "28A8",
+   "was": "F500",
+   "flat": 1200103
+  },
+  {
+   "name": "#PCGGC03 CGGS_VA1",
+   "config": "G3",
+   "addr": "0edaa",
+   "H": "44520800",
+   "was": "4455F000",
+   "flat": 1200104
+  },
+  {
+   "name": "#PCGGC03 CGGS_VA2",
+   "config": "G3",
+   "addr": "0edac",
+   "H": "446952C2",
+   "was": "446BF500",
+   "flat": 1200106
+  },
+  {
+   "name": "#PCGGC03 CGGS_VB1",
+   "config": "G3",
+   "addr": "0edae",
+   "H": "44426800",
+   "was": "444A3800",
+   "flat": 1200108
+  },
+  {
+   "name": "#PCGGC03 CGGS_VELMN",
+   "config": "G3",
+   "addr": "0edb2",
+   "H": "44271000",
+   "was": "44251C00",
+   "flat": 1200112
+  },
+  {
+   "name": "#PCGGC03 CGGS_VS1",
+   "config": "G3",
+   "addr": "0edc0",
+   "H": "4459DB75",
+   "was": "445AF380",
+   "flat": 1200126
+  },
+  {
+   "name": "#PCGGC03 CGGS_ZK1",
+   "config": "G3",
+   "addr": "0edcf",
+   "H": "9999",
+   "was": "9998",
+   "flat": 1200141
+  },
+  {
+   "name": "#PCGGC03 CGGS_RLMC5",
+   "config": "G3",
+   "addr": "0eddd",
+   "H": "F5C2",
+   "was": "F5C1",
+   "flat": 1200155
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP0",
+   "config": "G3",
+   "addr": "0ede2",
+   "H": "41508D3CC1DD0C544228000042280000",
+   "was": "4213747AC1412F1AC14471DE421065E3",
+   "flat": 1200160
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP0",
+   "config": "G3",
+   "addr": "0edea",
+   "H": "4228000042280000",
+   "was": "41479DB2C19EF141",
+   "flat": 1200168
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP0",
+   "config": "G3",
+   "addr": "0edfa",
+   "H": "422B",
+   "was": "4232",
+   "flat": 1200184
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP1",
+   "config": "G3",
+   "addr": "0edfc",
+   "H": "3EEB0691",
+   "was": "BF1FCD04",
+   "flat": 1200186
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP1",
+   "config": "G3",
+   "addr": "0edff",
+   "H": "FD010000000000000000000000000000",
+   "was": "D4A33F245A1DBE1499433ED0E5603F1C",
+   "flat": 1200189
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP1",
+   "config": "G3",
+   "addr": "0ee07",
+   "H": "0000",
+   "was": "3600",
+   "flat": 1200197
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP2",
+   "config": "G3",
+   "addr": "0ee16",
+   "H": "00000000BB60443A0000000000000000",
+   "was": "3C241E1ABBC7B74ABBCD0E0F3B4506E9",
+   "flat": 1200212
+  },
+  {
+   "name": "#PCGGC03 CGGS_CALP2",
+   "config": "G3",
+   "addr": "0ee20",
+   "H": "00000000",
+   "was": "BB3FC0B9",
+   "flat": 1200222
+  },
+  {
+   "name": "#PCGGC03 CGGS_VALP",
+   "config": "G3",
+   "addr": "0ee30",
+   "H": "441C5200442FDA004438A4004438A400",
+   "was": "43B2200043C8000044119400441A9900",
+   "flat": 1200238
+  },
+  {
+   "name": "#PCGGC03 CGGS_VALP",
+   "config": "G3",
+   "addr": "0ee38",
+   "H": "4438A400",
+   "was": "441E6D66",
+   "flat": 1200246
+  },
+  {
+   "name": "#PCGGC03 CGGS_EMOHC1",
+   "config": "G3",
+   "addr": "0ee4e",
+   "H": "C4972C00C4196400",
+   "was": "C3F36000C3F36000",
+   "flat": 1200268
+  },
+  {
+   "name": "#PCGGC03 CGGS_EMOHC2",
+   "config": "G3",
+   "addr": "0ee52",
+   "H": "408B6AE74076C226",
+   "was": "4083BF724083BF72",
+   "flat": 1200272
+  },
+  {
+   "name": "#PCGGC03 CGGS_ENBIAS",
+   "config": "G3",
+   "addr": "0ee56",
+   "H": "44271000",
+   "was": "00000000",
+   "flat": 1200276
+  },
+  {
+   "name": "#PCGGC03 CGGS_X_HAC_LOW_MASS",
+   "config": "G3",
+   "addr": "0ee58",
+   "H": "C49E4700",
+   "was": "C48D9500",
+   "flat": 1200278
+  },
+  {
+   "name": "#PCGGC03 CGGS_X_HAC_HIGH_MASS",
+   "config": "G3",
+   "addr": "0ee5a",
+   "H": "C4ADC800",
+   "was": "C48D9500",
+   "flat": 1200280
+  },
+  {
+   "name": "#PCGGC03 CGGS_ACLAM1",
+   "config": "G3",
+   "addr": "0ee68",
+   "H": "4130",
+   "was": "4118",
+   "flat": 1200294
+  },
+  {
+   "name": "#PCGGC03 CGGS_ACLAM2",
+   "config": "G3",
+   "addr": "0ee6a",
+   "H": "00000000",
+   "was": "3DD1B717",
+   "flat": 1200296
+  },
+  {
+   "name": "#PCGGC03 CGGS_ACLIM3",
+   "config": "G3",
+   "addr": "0ee70",
+   "H": "3E370CDC",
+   "was": "3E418937",
+   "flat": 1200302
+  },
+  {
+   "name": "#PCGGC03 CGGS_CUBIC_C3",
+   "config": "G3",
+   "addr": "0ee78",
+   "H": "BB44D6A0BAED937C",
+   "was": "BB61BDEABB61BDEA",
+   "flat": 1200310
+  },
+  {
+   "name": "#PCGGC03 CGGS_CUBIC_C4",
+   "config": "G3",
+   "addr": "0ee7c",
+   "H": "B67C3E01B6D5094B",
+   "was": "B61AAFCCB61AAFCC",
+   "flat": 1200314
+  },
+  {
+   "name": "#PCGGC03 CGGS_DLAPLM",
+   "config": "G3",
+   "addr": "0ee9a",
+   "H": "4150",
+   "was": "4120",
+   "flat": 1200344
+  },
+  {
+   "name": "#PCGGC03 CGGS_S_DR_WIND",
+   "config": "G3",
+   "addr": "0ee9c",
+   "H": "4232",
+   "was": "422C",
+   "flat": 1200346
+  },
+  {
+   "name": "#PCGGC03 CGGS_EDRS",
+   "config": "G3",
+   "addr": "0eea6",
+   "H": "40AAA64C4099930B",
+   "was": "409B0BBD409C0A6B",
+   "flat": 1200356
+  },
+  {
+   "name": "#PCGGC03 CGGS_EMEP_C1",
+   "config": "G3",
+   "addr": "0eeaa",
+   "H": "C3A8C0004435E800C42134004435E800",
+   "was": "C3C1AA244431D6FFC3C1AA244431D6FF",
+   "flat": 1200360
+  },
+  {
+   "name": "#PCGGC03 CGGS_EMEP_C2",
+   "config": "G3",
+   "addr": "0eeb2",
+   "H": "4060CB29403E2824407000004034D6A1",
+   "was": "406AB533404838EE406AB533404838EE",
+   "flat": 1200368
+  },
+  {
+   "name": "#PCGGC03 CGGS_EN_C1",
+   "config": "G3",
+   "addr": "0eeba",
+   "H": "C38FC000443C2800C3578000443C2800",
+   "was": "C3F0D01B443AFC00C3F0D01B443AFC00",
+   "flat": 1200376
+  },
+  {
+   "name": "#PCGGC03 CGGS_EN_C2",
+   "config": "G3",
+   "addr": "0eec2",
+   "H": "408B923A40666CF4",
+   "was": "408CCE9A40639713",
+   "flat": 1200384
+  },
+  {
+   "name": "#PCGGC03 CGGS_EN_C2",
+   "config": "G3",
+   "addr": "0eec7",
+   "H": "3C9E405FAACD",
+   "was": "CE9A40639713",
+   "flat": 1200389
+  },
+  {
+   "name": "#PCGGC03 CGGS_EOW_SPT",
+   "config": "G3",
+   "addr": "0eeca",
+   "H": "451DC90045178F40",
+   "was": "451CBD60451CBD60",
+   "flat": 1200392
+  },
+  {
+   "name": "#PCGGC03 CGGS_ES1",
+   "config": "G3",
+   "addr": "0eece",
+   "H": "4417D400442D5000",
+   "was": "4442D9BA4442D9BA",
+   "flat": 1200396
+  },
+  {
+   "name": "#PCGGC03 CGGS_GAMMA_REF_1",
+   "config": "G3",
+   "addr": "0eed8",
+   "H": "C212",
+   "was": "C214",
+   "flat": 1200406
+  },
+  {
+   "name": "#PCGGC03 CGGS_GAMSGS",
+   "config": "G3",
+   "addr": "0eede",
+   "H": "C212",
+   "was": "C214",
+   "flat": 1200412
+  },
+  {
+   "name": "#PCGGC03 CGGS_H_DECAY",
+   "config": "G3",
+   "addr": "0eee4",
+   "H": "4223",
+   "was": "421E",
+   "flat": 1200418
+  },
+  {
+   "name": "#PCGGC03 CGGS_H_K",
+   "config": "G3",
+   "addr": "0eef0",
+   "H": "44659F0044677B00447DF20044804F00",
+   "was": "447640004478710044955C0044983300",
+   "flat": 1200430
+  },
+  {
+   "name": "#PCGGC03 CGGS_N_FADER",
+   "config": "G3",
+   "addr": "0ef34",
+   "H": "4219",
+   "was": "0000",
+   "flat": 1200498
+  },
+  {
+   "name": "#PCGGC03 CGGS_PBGC",
+   "config": "G3",
+   "addr": "0ef38",
+   "H": "401F6ECF401F6ECF",
+   "was": "401CD30B401CD30B",
+   "flat": 1200502
+  },
+  {
+   "name": "#PCGGC03 CGGS_PBHC",
+   "config": "G3",
+   "addr": "0ef3c",
+   "H": "4513E80945136577",
+   "was": "4514B5544514B554",
+   "flat": 1200506
+  },
+  {
+   "name": "#PCGGC03 CGGS_PBRC",
+   "config": "G3",
+   "addr": "0ef40",
+   "H": "4543238045432380",
+   "was": "454B38D8454B38D8",
+   "flat": 1200510
+  },
+  {
+   "name": "#PCGGC03 CGGS_PBRCQ",
+   "config": "G3",
+   "addr": "0ef45",
+   "H": "4C00",
+   "was": "C900",
+   "flat": 1200515
+  },
+  {
+   "name": "#PCGGC03 CGGS_PBRCQ",
+   "config": "G3",
+   "addr": "0ef47",
+   "H": "4C00",
+   "was": "C900",
+   "flat": 1200517
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBC1",
+   "config": "G3",
+   "addr": "0ef51",
+   "H": "1A313E508400",
+   "was": "777E3E26777E",
+   "flat": 1200527
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBC2",
+   "config": "G3",
+   "addr": "0ef54",
+   "H": "BE4FDF3BBE3D5D90",
+   "was": "BE40947FBE40947F",
+   "flat": 1200530
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBG2",
+   "config": "G3",
+   "addr": "0ef58",
+   "H": "4010",
+   "was": "4020",
+   "flat": 1200534
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBRLL",
+   "config": "G3",
+   "addr": "0ef5c",
+   "H": "42AF",
+   "was": "42A1",
+   "flat": 1200538
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBRLL",
+   "config": "G3",
+   "addr": "0ef5e",
+   "H": "42CA",
+   "was": "42A1",
+   "flat": 1200540
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBRML",
+   "config": "G3",
+   "addr": "0ef60",
+   "H": "42C3",
+   "was": "42B4",
+   "flat": 1200542
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBRML",
+   "config": "G3",
+   "addr": "0ef62",
+   "H": "42F5",
+   "was": "42B4",
+   "flat": 1200544
+  },
+  {
+   "name": "#PCGGC03 CGGS_QBRUL",
+   "config": "G3",
+   "addr": "0ef64",
+   "H": "4313100043131000",
+   "was": "431096E1431096E1",
+   "flat": 1200546
+  },
+  {
+   "name": "#PCGGC03 CGGS_R",
+   "config": "G3",
+   "addr": "0ef68",
+   "H": "4465140044670E00447D7200447FEE00",
+   "was": "4475C200447812004494ED004497E300",
+   "flat": 1200550
+  },
+  {
+   "name": "#PCGGC03 CGGS_SB_REF",
+   "config": "G3",
+   "addr": "0ef7a",
+   "H": "4241",
+   "was": "4237",
+   "flat": 1200568
+  },
+  {
+   "name": "#PCGGC03 CGGS_A_DR_WT",
+   "config": "G3",
+   "addr": "0ef7e",
+   "H": "C5122D20C5106580",
+   "was": "C510B350C4ECF700",
+   "flat": 1200572
+  },
+  {
+   "name": "#PCGGC03 CGGS_SIGMA",
+   "config": "G3",
+   "addr": "0ef83",
+   "H": "6000",
+   "was": "5000",
+   "flat": 1200577
+  },
+  {
+   "name": "#PCGGC03 CGGS_SIGMA",
+   "config": "G3",
+   "addr": "0ef85",
+   "H": "2000",
+   "was": "C000",
+   "flat": 1200579
+  },
+  {
+   "name": "#PCGGC03 CGGS_TAU_GAMMA",
+   "config": "G3",
+   "addr": "0ef88",
+   "H": "4124CCCC",
+   "was": "41200000",
+   "flat": 1200582
+  },
+  {
+   "name": "#PCGGC03 CGGS_TGGS",
+   "config": "G3",
+   "addr": "0ef91",
+   "H": "2D26C0532DEF",
+   "was": "2D23C05D2D23",
+   "flat": 1200591
+  },
+  {
+   "name": "#PCGGC03 CGGS_V_REF",
+   "config": "G3",
+   "addr": "0ef98",
+   "H": "431FA4CC431FA4CC",
+   "was": "431EA000431EA000",
+   "flat": 1200598
+  },
+  {
+   "name": "#PCGGC03 CGGS_VNOALP",
+   "config": "G3",
+   "addr": "0efa2",
+   "H": "44753000",
+   "was": "4461A800",
+   "flat": 1200608
+  },
+  {
+   "name": "#PCGGC03 CGGS_X_EXP",
+   "config": "G3",
+   "addr": "0efa4",
+   "H": "C4135700C3ED6000C4126600C3DD3000",
+   "was": "C411D200C3D45000C4108C00C3BE9000",
+   "flat": 1200610
+  },
+  {
+   "name": "#PCGGC03 CGGS_X_K",
+   "config": "G3",
+   "addr": "0efac",
+   "H": "C3CF9000C3863000C3AF8000C364C000",
+   "was": "C3B06000C3661000C3879000C33B8000",
+   "flat": 1200618
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_L_X",
+   "config": "G3",
+   "addr": "0f007",
+   "H": "5C93",
+   "was": "0000",
+   "flat": 1200709
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_L_Y",
+   "config": "G3",
+   "addr": "0f008",
+   "H": "C168C5B0",
+   "was": "C1700000",
+   "flat": 1200710
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_R_X",
+   "config": "G3",
+   "addr": "0f00a",
+   "H": "42B2A36D",
+   "was": "42B30000",
+   "flat": 1200712
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_R_Y",
+   "config": "G3",
+   "addr": "0f014",
+   "H": "C168C5B0",
+   "was": "C1700000",
+   "flat": 1200722
+  },
+  {
+   "name": "#PCGGC03 CGGS_VALPD1",
+   "config": "G3",
+   "addr": "0f038",
+   "H": "437D",
+   "was": "4364",
+   "flat": 1200758
+  },
+  {
+   "name": "#PCGGC03 CGGS_VALPD2",
+   "config": "G3",
+   "addr": "0f03a",
+   "H": "436D6000",
+   "was": "43320000",
+   "flat": 1200760
+  },
+  {
+   "name": "#PCGGC03 CGGS_VNOALP2",
+   "config": "G3",
+   "addr": "0f03c",
+   "H": "44520800",
+   "was": "4461A800",
+   "flat": 1200762
+  },
+  {
+   "name": "#PCGGC03 CGGS_DYL1",
+   "config": "G3",
+   "addr": "0f040",
+   "H": "401D7D17",
+   "was": "3F333333",
+   "flat": 1200766
+  },
+  {
+   "name": "#PCGGC03 CGGS_B_DR_WT",
+   "config": "G3",
+   "addr": "0f042",
+   "H": "44217700441DB400",
+   "was": "441EAC00441B0C00",
+   "flat": 1200768
+  },
+  {
+   "name": "#PCGGC03 CGGS_S_SB_DR",
+   "config": "G3",
+   "addr": "0f046",
+   "H": "3F353F7C3F31F8A0",
+   "was": "3F32CA573F2DE00D",
+   "flat": 1200772
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_L_STRT_X",
+   "config": "G3",
+   "addr": "0f05d",
+   "H": "1463",
+   "was": "0000",
+   "flat": 1200795
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_L_STRT_Y",
+   "config": "G3",
+   "addr": "0f05f",
+   "H": "73BE",
+   "was": "0000",
+   "flat": 1200797
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_R_STRT_X",
+   "config": "G3",
+   "addr": "0f060",
+   "H": "428BEB9C",
+   "was": "428C0000",
+   "flat": 1200798
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE1_R_STRT_Y",
+   "config": "G3",
+   "addr": "0f063",
+   "H": "73BE",
+   "was": "0000",
+   "flat": 1200801
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_L_X",
+   "config": "G3",
+   "addr": "0f064",
+   "H": "4249CB2F",
+   "was": "424A0000",
+   "flat": 1200802
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_L_Y",
+   "config": "G3",
+   "addr": "0f066",
+   "H": "C22FE0D6",
+   "was": "C2300000",
+   "flat": 1200804
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_R_X",
+   "config": "G3",
+   "addr": "0f069",
+   "H": "34D1",
+   "was": "0000",
+   "flat": 1200807
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_R_Y",
+   "config": "G3",
+   "addr": "0f06a",
+   "H": "C22FE0D6",
+   "was": "C2300000",
+   "flat": 1200808
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_L_STRT_X",
+   "config": "G3",
+   "addr": "0f06c",
+   "H": "427EE185",
+   "was": "427F0000",
+   "flat": 1200810
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_L_STRT_Y",
+   "config": "G3",
+   "addr": "0f06f",
+   "H": "3FE9",
+   "was": "0000",
+   "flat": 1200813
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_R_STRT_X",
+   "config": "G3",
+   "addr": "0f071",
+   "H": "1E7A",
+   "was": "0000",
+   "flat": 1200815
+  },
+  {
+   "name": "#PCGGC03 CGZV_EB_POS_RR_LINE2_R_STRT_Y",
+   "config": "G3",
+   "addr": "0f073",
+   "H": "3FE9",
+   "was": "0000",
+   "flat": 1200817
+  }
+ ]
+}

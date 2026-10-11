@@ -244,6 +244,45 @@ TAL_OPS3 = "+1     keys OPS 3 0 1 PRO\nwait crt 1 title 3041/ timeout 180\n"
 TAL_SITES = {"BEN": 1449.0, "MRN": 326.0, "ZZA": 927.0}
 TAL_DEFAULT = "ZZA"
 
+# AN ATO's OMS BURNS, on PASS's own ATO targets (sts134-abort-iloads.json,
+# #PCGGD01 as flown): OMS 1 at CGGS_ATO_OMS1_REL_TIG, about 102 s after MECO,
+# for CGGS_ATO_OMS1_TARGET_ALT 104 n.mi.; OMS 2 at CGGS_ATO_OMS2_REL_TIG with
+# its own target.  A low ATO MECO is underspeed by design (57 x -106 n.mi. on
+# -full2 with ME2 out at +330 s) and the two burns make the orbit; without
+# them the vehicle re-enters within the orbit.  MM 104 comes up at ET SEP and
+# MM 105 is keyed for OMS 2 (ASC/134 3-3).  The crew's minimum: DAP AUTO, the
+# two-engine trims, LOAD, TIMER, MNVR, then EXEC when the display's TIG comes
+# (read off CRT 1, as the crew read it).
+ATO_OMS1 = """
+wait crt 1 title 1041/ timeout 120
++1     dap c3 auto
++5     keys ITEM 6 + 0 . 4 - 5 . 7 + 5 . 7 EXEC
++5     keys ITEM 2 2 EXEC
++5     keys ITEM 2 3 EXEC
++5     keys ITEM 2 7 EXEC
+"""
+# OMS 2 on PASS's own ATO targets too: MM 105 after an ATO comes up with
+# GH6_OMS2_ATO's I-loaded HT 104, THETA T 400 (from the launch site: one
+# revolution plus 40 deg) and TIG.  The keys wait 20 s after the page, as the
+# nominal OMS 2 setup's do: keyed 5 s after it, the trims and LOAD were
+# refused (ILLEGAL ENTRY; abort8-ato, 2026-10-10) -- the GKPMNV item checks
+# refuse targeting items while the maneuver display is initialising.  LOAD's
+# solution takes about 12 s to show (delta-V TOT).
+ATO_OMS2 = """
++1     dap c3 auto
++5     keys OPS 1 0 5 PRO
+wait crt 1 title 1051/ timeout 120
++20    keys ITEM 6 + 0 . 4 - 5 . 7 + 5 . 7 EXEC
++5     keys ITEM 2 2 EXEC
+"""
+ATO_OMS2_MNVR = """
++1     keys ITEM 2 3 EXEC
++5     keys ITEM 2 7 EXEC
+"""
+# a MNVR EXEC display's TIG, MET DDD/HH:MM:SS.S: the line under " 10 TIG",
+# the day's leading blanks drawn as underscores ("__0/00:11:37.8")
+TIG_RE = re.compile(r"\bTIG\b[^/:]*?([0-9_]+)/(\d+):(\d+):(\d+(?:\.\d*)?)")
+
 
 def keys_signed(x, fmt):
     """A number as DEORB MNVR keystrokes: its sign, then digit by digit."""
@@ -268,6 +307,8 @@ class Flight:
                    YAGPC_VEHDYN_ORBITER_KG=str(FL["orbiter_kg"]), YAGPC_OMS_ARMED="1",
                    YAGPC_RNP="%d,%d" % tuple(FL["rnp"]), YAGPC_VEHDYN_STATELOG=os.environ.get("FLY_STATELOG", "5"),
                    PYTHONUNBUFFERED="1", **fenv)
+        if getattr(self.a, "abort", None) == "ATO":
+            env["NSTS_ANNOUNCE_ROWS"] = "all"     # the MNVR pages' TIG, for EXEC
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
@@ -535,7 +576,10 @@ class Flight:
         with open(os.path.join(self.a.logs, "etsep.gmt"), "w") as fh:
             fh.write("%.3f\n" % (g + tsep - t))
         self.say("ET separation at GMT %.3f" % (g + tsep - t))
-        if getattr(self.a, "abort", None) != "TAL":
+        if getattr(self.a, "abort", None) == "ATO":
+            self.wait_sim(5)
+            self.ato_burn("ato-oms1", ATO_OMS1, g + tsep - t + 84.0)
+        elif getattr(self.a, "abort", None) != "TAL":
             self.wait_sim(20)
         else:
             # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
@@ -543,6 +587,106 @@ class Flight:
             self.play(G3_FROM_MM + TAL_OPS3, "tal-ops3")
             self.script_done("tal-ops3", 300)
             self.say("crew: TAL, G3 from mass memory, OPS 3 PRO after ET SEP: MM 304")
+
+    # --- an ATO's burns ------------------------------------------------------
+    def crt1_text(self):
+        """CRT 1's whole page as MEDS2 last announced it (NSTS_ANNOUNCE_ROWS
+        all, set for an ATO): a listener on port base + 91, started once."""
+        if not hasattr(self, "_crt1"):
+            import socket
+            import threading
+            self._crt1 = ""
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if hasattr(socket, "SO_REUSEPORT"):
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            s.bind(("", self.base + crewscript.SCREEN_OFFSET))
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
+                         socket.inet_aton("239.255.1.1")
+                         + socket.inet_aton(os.environ.get("NSTS_BUS_IFACE", "127.0.0.1")))
+            s.settimeout(1.0)
+
+            def listen():
+                while True:
+                    try:
+                        d = s.recv(8192)
+                    except OSError:
+                        continue
+                    name, _, body = d.decode("utf-8", "replace").partition("\n")
+                    if name.strip().lower() == "crt1":
+                        self._crt1 = body
+            threading.Thread(target=listen, daemon=True).start()
+            time.sleep(2)
+        return self._crt1
+
+    def vehicle_kg(self):
+        """The truth's mass from the last state line: an OMS burn takes
+        about 17 kg/s off it."""
+        m = re.findall(r"^vehdyn-state: .* mass_kg=([\d.]+)", self.log_text()[-20000:], re.M)
+        return float(m[-1]) if m else None
+
+    def ato_oms2_loaded(self, tig):
+        """After LOAD: the solution on the page (delta-V TOT) within a
+        minute, then TIMER and MNVR.  Without one, say so and go on: the
+        EXEC that follows will show the burn not starting."""
+        for _ in range(60):
+            if re.search(r"VTOT\s+[\d.]+", self.crt1_text()):
+                break
+            time.sleep(1)
+        else:
+            self.say("crew: ato-oms2 LOAD gave no solution on CRT 1")
+        self.play(ATO_OMS2_MNVR, "ato-oms2-mnvr")
+        self.script_done("ato-oms2-mnvr", 60)
+
+    def ato_burn(self, name, script, estimate, targets=None):
+        """Set up a burn on PASS's own targets, then EXEC at the TIG on CRT 1
+        (estimate, a GMT, if the page cannot be read).  EXEC is taken from
+        TIG-15 s; until the vehicle's mass starts falling it is pressed again,
+        as a crew would on seeing the burn not start."""
+        self.crt1_text()
+        self.play(script, name)
+        self.script_done(name, 300)
+        page = self.crt1_text()
+        with open(os.path.join(self.a.logs, name + ".crt1"), "w") as fh:
+            fh.write(page)
+        m = TIG_RE.search(page)
+        if m:
+            d, h, mi, sec = m.groups()
+            d = d.replace("_", "") or "0"
+            tig = T0 + int(d) * 86400 + int(h) * 3600 + int(mi) * 60 + float(sec)
+            self.say("crew: %s TIG MET %s/%s:%s:%s on CRT 1 (GMT %.1f)" % (name, d, h, mi, sec, tig))
+        else:
+            tig = estimate
+            self.say("crew: %s TIG not read off CRT 1; estimated GMT %.1f" % (name, tig))
+        if targets:
+            targets(tig)
+            with open(os.path.join(self.a.logs, name + "-loaded.crt1"), "w") as fh:
+                fh.write(self.crt1_text())
+        self.wait_gmt(tig - 8.0)
+        kg0 = self.vehicle_kg()
+        for k in range(12):
+            self.play("+0     keys EXEC\n", name + "-exec")
+            self.wait_sim(4)
+            kg = self.vehicle_kg()
+            if kg0 is not None and kg is not None and kg < kg0 - 20.0:
+                self.say("crew: %s EXEC; the burn is on" % name)
+                # PASS ends the burn itself; anything keyed meanwhile -- OPS
+                # 105 PRO for the next burn above all -- stops it: OPS 105 at
+                # once cut an ATO OMS 1 off after 17 s (2026-10-10)
+                t0, last = time.time(), kg
+                while time.time() - t0 < 900.0:
+                    self.wait_sim(5)
+                    kg = self.vehicle_kg()
+                    if kg is None:
+                        kg = last
+                        continue
+                    if kg > last - 5.0:
+                        break
+                    last = kg
+                self.say("crew: %s done: %.0f kg in %.0f s" % (name, kg0 - kg, time.time() - t0))
+                return tig
+        self.say("crew: %s EXEC pressed %d times; NO BURN seen" % (name, k + 1))
+        return tig
 
     def oms2_targets(self):
         """THE GROUND'S OMS-2 TARGETS from the actual insertion: the truth
@@ -579,6 +723,12 @@ class Flight:
 
     def oms2(self):
         etsep = float(open(os.path.join(self.a.logs, "etsep.gmt")).read())
+        if getattr(self.a, "abort", None) == "ATO":
+            # PASS's ATO OMS 2 target; the estimate is the I-load's 2,760 s
+            # from MECO (about 18 s before ET SEP), should the page not read
+            tig = self.ato_burn("ato-oms2", ATO_OMS2, etsep - 18.0 + 2760.0, self.ato_oms2_loaded)
+            self.wait_gmt(tig + 300.0)
+            return
         tig = etsep + OMS2_DTIG
         self.wait_gmt(etsep + 120.0)
         self.oms2_targets()
