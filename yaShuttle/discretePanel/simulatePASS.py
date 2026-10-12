@@ -1397,6 +1397,11 @@ def main():
                     help="which flight station's panels, displays and keyboards to show: "
                          "forward, the aft flight deck (rendezvous, docking, RMS), or all "
                          "(default); the manager's STATION row changes it")
+    ap.add_argument("--auto-place", action="store_true",
+                    help="place the windows by simulatePASS's own screen plan (the displays, "
+                         "keyboards, CAM, O6, the manager, the panels' tiling) when no --layout "
+                         "says where; off by default: windows then open where the window "
+                         "manager puts them and a --layout places them")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring every window up and place it, but hold the vehicle -- yaGPC2 "
                          "not started, so nothing moves -- until the session command 'go' "
@@ -1813,6 +1818,8 @@ def main():
     if tk_font_scale != 1:
         env.setdefault("NSTS_TK_FONT_SCALE", str(tk_font_scale))
     env["NSTS_MAJOR_FUNC"] = str(MAJOR_FUNC[args.major_func])
+    env["NSTS_AUTO_PLACE"] = "1" if args.auto_place else "0"
+    env["NSTS_STATION"] = getattr(args, "station", "all")      # for programs that start after it was said
     # How far apart in simulated time the computers may drift.  25 us is what
     # every verified multi-GPC run used through OPS 2; the built-in 200 has not
     # been.  An explicit YAGPC_BARRIER_US in the environment still wins.
@@ -1881,7 +1888,8 @@ def main():
             title_arg = ["--title", args.title] if args.title else []
             for k in range(args.crts):
                 e = dict(env)
-                e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
+                if args.auto_place:
+                    e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
                 # A RESTORED DISPLAY IS HANDED ITS OWN MEMORY.  Without
                 # this the unit comes up blank and PASS only ever rewrites
                 # the changing fields, so the numbers appear over no format
@@ -1903,7 +1911,8 @@ def main():
                 # to PASS's polls came late -- "I/O ERROR CRT4" (post3,
                 # 2026-10-10).
                 e = dict(env)
-                e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[3]
+                if args.auto_place:
+                    e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[3]
                 L.start("meds-afd1",
                         [py, "MEDS2.py"]
                         + ["--port-base", str(args.port_base), "--size", str(size),
@@ -1916,11 +1925,13 @@ def main():
                     L.start("keyboard%d" % (k + 1),
                             [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
                              str(k + 1), "--port-base",
-                             str(args.port_base), "--size", str(tk_px(size)), "--geometry", geom],
+                             str(args.port_base), "--size", str(tk_px(size))]
+                            + (["--geometry", geom] if args.auto_place else []),
                             HERE, env)
             if multi:
                 L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
-                                "--size", str(tk_px(cam_size)), "--geometry", cam_geom],
+                                "--size", str(tk_px(cam_size))]
+                        + (["--geometry", cam_geom] if args.auto_place else []),
                         HERE, env)
             # THE HAND CONTROLLERS, one station's: one person flies this.  The
             # same --size as the keyboards (halved on macOS by tk_px, where
@@ -2042,7 +2053,9 @@ def main():
             # OFF and MODE HALT within a quarter second and halt it.
             panel_restore = os.path.join(resume, "panel.json") if resume else None
             panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
-                          "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size)), "--geometry", o6_geom]
+                          "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size))]
+            if args.auto_place:
+                panel_argv += ["--geometry", o6_geom]
             if panel_restore and os.path.isfile(panel_restore):
                 panel_argv += ["--restore", panel_restore]
             if args.ssp:
@@ -2148,7 +2161,7 @@ def main():
             # not by hand.
             if args.debug:
                 manager_argv += ["--debug"]
-            if sys.platform == "darwin" and not args.layout:
+            if sys.platform == "darwin" and not args.layout and args.auto_place:
                 # macOS puts an unplaced window at the top left, which is on
                 # top of the displays; a Linux window manager finds it free
                 # space.  So say where: just under the displays.

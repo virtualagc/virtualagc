@@ -1394,6 +1394,9 @@ class Manager(object):
 
     def set_station(self, st):
         """The STATION row: tell the panel and the displays, then follow."""
+        if getattr(self, "_station_busy", False):
+            self.say("A station change is still under way; wait for it to finish")
+            return
         crewscript.send_control("station %s" % st, self.args.port_base)
         crewscript.send_meds("station %s" % st, self.args.port_base)
         self._station_changed(st)
@@ -1427,32 +1430,46 @@ class Manager(object):
         threading.Thread(target=listen, daemon=True).start()
 
     def _station_changed(self, st):
-        """Follow a station change: its hand controllers and window views
-        restarted, then -- with a layout for it -- its windows placed."""
+        """Follow a station change.  The panels, the displays, the window views
+        and RPOP each minimize or restore their own windows on the 'station'
+        message -- nothing is stopped, created or placed, so this is quick; the
+        hand controllers are the one thing restarted.  While it happens the
+        Manager says so and asks to be left alone (owner, 2026-10-12)."""
         if st == self.station:
             return
         self.station = st
-        self.say("Station: %s" % {"fwd": "forward", "aft": "aft flight deck", "all": "both"}[st])
-        hands, views = self.STATION_HANDS[st], self.STATION_VIEWS[st]
+        name = {"fwd": "forward", "aft": "aft flight deck", "all": "both"}[st]
+        hands = self.STATION_HANDS[st]
+        self._station_busy = True
+        self.say("Changing to the %s station -- please do not touch the simulation until "
+                 "this message goes" % name, sticky=True)
+        try:
+            self.root.config(cursor="watch")
+        except tk.TclError:
+            pass
         if hands:
             self.stop_hands()
-        if views:
-            self.stop_views()
 
         def restart():
             if hands:
                 self.start_hands(hands)
-            if views:
-                self.start_views(views)
-        # the stopped programs' ports and windows released first
+
+        def done():
+            self._station_busy = False
+            try:
+                self.root.config(cursor="")
+            except tk.TclError:
+                pass
+            self._note_until = 0.0
+            self.say("Station: %s" % name)
+        # the stopped hand controllers' ports and windows released first
         self.root.after(2500, restart)
-        # A LAYOUT PER STATION (--layout for forward, --layout-aft for aft),
-        # so a recording changes from one to the other by itself at the
-        # handover.  Once the restarted windows are up: the views take ~8 s.
-        path = (getattr(self.args, "layout_aft", None) if st == "aft"
-                else self.layout.get().strip() if st == "fwd" else None)
+        self.root.after(2500 + (3500 if hands else 1500), done)
+        # THE AFT STATION'S OWN LAYOUT, only if one was named (--layout-aft):
+        # nothing else is placed on a change of station.
+        path = getattr(self.args, "layout_aft", None) if st == "aft" else None
         if path and os.path.isfile(path):
-            self.root.after(14000, lambda: self.restore_layout(path=path))
+            self.root.after(4000, lambda: self.restore_layout(path=path))
 
     def start_views(self, views=None):
         # "rpop": rpop.py, the aft PGSC's RPOP display, a program of its own

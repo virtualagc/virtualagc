@@ -785,7 +785,7 @@ PANEL_WINDOWS = (
 # -- are always up.  Panels not yet built are listed so that adding one is
 # only adding its window.  O3 (RCS/OMS PRESS and PRPLT QTY, MISSION TIME) is up
 # in every OPS but 9 (owner, 2026-10-11).
-BASE_PANELS = ("O6", "C2", "R11", "A7")    # A7: the aft MASTER ALARM, in every OPS
+BASE_PANELS = ("O6", "C2", "R11", "A7", "A6U")    # A7 the aft MASTER ALARM, A6U the aft ADI/DAP: the aft station always has them
 OPS_PANELS = {
     ("GNC", 1): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
     ("GNC", 6): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
@@ -2319,7 +2319,12 @@ class PanelO6:
                 if not self._placed and all(x._measured or x.natural is None
                                             for x in self.wins.values()):
                     self._placed = True
-                    self.root.after(600, self._auto_place)
+                    # NOT PLACED AUTOMATICALLY (owner, 2026-10-12): it was
+                    # slow, wrong and confusing.  A --layout places windows;
+                    # NSTS_AUTO_PLACE=1 (simulatePASS --auto-place) brings the
+                    # old tiling back.
+                    if os.environ.get("NSTS_AUTO_PLACE", "") not in ("", "0"):
+                        self.root.after(600, self._auto_place)
                 return
             # A WINDOW SOMEONE HAS SIZED is fitted to: the design size
             # follows what was laid out, in this host's fonts.

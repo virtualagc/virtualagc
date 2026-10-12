@@ -1481,6 +1481,33 @@ def main(argv=None):
     rp = Rpop(args.port_base, args.seed)
     w = Window(rp, args)
     w.show()
+    # THE FLIGHT STATION: RPOP is the aft station's, so the forward station
+    # minimizes it and Aft or Both restores it (a window stays; none is made
+    # or destroyed).  'station fwd|aft|all' arrives on panelO6's control port.
+    def station(st):
+        if st == "fwd":
+            w.showMinimized()
+        else:
+            w.showNormal()
+    try:
+        ssock = mcast_socket(args.port_base + 92)
+        notifier = QtCore.QSocketNotifier(ssock.fileno(), QtCore.QSocketNotifier.Type.Read)
+
+        def readable(*_):
+            while True:
+                try:
+                    d = ssock.recv(4096)
+                except (BlockingIOError, OSError):
+                    return
+                t = d.decode("utf-8", "replace").split()
+                if len(t) == 2 and t[0] == "station" and t[1] in ("fwd", "aft", "all"):
+                    station(t[1])
+        notifier.activated.connect(readable)
+        w._stationNotifier = notifier          # kept alive
+    except OSError as e:
+        log("no station control: %s" % e)
+    if os.environ.get("NSTS_STATION") == "fwd":
+        station("fwd")
     if args.snapshot:
         # QPixmap.save fails silently on a missing directory or an unknown
         # suffix: make the directory, default to PNG, and say if it failed

@@ -255,6 +255,11 @@ FRAME_PX = 4                       # the frame drawn around each view, logical p
 FRAME_SRGB = (0.62, 0.62, 0.62)
 MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET = 98
+STATION_OFFSET = 92         # panelO6's control port: 'station fwd|aft|all' arrives here
+# Which views each flight station sees; a view not shown is MINIMIZED and not
+# drawn, and shown again is restored -- nothing is destroyed or created, so a
+# change of station is as fast as the window manager (owner, 2026-10-12).
+STATION_SEES = {"fwd": ("front", "up", "left", "right"), "aft": ("aft", "cctv"), "all": None}
 TARGET_OFFSET = 109                # TGT1: other vehicles, from yaGPC2 (not 81-85, the GPCs' discretes; not 96, the crew scripts' progress)
 ISS_NORAD = 25544
 ISS_PMA2 = (15.655, 0.0, 5.562)          # its docking face on its axis, ISS frame (m), measured off the model's own PMA-2 (face ring X 15.655, barrel centre Z 5.562); --test vbar aims there
@@ -3100,6 +3105,43 @@ class Portview(object):
         self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self._maybe_tick)
         self.timer.start(4)
+        # THE FLIGHT STATION: minimize the views it cannot see (and the
+        # windows are not drawn while they are)
+        self.station = os.environ.get("NSTS_STATION", "all")
+        try:
+            self._stationSock = mcast_socket(args.port_base + STATION_OFFSET)
+            self._stationNotifier = QtCore.QSocketNotifier(
+                self._stationSock.fileno(), QtCore.QSocketNotifier.Type.Read)
+            self._stationNotifier.activated.connect(self._station_readable)
+        except (OSError, AttributeError, TypeError) as e:
+            print("portview: no station control (%s)" % e, file=sys.stderr, flush=True)
+
+    def _station_readable(self, *_):
+        while True:
+            try:
+                d = self._stationSock.recv(4096)
+            except (BlockingIOError, OSError):
+                return
+            w = d.decode("utf-8", "replace").split()
+            if len(w) == 2 and w[0] == "station" and w[1] in STATION_SEES:
+                self.set_station(w[1])
+
+    def set_station(self, st):
+        self.station = st
+        see = STATION_SEES[st]
+        shown, hid = [], []
+        for v in self.views:
+            want = see is None or v.name in see
+            # unconditionally: Qt's isMinimized() is not the window manager's word
+            # for it (a window minimized before a manager was up, or by hand)
+            if want:
+                v.showNormal()
+                v.raise_()
+            else:
+                v.showMinimized()
+            (shown if want else hid).append(v.name)
+        print("portview: station %s: showing %s, minimized %s" % (
+            st, ",".join(shown) or "none", ",".join(hid) or "none"), file=sys.stderr, flush=True)
 
     def status_line(self, fs):
         if not fs.ok:
@@ -3155,7 +3197,7 @@ class Portview(object):
                       file=sys.stderr, flush=True)
             self._feedState = state
         for v in self.views:
-            if v.isVisible():
+            if v.isVisible() and not v.isMinimized():       # a minimized window is not drawn
                 v.update()
         self.ticks += 1
         if self.args.stats:
@@ -3419,6 +3461,8 @@ def main(argv=None):
         v.move(x if x is not None else 40 + 40 * i, y if y is not None else 40 + 40 * i)
         v.show()
         views.append(v)
+    if app.station != "all":
+        app.set_station(app.station)
     return qapp.exec()
 
 
