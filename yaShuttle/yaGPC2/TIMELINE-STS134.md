@@ -2,7 +2,7 @@
 
 This is the flight being flown in yaGPC2: one GPC running PASS OI-34 (tape
 `OI340700-v44boot` with STS-134's OPS 1 overlay I-loads), from IPL on LC-39A
-to the orbit after OMS 2.
+to the orbit after OMS 2 and on to OPS 201.
 
 **T = 0 is SRB ignition** (the MECs fire SRM IGNITION; the hold-down posts let
 go). STS-134's was **136/12:56:27.994 GMT** on 2011-05-16 (JSC 37461,
@@ -238,7 +238,12 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 | ET sep + 600 s | 0:18:44 | CREW | `dap c3 auto`, `OPS 105 PRO`, TRIM LOAD `ITEM 6 +0.4 −5.7 +5.7 EXEC`, LOAD `ITEM 22`, TIMER `ITEM 23`, MNVR `ITEM 27 EXEC` |
 | — | — | SIM | OMS engines ARM/PRESS (`YAGPC_OMS_ARMED=1`; the checklist's TIG−2 switch) |
 | +2,272.1 | 0:37:52 | CREW | `EXEC` at TIG−8 s |
-| **+2,280.1** | **0:38:00** | PASS | **OMS 2 ignition** (TIG = ET separation + 1,756 s), about 164 s.  STS-134: ignition MET 0:37:58, 168.6 s, 259.2 ft/s. |
+| **+2,280.1** | **0:38:00** | PASS | **OMS 2 ignition** (TIG = ET separation + 1,756 s), about 164 s.  STS-134: ignition 136/13:33:25.4 = MET 0:36:57 (JSC 37461 Appendix A; this row read 0:37:58 before), 168.6 s, 259.2 ft/s. |
+
+Since the row above, the flight has not flown OMS 1 (the Mission Report: "Not
+Required") and the driver's OMS-2 TIG is ET separation + 1,695 s, ignition at
++2,220 (0:37:00), 2.6 s after the flown one: see "The owner's flight to OPS
+201" below.
 
 ### Result: the orbit after OMS 2
 
@@ -254,6 +259,64 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 | OMS-2 burn | 264.6 ft/s | 259.2 ft/s |
 
 Osculating apsides move about ±5.5 nmi around an orbit (J2).
+
+### The owner's flight to OPS 201 (run `ascent2`, 2026-10-12)
+
+The simulated flight did not stop at OMS 2: the owner's run continued through
+the post-insertion transitions to OPS 201 (ORBIT), 53 minutes after liftoff.
+Times are from the panel's script log and the truth log against the vehicle
+clock (T = SRB ignition; ±2 s, since the panel's clock is mapped to the
+vehicle's through ET separation).  The crew's actions are from the Ascent
+Checklist (ASC/134/FIN) FB 2-5 and 3-3 to 3-7 and the POST INSERTION
+procedures.
+
+| T | MET | GMT 136/ | Who | Event |
+|---|---|---|---|---|
+| +525.3 | 0:08:45 | 13:05:13 | CREW | MSG RESET after ET separation |
+| +527.3 | 0:08:47 | 13:05:15 | CREW | ORBIT PFD on CRT 2 (`edgekey crt2 3`) |
+| +549.9 | 0:09:10 | 13:05:38 | CREW | **OMS 1 not required** (the Mission Report: "Not Required"): OMS ENG LEFT and RIGHT to OFF, then on to POST OMS 1 (checklist FB 2-5) |
+| +1,131 | 0:18:51 | 13:15:19 | CREW | `OPS 105 PRO` after `dap c3 auto` and the OMS ENG ARM/PRESS (the OMS 2 setup, ASC 3-3 to 3-7) |
+| +2,210 | 0:36:50 | 13:33:18 | CREW | `EXEC` at TIG − 8 s |
+| **≈ +2,220** | **0:37:00** | **13:33:28** | PASS | **OMS 2 ignition**: TIG = ET separation + 1,695 s (OMS 1 not flown, so no delay for it).  STS-134: MET 0:36:57, GMT 13:33:25.4 |
+| ≈ +2,401 | 0:40:01 | 13:36:29 | PASS | OMS 2 cutoff, a burn of about 181 s against the flown 168.6 s (136/13:33:25.4 to 13:36:14.1).  The propellant used was 7,040 lb. |
+| +2,518 | 0:41:58 | 13:38:26 | CREW | OMS ENG LEFT and RIGHT to OFF |
+| +2,523 | 0:42:03 | 13:38:31 | CREW | `OPS 106 PRO`: the post-insertion major mode |
+| +2,998 | 0:49:58 | 13:46:26 | CREW | `SPEC 0 PRO`, then GPC MEMORY: `ITEM 1 +2` (configuration 2, GN&C), GPC 1 for the strings and buses, and every item to its OPS 2 setting, about 8 s apart |
+| +3,158 | 0:52:38 | 13:49:06 | CREW | `OPS 201 PRO`: ORBIT |
+| +3,177 | 0:52:57 | 13:49:25 | PASS | The panel set changes from GNC OPS 1 to GNC OPS 2 (A7L added) |
+| +3,215 | 0:53:35 | 13:50:03 | SIM | Capture `sts134-ops2` (the start of the orbital phase) |
+
+OMS 2's orbit in this run, from the truth state (osculating apsides of the
+vehicle, above the equatorial radius and above the mean radius of 6,371 km):
+
+| | Above the equatorial radius | Above the mean radius | STS-134 |
+|---|---|---|---|
+| ET separation, T+526 | 124.1 × 27.7 nmi | 128.0 × 31.6 | |
+| Just before OMS 2 | 126.4 × 32.2 | 130.2 × 36.1 | |
+| Just after OMS 2 (T+2,411) | 171.6 × 121.7 | **175.5 × 125.6** | 175.8 × 124.3 |
+| At OPS 201 (T+3,200) | 164.2 × 120.7 | 168.1 × 124.6 | |
+
+The apogee is 0.3 nmi low and the perigee 1.3 nmi high, with a burn 12.8 s
+(7.6%) longer than flown: the OMS 2 differences listed under "Known
+differences".
+
+### Beyond the simulated flight: what STS-134 did next
+
+The simulation ends at OPS 201; none of the following is in the driver's
+scripts, though STS-134 did them (JSC 37461 Appendix A; times from SRB ignition):
+
+| T | MET | Event |
+|---|---|---|
+| +844.6, +858.9, +871.1 | 0:14:05, 0:14:19, 0:14:31 | APU 1, 2, 3 deactivated (the gas generator chamber pressure falls) |
+| +5,322.0, +5,403.0 | 1:28:42, 1:30:03 | Payload bay doors open, right then left |
+| +10,337.1 to +10,397.3 | 2:52:17 to 2:53:17 | OMS 3 |
+| +62,783.7 to +62,798.3 | 17:26:24 to 17:26:38 | OMS 4 (right engine only) |
+| +148,259.5 to +148,270.5 | 41:11:00 to 41:11:10 | OMS 5 |
+| +153,705.1 to +153,716.3 | 42:41:45 to 42:41:56 | OMS 6 |
+| +161,033 | 44:43:53 | Docking: capture, to the ISS |
+
+The rendezvous from the OMS-2 orbit to capture is `RENDEZVOUS_PLAN.md`
+sections 5 to 5n, and the return is `TIMELINE-STS134-ENTRY.md`.
 
 ### Cross-check: STS-135 with the same model
 
