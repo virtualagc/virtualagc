@@ -2034,11 +2034,21 @@ def main():
                            "--size", str(args.portview_size)]
                 if pv_views:
                     pv_argv += ["--views", pv_views]
-                    # each view opens at its layout place and size
+                    # each view opens at its layout place and size.  The layout
+                    # is in physical pixels and portview's Qt in device-
+                    # independent ones, so under QT_SCALE_FACTOR 2 the layout's
+                    # numbers as given opened the views at twice their size
+                    # (owner, 2026-10-12).
+                    try:
+                        _qs = float(env.get("QT_SCALE_FACTOR") or os.environ.get("QT_SCALE_FACTOR") or 1) or 1.0
+                    except ValueError:
+                        _qs = 1.0
                     for _v in pv_views.split(","):
                         _r = LP.get("pv_" + _v)
                         if _r and _r[2] and _r[3]:
-                            pv_argv += ["--geometry", "%s=%dx%d+%d+%d" % (_v, _r[2], _r[3], _r[0], _r[1])]
+                            pv_argv += ["--geometry", "%s=%dx%d+%d+%d" % (
+                                _v, round(_r[2] / _qs), round(_r[3] / _qs),
+                                round(_r[0] / _qs), round(_r[1] / _qs))]
                 L.start("portview", pv_argv, HERE, env)
             if want_rpop and env.get("YAGPC_VEHDYN") == "1":
                 # at the displays' --size: under the desktop's QT_SCALE_FACTOR 2

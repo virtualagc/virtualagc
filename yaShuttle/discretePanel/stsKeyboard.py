@@ -589,6 +589,24 @@ def main(argv=None):
     root.mainloop()
 
 
+def _show(root, show, kept):
+    """Minimize or restore, at the place it was minimized from: a withdrawn
+    window comes back wherever the desktop chooses (owner, 2026-10-12: the
+    keyboard moved by the station change was back at the desktop's place)."""
+    try:
+        if show:
+            root.deiconify()
+            if "pos" in kept:
+                root.geometry(kept["pos"])
+        else:
+            if root.state() == "normal":
+                # `wm geometry` reports a position that setting it round-trips
+                kept["pos"] = "+" + root.geometry().split("+", 1)[1]
+            root.iconify()
+    except tk.TclError:
+        pass
+
+
 def _station_listener(root, n):
     """THE MANAGER'S STATION ('station fwd|aft|all' on MEDS2's port, base +
     95): keyboard 3 is the aft flight deck's (R11L), 1 and 2 the forward
@@ -601,6 +619,8 @@ def _station_listener(root, n):
         sys.stderr.write("stsKeyboard: no station listener (%s)\n" % e)
         return
 
+    kept = {}
+
     def listen():
         while True:
             try:
@@ -612,7 +632,7 @@ def _station_listener(root, n):
                 continue
             st = w[1].lower()
             show = st == "all" or (n == 3) == (st == "aft")
-            root.after(0, root.deiconify if show else root.withdraw)
+            root.after(0, lambda show=show: _show(root, show, kept))
     threading.Thread(target=listen, daemon=True).start()
 
 
