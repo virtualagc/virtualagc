@@ -1699,9 +1699,34 @@ static void qmat_body(const double q[4], double R[3][3]) {
 /* Total mass, the CG (as an offset from the dry CG) and the inertia tensor
  * about it, from the dry vehicle and the propellant left: parallel-axis
  * shifts of the dry body and of each module's propellant as a point mass. */
+/* WHAT THE ORBITER SHEDS ON THE WAY UP besides the OMS assist and the RCS:
+ * the APUs' hydrazine -- monopropellant, so the decomposition gas vented is
+ * the whole loss -- 49 lb each over their 18:55-19:19 ascent runs (STS-134
+ * Mission Report p. 46), taken from ignition to the 858 s the APUs were shut
+ * down (APU-1, 2, 3 at 845, 859, 871 s: 858 is the middle), as the 858/(287+
+ * 858) of it falling after SRB ignition (they start at T-287 s; the liftoff
+ * weight has the rest gone); and the water spray boilers' PGME/water, 3.6 +
+ * 2.8 + 4.2 lb from about 539 s (13:05:27) to the shutdown (p. 47).  The air
+ * in the payload bay and cabin, the MPS residual dump and the fuel cells'
+ * reactants are real too and not here: no number is printed for them.  Taken
+ * off the dry mass, linearly in time, at each mass update. */
+#define APU_ASCENT_LB    (3.0 * 49.0 * 858.0 / (287.0 + 858.0))
+#define WSB_ASCENT_LB    (3.6 + 2.8 + 4.2)
+#define ASCENT_END_S     858.0
+#define WSB_START_S      539.0
+static double consumables_kg(void) {
+    if (srbIgnT < 0.0) return 0.0;
+    double tau = st.t - srbIgnT;
+    double a = tau <= 0.0 ? 0.0 : tau >= ASCENT_END_S ? 1.0 : tau / ASCENT_END_S;
+    double w = tau <= WSB_START_S ? 0.0 : tau >= ASCENT_END_S ? 1.0
+             : (tau - WSB_START_S) / (ASCENT_END_S - WSB_START_S);
+    return (APU_ASCENT_LB * a + WSB_ASCENT_LB * w) * LB_KG;
+}
+
 static void mass_properties(void) {
     flight_params();
-    double m = dryKg, c[3] = { 0, 0, 0 };
+    double dry = dryKg - consumables_kg();
+    double m = dry, c[3] = { 0, 0, 0 };
     double tank[NMOD][3];
     for (int k = 0; k < NMOD; k++) {
         to_body(TANK_XYZ[k][0], TANK_XYZ[k][1], TANK_XYZ[k][2], tank[k]);
@@ -1749,7 +1774,7 @@ static void mass_properties(void) {
     double dd = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            I[i][j] += dryKg * ((i == j ? dd : 0.0) - d[i] * d[j]);
+            I[i][j] += dry * ((i == j ? dd : 0.0) - d[i] * d[j]);
     for (int k = 0; k < NMOD; k++) {
         double p[3] = { tank[k][0] - c[0], tank[k][1] - c[1], tank[k][2] - c[2] };
         double pp = p[0] * p[0] + p[1] * p[1] + p[2] * p[2];
