@@ -1824,7 +1824,6 @@ static void truth_publish(void) {
  * (2,400) -- the thrust, surfaces and main engine Pc are the model's own.  */
 #define SUBSYS_OFFSET 110     /* not 81-85, 91, 96-98, 100-109 */
 #define OMS_POD_KG 5897.0     /* vehdyn.c OMS_LOAD_KG, a pod at 100% */
-#define RCS_POD_KG (2387.0 * 0.45359237)     /* vehdyn.c RCS_LOAD_KG, a module at 100% */
 
 static void subsys_publish(void) {
     static double next = -1.0;
@@ -1862,12 +1861,13 @@ static void subsys_publish(void) {
     for (int i = 0; i < 6; i++) v[n++] = 250.0;     /* RCS ox/fu regulated, PROVISIONAL */
     static const int RCS_MOD[3] = { 1, 0, 2 };      /* left pod, forward, right pod */
     for (int i = 0; i < 3; i++) {
-        double used = 1.0 - vehdyn_propellant(RCS_MOD[i]) / RCS_POD_KG;
+        double used = 1.0 - vehdyn_propellant(RCS_MOD[i]) / vehdyn_rcs_load_kg(RCS_MOD[i]);
         used = used < 0.0 ? 0.0 : used > 1.0 ? 1.0 : used;
         v[n++] = 4400.0 - 1100.0 * used;            /* helium tank, PROVISIONAL */
     }
     for (int i = 0; i < 4; i++) v[n++] = 250.0;     /* OMS ox/fu regulated, PROVISIONAL */
-    for (int i = 0; i < 3; i++) v[n++] = 100.0 * vehdyn_propellant(RCS_MOD[i]) / RCS_POD_KG;
+    for (int i = 0; i < 3; i++)
+        v[n++] = vehdyn_rcs_gauge_pct0(RCS_MOD[i]) * vehdyn_propellant(RCS_MOD[i]) / vehdyn_rcs_load_kg(RCS_MOD[i]);
     for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_propellant(3 + e) / OMS_POD_KG;
     uint8_t b[4 + 8 * 48];
     memcpy(b, "SUB1", 4);

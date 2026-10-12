@@ -148,12 +148,18 @@ static double dryKg = DRY_MASS_KG;
 #define DRY_IXX          1.29e6
 #define DRY_IYY          9.68e6
 #define DRY_IZZ          1.01e7
-/* A module's full load, oxidizer and fuel together: "the nominal full load of
- * the forward and aft RCS tanks in each pod is 1,464 pounds in the oxidizer
- * tanks and 923 pounds in the fuel tanks" (SCOM SFOC-FL0884, 2.23) -- 2,387 lb.
- * This was 1,460 KG: the oxidizer's pounds read as kilograms and the fuel left
- * out, a load 35 percent too big, so that the quantity gauge fell too slowly. */
-#define RCS_LOAD_KG      (2387.0 * 0.45359237)
+/* THE RCS PROPELLANT LOADED, oxidizer and fuel together, lb, forward / left /
+ * right: STS-134 Space Shuttle Mission Report p. 38, "RCS PROPELLANT LOADING",
+ * the advertised loads: forward 1,178.5 ox + 728.1 fuel, left 1,525.0 + 961.6,
+ * right 1,523.7 + 961.8.  The forward module is not full: the report's gauge
+ * calculation reads 70.5 / 69.3 percent for it and 100.6 / 100.7 for the aft
+ * pods, so the O3 quantity at liftoff is 70 / 101 / 101, not 100 / 100 / 100.
+ * (SCOM 2.23 gives the full load as 1,464 lb ox + 923 lb fuel a module.)  This
+ * was 1,460 kg for each: the oxidizer's pounds as kilograms, the fuel left out. */
+static const double RCS_LOAD_LB[3] = { 1178.5 + 728.1, 1525.0 + 961.6, 1523.7 + 961.8 };
+static const double RCS_GAUGE_PCT0[3] = { 69.9, 100.7, 100.6 };
+#define LB_KG            0.45359237
+#define RCS_LOAD_KG(k)   (RCS_LOAD_LB[k] * LB_KG)
 
 /* THE OMS PROPELLANT, modules 3 (left pod) and 4 (right): "1% OMS = 130
  * lb/side" (SCOM 2.18), so 13,000 lb = 5,897 kg a pod at 100%, as a point
@@ -1858,7 +1864,7 @@ void vehdyn_reset(double t) {
     flight_params();
     memset(&st, 0, sizeof st);
     dock_reset();
-    for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG;
+    for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG(k);
     prop[3] = prop[4] = OMS_LOAD_KG;
     {
         const char *e = yagpc_getenv("YAGPC_VEHDYN_ORBITER_KG");
@@ -3298,6 +3304,8 @@ double vehdyn_unix(double t) { return (unixZero >= 0.0) ? unixZero + t : -1.0; }
 
 const PhysState *vehdyn_state(void) { return &st; }
 double vehdyn_propellant(int module) { return (module >= 0 && module < NMOD) ? prop[module] : 0.0; }
+double vehdyn_rcs_load_kg(int k) { return (k >= 0 && k < 3) ? RCS_LOAD_KG(k) : 0.0; }
+double vehdyn_rcs_gauge_pct0(int k) { return (k >= 0 && k < 3) ? RCS_GAUGE_PCT0[k] : 0.0; }
 
 void vehdyn_set_propellant(int module, double kg) {
     if (module < 0 || module >= NMOD) return;

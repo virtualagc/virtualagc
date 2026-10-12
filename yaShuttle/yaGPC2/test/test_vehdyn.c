@@ -59,17 +59,17 @@ int main(void) {
     vehdyn_set_fire_words(ff, fa, 11e6);             /* fire until t=11 */
     vehdyn_advance(11e6);
     const PhysState *s = vehdyn_state();
-    /* Iyy 10.507e6 with the RCS modules at 1,460 kg; 10.279e6 at their real
-     * 2,387 lb (SCOM 2.23), the rest of the mass sitting at the dry c.g. */
-    double wantQ = -73800.0 / 10.279e6, wantP = -1385.0 / 1.29e6;
+    /* Iyy 10.507e6 with the RCS modules at 1,460 kg each; 10.190e6 at STS-134's
+     * loads (forward 865, left 1,128, right 1,127 kg; Mission Report p. 38), the
+     * rest of the mass sitting at the dry c.g. */
+    double wantQ = -73800.0 / 10.190e6, wantP = -1385.0 / 1.29e6;
     check(fabs(s->w[1] - wantQ) < 0.005 * fabs(wantQ), "pitch rate from F1U (rad/s)", s->w[1], wantQ);
     check(fabs(s->w[0] - wantP) < 0.05 * fabs(wantP), "roll rate from F1U (rad/s)", s->w[0], wantP);
     check(fabs(s->w[2]) < 0.02 * fabs(wantQ), "no yaw from F1U", s->w[2], 0.0);
     double used = p0 - vehdyn_propellant(0), want = 3870.0 / (280.0 * 9.80665);
     check(fabs(used - want) < 1e-3, "forward propellant used (kg)", used, want);
-    const double RCS_FULL = 2387.0 * 0.45359237;     /* a module's full load, kg */
-    check(vehdyn_propellant(1) == RCS_FULL && vehdyn_propellant(2) == RCS_FULL,
-          "pods untouched", vehdyn_propellant(1), RCS_FULL);
+    check(vehdyn_propellant(1) == vehdyn_rcs_load_kg(1) && vehdyn_propellant(2) == vehdyn_rcs_load_kg(2),
+          "pods untouched", vehdyn_propellant(1), vehdyn_rcs_load_kg(1));
     check(fabs(vehdyn_jet_on_seconds(vehdyn_jet_index("F1U")) - 1.0) < 1e-6,
           "fired for exactly the commanded second", vehdyn_jet_on_seconds(vehdyn_jet_index("F1U")), 1.0);
     /* and it keeps that rate afterwards: coasting changes nothing about a
@@ -114,7 +114,7 @@ int main(void) {
     check(fabs(dvn - wantDv) < 0.005 * wantDv, "sensed delta-v of a +X burn (m/s)", dvn, wantDv);
     s = vehdyn_state();
     check(fabs(s->w[2]) < 1e-6, "no yaw from a symmetric pair", s->w[2], 0.0);
-    double usedL = RCS_FULL - vehdyn_propellant(1), usedR = RCS_FULL - vehdyn_propellant(2);
+    double usedL = vehdyn_rcs_load_kg(1) - vehdyn_propellant(1), usedR = vehdyn_rcs_load_kg(2) - vehdyn_propellant(2);
     check(fabs(usedL - usedR) < 1e-9 && fabs(usedL - 4.0 * want) < 4e-3,
           "each pod used its own propellant", usedL, 4.0 * want);
     check(s->mass < m0 && fabs((m0 - s->mass) - 8.0 * want) < 1e-2,
@@ -158,7 +158,7 @@ int main(void) {
                   "gimbals reach their command", vehdyn_oms_gimbal(0, 1), -ty);
             const PhysState *s0 = vehdyn_state();
             double m0 = s0->mass, dv0[3], dv1[3];
-            check(fabs(m0 - 115041.0) < 200.0, "full vehicle mass (kg)", m0, 115041.0);   /* dry 100,000 + 3 x 1,083 + 2 x 5,897 */
+            check(fabs(m0 - 114914.0) < 200.0, "full vehicle mass (kg)", m0, 114914.0);   /* dry 100,000 + RCS 865 + 1,128 + 1,127 + 2 x 5,897 */
             vehdyn_sensed_dv(dv0);
             vehdyn_set_oms(0, true, true, tp, -ty, 3e6);
             vehdyn_set_oms(1, true, true, tp, ty, 3e6);
@@ -177,7 +177,8 @@ int main(void) {
             double got = dv1[0] - dv0[0];
             if (trimmed)
                 check(fabs(got / want - 1.0) < 0.002, "OMS delta-v along X, rocket equation (m/s)", got, want);
-            check(fabs(s1->w[0]) < 1e-6 && fabs(s1->w[2]) < 1e-6, "no roll or yaw from a symmetric pair",
+            /* the pods differ by 0.5 kg of propellant as loaded (1,127.9 / 1,127.4) */
+            check(fabs(s1->w[0]) < 5e-6 && fabs(s1->w[2]) < 5e-6, "no roll or yaw from a symmetric pair",
                   s1->w[0] + s1->w[2], 0.0);
             miss[trimmed] = s1->I[1][1] * (s1->w[1] / 10.0) / (2 * 6087.0 * 4.4482216152605);
         }

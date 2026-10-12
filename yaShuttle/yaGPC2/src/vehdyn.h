@@ -43,6 +43,10 @@ const PhysState *vehdyn_state(void);
  * OMS 3 left, 4 right.  Set it -- for tests that want a vehicle without,
  * say, the OMS load -- and the mass properties follow. */
 double vehdyn_propellant(int module);
+/* The RCS load a flight starts with, kg, and what the quantity gauge reads at
+ * that load (percent), for RCS module 0 forward, 1 left, 2 right. */
+double vehdyn_rcs_load_kg(int k);
+double vehdyn_rcs_gauge_pct0(int k);
 void vehdyn_set_propellant(int module, double kg);
 
 /* THE OMS ENGINES, 0 left and 1 right: whether the engine's valves are open
