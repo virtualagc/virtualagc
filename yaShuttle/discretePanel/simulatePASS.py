@@ -102,8 +102,13 @@ from crewscript import SCAN, IDP_MSG
 MAJOR_FUNC = {"PL": 0, "GNC": 1, "SM": 2}
 
 
+_T_START = time.time()
+
+
 def log(msg):
-    print("simulatePASS: %s" % msg, flush=True)
+    # seconds since start, so that "why does it take so long to come up?" has
+    # an answer in the log (owner, 2026-10-12)
+    print("[%6.1fs] simulatePASS: %s" % (time.time() - _T_START, msg), flush=True)
 
 
 def parse_gpcs(text):
@@ -269,6 +274,45 @@ def procedure_text(gpcs, crts):
 
 # ---------------------------------------------------------------------------
 # Processes
+
+class Splash(object):
+    """splash.py, in front of everything while the simulation comes up: what it
+    is doing and that the user should wait (owner, 2026-10-12: "how can we
+    tell the user at startup that he has to wait?").  Any failure -- no
+    display, no Tk -- leaves the run as it was."""
+
+    def __init__(self, enabled):
+        self.p = None
+        if not enabled or (os.name != "nt" and not os.environ.get("DISPLAY")
+                           and sys.platform != "darwin"):
+            return
+        try:
+            self.p = subprocess.Popen([sys.executable, os.path.join(HERE, "splash.py")],
+                                      stdin=subprocess.PIPE, text=True, bufsize=1,
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            self.p = None
+
+    def _say(self, line):
+        if self.p is None:
+            return
+        try:
+            self.p.stdin.write(line + "\n")
+            self.p.stdin.flush()
+        except (OSError, ValueError):
+            self.p = None
+
+    def stage(self, text):
+        self._say("STAGE " + text)
+
+    def ready(self, text="Everything is up."):
+        self._say("READY " + text)
+        if self.p is not None:
+            try:
+                self.p.stdin.close()
+            except OSError:
+                pass
+
 
 class Launcher(object):
     def __init__(self, logs):
@@ -1397,6 +1441,9 @@ def main():
                     help="which flight station's panels, displays and keyboards to show: "
                          "forward, the aft flight deck (rendezvous, docking, RMS), or all "
                          "(default); the manager's STATION row changes it")
+    ap.add_argument("--no-splash", action="store_true",
+                    help="no start-up splash window (it tells the user to wait while the "
+                         "windows come up, in front of everything)")
     ap.add_argument("--auto-place", action="store_true",
                     help="place the windows by simulatePASS's own screen plan (the displays, "
                          "keyboards, CAM, O6, the manager, the panels' tiling) when no --layout "
@@ -1854,6 +1901,8 @@ def main():
         raise SystemExit("simulatePASS: --snapshot-resume %s is not a directory"
                          % args.snapshot_resume)
     L = Launcher(logs)
+    splash = Splash(not args.no_splash)
+    splash.stage("Starting the displays, the panels and the computer")
     stop_event = threading.Event()
     try:
         # EVERY CHILD BUT THE MANAGER, IN ONE PLACE, so that a resume can
@@ -2224,6 +2273,9 @@ def main():
             # windows are the whole point (hold-test3: pv_aft and pv_cctv "not
             # on screen"), so a layout naming its views waits for them longer.
             wait_s = 90 if (args.hold_start and any(r.startswith("pv_") for r in roles_wanted)) else 12
+            splash.stage("Waiting for the windows" + (" (the window views load their "
+                         "textures first: up to a minute or more without a fast GPU)"
+                         if wait_s > 12 else ""))
             deadline = time.time() + wait_s
             while time.time() < deadline:
                 mine = windowLayout.window_ids() - windows_before
@@ -2231,6 +2283,7 @@ def main():
                 if all(r in roles for r in roles_wanted):
                     break
                 time.sleep(0.5)
+            splash.stage("Placing the windows where the layout says")
             time.sleep(1.5)        # let the window manager finish placing them
             mine = windowLayout.window_ids() - windows_before
             # MATCHED BY ROLE, NOT BY WINDOW ID.
@@ -2293,6 +2346,8 @@ def main():
             # long enough for an Orbiter 100 ft from the ISS to drift.  Here
             # the computer has not started, so nothing moves at all.
             tty = sys.stdin is not None and sys.stdin.isatty() and os.name != "nt"
+            splash.ready("Every window is up. Arrange them if you like, then press Enter "
+                         "in the terminal (or 'go') to start the vehicle.")
             log("HELD: every window is up and placed; the vehicle starts on the session "
                 "command 'go'%s" % (" or Enter here" if tty else ""))
             while not SESSION["go"]:
@@ -2340,6 +2395,7 @@ def main():
                            and SESSION["action"] is None):
                         time.sleep(0.5)
                 else:
+                    splash.ready("Everything is up.")
                     print("Everything is up.  Press Enter here to shut it all "
                           "down (Ctrl-C also works).")
                     try:
