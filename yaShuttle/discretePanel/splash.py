@@ -1,65 +1,127 @@
 #!/usr/bin/env python3
-"""A start-up splash: tells the user the simulation is still coming up and
-what it is doing, in front of everything, until simulatePASS says it is ready.
+"""A start-up splash, in front of everything until simulatePASS says it is up.
 
-Started by simulatePASS.py; it reads lines from its stdin:
+    splash.py [--image FILE]
 
-    STAGE text      the current step, shown big; earlier ones tick off below
-    READY text      everything is up: shown for a moment, then the window closes
+Reads lines from stdin:
 
-and closes by itself when stdin closes.  Runs fine without a display (it then
-exits at once), so a headless run is unaffected.
+    STAGE text      the current step (one short line)
+    READY text      everything is up: shown briefly, then the window closes
+
+and closes when stdin does.  Without --image it is a small plain window; with
+one (PNG, GIF or, with Pillow, JPEG) the picture IS the splash and the step is
+one line beneath it.  It sits on the PRIMARY monitor, never straddling two.
+Without a display or Tk it exits at once, so a headless run is unaffected.
 """
+import argparse
+import os
+import queue
+import re
+import subprocess
 import sys
 import threading
 import time
-import queue
 
 try:
     import tkinter as tk
-except Exception:                       # no Tk here: simulatePASS carries on without
+except Exception:
     sys.exit(0)
 
-BG, FG, DIM, OK, WARN = "#1e1e1e", "#e8e8e8", "#8a8a8a", "#7ec87e", "#f2c14e"
+BG, FG, DIM, OK = "#202020", "#e8e8e8", "#8a8a8a", "#7ec87e"
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def primary_monitor(root):
+    """(x, y, w, h) of the primary monitor.  Tk's screen is the whole virtual
+    desktop on X11 (two monitors are one wide screen), so ask xrandr there; on
+    Windows and macOS Tk's screen is the primary display already."""
+    if sys.platform.startswith("linux"):
+        try:
+            out = subprocess.run(["xrandr", "--listmonitors"], capture_output=True,
+                                 text=True, timeout=3).stdout
+            first = None
+            for line in out.splitlines():
+                m = re.search(r"(\d+)/\d+x(\d+)/\d+\+(-?\d+)\+(-?\d+)", line)
+                if not m:
+                    continue
+                g = (int(m.group(3)), int(m.group(4)), int(m.group(1)), int(m.group(2)))
+                if first is None:
+                    first = g
+                if "*" in line.split(":", 1)[-1].split()[0]:
+                    return g
+            if first is not None:
+                return first
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return (0, 0, root.winfo_screenwidth(), root.winfo_screenheight())
+
+
+def load_image(path):
+    try:
+        return tk.PhotoImage(file=path)
+    except tk.TclError:
+        pass
+    try:
+        from PIL import Image, ImageTk
+        return ImageTk.PhotoImage(Image.open(path))
+    except Exception:
+        return None
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--image")
+    args = ap.parse_args()
     try:
         root = tk.Tk()
     except Exception:
         return 0
-    root.title("Starting")
     root.configure(bg=BG)
-    root.overrideredirect(True)                 # no frame: nothing to drag or close
+    root.overrideredirect(True)
     try:
         root.attributes("-topmost", True)
     except tk.TclError:
         pass
-    w, h = 640, 330
-    sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
-    root.geometry("%dx%d+%d+%d" % (w, h, (sw - w) // 2, (sh - h) // 3))
-    tk.Label(root, text="STARTING THE SIMULATION", bg=BG, fg=FG,
-             font=("Helvetica", 22, "bold")).pack(pady=(22, 4))
-    tk.Label(root, text="Please wait.  Do not touch the windows or the keyboard until this "
-             "message goes.", bg=BG, fg=WARN, font=("Helvetica", 13), wraplength=w - 40).pack()
-    cur = tk.Label(root, text="", bg=BG, fg=FG, font=("Helvetica", 15), wraplength=w - 40)
-    cur.pack(pady=(18, 4))
-    done_box = tk.Label(root, text="", bg=BG, fg=DIM, font=("Helvetica", 11), justify="left",
-                        anchor="w", wraplength=w - 60)
-    done_box.pack(fill="x", padx=30)
-    clock = tk.Label(root, text="0 s", bg=BG, fg=DIM, font=("Helvetica", 11))
-    clock.pack(side="bottom", pady=10)
+    mx, my, mw, mh = primary_monitor(root)
+    img = None
+    path = args.image
+    if not path:
+        for n in ("splash.png", "splash.jpg", "splash.gif"):
+            if os.path.isfile(os.path.join(HERE, n)):
+                path = os.path.join(HERE, n)
+                break
+    if path and os.path.isfile(path):
+        img = load_image(path)
+    if img is not None:
+        # no larger than 80% of the monitor
+        k = max(1, -(-img.width() // int(mw * 0.8)), -(-img.height() // int(mh * 0.8)))
+        if k > 1:
+            img = img.subsample(k, k)
+        tk.Label(root, image=img, bd=0, bg=BG).pack()
+        w = img.width()
+        status = tk.Label(root, text="", bg=BG, fg=FG, font=("Helvetica", 12), pady=6,
+                          wraplength=w - 20)
+        status.pack(fill="x")
+    else:
+        w = min(460, mw - 40)
+        tk.Label(root, text="Starting the simulation", bg=BG, fg=FG,
+                 font=("Helvetica", 18, "bold")).pack(pady=(24, 6))
+        tk.Label(root, text="please wait", bg=BG, fg=DIM, font=("Helvetica", 12)).pack()
+        status = tk.Label(root, text="", bg=BG, fg=FG, font=("Helvetica", 12), pady=16,
+                          wraplength=w - 40)
+        status.pack(fill="x", padx=20)
+    root.update_idletasks()
+    h = root.winfo_reqheight()
+    w = max(w, root.winfo_reqwidth())
+    root.geometry("%dx%d+%d+%d" % (w, h, mx + (mw - w) // 2, my + (mh - h) // 2))
     q = queue.Queue()
-    t0 = time.monotonic()
-    stages = []                                 # finished steps
 
     def reader():
         for line in sys.stdin:
             q.put(line.rstrip("\n"))
         q.put(None)
     threading.Thread(target=reader, daemon=True).start()
-
-    state = {"cur": "", "ready": None}
+    ready = [None]
 
     def pump():
         try:
@@ -70,25 +132,16 @@ def main():
                     return
                 kind, _, text = line.partition(" ")
                 if kind == "STAGE":
-                    if state["cur"]:
-                        stages.append(state["cur"])
-                    state["cur"] = text
-                    cur.config(text=text + " ...", fg=FG)
-                    done_box.config(text="\n".join("  ✓ " + s for s in stages[-6:]))
+                    status.config(text=text, fg=FG)
                 elif kind == "READY":
-                    if state["cur"]:
-                        stages.append(state["cur"])
-                        state["cur"] = ""
-                    cur.config(text=text or "Ready", fg=OK)
-                    done_box.config(text="\n".join("  ✓ " + s for s in stages[-6:]))
-                    state["ready"] = time.monotonic()
+                    status.config(text=text or "Ready", fg=OK)
+                    ready[0] = time.monotonic()
         except queue.Empty:
             pass
-        clock.config(text="%d s" % (time.monotonic() - t0))
-        if state["ready"] is not None and time.monotonic() - state["ready"] > 4.0:
+        if ready[0] is not None and time.monotonic() - ready[0] > 3.0:
             root.destroy()
             return
-        root.after(200, pump)
+        root.after(150, pump)
     root.after(100, pump)
     root.mainloop()
     return 0

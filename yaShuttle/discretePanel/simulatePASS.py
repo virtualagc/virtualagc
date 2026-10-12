@@ -275,6 +275,24 @@ def procedure_text(gpcs, crts):
 # ---------------------------------------------------------------------------
 # Processes
 
+def layout_positions(path):
+    """{role: (x, y, w, h)} of the windows a --layout names with a place: where
+    each program is started, so that it opens THERE and is not moved there
+    afterwards (owner, 2026-10-12: the panels shown late were already in
+    place, everything else opened at the desktop's choice and then jumped).
+    The layout's numbers carry a window-manager frame offset, so this is
+    close, not exact; the restore that follows settles the last few pixels."""
+    out = {}
+    try:
+        with open(path) as fh:
+            for w in json.load(fh).get("windows", []):
+                if "x" in w and "y" in w and not w.get("min"):
+                    out[w["role"]] = (int(w["x"]), int(w["y"]), int(w.get("w") or 0), int(w.get("h") or 0))
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return out
+
+
 class Splash(object):
     """splash.py, in front of everything while the simulation comes up: what it
     is doing and that the user should wait (owner, 2026-10-12: "how can we
@@ -1902,7 +1920,8 @@ def main():
                          % args.snapshot_resume)
     L = Launcher(logs)
     splash = Splash(not args.no_splash)
-    splash.stage("Starting the displays, the panels and the computer")
+    LP = layout_positions(args.layout) if args.layout and not args.auto_place else {}
+    splash.stage("Starting")
     stop_event = threading.Event()
     try:
         # EVERY CHILD BUT THE MANAGER, IN ONE PLACE, so that a resume can
@@ -1939,6 +1958,8 @@ def main():
                 e = dict(env)
                 if args.auto_place:
                     e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[k]
+                elif ("crt%d" % (k + 1)) in LP:
+                    e["NSTS_MDU_POS"] = "%d,%d" % LP["crt%d" % (k + 1)][:2]
                 # A RESTORED DISPLAY IS HANDED ITS OWN MEMORY.  Without
                 # this the unit comes up blank and PASS only ever rewrites
                 # the changing fields, so the numbers appear over no format
@@ -1962,6 +1983,8 @@ def main():
                 e = dict(env)
                 if args.auto_place:
                     e["NSTS_MDU_POS"] = "%d,%d" % crt_pos[3]
+                elif "afd1" in LP:
+                    e["NSTS_MDU_POS"] = "%d,%d" % LP["afd1"][:2]
                 L.start("meds-afd1",
                         [py, "MEDS2.py"]
                         + ["--port-base", str(args.port_base), "--size", str(size),
@@ -1975,12 +1998,15 @@ def main():
                             [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
                              str(k + 1), "--port-base",
                              str(args.port_base), "--size", str(tk_px(size))]
-                            + (["--geometry", geom] if args.auto_place else []),
+                            + (["--geometry", geom] if args.auto_place else
+                               ["--geometry", "+%d+%d" % LP["kybd%d" % (k + 1)][:2]]
+                               if ("kybd%d" % (k + 1)) in LP else []),
                             HERE, env)
             if multi:
                 L.start("cam", [py, "cam.py", "--port-base", str(args.port_base),
                                 "--size", str(tk_px(cam_size))]
-                        + (["--geometry", cam_geom] if args.auto_place else []),
+                        + (["--geometry", cam_geom] if args.auto_place else
+                           ["--geometry", "+%d+%d" % LP["cam"][:2]] if "cam" in LP else []),
                         HERE, env)
             # THE HAND CONTROLLERS, one station's: one person flies this.  The
             # same --size as the keyboards (halved on macOS by tk_px, where
@@ -2008,6 +2034,11 @@ def main():
                            "--size", str(args.portview_size)]
                 if pv_views:
                     pv_argv += ["--views", pv_views]
+                    # each view opens at its layout place and size
+                    for _v in pv_views.split(","):
+                        _r = LP.get("pv_" + _v)
+                        if _r and _r[2] and _r[3]:
+                            pv_argv += ["--geometry", "%s=%dx%d+%d+%d" % (_v, _r[2], _r[3], _r[0], _r[1])]
                 L.start("portview", pv_argv, HERE, env)
             if want_rpop and env.get("YAGPC_VEHDYN") == "1":
                 # at the displays' --size: under the desktop's QT_SCALE_FACTOR 2
@@ -2105,6 +2136,8 @@ def main():
                           "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size))]
             if args.auto_place:
                 panel_argv += ["--geometry", o6_geom]
+            elif "panel_o6" in LP:
+                panel_argv += ["--geometry", "+%d+%d" % LP["panel_o6"][:2]]
             if panel_restore and os.path.isfile(panel_restore):
                 panel_argv += ["--restore", panel_restore]
             if args.ssp:
@@ -2210,6 +2243,8 @@ def main():
             # not by hand.
             if args.debug:
                 manager_argv += ["--debug"]
+            if "manager" in LP:
+                manager_argv += ["--geometry", "+%d+%d" % LP["manager"][:2]]
             if sys.platform == "darwin" and not args.layout and args.auto_place:
                 # macOS puts an unplaced window at the top left, which is on
                 # top of the displays; a Linux window manager finds it free
@@ -2273,9 +2308,7 @@ def main():
             # windows are the whole point (hold-test3: pv_aft and pv_cctv "not
             # on screen"), so a layout naming its views waits for them longer.
             wait_s = 90 if (args.hold_start and any(r.startswith("pv_") for r in roles_wanted)) else 12
-            splash.stage("Waiting for the windows" + (" (the window views load their "
-                         "textures first: up to a minute or more without a fast GPU)"
-                         if wait_s > 12 else ""))
+            splash.stage("Waiting for the windows to open")
             deadline = time.time() + wait_s
             while time.time() < deadline:
                 mine = windowLayout.window_ids() - windows_before
@@ -2283,7 +2316,7 @@ def main():
                 if all(r in roles for r in roles_wanted):
                     break
                 time.sleep(0.5)
-            splash.stage("Placing the windows where the layout says")
+            splash.stage("Placing the windows")
             time.sleep(1.5)        # let the window manager finish placing them
             mine = windowLayout.window_ids() - windows_before
             # MATCHED BY ROLE, NOT BY WINDOW ID.
@@ -2346,8 +2379,7 @@ def main():
             # long enough for an Orbiter 100 ft from the ISS to drift.  Here
             # the computer has not started, so nothing moves at all.
             tty = sys.stdin is not None and sys.stdin.isatty() and os.name != "nt"
-            splash.ready("Every window is up. Arrange them if you like, then press Enter "
-                         "in the terminal (or 'go') to start the vehicle.")
+            splash.ready("Ready: arrange the windows, then press Enter in the terminal")
             log("HELD: every window is up and placed; the vehicle starts on the session "
                 "command 'go'%s" % (" or Enter here" if tty else ""))
             while not SESSION["go"]:
@@ -2395,7 +2427,7 @@ def main():
                            and SESSION["action"] is None):
                         time.sleep(0.5)
                 else:
-                    splash.ready("Everything is up.")
+                    splash.ready("Ready")
                     print("Everything is up.  Press Enter here to shut it all "
                           "down (Ctrl-C also works).")
                     try:

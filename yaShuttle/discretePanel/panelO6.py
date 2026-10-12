@@ -2785,6 +2785,10 @@ class PanelO6:
             if up and not win.shown:
                 win.top.deiconify()
                 win.shown = True
+                # A WINDOW MINIMIZED WHEN IT WENT (by the layout or by hand) comes
+                # back minimized, not restored (owner, 2026-10-12)
+                if getattr(win, "was_iconic", False):
+                    self.root.after(250, win.top.iconify)
                 if sys.platform == "darwin":
                     self.root.after(300, lambda w=win: self._darwin_nudge(w))
                 if not win.layout_placed:
@@ -2800,6 +2804,7 @@ class PanelO6:
                 # 2026-10-05).  The content's corner on the screen, since that
                 # is the one thing every window manager agrees on.
                 win.top.update_idletasks()
+                win.was_iconic = (win.top.state() == "iconic")
                 win.home = (win.top.winfo_rootx(), win.top.winfo_rooty())
                 win.top.withdraw()
                 win.shown = False

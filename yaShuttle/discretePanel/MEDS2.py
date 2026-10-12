@@ -14589,9 +14589,23 @@ class MedsRunner(object):
                         if not re.match(r"(crt\d|afd1)$", name):
                             continue
                         if st == "all" or (name in ("crt4", "afd1")) == (st == "aft"):
-                            w.show()
+                            if not w.isVisible():
+                                # where it was, and as it was (owner, 2026-10-12:
+                                # CRT1 and CRT2 came back shifted, and a minimized
+                                # window came back restored)
+                                pos = getattr(w, "_stationPos", None)
+                                if pos is not None:
+                                    w.move(pos)
+                                w.show()
+                                if pos is not None:
+                                    QtCore.QTimer.singleShot(150, lambda w=w, p=pos: w.move(p))
+                                if getattr(w, "_stationMin", False):
+                                    QtCore.QTimer.singleShot(300, w.showMinimized)
                         else:
-                            w.hide()
+                            if w.isVisible():
+                                w._stationPos = w.pos()
+                                w._stationMin = w.isMinimized()
+                                w.hide()
                     print("meds: station %s" % st)
                     continue
                 if len(words) != 3 or words[0].lower() != "edgekey":
