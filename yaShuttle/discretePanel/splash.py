@@ -92,27 +92,34 @@ def main():
                 break
     if path and os.path.isfile(path):
         img = load_image(path)
+    FONT = ("Helvetica", 15, "italic")
     if img is not None:
         # no larger than 80% of the monitor
         k = max(1, -(-img.width() // int(mw * 0.8)), -(-img.height() // int(mh * 0.8)))
         if k > 1:
             img = img.subsample(k, k)
-        tk.Label(root, image=img, bd=0, bg=BG).pack()
-        w = img.width()
-        status = tk.Label(root, text="", bg=BG, fg=FG, font=("Helvetica", 12), pady=6,
-                          wraplength=w - 20)
-        status.pack(fill="x")
+        w, h = img.width(), img.height()
+        cv = tk.Canvas(root, width=w, height=h, bd=0, highlightthickness=0, bg=BG)
+        cv.pack()
+        cv.create_image(0, 0, image=img, anchor="nw")
+        ty = h - 24                 # the status line sits ON the picture, along its bottom
     else:
-        w = min(460, mw - 40)
-        tk.Label(root, text="Starting the simulation", bg=BG, fg=FG,
-                 font=("Helvetica", 18, "bold")).pack(pady=(24, 6))
-        tk.Label(root, text="please wait", bg=BG, fg=DIM, font=("Helvetica", 12)).pack()
-        status = tk.Label(root, text="", bg=BG, fg=FG, font=("Helvetica", 12), pady=16,
-                          wraplength=w - 40)
-        status.pack(fill="x", padx=20)
+        w, h = min(460, mw - 40), 150
+        cv = tk.Canvas(root, width=w, height=h, bd=0, highlightthickness=0, bg=BG)
+        cv.pack()
+        cv.create_text(w // 2, 44, text="Starting the simulation", fill=FG,
+                       font=("Helvetica", 18, "bold italic"))
+        ty = 100
+    # the text is drawn twice, a dark copy a pixel off, so it reads on any picture
+    shadow = cv.create_text(w // 2 + 1, ty + 1, text="", fill="#000000", font=FONT,
+                            width=w - 40, anchor="center")
+    status = cv.create_text(w // 2, ty, text="", fill=FG, font=FONT, width=w - 40,
+                            anchor="center")
+
+    def say(text, colour=FG):
+        cv.itemconfig(shadow, text=text)
+        cv.itemconfig(status, text=text, fill=colour)
     root.update_idletasks()
-    h = root.winfo_reqheight()
-    w = max(w, root.winfo_reqwidth())
     root.geometry("%dx%d+%d+%d" % (w, h, mx + (mw - w) // 2, my + (mh - h) // 2))
     q = queue.Queue()
 
@@ -132,9 +139,9 @@ def main():
                     return
                 kind, _, text = line.partition(" ")
                 if kind == "STAGE":
-                    status.config(text=text, fg=FG)
+                    say(text.rstrip(" .") + " ...")          # an operation under way
                 elif kind == "READY":
-                    status.config(text=text or "Ready", fg=OK)
+                    say(text or "Ready", OK)
                     ready[0] = time.monotonic()
         except queue.Empty:
             pass
