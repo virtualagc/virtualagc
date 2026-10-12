@@ -2095,15 +2095,19 @@ the radar (above) or MCC.  No further search was added.
 
 **Not done.**  More seeds; the trial on through MC2-MC4 and the manual phase.
 
-**The owner's decision, pending.**  5k and 5l together leave the choice of
-default for rendezvous runs open.  With the radar ahead of the final Ti
-targeting, `--dass-iloads all` with `YAGPC_STARTRK_MOUNT=flown` and
-`--onboard-error flown` recovers on both seeds; Mac-portview's recommendation
-is that combination.  The tracker mounting is in yaGPC2 (startrk.c, peer-passed
-at 6e767035f) but opt-in, the tape's mounting the default.  `all` less
-#PCGEIPD with the flown mounting reproduces the baseline when PASS is started
-with the true state.  Also still the owner's: the default volume
-(Mac-portview suggests `-rndz2.mmv`) and the IGOAL radiator white plate.
+**The owner's decision (2026-10-10, via Mac-portview).**  The default volume
+is `-rndz2.mmv` (83990ee41; `fly_rndz134 --tape` defaults to
+`~/sts134-runs/rendezvous/...-rndz2.mmv`).  The default GNC stays **option A**
+(rndz2: the tape's tracker mounting, PASS started with the true state).
+**Option B** is one switch, `--flight-gnc`: a `-gnc` volume with STS-134's GNC
+I-loads except the ascent/abort guidance (#PCGGCOM), plus
+`YAGPC_STARTRK_MOUNT=flown` and `--onboard-error flown` (branch
+`review/flight-gnc`, plan 5n, being flown).  B may become the default later,
+if it flies well and the owner agrees.  **IGOAL radiator white plate:
+closed.**  It is the real 2008 S1 radiator face-sheet peel, there for STS-134;
+the geometry is kept and retextured with the panel's own texture instead of
+IGOAL's white edge texel (29575bad0, `fetch_assets.prepare_iss_radiator_damage`),
+at the owner's request.
 
 ## 5m. Docking, and the aft flight station (2026-10-09/10, Linux)
 
@@ -2147,10 +2151,10 @@ aft,cctv,rpop`):
 
 **Open.**
 
-- SPEC 23 F1F/F2F deselect, and the angular flyout.
+- The angular flyout (contingency only).
 - The crew's commands to the APDS, beyond the A7L sequence.
 - The stack's shared momentum at contact, and the post-contact thruster
-  firing (PCT).
+  firing (PCT; it needs the F2/F4 SPDBK/THROT pushbutton, not modelled).
 - The 4 deg angular capture limit is a model choice, not documented.
 - The virtual RHC/THC shows its red "inactive" message while scripted input
   visibly moves the controllers.  It should not show while scripted input
@@ -2158,6 +2162,10 @@ aft,cctv,rpop`):
 - For the video: a layout per station, switched by the script at the handover
   to the aft station, and SimpleScreenRecorder driven through its stdin
   (`record-start`, `record-save`).  Agreed with the owner; not started.
+
+**Backlog closed (a0d55bfd9, 2026-10-10).**  KU FOR COMM at 110 ft and GNC 23
+JET DES F1F/F2F at 75 ft are done, per CC 9-5 and 9-8.  The post5 test capture
+docked 0.14 / 0.17 ft off axis with a hard mate, and the [22A] sequence ran.
 
 ## 5n. Option B: the flight's GNC, as one switch (2026-10-10, macOS)
 
@@ -2318,6 +2326,66 @@ propellant. B starts the manual phase 210 ft out of plane, where A starts
 
 Runs: `gnc-run2`, `optA-run650`; the bisect probes `bisA-full`, `bisA-a`,
 `bisB-repro`, `bisB-tapemount`, `bisB-fresh`, `bisB-rbaratt`, `bisB-att`.
+
+## 5o. Entry: the nominal, RTLS and TAL re-flies (2026-10-11, Linux)
+
+Entry I-loads `sts134-entry-iloads.json` (#PCGGC03, as flown) on `-full3`
+(09123320), re-flown from the abort and orbit captures.
+
+- **Nominal, KSC** (`entry-full3/run1`, orbit capture retagged, coast at rate
+  4): lands at **196.5 kt, 3.9 ft/s**, OGS q about 200 psf.  The flown entry
+  set is safe for the nominal case.
+- **Entry aero** (review/ops1-lps, not master): subsonic speedbrake
+  increments now come from the CP-2283 Fig 5 flight data
+  (`tools/entryaero.py`, `src/entryaero.h` regenerated); the RTLS re-fly lands
+  at 223 kt / 3.2 ft/s.  The nominal entry has not been re-flown with it.
+- **TAL:** MECO is on PASS's targets (361 kft over the ellipsoid, gamma 0 at
+  363 kft at ET SEP, as JSC-10559).  The remaining defect is a post-pull-out
+  low-q roll (129 deg) and beta the DAP cannot hold.  Ruled out: the entry
+  I-loads, the fc filters, the MECO targets, aero L/D, damping derivatives,
+  the Ny sign, the alpha-34 lateral hold, jet scale 0.6-1.6x, and Ixz.
+  - JSC-10559 p.3.3-67 says the early S-turn roll reversals are designed.
+  - The entry DAP builds beta deliberately and lets Cl_beta roll the vehicle
+    (abort9 trace).  OA98 M10.3 alpha 40 gives Cl_beta -0.0023, Cn_beta
+    -0.0018 against vehdyn's held -0.0021 / -0.00134: about 1.2x harder for
+    the jets than vehdyn, so the aero hold is not the cause.
+  - Jet scale (Mac-portview local harness, `~/sts134-runs/ascent/tal-jet*`):
+    beta above M7 is monotonic in jet scale (0.6x mean 1.7, 1.0x 2.7, 1.6x
+    4.7 deg), and x1.6 makes the beta cycle worse (M15-30 max 17 against
+    11.8).  Per-side yaw duty is unchanged at 0.6x (~80-95 jet-s per 50 s)
+    while beta halves: demand side, not jet efficiency.  The ~5,040 aft
+    jet-seconds at every scale only mean the pods emptied (vehdyn counts
+    jet-seconds only while a module has propellant, vehdyn.c:~3072).  Real
+    TAL entry also flies aft jets on pod propellant (SPEC 51 ICNCT inhibited
+    in OPS 3, JSC-10559 3.1-38).
+  - abort21 and the 0.6x trace: aft yaw firing balanced and alternating,
+    aileron trim about 0, up/down jets about 0 above q 20; runs median 2.9 s
+    (L) and 3.0 s (R), gaps 0.16 s, jets on about 90%, r swinging +/-1.8
+    deg/s with period about 6.5 s: a relay limit cycle.  Jets fire in the
+    damping direction and the 6.4 s cycle matches vehdyn's Dutch roll, which
+    points at the airframe model.
+  - vehdyn's inertia has no products of inertia (vehdyn.c:131-134); STS-134's
+    flown I-loads give Ixz about 273,803 slug-ft2 (~371,000 kg m2).  Adding
+    +/-371,227 kg m2 did **not** damp the cycle (M15-30 mean |beta| 2.58 /
+    2.57 against 2.73).  Still worth adding for realism, not the cause.
+  - **Next:** capture PASS through one cycle (yaw-rate command,
+    DAB/DELTA_AB, aileron command, NYP_LAT_ACCEL; GCDAER.hal:587) against
+    vehdyn's aileron deflection and moments, for the lagging or wrong-sign
+    link in the DAP lateral feedback; a plume-interaction model (TM-4500
+    figs 15/16/26, TP-1011) is the fallback.
+- **RTLS** (abort24/26; site-table fix 054ef3cbb gives a normal touchdown at
+  233 kt / 3.7 ft/s): OGS q is still about 360-370 psf on final with the
+  speedbrake at 98.6.  TAEM energy matches PASS's reference at handover (EOW
+  +0.6k) but the altitude is **1,690 ft above** TAEM HREF (12,897 against
+  14,587 ft at t=2254): high and slow.  The A/L pushes over to -27 deg
+  (PREFINAL at its Nz floor, NZC -0.5 g, DNZC -0.73) to capture the -18 deg
+  RTLS OGS (GAMSGS_RTLS -18, X_AIM_PT 1000, V_REF 506 fps) and gains about 90
+  fps it cannot shed (vehdyn full-SB L/D 2.55 against 3.08 needed).  TAEM
+  began 27 kft low on EOW at Mach 2.5 (186k against 214k).  IPHASE 1 (ACQ) at
+  t=1894/2000, 3 (PREFINAL) at 2254/2270.  Dump time is not the cause.
+  **Open:** the TAEM altitude/airspeed split (Nz limits, handover criteria)
+  and vehdyn's subsonic CL (alpha 9-10) and full-SB CD against LA66/TP-1779
+  (alpha 6-12, SB 0-98.6, M 0.4-0.9).
 
 ## 6. The stages
 

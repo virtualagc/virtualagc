@@ -155,6 +155,36 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | +516.72 | MEC: ET umbilical unlatch fired | |
 | **+523.96** | **ET separation** (`sts134f`; `sts134e` +524.08).  Post-MECO orbit 120.9 × 25.9 nmi osculating above the equatorial radius (`sts134e` 124.1 × 25.7; PASS's display, J2-mean, 125.3 × 25.1) | ET sep +522; MOD FRR: "insertion altitude 122 nm" |
 
+**A flight by the owner, run `ascent2` (2026-10-12).**  Restored from the
+T-5 minute capture with the **170 s** OMS assist (the 165.4 s the flight used
+is in the later `count165c` capture), on the model after the APU and OMS load
+changes.  Times are PASS's command-accepted instants, from
+`tools/missionaudit.py` on the run's `yaGPC2.log`; T is SRB ignition and the
+flown column is JSC 37461 Appendix A:
+
+| Event | `ascent2` | Flown |
+|---|---|---|
+| SSME 3 / 2 / 1 start | −6.6 / −6.4 / −6.3 | the same |
+| Throttle up to 104.5% | +3.8 | +4.1 |
+| Throttle down to 72% | +39.0 | +39.5 |
+| Throttle up to 104.5% | +51.0 | +51.3 |
+| SRB separation command | +125.1 | +125.0 |
+| 3-g throttle-down | +442.2 | +440.0 |
+| Throttle to 67% | +503.9 | +494.7 |
+| SSME shutdown, MECO command | +504.0 | +501.0 |
+| ET separation command | +525.2 | +522.0 |
+
+Its MECO and ET separation are about 1.2 s later than the `sts134f` rows
+above (+502.8, +523.96), likely the 170 s assist and the mass-model changes
+since; the rows above are left as they are until a flight from the 165.4 s
+capture is measured.  Max-q, the SRB arming time, OMS 2 and the orbit are not
+read from this run (no vehicle trace in its log).  The flown OMS 2 ignition
+is MET 0:36:57 (2,217.4 s), burn 168.6 s.
+
+The run raised one SM alert tone (PASS's alert-tone bit, panel t=127.6 s,
+136/12:52:15) and no backup C&W alarm: the C&W unit's own sensor channels are
+not simulated, so a nominal ascent is nearly silent.
+
 The truth's velocity budget to ET separation (vehdyn, `sts134f`): 30,356 ft/s
 of thrust, of it 27,500 along the velocity; drag loss 377 ft/s; gravity loss
 2,641 ft/s (`sts134e`: 30,353, 27,542, 424, 2,634).

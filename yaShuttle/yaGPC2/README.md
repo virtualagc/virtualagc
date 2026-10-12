@@ -406,6 +406,24 @@ are about docking:
 Readers take the first N doubles they know. The full layout is in
 `src/mdmdev.c` at `TRUTH_OFFSET`.
 
+### Changes of 2026-10-10 to 12
+
+- **OMS/RCS interconnect** (review/oms-interconnect, 8fd2d2c39): twelve valves
+  (RCS TK ISOL, RCS XFEED, OMS XFEED A/B) in `valvemodel.c`; `mdmdev`'s
+  `aft_rcs_feed` routes an aft group to the fuller OMS pod.  Awaiting the TAL
+  re-fly and the peer pass.
+- **OPS 101 hang fixed** (gpc-causes #297, a825ee831): CONFIGURE PROCESSORS
+  ENABLE now puts a released MSC in Wait (IBM-6246556A 2.0).  It used to resume
+  and double-post an IOQE, which corrupted FCOS's free lists and killed
+  Clock 2.  Also: `windowLayout` remembers minimised windows and converges
+  near the bottom panel; `fly_sts134` takes `--layout`, `--hold-start`,
+  `--rtls-runway` and `--portview-views`; the Manager's End simulation closes
+  orphaned runs; `simulatePASS` quits robustly.
+- **Entry aero:** the subsonic speedbrake increments come from CP-2283 Fig 5
+  flight data (`tools/entryaero.py`, `src/entryaero.h` regenerated).  The RTLS
+  re-fly lands at 223 kt / 3.2 ft/s.  The nominal entry has not been re-flown
+  with it, and it is on review/ops1-lps, not master.
+
 ### The regression gate
 
 Most of `yaGPC2`'s defects have been caught not by the unit tests but by one
