@@ -1824,7 +1824,7 @@ static void truth_publish(void) {
  * (2,400) -- the thrust, surfaces and main engine Pc are the model's own.  */
 #define SUBSYS_OFFSET 110     /* not 81-85, 91, 96-98, 100-109 */
 #define OMS_POD_KG 5897.0     /* vehdyn.c OMS_LOAD_KG, a pod at 100% */
-#define RCS_POD_KG 1460.0     /* vehdyn.c RCS_LOAD_KG, a module at 100% */
+#define RCS_POD_KG (2387.0 * 0.45359237)     /* vehdyn.c RCS_LOAD_KG, a module at 100% */
 
 static void subsys_publish(void) {
     static double next = -1.0;

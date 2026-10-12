@@ -148,7 +148,12 @@ static double dryKg = DRY_MASS_KG;
 #define DRY_IXX          1.29e6
 #define DRY_IYY          9.68e6
 #define DRY_IZZ          1.01e7
-#define RCS_LOAD_KG      1460.0
+/* A module's full load, oxidizer and fuel together: "the nominal full load of
+ * the forward and aft RCS tanks in each pod is 1,464 pounds in the oxidizer
+ * tanks and 923 pounds in the fuel tanks" (SCOM SFOC-FL0884, 2.23) -- 2,387 lb.
+ * This was 1,460 KG: the oxidizer's pounds read as kilograms and the fuel left
+ * out, a load 35 percent too big, so that the quantity gauge fell too slowly. */
+#define RCS_LOAD_KG      (2387.0 * 0.45359237)
 
 /* THE OMS PROPELLANT, modules 3 (left pod) and 4 (right): "1% OMS = 130
  * lb/side" (SCOM 2.18), so 13,000 lb = 5,897 kg a pod at 100%, as a point
