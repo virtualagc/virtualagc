@@ -76,7 +76,11 @@ EPOCH = "2011-05-16T11:30:00"
 # 12:56:25, giving 12:56:27.8 plus the RSLS's own latency.
 T0 = 136 * 86400 + 12 * 3600 + 56 * 60 + 27.994        # STS-134's SRB ignition
 GMTLO = 136 * 86400 + 12 * 3600 + 56 * 60 + 25.0       # what the ground sends
-OMS2_DTIG = 1756.0                                  # after ET separation (DOLILU message 25)
+# after ET separation (DOLILU message 25).  The flown value: the STS-134 Space
+# Shuttle Mission Report, App. A, has ET SEP at 136/13:05:10 GMT and OMS 2
+# ignition at 136/13:33:25.4, 1,695 s later (cutoff 13:36:14.1: 168.6 s, 259.2
+# ft/s, 124.3 x 175.8 nmi).  This was 1,756 s, which put the burn 61 s late.
+OMS2_DTIG = 1695.0
 # THE FLIGHT: STS-134 unless --flight FILE names another (a JSON object with
 # any of these keys; "t0" and "gmtlo" as [day, h, m, s]; "env" extra
 # environment for the vehicle, e.g. vehdyn's YAGPC_VEHDYN_ET_LB)
@@ -627,7 +631,14 @@ class Flight:
             self.wait_sim(5)
             self.ato_burn("ato-oms1", ATO_OMS1, g + tsep - t + 84.0)
         elif getattr(self.a, "abort", None) != "TAL":
+            # ASC/134 FB 2-5, MM 104 + 2 s: "If OMS 1 not reqd: OMS ENG (two) -
+            # OFF; go to POST OMS 1".  STS-134 was a direct insertion: the
+            # Mission Report's App. A has OMS 1 ignition and cutoff "Not
+            # Required".  The engines were armed for the assist; the OMS 2
+            # setup arms them again ("sqrt OMS ENG (two) - ARM/PRESS").
             self.wait_sim(20)
+            self.play("+0     omseng left off\n+1     omseng right off\n", "oms1-not-reqd")
+            self.say("crew: OMS 1 not required: OMS ENG (two) OFF (ASC/134 FB 2-5)")
         else:
             # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
             # keys it, and OPS 1 flies no aerosurfaces
