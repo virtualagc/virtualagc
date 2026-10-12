@@ -1823,7 +1823,6 @@ static void truth_publish(void) {
  * linearly with the propellant used (4,500 to 3,500 psia), N2 is steady
  * (2,400) -- the thrust, surfaces and main engine Pc are the model's own.  */
 #define SUBSYS_OFFSET 110     /* not 81-85, 91, 96-98, 100-109 */
-#define OMS_POD_KG 5897.0     /* vehdyn.c OMS_LOAD_KG, a pod at 100% */
 
 static void subsys_publish(void) {
     static double next = -1.0;
@@ -1836,7 +1835,7 @@ static void subsys_publish(void) {
     v[n++] = st->t;
     for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_oms_thrust(e);
     for (int e = 0; e < 2; e++) {
-        double used = 1.0 - vehdyn_propellant(3 + e) / OMS_POD_KG;
+        double used = 1.0 - vehdyn_propellant(3 + e) / vehdyn_oms_load_kg(e);
         if (used < 0.0) used = 0.0;
         if (used > 1.0) used = 1.0;
         v[n++] = 4500.0 - 1000.0 * used;
@@ -1868,7 +1867,7 @@ static void subsys_publish(void) {
     for (int i = 0; i < 4; i++) v[n++] = 250.0;     /* OMS ox/fu regulated, PROVISIONAL */
     for (int i = 0; i < 3; i++)
         v[n++] = vehdyn_rcs_gauge_pct0(RCS_MOD[i]) * vehdyn_propellant(RCS_MOD[i]) / vehdyn_rcs_load_kg(RCS_MOD[i]);
-    for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_propellant(3 + e) / OMS_POD_KG;
+    for (int e = 0; e < 2; e++) v[n++] = 100.0 * vehdyn_propellant(3 + e) / vehdyn_oms_gauge_full_kg();
     uint8_t b[4 + 8 * 48];
     memcpy(b, "SUB1", 4);
     for (int i = 0; i < n; i++) put_be_double(b + 4 + 8 * i, v[i]);

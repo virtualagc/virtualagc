@@ -158,7 +158,7 @@ int main(void) {
                   "gimbals reach their command", vehdyn_oms_gimbal(0, 1), -ty);
             const PhysState *s0 = vehdyn_state();
             double m0 = s0->mass, dv0[3], dv1[3];
-            check(fabs(m0 - 114914.0) < 200.0, "full vehicle mass (kg)", m0, 114914.0);   /* dry 100,000 + RCS 865 + 1,128 + 1,127 + 2 x 5,897 */
+            check(fabs(m0 - (100000.0 + 864.8 + 1127.9 + 1127.4 + 5605.5 + 5600.1)) < 200.0, "full vehicle mass (kg)", m0, 114326.0);   /* dry + RCS + OMS as STS-134 loaded them */
             vehdyn_sensed_dv(dv0);
             vehdyn_set_oms(0, true, true, tp, -ty, 3e6);
             vehdyn_set_oms(1, true, true, tp, ty, 3e6);
@@ -169,16 +169,16 @@ int main(void) {
             vehdyn_sensed_dv(dv1);
             double used = 2 * 6087.0 * 4.4482216152605 / (10136.8 * 0.3048) * 10.0;
             check(fabs((m0 - s1->mass) - used) < 0.05, "OMS propellant used (kg)", m0 - s1->mass, used);
-            check(fabs((5897.0 - vehdyn_propellant(3)) - used / 2) < 0.05, "from each pod",
-                  5897.0 - vehdyn_propellant(3), used / 2);
+            check(fabs((vehdyn_oms_load_kg(0) - vehdyn_propellant(3)) - used / 2) < 0.05, "from each pod",
+                  vehdyn_oms_load_kg(0) - vehdyn_propellant(3), used / 2);
             double P = 0.276053 - tp * 3.14159265358979323846 / 180;
             double Y = (6.50 - ty) * 3.14159265358979323846 / 180;
             double want = 10136.8 * 0.3048 * cos(P) * cos(Y) * log(m0 / s1->mass);
             double got = dv1[0] - dv0[0];
             if (trimmed)
                 check(fabs(got / want - 1.0) < 0.002, "OMS delta-v along X, rocket equation (m/s)", got, want);
-            /* the pods differ by 0.5 kg of propellant as loaded (1,127.9 / 1,127.4) */
-            check(fabs(s1->w[0]) < 5e-6 && fabs(s1->w[2]) < 5e-6, "no roll or yaw from a symmetric pair",
+            /* the pods differ as loaded: RCS 1,127.9 / 1,127.4 kg, OMS 5,605.5 / 5,600.1 */
+            check(fabs(s1->w[0]) < 2e-5 && fabs(s1->w[2]) < 2e-5, "no roll or yaw from a symmetric pair",
                   s1->w[0] + s1->w[2], 0.0);
             miss[trimmed] = s1->I[1][1] * (s1->w[1] / 10.0) / (2 * 6087.0 * 4.4482216152605);
         }

@@ -45,6 +45,10 @@ const PhysState *vehdyn_state(void);
 double vehdyn_propellant(int module);
 /* The RCS load a flight starts with, kg, and what the quantity gauge reads at
  * that load (percent), for RCS module 0 forward, 1 left, 2 right. */
+/* The OMS load of pod e (0 left, 1 right) at liftoff, kg, and what its
+ * quantity gauge calls 100 percent. */
+double vehdyn_oms_load_kg(int e);
+double vehdyn_oms_gauge_full_kg(void);
 double vehdyn_rcs_load_kg(int k);
 double vehdyn_rcs_gauge_pct0(int k);
 void vehdyn_set_propellant(int module, double kg);

@@ -165,7 +165,13 @@ static const double RCS_GAUGE_PCT0[3] = { 69.9, 100.7, 100.6 };
  * lb/side" (SCOM 2.18), so 13,000 lb = 5,897 kg a pod at 100%, as a point
  * mass at the pod's tanks -- the position ESTIMATED, forward of and level
  * with the engines. */
-#define OMS_LOAD_KG      5897.0
+/* THE OMS LOADED, oxidizer and fuel together, lb, left / right pod: the Mission
+ * Report p. 44, "PROPELLANT USAGE DATA", loaded lbm 7,701 + 4,660 and 7,707 +
+ * 4,640 -- 95 percent of the gauge's full, which is 12,950 lb a pod (the same
+ * page: 267.56 lb of interconnect usage is 2.066 percent; SCOM: 1 percent =
+ * 130 lb, 80 ox + 50 fuel).  This was 13,000 lb, full, in each. */
+static const double OMS_LOAD_LB[2] = { 7701.0 + 4660.0, 7707.0 + 4640.0 };
+#define OMS_GAUGE_FULL_LB 12950.0
 #define NMOD             5
 
 static const double TANK_XYZ[NMOD][3] = {  /* inches, Orbiter structural */
@@ -1865,7 +1871,8 @@ void vehdyn_reset(double t) {
     memset(&st, 0, sizeof st);
     dock_reset();
     for (int k = 0; k < 3; k++) prop[k] = RCS_LOAD_KG(k);
-    prop[3] = prop[4] = OMS_LOAD_KG;
+    prop[3] = OMS_LOAD_LB[0] * LB_KG;
+    prop[4] = OMS_LOAD_LB[1] * LB_KG;
     {
         const char *e = yagpc_getenv("YAGPC_VEHDYN_ORBITER_KG");
         double kg = e ? atof(e) : 0.0, p = 0.0;
@@ -3304,6 +3311,8 @@ double vehdyn_unix(double t) { return (unixZero >= 0.0) ? unixZero + t : -1.0; }
 
 const PhysState *vehdyn_state(void) { return &st; }
 double vehdyn_propellant(int module) { return (module >= 0 && module < NMOD) ? prop[module] : 0.0; }
+double vehdyn_oms_load_kg(int e) { return (e >= 0 && e <= 1) ? OMS_LOAD_LB[e] * LB_KG : 0.0; }
+double vehdyn_oms_gauge_full_kg(void) { return OMS_GAUGE_FULL_LB * LB_KG; }
 double vehdyn_rcs_load_kg(int k) { return (k >= 0 && k < 3) ? RCS_LOAD_KG(k) : 0.0; }
 double vehdyn_rcs_gauge_pct0(int k) { return (k >= 0 && k < 3) ? RCS_GAUGE_PCT0[k] : 0.0; }
 
