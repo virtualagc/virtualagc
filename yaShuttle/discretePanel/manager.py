@@ -1388,7 +1388,8 @@ class Manager(object):
     # What can be seen from each station: the forward station's windows, or
     # the aft flight deck's overhead window and its A3 monitor's centerline
     # camera picture (portview's cctv).
-    STATION_VIEWS = {"fwd": "front,up,left,right", "aft": "aft,cctv,rpop", "all": None}
+    STATION_VIEWS = {"fwd": "front,up,left,right", "aft": "aft,cctv,rpop",
+                    "all": "front,up,left,right,aft,cctv,rpop"}
     STATION_HANDS = {"fwd": "lh", "aft": "aft", "all": None}
 
     def set_station(self, st):
