@@ -1216,7 +1216,7 @@ void main() {
 """
 
 
-def compile_program(vs, fs):
+def compile_program(vs, fs, gs=None):
     def sh(kind, src):
         s = GL.glCreateShader(kind)
         GL.glShaderSource(s, src)
@@ -1225,7 +1225,10 @@ def compile_program(vs, fs):
             raise RuntimeError(GL.glGetShaderInfoLog(s).decode())
         return s
     p = GL.glCreateProgram()
-    for s in (sh(GL.GL_VERTEX_SHADER, vs), sh(GL.GL_FRAGMENT_SHADER, fs)):
+    stages = [sh(GL.GL_VERTEX_SHADER, vs), sh(GL.GL_FRAGMENT_SHADER, fs)]
+    if gs is not None:
+        stages.append(sh(GL.GL_GEOMETRY_SHADER, gs))
+    for s in stages:
         GL.glAttachShader(p, s)
     GL.glLinkProgram(p)
     if not GL.glGetProgramiv(p, GL.GL_LINK_STATUS):
@@ -1295,6 +1298,7 @@ def load_rgb(path):
 # Unified-memory GPUs (Apple, Intel) report nothing and get 'full'.
 TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
+THIN = {'gain': 0.35}                  # the brightness a hair-thin triangle keeps (--thin-gain)
 MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 # 'full' takes about 1.4 GB of textures: two 16384 x 8192 Earth maps
@@ -1603,10 +1607,10 @@ class Resources(object):
         self.earthDayTex = None
         self.earthMonth = None
         self.preloadMonth = None               # the flight's month, loaded in build()
-        self.modelProg = compile_program(MODEL_VS, MODEL_FS)
+        self.modelProg = compile_program(MODEL_VS, MODEL_FS, MODEL_GS)
         self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
-                               "uSunVis", "uEarthLit")
+                               "uSunVis", "uEarthLit", "uViewPx", "uThinGain")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
                                  "uCctv", "uSize")
@@ -2530,10 +2534,10 @@ uniform float uNear, uFar;
 // triangle, where the texture coordinates and normal are extrapolated past
 // its edge: a line of wrong, often bright, pixels crawling along every
 // outline against black space.  At the covered samples' centroid instead.
-centroid out vec3 vNrm;         // body frame
-centroid out vec3 vPos;         // body frame
-centroid out vec2 vUv;
-centroid out float vDist;       // the camera-frame depth, for the fragment's own
+out vec3 wNrm;                  // body frame (the geometry shader's, which forwards
+out vec3 wPos;                  // them, as centroid, to the fragment stage)
+out vec2 wUv;
+out float wDist;                // the camera-frame depth, for the fragment's own
 void main() {
     vec3 c = uRot * aPos + uTrans;
     // Depth linear in distance over just this vehicle's span: exact to well
@@ -2541,10 +2545,55 @@ void main() {
     // fragment's own, below.)
     float z = ((c.z - uNear) / (uFar - uNear)) * 2.0 - 1.0;
     gl_Position = vec4(c.x / uTan.x, c.y / uTan.y, z * c.z, c.z);
-    vDist = c.z;
-    vNrm = aNrm;
-    vPos = aPos;
-    vUv = aUv;
+    wDist = c.z;
+    wNrm = aNrm;
+    wPos = aPos;
+    wUv = aUv;
+}
+"""
+
+# THIN FEATURES.  A strut under a pixel across, lit by the Sun against black
+# space, is hit by one sample and missed by the next as the station moves: a
+# bright dot crawling along the line -- "crawling ants", and the eye is made
+# for it.  Multisampling averages it, in steps of a quarter of a pixel; what
+# is left is the contrast.  So each triangle's smallest width on the screen,
+# its altitude over its longest edge in pixels, scales its brightness:
+# a full pixel or more as it is, a sliver at uThinGain of it (--thin-gain).
+MODEL_GS = """
+#version 410 core
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 3) out;
+in vec3 wNrm[];
+in vec3 wPos[];
+in vec2 wUv[];
+in float wDist[];
+centroid out vec3 vNrm;
+centroid out vec3 vPos;
+centroid out vec2 vUv;
+centroid out float vDist;
+flat out float vThin;           // 1: a pixel or more across; 0: a hair
+uniform vec2 uViewPx;           // the target's size, pixels
+const float WIDE_PX = 1.25;     // wide enough to need no help
+void main() {
+    float thin = 1.0;
+    vec4 a = gl_in[0].gl_Position, b = gl_in[1].gl_Position, c = gl_in[2].gl_Position;
+    if (a.w > 0.0 && b.w > 0.0 && c.w > 0.0) {
+        vec2 pa = a.xy / a.w * 0.5 * uViewPx, pb = b.xy / b.w * 0.5 * uViewPx,
+             pc = c.xy / c.w * 0.5 * uViewPx;
+        float twice = abs((pb.x - pa.x) * (pc.y - pa.y) - (pc.x - pa.x) * (pb.y - pa.y));
+        float longest = max(length(pb - pa), max(length(pc - pb), length(pa - pc)));
+        thin = clamp(twice / max(longest, 1e-6) / WIDE_PX, 0.0, 1.0);
+    }
+    for (int i = 0; i < 3; i++) {
+        gl_Position = gl_in[i].gl_Position;
+        vNrm = wNrm[i];
+        vPos = wPos[i];
+        vUv = wUv[i];
+        vDist = wDist[i];
+        vThin = thin;
+        EmitVertex();
+    }
+    EndPrimitive();
 }
 """
 
@@ -2554,6 +2603,8 @@ centroid in vec3 vNrm;
 centroid in vec3 vPos;
 centroid in vec2 vUv;
 centroid in float vDist;
+flat in float vThin;
+uniform float uThinGain;
 uniform float uNear, uFar;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out vec4 fragTrans;
@@ -2577,6 +2628,7 @@ void main() {
     vec3 h = normalize(uSunB + toEye);
     float spec = 0.04 * pow(max(dot(n, h), 0.0), 40.0) * uSunVis * step(0.0, dot(n, uSunB));
     vec3 c = (alb / PI * (sun + earth + 0.01) + spec) * uSunE;
+    c *= mix(uThinGain, 1.0, vThin);                 // slivers' brightness capped
     fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
     fragTrans = vec4(0.0);
     // ITS OWN DEPTH, from its interpolated distance.  The depth the vertex
@@ -2724,6 +2776,8 @@ class VehicleLayer(object):
             GL.glUniform1f(U["uSunE"], self.SUN_E)
             GL.glUniform1f(U["uSunVis"], vis)
             GL.glUniform1f(U["uEarthLit"], earth_lit)
+            GL.glUniform2f(U["uViewPx"], float(view.hdrSize[0]), float(view.hdrSize[1]))
+            GL.glUniform1f(U["uThinGain"], THIN['gain'])
             GL.glUniform1i(U["uTex"], 0)
             GL.glEnable(GL.GL_DEPTH_TEST)
             GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
@@ -3302,6 +3356,10 @@ def main(argv=None):
                          "none with reduced textures)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
+    ap.add_argument("--thin-gain", type=float, default=0.35, metavar="G",
+                    help="the brightness that triangles under a pixel across keep, 0 to 1 (default "
+                         "0.35; 1 for none): thin struts lit against black space crawl as the "
+                         "station moves, and the eye is made to see it")
     ap.add_argument("--textures", choices=('auto', 'full', 'reduced'), default='auto',
                     help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
                          "compressed), or auto: reduced on a GPU with under 3 GB of its own "
@@ -3402,6 +3460,7 @@ def main(argv=None):
     site = None
     TERRAIN['on'] = args.terrain == 'on'
     MSAA['samples'] = args.msaa
+    THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
     if args.site != 'none':
         path = os.path.join(SITES_DIR, args.site)
         if os.path.exists(os.path.join(path, "ring.json")):
