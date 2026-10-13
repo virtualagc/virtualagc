@@ -185,7 +185,12 @@ else:
     if pattern:
         d.setNameFilters([pattern, "All files (*)"])
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptSave
-                    if mode == "save" else QFileDialog.AcceptMode.AcceptOpen)
+                    if mode in ("save", "choose") else QFileDialog.AcceptMode.AcceptOpen)
+    if mode == "choose":
+        # an existing file or a new name, without "replace it?": the box is
+        # as often used to find a layout to RESTORE (owner, 2026-10-13), and
+        # Save asks for itself before it overwrites
+        d.setOption(QFileDialog.Option.DontConfirmOverwrite, True)
 if d.exec():
     got = d.selectedFiles()
     if got:
@@ -518,7 +523,7 @@ class Manager(object):
             self.script.set(got)
 
     def browse_layout(self):
-        got = native_dialog("save", "Window layout", HERE, "Layouts (*.layout)")
+        got = native_dialog("choose", "Window layout", HERE, "Layouts (*.layout)")
         if got is None:
             self.say("Cannot open a file chooser")
         elif got:
