@@ -2923,10 +2923,18 @@ class ViewWidget(QOpenGLWidget):
                 ok = False
             if ok:
                 self.earthMs = (fbo, rbs)
+                if not MSAA.get('said'):
+                    MSAA['said'] = True
+                    print("portview: Earth and vehicles drawn at %d samples a pixel (textures %s)"
+                          % (n, TEXTURES['mode']))
                 break
             GL.glDeleteFramebuffers(1, [fbo])
             GL.glDeleteRenderbuffers(3, rbs)
             n //= 2
+        if self.earthMs is None and not MSAA.get('said'):
+            MSAA['said'] = True
+            print("portview: Earth and vehicles drawn WITHOUT multisampling (textures %s): "
+                  "thin structure will crawl" % TEXTURES['mode'], file=sys.stderr)
         self.hdrSize = (w, h)
 
     def paintGL(self):
