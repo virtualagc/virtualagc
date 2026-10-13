@@ -1880,6 +1880,12 @@ def main():
     env["YAGPC_RATE_FILE"] = SESSION["ratefile"]
     if args.orbit:
         env["YAGPC_VEHDYN_ORBIT"] = args.orbit
+    # THE VIEWS NEED THE TRUTH.  portview draws what the vehicle dynamics say,
+    # so asking for views (--portview-views) switches them on; without that a
+    # plain run never started portview and said nothing (owner, 2026-10-13).
+    if args.portview and args.portview_views and env.get("YAGPC_VEHDYN") != "1":
+        env["YAGPC_VEHDYN"] = "1"
+        log("portview: the vehicle dynamics are switched on (YAGPC_VEHDYN=1) for --portview-views")
     if tk_font_scale != 1:
         env.setdefault("NSTS_TK_FONT_SCALE", str(tk_font_scale))
     env["NSTS_MAJOR_FUNC"] = str(MAJOR_FUNC[args.major_func])
@@ -1937,6 +1943,9 @@ def main():
         # draws their truth) and only where it can run -- `portview.py --check`
         # names a missing module or its missing assets in one line, cheaply.
         start_portview = False
+        if args.portview and env.get("YAGPC_VEHDYN") != "1":
+            log("portview: not started -- the vehicle dynamics are off (set YAGPC_VEHDYN=1, "
+                "or name the views with --portview-views)")
         if args.portview and env.get("YAGPC_VEHDYN") == "1":
             try:
                 chk = subprocess.run([py, os.path.join(HERE, "portview.py"), "--check"], cwd=HERE,
