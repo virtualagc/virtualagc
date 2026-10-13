@@ -1172,6 +1172,7 @@ FAULT_SUMMARY_HW = 0x1D02          # CDL_FAULT_SUMMARY_PAGE
 class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
+        os.makedirs(a.logs, exist_ok=True)      # a new --logs directory, as a GUI run names one
         self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a")
         self.ti_unix = unix(TI_TIG)
         self.ti_gmt = gmt_of_unix(self.ti_unix)
