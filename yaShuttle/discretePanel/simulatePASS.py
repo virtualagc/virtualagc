@@ -2306,6 +2306,12 @@ def main():
             # them, and panelO6 places those itself (its --layout).
             roles_wanted = {r for r in roles_wanted
                             if not r.startswith("panel_") or r in windowLayout.PANEL_BASE_ROLES}
+            # NOR THE HAND CONTROLLERS' WINDOW: there is one only when no
+            # joystick is connected (or --input virtual), so waiting for it
+            # cost every run with a joystick the whole of the deadline below
+            # -- 90 s of nothing on the screen (owner, 2026-10-13).  It is
+            # placed if it is there.
+            roles_wanted = {r for r in roles_wanted if not r.startswith("hc_")}
             survivors = windowLayout.window_ids() & windows_before
             if survivors:
                 roles_wanted -= {w["role"] for w in windowLayout.windows()
@@ -2329,11 +2335,18 @@ def main():
             wait_s = 90 if (args.hold_start and any(r.startswith("pv_") for r in roles_wanted)) else 12
             splash.stage("Waiting for the windows to open")
             deadline = time.time() + wait_s
+            next_say = time.time() + 15
             while time.time() < deadline:
                 mine = windowLayout.window_ids() - windows_before
                 roles = {w["role"] for w in windowLayout.windows() if w["id"] in mine}
                 if all(r in roles for r in roles_wanted):
                     break
+                if time.time() >= next_say:
+                    # SAY SO: a long silence reads as a hang
+                    log("still waiting for %s (up to %d s)"
+                        % (", ".join(sorted(roles_wanted - roles)),
+                           max(0, int(deadline - time.time()))))
+                    next_say = time.time() + 15
                 time.sleep(0.5)
             splash.stage("Placing the windows")
             time.sleep(1.5)        # let the window manager finish placing them
@@ -2401,15 +2414,43 @@ def main():
             splash.ready("Ready: arrange the windows, then press Enter in the terminal")
             log("HELD: every window is up and placed; the vehicle starts on the session "
                 "command 'go'%s" % (" or Enter here" if tty else ""))
+            # A SESSION COMMAND DURING THE HOLD.  The listener wakes the main
+            # thread with SIGINT, which here used to land in the outer
+            # handler and shut the whole run down: Restore pressed in the
+            # Manager while the run was held closed everything (owner,
+            # 2026-10-13).  A 'resume' or 'quit' ends the hold -- the held
+            # vehicle is not started, the main loop below acts on it -- and
+            # a 'save' has no vehicle to save yet.
             while not SESSION["go"]:
-                if tty:
-                    import select as _select
-                    if _select.select([sys.stdin], [], [], 0.5)[0]:
-                        sys.stdin.readline()
-                        break
-                else:
-                    time.sleep(0.5)
-            gpc = held()
+                try:
+                    if tty:
+                        import select as _select
+                        if _select.select([sys.stdin], [], [], 0.5)[0]:
+                            sys.stdin.readline()
+                            break
+                    else:
+                        time.sleep(0.5)
+                except KeyboardInterrupt:
+                    if SESSION["action"] is None:
+                        raise            # a real Ctrl-C still shuts everything down
+                if SESSION["action"] in ("save", "save-and-quit"):
+                    log("%s: the vehicle has not been started yet, so there is "
+                        "nothing to save" % SESSION["action"])
+                    crewscript.send_result("fail %s the vehicle has not been started yet"
+                                           % SESSION["action"], args.port_base)
+                    SESSION["action"] = SESSION["dir"] = None
+                elif SESSION["action"] in ("resume", "quit"):
+                    break
+            if SESSION["action"] in ("resume", "quit"):
+                class _NotStarted(object):
+                    returncode = None
+
+                    def poll(self):
+                        return 0
+                gpc = _NotStarted()
+                log("hold ended by the session command %s" % SESSION["action"])
+            else:
+                gpc = held()
             t0 = time.time()
             log("released: the vehicle is running")
         if wsl:
@@ -2432,6 +2473,9 @@ def main():
         # told apart by whether the listener left a request behind.
         while True:
             try:
+                if SESSION["action"] is not None:
+                    # one arrived during the hold (or between rounds): act on it
+                    raise KeyboardInterrupt
                 if args.duration:
                     log("running for %.0f s" % args.duration)
                     # AND A SESSION COMMAND ENDS THE WAIT, exactly as it does
