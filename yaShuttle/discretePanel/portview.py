@@ -1298,7 +1298,7 @@ def load_rgb(path):
 # Unified-memory GPUs (Apple, Intel) report nothing and get 'full'.
 TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
-THIN = {'gain': 0.35}                  # the brightness a hair-thin triangle keeps (--thin-gain)
+THIN = {'gain': 0.2}                  # the brightness a hair-thin triangle keeps (--thin-gain)
 MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 # 'full' takes about 1.4 GB of textures: two 16384 x 8192 Earth maps
@@ -3356,10 +3356,13 @@ def main(argv=None):
                          "none with reduced textures)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
-    ap.add_argument("--thin-gain", type=float, default=0.35, metavar="G",
+    ap.add_argument("--thin-gain", type=float, metavar="G",
+                    default=float(os.environ.get("NSTS_THIN_GAIN", "0.2")),
                     help="the brightness that triangles under a pixel across keep, 0 to 1 (default "
-                         "0.35; 1 for none): thin struts lit against black space crawl as the "
-                         "station moves, and the eye is made to see it")
+                         "0.2, or NSTS_THIN_GAIN in the environment, which is how a run started "
+                         "by simulatePASS or the manager gets another; 1 for none): thin struts "
+                         "lit against black space crawl as the station moves, and the eye is "
+                         "made to see it")
     ap.add_argument("--textures", choices=('auto', 'full', 'reduced'), default='auto',
                     help="texture memory: full (~1.2 GB), reduced (~0.5 GB: half-size, "
                          "compressed), or auto: reduced on a GPU with under 3 GB of its own "
