@@ -1856,7 +1856,19 @@ static void subsys_publish(void) {
     /* panel O3 */
     double ign = vehdyn_srb_ignition_t();
     v[n++] = vehdyn_gmt(st->t);
-    v[n++] = (ign >= 0.0 && st->t >= ign) ? st->t - ign : 0.0;
+    {
+        /* MET: from SRB ignition in an ascent; else from the MET epoch the
+         * timing unit counts from (YAGPC_MTU_MET_EPOCH, a Unix time), so a run
+         * on orbit -- a rendezvous, a restored snapshot -- shows the flight's
+         * MET on O3 and not zeros (owner, 2026-10-13). */
+        double met = (ign >= 0.0 && st->t >= ign) ? st->t - ign : 0.0;
+        if (!(ign >= 0.0)) {
+            const char *e = yagpc_getenv("YAGPC_MTU_MET_EPOCH");
+            double ux = vehdyn_unix(st->t);
+            if (e != NULL && *e != '\0' && ux >= 0.0 && ux >= atof(e)) met = ux - atof(e);
+        }
+        v[n++] = met;
+    }
     for (int i = 0; i < 6; i++) v[n++] = 250.0;     /* RCS ox/fu regulated, PROVISIONAL */
     static const int RCS_MOD[3] = { 1, 0, 2 };      /* left pod, forward, right pod */
     for (int i = 0; i < 3; i++) {
