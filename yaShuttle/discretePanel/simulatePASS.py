@@ -688,6 +688,89 @@ def snapshot_forced(snapdir):
             % (int(d.get("retries", 0)), (" (%s)" % why) if why else ""))
 
 
+# STS-134's liftoff, the zero of the flight's MET (fly_rndz134.MET_ZERO_UNIX).
+STS134_MET_ZERO_UNIX = 1305550587.994
+
+
+def restore_environment(snapdir, env):
+    """What a restored vehicle needs in its environment that the snapshot does
+    not carry, set in `env`.
+
+    A snapshot with vehdyn.json was taken with the vehicle and device models
+    on, and restoring it without them gives the vehicle no truth: the
+    portviews dark, O3 and its MET dead, every C&W and RCS/OMS lamp lit,
+    because nothing answers the flight software's MDM reads (owner,
+    2026-10-13, on the rendezvous snapshots).  So they are switched on.  MET
+    counts from `metEpoch` in vehicle.json where the snapshot has it (taken by
+    this program from 2026-10-13), else from STS-134's liftoff for a snapshot
+    taken in its flight window; the environment's own value wins."""
+    if not os.path.isfile(os.path.join(snapdir, "vehdyn.json")):
+        return
+    said = []
+    for k in ("YAGPC_VEHDYN", "YAGPC_MDM_DEVICES"):
+        if env.get(k) != "1":
+            env[k] = "1"
+            said.append(k + "=1")
+    if not env.get("YAGPC_MTU_MET_EPOCH"):
+        met = None
+        try:
+            with open(os.path.join(snapdir, "vehicle.json")) as fh:
+                v = json.load(fh)
+            met = v.get("metEpoch")
+            if met is None and v.get("epoch") is not None:
+                e = float(v["epoch"])
+                # the window of STS-134's flight, 2011-05-16 to 2011-05-31
+                if 1305550000 <= e <= 1306800000:
+                    met = STS134_MET_ZERO_UNIX
+        except (OSError, ValueError, TypeError):
+            met = None
+        if met is not None:
+            env["YAGPC_MTU_MET_EPOCH"] = "%.3f" % float(met)
+            said.append("YAGPC_MTU_MET_EPOCH=%.3f" % float(met))
+    if said:
+        log("restore: %s needs the vehicle model on; set %s" % (os.path.basename(snapdir.rstrip("/")),
+                                                              ", ".join(said)))
+
+
+def seeded_for_crt4(snapdir, logs):
+    """A copy of `snapdir` with IDP 4 loaded and powered, if it has none, so
+    CRT 4 and AFD 1 can serve the aft station; else `snapdir` itself.
+
+    The snapshot is not changed: the copy goes under the run's logs.  This is
+    fly_rndz134.seed_idp4's method (PASS in OPS 2 never loads an IDP, gpc-causes
+    #294): IDP 1's loaded state, as IDP 4, keyboard 3's."""
+    pj = os.path.join(snapdir, "panel.json")
+    src = os.path.join(snapdir, "idp1.json")
+    if not (os.path.isfile(pj) and os.path.isfile(src)):
+        return snapdir
+    try:
+        panel = json.load(open(pj))
+    except (OSError, ValueError):
+        return snapdir
+    power = panel.get("idp_power") or []
+    if (len(power) >= 4 and power[3] == "ON"
+            and os.path.isfile(os.path.join(snapdir, "idp4.json"))):
+        return snapdir
+    import shutil
+    dest = os.path.join(logs, "restored", os.path.basename(snapdir.rstrip("/")))
+    shutil.rmtree(dest, ignore_errors=True)
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.copytree(snapdir, dest)
+    st = json.load(open(src))
+    st.update(id="IDP4", deuId=4, kybdSel=0)
+    with open(os.path.join(dest, "idp4.json"), "w") as fh:
+        json.dump(st, fh)
+    shutil.copyfile(os.path.join(dest, "idp1.mem.bin"), os.path.join(dest, "idp4.mem.bin"))
+    while len(power) < 4:
+        power.append("OFF")
+    power[3] = "ON"
+    panel["idp_power"] = power
+    with open(os.path.join(dest, "panel.json"), "w") as fh:
+        json.dump(panel, fh)
+    log("restore: IDP 4 loaded and powered in a copy of the snapshot (%s), for CRT 4" % dest)
+    return dest
+
+
 def snapshot_tape_problem(snapdir, tape):
     """Whether `tape` is the mass memory `snapdir` was taken with: None if it
     is, ("warn", why) if the snapshot does not say, ("fail", why) if it is not.
@@ -918,7 +1001,9 @@ def take_snapshot(staging, target, gpc, port_base, gpcs, crts=0, idps=(),
                    "taken": time.strftime("%Y-%m-%d %H:%M:%S",
                                           time.localtime(epoch)),
                    "tape": tape,
-                   "tapeSha256": tape_digest(tape) if tape else None},
+                   "tapeSha256": tape_digest(tape) if tape else None,
+                   "metEpoch": (float(SESSION["met_epoch"])
+                                if SESSION.get("met_epoch") else None)},
                   fh, indent=1)
         fh.write("\n")
 
@@ -1873,6 +1958,9 @@ def main():
         kb_geom, o6_geom, cam_geom = to_x(kb_geom), to_x(o6_geom), to_x(cam_geom)
 
     env = dict(os.environ)
+    if args.snapshot_resume and os.path.isdir(args.snapshot_resume):
+        restore_environment(args.snapshot_resume, env)
+    SESSION["met_epoch"] = env.get("YAGPC_MTU_MET_EPOCH")
     # the run-time rate control (session command `rate X`)
     SESSION["ratefile"] = os.path.join(tempfile.gettempdir(), "simulatePASS-rate-%d" % args.port_base)
     with open(SESSION["ratefile"], "w") as fh:
@@ -1963,6 +2051,11 @@ def main():
             # cut off.  MEDS2.py calls a window just "CRT1" when no --title
             # comes down.
             title_arg = ["--title", args.title] if args.title else []
+            if resume:
+                restore_environment(resume, env)
+                if args.crts >= 4:
+                    resume = seeded_for_crt4(resume, logs)
+                SESSION["met_epoch"] = env.get("YAGPC_MTU_MET_EPOCH")
             for k in range(args.crts):
                 e = dict(env)
                 if args.auto_place:
