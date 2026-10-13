@@ -2504,6 +2504,22 @@ def main():
             # long enough for an Orbiter 100 ft from the ISS to drift.  Here
             # the computer has not started, so nothing moves at all.
             tty = sys.stdin is not None and sys.stdin.isatty() and os.name != "nt"
+            if tty:
+                # A TERMINAL WITHOUT CR->NL TRANSLATION (something left it
+                # in raw mode, or `stty -icrnl`): Enter echoes "^M" and the
+                # line never completes, so the hold could not be ended from
+                # the keyboard (owner, 2026-10-13).  Switch the translation
+                # back on; nothing else of the terminal is touched.
+                try:
+                    import termios
+                    _attr = termios.tcgetattr(sys.stdin.fileno())
+                    if not _attr[0] & termios.ICRNL:
+                        _attr[0] |= termios.ICRNL
+                        termios.tcsetattr(sys.stdin.fileno(), termios.TCSANOW, _attr)
+                        log("terminal: Enter was not being translated (^M); turned "
+                            "CR-to-NL translation back on")
+                except Exception:
+                    pass
             splash.ready("Ready: arrange the windows, then press Enter in the terminal")
             log("HELD: every window is up and placed; the vehicle starts on the session "
                 "command 'go'%s" % (" or Enter here" if tty else ""))
@@ -2519,8 +2535,13 @@ def main():
                     if tty:
                         import select as _select
                         if _select.select([sys.stdin], [], [], 0.5)[0]:
-                            sys.stdin.readline()
-                            break
+                            # os.read, not readline: a terminal left without
+                            # CR->NL translation (stty -icrnl, or raw mode)
+                            # sends '\r' for Enter and readline() waits for
+                            # a '\n' that never comes (owner, 2026-10-13: "^M")
+                            got = os.read(sys.stdin.fileno(), 4096)
+                            if not got or b"\n" in got or b"\r" in got:
+                                break
                     else:
                         time.sleep(0.5)
                 except KeyboardInterrupt:
