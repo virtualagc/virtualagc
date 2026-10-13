@@ -1275,6 +1275,10 @@ def make_srgb_texture(rgb):
     GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
     for wrap in (GL.GL_TEXTURE_WRAP_S, GL.GL_TEXTURE_WRAP_T):
         GL.glTexParameteri(GL.GL_TEXTURE_2D, wrap, GL.GL_CLAMP_TO_EDGE)
+    try:                                 # thin panel lines seen at a slant: "crawling ants"
+        GL.glTexParameterf(GL.GL_TEXTURE_2D, 0x84FE, min(8.0, GL.glGetFloatv(0x84FF)))
+    except GL.GLError:
+        pass
     return tid
 
 
@@ -2893,8 +2897,11 @@ class ViewWidget(QOpenGLWidget):
         # averaged down into the textures above: an edge pixel is then the
         # vehicle by its coverage, over whatever is behind (the
         # transmittance averages too).  The Earth's ray-cast still runs once
-        # a pixel.  Fewer samples if the driver can't, none in 'reduced'.
-        n = MSAA['samples'] if TEXTURES['mode'] != 'reduced' else 0
+        # a pixel.  Fewer samples if the driver can't; two in 'reduced'.
+        # 'reduced' keeps two samples a pixel (about 80 MB for four 700-pixel
+        # views): with none, the station's thin struts crawl as it moves --
+        # and the fallback below drops to none where the card cannot.
+        n = MSAA['samples'] if TEXTURES['mode'] != 'reduced' else min(2, MSAA['samples'])
         try:
             n = min(n, int(GL.glGetIntegerv(GL.GL_MAX_SAMPLES)))
         except (GL.GLError, TypeError, ValueError):
