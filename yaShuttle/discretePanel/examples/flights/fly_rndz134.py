@@ -1337,6 +1337,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             print("\n*** The windows are up and the vehicle is HELD.  Arrange them, then "
                   "press Enter here, or Start in the manager. ***", flush=True)
             interactive = sys.stdin is not None and sys.stdin.isatty()
+            if interactive and os.name != "nt":
+                fly_sts134.icrnl_on()
             if not interactive:
                 fly_sts134.crewscript.send_session("go", self.base)   # nobody to ask
             while True:

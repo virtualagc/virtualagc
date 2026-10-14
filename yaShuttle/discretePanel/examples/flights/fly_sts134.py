@@ -295,6 +295,23 @@ ATO_OMS2_MNVR = """
 TIG_RE = re.compile(r"\bTIG\b[^/:]*?([0-9_]+)/(\d+):(\d+):(\d+(?:\.\d*)?)")
 
 
+def icrnl_on():
+    """Turn CR->NL translation back on for the terminal on stdin, if it has
+    been left off (raw mode, `stty -icrnl`): Enter then echoes "^M" and a
+    line never completes, so a held start could not be ended from the
+    keyboard (owner, 2026-10-13).  Nothing else of the terminal is touched."""
+    try:
+        import termios
+        fd = sys.stdin.fileno()
+        attr = termios.tcgetattr(fd)
+        if not attr[0] & termios.ICRNL:
+            attr[0] |= termios.ICRNL
+            termios.tcsetattr(fd, termios.TCSANOW, attr)
+            print("terminal: Enter was not being translated (^M); turned it back on", flush=True)
+    except Exception:
+        pass
+
+
 def keys_signed(x, fmt):
     """A number as DEORB MNVR keystrokes: its sign, then digit by digit."""
     t = fmt % abs(x)
@@ -355,6 +372,7 @@ class Flight:
             self.say("HELD: every window is up and nothing is moving.  Arrange the windows, "
                      "then press Enter here to start the vehicle.")
             if sys.stdin is not None and sys.stdin.isatty():
+                icrnl_on()
                 sys.stdin.readline()
             crewscript.send_session("go", self.base)
             self.say("go: the vehicle starts")
