@@ -1164,6 +1164,56 @@ def cmd_save(args):
     return 0
 
 
+_NOMAX = set()
+
+
+def no_maximize(only_pids):
+    """Take the MAXIMIZE function away from this run's windows, so a window
+    manager that honours Motif hints (Marco, Metacity, Mutter, Xfwm, KWin...)
+    draws no maximize button and a double-click on the titlebar does nothing.
+    Nothing here wants to fill a screen, and the keyboards' titlebars are
+    narrow enough already (owner, 2026-10-14).  X11 only; once per window;
+    resize and minimize are untouched (the stations are changed by
+    minimizing).  Returns how many windows it changed.  NSTS_ALLOW_MAXIMIZE=1
+    leaves them alone."""
+    if MAC or WIN or os.environ.get("NSTS_ALLOW_MAXIMIZE") == "1":
+        return 0
+    import ctypes
+    import ctypes.util
+    lib = ctypes.util.find_library("X11")
+    if not lib or not os.environ.get("DISPLAY"):
+        return 0
+    todo = []
+    for w in windows():
+        if w.get("pid") in only_pids and w["id"] not in _NOMAX:
+            todo.append(w["id"])
+    if not todo:
+        return 0
+    x11 = ctypes.CDLL(lib)
+    x11.XOpenDisplay.restype = ctypes.c_void_p
+    x11.XInternAtom.restype = ctypes.c_ulong
+    d = x11.XOpenDisplay(None)
+    if not d:
+        return 0
+    dp = ctypes.c_void_p(d)
+    atom = ctypes.c_ulong(x11.XInternAtom(dp, b"_MOTIF_WM_HINTS", 0))
+    n = 0
+    for wid in todo:
+        try:
+            xid = int(str(wid), 16) if str(wid).lower().startswith("0x") else int(wid)
+        except ValueError:
+            continue
+        # flags = functions (1); functions = ALL | MAXIMIZE, i.e. every function
+        # but maximize (MWM_FUNC_ALL turns the listed ones into exclusions)
+        data = (ctypes.c_long * 5)(1, 0x11, 0, 0, 0)
+        x11.XChangeProperty(dp, ctypes.c_ulong(xid), atom, atom, 32, 0, data, 5)
+        _NOMAX.add(wid)
+        n += 1
+    x11.XFlush(dp)
+    x11.XCloseDisplay(dp)
+    return n
+
+
 def window_ids():
     """Every window id on screen now.  A launcher takes this before it starts
     anything, so it can place its OWN windows and not another run's."""

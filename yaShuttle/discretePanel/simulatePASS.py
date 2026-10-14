@@ -2538,6 +2538,7 @@ def main():
             while not stop_event.wait(5.0):
                 try:
                     L.revive()
+                    windowLayout.no_maximize(windowLayout.descendants(os.getpid()))
                 except Exception as e:             # never let the watcher end the run
                     log("display watcher: %s" % e)
         threading.Thread(target=_watch_displays, daemon=True).start()
