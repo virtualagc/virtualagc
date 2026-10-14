@@ -500,7 +500,9 @@ class ManualPhase(object):
             return t > 480.0 and settled["n"] >= 12
 
         stats = self.fly("RBAR", lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0]), done,
-                         tau=150.0, vmax=0.3, dead=0.08, every=10.0, limit=1800.0)
+                         tau=150.0, vmax=0.3, dead=0.08, every=10.0,
+                         # NSTS_RBAR_LIMIT_S: a test may allow a longer leg (default 30 min)
+                         limit=float(os.environ.get("NSTS_RBAR_LIMIT_S", "1800")))
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
         self.man_record("RBAR", report=rep, pulses=dict(self.pulses))
 
