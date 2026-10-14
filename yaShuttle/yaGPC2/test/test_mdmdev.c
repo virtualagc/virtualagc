@@ -82,7 +82,7 @@ static void write_words(int bus, uint32_t cmd, const uint16_t *w, int n) {
 /* A crew contact, as panelO6 drives it: one datagram on FFk's hardware-side
  * bus (CREW_BASE + 100 + k - 1), halfwords op, type, card<<8|channel, count,
  * word -- big-endian. */
-#define CREW_BASE 39400
+#define CREW_BASE 60400
 static void crew_send(int k, int op, int card, int ch, uint16_t word) {
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     struct in_addr lo; lo.s_addr = inet_addr("127.0.0.1");

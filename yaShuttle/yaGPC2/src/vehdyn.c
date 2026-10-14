@@ -1891,6 +1891,28 @@ static struct {
     bool keepAtt;             /* YAGPC_VEHDYN_ATT given: leave the attitude be */
 } startRel;
 
+/* Depletion before a resumed mission segment, after liftoff dry mass is fixed. */
+static void propellant_used(const char *name, int first, int count) {
+    const char *text = yagpc_getenv(name);
+    if (!text || !*text) return;
+    double used[3];
+    for (int k = 0; k < count; k++) {
+        char *end;
+        used[k] = strtod(text, &end);
+        if (end == text || !isfinite(used[k]) || used[k] < 0.0 ||
+            used[k] * LB_KG > prop[first + k]) goto invalid;
+        while (*end == ' ' || *end == '\t') end++;
+        if (k + 1 < count) {
+            if (*end != ',') goto invalid;
+            text = end + 1;
+        } else if (*end != '\0') goto invalid;
+    }
+    for (int k = 0; k < count; k++) prop[first + k] -= used[k] * LB_KG;
+    return;
+invalid:
+    fprintf(stderr, "vehdyn: invalid %s; propellant unchanged\n", name);
+}
+
 void vehdyn_reset(double t) {
     flight_params();
     memset(&st, 0, sizeof st);
@@ -1907,6 +1929,8 @@ void vehdyn_reset(double t) {
             fprintf(stderr, "vehdyn: the orbiter %.0f kg at liftoff (dry %.0f + propellant %.0f)\n",
                     dryKg + p, dryKg, p);
     }
+    propellant_used("YAGPC_VEHDYN_OMS_USED_LB", 3, 2);
+    propellant_used("YAGPC_VEHDYN_RCS_USED_LB", 0, 3);
     memset(oms, 0, sizeof oms);
     memset(on, 0, sizeof on);
     memset(onSec, 0, sizeof onSec);

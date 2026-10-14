@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #include "../src/vehdyn.h"
 
@@ -46,7 +48,38 @@ static void reset_rcs_only(double t) {
     vehdyn_set_propellant(4, 0.0);
 }
 
+static void check_segment_depletion(void) {
+    for (int scenario = 0; scenario < 4; scenario++) {
+        pid_t pid = fork();
+        if (pid == 0) {
+            setenv("YAGPC_VEHDYN_ORBITER_KG", "121912", 1);
+            unsetenv("YAGPC_VEHDYN_OMS_USED_LB");
+            unsetenv("YAGPC_VEHDYN_RCS_USED_LB");
+            if (scenario == 1) {
+                setenv("YAGPC_VEHDYN_OMS_USED_LB", "100,200", 1);
+                setenv("YAGPC_VEHDYN_RCS_USED_LB", "10,20,30", 1);
+            } else if (scenario == 2) {
+                setenv("YAGPC_VEHDYN_OMS_USED_LB", "-1,200", 1);
+            } else if (scenario == 3) {
+                setenv("YAGPC_VEHDYN_OMS_USED_LB", "nan,200", 1);
+                setenv("YAGPC_VEHDYN_RCS_USED_LB", "10,20,999999", 1);
+            }
+            vehdyn_reset(0.0);
+            double want = 121912.0 - (scenario == 1 ? 360.0 * .45359237 : 0.0);
+            int ok = fabs(vehdyn_state()->mass - want) < 1e-7;
+            ok = ok && fabs(vehdyn_propellant(3) - (12361.0 - (scenario == 1 ? 100.0 : 0.0)) * .45359237) < 1e-7;
+            ok = ok && fabs(vehdyn_propellant(4) - (12347.0 - (scenario == 1 ? 200.0 : 0.0)) * .45359237) < 1e-7;
+            _exit(ok ? 0 : 1);
+        }
+        int status = 0;
+        int waited = pid > 0 && waitpid(pid, &status, 0) == pid;
+        check(waited && WIFEXITED(status) && WEXITSTATUS(status) == 0,
+              "segment depletion lowers total mass; absent/invalid values preserve load", status, 0);
+    }
+}
+
 int main(void) {
+    check_segment_depletion();
     setenv("YAGPC_VEHDYN", "1", 1);
     uint16_t ff[5] = { 0 }, fa[5] = { 0 };
 
