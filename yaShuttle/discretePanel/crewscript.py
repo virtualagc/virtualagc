@@ -239,7 +239,7 @@ HELP = """\
                         start, or from when the last wait line was met.
                         Lines run in file order; a time may not be earlier
                         than the line before it since the last wait.
-  +<seconds> <command>  a timed step that many seconds after the line before
+  +<seconds> <command>  a timed step that many vehicle seconds after the line before
                         was due (or after the start or the last wait, if no
                         line came since), as if the sum had been written.  A
                         line added among +N lines needs no renumbering of
@@ -781,9 +781,9 @@ def parse(text, path=None, _depth=0, _seen=None):
 
             elif verb == "rate":
                 # SIMULATED SECONDS PER WALL SECOND from here on (simulatePASS
-                # session `rate X`).  The script's own '+N' times stay WALL
-                # seconds, so a quiet stretch at 'rate 4' covers four times
-                # the simulated time per '+N'.
+                # session `rate X`).  Timed steps use vehicle seconds via
+                # the shared runtime rate file; changing rate preserves
+                # their vehicle-time spacing.
                 try:
                     entry["rate"] = float(arg)
                 except ValueError:
@@ -1304,7 +1304,9 @@ class Player(object):
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
                  source=None, gap=None, snaps=None, unattended=False, marks=None,
-                 plan=None, circle=None):
+                 plan=None, circle=None, clock=None):
+        from scriptclock import ScriptClock
+        self.clock = clock or ScriptClock()
         self.entries, self.after, self.panel = entries, after, panel
         self.marks = marks
         self.plan, self.circle = plan, circle
@@ -1356,7 +1358,7 @@ class Player(object):
                                                       "failed": 0}
 
     def start(self):
-        self.origin = time.monotonic()
+        self.origin = self.clock.now()
         self.after(0, lambda: self._run(0))
 
     def _note(self, k, e):
@@ -1401,7 +1403,7 @@ class Player(object):
                     if self.stopped:
                         return
                     self.log("wait user met after %.1f s" % (time.monotonic() - begun))
-                    self.origin = time.monotonic()
+                    self.origin = self.clock.now()
                     self._run(k + 1)
                 self.wait_user(resumed)
                 return
@@ -1411,9 +1413,9 @@ class Player(object):
                 self._poll(k, e, time.monotonic())
                 return
             if e["kind"] == "step" and e["verb"] == "script":
-                due = self.origin + e["ms"] / 1000.0 - time.monotonic()
+                due = self.origin + e["ms"] / 1000.0 - self.clock.now()
                 if due > 0:
-                    self.after(int(due * 1000) + 1, lambda k=k: self._run(k))
+                    self.after(self.clock.delay_ms(due), lambda k=k: self._run(k))
                     return
                 self.log("%s  [%d lines]" % (e["text"], len(e["entries"])))
                 self._call(k, e)
@@ -1427,9 +1429,9 @@ class Player(object):
                 self.log(e["text"])
                 self._poll_screen(k, e, time.monotonic(), [False, None])
                 return
-            due = self.origin + e["ms"] / 1000.0 - time.monotonic()
+            due = self.origin + e["ms"] / 1000.0 - self.clock.now()
             if due > 0:
-                self.after(int(due * 1000) + 1, lambda k=k: self._run(k))
+                self.after(self.clock.delay_ms(due), lambda k=k: self._run(k))
                 return
             if e["verb"] == "snapshots":
                 # Not a panel control either: it changes what the snapshot
@@ -1454,7 +1456,7 @@ class Player(object):
                     # overdue, and the whole rest of the script fired at once
                     # -- which would have turned "disable snapshots" from a
                     # way of silencing captures into a way of wrecking the run.
-                    self.origin = time.monotonic()
+                    self.origin = self.clock.now()
                     k += 1
                     continue
                 self.log(e["text"])
@@ -1479,6 +1481,8 @@ class Player(object):
                 self.log(e["text"])
                 self._type(k, e["keys"], 0)
                 return
+            if e["verb"] in ("thc", "rhc"):
+                self.origin = max(self.origin, self.clock.now() - e["ms"] / 1000.0)
             self.log(e["text"])
             if e["verb"] == "audio":
                 if AUDIO and "audio" in e:
@@ -1524,7 +1528,7 @@ class Player(object):
                 self.bus.send_key(keys[i])
             except OSError as err:
                 self.log("cannot send key %s: %s" % (keys[i][3], err))
-            self.after(int(self.gap[0] * 1000), lambda: self._type(k, keys, i + 1))
+            self.clock.schedule(self.after, self.gap[0], lambda: self._type(k, keys, i + 1))
         else:
             self._run(k + 1)
 
@@ -1556,7 +1560,7 @@ class Player(object):
         firsts = [e for e, n in zip(steps, names) if n]
         if not firsts:
             return
-        now = time.monotonic()
+        now = self.clock.now()
         short = AUTOCIRCLE_LEAD_S - (self.origin + firsts[0]["ms"] / 1000.0 - now)
         if short > 0.0005:
             # Reported as how much LATER it now happens than it otherwise
@@ -1570,7 +1574,7 @@ class Player(object):
         for e, n in zip(steps, names):
             if n:
                 at = self.origin + e["ms"] / 1000.0 - AUTOCIRCLE_LEAD_S - now
-                self.after(max(0, int(at * 1000)),
+                self.clock.schedule(self.after, max(0.0, at),
                            lambda n=n: None if self.stopped else self.circle(n))
 
     def _mark(self, e, on):
@@ -1588,7 +1592,7 @@ class Player(object):
         if self.talkback(e["gpc"]) == e["state"]:
             self.log("wait met after %.1f s: %s" % (waited, e["text"]))
             self._mark(e, False)
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self._run(k + 1)
         elif waited > e["timeout"]:
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
@@ -1626,7 +1630,7 @@ class Player(object):
         except OSError as err:
             self.log("snapshot: cannot listen for the answer: %s -- not taken" % err)
             self.snaps["failed"] += 1
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self._run(k + 1)
             return
         sock.setblocking(False)
@@ -1636,7 +1640,7 @@ class Player(object):
             sock.close()
             self.log("snapshot: cannot ask for it: %s -- not taken" % err)
             self.snaps["failed"] += 1
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self._run(k + 1)
             return
         self.log("snapshot: writing %s -- the vehicle is stopped while it is"
@@ -1664,7 +1668,7 @@ class Player(object):
             if what != "save" or word == "progress":
                 continue
             sock.close()
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             if word == "ok":
                 self.snaps["taken"] += 1
                 self.log("snapshot: written after %.1f s: %s" % (waited, e["snapdir"]))
@@ -1677,7 +1681,7 @@ class Player(object):
         if waited > SNAPSHOT_TIMEOUT_S:
             sock.close()
             self.snaps["failed"] += 1
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self.log("SNAPSHOT TIMED OUT after %.0f s: %s never answered -- is "
                      "simulatePASS.py the program that started this run?  The "
                      "script carries on without it." % (waited, e["snapdir"]))
@@ -1699,7 +1703,7 @@ class Player(object):
                     self.on_done(True)
                 return
             self.log("back from %s" % os.path.basename(e["path"]))
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self._run(k + 1)
 
         child = Player(e["entries"], self.after, self.panel, self.talkback, self.log,
@@ -1707,7 +1711,7 @@ class Player(object):
                        on_done=done, progress=self.progress, counter=self.counter,
                        source=os.path.basename(e["path"]), gap=self.gap,
                        snaps=self.snaps, unattended=self.unattended, marks=self.marks,
-                       plan=self.plan, circle=self.circle)
+                       plan=self.plan, circle=self.circle, clock=self.clock)
         child.start()
 
     def _poll_screen(self, k, e, begun, base):
@@ -1729,7 +1733,7 @@ class Player(object):
         if met:
             self.log("wait met after %.1f s: %s  [%s: %s]"
                      % (waited, e["text"], e["mdu"], cur[0]))
-            self.origin = time.monotonic()
+            self.origin = self.clock.now()
             self._run(k + 1)
         elif waited > e["timeout"]:
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped  [%s: %s]"
@@ -1772,6 +1776,8 @@ def self_test():
     player.origin = 0.0
     real = time.monotonic
     time.monotonic = lambda: now[0]
+    from scriptclock import ScriptClock
+    player.clock = ScriptClock()
     try:
         player._run(0)
         for _ in range(500):

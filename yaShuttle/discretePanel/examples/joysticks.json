@@ -1,0 +1,67 @@
+{
+  "_comment": "Default preserves current Logitech mapping; buttons are one-based. Copy the optional template into roles/sticks to enable a second stick.",
+  "roles": {
+    "rhc": {
+      "match": "Extreme 3D"
+    }
+  },
+  "sticks": {
+    "Extreme 3D": {
+      "axes": {
+        "0": {
+          "to": "rhc.roll",
+          "sign": 1,
+          "deadband": 0.05
+        },
+        "1": {
+          "to": "rhc.pitch",
+          "sign": 1,
+          "deadband": 0.05
+        },
+        "2": {
+          "to": "rhc.yaw",
+          "sign": 1,
+          "deadband": 0.05
+        }
+      },
+      "hat": {
+        "left": "-Y",
+        "right": "+Y",
+        "down": "+Z",
+        "up": "-Z"
+      },
+      "buttons": {
+        "5": "+X",
+        "3": "-X"
+      }
+    }
+  },
+  "_second_stick_template": {
+    "role": {
+      "match": "T.16000M"
+    },
+    "profile": {
+      "axes": {
+        "0": {
+          "to": "thc.Y",
+          "sign": 1,
+          "threshold": 0.5,
+          "hysteresis": 0.15
+        },
+        "1": {
+          "to": "thc.X",
+          "sign": -1,
+          "threshold": 0.5,
+          "hysteresis": 0.15
+        },
+        "2": {
+          "to": "thc.Z",
+          "sign": 1,
+          "threshold": 0.5,
+          "hysteresis": 0.15
+        }
+      }
+    },
+    "_comment": "Forward(axis1 negative) physical+X;left-Y;positive twist+Z; aft wiring applies after merge."
+  }
+}

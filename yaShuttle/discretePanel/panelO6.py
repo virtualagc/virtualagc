@@ -5457,6 +5457,12 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
     # published.
     target = [panel.wired]
 
+    from scriptclock import ScriptClock
+    script_clock = ScriptClock()
+
+    def vehicle_after(ms, callback):
+        script_clock.schedule(root.after, ms / 1000.0, callback)
+
     def do(verb, arg):
         # THE SCRIPT'S OWN ACTIONS ARE NOT RECORDED: see _RECORD.
         panel._rec_quiet = getattr(panel, "_rec_quiet", 0) + 1
@@ -5577,7 +5583,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             panel._set_mode(w, name)
         elif verb == "ipl":
             panel._set_ipl(w, True)
-            root.after(IPL_HOLD_MS, lambda: panel._set_ipl(w, False))
+            vehicle_after(IPL_HOLD_MS, lambda: panel._set_ipl(w, False))
         elif verb == "source":
             name = {"MM1": "MMU 1", "MM2": "MMU 2",
                     "OFF": "OFF"}.get(arg.upper())
@@ -5628,7 +5634,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             st = {"C3": "FWD", "FWD": "FWD", "A6U": "AFT", "AFT": "AFT"}[st]
             k = {"FREE DRIFT": "FREE"}.get(k, k)
             panel._set_dap(st, k, True)
-            root.after(DAP_HOLD_MS, lambda: panel._set_dap(st, k, False))
+            vehicle_after(DAP_HOLD_MS, lambda: panel._set_dap(st, k, False))
         elif verb == "fcs":
             n, val = arg.split()
             panel._set_fcs(int(n) - 1, position("FCS CHANNEL", val, FCS_CH_POS))
@@ -5645,7 +5651,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             key = ({"CDR": "L", "PLT": "R"}[arg.strip().upper()],
                    "BF" if verb == "bodyflap" else "SB")
             panel._set_am(key, True)
-            root.after(AM_HOLD_MS, lambda: panel._set_am(key, False))
+            vehicle_after(AM_HOLD_MS, lambda: panel._set_am(key, False))
         elif verb == "switch":
             key, _, val = arg.strip().partition(" ")
             key, val = key.lower(), val.strip().upper()
@@ -5653,12 +5659,12 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             panel._set_ctl(key, pos)
             c = PC.CONTROLS[key]
             if pos in (c.get("spring") or ()):
-                root.after(c.get("hold_ms", 500),
+                vehicle_after(c.get("hold_ms", 500),
                            lambda k=key, d=c["default"]: panel._set_ctl(k, d))
         elif verb == "press":
             key = arg.strip().lower()
             panel._set_ctl(key, True)
-            root.after(PC.CONTROLS[key].get("hold_ms", 500),
+            vehicle_after(PC.CONTROLS[key].get("hold_ms", 500),
                        lambda k=key: panel._set_ctl(k, False))
         elif verb == "circle":
             words = arg.split()
@@ -5685,7 +5691,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         elif verb == "attref":
             i = ADI_STATIONS.index(arg.upper())
             panel._set_attref(i, True)
-            root.after(ATT_REF_HOLD_MS, lambda: panel._set_attref(i, False))
+            vehicle_after(ATT_REF_HOLD_MS, lambda: panel._set_attref(i, False))
         elif verb == "edgekey":
             # NOT A CREW-PANEL SWITCH: the edgekeys are the MDU's own, under
             # each display, and MEDS2 runs them without the GPC.  So the
@@ -5744,7 +5750,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                 raise SystemExit("panelO6: IDP LOAD is 1 to %d, not %r"
                                  % (N_IDP_LOAD, arg))
             panel._set_idp_load(n, True)
-            root.after(IPL_HOLD_MS, lambda: panel._set_idp_load(n, False))
+            vehicle_after(IPL_HOLD_MS, lambda: panel._set_idp_load(n, False))
         # Every other control, by its panel legend, as the crew would move it.
         elif verb == "power":
             panel._set_power(w, position("GPC POWER", arg, POWER_POS))
@@ -5759,7 +5765,7 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         elif verb == "rhcengage":
             i = RHCS.index(position("RHC BFC ENGAGE", arg, RHCS))
             panel._set_rhc(i, True)
-            root.after(IPL_HOLD_MS, lambda: panel._set_rhc(i, False))
+            vehicle_after(IPL_HOLD_MS, lambda: panel._set_rhc(i, False))
         else:
             raise SystemExit("panelO6: unknown command %r" % verb)
 
@@ -5780,10 +5786,10 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
     def bfsengage(on):
         if on:
             panel._set_rhc(0, True)
-            root.after(IPL_HOLD_MS, lambda: panel._set_rhc(0, False))
+            vehicle_after(IPL_HOLD_MS, lambda: panel._set_rhc(0, False))
         else:
             panel._set_bfc_disengage("RIGHT")
-            root.after(IPL_HOLD_MS,
+            vehicle_after(IPL_HOLD_MS,
                        lambda: panel._set_bfc_disengage("LEFT"))
 
     # ONE PLAYER FOR THE WHOLE CREW SCRIPT: its clock and its waits time the
