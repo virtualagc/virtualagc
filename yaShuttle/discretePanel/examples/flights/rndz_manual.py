@@ -66,7 +66,7 @@ HOLD_FT = 100.0                  # ODS ring to PMA-2's face
 # drift had stayed under 0.02 ft/s for STEADY_S: it never was, and the hold ran
 # to its limit with the ring at 100 ft (night3, night4, 2026-10-14).
 STEADY_FPS = 0.06
-STEADY_S = 120.0                 # ... for this long before the capture
+STEADY_S = 30.0                  # ... for this long before the capture (was 120: the approach is continuous)
 RPM_RATE = 0.75                  # deg/s, RPM SETUP's PRI and VERN ROT RATE
 RPM_STEPS = (180, 270, 0, 90)    # UNIV PTG BODY VECT 5 P: -X, +Z, +X, -Z on the ISS
 # DAP A10 and B10, the DOCKING configurations, as JSC-48072-134 p. 6-2's
