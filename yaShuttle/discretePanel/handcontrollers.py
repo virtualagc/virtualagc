@@ -365,9 +365,11 @@ class ScriptInput:
     hold (both directions on one axis cancel, as for the keys); an RHC
     fraction is added to the stick's and clipped to full throw."""
 
-    def __init__(self, rhc_name, thc_name):
+    def __init__(self, rhc_name, thc_name, clock=None):
         import threading
         import crewscript
+        from scriptclock import ScriptClock
+        self.clock = clock or ScriptClock()
         self.rhc_name, self.thc_name = rhc_name, thc_name
         self.cs = crewscript
         self.lock = threading.Lock()
@@ -388,7 +390,7 @@ class ScriptInput:
             except OSError:
                 return
             w = data.decode("utf-8", errors="replace").lower().split()
-            now = time.monotonic()
+            now = self.clock.now()
             try:
                 if len(w) == 4 and w[0] == "thc" and w[1] == self.thc_name:
                     with self.lock:
@@ -402,13 +404,13 @@ class ScriptInput:
                     continue
             except ValueError:
                 continue
-            self.last_cmd = now
+            self.last_cmd = time.monotonic()
             log("crew script: %s" % " ".join(w))
             self.cs.send_hc_ack("ok " + " ".join(w), D.PORT_BASE)
 
     def apply(self, bits, counts):
         """(bits, counts) with whatever a script is holding added in."""
-        now = time.monotonic()
+        now = self.clock.now()
         with self.lock:
             self.thc = dict((d, t) for d, t in self.thc.items() if t > now)
             self.rhc = dict((a, v) for a, v in self.rhc.items() if v[1] > now)
