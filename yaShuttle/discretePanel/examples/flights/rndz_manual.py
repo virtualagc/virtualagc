@@ -60,7 +60,12 @@ PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
 TORVA_END_FT = 400.0             # the +V-bar point TORVA ends at (CG range, "400-310 ft")
 HOLD_FT = 100.0                  # ODS ring to PMA-2's face
-STEADY_FPS = 0.02                # HOLD: steady when every rate is under this
+# HOLD: steady when every rate is under this.  It was 0.02 ft/s, tighter than
+# the control's own deadband (fly(): dead = 0.05 ft/s) and than one pulse (0.10
+# ft/s and up), so the Orbiter was "steady" only if no pulse had fired and the
+# drift had stayed under 0.02 ft/s for STEADY_S: it never was, and the hold ran
+# to its limit with the ring at 100 ft (night3, night4, 2026-10-14).
+STEADY_FPS = 0.06
 STEADY_S = 120.0                 # ... for this long before the capture
 RPM_RATE = 0.75                  # deg/s, RPM SETUP's PRI and VERN ROT RATE
 RPM_STEPS = (180, 270, 0, 90)    # UNIV PTG BODY VECT 5 P: -X, +Z, +X, -Z on the ISS
@@ -1044,7 +1049,13 @@ class ManualPhase(object):
             # steady by the truth (the TCS's own noise is of this order)
             tr = self.rel("ods", noisy=False)
             terr = [[HOLD_FT, 0.0, 0.0][i] - tr["r"][i] for i in range(3)]
-            if max(abs(x) for x in tr["v"]) < STEADY_FPS and all(abs(x) < 5.0 for x in terr):
+            # THE POSITION BAND IS WIDER THAN THE CONTROL DEADBAND: the leg
+            # (fly(), below) does not pulse for a position error under
+            # dead x tau = 0.05 ft/s x 90 s = 4.5 ft, so a lateral offset of
+            # 4.5-5 ft stays put; a band of 5 ft kept resetting the steady
+            # timer on noise and ran the hold to its 40 min limit with the
+            # Orbiter sitting 100 ft out (night3 and night4, 2026-10-14).
+            if max(abs(x) for x in tr["v"]) < STEADY_FPS and all(abs(x) < 7.0 for x in terr):
                 if steady["since"] is None:
                     steady["since"] = t
             else:
