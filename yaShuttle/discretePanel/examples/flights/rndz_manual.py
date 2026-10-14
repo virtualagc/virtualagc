@@ -472,6 +472,7 @@ class ManualPhase(object):
         st = self.rel("cg", noisy=False)
         self.say("MANUAL: CG from the ISS's X %+.1f Y %+.1f Z %+.1f ft, XD %+.3f YD %+.3f ZD %+.3f ft/s; %s"
                  % (*st["r"], *st["v"], self.readings()))
+        self.rr_inhibit_inside_650(st)      # every phase of the manual part starts here
         return st
 
     def rbar(self):
@@ -480,7 +481,11 @@ class ManualPhase(object):
         1,000 ft, so that the up-firing jets do not plume the ISS); DAP
         A/AUTO/VERN, TRANS PULSE."""
         self.man_start()
-        self.rr_inhibit_650()
+        # THE RADAR STAYS IN PASS'S NAVIGATION UNTIL 650 FT: the cue card's
+        # "650 ft / Report to ISS: Range 650 ft / If Go for RPM: INH RNG,
+        # RDOT, ANGLES".  It was keyed here unconditionally, at the phase's
+        # start, which in the overnight run (2026-10-14) was ~1,376 ft: PASS
+        # took no more marks from 09:12 and its relative state drifted 1.4 kft.
         self.dap_pulse_modes()
         self.say("crew: DAP A/AUTO/VERN, TRANS PULSE%s; stationkeep on the R-bar at %.0f ft"
                  % (", LOW Z" if getattr(self.a, "low_z", False) else " (NOT LOW Z: --low-z not given)",
@@ -488,6 +493,7 @@ class ManualPhase(object):
         settled = {"n": 0}
 
         def done(t, st, err):
+            self.rr_inhibit_inside_650(st)
             ok = (abs(err[0]) < 25 and abs(err[1]) < 25 and abs(err[2]) < 15
                   and max(abs(x) for x in st["v"]) < 0.12)       # a pulse is ~0.15 ft/s
             settled["n"] = settled["n"] + 1 if ok else 0
@@ -497,6 +503,17 @@ class ManualPhase(object):
                          tau=150.0, vmax=0.3, dead=0.08, every=10.0, limit=1800.0)
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
         self.man_record("RBAR", report=rep, pulses=dict(self.pulses))
+
+    def rr_inhibit_inside_650(self, st):
+        """rr_inhibit_650, once, when the truth range from the CG is 650 ft or
+        less (the crew's report to the ISS is by RPOP's range, which is the
+        truth's here)."""
+        try:
+            rng = math.sqrt(sum(x * x for x in st["r"]))
+        except (KeyError, TypeError):
+            return
+        if rng <= 650.0:
+            self.rr_inhibit_650()
 
     def rr_inhibit_650(self):
         """APPROACH, CC 9-7 (JSC-48072-134 p. 305), at "650 ft / Report to
