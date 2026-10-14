@@ -1266,6 +1266,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                 self.say("start: " + line)
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1",
                    YAGPC_VEHDYN_ORBITER_KG=str(ORBITER_KG), YAGPC_OMS_ARMED="1",
+                   # MR Appendix A valve times: assist L/R165.4/165.6,
+                   # OMS2 168.6/168.8, OMS3 60.2/59.8, OMS4 R14.6.
+                   # OMS5 is L10.6s in MR p44; Appendix A labels conflict.
+                   # 6087lbf/315.06s ~=19.32lb/s. Mission-total interconnect
+                   # usage has no pre-Ti split, so it is not subtracted here.
+                   YAGPC_VEHDYN_OMS_USED_LB="7820.736,7898.016",
                    YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG="10",
                    YAGPC_VEHDYN_TARGETS=self.a.targets, YAGPC_VEHDYN_START_REL=rel,
                    YAGPC_MTU_MET_EPOCH="%.3f" % MET_ZERO_UNIX,
@@ -2365,7 +2371,7 @@ wait crt 1 title 2011/ timeout 600
             m = re.search(r"vehdyn-state:.*mass_kg=([\d.]+)", line)
             if m:
                 return float(m.group(1)) / 0.45359237
-        return ORBITER_KG / 0.45359237
+        return ORBITER_KG / 0.45359237 - (7820.736 + 7898.016)
 
     def tiburn(self):
         """TARGET Ti BURN [15A] (Final) and RNDZ OMS BURN (CONTINGENCY OPS
