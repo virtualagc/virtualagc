@@ -3240,7 +3240,12 @@ def main():
     ap.add_argument("--rpm-return", action="store_true",
                     help="after a continuous RPM, fly back to the R-bar point (if more than 50 ft off) before "
                          "TORVA, instead of starting TORVA from where the turn ended")
-    ap.add_argument("--hold-min", type=float, default=20.0,
+    # 5 MIN, NOT 20: the hold is the crew's check of the docking start point
+    # before "GO for docking", and every minute of it is station-keeping fuel
+    # (209 lb of forward RCS in 29 minutes in night3, against a forward tank of
+    # 1,907 lb) with nothing to gain; the early successful dock began at DOCK30
+    # from a capture, not after 20 minutes of this (owner, 2026-10-14).
+    ap.add_argument("--hold-min", type=float, default=5.0,
                     help="HOLD: minutes of station-keeping 100 ft out on the +V-bar (default %(default)s)")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
