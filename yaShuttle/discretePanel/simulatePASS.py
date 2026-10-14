@@ -336,6 +336,8 @@ class Launcher(object):
     def __init__(self, logs):
         self.logs = logs
         self.procs = []
+        self.specs = {}
+        self.revived = {}
 
     def start(self, name, argv, cwd, env=None, pass_fds=(), stdin_text=None):
         """stdin_text, if given, is written to the child's standard input,
@@ -362,8 +364,46 @@ class Launcher(object):
             except OSError:
                 pass                # it has gone already, and its log says why
         self.procs.append((name, p, fh))
+        self.specs[name] = (argv, cwd, env, pass_fds)
         log("%-9s started (pid %d, log %s)" % (name, p.pid, path))
         return p
+
+    def revive(self, prefix="meds", limit=5):
+        """Start again any display process (MEDS2: meds1, meds2, meds-afd1...)
+        that has exited, appending to its log.
+
+        A DISPLAY'S PROCESS HOLDS ITS IDP, and every snapshot needs every
+        IDP's state: a CRT2 process that went away 30 s into an unattended
+        overnight run made each of the driver's captures fail, and the driver
+        stopped the whole run when it came to restart from one
+        (owner, 2026-10-13).  A revived process comes up as a fresh one --
+        its IDP powered off, as at the start -- and the log says so."""
+        for entry in list(self.procs):
+            name, p, fh = entry
+            if not name.startswith(prefix) or p.poll() is None or name not in self.specs:
+                continue
+            if self.revived.get(name, 0) >= limit:
+                continue
+            self.revived[name] = self.revived.get(name, 0) + 1
+            argv, cwd, env, pass_fds = self.specs[name]
+            try:
+                fh2 = open(os.path.join(self.logs, name + ".log"), "a")
+                fh2.write("\n=== %s had exited (code %s); started again by simulatePASS (%d of %d) ===\n"
+                          % (name, p.returncode, self.revived[name], limit))
+                fh2.flush()
+                kw = {"pass_fds": pass_fds} if pass_fds else {}
+                if os.name == "posix":
+                    kw["start_new_session"] = True
+                q = subprocess.Popen(argv, cwd=cwd, env=env, stdout=fh2, stderr=subprocess.STDOUT,
+                                     stdin=subprocess.DEVNULL, **kw)
+            except OSError as e:
+                log("%s had exited and could not be started again: %s" % (name, e))
+                continue
+            try:
+                self.procs[self.procs.index(entry)] = (name, q, fh2)
+            except ValueError:
+                pass
+            log("%-9s had exited (code %s): started again (pid %d)" % (name, p.returncode, q.pid))
 
     def stop(self, keep=()):
         """Stop the children, except any whose name is in `keep`.
@@ -2493,6 +2533,14 @@ def main():
                       else None)
         threading.Thread(target=session_listener,
                          args=(args.port_base, stop_event), daemon=True).start()
+
+        def _watch_displays():
+            while not stop_event.wait(5.0):
+                try:
+                    L.revive()
+                except Exception as e:             # never let the watcher end the run
+                    log("display watcher: %s" % e)
+        threading.Thread(target=_watch_displays, daemon=True).start()
         if args.station != "all":
             # one station's windows, as the manager's STATION row would
             crewscript.send_control("station %s" % args.station, args.port_base)
