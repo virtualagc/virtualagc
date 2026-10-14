@@ -50,6 +50,19 @@ Default mapping (Logitech Extreme 3D Pro; every entry overridable with
 
 Buttons are numbered as printed on the stick, 1-12 (pygame counts from 0).
 
+Joystick profiles: --joysticks FILE selects JSON roles (name substring,
+index or GUID) and per-stick axes, sign, scale, offset, deadband and THC
+threshold/hysteresis, plus hats and one-based buttons. Without an explicit
+file, ~/.config/nsts/joysticks.json then examples/joysticks.json are tried.
+An explicit legacy --config overrides these implicit defaults; --joysticks
+wins when both are explicit. --list-joysticks lists devices and resolved
+roles; --probe prints raw values at 5 Hz without publishing control inputs.
+Auto and both keep the virtual window and physical sticks active together.
+Joystick remains windowless; virtual excludes physical sticks. Sources OR
+THC contacts (opposites cancel) and sum/clip RHC counts before publication.
+A second stick's forward motion commands physical +X, left -Y and positive
+twist +Z; the station's aft wiring is applied after source merging.
+
 The joystick may be connected or disconnected while this runs; while there
 is none both controllers are held in detent.  An axis or the hat that has
 not moved since the stick was opened is ALSO held in detent: SDL has no
@@ -805,7 +818,7 @@ class VirtualControls:
             pg.display.flip()
 
 
-def run_virtual(pg, args, pub, rp, status, script=None):
+def run_virtual(pg, args, pub, rp, status, script=None, physical=None):
     """The window loop: publish what the virtual controllers command."""
     style = args.style
     if style is None:
@@ -831,7 +844,7 @@ def run_virtual(pg, args, pub, rp, status, script=None):
     # events are not even queued; any other failure of event.get() is
     # logged and the loop carries on.
     try:
-        pg.event.set_blocked([pg.JOYDEVICEADDED, pg.JOYDEVICEREMOVED])
+        (pg.event.set_blocked if physical is None else pg.event.set_allowed)([pg.JOYDEVICEADDED, pg.JOYDEVICEREMOVED])
     except (AttributeError, pg.error):
         pass
     event_errors = 0
@@ -843,6 +856,8 @@ def run_virtual(pg, args, pub, rp, status, script=None):
             if event_errors <= 5 or event_errors % 1000 == 0:
                 log("pygame event.get() failed (%d so far): %r -- carrying on" % (event_errors, e))
             events = []
+        if physical is not None:
+            physical.events(events)
         for e in events:
             if e.type == pg.QUIT:
                 return 0
@@ -857,6 +872,12 @@ def run_virtual(pg, args, pub, rp, status, script=None):
         defl = vc.deflection()
         rp.counts = dict((a, round(defl[a] * RHC_FULL)) for a in RHC_AXES)
         pub.bits = vc.thc_bits()
+        if physical is not None:
+            from joystick_profiles import merge
+            try:
+                pub.bits, rp.counts = merge([(pub.bits, rp.counts), physical.read()])
+            except (pg.error, ValueError) as error:
+                log("physical joystick unavailable: %s" % error)
         if script is not None:
             pub.bits, rp.counts = script.apply(pub.bits, rp.counts)
             defl = dict((a, rp.counts[a] / float(RHC_FULL)) for a in RHC_AXES)
@@ -879,7 +900,7 @@ def main(argv=None):
     ap.add_argument("--port-base", type=int, default=None)
     ap.add_argument("--joystick", type=int, default=0, help="SDL joystick index")
     ap.add_argument("--config", help="JSON mapping overriding the defaults")
-    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default="auto",
+    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), default="auto",
                     help="auto (default): the joystick if there is one at start-up, "
                          "else a window of virtual controllers")
     ap.add_argument("--style", choices=("split", "gimbal"), default=None,
@@ -891,7 +912,12 @@ def main(argv=None):
                          "half of it (default %d)" % (FULL_SIZE, FULL_SIZE))
     ap.add_argument("--test", metavar="'DIR SECONDS'",
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
+    ap.add_argument("--thc-joystick", type=int, help="optional second stick index for THC axes")
+    ap.add_argument("--joysticks", metavar="FILE", help="joystick role and axis profile JSON")
+    ap.add_argument("--list-joysticks", action="store_true", help="list identities, roles and profiles")
+    ap.add_argument("--probe", action="store_true", help="print live raw stick values at 5 Hz")
     args = ap.parse_args(argv)
+    args._joystick_explicit = any(a == "--joystick" or a.startswith("--joystick=") for a in (sys.argv[1:] if argv is None else argv))
     # THE STATION IS ITS RHC (Ron, 2026-10-01): the forward THC is the CDR's
     # alone, so lh brings the forward THC, aft the aft one, and rh -- the PLT
     # -- none.  There is no --thc.
@@ -940,9 +966,16 @@ def main(argv=None):
     # needs a real window.
     pygame.joystick.init()
     mode = args.input
-    if mode == "auto":
-        mode = "joystick" if pygame.joystick.get_count() > args.joystick else "virtual"
-    if mode == "virtual":
+    if mode in ("auto", "both"):
+        mode = "both"
+    if args.list_joysticks or args.probe:
+        mode = "joystick"
+    from joystick_sources import Sources
+    physical = Sources(pygame, args, mapping, log) if mode != "virtual" else None
+    if args.list_joysticks:
+        print(json.dumps(physical.listing(), indent=2))
+        return 0
+    if mode in ("virtual", "both"):
         # X11 on Linux, so --layout (windowLayout, which works through X)
         # can find and place it -- under WSLg too.
         if sys.platform.startswith("linux") and os.environ.get("DISPLAY"):
@@ -957,7 +990,7 @@ def main(argv=None):
         except Exception:
             pass
         pygame.init()
-        return run_virtual(pygame, args, pub, rp, status, script)
+        return run_virtual(pygame, args, pub, rp, status, script, physical)
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
     try:                                    # its Dock name, and no App Nap (macdock.py)
         import macdock
@@ -966,54 +999,25 @@ def main(argv=None):
         pass
     pygame.init()
 
-    def open_stick():
-        if pygame.joystick.get_count() <= args.joystick:
-            return None
-        js = pygame.joystick.Joystick(args.joystick)
-        if not hasattr(pygame, "IS_CE"):     # pygame-ce opens it already, and
-            js.init()                        # deprecates init()
-        log("joystick %d: %s, %d axes, %d buttons, %d hat(s)"
-            % (args.joystick, js.get_name(), js.get_numaxes(), js.get_numbuttons(),
-               js.get_numhats()))
-        return js
-
-    # HOT-PLUG, BOTH WAYS.  A stick connected after start-up is opened when
-    # SDL says so, and one that goes away -- unplugged, or switched away by a
-    # KVM -- puts both controllers back in detent rather than leaving its
-    # last deflection latched, and is waited for again.
-    js = open_stick()
-    seen_axes, hat_seen = set(), False      # what has reported since opening
-    if js is None:
-        log("no joystick %d yet; holding the THC and RHC in detent" % args.joystick)
     while True:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                return 0
-            if e.type == pygame.JOYDEVICEADDED and js is None:
-                js = open_stick()
-                seen_axes, hat_seen = set(), False
-            elif e.type == pygame.JOYDEVICEREMOVED and js is not None and \
-                    getattr(e, "instance_id", None) == js.get_instance_id():
-                log("joystick %d gone; THC and RHC back in detent" % args.joystick)
-                js = None
-                seen_axes, hat_seen = set(), False
-            elif e.type == pygame.JOYAXISMOTION:
-                seen_axes.add(e.axis)
-            elif e.type == pygame.JOYHATMOTION:
-                hat_seen = True
-        if js is None:
-            pub.bits = 0
-            rp.counts = dict((a, 0) for a in RHC_AXES)
-            pub.bits, rp.counts = script.apply(pub.bits, rp.counts)
+        try:
+            events = pygame.event.get()
+        except (SystemError, KeyError) as error:
+            log("pygame event.get failed: %r; polling sticks continues" % error)
+            events = []
+        if any(e.type == pygame.QUIT for e in events):
+            return 0
+        physical.events(events)
+        try:
+            bits, counts = physical.read()
+        except (pygame.error, ValueError) as error:
+            log("physical joystick unavailable: %s" % error)
+            bits, counts = 0, dict((a, 0) for a in RHC_AXES)
+        if not args.probe:
+            pub.bits, rp.counts = script.apply(bits, counts)
             pub.send()
             rp.send()
-            time.sleep(0.1)
-            continue
-        pub.bits, rp.counts = script.apply(thc_bits(js, mapping, hat_seen),
-                                           rhc_counts(js, mapping, seen_axes))
-        pub.send()
-        rp.send()
-        status.show(rp.counts, pub.bits, js)
+            status.show(rp.counts, pub.bits)
         time.sleep(0.02)
 
 if __name__ == "__main__":

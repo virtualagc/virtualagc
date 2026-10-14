@@ -1489,7 +1489,9 @@ def main():
                          "L12L, L11U), passed to panelO6.py; e.g. examples/sts109-ssp.txt")
     ap.add_argument("--joystick", type=int, default=None, metavar="N",
                     help="handcontrollers.py: the SDL joystick index (default 0)")
-    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default=None,
+    ap.add_argument("--thc-joystick", type=int, default=None,
+                    help="second THC stick index, forwarded when --rhc starts controls")
+    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), default=None,
                     help="handcontrollers.py: auto (default) uses a joystick if one is "
                          "present at start-up, else a window of virtual controllers")
     ap.add_argument("--style", choices=("split", "gimbal"), default=None,
@@ -2020,6 +2022,8 @@ def main():
                     hc_argv += ["--joystick", str(args.joystick)]
                 if args.input:
                     hc_argv += ["--input", args.input]
+                if args.thc_joystick is not None:
+                    hc_argv += ["--thc-joystick", str(args.thc_joystick)]
                 if args.style:
                     hc_argv += ["--style", args.style]
                 L.start("handcontrollers", hc_argv, HERE, env)
