@@ -103,7 +103,12 @@ def main():
                     if near is None or abs(near - v[0]) > 0.15:
                         continue
                     tr = hist[near]
-                    rel = [v[2 + i] - tr[9 + i] for i in range(3)]
+                    # THE ORBITER AT THE TARGET DATAGRAM'S OWN TIME: the nearest
+                    # TRU1 may be a few hundredths of a second off (a dropped
+                    # or reordered datagram), and 7.7 km/s of orbital velocity
+                    # turns 0.06 s into 460 m (1,500 ft) of "step".
+                    dtp = v[0] - tr[0]
+                    rel = [v[2 + i] - (tr[9 + i] + tr[12 + i] * dtp) for i in range(3)]
                     # relative velocity: TGT1 doubles 5-7 (target), TRU1 12-14 (orbiter) when present
                     try:
                         relv = [v[5 + i] - tr[12 + i] for i in range(3)]
