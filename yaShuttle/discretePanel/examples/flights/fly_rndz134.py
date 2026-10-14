@@ -1303,7 +1303,13 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             cmd += ["--no-portview"]
         elif self.a.views:
             cmd += ["--portview-views", self.a.views]
-        if self.a.hold_start:
+        # THE HOLD IS FOR THE FIRST START ONLY: the driver restarts the whole
+        # simulation from its own captures (restart_from), and holding at each
+        # of those waited for an Enter nobody was there to give -- the
+        # overnight run stalled with every window up (owner, 2026-10-13).
+        hold = bool(self.a.hold_start) and not getattr(self, "_held_once", False)
+        self._held_once = True
+        if hold:
             cmd += ["--hold-start"]
         if self.a.station != "all":
             cmd += ["--station", self.a.station]
@@ -1323,7 +1329,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
         self.leave_nothing_running()
         self.wait_file(outp, "session commands on port", 180)
-        if self.a.hold_start:
+        if hold:
             # --hold-start: every window up and placed, the vehicle not yet
             # started -- the person watching arranges the windows, then says go
             self.wait_file(outp, "HELD:", 180)
