@@ -147,6 +147,41 @@ MET_ZERO_UNIX = calendar.timegm((2011, 5, 16, 12, 56, 27)) + 0.994
 NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
+
+# What the ascent left the vehicle with.  The rendezvous model starts two days
+# after OMS-2, at an orbit worked out from the target (START_REL), so position
+# cannot come from the ascent -- but the propellant and the mass can, and do.
+LB_KG = 0.45359237
+OMS_AFTER_OMS2_LB = (70.8 * 19.32, 74.4 * 19.32)    # MR: OMS3+OMS5 left, OMS3+OMS4 right
+ASCENT_CONSUMABLES_LB = 3.0 * 49.0 * 858.0 / (287.0 + 858.0) + 3.6 + 2.8 + 4.2   # vehdyn.c
+ASCENT_STATE = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2/vehdyn.json")
+ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what it loaded
+
+
+def ascent_end_state(path, say=print):
+    """Propellant used and the orbiter's mass, from the ascent capture's
+    vehdyn.json (vehdyn_dump entries 16..20: forward, left, right RCS, left,
+    right OMS, kg).  Falls back to the typed figures, and says so."""
+    try:
+        prop = json.load(open(path))["vehdyn"][16:21]
+        # what that run loaded is its own pre-liftoff capture's propellant:
+        # it ran on 1,460 kg / 5,897 kg modules, not today's loads, so the
+        # amount USED is the difference and is what carries over
+        full = json.load(open(os.path.join(os.path.dirname(os.path.dirname(path)),
+                                           ASCENT_START, "vehdyn.json")))["vehdyn"][16:21]
+        assert len(prop) == 5 and all(p > 0 for p in prop) and all(f >= p for f, p in zip(full, prop))
+        rcs = [(full[k] - prop[k]) / LB_KG for k in range(3)]
+        oms = [(full[3 + k] - prop[3 + k]) / LB_KG + OMS_AFTER_OMS2_LB[k] for k in range(2)]
+        say("start: propellant from the ascent capture %s" % path)
+        say("start:   RCS used %s lb, OMS used %s lb" % (
+            ", ".join("%.1f" % x for x in rcs), ", ".join("%.1f" % x for x in oms)))
+        return dict(rcs_used=",".join("%.3f" % x for x in rcs),
+                    oms_used=",".join("%.3f" % x for x in oms),
+                    orbiter_kg=ORBITER_KG - ASCENT_CONSUMABLES_LB * LB_KG)
+    except Exception as e:
+        say("start: WARNING no usable ascent capture (%s: %s); typed propellant figures" % (path, e))
+        return dict(rcs_used="109.6,77.6,78.0", oms_used="7820.736,7898.016", orbiter_kg=ORBITER_KG)
+
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
           # the manual phase (rndz_manual.py, Stage 5), to 100 ft station-keeping
@@ -1264,21 +1299,17 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             rel = re.search(r"YAGPC_VEHDYN_START_REL=(\S+)", out).group(1)
             for line in out.strip().splitlines():
                 self.say("start: " + line)
+        st = ascent_end_state(self.a.ascent_state, self.say)
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1",
-                   YAGPC_VEHDYN_ORBITER_KG=str(ORBITER_KG), YAGPC_OMS_ARMED="1",
-                   # MR Appendix A valve times: assist L/R165.4/165.6,
-                   # OMS2 168.6/168.8, OMS3 60.2/59.8, OMS4 R14.6.
-                   # OMS5 is L10.6s in MR p44; Appendix A labels conflict.
-                   # 6087lbf/315.06s ~=19.32lb/s. Mission-total interconnect
-                   # usage has no pre-Ti split, so it is not subtracted here.
-                   YAGPC_VEHDYN_OMS_USED_LB="7820.736,7898.016",
-                   # RCS used from liftoff to the end of OMS 2 in OUR ascent run
-                   # (ascent2's end state against its loads: forward 49.7 kg,
-                   # left 35.2, right 35.4), so that the tanks do not start the
-                   # rendezvous full: carried across the segment boundary, not
-                   # invented.  FD1-FD3's own usage up to Ti is not in the
-                   # record and is not included (owner, 2026-10-14).
-                   YAGPC_VEHDYN_RCS_USED_LB="109.6,77.6,78.0",
+                   YAGPC_VEHDYN_ORBITER_KG="%.1f" % st["orbiter_kg"], YAGPC_OMS_ARMED="1",
+                   # The propellant is the vehicle's own, carried from the
+                   # ascent capture (ascent_end_state): the loads less what
+                   # that run had left, plus the Mission Report's burns after
+                   # OMS-2 (OMS3 L60.2/R59.8 s, OMS4 R14.6, OMS5 L10.6 at
+                   # 6087 lbf / 315.06 s = 19.32 lb/s).  FD1-FD3's RCS use up
+                   # to Ti is not in the record and is not included.
+                   YAGPC_VEHDYN_OMS_USED_LB=st["oms_used"],
+                   YAGPC_VEHDYN_RCS_USED_LB=st["rcs_used"],
                    YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG="10",
                    YAGPC_VEHDYN_TARGETS=self.a.targets, YAGPC_VEHDYN_START_REL=rel,
                    YAGPC_MTU_MET_EPOCH="%.3f" % MET_ZERO_UNIX,
@@ -3129,6 +3160,7 @@ def main():
                          "2026-10-10).  The unpatched volume is " + BASE_VOLUME)
     ap.add_argument("--no-rr-force", dest="rr_force", action="store_false",
                     help="don't play MCC's FORCE of the radar's refused range marks (see rr_converge)")
+    ap.add_argument("--ascent-state", default=ASCENT_STATE, help="the ascent capture's vehdyn.json: the propellant and mass the rendezvous starts with")
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
