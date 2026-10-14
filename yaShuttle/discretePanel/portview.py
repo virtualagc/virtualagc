@@ -2745,7 +2745,13 @@ class VehicleLayer(object):
             to_sun = sun_m50 - r
             dsun = float(np.linalg.norm(to_sun))
             sep = math.acos(max(-1.0, min(1.0, float(np.dot(to_sun / dsun, -r / np.linalg.norm(r))))))
-            vis = uncovered_disk(R_SUN / dsun, EARTH_A / float(np.linalg.norm(r)), sep)
+            # ANGULAR RADII, not radius over distance: from a low orbit the Earth
+            # subtends 71.6 degrees (asin(R/r)), not the 54.4 degrees R/r
+            # gives, which brought the ISS out of the Earth's shadow some five
+            # minutes early (owner, 2026-10-13: lit at 138/08:43:26; the orbit's
+            # real shadow exit is 08:48:55).
+            vis = uncovered_disk(math.asin(min(1.0, R_SUN / dsun)),
+                                 math.asin(min(1.0, EARTH_A / float(np.linalg.norm(r)))), sep)
             px = model.radius / dist * (view.view_size()[0] / 2.0) / view.tanX
             if model.point and px < self.FADE_PX and vis > 0.01 and rel[2] > 0:
                 # Phase: lit fraction seen from the eye, as a Lambert sphere.
