@@ -992,8 +992,9 @@ class RadarNav(object):
                    w.sv_sel_bit()))
 
     def ku_switches(self, name, **pos):
-        self.play("".join("+1     switch ku_%s %s\n" % (k, v) for k, v in pos.items()), name)
-        self.script_done(name, 60)
+        with fly_sts134.PANEL_LOCK:
+            self.play("".join("+1     switch ku_%s %s\n" % (k, v) for k, v in pos.items()), name)
+            self.script_done(name, 60)
 
     def pass_range_ft(self):
         """NAV RNG: PASS's own range, |FLTR - target| or |PROP - target| as
@@ -1551,8 +1552,9 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                                                   if on - {"BACKUP C/W ALARM", "SM ALERT TONE"} else "")
         n = getattr(self, "_cw_n", 0) + 1
         self._cw_n = n
-        self.play(script, "cw-ack-%d" % n)
-        self.script_done("cw-ack-%d" % n, 60)
+        with fly_sts134.PANEL_LOCK:
+            self.play(script, "cw-ack-%d" % n)
+            self.script_done("cw-ack-%d" % n, 60)
         self.cw_log("crew: MASTER ALARM%s%s (lit: %s)" % (", MSG RESET" if "MSG_RESET" in script else "",
                                                            " -- " + why if why else "",
                                                            ", ".join(sorted(on)) or "nothing"))

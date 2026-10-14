@@ -59,6 +59,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -318,7 +319,27 @@ def keys_signed(x, fmt):
     return ("- " if x < 0 else "+ ") + " ".join(t)
 
 
+# ONE SCRIPT AT A TIME ON THE PANEL.  The panel stops a script that is playing
+# when another is played (panelO6.py), and the driver has threads that play
+# scripts of their own (RADAR OUTPUT LOW, the C&W acknowledgements) beside the
+# flight's.  One that landed in the middle of a THC pulse train dropped its last
+# pulses and the driver, waiting for their last line, stopped the run at
+# GMT 138/10:05 (owner's overnight run, 2026-10-14: "'+1.0 thc aft -x 0.30'
+# never appeared").  So a play and the wait for its end are made under this
+# lock, and each thread keeps its own idea of where in the log its script began.
+PANEL_LOCK = threading.RLock()
+_PLAYED = threading.local()
+
+
 class Flight:
+    @property
+    def played_at(self):
+        return getattr(_PLAYED, "at", 0)
+
+    @played_at.setter
+    def played_at(self, v):
+        _PLAYED.at = v
+
     def __init__(self, a):
         self.a = a
         self.base = a.port_base

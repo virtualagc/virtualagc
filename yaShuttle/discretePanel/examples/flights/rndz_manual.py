@@ -53,6 +53,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import rndz_instruments as ins  # noqa: E402
+import fly_sts134  # noqa: E402 -- PANEL_LOCK
 
 FT = 0.3048
 PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
@@ -248,8 +249,9 @@ class ManualPhase(object):
             lines += ["+1.0   thc fwd %s%s 0.30" % (sgn, ax)] * npl
         if lines:
             name = "man-%s-%d" % (label, int(time.time() * 10) % 100000)
-            self.play("\n".join(lines) + "\n", name)
-            self.script_done(name, 120)
+            with fly_sts134.PANEL_LOCK:
+                self.play("\n".join(lines) + "\n", name)
+                self.script_done(name, 120)
             try:
                 os.remove(os.path.join(self.a.logs, name + ".script"))
             except OSError:
