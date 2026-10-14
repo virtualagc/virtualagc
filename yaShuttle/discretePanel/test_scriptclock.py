@@ -47,5 +47,15 @@ class Timing(unittest.TestCase):
         with patch.dict(os.environ, {'YAGPC_RATE_FILE':'/tmp/no-such-task-k-rate-file'}):
             self.assertEqual(runtime_rate(),1)
 
+    def test_actual_vehicle_clock_overrides_requested_rate(self):
+        wall=[0.0];vehicle=[10.0]
+        c=ScriptClock(wall=lambda:wall[0],rate=lambda:8.0,vehicle=lambda:vehicle[0])
+        self.assertEqual(c.now(),0)
+        wall[0]=1;vehicle[0]=14;self.assertEqual(c.now(),4)
+        wall[0]=2;self.assertEqual(c.now(),4)
+        vehicle[0]=None;wall[0]=3;self.assertEqual(c.now(),4)
+        vehicle[0]=15;self.assertEqual(c.now(),5)
+
 if __name__=='__main__':unittest.main()
+
 
