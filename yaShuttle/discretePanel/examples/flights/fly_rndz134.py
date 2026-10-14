@@ -1272,6 +1272,13 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    # 6087lbf/315.06s ~=19.32lb/s. Mission-total interconnect
                    # usage has no pre-Ti split, so it is not subtracted here.
                    YAGPC_VEHDYN_OMS_USED_LB="7820.736,7898.016",
+                   # RCS used from liftoff to the end of OMS 2 in OUR ascent run
+                   # (ascent2's end state against its loads: forward 49.7 kg,
+                   # left 35.2, right 35.4), so that the tanks do not start the
+                   # rendezvous full: carried across the segment boundary, not
+                   # invented.  FD1-FD3's own usage up to Ti is not in the
+                   # record and is not included (owner, 2026-10-14).
+                   YAGPC_VEHDYN_RCS_USED_LB="109.6,77.6,78.0",
                    YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG="10",
                    YAGPC_VEHDYN_TARGETS=self.a.targets, YAGPC_VEHDYN_START_REL=rel,
                    YAGPC_MTU_MET_EPOCH="%.3f" % MET_ZERO_UNIX,
@@ -2371,7 +2378,7 @@ wait crt 1 title 2011/ timeout 600
             m = re.search(r"vehdyn-state:.*mass_kg=([\d.]+)", line)
             if m:
                 return float(m.group(1)) / 0.45359237
-        return ORBITER_KG / 0.45359237 - (7820.736 + 7898.016)
+        return ORBITER_KG / 0.45359237 - (7820.736 + 7898.016) - (109.6 + 77.6 + 78.0)
 
     def tiburn(self):
         """TARGET Ti BURN [15A] (Final) and RNDZ OMS BURN (CONTINGENCY OPS
