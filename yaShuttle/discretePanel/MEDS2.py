@@ -5730,7 +5730,7 @@ class Screen_DPS(MDUScreen):
         # later.  That is the same one-frame lag _fmtAdj above has always had
         # and for the same reason, and at a display's call-up it costs one
         # frame of the bare foreground -- the state every frame used to be.
-        self._vdisp = self._vdispNext
+        self._vdisp = tuple(self._vdispNext) if self._vdispNext else None
         self._vdispNext = None
         self._announceTopLines()
 
@@ -6229,7 +6229,17 @@ class Screen_DPS(MDUScreen):
                 # walk finds it -- never from the MEDS background's own,
                 # which would be circular.
                 if not opts.get('medsBg'):
-                    self._vdispNext = v['vdisp']
+                    # EVERY name, in order: HORIZ SIT names its common
+                    # background (153) and a pseudo-background (154 or 155)
+                    if self._vdispNext is None:
+                        self._vdispNext = []
+                    if v['vdisp'] not in self._vdispNext:
+                        self._vdispNext.append(v['vdisp'])
+                    if v['vdisp'] not in self._vdispSeen:
+                        self._vdispSeen.add(v['vdisp'])
+                        print('MEDS background named: VDISP=%d (%s)' % (
+                            v['vdisp'], self.MEDS_BACKGROUNDS.get(v['vdisp'], 'no file')),
+                            flush=True)
 
         self.group.add(targetGroup)
         self.d.dirty = True
@@ -6469,29 +6479,46 @@ class Screen_DPS(MDUScreen):
     # release that still drew them: the static labels (TAEM TGT, G&N, HSI, EP,
     # AIM, S/B, NAV RESID RATIO, GPS, DRAG H, ADTA H, the item numbers) and the
     # rules, with the rate-6 foreground cards left to PASS.
+    # 153: HORIZ SIT's COMMON background -- the title, the item labels and the
+    # rules -- which XG0500.dfg names (`DRAW HORIZ SIT DISPLAY COMMON
+    # BACKGROUND`, VDISP=153) where OI30's drew them: its cards 013700-020000.
     MEDS_BACKGROUNDS = {158: '0010-D-DPS_UTILITY.dfb',
+                        153: '0500-D-HORIZ_SIT_COMMON.dfb',
                         154: '0500-D-HORIZ_SIT_01GPS.dfb',
-                        155: '0500-D-HORIZ_SIT_3GPS.dfb'}
+                        155: '0500-D-HORIZ_SIT_3GPS.dfb',
+                        # a frame that names two is drawn from ONE file: a
+                        # stream ends at its own END, so two files joined
+                        # draw only the first (HORIZ SIT lost its
+                        # pseudo-background that way).  Both decks' static
+                        # cards, in one module: build_meds_background.py --also
+                        (153, 154): '0500-D-HORIZ_SIT_153+154.dfb',
+                        (153, 155): '0500-D-HORIZ_SIT_153+155.dfb'}
     _medsBackgroundCache = {}
+    _vdispSeen = set()
 
     def _medsBackground(self, vdisp):
-        """The halfword stream for a VDISP number, or None if there is no
-        such background.  Read once and kept: a display names it on every
-        refresh."""
-        if vdisp is None:
+        """The halfword stream for the VDISP numbers a frame named (a tuple,
+        in the order named), or None if there is none.  Several names are
+        several whole pictures, joined: HORIZ SIT draws its common background
+        and a pseudo-background.  Read once and kept: a display names them on
+        every refresh."""
+        if not vdisp:
             return None
         if vdisp not in self._medsBackgroundCache:
-            name = self.MEDS_BACKGROUNDS.get(vdisp)
-            words = None
-            if name is not None:
+            words = []
+            names = ([self.MEDS_BACKGROUNDS[vdisp]]
+                     if vdisp in self.MEDS_BACKGROUNDS
+                     else [self.MEDS_BACKGROUNDS[c] for c in vdisp
+                           if c in self.MEDS_BACKGROUNDS][-1:])
+            for name in names:
                 path = os.path.join(self.d.CONFIG['NSTS_TOP'], 'data', name)
                 try:
-                    words = self.loadBGDFBFile(path)
+                    words += list(self.loadBGDFBFile(path))
                 except OSError as e:
                     # Said once, and then drawn as any other backgroundless
                     # display: a missing file must not stop the screen.
-                    print('MEDS background %d: %s' % (vdisp, e))
-            self._medsBackgroundCache[vdisp] = words
+                    print('MEDS background %s: %s' % (vdisp, e))
+            self._medsBackgroundCache[vdisp] = words or None
         return self._medsBackgroundCache[vdisp]
 
     def _dfbList(self):

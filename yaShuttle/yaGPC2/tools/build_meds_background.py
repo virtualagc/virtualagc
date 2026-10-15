@@ -89,6 +89,12 @@ def main():
                          "(HORIZ SIT's backgrounds are pieces of a rate section)")
     ap.add_argument("--format", required=True,
                     help="the display number, e.g. 0010")
+    ap.add_argument("--also", nargs=2, action="append", default=[],
+                    metavar=("DECK", "LINES"),
+                    help="more cards, from another deck, joined after these: a "
+                         "display that names two backgrounds at once (HORIZ SIT "
+                         "names its common one, VDISP=153, and a pseudo-"
+                         "background, 154 or 155) is drawn from one file")
     ap.add_argument("--dfg", default=os.environ.get("DFG", "dfg"),
                     help="the dfg executable [$DFG, else `dfg` on PATH]")
     ap.add_argument("-o", "--output", required=True)
@@ -104,6 +110,13 @@ def main():
         if not got:
             sys.exit("no cards in %s between %s and %s" % (a.deck, lo, hi))
         body += got
+    for deck, ranges in a.also:
+        for part in ranges.split(","):
+            lo, _, hi = part.strip().partition("-")
+            got = cards(deck, lo, hi)
+            if not hi or not got:
+                sys.exit("no cards in %s between %s and %s" % (deck, lo, hi))
+            body += got
 
     work = Path(a.keep) if a.keep else Path(tempfile.mkdtemp(prefix="medsbg."))
     (work / "SSSRC").mkdir(parents=True, exist_ok=True)
