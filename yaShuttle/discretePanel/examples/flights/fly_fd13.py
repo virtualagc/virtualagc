@@ -96,6 +96,7 @@ def design(r0, v0, rt0, vt0, burn_dts, dtA, aim, unknowns, cons, start=None):
     Returns the first burn's delta-V (M50 m/s and LVLH components), every
     unknown's value, and the miss left in cons."""
     rtT, vtT = RS.propagate(rt0, vt0, dtA, step=20.0)
+    last_full = [0.0, 0.0, 0.0]
 
     def run(x):
         r, v, t = list(r0), list(v0), 0.0
@@ -115,6 +116,7 @@ def design(r0, v0, rt0, vt0, burn_dts, dtA, aim, unknowns, cons, start=None):
                 first = (dvm, dvl)
         r, v = RS.propagate(r, v, dtA - t, step=20.0)
         rel = rel_full(rtT, vtT, r, v)
+        last_full[:] = [rel[i] - aim[i] for i in range(3)]
         return [rel[k] - aim[k] for k in cons], first
     x = list(start) if start else [0.0] * len(unknowns)
     n = len(unknowns)
@@ -145,7 +147,7 @@ def design(r0, v0, rt0, vt0, burn_dts, dtA, aim, unknowns, cons, start=None):
             d[i] = (bvec[i] - sum(A[i][c] * d[c] for c in range(i + 1, n))) / A[i][i]
         x = [x[j] + d[j] for j in range(n)]
     m, first = run(x)
-    return first[0], first[1], x, m
+    return first[0], first[1], x, m, list(last_full)
 
 
 class FD13(F.Flight):
@@ -203,25 +205,32 @@ class FD13(F.Flight):
                 unknowns, cons = [(0, 0), (0, 1), (1, 0)], [0, 1, 2]
             elif name == "NC2":    # along-track now and at NC3
                 unknowns, cons = [(0, 0), (1, 0)], [0, 2]
-            else:                  # NC3: along-track and radial
-                unknowns, cons = [(0, 0), (0, 2)], [0, 2]
+            else:                  # NC3 (an RCS burn, 2.7 ft/s flown): along-track
+                # only.  X and Z together asked 55 ft/s of RADIAL delta-V of
+                # it (Mac-integrate, 2026-10-15) -- ~700 kg of RCS
+                # propellant, nearly the forward tank; the Z left is shown in
+                # the full miss and NC4's arc to the Ti point takes what it can.
+                unknowns, cons = [(0, 0)], [0]
         start = None
         if name == "NC1":          # the flown family: posigrade
             start = [flown_dv * FT, 0.0, 0.0]
-        dvm, dvl, xs, miss = design(rB, vB, rtB, vtB, burn_dts, dtA, aim, unknowns, cons, start)
+        dvm, dvl, xs, miss, full = design(rB, vB, rtB, vtB, burn_dts, dtA, aim, unknowns, cons, start)
         rel = None
         size = math.sqrt(sum(x * x for x in dvm)) / FT
         relnow = RS.m50_to_lvc(rtB, vtB, rB, vB)
         self.say("%s: at TIG the Orbiter is X %+.1f Y %+.1f Z %+.1f kft from the ISS" % (
             name, relnow[0] / FT / 1e3, relnow[1] / FT / 1e3, relnow[2] / FT / 1e3))
         self.say("%s: designed to %s: DVX %+.2f DVY %+.2f DVZ %+.2f ft/s = %.2f ft/s "
-                 "(flown %.1f ft/s, %.1f s %s); planned later %s ft/s; miss %s ft" % (
+                 "(flown %.1f ft/s, %.1f s %s); planned later %s ft/s; miss in the aimed "
+                 "axes %s ft; full X/Y/Z miss at the aim %s ft" % (
                      name, tag, dvl[0] / FT, dvl[1] / FT, dvl[2] / FT, size, flown_dv, flown_s,
-                     eng, ", ".join("%+.1f" % (x / FT) for x in xs[len([1 for u in unknowns if u[0] == 0]):]),
-                     ", ".join("%.0f" % (x / FT) for x in miss)))
+                     eng, ", ".join("%+.1f" % (x / FT) for x in
+                                    xs[len([1 for u in unknowns if u[0] == 0]):]) or "none",
+                     ", ".join("%.0f" % (x / FT) for x in miss),
+                     ", ".join("%.0f" % (x / FT) for x in full)))
         self.designs = getattr(self, "designs", {})
         self.designs[name] = dict(dvx=dvl[0] / FT, dvy=dvl[1] / FT, dvz=dvl[2] / FT, size=size,
-                                  flown=flown_dv, miss_ft=[x / FT for x in miss], later_ft_s=[x / FT for x in xs],
+                                  flown=flown_dv, miss_ft=[x / FT for x in miss], full_miss_ft=[x / FT for x in full], later_ft_s=[x / FT for x in xs],
                                   rel_at_tig_ft=[x / FT for x in relnow])
         with open(os.path.join(self.a.logs, "fd13-designs.json"), "w") as fh:
             import json
