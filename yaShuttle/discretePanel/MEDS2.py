@@ -6457,7 +6457,17 @@ class Screen_DPS(MDUScreen):
     # the change request that put it here.  The file is generated from the
     # drawing commands that change request deleted, which the release before
     # it still carries; tools/build_meds_background.py rebuilds it.
-    MEDS_BACKGROUNDS = {158: '0010-D-DPS_UTILITY.dfb'}
+    # 158: DPS UTILITY (CR93220A, OI34.04).  154 and 155: HORIZ SIT's two
+    # pseudo-backgrounds (CR093172B, OI34.02, CG0500.dfg `VDISP=154` for the
+    # 0 or 1 GPS receiver configuration and `VDISP=155` for the 3-receiver
+    # one, chosen by the deck's own TEST of CGNS_GPS_TAC_CONFIG).  Built by
+    # yaGPC2/tools/build_meds_background.py from the OI301700 CG0500 deck, the
+    # release that still drew them: the static labels (TAEM TGT, G&N, HSI, EP,
+    # AIM, S/B, NAV RESID RATIO, GPS, DRAG H, ADTA H, the item numbers) and the
+    # rules, with the rate-6 foreground cards left to PASS.
+    MEDS_BACKGROUNDS = {158: '0010-D-DPS_UTILITY.dfb',
+                        154: '0500-D-HORIZ_SIT_01GPS.dfb',
+                        155: '0500-D-HORIZ_SIT_3GPS.dfb'}
     _medsBackgroundCache = {}
 
     def _medsBackground(self, vdisp):

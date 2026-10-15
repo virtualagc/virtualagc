@@ -53,12 +53,17 @@ HEX = re.compile(r"HEX'([0-9A-Fa-f]{4})'")
 
 
 def cards(deck, lo, hi):
-    """The cards of `deck` whose sequence numbers fall in [lo, hi]."""
+    """The cards of `deck` whose sequence numbers fall in [lo, hi].  Comment
+    cards (`*/ ...`) and blanks are left out: they draw nothing, and a range
+    cut across a deck's structure (HORIZ SIT's pseudo-backgrounds sit among
+    TEST and BR cards) has comments that belong to neither side."""
     out = []
     for raw in open(deck, errors="replace"):
         m = CARD.match(raw.rstrip("\r\n"))
         if m is not None and lo <= m.group(1) <= hi:
-            out.append(m.group(2).strip())
+            card = m.group(2).strip()
+            if card and not card.startswith("*"):
+                out.append(card)
     return out
 
 
@@ -79,7 +84,9 @@ def main():
     ap.add_argument("--deck", required=True,
                     help="the as-received deck that still draws it")
     ap.add_argument("--lines", required=True,
-                    help="sequence range of the static drawing, LO-HI")
+                    help="sequence range of the static drawing, LO-HI; several "
+                         "ranges, comma separated, are joined in the order given "
+                         "(HORIZ SIT's backgrounds are pieces of a rate section)")
     ap.add_argument("--format", required=True,
                     help="the display number, e.g. 0010")
     ap.add_argument("--dfg", default=os.environ.get("DFG", "dfg"),
@@ -88,12 +95,15 @@ def main():
     ap.add_argument("--keep", help="keep the deck and module here")
     a = ap.parse_args()
 
-    lo, _, hi = a.lines.partition("-")
-    if not hi:
-        sys.exit("--lines wants a range, LO-HI")
-    body = cards(a.deck, lo, hi)
-    if not body:
-        sys.exit("no cards in %s between %s and %s" % (a.deck, lo, hi))
+    body = []
+    for part in a.lines.split(","):
+        lo, _, hi = part.strip().partition("-")
+        if not hi:
+            sys.exit("--lines wants ranges, LO-HI[,LO-HI...]")
+        got = cards(a.deck, lo, hi)
+        if not got:
+            sys.exit("no cards in %s between %s and %s" % (a.deck, lo, hi))
+        body += got
 
     work = Path(a.keep) if a.keep else Path(tempfile.mkdtemp(prefix="medsbg."))
     (work / "SSSRC").mkdir(parents=True, exist_ok=True)

@@ -193,8 +193,8 @@ G3_FROM_MM = ("+1     keys SPEC 1 PRO\n"
 # mission I-load CGNS_GPS_LOCKOUT >= 3 (tools/sites/sts134-gps-lockout.json,
 # on the ksc4 volume); a generic tape rejects it as an ILLEGAL ENTRY.
 GPS_INCORPORATE = ("+1     keys SPEC 5 0 PRO\n"
-                   "+3     keys ITEM 4 4 EXEC\n"
-                   "+3     keys RESUME\n")
+                   "+8     keys ITEM 4 4 EXEC\n"
+                   "+8     keys RESUME\n")
 # DEVELOPMENT ONLY, with --incorporate-at-land: SPEC 55 ITEM 38, METERING
 # OVERRIDE (a toggle; legal in MM 301-603, GKAGPS.hal CASE_10).  A capture
 # resumed in TAEM can carry a nav error of 30,000 ft; incorporated, PASS meters
@@ -212,8 +212,8 @@ METERING_OVERRIDE = ("+1     keys SPEC 5 5 PRO\n"
 AIR_DATA = ("+1     switch adp_l DEPLOY\n"
             "+1     switch adp_r DEPLOY\n"
             "+1     keys SPEC 5 0 PRO\n"
-            "+3     keys ITEM 2 8 EXEC\n"
-            "+3     keys RESUME\n")
+            "+8     keys ITEM 2 8 EXEC\n"
+            "+8     keys RESUME\n")
 # THE RTLS RUNWAY: SPEC 50 ITEM 4 selects the landing area's secondary runway
 # (ITEM 3 the primary; mutually exclusive), legal in OPS 1, 3 and 6 -- after
 # an RTLS's powered pitchdown the runway can still change, only the MECO
@@ -222,8 +222,8 @@ AIR_DATA = ("+1     switch adp_l DEPLOY\n"
 # OPS 6 is up -- at once after the ABORT pb, OPS 6 sharing OPS 1's memory
 # configuration (G16) -- and back to RTLS TRAJ with RESUME.
 RTLS_RW_SEC = ("+10    keys SPEC 5 0 PRO\n"
-               "+3     keys ITEM 4 EXEC\n"
-               "+3     keys RESUME\n")
+               "+8     keys ITEM 4 EXEC\n"
+               "+8     keys RESUME\n")
 OPS302 = "+1     keys OPS 3 0 2 PRO\n"
 DEORB_MNVR = ("+1     dap c3 auto\n+1     omseng left arm/press\n"
               "+1     omseng right arm/press\n+5     keys ITEM 2 7 EXEC\n")
