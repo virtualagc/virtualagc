@@ -45,6 +45,10 @@ import sys
 import time
 
 import numpy as np
+import os as _os
+# pygame.init() would start the mixer and hold the sound device open (see
+# handcontrollers.py); the truth ball makes no sound
+_os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 import pygame
 from pygame.locals import DOUBLEBUF, OPENGL, QUIT, KEYDOWN
 
