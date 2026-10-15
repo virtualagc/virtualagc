@@ -55,7 +55,13 @@ def gmt(d, h, m, s):
 BURNS = {
     "NC1": (gmt(136, 15, 48, 38.1), "both", 93.6, 66.7),
     "NC2": (gmt(137, 6, 22, 51.6), "right", 11.2, 14.4),
-    "NC3": (gmt(137, 15, 41, 14.0), "rcs", 2.7, 11.5),
+    # NC3 was an RCS burn (2.7 ft/s, 11.5 s): flown by the crew nulling VGO with
+    # the THC.  This driver has no hands, so EXEC on RCS SEL fired nothing (a
+    # delivered -0.18 ft/s against +1.56 designed, 2026-10-15: NC4 then began
+    # 150 and 2 kft AHEAD of the aim on the Mac).  Done here as a one-engine OMS
+    # burn, which PASS executes by itself; the Delta-V is the same and the
+    # propellant is ~30 kg.  A documented deviation from the flown engine.
+    "NC3": (gmt(137, 15, 41, 14.0), "left", 2.7, 11.5),
     "NC4": (gmt(138, 6, 7, 27.4), "left", 8.2, 10.6),
 }
 TI_GMT = gmt(138, 7, 38, 0.0)
