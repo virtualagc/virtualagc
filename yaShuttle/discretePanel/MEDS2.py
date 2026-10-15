@@ -3445,13 +3445,17 @@ class GLRenderer(object):
             count = int(iarr.size)
             keep.append(ib)
         g = {'bufs': bufs, 'ib': ib, 'count': count, 'itype': itype, 'keep': keep}
-        geom._gl = keep            # the sweep list wants the raw buffers
+        # _glinfo BEFORE _gl: _geominfo tests _gl, and a second thread that
+        # arrived between the two assignments got _glinfo None (Mac-integrate:
+        # renderFrame on the BusPump thread beside paintGL, TypeError in _draw,
+        # SIGABRT, about every 3 hours)
         geom._glinfo = g
+        geom._gl = keep            # the sweep list wants the raw buffers
         geom._glowner = self
         return keep
 
     def _geominfo(self, geom):
-        if geom._gl is None:
+        if geom._gl is None or geom._glinfo is None:
             self._bufs(geom)
         return geom._glinfo
 
@@ -3526,7 +3530,7 @@ class GLRenderer(object):
         if geom._disposed:
             return
         info = self._geominfo(geom)
-        if info['count'] == 0:
+        if info is None or info['count'] == 0:
             return
         kind = mat.kind if mat.isShaderMaterial else 'basic'
         pr = self.programs[kind]
