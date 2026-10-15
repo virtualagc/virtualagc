@@ -242,17 +242,18 @@ class FD13(F.Flight):
         def kn(x):
             t = "%.1f" % abs(x)
             return ("- " if x < 0 else "+ ") + " ".join(t)
-        self.play("+1     keys OPS 2 0 2 PRO\n"
+        chunks = [
+            ("a", "+1     keys OPS 2 0 2 PRO\n"
                   "wait crt 1 title 2021/ timeout 180\n"
                   "+3     keys RESUME\n"
                   "wait crt 1 title MNVR EXEC timeout 60\n"
                   + sel + (trims if eng != "rcs" else "") +
-                  "+4     keys ITEM 9 + %s EXEC\n" % " ".join("%d" % round(wt)) +
-                  "+3     keys ITEM 1 0 + %d + %s + %s + %s EXEC\n" % (
-                      d, " ".join("%d" % h), " ".join("%d" % m_), " ".join("%.1f" % sx)) +
-                  "+4     keys ITEM 1 9 %s %s %s EXEC\n" % (
-                      kn(dvl[0] / FT), kn(dvl[1] / FT), kn(dvl[2] / FT)) +
-                  "+3     keys ITEM 2 2 EXEC\n"
+                  "+4     keys ITEM 9 + %s EXEC\n" % " ".join("%d" % round(wt))),
+            ("b", "+3     keys ITEM 1 0 + %d + %s + %s + %s EXEC\n" % (
+                      d, " ".join("%d" % h), " ".join("%d" % m_), " ".join("%.1f" % sx))),
+            ("c", "+4     keys ITEM 1 9 %s %s %s EXEC\n" % (
+                      kn(dvl[0] / FT), kn(dvl[1] / FT), kn(dvl[2] / FT))),
+            ("d", "+3     keys ITEM 2 2 EXEC\n"
                   "+4     keys ITEM 2 3 EXEC\n"
                   "+3     dap c3 a\n"
                   "+2     dap c3 auto\n"
@@ -260,9 +261,18 @@ class FD13(F.Flight):
                   "+3     keys ITEM 2 7 EXEC\n"
                   "+3     dap c3 x_norm\n"
                   "+2     dap c3 y_norm\n"
-                  "+2     dap c3 z_norm\n", name.lower() + "-mnvr")
-        self.script_done(name.lower() + "-mnvr", 240)
-        self.say("crew: %s LOADed, TIMER, MNVR; %s" % (name, eng))
+                  "+2     dap c3 z_norm\n")]
+        for tag_, text in chunks:
+            self.play(text, "%s-mnvr-%s" % (name.lower(), tag_))
+            self.script_done("%s-mnvr-%s" % (name.lower(), tag_), 240)
+            pg = self.crt1_text()
+            self.say("%s CRT 1 after %s: %s" % (name, tag_, " | ".join(
+                l.strip() for l in pg.splitlines() if l.strip())[:400]))
+        page = self.crt1_text()
+        with open(os.path.join(self.a.logs, name.lower() + "-loaded.crt1"), "w") as fh:
+            fh.write(page)
+        self.say("crew: %s LOADed, TIMER, MNVR; %s; CRT 1: %s" % (
+            name, eng, " | ".join(l.strip() for l in page.splitlines() if l.strip())[:300]))
         self.wait_gmt(tig - 15.0)
         kg0 = self.vehicle_kg()
         self.play("+0     keys EXEC\n", name.lower() + "-exec")
@@ -312,6 +322,8 @@ def main():
     os.environ["YAGPC_VEHDYN_TARGETS"] = tf
     os.environ.setdefault("YAGPC_MTU_MET_EPOCH", "1305550587.994")
     os.environ.setdefault("YAGPC_OMS_ARMED", "1")
+    # simulatePASS --duration is WALL seconds: the 20,000 default ended every run at 5.6 h
+    os.environ.setdefault("FLY_DURATION", "400000")
     sys.argv[1:] = [x for x in sys.argv[1:]]
     # --snap-every is ours: pull it out before fly_sts134's parser sees it
     snap = 1800.0
