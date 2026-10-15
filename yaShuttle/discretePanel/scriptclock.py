@@ -29,6 +29,13 @@ class TruthTime:
         self.latest = None
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # the truth feed is shared with groundstation.truth_state, which sets
+        # both: on macOS/BSD a second UDP bind needs SO_REUSEPORT on EVERY
+        # socket already holding the port (Errno 48 in fly_fd13's EXEC wait)
+        try:
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        except (AttributeError, OSError):
+            pass
         self.socket.bind(("", port))
         threading.Thread(target=self._read, daemon=True).start()
 
