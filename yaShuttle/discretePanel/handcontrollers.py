@@ -953,6 +953,12 @@ def main(argv=None):
     # SDL otherwise takes SIGINT and SIGTERM for itself and turns them into a
     # quit event, so neither Ctrl-C nor simulatePASS's shutdown stopped this.
     os.environ.setdefault("SDL_NO_SIGNAL_HANDLERS", "1")
+    # No sound from here, ever: pygame.init() starts the mixer, which opens the
+    # default audio device and streams silence at it for as long as this runs.
+    # With a USB sound device that showed in pw-top as an ever-rising error
+    # count against the C&W tones playing beside it (owner, 2026-10-15), in
+    # EVERY simulation's hand-controller process, NSTS_NO_AUDIO or not.
+    os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
     # macOS: SDL 2.32's GameController (MFi) backend takes the joystick and
     # then never reports it -- get_count() stays 0 (Mac-integrate, with an
     # Extreme 3D Pro, 2026-10-01).  Overridable; Linux and Windows untouched.
