@@ -2644,6 +2644,10 @@ def main():
                     # one arrived during the hold (or between rounds): act on it
                     raise KeyboardInterrupt
                 if args.duration:
+                    # everything is up: tell the splash, which otherwise
+                    # stayed on screen for the whole run (READY was sent only
+                    # in the no-duration branch, and every driven run has one)
+                    splash.ready("Ready")
                     log("running for %.0f s" % args.duration)
                     # AND A SESSION COMMAND ENDS THE WAIT, exactly as it does
                     # in the no-duration branch below.  Without this a 'save'
