@@ -58,7 +58,12 @@ import fly_sts134  # noqa: E402 -- PANEL_LOCK
 FT = 0.3048
 PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
-TORVA_END_FT = 400.0             # the +V-bar point TORVA ends at (CG range, "400-310 ft")
+TORVA_END_FT = 340.0             # the +V-bar point TORVA ends at (CG range; the card's arrival is "415-315 ft")
+# THE R-BAR LEG'S PACE.  The Mission Report has the RPM begin at 138/09:15:31,
+# ~5 min before the legs' old pace (0.3 ft/s, tau 150, 8 min and two more
+# minutes steady) reached it (owner goal 2026-10-16: hard mate at the
+# report's time).
+RBAR_VMAX, RBAR_TAU, RBAR_MIN_S, RBAR_SETTLE_N = 0.5, 100.0, 180.0, 6
 HOLD_FT = 100.0                  # ODS ring to PMA-2's face
 # HOLD: steady when every rate is under this.  It was 0.02 ft/s, tighter than
 # the control's own deadband (fly(): dead = 0.05 ft/s) and than one pulse (0.10
@@ -502,10 +507,10 @@ class ManualPhase(object):
             ok = (abs(err[0]) < 25 and abs(err[1]) < 25 and abs(err[2]) < 15
                   and max(abs(x) for x in st["v"]) < 0.12)       # a pulse is ~0.15 ft/s
             settled["n"] = settled["n"] + 1 if ok else 0
-            return t > 480.0 and settled["n"] >= 12
+            return t > RBAR_MIN_S and settled["n"] >= RBAR_SETTLE_N
 
         stats = self.fly("RBAR", lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0]), done,
-                         tau=150.0, vmax=0.3, dead=0.08, every=10.0,
+                         tau=RBAR_TAU, vmax=RBAR_VMAX, dead=0.08, every=10.0,
                          # NSTS_RBAR_LIMIT_S: a test may allow a longer leg (default 30 min)
                          limit=float(os.environ.get("NSTS_RBAR_LIMIT_S", "1800")))
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
@@ -813,7 +818,7 @@ class ManualPhase(object):
         def done(t, s, err):
             ok = abs(err[0]) < 20 and abs(err[2]) < 20 and abs(err[1]) < 20 and max(abs(x) for x in s["v"]) < 0.12
             settled["n"] = settled["n"] + 1 if (t > T and ok) else 0
-            return settled["n"] >= 9
+            return settled["n"] >= 4
 
         m0, p0 = self.orbiter_kg(), dict(self.pulses)
         stats = self.fly("TORVA", goal, done, tau=60.0, vmax=0.6, dead=0.08, every=10.0, limit=T + 900.0)
@@ -894,6 +899,8 @@ class ManualPhase(object):
         once per step ALL -> NOSE -> TAIL, ALT JET OPT once (it toggles ALL
         <-> TAIL).  Returns the items still wrong."""
         from fly_rndz134 import parse_spec20, keys_short, DAP_FMT
+        if getattr(self, "dock_dap_stored", False):
+            return {}               # keyed and checked ahead of time (arrival): ~4 min saved here
         left = {}
         for side, edit in (("A", 3), ("B", 4)):
             base = 10 if side == "A" else 30
@@ -954,6 +961,7 @@ class ManualPhase(object):
         self.say("DAP DOCK: stored A%d/B%d; selected A%s B%s" % (config, config, sel.get("A"), sel.get("B")))
         self.play("+1     keys RESUME\n", "dap-dock-resume")
         self.script_done("dap-dock-resume", 60)
+        self.dock_dap_stored = not left
         return left
 
     def vbar(self):
@@ -970,12 +978,23 @@ class ManualPhase(object):
         self.say("VBAR: ODS ring %.1f ft from PMA-2's face; %s" % (d0, self.readings()))
 
         def dist(t):
-            # d' = -max(0.1, d/1000): exponential to 100 ft, then linear
-            d = d0
-            t_e = 1000.0 * math.log(max(d0, 100.0) / 100.0) if d0 > 100.0 else 0.0
-            if t < t_e:
-                d = d0 * math.exp(-t / 1000.0)
-                return max(d, HOLD_FT), -d / 1000.0
+            # THE CUE CARD'S CLOSING (CC 9-8, ring ranges): about -0.2 ft/s
+            # from the V-bar arrival to 170 ft, -0.15 at 110.  Flown here as
+            # 0.25 ft/s down to 200 ft, then d' = -d/800 (0.21 at 170, 0.14 at
+            # 110, 0.125 at 100), to 100 ft.  The old d/1000 from the arrival
+            # was slower than the card everywhere inside 250 ft (owner goal,
+            # 2026-10-16: hard mate at the Mission Report's time).
+            if d0 <= 100.0:
+                return HOLD_FT, 0.0
+            t_lin = max(d0 - 200.0, 0.0) / 0.25
+            if t < t_lin:
+                return d0 - 0.25 * t, -0.25
+            d1 = min(d0, 200.0)
+            t_e = 800.0 * math.log(d1 / 100.0)
+            u = t - t_lin
+            if u < t_e:
+                d = d1 * math.exp(-u / 800.0)
+                return max(d, HOLD_FT), -d / 800.0
             return HOLD_FT, 0.0
 
         def goal(t):

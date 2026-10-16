@@ -1226,6 +1226,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                 self.pass_acc0 = tuple(st["pass_acc0"])
             self.rr_active = bool(st.get("rr_active"))
             self.strk_ended = bool(st.get("strk_ended"))
+            self.dock_dap_stored = bool(st.get("dock_dap_stored"))
             if st.get("rr_acc0"):
                 self.rr_acc0 = tuple(st["rr_acc0"])
         except (OSError, ValueError):
@@ -1234,7 +1235,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def save_state(self):
         json.dump({"burns": self.burns, "mc_tig": self.mc_tig, "thc_acc": getattr(self, "thc_acc", None),
                    "pass_acc0": getattr(self, "pass_acc0", None), "rr_active": getattr(self, "rr_active", False),
-                   "strk_ended": getattr(self, "strk_ended", False), "rr_acc0": getattr(self, "rr_acc0", None)},
+                   "strk_ended": getattr(self, "strk_ended", False), "rr_acc0": getattr(self, "rr_acc0", None),
+                   "dock_dap_stored": getattr(self, "dock_dap_stored", False)},
                   open(os.path.join(self.a.logs, "mc-state.json"), "w"), indent=1)
 
     def say(self, text):
@@ -2918,6 +2920,10 @@ wait crt 1 title 2011/ timeout 600
         if self.a.no_mc:
             return
         t2 = self.mc_tig[14] + TGT_SETS[14]["DT"] * 60.0
+        # THE DOCKING DAP, A10/B10, stored now, in the quiet after MC4: the
+        # flight had it loaded long before the approach, and keyed in the
+        # VBAR leg it cost ~4 min of the approach's clock
+        self.dap_dock_store()
         rel = self.log_rel_until(t2, "arrival", 30.0)
         if rel is None:                     # T2 already past (a late MC4)
             tru, tgt, _ = self.ears.snap()
@@ -2929,7 +2935,7 @@ wait crt 1 title 2011/ timeout 600
                      % ((self.truth()["gmt"] - self.mc_tig[14]) / 60.0, rndz_start.fmt_rel(rel)))
             self.arrival_rel = rel
         self.burn_table()
-        self.log_rel_until(t2 + 120.0, "after arrival", 30.0)
+        # (no longer 2 min past T2: the R-bar leg is on the Mission Report's clock)
 
     def burn_table(self):
         lines = ["THE BURNS (ft/s, LVLH):",
