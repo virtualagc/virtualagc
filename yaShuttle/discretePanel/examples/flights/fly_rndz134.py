@@ -3222,7 +3222,8 @@ def main():
     ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
-                    help="with --portview: portview's views, from front, up, left, right, aft, cl "
+                    help="with --portview: portview's views, from front, up, left, right, aft, cl, "
+                         "plus rpop, which starts rpop.py (the RPOP trajectory display) "
                          "(default front)")
     ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default="lh",
                     help="the station whose hand controllers are started (default lh, the "
