@@ -772,42 +772,66 @@ def restore_environment(snapdir, env):
                                                               ", ".join(said)))
 
 
-def seeded_for_crt4(snapdir, logs):
-    """A copy of `snapdir` with IDP 4 loaded and powered, if it has none, so
-    CRT 4 and AFD 1 can serve the aft station; else `snapdir` itself.
+def seeded_idps(snapdir, logs, crts):
+    """A copy of `snapdir` in which every IDP a CRT here needs is loaded, if
+    any is not; else `snapdir` itself.
 
     The snapshot is not changed: the copy goes under the run's logs.  This is
-    fly_rndz134.seed_idp4's method (PASS in OPS 2 never loads an IDP, gpc-causes
-    #294): IDP 1's loaded state, as IDP 4, keyboard 3's."""
+    fly_rndz134.seed_idp4's method, and the reason is gpc-causes #294/#197:
+    PASS loads an IDP only in OPS 0 after its IPL, in payload ops 9 or in
+    SM2/SM4, so a unit powered later (CRT 2's PFD in the ascent runs; CRT 4
+    for the aft station) polls for ever, and a capture of it carries that --
+    CRT 2 came back showing a page's foreground and no background (a unit with
+    no formats).  IDP 1's loaded state, as IDP k, is the state the unit would
+    have had when the vehicle was loaded before launch.  An IDP that is
+    powered and not loaded is repaired, and IDP 4 is also powered when
+    `crts` reaches 4; one that is off, or already loaded, is left alone."""
     pj = os.path.join(snapdir, "panel.json")
     src = os.path.join(snapdir, "idp1.json")
     if not (os.path.isfile(pj) and os.path.isfile(src)):
         return snapdir
     try:
         panel = json.load(open(pj))
+        base = json.load(open(src))
     except (OSError, ValueError):
         return snapdir
-    power = panel.get("idp_power") or []
-    if (len(power) >= 4 and power[3] == "ON"
-            and os.path.isfile(os.path.join(snapdir, "idp4.json"))):
+    if not base.get("ipled"):
+        return snapdir
+    power = list(panel.get("idp_power") or [])
+    while len(power) < 4:
+        power.append("OFF")
+    todo = []
+    for k in (2, 3, 4):
+        jf = os.path.join(snapdir, "idp%d.json" % k)
+        try:
+            cur = json.load(open(jf))
+        except (OSError, ValueError):
+            cur = {}
+        loaded = cur.get("ipled") and cur.get("formatsLoaded") is not False
+        if power[k - 1] == "ON" and not loaded:
+            todo.append((k, cur))
+        elif k == 4 and crts >= 4 and power[3] != "ON":
+            todo.append((k, cur))
+    if not todo:
         return snapdir
     import shutil
     dest = os.path.join(logs, "restored", os.path.basename(snapdir.rstrip("/")))
     shutil.rmtree(dest, ignore_errors=True)
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     shutil.copytree(snapdir, dest)
-    st = json.load(open(src))
-    st.update(id="IDP4", deuId=4, kybdSel=0)
-    with open(os.path.join(dest, "idp4.json"), "w") as fh:
-        json.dump(st, fh)
-    shutil.copyfile(os.path.join(dest, "idp1.mem.bin"), os.path.join(dest, "idp4.mem.bin"))
-    while len(power) < 4:
-        power.append("OFF")
-    power[3] = "ON"
+    for k, cur in todo:
+        st = dict(base)
+        # keyboard 3 is wired to IDP 4 alone; the others keep their own
+        st.update(id="IDP%d" % k, deuId=k, kybdSel=0 if k == 4 else cur.get("kybdSel", k))
+        with open(os.path.join(dest, "idp%d.json" % k), "w") as fh:
+            json.dump(st, fh)
+        shutil.copyfile(os.path.join(dest, "idp1.mem.bin"), os.path.join(dest, "idp%d.mem.bin" % k))
+        power[k - 1] = "ON"
     panel["idp_power"] = power
     with open(os.path.join(dest, "panel.json"), "w") as fh:
         json.dump(panel, fh)
-    log("restore: IDP 4 loaded and powered in a copy of the snapshot (%s), for CRT 4" % dest)
+    log("restore: IDP %s loaded from IDP 1's state in a copy of the snapshot (%s)"
+        % (", ".join(str(k) for k, _ in todo), dest))
     return dest
 
 
@@ -2095,8 +2119,7 @@ def main():
             title_arg = ["--title", args.title] if args.title else []
             if resume:
                 restore_environment(resume, env)
-                if args.crts >= 4:
-                    resume = seeded_for_crt4(resume, logs)
+                resume = seeded_idps(resume, logs, args.crts)
                 SESSION["met_epoch"] = env.get("YAGPC_MTU_MET_EPOCH")
             for k in range(args.crts):
                 e = dict(env)
