@@ -165,10 +165,17 @@ ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what
 # Mission Report's landing residuals (forward dumped to 32 lb; left 1,081,
 # right 1,048 lb) plus its post-docking jet lists put the real remaining at
 # hard mate near 610-1,015 lb forward and 1,500-1,800 lb per aft pod; with
-# nothing offset the stage arrives with ~1,210 / ~1,960 / ~1,960.  These put
-# it at ~960 and ~1,660 (CAUSES.md; CLAUDE_LOG 2026-10-16).  Applied only to a
-# run started from IPL: a capture carries its own tanks.
-PRESTART_EXTRA_RCS_LB = (250.0, 300.0, 300.0)
+# nothing offset the stage arrives with ~1,210 / ~1,960 / ~1,960.  REFINED:
+# STS-133's report gives a four-thruster forward dump (18.72 s) as 228.3 lb,
+# 3.05 lb/s per jet, so STS-134's 11.04 s dump was ~135 lb and the forward tank
+# held ~167 lb before it; with the post-docking forward use (128 primary
+# jet-s, reboost verniers, holds) the real forward remaining at hard mate is
+# ~640-745 lb, and the aft pods ~1,730 lb each.  These put the stage at ~690
+# forward and ~1,660-1,730 aft (CAUSES.md; CLAUDE_LOG 2026-10-16).  The
+# forward 640 is mostly UNEXPLAINED real use (the verniers cannot account
+# for it).  Applied only to a run started from IPL: a capture carries its
+# own tanks.
+PRESTART_EXTRA_RCS_LB = (640.0, 300.0, 300.0)
 
 
 def ascent_end_state(path, say=print):
