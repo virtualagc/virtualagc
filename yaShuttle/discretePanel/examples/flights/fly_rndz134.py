@@ -172,10 +172,15 @@ ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what
 # jet-s, reboost verniers, holds) the real forward remaining at hard mate is
 # ~640-745 lb, and the aft pods ~1,730 lb each.  These put the stage at ~690
 # forward and ~1,660-1,730 aft (CAUSES.md; CLAUDE_LOG 2026-10-16).  The
-# forward 640 is mostly UNEXPLAINED real use (the verniers cannot account
-# for it).  Applied only to a run started from IPL: a capture carries its
-# own tanks.
-PRESTART_EXTRA_RCS_LB = (640.0, 300.0, 300.0)
+# forward is ~390 lb above that on these offsets and is LEFT as extra
+# propellant (owner, 2026-10-16: nothing wrong with extra): the sim has no
+# pulse-mode inefficiency (flow is nominal thrust/Isp for the whole commanded
+# on-time, so short THC and DAP pulses cost less per impulse than the real
+# jets), and the real crews may simply have flown less efficiently.  The
+# offsets are the sim's own FD1-3 coast use per module (~250 lb), an
+# accounting of the unflown stage.  Applied only to a run started from IPL: a
+# capture carries its own tanks.
+PRESTART_EXTRA_RCS_LB = (250.0, 300.0, 300.0)
 
 
 def ascent_end_state(path, say=print):
