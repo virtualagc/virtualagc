@@ -703,6 +703,20 @@ def _starred(page, item):
 def _exit_rpop(self):
     """'Exit RPOP - [Shift]/[F10]': the program closes on the PGSC."""
     gone = 0
+    if not os.path.isdir("/proc"):         # macOS, Windows: psutil, if it is there
+        try:
+            import psutil
+        except ImportError:
+            return 0
+        for p in psutil.process_iter(["pid", "cmdline"]):
+            argv = p.info["cmdline"] or []
+            if any(a.endswith("rpop.py") for a in argv) and str(self.base) in argv:
+                try:
+                    p.terminate()
+                    gone += 1
+                except psutil.Error:
+                    pass
+        return gone
     for d in os.listdir("/proc"):
         if not d.isdigit():
             continue
