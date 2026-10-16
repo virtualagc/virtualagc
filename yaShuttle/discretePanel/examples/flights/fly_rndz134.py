@@ -158,6 +158,19 @@ ASCENT_STATE = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2/vehdyn.json
 ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what it loaded
 
 
+# RCS USED BEFORE THE RENDEZVOUS BEGINS THAT THE SIM DOES NOT FLY (an ESTIMATE,
+# lb forward/left/right).  The rendezvous starts at the flown loads less the
+# ascent's use; the real flight also spent propellant through FD1-FD3 (attitude
+# holds, NC3, NCC, the NC burns' RCS share) that the stage does not fly.  The
+# Mission Report's landing residuals (forward dumped to 32 lb; left 1,081,
+# right 1,048 lb) plus its post-docking jet lists put the real remaining at
+# hard mate near 610-1,015 lb forward and 1,500-1,800 lb per aft pod; with
+# nothing offset the stage arrives with ~1,210 / ~1,960 / ~1,960.  These put
+# it at ~960 and ~1,660 (CAUSES.md; CLAUDE_LOG 2026-10-16).  Applied only to a
+# run started from IPL: a capture carries its own tanks.
+PRESTART_EXTRA_RCS_LB = (250.0, 300.0, 300.0)
+
+
 def ascent_end_state(path, say=print):
     """Propellant used and the orbiter's mass, from the ascent capture's
     vehdyn.json (vehdyn_dump entries 16..20: forward, left, right RCS, left,
@@ -175,12 +188,16 @@ def ascent_end_state(path, say=print):
         say("start: propellant from the ascent capture %s" % path)
         say("start:   RCS used %s lb, OMS used %s lb" % (
             ", ".join("%.1f" % x for x in rcs), ", ".join("%.1f" % x for x in oms)))
+        rcs = [rcs[k] + PRESTART_EXTRA_RCS_LB[k] for k in range(3)]
+        say("start:   plus the estimated unflown FD1-3 use, %s lb: RCS used %s lb"
+            % (PRESTART_EXTRA_RCS_LB, ", ".join("%.1f" % x for x in rcs)))
         return dict(rcs_used=",".join("%.3f" % x for x in rcs),
                     oms_used=",".join("%.3f" % x for x in oms),
                     orbiter_kg=ORBITER_KG - ASCENT_CONSUMABLES_LB * LB_KG)
     except Exception as e:
         say("start: WARNING no usable ascent capture (%s: %s); typed propellant figures" % (path, e))
-        return dict(rcs_used="109.6,77.6,78.0", oms_used="7820.736,7898.016", orbiter_kg=ORBITER_KG)
+        return dict(rcs_used=",".join("%.1f" % (x + e) for x, e in zip((109.6, 77.6, 78.0), PRESTART_EXTRA_RCS_LB)),
+                    oms_used="7820.736,7898.016", orbiter_kg=ORBITER_KG)
 
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
