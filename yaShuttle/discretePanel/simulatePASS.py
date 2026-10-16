@@ -293,6 +293,22 @@ def layout_positions(path):
     return out
 
 
+def _sigint(signum, frame):
+    """THE SESSION LISTENER'S WAKE-UP, NOT A SECOND WAY TO SHUT DOWN.  The
+    listener records a command in SESSION and then signals this process; a
+    main thread that is polling (a --duration run, the hold) has usually seen
+    the command already and moved on, so the signal landed later -- in
+    take_snapshot, or past the loop's try -- and went to the outer handler,
+    which shuts the whole run down.  A scripted run died that way at its
+    third capture (2026-10-16, full-B: 'save mc1-tig' then 'shutting
+    down').  So a signal that arrives with a command pending is ignored
+    unless the main thread is parked in input(), the one place that needs
+    it; Ctrl-C with nothing pending is Ctrl-C."""
+    if SESSION["action"] is not None and not SESSION.get("in_input"):
+        return
+    raise KeyboardInterrupt
+
+
 class Splash(object):
     """splash.py, in front of everything while the simulation comes up: what it
     is doing and that the user should wait (owner, 2026-10-12: "how can we
@@ -1741,7 +1757,7 @@ def main():
     # started so) gets SIGINT at SIG_IGN, Python keeps it, and every 'quit'
     # was logged and did nothing (2026-10-10).
     if os.name != "nt":
-        signal.signal(signal.SIGINT, signal.default_int_handler)
+        signal.signal(signal.SIGINT, _sigint)
     gpcs = args.gpcs
     multi = len(gpcs) > 1
     if args.crts is None:
@@ -2691,7 +2707,11 @@ def main():
                         if os.name == "nt":
                             win_wait_for_enter()
                         else:
-                            input()
+                            SESSION["in_input"] = True
+                            try:
+                                input()
+                            finally:
+                                SESSION["in_input"] = False
                     except EOFError:
                         while gpc.poll() is None and SESSION["action"] is None:
                             time.sleep(0.5)
