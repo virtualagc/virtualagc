@@ -603,7 +603,9 @@ C_TB_GRAY = "#a3a39c"
 C_TB_LEGEND = "#f2f0e6"
 C_BTN = "#d5d2c6"
 C_BTN_DOWN = "#8f8c80"
-PBI_LAMP_H = 6                # the DAP lamp strip's height
+PBI_LAMP_H = 6                # the space the DAP lamp strip is given (sizes the button)
+PBI_LAMP_DRAW_H = 12          # the lamp as drawn: twice that, grown UPWARD (owner, 2026-10-16)
+PBI_LAMP_DRAW_W = 2.0 / 3.0   # ... and this fraction of the old width, centred
 C_PBI_DARK = "#8a8676"       # a DAP lamp unlit
 C_PBI_LIT = "#f4f0c8"        # a DAP lamp lit (to be tuned against photographs)
 # ACTIVITY lamps.  Unpowered is the pane grey, so a dark lamp is just its rim.
@@ -4283,10 +4285,11 @@ class PanelO6:
         cx = (x1 + x2) / 2.0 + dx
         fy1, fy2 = y1 + 6 + dx, y2 - 6 + dx          # the face
         ly2 = fy2 - 3
-        ly1 = ly2 - PBI_LAMP_H
-        lx1, lx2 = x1 + 6 + dx + 5, x2 - 6 + dx - 5
+        ly1 = ly2 - PBI_LAMP_H                       # where the legend is centred against
+        half = (x2 - 6 + dx - 5 - (x1 + 6 + dx + 5)) / 2.0 * PBI_LAMP_DRAW_W
+        lx1, lx2 = cx - half, cx + half
         on = C_ANN[color] if color else C_PBI_LIT
-        self._rect(lx1, ly1, lx2, ly2, fill=on if lit else C_PBI_DARK,
+        self._rect(lx1, ly2 - PBI_LAMP_DRAW_H, lx2, ly2, fill=on if lit else C_PBI_DARK,
                    outline=C_PADDLE_LO, width=1)
         lines = [l for l in legend.split("\n") if l]
         if not lines:
@@ -4294,6 +4297,8 @@ class PanelO6:
         ls = self._linespace(SETTING_SIZE) / max(self.s, 0.01)
         mid = (fy1 + 2 + ly1 - 2) / 2.0
         top = mid - ls * len(lines) / 2.0
+        if len(lines) > 1:         # clear of the taller lamp; one-line legends stay put
+            top -= PBI_LAMP_DRAW_H - PBI_LAMP_H - 3
         for j, l in enumerate(lines):
             self._text(cx, top + ls * (j + 0.5), l, size=SETTING_SIZE)
 
