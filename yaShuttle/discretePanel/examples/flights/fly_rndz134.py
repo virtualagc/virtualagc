@@ -2553,6 +2553,26 @@ wait crt 1 title 2011/ timeout 600
     def trim_residuals(self):
         return self.null_vgo("ti", 6)
 
+    def thc_moved_check(self, label):
+        """THE THC'S SCRIPT REACHED A WINDOW, or the run stops.  A `thc fwd`
+        line moves nothing when only the aft station's hand controllers are
+        running (dock_autopilot started them for the whole run), the panel
+        logs "moved nothing" for it, and the Ti burn's trim and the whole of
+        MC1-MC4 -- RCS burns the crew flies on the THC (RCS BURN, CC 9-3) --
+        came out as 0.00 ft/s of sensed delta-V: the Orbiter reached the
+        R-bar a thousand feet off and 50 minutes late (rndz-night1 and
+        rndz-dock1, 2026-10-13/14: 45 and 32 lines)."""
+        try:
+            with open(os.path.join(self.a.logs, "logs", "panel.log"), errors="replace") as fh:
+                fh.seek(self.played_at)
+                if "moved nothing -- no hand-controller window" in fh.read():
+                    self.say("%s: the THC moved nothing -- no hand-controller window for the forward "
+                             "station is running (--rhc %s); stopping rather than flying a burn that "
+                             "delivers nothing" % (label, self.a.rhc))
+                    raise SystemExit(2)
+        except OSError:
+            pass
+
     def null_vgo(self, label, passes):
         """Null VGO with the THC, DAP TRANS NORM: the Ti burn's residuals
         ("Trim Residuals: ... Orbit: All axes < 0.2 fps", OMS 2/ORBIT OMS
@@ -2616,6 +2636,7 @@ wait crt 1 title 2011/ timeout 600
             name = "%s-null-%d" % (label, n)
             self.play("\n".join(lines) + "\n", name)
             self.script_done(name, 120)
+            self.thc_moved_check(label)
             self.wait_sim(holds[-1][3] + 1.5)       # the last hold runs on after the script ends
             new = read_vgo() or vgo
             for ax, key, v, hold in holds:
@@ -2662,6 +2683,7 @@ wait crt 1 title 2011/ timeout 600
             name = "%s-pulse-%d" % (label, n)
             self.play("\n".join(lines) + "\n", name)
             self.script_done(name, 120)
+            self.thc_moved_check(label)
             self.wait_sim(2.0)
             vgo = read_vgo() or vgo
         self.say("PULSE TRIM (%s): VGO %+.2f %+.2f %+.2f ft/s" % (label, vgo["x"], vgo["y"], vgo["z"]))
@@ -3119,6 +3141,7 @@ wait crt 1 title 2011/ timeout 600
                   "+2     dap c3 z_norm\n"
                   "+2     thc fwd %s %.2f\n" % (key, hold), "oop-null")
         self.script_done("oop-null", 120)
+        self.thc_moved_check("oop-null")
         self.wait_sim(hold + 4.0)
         self.play("+1     dap c3 alt\n"
                   "+2     dap c3 x_pulse\n"

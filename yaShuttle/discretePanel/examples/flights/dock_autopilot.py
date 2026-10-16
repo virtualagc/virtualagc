@@ -901,12 +901,31 @@ R.Rendezvous.stay = stay
 R.PHASES.extend(["DOCK30", "DOCK", "STAY"])
 
 if __name__ == "__main__":
+    # WHICH STATION FLIES WHAT.  The Ti burn's trim and MC1-MC4 are RCS burns
+    # flown on the forward station's THC (RCS BURN, CC 9-3); the CDR moves to
+    # the aft station at ESTABLISH RBAR [20C].  A whole run on the aft
+    # controllers sent every `thc fwd` of those burns to a window that was not
+    # running: they delivered 0.00 ft/s, the R-bar was reached 1,000 ft off and
+    # 50 minutes late, and the propellant went on brake-and-recover pulses
+    # (rndz-night1, rndz-dock1, 2026-10-13/14).  So a run that starts before
+    # the manual phase starts forward and hands over at RBAR (--handover); one
+    # resumed inside it, or at the docking, starts aft.
+    _late = ("RPM", "TORVA", "VBAR", "HOLD", "DOCK30", "DOCK", "STAY")
+    _from = None
+    for _i, _a in enumerate(sys.argv):
+        if _a == "--from" and _i + 1 < len(sys.argv):
+            _from = sys.argv[_i + 1]
+        elif _a.startswith("--from="):
+            _from = _a.split("=", 1)[1]
+    _aft = _from in _late
     # the aft station's hand controllers, unless asked otherwise
     if "--rhc" not in sys.argv:
-        sys.argv += ["--rhc", "aft"]
+        sys.argv += ["--rhc", "aft" if _aft else "lh"]
     # and that station's windows
     if "--station" not in sys.argv:
-        sys.argv += ["--station", "aft"]
+        sys.argv += ["--station", "aft" if _aft else "fwd"]
+    if not _aft and "--handover" not in sys.argv:
+        sys.argv += ["--handover"]
     # the virtual hand controllers, so the THC's deflections can be watched
     # -- with a joystick plugged in, "auto" draws none (watch4, 2026-10-09)
     if "--input" not in sys.argv:
