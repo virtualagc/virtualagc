@@ -984,14 +984,22 @@ class ManualPhase(object):
             # 110, 0.125 at 100), to 100 ft.  The old d/1000 from the arrival
             # was slower than the card everywhere inside 250 ft (owner goal,
             # 2026-10-16: hard mate at the Mission Report's time).
-            if d0 <= 100.0:
+            through = getattr(self.a, "through_100", False)
+            if d0 <= 100.0 and not through:
                 return HOLD_FT, 0.0
             t_lin = max(d0 - 200.0, 0.0) / 0.25
             if t < t_lin:
                 return d0 - 0.25 * t, -0.25
             d1 = min(d0, 200.0)
-            t_e = 800.0 * math.log(d1 / 100.0)
             u = t - t_lin
+            if through:
+                # no stop at 100 ft: the card has none (110 ft -0.15, 75 ft
+                # -0.10), so the closing runs on through it and the leg ends
+                # when the ring is there (the cross-flight comparison:
+                # stopping and settling cost ~7 min of the approach)
+                d = d1 * math.exp(-u / 800.0)
+                return d, -d / 800.0
+            t_e = 800.0 * math.log(d1 / 100.0)
             if u < t_e:
                 d = d1 * math.exp(-u / 800.0)
                 return max(d, HOLD_FT), -d / 800.0
@@ -1004,6 +1012,10 @@ class ManualPhase(object):
         settled = {"n": 0}
 
         def done(t, s, err):
+            if getattr(self.a, "through_100", False):
+                # at 100 ft on the way in: lined up laterally, nothing more
+                return (s["r"][0] <= HOLD_FT and abs(s["r"][1]) < 6.0 and abs(s["r"][2]) < 6.0
+                        and abs(s["v"][1]) < 0.06 and abs(s["v"][2]) < 0.06)
             d, _ = dist(t)
             ok = d <= HOLD_FT and all(abs(x) < 5.0 for x in err) and max(abs(x) for x in s["v"]) < 0.1
             settled["n"] = settled["n"] + 1 if ok else 0
@@ -1037,6 +1049,16 @@ class ManualPhase(object):
         STEADY_S; and the capture is taken there, with nothing in between."""
         self.man_start()
         self.truth_note("HOLD start")
+        if getattr(self.a, "through_100", False):
+            # THROUGH 100 FT: no station-keeping here; the capture is taken
+            # on the move so that DOCK30 can be resumed from it, and the
+            # approach goes on (DOCK30 does its own MSG RESET and DAP steps)
+            st = self.truth_note("pass through 100 ft")
+            self.snapshot("hold")
+            self._hold_captured = True
+            self.hold_capture_state = st
+            self.say("HOLD: passed through, not stopped (--through-100)")
+            return
         # the docking start point clean: IMU 1 selected (a capture flown
         # before the [10A]/[10B] fix has it deselected), the latched class-2
         # messages and lamps reset, the tone acknowledged

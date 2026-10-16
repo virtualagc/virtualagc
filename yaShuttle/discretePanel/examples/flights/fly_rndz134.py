@@ -3344,6 +3344,10 @@ def main():
     # from a capture, not after 20 minutes of this (owner, 2026-10-14).
     ap.add_argument("--hold-min", type=float, default=1.0,
                     help="HOLD: minutes of station-keeping 100 ft out on the +V-bar (default %(default)s)")
+    ap.add_argument("--through-100", dest="through_100", action="store_true",
+                    help="VBAR goes on through 100 ft without stopping and HOLD takes only its capture "
+                         "(dock_autopilot.py sets this for a run that goes on to the docking; "
+                         "--stop-at-100 there undoes it)")
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()

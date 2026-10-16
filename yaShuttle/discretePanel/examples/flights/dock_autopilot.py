@@ -940,6 +940,19 @@ if __name__ == "__main__":
         sys.argv += ["--station", "aft" if _aft else "fwd"]
     if not _aft and "--handover" not in sys.argv:
         sys.argv += ["--handover"]
+    # THROUGH 100 FT, as the card flies it: no stop (and no 7-minute settle and
+    # hold) at 100 ft when the run goes on to the docking; --stop-at-100 keeps
+    # the old stop (for the HOLD demo)
+    _to = None
+    for _i, _a in enumerate(sys.argv):
+        if _a == "--to" and _i + 1 < len(sys.argv):
+            _to = sys.argv[_i + 1]
+        elif _a.startswith("--to="):
+            _to = _a.split("=", 1)[1]
+    if "--stop-at-100" in sys.argv:
+        sys.argv.remove("--stop-at-100")
+    elif "--through-100" not in sys.argv and (_to is None or _to in ("DOCK30", "DOCK", "STAY")):
+        sys.argv += ["--through-100"]
     # the virtual hand controllers, so the THC's deflections can be watched
     # -- with a joystick plugged in, "auto" draws none (watch4, 2026-10-09)
     if "--input" not in sys.argv:
