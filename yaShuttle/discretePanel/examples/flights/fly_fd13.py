@@ -284,7 +284,7 @@ class FD13(F.Flight):
             self.say("%s CRT 1 after %s: %s" % (name, tag_, " | ".join(
                 l.strip() for l in pg.splitlines() if l.strip())[:400]))
         page = self.crt1_text()
-        with open(os.path.join(self.a.logs, name.lower() + "-loaded.crt1"), "w") as fh:
+        with open(os.path.join(self.a.logs, name.lower() + "-loaded.crt1"), "w", encoding="utf-8") as fh:
             fh.write(page)
         self.say("crew: %s LOADed, TIMER, MNVR; %s; CRT 1: %s" % (
             name, eng, " | ".join(l.strip() for l in page.splitlines() if l.strip())[:300]))

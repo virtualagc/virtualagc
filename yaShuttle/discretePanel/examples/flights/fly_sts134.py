@@ -381,7 +381,7 @@ class Flight:
         outp = os.path.join(self.a.logs, "simulatePASS.out")
         if os.path.exists(outp):
             os.replace(outp, outp + ".%d" % int(time.time()))
-        self.out = open(outp, "w")
+        self.out = open(outp, "w", encoding="utf-8")
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
         self.leave_nothing_running()
@@ -744,7 +744,7 @@ class Flight:
         self.play(script, name)
         self.script_done(name, 300)
         page = self.crt1_text()
-        with open(os.path.join(self.a.logs, name + ".crt1"), "w") as fh:
+        with open(os.path.join(self.a.logs, name + ".crt1"), "w", encoding="utf-8") as fh:
             fh.write(page)
         m = TIG_RE.search(page)
         if m:
@@ -757,7 +757,7 @@ class Flight:
             self.say("crew: %s TIG not read off CRT 1; estimated GMT %.1f" % (name, tig))
         if targets:
             targets(tig)
-            with open(os.path.join(self.a.logs, name + "-loaded.crt1"), "w") as fh:
+            with open(os.path.join(self.a.logs, name + "-loaded.crt1"), "w", encoding="utf-8") as fh:
                 fh.write(self.crt1_text())
         self.wait_gmt(tig - 8.0)
         kg0 = self.vehicle_kg()

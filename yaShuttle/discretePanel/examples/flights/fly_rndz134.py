@@ -1209,7 +1209,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
         super().__init__(a)
         os.makedirs(a.logs, exist_ok=True)      # a new --logs directory, as a GUI run names one
-        self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a")
+        self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a", encoding="utf-8")
         self.ti_unix = unix(TI_TIG)
         self.ti_gmt = gmt_of_unix(self.ti_unix)
         self.ti_met = self.ti_unix - MET_ZERO_UNIX
@@ -1253,7 +1253,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     # a pipe nor needs the recorder started by it.  The timeline is the video
     # time of every driver line, for cutting the recording afterwards.
     def _record_cmd(self, cmd):
-        with open(os.path.expanduser(self.a.record), "a") as fh:
+        with open(os.path.expanduser(self.a.record), "a", encoding="utf-8") as fh:
             fh.write(cmd + "\n")
 
     def record_start(self):
@@ -1261,7 +1261,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             return
         self._record_cmd("record-start")
         self._rec_t0 = time.time()
-        self._timeline = open(os.path.expanduser(self.a.record) + ".timeline", "a")
+        self._timeline = open(os.path.expanduser(self.a.record) + ".timeline", "a", encoding="utf-8")
         self._timeline.write("# %s: recording started (video time 0:00:00.0)\n"
                              % time.strftime("%Y-%m-%d %H:%M:%S"))
         import atexit
@@ -1368,7 +1368,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         outp = os.path.join(self.a.logs, "simulatePASS.out")
         if os.path.exists(outp):
             os.replace(outp, outp + ".%d" % int(time.time()))
-        self.out = open(outp, "w")
+        self.out = open(outp, "w", encoding="utf-8")
         self.ears = Ears(self.base)
         self.proc = subprocess.Popen(cmd, env=env, stdout=self.out, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
