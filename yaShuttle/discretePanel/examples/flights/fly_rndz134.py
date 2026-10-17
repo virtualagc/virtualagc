@@ -1315,7 +1315,11 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         --station all no window is hidden, shown or moved, so only the hand
         controllers change to the aft ones."""
         if getattr(self.a, "handover", False):
-            if self.a.station == "all":
+            if self.a.station == "all" and self.a.rhc == "both":
+                fly_sts134.crewscript.send_control("raise aft", self.base)
+                self.say("crew: the aft station's controllers raised over the forward's, "
+                         "no window changed (ESTABLISH RBAR [20C], --station all)")
+            elif self.a.station == "all":
                 fly_sts134.crewscript.send_control("hands aft", self.base)
                 self.say("crew: the CDR's hands to the aft station's controllers, no window "
                          "changed (ESTABLISH RBAR [20C], --station all)")
@@ -3232,7 +3236,7 @@ def main():
                     help="with --portview: portview's views, from front, up, left, right, aft, cl (the scene camera, a plain 768x768 window), "
                          "cctv (the A3 MON1 monitor: 4:3 NTSC picture, as the crew saw it), plus rpop, which starts rpop.py (the RPOP trajectory display) "
                          "(default front)")
-    ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default="lh",
+    ap.add_argument("--rhc", choices=("lh", "aft", "rh", "both"), default="lh",
                     help="the station whose hand controllers are started (default lh, the "
                          "CDR's; dock_autopilot.py uses aft)")
     ap.add_argument("--layout", default=None, metavar="FILE",

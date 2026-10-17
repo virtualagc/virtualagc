@@ -1647,11 +1647,12 @@ def main():
                     help="start truthball.py, a debugging attitude indicator driven "
                          "by the vehicle dynamics' truth state (needs YAGPC_MDM_DEVICES=1 "
                          "YAGPC_VEHDYN=1), beside PASS's own ADI attitude")
-    ap.add_argument("--rhc", choices=("lh", "aft", "rh"), default=None,
+    ap.add_argument("--rhc", choices=("lh", "aft", "rh", "both"), default=None,
                     help="start handcontrollers.py for this station: lh (CDR, with the "
-                         "forward THC), aft (aft RHC and THC) or rh (PLT, no THC).  One "
-                         "station, since one person flies the simulation; omitted, none "
-                         "is started")
+                         "forward THC), aft (aft RHC and THC) or rh (PLT, no THC); both "
+                         "starts lh and aft together, for --station all, where a flight "
+                         "script's handover only raises the aft window (the manager's "
+                         "'raise aft').  Omitted, none is started")
     ap.add_argument("--ssp", metavar="FILE", default=None,
                     help="names file for the payload standard switch panels (L12U, "
                          "L12L, L11U), passed to panelO6.py; e.g. examples/sts109-ssp.txt")
@@ -2201,8 +2202,10 @@ def main():
             # SDL measures in points as Tk does); with a joystick it has no
             # window, without one its window is placed by --layout like any
             # other (role hc_fwd_lh / hc_aft_aft / hc_rh).
-            if args.rhc:
-                hc_argv = [py, "handcontrollers.py", "--rhc", args.rhc,
+            # "both": the aft one first, so the forward window (the CDR's, to
+            # begin with) is the one on top where the two share a place
+            for rhc in (("aft", "lh") if args.rhc == "both" else (args.rhc,) if args.rhc else ()):
+                hc_argv = [py, "handcontrollers.py", "--rhc", rhc,
                            "--port-base", str(args.port_base), "--size", str(tk_px(size))]
                 if args.joystick is not None:
                     hc_argv += ["--joystick", str(args.joystick)]
@@ -2212,7 +2215,8 @@ def main():
                     hc_argv += ["--thc-joystick", str(args.thc_joystick)]
                 if args.style:
                     hc_argv += ["--style", args.style]
-                L.start("handcontrollers", hc_argv, HERE, env)
+                L.start("handcontrollers" if args.rhc != "both" else "handcontrollers-" + rhc,
+                        hc_argv, HERE, env)
             if args.truth_ball:
                 L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
                                       "--size", str(tk_px(size))], HERE, env)

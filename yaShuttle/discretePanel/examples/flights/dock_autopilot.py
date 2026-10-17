@@ -935,7 +935,8 @@ if __name__ == "__main__":
     _aft = _from in _late
     # the aft station's hand controllers, unless asked otherwise
     if "--rhc" not in sys.argv:
-        sys.argv += ["--rhc", "aft" if _aft else "lh"]
+        _all = "--station" in sys.argv and sys.argv[sys.argv.index("--station") + 1:][:1] == ["all"]
+        sys.argv += ["--rhc", "both" if _all else "aft" if _aft else "lh"]
     # and that station's windows
     if "--station" not in sys.argv:
         sys.argv += ["--station", "aft" if _aft else "fwd"]

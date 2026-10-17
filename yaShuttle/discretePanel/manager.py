@@ -1431,6 +1431,10 @@ class Manager(object):
                 w = data.decode("utf-8", errors="replace").split()
                 if len(w) == 2 and w[0] == "station" and w[1] in ("fwd", "aft", "all"):
                     self._stationQ.put(w[1])
+                elif len(w) == 2 and w[0] == "raise" and w[1] in ("lh", "rh", "aft"):
+                    # a station's hand controllers to the top of the stack,
+                    # WITHOUT focus (--station all, with --rhc both)
+                    self._stationQ.put(("raise", w[1]))
                 elif len(w) == 2 and w[0] == "hands" and w[1] in ("lh", "rh", "aft"):
                     # ONLY the hand controllers change; no window is hidden,
                     # shown or moved (a flight script's handover with both
@@ -1480,6 +1484,17 @@ class Manager(object):
         path = getattr(self.args, "layout_aft", None) if st == "aft" else None
         if path and os.path.isfile(path):
             self.root.after(4000, lambda: self.restore_layout(path=path))
+
+    def _raise_hands(self, rhc):
+        """That station's hand controllers' window above the other's, which
+        shares its place: xdotool windowraise restacks and does not focus."""
+        role = windowLayout._hc_role(rhc)
+        for w in windowLayout.windows():
+            if w["role"] == role:
+                windowLayout.run(["xdotool", "windowraise", str(w["id"])], timeout=5)
+                self.say("Hand controllers raised: %s" % rhc)
+                return
+        self.say("No %s hand-controller window to raise" % rhc)
 
     def _hands_changed(self, rhc):
         """The hand controllers alone, to another station's: stopped, then
@@ -1642,7 +1657,9 @@ class Manager(object):
         q = getattr(self, "_stationQ", None)
         while q is not None and not q.empty():
             item = q.get_nowait()
-            if isinstance(item, tuple):
+            if isinstance(item, tuple) and item[0] == "raise":
+                self._raise_hands(item[1])
+            elif isinstance(item, tuple):
                 self._hands_changed(item[1])
             else:
                 self._station_changed(item)
