@@ -1204,6 +1204,7 @@ def no_maximize(only_pids):
     dp = ctypes.c_void_p(d)
     atom = ctypes.c_ulong(x11.XInternAtom(dp, b"_MOTIF_WM_HINTS", 0))
     n = 0
+    done = []
     for wid in todo:
         try:
             xid = int(str(wid), 16) if str(wid).lower().startswith("0x") else int(wid)
@@ -1215,7 +1216,29 @@ def no_maximize(only_pids):
         x11.XChangeProperty(dp, ctypes.c_ulong(xid), atom, atom, 32, 0, data, 5)
         _NOMAX.add(wid)
         n += 1
+        done.append(xid)
     x11.XFlush(dp)
+    # THE BUTTON STAYS UNTIL MARCO LAYS THE FRAME OUT AGAIN.  It re-reads the
+    # hint at once but redraws the titlebar only when the window is next
+    # resized (a focus change, a move, a rewrite of the size hints, even
+    # the same size again, all measured not to do it), so a window the hint
+    # reached after it was mapped kept its button until something happened
+    # to resize it (owner, 2026-10-17).  Resize each by a pixel and straight
+    # back, a frame apart, and the titlebar is laid out without it.
+    if done:
+        geo = (ctypes.c_ulong(), ctypes.c_int(), ctypes.c_int(), ctypes.c_uint(),
+               ctypes.c_uint(), ctypes.c_uint(), ctypes.c_uint())
+        sizes = []
+        for xid in done:
+            if x11.XGetGeometry(dp, ctypes.c_ulong(xid), *[ctypes.byref(g) for g in geo]):
+                sizes.append((xid, geo[3].value, geo[4].value))
+        for xid, w, h in sizes:
+            x11.XResizeWindow(dp, ctypes.c_ulong(xid), w, h + 1)
+        x11.XFlush(dp)
+        time.sleep(0.25)
+        for xid, w, h in sizes:
+            x11.XResizeWindow(dp, ctypes.c_ulong(xid), w, h)
+        x11.XFlush(dp)
     x11.XCloseDisplay(dp)
     return n
 
