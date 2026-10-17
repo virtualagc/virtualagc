@@ -337,11 +337,12 @@ def run_test(pub, spec):
 #   RHC, --style gimbal (mouse): left-drag is pitch/roll, right-drag is yaw,
 #     by relative motion; the pointer is grabbed and hidden ONLY while a
 #     button is held, and the axes spring back on release.
-#   RHC from the keyboard, either style: arrows pitch/roll, Q / E yaw, a
+#   RHC from the keyboard, either style: arrows pitch/yaw, Q / E roll, a
 #     fixed third of full throw -- past detent, short of softstop, which on
 #     orbit is what the DAP's DISC RATE and PULSE modes respond to.
 #   THC from the keyboard: on/off contacts, as the real THC is -- W/S +X/-X,
-#     D/A +Y/-Y, Space -Z (up), C +Z (down).  Opposite keys cancel.
+#     D/A +Y/-Y, R -Z (up), F +Z (down); Space and C still work for -Z and
+#     +Z.  Opposite keys cancel.
 #
 # Signs: stick right is +roll, stick forward (pushed) is -pitch (nose down),
 # twist right is +yaw, as the joystick path sends them (roll checked against
@@ -358,8 +359,13 @@ DETENT_FRAC = {"roll": 1.725 / _FULL_DEG["roll"], "pitch": 1.725 / _FULL_DEG["pi
                "yaw": 0.975 / _FULL_DEG["yaw"]}
 SOFTSTOP_FRAC = {"roll": 21.17 / _FULL_DEG["roll"], "pitch": 21.17 / _FULL_DEG["pitch"],
                  "yaw": 11.41 / _FULL_DEG["yaw"]}
+# The space-sim convention (Elite Dangerous, Star Citizen): translation on the
+# left hand -- W/S surge, A/D sway, R/F heave (R up = -Z, F down = +Z) -- and
+# rotation on the right: arrows pitch and yaw, Q/E roll.  Space and C, the
+# first layout's Z keys (2026-10-01), still work.
 THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
-            ("space", "-Z"), ("c", "+Z"))
+            ("r", "-Z"), ("f", "+Z"))
+THC_ALIAS_KEYS = (("space", "-Z"), ("c", "+Z"))
 # The window's title names the controllers it stands in for -- "THC FWD /
 # RHC LH" -- so two instances (the CDR's and the aft station's) can be told
 # apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
@@ -700,15 +706,16 @@ class VirtualControls:
         if keys is not None:
             K, kd = self.pg, VIRTUAL_KEY_DEFLECT
             out["pitch"] += kd * (keys[K.K_DOWN] - keys[K.K_UP])
-            out["roll"] += kd * (keys[K.K_RIGHT] - keys[K.K_LEFT])
-            out["yaw"] += kd * (keys[K.K_e] - keys[K.K_q])
+            out["yaw"] += kd * (keys[K.K_RIGHT] - keys[K.K_LEFT])
+            out["roll"] += kd * (keys[K.K_e] - keys[K.K_q])
         return dict((a, _clip(v)) for a, v in out.items())
 
     def thc_bits(self):
         if not self.focused or not self.thc_name:
             return 0
         keys = self.pg.key.get_pressed()
-        want = set(d for name, d in THC_KEYS if keys[self.pg.key.key_code(name)])
+        want = set(d for name, d in THC_KEYS + THC_ALIAS_KEYS
+                   if keys[self.pg.key.key_code(name)])
         for axis in "XYZ":
             if "+" + axis in want and "-" + axis in want:
                 want -= {"+" + axis, "-" + axis}
@@ -780,7 +787,7 @@ class VirtualControls:
         bottom = ch
         rx = int(320 * k) if self.thc_name else None   # the THC panel's left
         text(hint, int(10 * k), bottom - int(62 * k), right=rx)
-        text("KEYS: ARROWS, Q/E", int(10 * k), bottom - int(43 * k), right=rx)
+        text("KEYS: ARROWS PITCH/YAW, Q/E ROLL", int(10 * k), bottom - int(43 * k), right=rx)
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
         text(degs + " DEG", int(10 * k), bottom - int(24 * k), right=rx)
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
