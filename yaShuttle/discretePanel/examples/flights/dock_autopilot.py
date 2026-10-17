@@ -462,6 +462,33 @@ def settled_at(t_run, n_needed=6, lat_ft=0.5, x_ft=1.0, rate=0.04):
     return done
 
 
+def station_keep(self, label, secs, settle=False):
+    """Fly the ring to rest on the axis where it is, for secs of simulated
+    time (settle: and until it IS at rest, up to secs + 5 min).
+
+    THE CONTROL LOOP MUST NOT GO QUIET.  The setup keyed before DOCK30
+    (aft displays, Ku, SPEC 20, the DAP modes) takes minutes, and the
+    Orbiter was not at rest: coming through 100 ft at 0.12 ft/s, it closed
+    to 74 ft and drifted 5 ft off the axis, with a lateral rate growing
+    past 0.1 ft/s, before the first pulse was flown (approach-mine, the
+    10:06-10:09 wall-clock setup), because nobody was flying it.  On the
+    V-bar a closing rate is itself a radial acceleration (Clohessy-
+    Wiltshire, 2 n xdot), so coasting while closing is not a hold.  Stopped
+    it is, and the setup then runs between short stationkeeping passes.
+    'At rest' is the DAP's own resolution: A7's pulse is ~0.15 ft/s, so a
+    hold cannot be quieter than ~0.1 ft/s until A10/B10 are selected."""
+    st = self.rel("ods")
+    goal = RangeSchedule(self, st["r"][0], [(DOCK30_FT, 0.0)])
+    goal.holding = True
+    if settle:
+        done = settled_at(secs, n_needed=3, lat_ft=2.0, x_ft=8.0, rate=0.12)
+    else:
+        def done(t, s, err):
+            return t >= secs
+    self.fly(label, goal, done, point="ods", tau=40.0, vmax=0.20, dead=0.02,
+             every=5.0, limit=secs + (300.0 if settle else 30.0), nmax=6)
+
+
 def orbit_pfd_on_crt2(self):
     """The aft station's displays (with --crts 4), else the ORBIT PFD on CRT 2.
 
@@ -521,8 +548,14 @@ def dock30(self):
     "A10/B10" at 75 ft is a selection the crew had prepared."""
     self.man_start()
     aft_station(self)
+    # STOP FIRST, then key: the setup below is minutes of panel work (see
+    # station_keep), and each step is followed by a pass of stationkeeping
+    self._inst()
+    station_keep(self, "DOCK30 stop", 20.0, settle=True)
     orbit_pfd_on_crt2(self)
+    station_keep(self, "DOCK30 keep", 10.0)
     ku_for_comm(self)
+    station_keep(self, "DOCK30 keep", 10.0)
     # Lamps latched from before the capture -- rndz-hold-v2's IMU caution and
     # B/U C&W, whose dilemma the RM-threshold seeding had already cleared --
     # reset as the crew would: MSG RESET twice (a pending class-5 ILLEGAL
@@ -530,11 +563,14 @@ def dock30(self):
     self.play("+1     keys MSG_RESET\n+3     keys MSG_RESET\n+3     press master_alarm\n",
               "dock-msg-reset")
     self.script_done("dock-msg-reset", 60)
+    station_keep(self, "DOCK30 keep", 10.0)
     dap_load(self, "dock", 10, DAP_DOCK)
+    station_keep(self, "DOCK30 keep", 10.0)
     dap_modes(self, "A", low_z=True)
     self._inst()
     for ax in "xyz":
         self.pulse_est[ax] = DAP_DOCK["A"][17]
+    station_keep(self, "DOCK30 keep", 10.0)
     st = self.rel("ods")
     d0 = st["r"][0]
     self.say("DOCK30: ODS ring %.1f ft from PMA-2's face, %.2f %.2f ft off the axis; %s"
