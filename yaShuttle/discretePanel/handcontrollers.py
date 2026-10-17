@@ -863,6 +863,28 @@ class VirtualControls:
             s.blit(img, (x, y))
             return img.get_height()
 
+        # THE RHC'S KEYS, ON THE DIAL where each acts (owner, 2026-10-17): pitch and
+        # roll at the ends of the knob's cross on the softstop circle, yaw at the
+        # softstop ticks on the ring.  Drawn from the configured keys.
+        def label(t, x, y):
+            img = self.small.render(t, True, ink)
+            r = img.get_rect(center=(int(x), int(y)))
+            pg.draw.rect(s, (40, 42, 44), r.inflate(int(6 * k), int(2 * k)), border_radius=3)
+            s.blit(img, r)
+        rk = self.keys["rhc"]
+        def kn(a):
+            n = (rk[a] or ["?"])[0]
+            return {"up": "UP", "down": "DOWN", "left": "LEFT", "right": "RIGHT"}.get(n, n.upper())
+        rs = self.R * SOFTSTOP_FRAC["roll"]
+        label(kn("pitch-"), self.cx, self.cy - rs)
+        label(kn("pitch+"), self.cx, self.cy + rs)
+        label(kn("roll-"), self.cx - rs, self.cy)
+        label(kn("roll+"), self.cx + rs, self.cy)
+        ra = (self.ring_in + self.ring_out) / 2.0
+        for sg, a in ((-1, "yaw-"), (1, "yaw+")):
+            th = math.radians(90 - sg * SOFTSTOP_FRAC["yaw"] * VIRTUAL_RING_FULL_DEG)
+            label(kn(a), self.cx + ra * math.cos(th), self.cy - ra * math.sin(th))
+
         # Unfocused, the warning takes the headings' band: anywhere lower it
         # ran over the dial and the THC column (Mac-integrate, 2026-10-01).
         if self.focused or self.scripted:
