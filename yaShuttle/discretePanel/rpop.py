@@ -689,6 +689,15 @@ class View(QtWidgets.QWidget):
         self.whatif_dap = "prox"        # RPOP Configuration's THC "What if"... (7-24)
         self.whatif_user = (0.10, 0.05)
         self.n_pred, self.dt_pred = 9, 60.0   # Predictors... (7-24); [JSC]'s 1-9, a minute apart
+        # WHAT THE PREDICTORS ASSUME.  "hold": the relative velocity held, a
+        # straight line -- what the pilot's pulses keep doing, so a mark off the
+        # line to the target says to correct now; "coast": no further thrust,
+        # Clohessy-Wiltshire, which curves (down on a closing approach along the
+        # V-bar, up on a receding one) and so shows the drift the pilot is
+        # cancelling.  The program's own rule is not public; [JSC] Fig 25.31's
+        # digits fit "coast" (RPOP's CW is exact against two-body motion).  "hold"
+        # is the owner's choice for guidance (2026-10-16).
+        self.pred_mode = getattr(args, "predictor", "hold")
         fams = set(QtGui.QFontDatabase.families())
         fam = next((f for f in ("Courier New", "Menlo", "DejaVu Sans Mono", "Courier") if f in fams),
                    "Monospace")
@@ -1155,7 +1164,11 @@ class View(QtWidgets.QWidget):
             s[3:] += self.whatif            # THC "What if" inputs, on the prime trajectory only
             n = rp.geo["n"]
             for k in range(self.n_pred):
-                s = cw_step(s, n, self.dt_pred)
+                if self.pred_mode == "hold":
+                    s = s.copy()
+                    s[:3] += s[3:] * self.dt_pred
+                else:
+                    s = cw_step(s, n, self.dt_pred)
                 preds.append(s[:3] + off)
         # A FIXED FRAME, as JSC-63400 Fig 20.4: the target's point at a fixed
         # place on the screen (the figure's, 91 % across and 43 % down the
@@ -1421,6 +1434,10 @@ class Window(QtWidgets.QMainWindow):
         dpred.setSuffix(" s"); dpred.setValue(v.dt_pred)
         f.addRow("Predictors... number", npred)
         f.addRow("Predictors... time increment", dpred)
+        pmode = QtWidgets.QComboBox()
+        pmode.addItems(["Hold velocity (straight line)", "Coast (no thrust, Clohessy-Wiltshire)"])
+        pmode.setCurrentIndex(0 if v.pred_mode == "hold" else 1)
+        f.addRow("Predictors... path", pmode)
         met = QtWidgets.QLineEdit()
         met.setPlaceholderText("DDD/HH:MM:SS (blank: unchanged)")
         f.addRow("Update MET...", met)
@@ -1445,6 +1462,7 @@ class Window(QtWidgets.QMainWindow):
             return
         rp.tcs_period = freq.value()
         v.n_pred, v.dt_pred = npred.value(), dpred.value()
+        v.pred_mode = ("hold", "coast")[pmode.currentIndex()]
         v.whatif_dap = ("rndz", "prox", "user")[dap.currentIndex()]
         v.whatif_user = (ua.value(), ub.value())
         txt = met.text().strip()
@@ -1469,6 +1487,10 @@ def main(argv=None):
     ap.add_argument("--met-zero", default=MET_ZERO, metavar="DDD/HH:MM:SS",
                     help="GMT of MET zero (default STS-134's, %s)" % MET_ZERO)
     ap.add_argument("--seed", type=int, default=134, help="the instruments' noise seed")
+    ap.add_argument("--predictor", choices=("hold", "coast"), default="hold",
+                    help="what the predictors assume: hold (default) the relative velocity, a "
+                         "straight line; coast, no thrust (Clohessy-Wiltshire, which curves); "
+                         "also in RPOP Configuration")
     ap.add_argument("--snapshot", metavar="PNG", help="save the window after --snapshot-after s and exit")
     ap.add_argument("--snapshot-after", type=float, default=5.0, metavar="S")
     args = ap.parse_args(argv)
