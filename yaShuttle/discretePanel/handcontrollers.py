@@ -425,18 +425,6 @@ def _upper(name):
     return name.upper()
 
 
-def rhc_hint(k):
-    """The RHC key line, short for the usual layouts."""
-    r = k["rhc"]
-    def one(a):
-        return "/".join(_upper(n) for n in r[a][:1])
-    if (r["pitch-"][:1], r["pitch+"][:1], r["yaw-"][:1], r["yaw+"][:1]) == (["up"], ["down"], ["left"], ["right"]):
-        py = "ARROWS PITCH/YAW"
-    else:
-        py = "%s/%s PITCH, %s/%s YAW" % (one("pitch-"), one("pitch+"), one("yaw-"), one("yaw+"))
-    return "KEYS: %s, %s/%s ROLL" % (py, one("roll-"), one("roll+"))
-
-
 # The window's title names the controllers it stands in for -- "THC FWD /
 # RHC LH" -- so two instances (the CDR's and the aft station's) can be told
 # apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
@@ -615,7 +603,7 @@ class VirtualControls:
         px = max(5, int(round(px)))
         f = self._fonts.get(px)
         if f is None:
-            f = self.pg.font.SysFont("dejavusans,helvetica,arial", px)
+            f = self.pg.font.SysFont("dejavusansmono,liberationmono,menlo,consolas,lucidaconsole,couriernew", px)
             self._fonts[px] = f
             self._font_size[id(f)] = px
         return f
@@ -895,8 +883,7 @@ class VirtualControls:
                 "LEFT-DRAG: PITCH/ROLL   RIGHT-DRAG: YAW")
         bottom = ch
         rx = int(320 * k) if self.thc_name else None   # the THC panel's left
-        text(hint, int(10 * k), bottom - int(62 * k), right=rx)
-        text(rhc_hint(self.keys), int(10 * k), bottom - int(43 * k), right=rx)
+        text(hint, int(10 * k), bottom - int(43 * k), right=rx)
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
         text(degs + " DEG", int(10 * k), bottom - int(24 * k), right=rx)
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
@@ -910,9 +897,12 @@ class VirtualControls:
             on = bool(bits & THC_BITS[d])
             r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
             pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
-            label = "%s   %s" % (d, name.upper() if name != "space" else "SPACE")
-            text(label, r.x + int(10 * k), r.y + (r.h - self.font.get_height()) // 2,
-                 self.font, (20, 20, 20) if on else ink)
+            col = (20, 20, 20) if on else ink
+            text(d, r.x + int(10 * k), r.y + (r.h - self.font.get_height()) // 2, self.font, col)
+            # the key, as large as the RHC's, flush right
+            kimg = self.small.render(name.upper(), True, col)
+            s.blit(kimg, (r.right - int(10 * k) - kimg.get_width(),
+                          r.y + (r.h - kimg.get_height()) // 2))
         if not self.focused and not self.scripted:
             # Inside the area above the macOS bottom margin, so the rounded
             # corners do not cut the frame (Ron, via Mac-integrate).

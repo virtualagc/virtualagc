@@ -1663,6 +1663,8 @@ def main():
     ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), default=None,
                     help="handcontrollers.py: auto (default) uses a joystick if one is "
                          "present at start-up, else a window of virtual controllers")
+    ap.add_argument("--hc-keys", metavar="FILE", default=None,
+                    help="handcontrollers.py --keys: keyboard layout JSON for the virtual RHC and THC")
     ap.add_argument("--style", choices=("split", "gimbal"), default=None,
                     help="handcontrollers.py's virtual RHC: split (touch) or gimbal "
                          "(mouse); default split if a touchscreen is found")
@@ -2215,6 +2217,8 @@ def main():
                     hc_argv += ["--thc-joystick", str(args.thc_joystick)]
                 if args.style:
                     hc_argv += ["--style", args.style]
+                if args.hc_keys:
+                    hc_argv += ["--keys", os.path.abspath(os.path.expanduser(args.hc_keys))]
                 L.start("handcontrollers" if args.rhc != "both" else "handcontrollers-" + rhc,
                         hc_argv, HERE, env)
             if args.truth_ball:
@@ -2433,6 +2437,8 @@ def main():
                 manager_argv += ["--hc-input", args.input]
             if args.style:
                 manager_argv += ["--hc-style", args.style]
+            if args.hc_keys:
+                manager_argv += ["--hc-keys", os.path.abspath(os.path.expanduser(args.hc_keys))]
             if args.panel_script:
                 manager_argv += ["--script", os.path.abspath(args.panel_script)]
             if args.layout:

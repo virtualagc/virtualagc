@@ -1368,7 +1368,7 @@ class Manager(object):
                 "--size", str(self.args.hc_size)]
         # simulatePASS's --joystick/--input/--style, as it would have passed
         # them had it started this station itself.
-        for opt in ("joystick", "input", "style"):
+        for opt in ("joystick", "input", "style", "keys"):
             v = getattr(self.args, "hc_" + opt)
             if v is not None:
                 argv += ["--" + opt, str(v)]
@@ -1729,6 +1729,8 @@ def main(argv=None):
                     help="--input for hand controllers started from here")
     ap.add_argument("--hc-style", choices=("split", "gimbal"), default=None,
                     help="--style for hand controllers started from here")
+    ap.add_argument("--hc-keys", metavar="FILE", default=None,
+                    help="--keys for hand controllers started from here")
     ap.add_argument("--tape", metavar="FILE", default="")
     ap.add_argument("--snapshot-dir", metavar="DIR", default="",
                     help="where Save writes and Restore reads")

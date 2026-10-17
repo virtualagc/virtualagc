@@ -1407,6 +1407,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             cmd += ["--station", self.a.station]
         if self.a.input:
             cmd += ["--input", self.a.input]
+        if self.a.hc_keys:
+            cmd += ["--hc-keys", os.path.abspath(os.path.expanduser(self.a.hc_keys))]
         if self.a.layout:
             cmd += ["--layout", os.path.abspath(os.path.expanduser(self.a.layout))]
         if getattr(self.a, "layout_aft", None):
@@ -3251,6 +3253,9 @@ def main():
                     help="the hand controllers' input (simulatePASS --input): auto uses a "
                          "joystick if one is plugged in, and then draws no virtual controllers; "
                          "dock_autopilot.py uses virtual, so the THC's movements can be watched")
+    ap.add_argument("--hc-keys", metavar="FILE", default=None,
+                    help="the virtual RHC/THC keyboard layout (simulatePASS --hc-keys; see "
+                         "examples/keys-keypad.json); default WSDA/RF and arrows, Q/E")
     ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="the flight station whose windows are shown (simulatePASS --station; "
                          "dock_autopilot.py uses aft); all: every window, left exactly as "
