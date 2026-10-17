@@ -1255,7 +1255,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                 self.pass_acc0 = tuple(st["pass_acc0"])
             self.rr_active = bool(st.get("rr_active"))
             self.strk_ended = bool(st.get("strk_ended"))
-            self.dock_dap_stored = bool(st.get("dock_dap_stored"))
+            # mc-state.json is the LAST run's: a restart from MC4 (say) is
+            # before the ARRIVAL that keys A10/B10, whatever the file says --
+            # taken as stored, the 6 minutes of DAP editing came in DOCK30,
+            # coasting, and the ring drifted 55 ft off the axis (2026-10-16)
+            self.dock_dap_stored = bool(st.get("dock_dap_stored")) and not (
+                a.from_ in PHASES and PHASES.index(a.from_) <= PHASES.index("ARRIVAL"))
             if st.get("rr_acc0"):
                 self.rr_acc0 = tuple(st["rr_acc0"])
         except (OSError, ValueError):
