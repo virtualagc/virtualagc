@@ -1681,7 +1681,7 @@ def main(argv=None):
     ap.add_argument("--layout-aft", metavar="FILE", default=None,
                     help="the aft station's layout, applied when the station changes to aft "
                          "(--layout is then the forward station's)")
-    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+    ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="the station the run starts at (simulatePASS --station)")
     ap.add_argument("--geometry", metavar="SPEC", help="Tk geometry for this window")
     ap.add_argument("--debug", action="store_true",
@@ -1716,6 +1716,8 @@ def main(argv=None):
     ap.add_argument("--snapshot-dir", metavar="DIR", default="",
                     help="where Save writes and Restore reads")
     args = ap.parse_args(argv)
+    if args.station == "auto":
+        args.station = "all"
     if args.port_base is not None:
         D.set_port_base(args.port_base)
     else:

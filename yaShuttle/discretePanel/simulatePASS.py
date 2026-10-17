@@ -1620,10 +1620,13 @@ def main():
     ap.add_argument("--portview-views", default=None, metavar="LIST",
                     help="portview.py's --views: comma-separated, from front, up, left, right, "
                          "aft, cl (its default is front alone)")
-    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+    ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="which flight station's panels, displays and keyboards to show: "
-                         "forward, the aft flight deck (rendezvous, docking, RMS), or all "
-                         "(default); the manager's STATION row changes it")
+                         "forward, the aft flight deck (rendezvous, docking, RMS), all "
+                         "(every window, left as placed: a flight script's handover "
+                         "changes only the hand controllers), or auto (default: every "
+                         "window to begin with, then following the station changes); the "
+                         "manager's STATION row changes it")
     ap.add_argument("--no-splash", action="store_true",
                     help="no start-up splash window (it tells the user to wait while the "
                          "windows come up, in front of everything)")
@@ -1751,6 +1754,8 @@ def main():
                          "TIG -- which a clock that starts at 'now' makes "
                          "impossible to know in advance")
     args = ap.parse_args()
+    if args.station == "auto":      # all windows to begin with; 'all' is the same until a script's handover
+        args.station = "all"
     # SIGINT IS HOW 'quit' ARRIVES (session_listener signals this process),
     # so it must not be inherited as ignored: a run started in the
     # background from a non-interactive shell (nohup ... &, or a driver

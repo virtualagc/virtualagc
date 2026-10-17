@@ -1312,20 +1312,18 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         ON', RNDZ/134/FIN A p. 4-20): with --handover the station changes to
         aft first -- the panel and displays, and the manager, which restarts
         the aft hand controllers and views and applies --layout-aft.  With
-        --handover-keep-forward nothing is hidden or shown: both stations'
-        windows stay up (start with --station all) and only the hand
+        --station all no window is hidden, shown or moved, so only the hand
         controllers change to the aft ones."""
         if getattr(self.a, "handover", False):
-            if getattr(self.a, "handover_keep_forward", False):
+            if self.a.station == "all":
                 fly_sts134.crewscript.send_control("hands aft", self.base)
                 self.say("crew: the CDR's hands to the aft station's controllers, no window "
-                         "changed (ESTABLISH RBAR [20C], --handover-keep-forward)")
-                self.wait_sim(15)
+                         "changed (ESTABLISH RBAR [20C], --station all)")
             else:
                 fly_sts134.crewscript.send_control("station aft", self.base)
                 fly_sts134.crewscript.send_meds("station aft", self.base)
                 self.say("crew: the CDR to the aft flight station (ESTABLISH RBAR [20C])")
-                self.wait_sim(15)
+            self.wait_sim(15)
         return super().rbar()
 
     # --- the vehicle ------------------------------------------------------
@@ -3244,9 +3242,11 @@ def main():
                     help="the hand controllers' input (simulatePASS --input): auto uses a "
                          "joystick if one is plugged in, and then draws no virtual controllers; "
                          "dock_autopilot.py uses virtual, so the THC's movements can be watched")
-    ap.add_argument("--station", choices=("fwd", "aft", "all"), default="all",
+    ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="the flight station whose windows are shown (simulatePASS --station; "
-                         "dock_autopilot.py uses aft)")
+                         "dock_autopilot.py uses aft); all: every window, left exactly as "
+                         "placed, a --handover changing only the hand controllers; auto: "
+                         "every window to begin with, then following the station changes")
     ap.add_argument("--layout-aft", default=None, metavar="FILE",
                     help="simulatePASS --layout-aft: the aft station's layout, applied by the "
                          "manager when the station changes to aft (with --handover, at ESTABLISH "
@@ -3256,10 +3256,6 @@ def main():
                          "ESTABLISH RBAR [20C], 'A6U FLT CNTLR PWR - ON' (RNDZ/134/FIN A p. 4-20): "
                          "the displays, hand controllers, views and layout follow (start with "
                          "--station fwd)")
-    ap.add_argument("--handover-keep-forward", action="store_true",
-                    help="with --handover, change only the hand controllers to the aft "
-                         "station's and leave every window as it is: start with --station "
-                         "all, so both stations' windows are up")
     ap.add_argument("--record", default=None, metavar="FILE",
                     help="drive SimpleScreenRecorder through FILE: 'record-start' is appended "
                          "when the vehicle is released, 'record-save' when the run ends; run the "
