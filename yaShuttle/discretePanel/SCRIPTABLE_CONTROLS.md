@@ -671,6 +671,31 @@ command ends it returns to whatever the stick or keys are doing.
   `crew-switches-OPS2.md`.  The aft controllers are transformed by the A6U
   SENSE switch (`sense -z|-x`).
 
+### Keys in the virtual window
+
+A script does not need them, but the window shows them (2026-10-16/17).  The
+default layout follows the space-sim convention: THC `W`/`S` +X/-X, `D`/`A`
++Y/-Y, `R` -Z (up) and `F` +Z (down), with `Space` and `C` also working for
+-Z and +Z; RHC arrows pitch (Up is stick forward) and yaw (Right is +yaw),
+`Q`/`E` roll (E is +roll).  The RHC's key names are drawn on the dial where
+each acts (pitch at the top and bottom, roll at the left and right of the
+knob's cross, yaw at the ring's softstop ticks), and each THC key flush right
+in its row, all in a fixed-width font.
+
+The layout is configurable so no one is boxed into one convention: a `keys`
+object in the joystick profile file (`--joysticks`, `~/.config/nsts/joysticks.json`,
+`examples/joysticks.json`) or in a file of its own (`handcontrollers.py --keys
+FILE`; `--hc-keys FILE` on `dock_autopilot.py`/`fly_rndz134.py`,
+`simulatePASS.py` and the manager, because `simulatePASS.py --keys` is the
+timed-keystroke file).  Its groups are `thc` (actions `+X -X +Y -Y -Z +Z`) and
+`rhc` (`pitch+ pitch- yaw+ yaw- roll+ roll-`; `pitch+` is Down, `roll+` is E);
+each action is a list of pygame key names (`"w"`, `"up"`, `"space"`, `"page up"`,
+`"[4]"` for keypad 4 -- plain `"8"` is the top-row key, a different one), and
+an action not named keeps its default.  An unknown group, action or key name is
+an error.  `examples/keys-default.json` writes out the built-in layout;
+`examples/keys-keypad.json` puts rotation on the keypad and translation on the
+arrows and Page Up/Down.
+
 ---
 
 ## Window "Subtitles" (the caption box)

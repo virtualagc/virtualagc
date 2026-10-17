@@ -318,6 +318,13 @@ scripts, though STS-134 did them (JSC 37461 Appendix A; times from SRB ignition)
 The rendezvous from the OMS-2 orbit to capture is `RENDEZVOUS_PLAN.md`
 sections 5 to 5n, and the return is `TIMELINE-STS134-ENTRY.md`.
 
+### After docking: undocking, the STORRM re-rendezvous and the night landing (reference, not simulated)
+
+- Reference only (owner, 2026-10-16: NOT current work).  Owner's decisions: the ISS stay is uninteresting for the PASS emulation; undocking/flyaround/separation is a demo video in its own right, run by itself (no timeline problem); the night landing (below) is welcome because it differs from the RTLS video.  Current work stays: fix the ISS approach and hard-dock at about the Mission Report's time.
+- Mission Report (FD15-17), GMT: Orbiter DAP resumes attitude control 150/02:35:28; maneuver to undocking attitude 02:46:28-03:18:31; FREE drift 03:52:28; hook drive 03:53:08 (~2 min 7 s); flyaround start (+X pulses L1A/R1A) 04:20; Ku RADAR 04:49:20 (lock ~600 ft); SEP1 05:06:02 (6.48 s +X); SEP2 05:34:06 (5.2 s); STORRM re-rendezvous: NH2 06:39:38, MC5 06:59:08, NSR 07:24:08, TPI 07:57:34, closest approach 955 ft CG-CG 08:24:25 (TDA not required), SEP3 08:38:36; FCS checkout 151/02:24:36; RCS hot-fire 151/03:30:57; deorbit burn 152/05:29:03 (orbit 248, dual-engine, 158.3 s, 298.4 ft/s, resulting orbit 23.2 x 188.5 nmi); EI 152/06:03:06; KSC runway 15 main gear 152/06:34:50 (2011-06-01, about 02:35 EDT = NIGHT landing), nose gear 06:35:00, wheels stop 06:35:33.
+- Orbit before the deorbit burn: apogee 188.5 nmi unchanged by the burn, so about 188.5 nmi near-circular (the ISS's orbit, 51.6 deg); the exact elements would come from the ISS TLE for 2011-05-31/06-01 (the targets file has NORAD 25544's 2011-05-18 TLE only).
+- What the sim lacks: UNDOCKING in vehdyn.c (listed NOT MODELLED), a mated-stack attitude model (the Orbiter DAP controls the stack from 02:35:28; ISS mass/inertia and DAP configuration for it; whether the ISS gyros were used is not established), a TIME-WARP capture (propagate truth, re-seed PASS state vector and clocks) for the 11.7-day stay and the ~42 h after SEP3, night lighting in portview.  Rendezvous document sections: UNDOCKING PREP, UNDOCK OPS, UNDOCKING/TORS/TORF/INITIAL SEPARATION (p.1-9), STORRM DTO RE-RENDEZVOUS (p.1-10, SEP1 1.5, SEP2 1.5, NH2 2.0, NSR 2.4, TPI 3.4, SEP3 1.0 ft/s), UNDOCKING/SEPARATION TIMELINE (pp.2-x).
+
 ### Cross-check: STS-135 with the same model
 
 STS-135 was flown with the model built for STS-134 (`fly_sts134.py --flight

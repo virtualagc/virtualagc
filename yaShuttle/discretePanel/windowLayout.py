@@ -51,10 +51,16 @@ nudged by the difference, up to five times.  --verbose shows that happening.
 
 WHAT IT CANNOT DO.  Marco keeps a window on ONE monitor: asked for a place
 where the window would straddle the boundary, it shoves it back, and asked
-for one further over it moves it to the next monitor entirely.  A layout
-saved from windows that were placed by hand never asks for the impossible;
-one written by hand can, and then a window ends up somewhere else and the
-report says how far off it finished.
+for one further over it moves it to the next monitor entirely.  Only a drag
+by the user may straddle the seam: xdotool, wmctrl, a _NET_MOVERESIZE_WINDOW
+with the pager's source indication, and a resize across the seam were all
+refused (marco 1.26.2, two heads under Xephyr, 2026-10-17).  So a layout
+saved from windows that were placed by hand CAN ask for the impossible if one
+was dragged across the seam, and replaying it then moves that window
+back and forth between the monitors until the retries give up; a window ends
+up somewhere else and the report says how far off it finished.  (Accepted by
+the owner; stopping the retries on a straddler, or an opt-in synthetic
+title-bar drag that moves the pointer and takes focus, are the ways out.)
 """
 
 import argparse
