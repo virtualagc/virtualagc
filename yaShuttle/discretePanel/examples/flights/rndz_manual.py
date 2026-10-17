@@ -786,6 +786,25 @@ class ManualPhase(object):
         rep = self.leg_report("RPM (the R-bar point through the turn)", stats)
         self.man_record("RPM", minutes=t / 60.0, steps=times, report=rep, pulses=dict(self.pulses))
 
+    def torva_end_offset(self, tru, tgt):
+        """(dy, dz) ft: where the CG must be, off the ISS origin's V-bar line,
+        for the ODS ring to be on PMA-2's axis in the docking attitude (nose
+        to the zenith, -Z to the ISS: body +X = LVLH -z, body +Z = LVLH +x,
+        body +Y = LVLH +y).  PMA-2's place is read off the target's own
+        attitude, the ring's off the CG the truth carries."""
+        cg = tru.get("cg") or (0.0, 0.0, 0.0)
+        b = [(ins.ODS_BODY[i] - cg[i]) / FT for i in range(3)]       # ring from the CG, body ft
+        ring = (b[2], b[1], -b[0])                                    # LVLH x, y, z in that attitude
+        _, _, _, _, pma_r, _ = ins.points(tru, tgt)
+        ex, ey, ez = ins.lvlh_axes(list(tgt["r"]), list(tgt["v"]))
+        d = ins.sub(pma_r, list(tgt["r"]))
+        pma = [ins.dot(d, e) / FT for e in (ex, ey, ez)]
+        dy, dz = pma[1] - ring[1], pma[2] - ring[2]
+        self.say("TORVA: ring %.1f %.1f %.1f ft from the CG in the docking attitude, PMA-2 %.1f %.1f %.1f "
+                 "ft from the ISS origin; the CG is aimed %.1f ft right and %.1f ft down of the origin's V-bar"
+                 % (ring[0], ring[1], ring[2], pma[0], pma[1], pma[2], dy, dz))
+        return dy, dz
+
     def torva(self):
         """TORVA: from the R-bar to the +V-bar at twice the orbital rate,
         -Z on the ISS (target track) and the ISS in the centerline camera,
@@ -801,14 +820,26 @@ class ManualPhase(object):
         w = 2.0 * n
         T = (th1 - th0) / w
 
+        # THE RING, NOT THE CG, ON THE V-BAR (the owner's overshoot at ~300 ft,
+        # 2026-10-16).  PMA-2's axis is not through the ISS's origin and the ODS
+        # ring is not at the Orbiter's CG, and the turn to the docking attitude
+        # swings the ring about the CG: with the CG on the origin's V-bar the
+        # ring came out some 55-63 ft off PMA-2's axis (Z -63 ft at 277 ft) and
+        # the V-bar leg spent four minutes moving it.  So the arc ends with the
+        # CG where the RING will be on the axis once the docking attitude is
+        # held: dy, dz below.
+        dy, dz = self.torva_end_offset(tru, tgt)
+
         def goal(t):
             u = min(max(t, 0.0), T)
             th = th0 + w * u
             rr = r0 + (TORVA_END_FT - r0) * (u / T)
             drr = (TORVA_END_FT - r0) / T if t < T else 0.0
             dth = w if t < T else 0.0
-            pos = [rr * math.sin(th), 0.0, rr * math.cos(th)]
-            vel = [drr * math.sin(th) + rr * math.cos(th) * dth, 0.0, drr * math.cos(th) - rr * math.sin(th) * dth]
+            f, df = u / T, (1.0 / T if t < T else 0.0)
+            pos = [rr * math.sin(th), dy * f, rr * math.cos(th) + dz * f]
+            vel = [drr * math.sin(th) + rr * math.cos(th) * dth, dy * df,
+                   drr * math.cos(th) - rr * math.sin(th) * dth + dz * df]
             return pos, vel
 
         self.say("crew: TORVA -- %.0f deg around at twice the orbital rate (%.1f min), %.0f to %.0f ft"
