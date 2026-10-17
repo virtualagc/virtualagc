@@ -182,13 +182,14 @@ def thc_pulses_aft(self, dv_lvlh, axes, q, label, nmax=4):
 
 
 def aft_station(self):
-    """AFT FLT STATION CONFIG for the approach: SENSE -Z on A6U."""
+    """AFT FLT STATION CONFIG [4A] for the approach (RNDZ p74): A6U SENSE -Z
+    and ADI ATT LVLH -- a capture from OPS 2 carries ATT at INRTL."""
     if getattr(self, "aft_up", False):
         return
-    self.play("+1     sense -z\n", "dock-sense")
+    self.play("+1     sense -z\n+1     adi a att lvlh\n", "dock-sense")
     self.script_done("dock-sense", 60)
     self.aft_up = True
-    self.say("crew: aft flight station -- A6U SENSE -Z, aft THC, A6U DAP")
+    self.say("crew: aft flight station -- A6U SENSE -Z, ADI ATT LVLH, aft THC, A6U DAP")
 
 
 def dap_modes(self, side, low_z):
