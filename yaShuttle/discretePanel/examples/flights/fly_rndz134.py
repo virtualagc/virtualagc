@@ -1311,22 +1311,21 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         """ESTABLISH RBAR [20C] begins at the aft station ('A6U FLT CNTLR PWR -
         ON', RNDZ/134/FIN A p. 4-20): with --handover the station changes to
         aft first -- the panel and displays, and the manager, which restarts
-        the aft hand controllers and views and applies --layout-aft."""
+        the aft hand controllers and views and applies --layout-aft.  With
+        --handover-keep-forward nothing is hidden or shown: both stations'
+        windows stay up (start with --station all) and only the hand
+        controllers change to the aft ones."""
         if getattr(self.a, "handover", False):
-            fly_sts134.crewscript.send_control("station aft", self.base)
-            fly_sts134.crewscript.send_meds("station aft", self.base)
-            self.say("crew: the CDR to the aft flight station (ESTABLISH RBAR [20C])")
-            self.wait_sim(15)
             if getattr(self.a, "handover_keep_forward", False):
-                # the manager is busy for a few seconds of WALL time after a
-                # station change; "all" restores the forward windows and keeps
-                # the aft hand controllers the change to aft started
-                time.sleep(8)
-                fly_sts134.crewscript.send_control("station all", self.base)
-                fly_sts134.crewscript.send_meds("station all", self.base)
-                self.say("crew: the forward station's windows restored beside the aft's "
-                         "(--handover-keep-forward)")
-                time.sleep(8)
+                fly_sts134.crewscript.send_control("hands aft", self.base)
+                self.say("crew: the CDR's hands to the aft station's controllers, no window "
+                         "changed (ESTABLISH RBAR [20C], --handover-keep-forward)")
+                self.wait_sim(15)
+            else:
+                fly_sts134.crewscript.send_control("station aft", self.base)
+                fly_sts134.crewscript.send_meds("station aft", self.base)
+                self.say("crew: the CDR to the aft flight station (ESTABLISH RBAR [20C])")
+                self.wait_sim(15)
         return super().rbar()
 
     # --- the vehicle ------------------------------------------------------
@@ -3258,9 +3257,9 @@ def main():
                          "the displays, hand controllers, views and layout follow (start with "
                          "--station fwd)")
     ap.add_argument("--handover-keep-forward", action="store_true",
-                    help="with --handover, once the aft station is up, show the forward "
-                         "station's windows again beside the aft's (the manager's 'Both'); "
-                         "the aft hand controllers stay")
+                    help="with --handover, change only the hand controllers to the aft "
+                         "station's and leave every window as it is: start with --station "
+                         "all, so both stations' windows are up")
     ap.add_argument("--record", default=None, metavar="FILE",
                     help="drive SimpleScreenRecorder through FILE: 'record-start' is appended "
                          "when the vehicle is released, 'record-save' when the run ends; run the "
