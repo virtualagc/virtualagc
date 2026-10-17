@@ -1317,6 +1317,16 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             fly_sts134.crewscript.send_meds("station aft", self.base)
             self.say("crew: the CDR to the aft flight station (ESTABLISH RBAR [20C])")
             self.wait_sim(15)
+            if getattr(self.a, "handover_keep_forward", False):
+                # the manager is busy for a few seconds of WALL time after a
+                # station change; "all" restores the forward windows and keeps
+                # the aft hand controllers the change to aft started
+                time.sleep(8)
+                fly_sts134.crewscript.send_control("station all", self.base)
+                fly_sts134.crewscript.send_meds("station all", self.base)
+                self.say("crew: the forward station's windows restored beside the aft's "
+                         "(--handover-keep-forward)")
+                time.sleep(8)
         return super().rbar()
 
     # --- the vehicle ------------------------------------------------------
@@ -3247,6 +3257,10 @@ def main():
                          "ESTABLISH RBAR [20C], 'A6U FLT CNTLR PWR - ON' (RNDZ/134/FIN A p. 4-20): "
                          "the displays, hand controllers, views and layout follow (start with "
                          "--station fwd)")
+    ap.add_argument("--handover-keep-forward", action="store_true",
+                    help="with --handover, once the aft station is up, show the forward "
+                         "station's windows again beside the aft's (the manager's 'Both'); "
+                         "the aft hand controllers stay")
     ap.add_argument("--record", default=None, metavar="FILE",
                     help="drive SimpleScreenRecorder through FILE: 'record-start' is appended "
                          "when the vehicle is released, 'record-save' when the run ends; run the "
