@@ -363,9 +363,80 @@ SOFTSTOP_FRAC = {"roll": 21.17 / _FULL_DEG["roll"], "pitch": 21.17 / _FULL_DEG["
 # left hand -- W/S surge, A/D sway, R/F heave (R up = -Z, F down = +Z) -- and
 # rotation on the right: arrows pitch and yaw, Q/E roll.  Space and C, the
 # first layout's Z keys (2026-10-01), still work.
-THC_KEYS = (("w", "+X"), ("s", "-X"), ("d", "+Y"), ("a", "-Y"),
-            ("r", "-Z"), ("f", "+Z"))
-THC_ALIAS_KEYS = (("space", "-Z"), ("c", "+Z"))
+# The keys are CONFIGURABLE (owner, 2026-10-17): a "keys" object in the joystick
+# profile file (--joysticks, ~/.config/nsts/joysticks.json, examples/joysticks.json)
+# or in a file of its own (--keys FILE; examples/keys-*.json), each action a
+# list of pygame key names -- "w", "up", "space", "[4]" for keypad 4, "page up".
+# What is not named keeps this default.  The labels on screen follow.
+DEFAULT_KEYS = {
+    "thc": {"+X": ["w"], "-X": ["s"], "+Y": ["d"], "-Y": ["a"],
+            "-Z": ["r", "space"], "+Z": ["f", "c"]},
+    "rhc": {"pitch+": ["down"], "pitch-": ["up"], "yaw+": ["right"],
+            "yaw-": ["left"], "roll+": ["e"], "roll-": ["q"]},
+}
+THC_ORDER = ("+X", "-X", "+Y", "-Y", "-Z", "+Z")
+
+
+def merge_keys(*layers):
+    """DEFAULT_KEYS overlaid by each layer in turn (a layer may be partial)."""
+    out = dict((g, dict((a, list(k)) for a, k in m.items())) for g, m in DEFAULT_KEYS.items())
+    for layer in layers:
+        for group, table in (layer or {}).items():
+            if group.startswith("_"):
+                continue
+            if group not in out or not isinstance(table, dict):
+                raise ValueError("keys: unknown group %r (use thc, rhc)" % group)
+            for action, names in table.items():
+                if action.startswith("_"):
+                    continue
+                if action not in out[group]:
+                    raise ValueError("keys: unknown %s action %r (use %s)"
+                                     % (group, action, ", ".join(sorted(out[group]))))
+                if isinstance(names, str):
+                    names = [names]
+                if not isinstance(names, list) or not all(isinstance(n, str) for n in names):
+                    raise ValueError("keys: %s %s must be a key name or a list of them" % (group, action))
+                out[group][action] = list(names)
+    return out
+
+
+def load_keys(keys_file, profile_file):
+    """The layers: the profile file's "keys", then --keys FILE (which may be
+    the bare object or hold it under "keys")."""
+    from pathlib import Path
+    layers = []
+    paths = [Path(profile_file)] if profile_file else [
+        Path.home() / ".config/nsts/joysticks.json", Path(__file__).parent / "examples/joysticks.json"]
+    for p in paths:
+        if p.is_file():
+            try:
+                layers.append(json.loads(p.read_text()).get("keys"))
+            except (ValueError, AttributeError):
+                pass
+            break
+    if keys_file:
+        with open(keys_file) as f:
+            d = json.load(f)
+        layers.append(d.get("keys", d))
+    return merge_keys(*layers)
+
+
+def _upper(name):
+    return name.upper()
+
+
+def rhc_hint(k):
+    """The RHC key line, short for the usual layouts."""
+    r = k["rhc"]
+    def one(a):
+        return "/".join(_upper(n) for n in r[a][:1])
+    if (r["pitch-"][:1], r["pitch+"][:1], r["yaw-"][:1], r["yaw+"][:1]) == (["up"], ["down"], ["left"], ["right"]):
+        py = "ARROWS PITCH/YAW"
+    else:
+        py = "%s/%s PITCH, %s/%s YAW" % (one("pitch-"), one("pitch+"), one("yaw-"), one("yaw+"))
+    return "KEYS: %s, %s/%s ROLL" % (py, one("roll-"), one("roll+"))
+
+
 # The window's title names the controllers it stands in for -- "THC FWD /
 # RHC LH" -- so two instances (the CDR's and the aft station's) can be told
 # apart, on screen and by windowLayout (role "hc_fwd_lh" etc.).
@@ -469,8 +540,11 @@ def _clip(v, lo=-1.0, hi=1.0):
 class VirtualControls:
     """State and drawing of the virtual RHC and THC; pygame passed in."""
 
-    def __init__(self, pg, style, scale, rhc_name, thc_name):
+    def __init__(self, pg, style, scale, rhc_name, thc_name, keys=None):
         self.pg = pg
+        self.keys = keys or merge_keys()
+        self.rhc_codes = dict((a, self._codes(pg, n)) for a, n in self.keys["rhc"].items())
+        self.thc_codes = dict((a, self._codes(pg, n)) for a, n in self.keys["thc"].items())
         self.style = style
         self.scale = scale
         self.rhc_name, self.thc_name = rhc_name, thc_name
@@ -699,23 +773,36 @@ class VirtualControls:
             self.ptr["yaw"] = _clip(d / VIRTUAL_RING_FULL_DEG)
 
     # -- what the controllers command ---------------------------------------
+    @staticmethod
+    def _codes(pg, names):
+        out = []
+        for n in names:
+            try:
+                out.append(pg.key.key_code(n))
+            except ValueError:
+                raise ValueError("keys: %r is not a pygame key name" % n)
+        return out
+
+    def _down(self, keys, codes):
+        return sum(1 for c in codes if keys[c])
+
     def deflection(self):
         """Fractions of full throw per RHC axis, pointer/touch plus keys."""
         keys = self.pg.key.get_pressed() if self.focused else None
         out = dict(self.ptr)
         if keys is not None:
             K, kd = self.pg, VIRTUAL_KEY_DEFLECT
-            out["pitch"] += kd * (keys[K.K_DOWN] - keys[K.K_UP])
-            out["yaw"] += kd * (keys[K.K_RIGHT] - keys[K.K_LEFT])
-            out["roll"] += kd * (keys[K.K_e] - keys[K.K_q])
+            c = self.rhc_codes
+            for ax in RHC_AXES:
+                out[ax] += kd * (bool(self._down(keys, c[ax + "+"]))
+                                 - bool(self._down(keys, c[ax + "-"])))
         return dict((a, _clip(v)) for a, v in out.items())
 
     def thc_bits(self):
         if not self.focused or not self.thc_name:
             return 0
         keys = self.pg.key.get_pressed()
-        want = set(d for name, d in THC_KEYS + THC_ALIAS_KEYS
-                   if keys[self.pg.key.key_code(name)])
+        want = set(d for d, codes in self.thc_codes.items() if self._down(keys, codes))
         for axis in "XYZ":
             if "+" + axis in want and "-" + axis in want:
                 want -= {"+" + axis, "-" + axis}
@@ -787,7 +874,7 @@ class VirtualControls:
         bottom = ch
         rx = int(320 * k) if self.thc_name else None   # the THC panel's left
         text(hint, int(10 * k), bottom - int(62 * k), right=rx)
-        text("KEYS: ARROWS PITCH/YAW, Q/E ROLL", int(10 * k), bottom - int(43 * k), right=rx)
+        text(rhc_hint(self.keys), int(10 * k), bottom - int(43 * k), right=rx)
         degs = "  ".join("%s %+5.1f" % (a.upper(), defl[a] * _FULL_DEG[a]) for a in RHC_AXES)
         text(degs + " DEG", int(10 * k), bottom - int(24 * k), right=rx)
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
@@ -796,7 +883,8 @@ class VirtualControls:
         if self.thc_name:
             if self.focused or self.scripted:
                 text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
-        for i, (name, d) in enumerate(THC_KEYS if self.thc_name else ()):
+        for i, d in enumerate(THC_ORDER if self.thc_name else ()):
+            name = (self.keys["thc"][d] or ["?"])[0]
             on = bool(bits & THC_BITS[d])
             r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
             pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
@@ -838,7 +926,8 @@ def run_virtual(pg, args, pub, rp, status, script=None, physical=None):
     # every widget the same number (and halve it on macOS, where SDL, like
     # Tk, measures windows in points).  This window's layout is drawn at
     # --size 384, so that is scale 1.
-    vc = VirtualControls(pg, style, args.size / 384.0, args.rhc, args.thc)
+    vc = VirtualControls(pg, style, args.size / 384.0, args.rhc, args.thc,
+                         load_keys(args.keys, args.joysticks))
     log("virtual hand controllers, style %s, window '%s'"
         % (style, window_title(args.thc, args.rhc)))
     clock = pg.time.Clock()
@@ -921,6 +1010,8 @@ def main(argv=None):
                     help="no joystick: hold one THC direction, e.g. '+X 2'")
     ap.add_argument("--thc-joystick", type=int, help="optional second stick index for THC axes")
     ap.add_argument("--joysticks", metavar="FILE", help="joystick role and axis profile JSON")
+    ap.add_argument("--keys", metavar="FILE", help="keyboard layout JSON for the virtual RHC and THC "
+                    "(see examples/keys-keypad.json); a \"keys\" object in the joystick profile also works")
     ap.add_argument("--list-joysticks", action="store_true", help="list identities, roles and profiles")
     ap.add_argument("--probe", action="store_true", help="print live raw stick values at 5 Hz")
     args = ap.parse_args(argv)
