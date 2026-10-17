@@ -3209,10 +3209,25 @@ class Portview(object):
             want = see is None or v.name in see
             # unconditionally: Qt's isMinimized() is not the window manager's word
             # for it (a window minimized before a manager was up, or by hand)
+            # WHERE IT WAS: the window manager may put a restored window
+            # anywhere, and showNormal on a window already shown can move it,
+            # so each view's position is kept when it is minimized (or, for one
+            # still shown, taken now) and put back (the MEDS displays' way)
             if want:
+                pos = getattr(v, "_stationPos", None)
+                restored = pos is not None
+                if pos is None and not v.isMinimized():
+                    pos = v.pos()
+                v._stationPos = None
                 v.showNormal()
-                v.raise_()
+                if restored:
+                    v.raise_()
+                if pos is not None:
+                    v.move(pos)
+                    QtCore.QTimer.singleShot(150, lambda v=v, p=pos: v.move(p))
             else:
+                if not v.isMinimized():
+                    v._stationPos = v.pos()
                 v.showMinimized()
             (shown if want else hid).append(v.name)
         print("portview: station %s: showing %s, minimized %s" % (
