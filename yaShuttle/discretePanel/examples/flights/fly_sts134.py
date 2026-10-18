@@ -881,7 +881,10 @@ class Flight:
         # PRPLT: the propellant the burn needs (no out-of-plane waste), from
         # the truth's mass: 2 OMS, Isp 316 s (VEX 10136.8 ft/s, FSSR K-loads)
         vd = json.load(open(os.path.join(cap, "vehdyn.json")))["vehdyn"]
-        kg = vd[-1] + sum(vd[16:21])
+        # the dry mass: the last value of the array until the docking block was appended to it (2026-10-09);
+        # since, vehdyn_save's index 167 (the last, alpha, is ~1.0 -- the PRPLT it gave was a tenth of the burn's)
+        dry = vd[167] if len(vd) > 167 and vd[167] > 50000.0 else vd[-1]
+        kg = dry + sum(vd[16:21])
         prplt = kg / 0.45359237 * (1.0 - math.exp(-dv / 10136.8))
         return dict(tig=tig, ei=ei, theta=theta, c1=c1, c2=c2, ht=ht, prplt=prplt)
 

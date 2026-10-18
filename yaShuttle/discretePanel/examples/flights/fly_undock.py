@@ -23,15 +23,27 @@ PHASES (the STS-134 Rendezvous book, "UNDOCKING / SEPARATION TIMELINE", 2-4 to 2
            RCS jets that plume the ISS deselected; UNIV PTG TGT ID 2, BODY VECT 5,
            P 180, Y 0, OM 0, TRK; ORBIT MNVR EXEC with TIG = the undock and the
            Orbiter's weight); the docking mechanism powered up.
+  UNDOCK   UNDOCK PET -3:00 to +10 min: DAP FREE at the Orbiter FREE time (03:52:28), DAP B/FREE/ALT, NORM Z;
+           APDS CIRC PROT OFF and UNDOCKING at the hook-drive command (03:53:08): the hooks open in 2:07
+           (vehdyn's undocking model), HOOKS 1/2 OPEN and UNDOCK COMPLETE; the +Z pulse at 03:55:22 and the
+           book's +Z pulses every 10 s to RDOT 0.2 ft/s; coast to 150 ft.  Ends in sts134r-undock.
 Not modelled, so not done: RPOP/TCS/HHL, the STORRM PGSC, the CCTV configuration,
 the RJD driver switches O14-O16, the MCC GO calls.
 """
 import os
 import sys
 
+import json
+import math
+
+import numpy as np
+
 import dock_autopilot as D       # extends fly_rndz134 with the A7L helpers
 import fly_rndz134 as R
+import rerndz as RR
+import rndz_instruments as ins
 
+HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
 
@@ -44,6 +56,10 @@ def sp(n):
 def met_of_gmt(gmt):
     """The mission elapsed time (s) of a GMT (s of the year, the vehicle's form)."""
     return gmt - R.gmt_of_unix(R.MET_ZERO_UNIX)
+
+
+D.A7L_LIGHT.update({"HOOKS 1 OPEN": (0, 0x0400), "HOOKS 2 OPEN": (0, 0x0200), "UNDOCK COMPLETE": (0, 0x0080),
+                    "APDS PROTECT CIRCUIT OFF": (0, 0x4000)})
 
 
 class Undock(R.Rendezvous):
@@ -77,7 +93,7 @@ class Undock(R.Rendezvous):
         self.do("sep-dapcfg", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
                               "+3     keys ITEM 1 + 1 2 EXEC\n+3     keys ITEM 2 + 1 2 EXEC\n", 10, "SPEC 20 DAP CONFIG")
         # DAP: A/AUTO/VERN, LO Z (the DAP panel, C3)
-        self.do("sep-dap", "+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n+2     dap c3 low_z\n", 4)
+        D.dap_modes(self, "a", True)
         # [GNC_23_RCS]: RCS F - ITEM 1 EXEC (*), the forward jets that plume the ISS off
         jets = "".join("+3     keys ITEM %s EXEC\n" % " ".join(str(i)) for i in (9, 11, 13, 15, 17, 19, 21))
         self.do("sep-rcs", "+1     keys SPEC 2 3 PRO\nwait crt 1 title /023/ timeout 120\n+3     keys ITEM 1 EXEC\n" + jets,
@@ -114,10 +130,442 @@ class Undock(R.Rendezvous):
                  % (UNDOCK_GMT, d, h, m, s, round(wt)))
 
 
+    def thc_pulse(self, ax, sgn, n=1, gap=10.0, name="und-pulse"):
+        """n THC pulses on the aft THC along body axis ax (x, y, z), sign sgn, gap seconds apart."""
+        st_ax, pos = D.AFT_STICK[ax]
+        neg = "+" if pos == "-" else "-"
+        stick = (pos if sgn > 0 else neg) + st_ax
+        text = "".join("+%s   thc aft %s 0.30\n" % ("1.0" if i == 0 else "%.1f" % gap, stick) for i in range(n))
+        self.play(text, name)
+        self.script_done(name, 60 + n * (gap + 2))
+
+    def rng(self):
+        """The CG-CG range (ft) and range rate (ft/s) from the truth's relative state (rel(): the two feeds
+        at one instant, a dropped-sample guard)."""
+        s = self.lvlh_state()
+        r = float(np.linalg.norm(s[:3]))
+        return r, float(np.dot(s[:3], s[3:]) / max(r, 1e-6))
+
+    def undock(self):
+        self.say("UNDOCK: GMT %.1f; FREE drift at %d, hook drive at %d, the +Z pulse at %d"
+                 % (self.truth()["gmt"], FREE_GMT, HOOK_GMT, UNDOCK_GMT))
+        # [GNC_20] Config DAP A,B to A9,B9 -- UNDOCK PET -3:00 (the book), before the FREE drift
+        self.wait_gmt(FREE_GMT - 150)
+        self.do("und-dap9", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
+                            "+3     keys ITEM 1 + 9 EXEC\n+3     keys ITEM 2 + 9 EXEC\n", 10, "SPEC 20, DAP A9 B9")
+        self.do("und-resume", "+1     keys RESUME\n", 4)
+        # UNDOCKING OPERATIONS [6A] step 1, "When MCC-H and ISS issue GO for Undocking": ORB TO TGT -- the
+        # docked pair is one point, and PASS's two propagated states had drifted apart (0.65 ft/s by now)
+        self.wait_gmt(FREE_GMT - 60)
+        self.do("und-orb2tgt", "+1     keys SPEC 3 3 PRO\n+4     keys ITEM 1 0 EXEC\n", 10, "SPEC 33 after ORB TO TGT")
+        self.do("und-resume2", "+1     keys RESUME\n", 4)
+        # DAP: B/FREE/ALT, NO LO Z, PULSE/PULSE/PULSE -- both stations in FREE drift (03:52:28)
+        self.wait_gmt(FREE_GMT - 45)          # the DAP buttons take ~25 s of script and lamp checks
+        D.dap_modes(self, "b", False)
+        self.do("und-free", "+1     dap c3 free\n+2     dap c3 alt\n", 4)
+        r, rd = self.rng()
+        self.say("UNDOCK: DAP B/FREE/ALT at GMT %.0f, range %s ft" % (self.truth()["gmt"], r))
+        # COMMAND UNDOCKING: APDS CIRC PROT OFF, then UNDOCKING (hook drive at 03:53:08)
+        self.wait_gmt(HOOK_GMT - 6)
+        D.a7l(self, "circ_prot_off", "undocking", tag="und-apds")
+        t_cmd = self.truth()["gmt"]
+        self.say("UNDOCK: UNDOCKING pb pressed, GMT %.0f (the command acts a second after the press)" % t_cmd)
+        ok = D.a7l_wait(self, "UNDOCK COMPLETE", limit=240, label="the hooks opening")
+        t_done = self.truth()["gmt"]
+        lit = D.a7l_lights(self)
+        self.say("UNDOCK: UNDOCK COMPLETE %s at GMT %.0f (%.0f s after the command, the MR drive 127 s); lights: %s"
+                 % ("lit" if ok else "NEVER LIT", t_done, t_done - t_cmd, ", ".join(sorted(lit)) if lit else "?"))
+        # the +Z pulse at 03:55:22
+        self.wait_gmt(UNDOCK_GMT - 1)
+        self.thc_pulse("z", +1, 1, name="und-pulse-1")
+        self.wait_sim(3)
+        r, rd = self.rng()
+        self.say("UNDOCK: the +Z pulse at GMT %.0f: range %s ft rdot %s ft/s" % (self.truth()["gmt"], r, rd))
+        # physical separation +1:00 and on: DAP A/VERN? the book's +Z pulses every 10 s to RDOT > 0.2 ft/s
+        self.wait_gmt(UNDOCK_GMT + 60)
+        # the book's +Z (out) pulses to RDOT > 0.2 ft/s: the DAP's pulses come out at ~0.04 ft/s here (the jets'
+        # 0.16 s for the 0.10 ft/s the page says), so the speed is flown as a THC hold along the port's axis (+x)
+        self.reselect_fwd_up_jets()
+        s = self.lvlh_state()
+        self.thc_burn((0.35 - s[3], 0.0, 0.0), "und-sep")
+        r, rd = self.rng()
+        self.say("UNDOCK: separating at RDOT %s ft/s, range %s ft" % (rd, r))
+        t0 = self.truth()["t"]
+        while (self.rng()[0] or 0) < 150.0 and self.truth()["t"] - t0 < 1800:
+            self.wait_sim(20)
+        r, rd = self.rng()
+        self.say("UNDOCK done: range %s ft, RDOT %s ft/s at GMT %.0f" % (r, rd, self.truth()["gmt"]))
+
+
+    # ------------------------------------------------------------------------------------------------
+    # THE LEGS AFTER THE UNDOCKING: fly-around, SEP1, SEP2 (this file), then the re-rendezvous
+    # ------------------------------------------------------------------------------------------------
+    def reselect_fwd_up_jets(self):
+        """SPEC 23: F1U, F3U and F2U back in (ITEMs 17, 19, 21).  SEPCFG deselects them as the book does, to keep
+        their plumes off the ISS; with them out the DAP's +Z translation (the pulses and THC holds along the
+        port's axis, 'out') fires only the aft up jets, the pitching moment is taken out with the down jets,
+        and the Orbiter gets a tenth of the delta-V.  The simulation has no plume, so they go back in (a
+        deviation, logged)."""
+        if getattr(self, "_fwd_up_in", False):
+            return
+        self.do("fa-jets", "+1     keys SPEC 2 3 PRO\nwait crt 1 title /023/ timeout 120\n"
+                           "+3     keys ITEM 1 7 EXEC\n+3     keys ITEM 1 9 EXEC\n+3     keys ITEM 2 1 EXEC\n"
+                           "+4     keys RESUME\n", 8, "SPEC 23, F1U F3U F2U reselected")
+        self._fwd_up_in = True
+
+    def lvlh_state(self):
+        """The Orbiter's centre of mass against the ISS: (x, y, z, xdot, ydot, zdot) in ft, ft/s, LVLH
+        (x ahead, y right, z down), the rotating frame's rates (rndz_manual.rel)."""
+        r = self.rel("cg", noisy=False)
+        return np.array(list(r["r"]) + list(r["v"]))
+
+    def body_axes_lvlh(self):
+        """The truth's attitude: (LVLH axes, q)."""
+        tru, tgt = self.feeds()
+        ex, ey, ez = ins.lvlh_axes(list(tgt["r"]), list(tgt["v"]))
+        return (ex, ey, ez), tru["q"]
+
+    def p_for(self, x, z, current=None):
+        """UNIV PTG's P (BODY VECT 5, TGT ID 2) whose quarter turn has the bay (-Z) nearest the ISS:
+        P 180 for the ISS behind, 90 below, 0 ahead, 270 above -- with 8 deg of hysteresis."""
+        ang = math.degrees(math.atan2(-z, -x)) % 360.0        # the ISS's direction from the Orbiter, from +x toward +z(down)
+        # bay directions in the (x, z) plane: P 180 -> 180 deg, P 90 -> 90 (down), P 0 -> 0 (ahead), P 270 -> 270 (up)
+        want = {180: 180.0, 90: 90.0, 0: 0.0, 270: 270.0}
+        def dist(p):
+            d = abs((ang - want[p] + 180.0) % 360.0 - 180.0)
+            return d
+        best = min(want, key=dist)
+        if current is not None and current in want and dist(current) <= dist(best) + 8.0:
+            return current
+        return best
+
+    def set_p(self, p, name):
+        """UNIV PTG: BODY VECT 5 at pitch P, TRK."""
+        self.do(name, "+1     keys RESUME\n"
+                      "+3     keys ITEM 1 5 + %s EXEC\n"
+                      "+3     keys ITEM 1 9 EXEC\n" % sp(p), 4)
+        self.say("UNIV PTG: TGT ID 2, BODY VECT 5, P %d" % p)
+
+    def lvlh_pulses(self, dv, label, nmax=12):
+        """dv (ft/s, LVLH) as aft-THC pulses along the body axes (the learned pulse size each)."""
+        axes, q = self.body_axes_lvlh()
+        return D.thc_pulses_aft(self, list(dv), axes, q, label, nmax=nmax)
+
+    def dap_both(self, buttons, name):
+        """The DAP buttons on both panels, C3 (forward) and A6U (aft): the aft THC takes its translation mode
+        from A6U, the forward from C3, and the aft station's burns were not moving the Orbiter with C3 alone."""
+        lines = ""
+        for i, b in enumerate(buttons):
+            lines += "+%d     dap c3 %s\n+0.5   dap a6u %s\n" % (1 if i == 0 else 2, b, b)
+        self.play(lines, name)
+        self.script_done(name, 90)
+        self.wait_sim(2)
+
+    def thc_burn(self, dv, label):
+        """A THC burn of dv (ft/s, LVLH) flown as continuous holds on the aft THC, DAP A/AUTO/PRI, TRANS
+        NORM: each body axis held for its share of the time (the acceleration seeded from the MC burns,
+        scaled to this Orbiter's mass), checked against the truth's relative rates and finished with one
+        correcting hold.  Returns the delta-V got (ft/s, LVLH)."""
+        dv = np.array(dv, float)
+        self.dap_both(("a", "auto", "pri", "x_norm", "y_norm", "z_norm"), label + "-norm")
+        s0 = self.lvlh_state()
+        want = dv.copy()
+        mass_scale = 120.7 / 97.4
+        for attempt in range(3):
+            axes, q = self.body_axes_lvlh()
+            m = [float(sum(want[k] * axes[k][i] for k in range(3))) for i in range(3)]
+            b = ins.to_body(ins.qmat(q), m)
+            lines, gap, plan = [], 0.0, []
+            for k, ax in enumerate("xyz"):
+                if abs(b[k]) < 0.04:
+                    continue
+                key = ("+" if b[k] > 0 else "-") + ax
+                acc = (getattr(self, "thc_acc", None) or {}).get(key) or R.THC_ACC_SEED[key] * mass_scale
+                hold = min(max(abs(b[k]) / acc * (0.85 if attempt == 0 else 1.0), 0.1), 20.0)
+                st_ax, pos = D.AFT_STICK[ax]
+                neg = "+" if pos == "-" else "-"
+                stick = (pos if b[k] > 0 else neg) + st_ax
+                lines.append("+%.2f   thc aft %s %.2f" % (gap, stick, hold))
+                plan.append("%s %.2f s" % (key.upper(), hold))
+                gap = hold + 0.3
+            if not lines:
+                break
+            self.say("%s: THC burn pass %d: want %+.2f %+.2f %+.2f ft/s (LVLH) = body %+.2f %+.2f %+.2f; holds %s"
+                     % (label, attempt, *want, *b, ", ".join(plan)))
+            name = "%s-hold-%d" % (label, attempt)
+            self.play("\n".join(lines) + "\n", name)
+            self.script_done(name, 120)
+            self.thc_moved_check(label)
+            self.wait_sim(gap + 1.0)
+            s1 = self.lvlh_state()
+            got = s1[3:] - s0[3:]
+            # the rotating frame turns: xdot, zdot change by 2 n z... over the burn (a few s) -- negligible
+            want = dv - got
+            if np.linalg.norm(want) < 0.12:
+                break
+        got = self.lvlh_state()[3:] - s0[3:]
+        self.say("%s: delta-V got %+.2f %+.2f %+.2f ft/s (|%.2f|), wanted %+.2f %+.2f %+.2f (|%.2f|)"
+                 % (label, *got, np.linalg.norm(got), *dv, np.linalg.norm(dv)))
+        self.dap_both(("vern", "x_pulse", "y_pulse", "z_pulse"), label + "-after")
+        return got
+
+    def gburn(self, name, tig_gmt, dv, lead=420.0):
+        """RE-RNDZ RCS BURN (+X, -X, Multi-axis) (CC 9-26) with MCC's solution: OPS 202 PRO, RCS SEL (ITEM 4),
+        WT (ITEM 9), TIG (ITEM 10) and the EXT delta-Vs (ITEMs 19-21, LVLH) keyed, LOAD (22), TIMER (23); at
+        TIG - 30 s DAP A/AUTO/PRI, TRANS NORM; at TIG the burn flown on the THC to null VGO (null_vgo, as the
+        midcourses); then DAP ALT, TRANS PULSE, OPS 201 PRO and the -Z target track again.  Returns the
+        delta-V the truth got (ft/s, LVLH)."""
+        dv = [float(x) for x in dv]
+        if self.truth()["gmt"] < tig_gmt - lead:
+            self.wait_gmt(tig_gmt - lead)
+        wt = self.orbiter_lb()
+        d, h, m, sec = R.dhms_f(met_of_gmt(tig_gmt))
+        self.say("== %s: RCS BURN, TIG GMT %.0f (MET %03d/%02d:%02d:%04.1f), %+.2f %+.2f %+.2f ft/s (|%.2f|), WT %d lb"
+                 % (name, tig_gmt, d, h, m, sec, *dv, math.sqrt(sum(x * x for x in dv)), round(wt)))
+        self.do(name.lower() + "-load",
+                "+1     keys OPS 2 0 2 PRO\nwait crt 1 title 2021/ timeout 180\n"
+                "+3     keys RESUME\nwait crt 1 title MNVR EXEC timeout 60\n"
+                "+3     keys ITEM 4 EXEC\n"
+                "+4     keys ITEM 9 + %s EXEC\n"
+                "+4     keys ITEM 1 0 + %s + %s + %s + %s EXEC\n"
+                "+4     keys ITEM 1 9 %s %s %s EXEC\n"
+                "+3     keys ITEM 2 2 EXEC\n"
+                "+4     keys ITEM 2 3 EXEC\n"
+                % (sp(round(wt)), sp(d), sp(h), sp(m), " ".join("%.1f" % sec), R.keys_num(dv[0], "%.1f"),
+                   R.keys_num(dv[1], "%.1f"), R.keys_num(dv[2], "%.1f")), 6, name + " loaded", timeout=400)
+        mem = self.probe(name.lower() + "-loaded")
+        if mem:
+            self.say("%s LOADed, TIMER: VGO %+.2f %+.2f %+.2f ft/s (body)" % ((name,) + tuple(mem.svec(mem.A["VGO_BODY"]))))
+        if self.truth()["gmt"] < tig_gmt - 30.0:
+            self.wait_gmt(tig_gmt - 30.0)
+        self.do(name.lower() + "-tig30", "+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 pri\n"
+                                          "+2     dap c3 x_norm\n+2     dap c3 y_norm\n+2     dap c3 z_norm\n", 2)
+        self.wait_gmt(tig_gmt)
+        s0 = self.lvlh_state()
+        self.say("%s: TIG, state x %.0f y %.0f z %.0f ft, rates %+.2f %+.2f %+.2f" % (name, *s0[:3], *s0[3:]))
+        vgo = self.null_vgo(name.lower(), 6)
+        self.wait_sim(5)
+        s1 = self.lvlh_state()
+        got = s1[3:] - s0[3:]
+        self.say("%s: the truth's delta-V %+.2f %+.2f %+.2f ft/s (LVLH, |%.2f|) against the %+.2f %+.2f %+.2f asked; VGO left %s"
+                 % (name, *got, float(np.linalg.norm(got)), *dv,
+                    ("%+.2f %+.2f %+.2f" % (vgo["x"], vgo["y"], vgo["z"])) if vgo else None))
+        self.rr_burns = getattr(self, "rr_burns", {})
+        self.rr_burns[name] = [float(x) for x in got]
+        self.do(name.lower() + "-post", "+1     dap c3 alt\n+2     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n", 2)
+        self.ops201_track(name.lower() + "-track", 300.0)
+        return got
+
+    def flyaround(self):
+        """SEP/FLYAROUND [8A] to [9A]: from 150 ft to 650 ft ahead on the +V-bar by 04:20:00 (the Mission
+        Report's fly-around pulse), the radial-up pulse that starts the half-orbit 2:1 ellipse about the ISS
+        (rerndz.flyaround_dv), the UNIV PTG pitch stepped to keep the bay toward the ISS, ending just before
+        SEP1.  The ISS is not in the Ku radar's lock at the end here, nor in the TCS."""
+        t_fa = RR.T["FA"]
+        self.reselect_fwd_up_jets()
+        n = RR.N_ISS
+        # 1. THE TRANSFER to 650 ft ahead on the +V-bar, arriving at T_FA: along-track speed on the V-bar costs
+        #    height (zddot = -2 n xdot, ~500 ft in 20 min at 0.3 ft/s), so the burn is the CW one for the point
+        #    (650, 0, 0), not a speed along x.
+        self.uplink()
+        self.wait_sim(5)
+        s = self.lvlh_state()
+        dt = t_fa - self.truth()["gmt"] - 30.0
+        dv1 = RR.transfer_dv(RR.prop(s, 30.0), dt, (650.0, 0.0, 0.0))
+        self.say("FLYAROUND: x %.0f z %.0f ft; the transfer to 650 ft ahead at 04:20:00 (%.0f s): %+.2f %+.2f %+.2f ft/s"
+                 % (s[0], s[2], dt, *dv1))
+        self.thc_burn(tuple(dv1 - 0.0), "fa-transfer")
+        # 2. THE MIDCOURSE halfway, if the transfer was off
+        self.wait_gmt(t_fa - 0.5 * dt - 30.0)
+        self.uplink()
+        self.wait_sim(5)
+        s = self.lvlh_state()
+        dt2 = t_fa - self.truth()["gmt"] - 10.0
+        dv2 = RR.transfer_dv(RR.prop(s, 10.0), dt2, (650.0, 0.0, 0.0))
+        self.say("FLYAROUND: halfway, x %.0f z %.0f ft; the midcourse %+.2f %+.2f %+.2f ft/s" % (s[0], s[2], *dv2))
+        if float(np.linalg.norm(dv2)) > 0.06:
+            self.thc_burn(tuple(dv2), "fa-mc")
+        # 3. THE FLY-AROUND: at 04:20:00 one burn that stops the transfer's rates and starts the half-orbit 2:1
+        #    ellipse about the ISS (zdot = -n x/2, up) -- the Mission Report's +X pulse of L3A and R3A
+        self.wait_gmt(t_fa - 40.0)
+        self.uplink()
+        self.wait_gmt(t_fa)
+        for k in range(3):
+            s = self.lvlh_state()
+            dv = RR.flyaround_dv_state(s)
+            self.say("FLYAROUND: at x %.0f y %.0f z %.0f ft, rates %+.2f %+.2f %+.2f; the fly-around burn %+.2f %+.2f %+.2f ft/s at GMT %.0f"
+                     % (*s[:3], *s[3:], *dv, self.truth()["gmt"]))
+            if float(np.linalg.norm(dv)) < 0.06 and k > 0:
+                break
+            self.thc_burn(tuple(dv), "fa-pulse%d" % k)
+            self.wait_sim(5)
+        self.uplink()
+        s = self.lvlh_state()
+        self.say("FLYAROUND: now x %.0f z %.0f ft, rates %+.3f %+.3f %+.3f ft/s; half an orbit on: %s"
+                 % (s[0], s[2], *s[3:], np.round(RR.prop(s, math.pi / n)[:3], 0)))
+        p_now = 180
+        # the attitude, quarter by quarter, until SEP1 minus 90 s
+        while self.truth()["gmt"] < RR.T["SEP1"] - 90.0:
+            s = self.lvlh_state()
+            p = self.p_for(s[0], s[2], p_now)
+            if p != p_now:
+                self.set_p(p, "fa-p%d" % p)
+                p_now = p
+                self.say("FLYAROUND: x %.0f z %.0f ft (range %.0f), P %d" % (s[0], s[2], math.sqrt(s[0] ** 2 + s[2] ** 2), p))
+            self.wait_sim(20)
+        s = self.lvlh_state()
+        self.say("FLYAROUND done: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f, range %.0f ft"
+                 % (s[0], s[2], s[3], s[5], math.sqrt(s[0] ** 2 + s[2] ** 2)))
+
+    def sep1(self):
+        """SEP1 BURN [8C]: 1.5 ft/s radially up (the jets' +X in the Mission Report), DAP TRANS NORM,
+        THC, then A/AUTO/VERN, TRANS PULSE.  TIG 05:06:02."""
+        self.wait_gmt(RR.T["SEP1"] - 10)
+        s = self.lvlh_state()
+        self.say("SEP1: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f at GMT %.0f" % (s[0], s[2], s[3], s[5], self.truth()["gmt"]))
+        self.wait_gmt(RR.T["SEP1"])
+        got = self.thc_burn((0.0, 0.0, -RR.PLAN["SEP1"]), "sep1")
+        self.uplink()
+        self.rr_burns = getattr(self, "rr_burns", {})
+        self.rr_burns["SEP1"] = [float(x) for x in got]
+
+    def sep2(self):
+        """RE-RENDEZVOUS: the -Z axis target track [11A] after SEP1, the ground's SEP2 solution (rerndz:
+        the direction for which NSR comes to 2.4 and TPI 3.4 ft/s), loaded and burned at 05:34:06."""
+        self.wait_gmt(RR.T["SEP1"] + 240)
+        self.uplink()                     # MCC UPLINK ORB SV, TGT SV
+        self.wait_sim(10)
+        self.ops201_track("sep2-track", 300.0)
+        self.wait_gmt(RR.T["SEP2"] - 420)
+        s = self.lvlh_state()
+        self.say("SEP2: state x %.0f y %.0f z %.0f ft, xdot %+.2f ydot %+.2f zdot %+.2f; range %.0f ft"
+                 % (*s[:3], *s[3:], np.linalg.norm(s[:3])))
+        s2 = RR.prop(s, RR.T["SEP2"] - self.truth()["gmt"])
+        d2, d3, rep = RR.sep2_nh2(s2)
+        self.say("SEP2: the ground's solution %+.2f %+.2f %+.2f ft/s (LVLH); NH2 would be %+.2f %+.2f %+.2f; predicted NSR %.2f TPI %.2f "
+                 "range at TPI %.0f ft" % (*d2, *d3, rep["NSR"], rep["TPI"], rep["range_tpi"]))
+        self.rr_plan = dict(SEP2=list(d2), NH2_nominal=list(d3))
+        self.gburn("SEP2", RR.T["SEP2"], d2)
+
+
+    # ------------------------------------------------------------------------------------------------
+    # THE STORRM RE-RENDEZVOUS (Rendezvous book pp. 1-10, 1-11, 2-11 to 2-20; Mission Report FD15)
+    # ------------------------------------------------------------------------------------------------
+    def rr_uplink_track(self, name, before_tig):
+        """MCC UPLINK ORB SV, TGT SV and the -Z axis target track [11A], some minutes before a burn."""
+        self.wait_gmt(before_tig - 900)
+        self.uplink()
+        self.wait_sim(10)
+        self.ops201_track(name + "-track", 300.0)
+
+    def nh2(self):
+        """NH2 (2.0 ft/s, 06:39:38): the ground's solution from the truth at the burn's time."""
+        self.rr_uplink_track("nh2", RR.T["NH2"])
+        self.wait_gmt(RR.T["NH2"] - 450)
+        s = self.lvlh_state()
+        s_t = RR.prop(s, RR.T["NH2"] - self.truth()["gmt"])
+        dv, rep = RR.nh2_dv(s_t)
+        self.say("NH2: state x %.0f z %.0f ft; at TIG x %.0f z %.0f; solution %+.2f %+.2f %+.2f ft/s (angle %.0f deg); predicted NSR %.2f "
+                 "TPI %.2f ft/s, range at TPI %.0f ft, z at NSR %.0f ft" % (s[0], s[2], s_t[0], s_t[2], *dv, rep["a_nh"], rep["NSR"],
+                                                                         rep["TPI"], rep["range_tpi"], rep["z_nsr"]))
+        self.rr_plan = getattr(self, "rr_plan", {})
+        self.rr_plan["z_nsr"] = rep["z_nsr"]
+        json.dump({"z_nsr": rep["z_nsr"]}, open(os.path.join(self.a.logs, "rr-plan.json"), "w"))
+        self.gburn("NH2", RR.T["NH2"], dv)
+
+    def _z_nsr(self):
+        try:
+            return json.load(open(os.path.join(self.a.logs, "rr-plan.json")))["z_nsr"]
+        except (OSError, ValueError, KeyError):
+            return 4260.0
+
+    def mc5(self):
+        """MC5 (planned 0.0 ft/s, 06:59:08; flown 1.6 s of multi-axis jets): the correction that leaves the
+        Orbiter at NH2's height with no radial rate when NSR comes; skipped under 0.1 ft/s."""
+        self.wait_gmt(RR.T["MC5"] - 600)
+        s = self.lvlh_state()
+        s_t = RR.prop(s, RR.T["MC5"] - self.truth()["gmt"])
+        dv = RR.mc5_dv(s_t, self._z_nsr())
+        mag = float(np.linalg.norm(dv))
+        self.say("MC5: at TIG x %.0f z %.0f ft; the correction %+.2f %+.2f %+.2f ft/s (|%.2f|)" % (s_t[0], s_t[2], *dv, mag))
+        if mag < 0.1:
+            self.say("MC5: under 0.1 ft/s -- no burn (the book plans 0.0)")
+            return
+        self.gburn("MC5", RR.T["MC5"], dv)
+
+    def nsr(self):
+        """NSR (2.4 ft/s, 07:24:08): the coelliptic burn, horizontal, at the apsis."""
+        self.wait_gmt(RR.T["NSR"] - 900)
+        self.uplink()
+        self.wait_sim(10)
+        s = self.lvlh_state()
+        s_t = RR.prop(s, RR.T["NSR"] - self.truth()["gmt"])
+        dv = RR.coelliptic_dv(s_t)
+        self.say("NSR: at TIG x %.0f y %.0f z %.0f ft, rates %+.2f %+.2f %+.2f; the coelliptic burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
+                 % (*s_t[:3], *s_t[3:], *dv, float(np.linalg.norm(dv))))
+        self.gburn("NSR", RR.T["NSR"], dv)
+
+    def tpi(self):
+        """TPI (3.4 ft/s, 07:57:34, ~6,860 ft): the onboard targeted burn to the TDA point, 1,000 ft below
+        and 333 ft behind the ISS, 26:51 later."""
+        self.wait_gmt(RR.T["TPI"] - 900)
+        self.uplink()
+        self.wait_sim(10)
+        s = self.lvlh_state()
+        s_t = RR.prop(s, RR.T["TPI"] - self.truth()["gmt"])
+        dv = RR.transfer_dv(s_t, RR.T["TDA"] - RR.T["TPI"], RR.TDA_POINT)
+        self.say("TPI: at TIG x %.0f y %.0f z %.0f ft (range %.0f, the book ~6,860), rates %+.2f %+.2f %+.2f; the burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
+                 % (*s_t[:3], float(np.linalg.norm(s_t[:3])), *s_t[3:], *dv, float(np.linalg.norm(dv))))
+        self.gburn("TPI", RR.T["TPI"], dv)
+
+    GATES = ((2000.0, -3.7), (1500.0, -2.9), (1000.0, -1.8), (600.0, 0.0))       # ft, the closing rate to brake to (ft/s)
+
+    def tda(self):
+        """The approach to TDA (08:24:25, ~1,050 ft): the braking gates (2000 ft to -3.7 ft/s, 1500 to -2.9, 1000
+        to -1.8 and LOW Z, 600 to 0.0) acted on if the closing is faster; NORM Z again after 1000 ft going out."""
+        gate_done = set()
+        lowz = False
+        while self.truth()["gmt"] < RR.T["TDA"] + 30:
+            s = self.lvlh_state()
+            rng = float(np.linalg.norm(s[:3]))
+            rdot = float(np.dot(s[:3], s[3:]) / max(rng, 1.0))
+            for g, rd in self.GATES:
+                if rng <= g and g not in gate_done and rdot < 0:
+                    gate_done.add(g)
+                    self.say("TDA: braking gate %d ft: range %.0f, RDOT %+.2f ft/s (gate %+.1f)" % (g, rng, rdot, rd))
+                    if g == 1000.0 and not lowz:
+                        D.dap_modes(self, "a", True)
+                        lowz = True
+                    if rdot < rd:
+                        u = s[:3] / rng
+                        self.lvlh_pulses(tuple((rd - rdot) * -u), "tda-brake-%d" % g, nmax=20)
+            self.wait_sim(10)
+        s = self.lvlh_state()
+        self.say("TDA: range %.0f ft (the book ~1,050), x %.0f z %.0f, GMT %.0f" % (float(np.linalg.norm(s[:3])), s[0], s[2], self.truth()["gmt"]))
+
+    def sep3(self):
+        """SEP3 (1.0 ft/s retrograde, 08:38:36, 15 min after TDA), DAP A, NORM Z, in the target track."""
+        self.wait_gmt(RR.T["SEP3"] - 20)
+        if lowz_on(self):
+            D.dap_modes(self, "a", False)
+        self.wait_gmt(RR.T["SEP3"])
+        got = self.thc_burn(tuple(RR.sep3_dv()), "sep3")
+        self.rr_burns = getattr(self, "rr_burns", {})
+        self.rr_burns["SEP3"] = [float(x) for x in got]
+        self.wait_sim(120)
+        s = self.lvlh_state()
+        self.say("SEP3 done: range %.0f ft, x %.0f z %.0f, GMT %.0f; burns got %s"
+                 % (float(np.linalg.norm(s[:3])), s[0], s[2], self.truth()["gmt"], getattr(self, "rr_burns", {})))
+
+
+def lowz_on(f):
+    return bool(f.lamps().low_z_lit())
+
+
 def main():
     R.Rendezvous = Undock
-    R.PHASES.extend(["START", "SEPCFG"])      # after dock_autopilot's DOCK30, DOCK, STAY
-    for a, v in (("--rhc", "aft"), ("--station", "aft"), ("--input", "virtual")):
+    R.PHASES.extend(["START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3"])      # after dock_autopilot's DOCK30, DOCK, STAY
+    for a, v in (("--rhc", "both"), ("--station", "all"), ("--input", "virtual")):
         if a not in sys.argv:
             sys.argv += [a, v]
     R.main()
