@@ -34,12 +34,21 @@ def overlay(src, dst, base, mass_kg=None, prop_kg=None):
     if dst.exists():
         raise ValueError("DEST exists")
     cap = json.loads((base / "capture.json").read_text())
-    vd = json.loads((src / "vehdyn.json").read_text())
-    v = vd["vehdyn"]
+    sd = json.loads((src / "vehdyn.json").read_text())
+    vd = json.loads((base / "vehdyn.json").read_text())
+    v = sd["vehdyn"]
     want = vehicle_gmt(cap["gmtUnix"])
     if abs(v[IDX_GMT] - want) > 5.0:
         raise ValueError("SRC's physics is at GMT %.1f, FRESH at %.1f: coast SRC to FRESH's time first" % (v[IDX_GMT], want))
     v[IDX_GMT] = want
+    # THE INSTRUMENTS ARE THE FRESH BOOT'S: the IMU platforms (and the star trackers, the Ku radar, the jets'
+    # and engines' state) are what the fresh flight software has aligned itself to, whatever the platforms
+    # of the SRC lineage had been aligned or drifted to (30 deg apart after the rendezvous, 2026-10-18) --
+    # PASS reads the gimbal angles the truth's attitude makes on THEM.  Only the physics -- the state, the
+    # tanks, the ISS -- is SRC's, on FRESH's clock (the instruments' times are on it).
+    v[2] = vd["vehdyn"][2]
+    vd["vehdyn"] = v
+    vd["targets"] = sd["targets"]
     if prop_kg:
         v[IDX_PROP:IDX_PROP + 5] = list(prop_kg)
     if mass_kg:

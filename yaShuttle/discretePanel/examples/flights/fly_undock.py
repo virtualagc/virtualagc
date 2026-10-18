@@ -301,7 +301,9 @@ class Undock(R.Rendezvous):
             got = s1[3:] - s0[3:]
             # the rotating frame turns: xdot, zdot change by 2 n z... over the burn (a few s) -- negligible
             want = dv - got
-            if np.linalg.norm(want) < 0.12:
+            # a THC hold has a floor: the shortest (0.1 s) gives 0.12-0.17 ft/s, so a correction smaller than that
+            # is not made -- it came out larger than the error it was for (f3, c1)
+            if np.max(np.abs(want)) < 0.12:
                 break
         got = self.lvlh_state()[3:] - s0[3:]
         self.say("%s: delta-V got %+.2f %+.2f %+.2f ft/s (|%.2f|), wanted %+.2f %+.2f %+.2f (|%.2f|)"
@@ -401,10 +403,21 @@ class Undock(R.Rendezvous):
             self.wait_sim(5)
         self.uplink()
         s = self.lvlh_state()
+        self.fa_s0, self.fa_t0 = s, self.truth()["gmt"]
         self.say("FLYAROUND: now x %.0f z %.0f ft, rates %+.3f %+.3f %+.3f ft/s; half an orbit on: %s"
                  % (s[0], s[2], *s[3:], np.round(RR.prop(s, math.pi / n)[:3], 0)))
         p_now = 180
-        # the attitude, quarter by quarter, until SEP1 minus 90 s
+        # the attitude, quarter by quarter, until SEP1 minus 90 s -- and the range kept: [9A] has the crew hold
+        # 650 +- 50 ft with the THC all the way round, and the DAP's own maneuvers (the quarter turns, and the
+        # verniers' small net force) take the Orbiter off the ellipse by ~0.8 ft/s over the half orbit.  Every
+        # 4 minutes the state is brought back toward where the ellipse would have it at SEP1.
+        # the centred ellipse itself, from T_FA: x = 650 cos(n t), z = -325 sin(n t) (the half orbit that ends
+        # 650 ft behind on the -V-bar), not the one the state after the fly-around burn would fly -- that one is
+        # as off as the burn was (-0.4 ft/s of xdot left in c1), and trimming to it kept the error
+        t_end = RR.T["SEP1"] - 90.0
+        a_end = n * (t_end - t_fa)
+        s_end = np.array([650.0 * math.cos(a_end), 0.0, -325.0 * math.sin(a_end), 0.0, 0.0, 0.0])
+        next_trim = self.truth()["gmt"] + 240.0
         while self.truth()["gmt"] < RR.T["SEP1"] - 90.0:
             s = self.lvlh_state()
             p = self.p_for(s[0], s[2], p_now)
@@ -412,6 +425,17 @@ class Undock(R.Rendezvous):
                 self.set_p(p, "fa-p%d" % p)
                 p_now = p
                 self.say("FLYAROUND: x %.0f z %.0f ft (range %.0f), P %d" % (s[0], s[2], math.sqrt(s[0] ** 2 + s[2] ** 2), p))
+            if self.truth()["gmt"] >= next_trim and RR.T["SEP1"] - 90.0 - self.truth()["gmt"] > 420.0:
+                s = self.lvlh_state()
+                left = RR.T["SEP1"] - 90.0 - self.truth()["gmt"] - 20.0
+                dv = RR.transfer_dv(RR.prop(s, 20.0), left, s_end[:3])
+                a_now = n * (self.truth()["gmt"] - t_fa)
+                ideal = np.array([650.0 * math.cos(a_now), 0.0, -325.0 * math.sin(a_now)])
+                self.say("FLYAROUND: trim, x %.0f z %.0f (the ellipse x %.0f z %.0f); %+.2f %+.2f %+.2f ft/s"
+                         % (s[0], s[2], ideal[0], ideal[2], *dv))
+                if float(np.linalg.norm(dv)) > 0.05:
+                    self.thc_burn(tuple(dv), "fa-trim")
+                next_trim = self.truth()["gmt"] + 240.0
             self.wait_sim(20)
         s = self.lvlh_state()
         self.say("FLYAROUND done: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f, range %.0f ft"
@@ -441,10 +465,13 @@ class Undock(R.Rendezvous):
         self.say("SEP2: state x %.0f y %.0f z %.0f ft, xdot %+.2f ydot %+.2f zdot %+.2f; range %.0f ft"
                  % (*s[:3], *s[3:], np.linalg.norm(s[:3])))
         s2 = RR.prop(s, RR.T["SEP2"] - self.truth()["gmt"])
-        d2, d3, rep = RR.sep2_nh2(s2)
-        self.say("SEP2: the ground's solution %+.2f %+.2f %+.2f ft/s (LVLH); NH2 would be %+.2f %+.2f %+.2f; predicted NSR %.2f TPI %.2f "
-                 "range at TPI %.0f ft" % (*d2, *d3, rep["NSR"], rep["TPI"], rep["range_tpi"]))
-        self.rr_plan = dict(SEP2=list(d2), NH2_nominal=list(d3))
+        ref = RR.ref()
+        d2 = RR.targeted_dv(s2, RR.T["SEP2"], RR.T["NH2"], ref["nh2_pos"])
+        nominal = ref["sep2"]
+        self.say("SEP2: the ground's solution %+.2f %+.2f %+.2f ft/s (LVLH, |%.2f|), aimed at the reference NH2 point x %.0f z %.0f ft; "
+                 "the nominal chain's is %+.2f %+.2f %+.2f"
+                 % (*d2, float(np.linalg.norm(d2)), ref["nh2_pos"][0], ref["nh2_pos"][2], *nominal))
+        self.rr_plan = dict(SEP2=list(d2))
         self.gburn("SEP2", RR.T["SEP2"], d2)
 
 
@@ -464,10 +491,14 @@ class Undock(R.Rendezvous):
         self.wait_gmt(RR.T["NH2"] - 450)
         s = self.lvlh_state()
         s_t = RR.prop(s, RR.T["NH2"] - self.truth()["gmt"])
-        dv, rep = RR.nh2_dv(s_t)
-        self.say("NH2: state x %.0f z %.0f ft; at TIG x %.0f z %.0f; solution %+.2f %+.2f %+.2f ft/s (angle %.0f deg); predicted NSR %.2f "
-                 "TPI %.2f ft/s, range at TPI %.0f ft, z at NSR %.0f ft" % (s[0], s[2], s_t[0], s_t[2], *dv, rep["a_nh"], rep["NSR"],
-                                                                         rep["TPI"], rep["range_tpi"], rep["z_nsr"]))
+        ref = RR.ref()
+        dv = RR.targeted_dv(s_t, RR.T["NH2"], RR.T["NSR"], ref["nsr_pos"])
+        rep = RR.chain(RR.kick(s_t, dv), RR.T["NH2"])
+        rep["z_nsr"] = float(ref["nsr_pos"][2])
+        self.say("NH2: state x %.0f z %.0f ft; at TIG x %.0f z %.0f; solution %+.2f %+.2f %+.2f ft/s (|%.2f|, the book 2.0), aimed at the "
+                 "reference NSR point x %.0f z %.0f; predicted NSR %.2f TPI %.2f ft/s, range at TPI %.0f ft"
+                 % (s[0], s[2], s_t[0], s_t[2], *dv, float(np.linalg.norm(dv)), ref["nsr_pos"][0], ref["nsr_pos"][2],
+                    rep["NSR"], rep["TPI"], rep["range_tpi"]))
         self.rr_plan = getattr(self, "rr_plan", {})
         self.rr_plan["z_nsr"] = rep["z_nsr"]
         json.dump({"z_nsr": rep["z_nsr"]}, open(os.path.join(self.a.logs, "rr-plan.json"), "w"))
