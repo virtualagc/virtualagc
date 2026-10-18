@@ -1,4 +1,5 @@
-/* THE DOCKING (vehdyn.c, THE DOCKING): the ODS ring meeting PMA-2.
+/* THE DOCKING (vehdyn.c, THE DOCKING): the ODS ring meeting PMA-2, and the UNDOCKING
+ * (OPEN HOOKS / UNDOCKING, the 2:07 drive, the release) at the end.
  *
  * A run of its own, because the vehicles come from the environment, which
  * vehdyn reads once: the ISS from STS-134's targets file with PMA-2's port
@@ -333,6 +334,87 @@ int main(void) {
         check(vehdyn_docked() == 2, "restored mated, and still mated", vehdyn_docked(), 2);
         geometry(460.0, &gap, &lat, rv, pv);
         check(fabs(gap) < 1e-3 && lat < 1e-3, "still on the port's face after the restore, the file's port (m)", gap, 0.0);
+    }
+
+    /* UNDOCKING.  The mated snapshot is kept to run it twice. */
+    static double mb[256], mt[512];
+    int mn, mnt;
+    {
+        mn = vehdyn_save(mb, 256);
+        mnt = vehdyn_targets_save(mt, 512);
+        vehdyn_load(mb, mn);
+        vehdyn_targets_load(mt, mnt);
+        t = 0.0;
+        run(&t, 5.0);
+        check(vehdyn_docked() == 2, "undock: starts mated", vehdyn_docked(), 2);
+        press(&t, 0x0010);                               /* UNDOCKING, unprotected: refused */
+        run(&t, t + 5.0);
+        check(vehdyn_docked() == 2 && lit(0, 0x0003) && !lit(0, 0x0080), "UNDOCKING without CIRC PROT OFF does nothing", 0, 0);
+        press(&t, 0x0400);                               /* APDS CIRC PROT OFF */
+        check(lit(0, 0x4000), "APDS CIRC PROT OFF lights its lamp", 0, 0);
+        press(&t, 0x0010);                               /* UNDOCKING */
+        check(!lit(0, 0x4000), "the protected command uses CIRC PROT OFF up", 0, 0);
+        double t0 = t;                                   /* the hooks started 0.5 s ago */
+        run(&t, t0 + 5.0);
+        check(lit(0, 0x0003) && !lit(0, 0x0004) && !lit(0, 0x0008) && !lit(0, 0x0600),
+              "opening, 5 s: HOOKS CLOSED still lit, INTERF SEALED and READY TO HOOK out", 0, 0);
+        run(&t, t0 + 20.0);
+        check(!lit(0, 0x0003) && !lit(0, 0x0600) && vehdyn_docked() == 2,
+              "opening, 20 s: HOOKS CLOSED out (8 %), HOOKS OPEN not yet, still mated", 0, 0);
+        /* a snapshot taken mid-drive carries it through */
+        {
+            static double sb[256], tb[512];
+            int n = vehdyn_save(sb, 256), nt = vehdyn_targets_save(tb, 512);
+            vehdyn_load(sb, n);
+            vehdyn_targets_load(tb, nt);
+            t = 0.0;
+            run(&t, 100.0);                              /* 20.5 + 100 = 120.5 s into a 127 s drive */
+            check(vehdyn_docked() == 2 && !lit(0, 0x0600) && !lit(0, 0x0080),
+                  "restored mid-drive, 120 s: still mated, not yet open", vehdyn_docked(), 2);
+            int contacts = vehdyn_dock_contacts();
+            run(&t, 110.0);
+            check(vehdyn_docked() == 0, "127 s: the hooks open and the Orbiter is free", vehdyn_docked(), 0);
+            check(lit(0, 0x0600) && lit(0, 0x0080) && !lit(0, 0x0003) && !lit(0, 0x0004),
+                  "HOOKS 1, 2 OPEN and UNDOCK COMPLETE lit, CLOSED and SEALED out", 0, 0);
+            geometry(460.0, &gap, &lat, rv, pv);
+            {
+                double d[3];
+                for (int i = 0; i < 3; i++) d[i] = rv[i] - pv[i];
+                check(sqrt(dot(d, d)) < 1e-3, "released with no relative velocity (m/s)", sqrt(dot(d, d)), 0.0);
+            }
+            run(&t, 170.0);
+            check(vehdyn_docked() == 0 && vehdyn_dock_contacts() == contacts,
+                  "not captured again, no new contact, 60 s on", vehdyn_dock_contacts(), contacts);
+            geometry(460.0, &gap, &lat, rv, pv);
+            check(fabs(gap) < 0.5 && lat < 0.5, "and still near where it was (no push; the Orbiter's own drag, not the ISS's) (m)", gap, 0.0);
+            /* a snapshot of the released state restores released */
+            {
+                n = vehdyn_save(sb, 256); nt = vehdyn_targets_save(tb, 512);
+                vehdyn_load(sb, n); vehdyn_targets_load(tb, nt);
+                t = 0.0;
+                run(&t, 20.0);
+                check(vehdyn_docked() == 0 && vehdyn_dock_contacts() == contacts && lit(0, 0x0080),
+                      "restored released: still free, UNDOCK COMPLETE still lit", vehdyn_docked(), 0);
+            }
+        }
+        /* and again with a push of 0.2 ft/s along the port's axis */
+        setenv("YAGPC_VEHDYN_UNDOCK_FPS", "0.2", 1);
+        vehdyn_load(mb, mn);
+        vehdyn_targets_load(mt, mnt);
+        int c0 = vehdyn_dock_contacts();
+        t = 0.0;
+        run(&t, 3.0);
+        press(&t, 0x0400);
+        press(&t, 0x0040);                               /* OPEN HOOKS does the same */
+        run(&t, t + 130.0);
+        check(vehdyn_docked() == 0, "OPEN HOOKS also lets go", vehdyn_docked(), 0);
+        double t1 = t;
+        run(&t, t1 + 30.0);
+        geometry(460.0, &gap, &lat, rv, pv);
+        check(gap > 0.18 * FT * 30.0 && gap < 0.22 * FT * 30.0 + 0.2,
+              "pushed off at 0.2 ft/s: 30 s on it is ~1.8 m out along the axis (m)", gap, 0.2 * FT * 30.0);
+        check(vehdyn_dock_contacts() == c0, "no contact made on the way out", vehdyn_dock_contacts(), c0);
+        unsetenv("YAGPC_VEHDYN_UNDOCK_FPS");
     }
 
     remove(path);
