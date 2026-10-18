@@ -19,6 +19,7 @@ Changes
 
 
 
+
           Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -69,6 +70,7 @@ Changes
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
 Interconnections
+
 
 
 
@@ -133,6 +135,7 @@ of
 
 
 
+
     introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -145,6 +148,7 @@ of
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
 As
+
 
 
 
@@ -347,6 +351,7 @@ As
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
 vs.
+
 
 
 
@@ -1278,6 +1283,7 @@ with
 
 
 
+
       the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
     standpoint than working with the DSKY.&nbsp; The DSKY is simply a
@@ -1440,6 +1446,7 @@ with
     sequences", refer to the <a
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
 Architecture
+
 
 
 
@@ -1695,6 +1702,7 @@ Input-Channel
 
 
 
+
       Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1766,6 +1774,7 @@ Input-Channel
     which bits of the output channels are applicable.<br>
     <h3><a name="Fictitious_IO_Channels" id="Fictitious_IO_Channels"></a>Fictitious
 I/O
+
 
 
 
@@ -2033,7 +2042,7 @@ I/O
             the AGC writes to the associated output channels (011 and
             013).&nbsp; In other words, it accounts for hardware
             handling of the signals after leaving the AGC's output
-            registers.&nbsp; For example, channel 10 has KEY REL and
+            registers.&nbsp; For example, channel 11 has KEY REL and
             OPER ERR bits that tell whether the KEY REL and OPER ERR
             signals are logically active or not, but don't account for
             the fact that in addition to the logical state of the
@@ -2060,6 +2069,7 @@ I/O
     <br>
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
 I/O
+
 
 
 
@@ -2096,6 +2106,7 @@ I/O
     </div>
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
 of
+
 
 
 
@@ -2448,6 +2459,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
 
 
 
+
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
       schematic have been traced out, and are shown in the leftmost
@@ -2697,7 +2709,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
             <td style="text-align: center; vertical-align: middle;"> 11<br>
             </td>
             <td style="vertical-align: middle; text-align: left;">
-              DSKY:&nbsp; Lights the "STANDBY" indicator. But see the
+              DSKY:&nbsp; Lights the "STBY" indicator. But see the
               "fictitious" i/o channel 163 discussed earlier on this
               page. </td>
           </tr>
@@ -3159,6 +3171,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
 
 
 
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3194,6 +3207,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
@@ -3201,6 +3215,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
 to
+
 
 
 
@@ -3215,7 +3230,7 @@ to
       style="font-weight: bold;">yaAGC</span> acts as a "server" to
     which client simulations like <span style="font-weight: bold;">yaDSKY</span>
     can connect. By default, <span style="font-weight: bold;">yaAGC</span>
-    listens for connections on 5 ports, 19697-19701. One
+    listens for connections on 5 ports, 19697-19706. One
     simulated-hardware client can connect on each port, so up to 5
     hardware simulations can be attached to the simulated computer at
     any time. (The number 5 is arbitrary, and can be increased by
@@ -3227,6 +3242,7 @@ to
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
 
 
 
@@ -3444,6 +3460,7 @@ Therefore,
 
 
 
+
       the operation of 16383+1 will overflow.&nbsp; In terms of bits,
       this operation results in 01 000000 000000.&nbsp; The mismatch
       between the most significant bits is an indication of
@@ -3458,6 +3475,7 @@ Therefore,
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
 Interconnections
+
 
 
 
@@ -3487,6 +3505,7 @@ Interconnections
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
 New
+
 
 
 
@@ -3912,6 +3931,7 @@ It's
 
 
 
+
     important to use this function rather than reading the mirror array
     directly, since the function accounts for the fact that the L and Q
     registers appear in both i/o space and erasable-memory space.&nbsp;
@@ -3920,6 +3940,7 @@ It's
     external to the CPU.<br>
     <h3><a name="AGC_Backtrace_API" id="AGC_Backtrace_API"></a><strike>AGC
 Backtrace
+
 
 
 
@@ -4014,6 +4035,7 @@ Backtrace
           find useful <a moz-do-not-send="true"
             href="yaTelemetry2.html">supplemental information here</a>.&nbsp;
 
+
           The changes to the API were the result of the belated
           realization that the downlists emitted by the AGC depend on
           the AGC software version being run, and that the existing code
@@ -4045,6 +4067,7 @@ Backtrace
     use what I've provided than to take care of it all yourself.<br>
     <br>
     <font color="#ff0000"><code><span style="font-family: monospace;">#include
+
 
           "agc_engine.h"<br>
           void dddConfigure(char *agcSoftware, const char *docPrefix);</span></code><br>
@@ -4084,6 +4107,7 @@ Backtrace
         uses the auxiliary files ddd-*-*.tsv, which are <a
           moz-do-not-send="true" href="yaTelemetry2.html">documented
           elsewhere</a>.&nbsp; The files </font><font color="#ff0000">must
+
 
         be in the current working directory.&nbsp; That's a drawback
         that I guess I'll have to fix if anybody complains about
@@ -4354,9 +4378,10 @@ Backtrace
 
 
 
+
         No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
-        agc_engine_init (&amp;State, argv[1], NULL);</span><br>
+        agc_engine_init (&amp;State, argv[1], NULL, 0);</span><br>
       <span style="font-family: monospace;">&nbsp; if (ReturnValue)</span><br>
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; return
         (ReturnValue);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Error
@@ -4581,10 +4606,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2025-04-10.<br>
+          2026-10-14.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

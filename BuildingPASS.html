@@ -32,11 +32,11 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
       <li><a moz-do-not-send="true" href="#standalone">Step 4:
           (Optional) Stand-Alone Emulation</a></li>
       <li><a moz-do-not-send="true" href="#taping">Step 5: Taping</a></li>
-      <li><a moz-do-not-send="true" href="emulationFromTape">Step 6:
+      <li><a moz-do-not-send="true" href="#emulationFromTape">Step 6:
           Emulation and IPL from Tape</a></li>
       <ul>
         <li><a moz-do-not-send="true" href="#background">Background</a></li>
-        <li><a moz-do-not-send="true" href="ipl">IPL</a></li>
+        <li><a moz-do-not-send="true" href="#ipl">IPL</a></li>
         <li><a moz-do-not-send="true" href="#tour">A Brief Tour</a></li>
       </ul>
       <li><a moz-do-not-send="true" href="#multiGPC">For Enthusiasts</a><br>
@@ -184,6 +184,8 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
+
           right down to the <i>other</i> dreadful, nerdy stuff</a>.<br>
       </p>
     </blockquote>
@@ -225,9 +227,13 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
+
         into <font color="#009900"><i><b>scratch</b></i></font>. <br>
       </li>
       <li>For OI-34.06:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
+
+
 
 
 
@@ -246,6 +252,8 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
+
         into <font color="#009900"><i><b>scratch</b></i></font>,
         renaming it OI340700. Then copy the directory <font
           color="#009900"><i><b>PFS</b></i></font>/OI340700 into <font
@@ -254,6 +262,8 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
         OI-34.06 and OI-34.07 source code is so similar, <font
           color="#009900"><i><b>PFS</b></i></font>/OI340700 stores only
         the files that are <i>different</i> from <font color="#009900"><i><b>PFS</b></i></font>/OI340600.
+
+
 
 
 
@@ -282,8 +292,12 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
+
         Code"/PASS.REL32V0/RUNASM</li>
       <li><font color="#009900"><i><b>virtualagc</b></i></font>/yaShuttle/"Source
+
+
 
 
 
@@ -432,6 +446,8 @@ compilePASS<br></pre>
 
 
 
+
+
           PASS User's Guide</i> has a more-extensive if still
         abbreviated discussion</a>.<br>
     </p>
@@ -470,7 +486,7 @@ compilePASS<br></pre>
     <ul>
       <li>OPS 000 (SSW) — System Software<br>
       </li>
-      <li>OPS 9 (GNC) — Precount / post-landing</li>
+      <li>OPS 9 (GNC) — Pre-countdown / post-landing</li>
       <li>OPS 2 (GNC) — On orbit</li>
       <li>OPS 8 (GNC) — On-orbit checkout</li>
       <li>OPS 2 (SM) — Orbit / doors</li>
@@ -526,63 +542,47 @@ compilePASS<br></pre>
       usually not something worthy of a "Dear Diary" entry.<br>
     </p>
     <p>Here's a video that shows going through an IPL process for GPC 1,
-      from power-up all the way to an OPS 000 menu screen. (It may play
-      in your browser, but if not, it'll hopefully let you download it
-      instead.)<br>
+      from power-up all the way to an OPS-101 (Ascent) menu screen. This
+      is not quite the easy, hand-off process we're familiar with on the
+      computers we use in everyday life.&nbsp; Rather, it's a hands-on
+      experience involving keypad entries and flipping switches on the
+      control panel, and it pretty much won't work unless you have a
+      pretty good idea what you're doing. As I'm sure you realize, the
+      control panel of the Orbiter is a rather large thing with hundreds
+      of switches, dials, indicator lamps, and so on, and we don't
+      pretend to emulate all of that stuff.&nbsp; For one thing, most of
+      it is irrelevant to you at any given time.&nbsp; For another,
+      there wouldn't be enough space on your computer's display screen.
+      Instead, we compromise and show just enough of the control panel
+      to deal with whatever "operational sequence" (OPS) of the flight
+      software (or boot software) that you happen to be in at the time.
+      During the course of the video, you'll actually pass through a
+      couple of different boot-loader programs, followed by a number of
+      PASS's so-called "operational sequences": FCMBOOT → GPCIPL → OPS-0
+      → OPS-9 → OPS-0 → OPS-1. You'll start out with the 3 control-panel
+      chunks needed by the boostrap loader, and end up in OPS-1 with no
+      less than 14 control-panel chunks being displayed.<br>
+    </p>
+    <p>It's sometimes hard to see what's going on with the control-panel
+      manipulations if you don't know what you're doing — and even if
+      you <i>do</i>! — so I've taken the liberty of accentuating the
+      controls that are about to be manipulated by drawing a red circle
+      around them; of course, you wouldn't expect to see those during an
+      actual simulation.&nbsp; There are also some subtitles giving very
+      general descriptions of what's going on.<br>
     </p>
     <p><video controls="controls" style="height:600px; width:auto;
-        display:block; margin:0 auto"> <source
-          src="demoIPL-final-1080.mp4" type="video/mp4"> </video></p>
-    <p><video controls="controls" style="height:600px; width:auto;
-        display:block; margin:0 auto"> <source
-          src="simulatorTour.mp4" type="video/mp4"> </video></p>
-    <p></p>
-    <p>Even from just the screen-capture above, you can tell that there
-      are a lot of seemingly-complicated controls, and a lot of them are
-      actually used in the IPL process!&nbsp; At the left is the
-      emulated display screen (MEDS) itself, while at the right is the
-      keyboard that's associated with the MEDS, and in the middle there
-      are a lot of Shuttle control-panel switches. How do we know what
-      to do with the keyboard and all of those switches?&nbsp; The <i><a
-          moz-do-not-send="true"
+        display:block; margin:0 auto" crossorigin="anonymous"> <source
+          src="demoIPL-final-1080.mp4" type="video/mp4"> <track
+          id="vtt1" src="demoIPL-final-1080.vtt" kind="captions"
+          srclang="en" label="English" default=""> </video> </p>
+    <p>How do we know what to do with the keyboard and all of those
+      switches?&nbsp; The <i><a moz-do-not-send="true"
           href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf#page=52">PASS
           User's Guide (OI-32)</a></i> goes through it step-by-step, as
       well as providing some extra explanation of what's going on behind
       the scenes, so I won't waste my or your time by rehashing
-      something you could read just as easily there as here.&nbsp; I
-      will comment that a few of the steps in the PASS User's Guide are
-      unnecessary in the simulation, and I haven't bothered to supply
-      controls for them.&nbsp; For example, Step #1 in the published
-      procedure is to apply power to MMU1 and MMU2, but in the
-      simulation they're just always "on", and I haven't bothered to
-      provide any fake power switches for them that you can pretend to
-      click.&nbsp; (But I don't present I'm consistent on this matter:
-      the simulated GPC POWER switches <i>are</i> fake and are just
-      provided for pretending.)&nbsp; The only place in the published
-      procedure where you have a real option is at Step #12, in which
-      you can choose which "area" into which the software downloaded
-      from the MMU is supposed to be loaded; choose any of 1, 3, or 5,
-      since areas 2 and 4 are for loading BFS, which we don't have. <br>
-    </p>
-    <p>The worst thing about the process, other than the need to hit all
-      those switches in the right order, at the right time instead of
-      having it proceed automatically, is that you'll notice the video
-      is 80 seconds long, and you've got 5 GPCs to deal with, so you're
-      looking at 400 seconds to IPL all of them unless you have buddies
-      helping you.<br>
-    </p>
-    <p>But enough grousing!&nbsp; What you get at the end of the process
-      is a menu screen entitled "GPC MEMORY", which is actually the
-      entry screen for OPS 000, as promised.&nbsp; That's your entrée to
-      the rest of PASS.<br>
-    </p>
-    <p>Beware! This was only a single GPC, and took only a bit over a
-      minute to run through the IPL process. When you have to deal with
-      <i>five</i> GPCs, while taking redundancy and backups into
-      account, it's neither so simple nor so pleasant.&nbsp; That takes
-      more like 15 minutes to run through the process, and <a
-        moz-do-not-send="true" href="#multiGPC">you can see a video of
-        it later on</a>, if you're so inclined.<br>
+      something you could read just as easily there as here.<br>
     </p>
     <h2><a name="tour"></a>A Brief Tour<br>
     </h2>
