@@ -24,9 +24,34 @@ THE SCHEDULE is the STS-134 VBAR APPROACH cue card (RNDZ p306, CC 9-8;
      10 ft  -0.10 ft/s   check no LO Z
       3 ft  -0.10 ft/s   maintain the 3 in lateral alignment cylinder
 
-NOT DONE HERE YET: the F1F/F2F deselection (SPEC 23), and the angular
-flyout -- the misalignment is read off the centerline camera at 30 ft and at
-contact and reported, but nothing is flown to correct it.
+NOT DONE HERE: the F1F/F2F deselection (SPEC 23), and the angular flyout
+(CC 9-9) -- the misalignment is read off the centerline camera at 30 ft and
+at contact and reported, but nothing is flown to correct it (every run so far
+read under 1 degree at 30 ft).  A flyout was tried and left out (2026-10-18,
+confirm-M; Codex's port: UNIV PTG TGT ID 1, BODY VECT 5, P/Y/OM from the
+camera angles): it turned a 0.3 degree misalignment into 15 degrees (camera P
++15.1 Y +1.6 R +2.0 after 300 s).  TGT ID 1 points at the ISS's state vector,
+which from 30 ft out is a different direction from PMA-2's axis; a flyout
+that works needs a target at the port.  Not attempted.
+
+THIS FILE IS FROZEN as a verification and demonstration tool (owner,
+2026-10-18): it showed that the MMU tapes and yaGPC2 fly the STS-134 docking
+at the flight's timing and propellant use.  It is not a product; users are
+expected to dock by hand (the captures to start from: ~/sts134-runs/
+approach-mine/sts134r-hold at 100 ft, sts134r-dock30 at 30 ft; the hand
+controllers: handcontrollers.py with a joystick profile).  KNOWN LIMITS,
+left as they are:
+  - a pulse's size is the DAP's: A7's ~0.15 ft/s until A10/B10 are selected
+    at 75 ft, so no hold before that is quieter than ~0.1 ft/s;
+  - after a station-keeping gap Z overshoots (to -5 ft in approach-mine):
+    vmax 0.2 ft/s against ~0.02 ft/s of braking authority;
+  - dap_load (about a minute) and the 75 ft DAP switch still block the
+    control loop, at nominal rates;
+  - the measured radial acceleration with a closing rate is about 2x the
+    Clohessy-Wiltshire 2*n*xdot (5.6e-4 against ~2.8e-4 ft/s^2): not
+    explained;
+  - the 30 ft pause (about 4 minutes with the settle test) is the
+    checklist's TARGET ALIGNMENT pause, not a defect.
 
 THERE WAS NO DOCKING AUTOPILOT.  Every Shuttle final approach was flown by
 hand, the commander on the THC with the centerline camera's cross on the
