@@ -154,6 +154,37 @@ def nh2_dv(s, mag=PLAN["NH2"], n=N_ISS, t_now=None):
     return np.array(dv), dict(err=err, a_nh=a3, z_nsr=z_nsr, **r)
 
 
+def reference(n=N_ISS):
+    """The idealised chain of the record, from the fly-around: the Orbiter's positions at NH2 and at NSR
+    (x, y, z ft) that SEP2 and NH2 are aimed at -- the ground targets each burn at the next point of a
+    reference trajectory, so that the dispersions of the burns before it (the THC cannot make a burn
+    better than ~0.1 ft/s) are taken out and NSR, TPI and the approach start where they should."""
+    s = np.array([650.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    s = kick(s, flyaround_dv(650.0, n))
+    s = prop(s, T["SEP1"] - T["FA"], n)
+    s = kick(s, (0.0, 0.0, -PLAN["SEP1"]))
+    s2 = prop(s, T["SEP2"] - T["SEP1"], n)
+    d2, d3, rep = sep2_nh2(s2, n=n)
+    s_nh = prop(kick(s2, d2), T["NH2"] - T["SEP2"], n)
+    s_nsr = prop(kick(s_nh, d3), T["NSR"] - T["NH2"], n)
+    return dict(sep2=np.array(d2), nh2=np.array(d3), nh2_pos=s_nh[:3].copy(), nsr_pos=s_nsr[:3].copy(), report=rep)
+
+
+_REF = None
+
+
+def ref():
+    global _REF
+    if _REF is None:
+        _REF = reference()
+    return _REF
+
+
+def targeted_dv(s, t_from, t_to, pos, n=N_ISS):
+    """The burn at t_from, from the state s there, that puts the Orbiter at pos at t_to."""
+    return transfer_dv(np.asarray(s, float), t_to - t_from, pos, n)
+
+
 def mc5_dv(s, z_nsr, n=N_ISS):
     """MC5, from the state s at its time: the burn (x, z only) that leaves the Orbiter at the height
     z_nsr (ft below) with no radial rate when NSR comes -- the apsis NSR needs."""
