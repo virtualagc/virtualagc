@@ -23,6 +23,7 @@ state is (x, y, z, xdot, ydot, zdot) in ft, ft/s, the rotating frame's rates (rn
     xddot = 2 n zdot,   yddot = -n^2 y,   zddot = 3 n^2 z - 2 n xdot.
 """
 import math
+import os
 
 import numpy as np
 
@@ -88,6 +89,14 @@ T = dict(FA=gmt(4, 20, 0), SEP1=gmt(5, 6, 2), SEP2=gmt(5, 34, 6), NH2=gmt(6, 39,
 TDA_POINT = (-333.0, 0.0, 1000.0)       # 1,000 ft below and 333 ft behind
 PLAN = dict(SEP1=1.5, SEP2=1.5, NH2=2.0, MC5=0.0, NSR=2.4, TPI=3.4, SEP3=1.0)       # ft/s, the Rendezvous book
 TPI_RANGE_FT = 6860.0
+# THE FLOWN SOLUTIONS (History of Space Shuttle Rendezvous, JSC-63400 ch. 21, pp. 153-154; LVLH ft/s): SEP2 +1.5 0.0 0.0,
+# NH2 -1.8 0.0 0.0, MC5 0.1 0.0 0.5, NSR -2.5 0.1 0.0, MC6 0 (no burn), TPI 0.3 0.1 -3.4 (elevation-angle Lambert, 42 deg).
+# SEP2 and NH2 are flown as they were; MC5, NSR and TPI are on-board targeted, so they are computed here.  The NSR point
+# is the one for which, after SEP2 and NH2 as flown, MC5 comes to 0.54 ft/s, NSR to 2.5 and TPI to 3.4 (search of the
+# CW chain, 2026-10-19: NSR point x -16,500 z +3,800 ft -> MC5 0.54, NSR 2.53, TPI 3.38; TPI elevation 48 deg, range 5,090 ft).
+FLOWN_SEP2 = (1.5, 0.0, 0.0)
+FLOWN_NH2 = (-1.8, 0.0, 0.0)
+NSR_POINT = (-16500.0, 0.0, 3800.0)
 
 
 def flyaround_dv(x_ahead, n=N_ISS):
@@ -173,10 +182,17 @@ def reference(n=N_ISS):
 _REF = None
 
 
+FIG_NH2_POINT = (-23000.0, 0.0, -3500.0)       # read from the History of Space Shuttle Rendezvous, Figure 21.1 (owner, 2026-10-19)
+FIG_NSR_POINT = (-21000.0, 0.0, 4600.0)        # (TPI is at the same height, -5,500: the coelliptic leg is flat)
+
+
 def ref():
+    """The reference chain; its NH2 and NSR points are those of Figure 21.1 (ledger #315) unless RERNDZ_IDEAL is set."""
     global _REF
     if _REF is None:
         _REF = reference()
+        if not os.environ.get("RERNDZ_IDEAL"):
+            _REF = dict(_REF, nh2_pos=np.array(FIG_NH2_POINT), nsr_pos=np.array(FIG_NSR_POINT))
     return _REF
 
 
