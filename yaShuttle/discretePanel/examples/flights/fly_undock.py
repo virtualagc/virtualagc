@@ -605,18 +605,48 @@ class Undock(R.Rendezvous):
                  % (*s_t[:3], *s_t[3:], *dv, float(np.linalg.norm(dv))))
         self.gburn("NSR", RR.T["NSR"], dv)
 
+    def tpi_shift(self):
+        """Seconds TPI slipped from the Mission Report's time (the book's TPI is Lambert-targeted on the 42 deg elevation
+        angle with no TIG slip limit; the flown TIGs were 33 s early); TDA and SEP3 follow it (+15 min, +26:51)."""
+        if hasattr(self, "_tpi_shift"):
+            return self._tpi_shift
+        try:
+            return float(json.load(open(os.path.join(self.a.logs, "rr-plan.json"))).get("tpi_shift", 0.0))
+        except (OSError, ValueError):
+            return 0.0
+
     def tpi(self):
-        """TPI (3.4 ft/s, 07:57:34, ~6,860 ft): the onboard targeted burn to the TDA point, 1,000 ft below
-        and 333 ft behind the ISS, 26:51 later."""
+        """TPI (3.4 ft/s, 07:57:34, ~6,860 ft): the onboard targeted burn to the TDA point, 1,000 ft below and 333 ft
+        behind the ISS, 26:51 later -- at the instant the ISS's elevation from the Orbiter's local horizontal reaches
+        42 deg (the book's elevation-angle option, History ch. 21 p. 150), as the crew would load the TIG: predicted
+        from the state 15 minutes ahead, within 10 minutes of the Mission Report's time either way, else its time.
+        UNDOCK_TPI_FIXED=1: the fixed time (f1-f8)."""
         self.wait_gmt(RR.T["TPI"] - 900)
         self.uplink()
         self.wait_sim(10)
         s = self.lvlh_state()
-        s_t = RR.prop(s, RR.T["TPI"] - self.truth()["gmt"])
+        now = self.truth()["gmt"]
+        tig = RR.T["TPI"]
+        if not os.environ.get("UNDOCK_TPI_FIXED"):
+            for tt in np.arange(RR.T["TPI"] - 300.0, RR.T["TPI"] + 600.0, 2.0):
+                q = RR.prop(s, tt - now)
+                if math.degrees(math.atan2(q[2], -q[0])) >= 42.0:
+                    tig = float(tt)
+                    break
+        s_t = RR.prop(s, tig - now)
         dv = RR.transfer_dv(s_t, RR.T["TDA"] - RR.T["TPI"], RR.TDA_POINT)
-        self.say("TPI: at TIG x %.0f y %.0f z %.0f ft (range %.0f, the book ~6,860), rates %+.2f %+.2f %+.2f; the burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
-                 % (*s_t[:3], float(np.linalg.norm(s_t[:3])), *s_t[3:], *dv, float(np.linalg.norm(dv))))
-        self.gburn("TPI", RR.T["TPI"], dv)
+        self._tpi_shift = tig - RR.T["TPI"]
+        try:
+            plan = json.load(open(os.path.join(self.a.logs, "rr-plan.json")))
+        except (OSError, ValueError):
+            plan = {}
+        plan["tpi_shift"] = self._tpi_shift
+        json.dump(plan, open(os.path.join(self.a.logs, "rr-plan.json"), "w"))
+        self.say("TPI: elevation %.1f deg at the Mission Report's time; TIG %+.0f s from it (42 deg); at TIG x %.0f y %.0f z %.0f ft (range %.0f, the book ~6,860), "
+                 "rates %+.2f %+.2f %+.2f; the burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
+                 % (math.degrees(math.atan2(*(lambda q: (q[2], -q[0]))(RR.prop(s, RR.T["TPI"] - now)))), self._tpi_shift,
+                    *s_t[:3], float(np.linalg.norm(s_t[:3])), *s_t[3:], *dv, float(np.linalg.norm(dv))))
+        self.gburn("TPI", tig, dv)
 
     GATES = ((2000.0, -3.7), (1500.0, -2.9), (1000.0, -1.8), (600.0, 0.0))       # ft, the closing rate to brake to (ft/s)
 
@@ -625,7 +655,7 @@ class Undock(R.Rendezvous):
         to -1.8 and LOW Z, 600 to 0.0) acted on if the closing is faster; NORM Z again after 1000 ft going out."""
         gate_done = set()
         lowz = False
-        while self.truth()["gmt"] < RR.T["TDA"] + 30:
+        while self.truth()["gmt"] < RR.T["TDA"] + self.tpi_shift() + 30:
             s = self.lvlh_state()
             rng = float(np.linalg.norm(s[:3]))
             rdot = float(np.dot(s[:3], s[3:]) / max(rng, 1.0))
@@ -645,10 +675,10 @@ class Undock(R.Rendezvous):
 
     def sep3(self):
         """SEP3 (1.0 ft/s retrograde, 08:38:36, 15 min after TDA), DAP A, NORM Z, in the target track."""
-        self.wait_gmt(RR.T["SEP3"] - 20)
+        self.wait_gmt(RR.T["SEP3"] + self.tpi_shift() - 20)
         if lowz_on(self):
             D.dap_modes(self, "a", False)
-        self.wait_gmt(RR.T["SEP3"])
+        self.wait_gmt(RR.T["SEP3"] + self.tpi_shift())
         got = self.thc_burn(tuple(RR.sep3_dv()), "sep3")
         self.rr_burns = getattr(self, "rr_burns", {})
         self.rr_burns["SEP3"] = [float(x) for x in got]
