@@ -43,6 +43,7 @@ import fly_rndz134 as R
 import rerndz as RR
 import rndz_instruments as ins
 
+FLOWN = bool(os.environ.get("UNDOCK_FLOWN"))      # UNDOCK_FLOWN=1: SEP2/NH2 as flown open-loop (rerndz.py) -- tried 2026-10-19, NH2 came out 10,000 ft off and MC5 asked 8.4 ft/s: the flown values were targeted from the real state, not ours; default: the CW designs of c1/c2
 HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
@@ -63,6 +64,18 @@ D.A7L_LIGHT.update({"HOOKS 1 OPEN": (0, 0x0400), "HOOKS 2 OPEN": (0, 0x0200), "U
 
 
 class Undock(R.Rendezvous):
+    # The re-rendezvous' -Z AXIS TARGET TRACK [11A] (book p. 2-10) is DAP A/AUTO/VERN(ALT), not [12A]'s B/AUTO/ALT that the
+    # rendezvous phase's TRACK_KEYS has: the B/ALT primaries left ~0.2 ft/s of net translation when the maneuver stopped
+    # (f6, GMT 12978870: a step of -0.21 ft/s in RDOT; SEP2's solution then needed a -0.9 ft/s radial part).  Ledger #316.
+    TRACK_KEYS = ("+3     keys ITEM 2 1 EXEC\n"
+                  "+3     keys ITEM 8 + 1 EXEC\n"
+                  "+3     keys ITEM 1 4 + 3 EXEC\n"
+                  "+3     keys ITEM 1 7 + 0 EXEC\n"
+                  "+3     dap c3 a\n"
+                  "+2     dap c3 auto\n"
+                  "+2     dap c3 vern\n"
+                  "+3     keys ITEM 1 9 EXEC\n")
+
     # --- helpers --------------------------------------------------------------
     def do(self, name, text, settle=8, dump=None, timeout=180):
         """Play a crew script, wait for its last step and a settle time, and show a page."""
@@ -95,9 +108,13 @@ class Undock(R.Rendezvous):
         # DAP: A/AUTO/VERN, LO Z (the DAP panel, C3)
         D.dap_modes(self, "a", True)
         # [GNC_23_RCS]: RCS F - ITEM 1 EXEC (*), the forward jets that plume the ISS off
-        jets = "".join("+3     keys ITEM %s EXEC\n" % " ".join(str(i)) for i in (9, 11, 13, 15, 17, 19, 21))
-        self.do("sep-rcs", "+1     keys SPEC 2 3 PRO\nwait crt 1 title /023/ timeout 120\n+3     keys ITEM 1 EXEC\n" + jets,
-                10, "SPEC 23 RCS, the forward jets deselected")
+        # The book's step is "JET DES F1L ... F2U - ITEMs 9-21 EXEC (no *)": the mated attitude control's deselected jets
+        # (the same page, "(*)") are put back, so the forward jets are AVAILABLE at the undock.  The start capture has them
+        # all selected already (PASS: FWD mask FFFF), so there is nothing to key; the earlier version keyed the items and
+        # DESELECTED them (mask 9979, then BB7B after the up jets were put back), leaving F1L F3L F2R F4R out through the
+        # fly-around and the re-rendezvous and the DAP's rotations with net force (ledger #316).
+        self.do("sep-rcs", "+1     keys SPEC 2 3 PRO\nwait crt 1 title /023/ timeout 120\n+3     keys ITEM 1 EXEC\n",
+                10, "SPEC 23 RCS F selected, the forward jets as they are (all available)")
         # [GNC_UNIV_PTG]: TGT ID +2, BODY VECT +5, P +180, Y +0, OM +0, ERR TOT, TRK
         self.do("sep-univptg", "+1     keys RESUME\n"
                                "+3     keys ITEM 8 + 2 EXEC\n"
@@ -206,8 +223,8 @@ class Undock(R.Rendezvous):
         port's axis, 'out') fires only the aft up jets, the pitching moment is taken out with the down jets,
         and the Orbiter gets a tenth of the delta-V.  The simulation has no plume, so they go back in (a
         deviation, logged)."""
-        if getattr(self, "_fwd_up_in", False):
-            return
+        if getattr(self, "_fwd_up_in", False) or not os.environ.get("UNDOCK_DESELECT_JETS"):
+            return          # SEPCFG leaves the forward jets selected now (ledger #316); UNDOCK_DESELECT_JETS=1: the old keying
         self.do("fa-jets", "+1     keys SPEC 2 3 PRO\nwait crt 1 title /023/ timeout 120\n"
                            "+3     keys ITEM 1 7 EXEC\n+3     keys ITEM 1 9 EXEC\n+3     keys ITEM 2 1 EXEC\n"
                            "+4     keys RESUME\n", 8, "SPEC 23, F1U F3U F2U reselected")
@@ -387,6 +404,8 @@ class Undock(R.Rendezvous):
         self.say("FLYAROUND: halfway, x %.0f z %.0f ft; the midcourse %+.2f %+.2f %+.2f ft/s" % (s[0], s[2], *dv2))
         if float(np.linalg.norm(dv2)) > 0.06:
             self.thc_burn(tuple(dv2), "fa-mc")
+        if not os.environ.get("UNDOCK_ELLIPSE"):
+            return self._circle(t_fa)
         # 3. THE FLY-AROUND: at 04:20:00 one burn that stops the transfer's rates and starts the half-orbit 2:1
         #    ellipse about the ISS (zdot = -n x/2, up) -- the Mission Report's +X pulse of L3A and R3A
         self.wait_gmt(t_fa - 40.0)
@@ -441,6 +460,45 @@ class Undock(R.Rendezvous):
         self.say("FLYAROUND done: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f, range %.0f ft"
                  % (s[0], s[2], s[3], s[5], math.sqrt(s[0] ** 2 + s[2] ** 2)))
 
+    def _circle(self, t_fa):
+        """THE FLY-AROUND as [9A] and the History (JSC-63400 ch. 21, p. 150) have it: one full revolution of 650 ft
+        (CG-CG, +-50) about the ISS from the +V-bar at 04:20:00 to the +V-bar at SEP1 (05:06:02, 2,762 s -- 1.98 n,
+        so forced, not the free 2:1 ellipse): up first (-Rbar, -Vbar, +Rbar, +Vbar crossings, the bay toward the ISS
+        by the quarter-turn P 180/90/0/270).  The first burn is the +X pulse (radial up, ~1.5 ft/s); then twelve
+        CW legs of 230 s, each burned from the truth's state to the next point of the circle (~0.35 ft/s each,
+        4 ft/s in all, the range held within ~15 ft by the geometry).  Ledger #316: the earlier half-orbit ellipse
+        ended on the -V-bar, which put SEP2 3,200 ft from Figure 21.1's."""
+        n, rho, legs = RR.N_ISS, 650.0, 12
+        tf = RR.T["SEP1"] - t_fa
+        w = 2.0 * math.pi / tf
+        dl = tf / legs
+        self.wait_gmt(t_fa - 40.0)
+        self.uplink()
+        self.wait_gmt(t_fa)
+        p_now = 180
+        for k in range(legs):
+            s = self.lvlh_state()
+            th = w * (k + 1) * dl
+            tgt = (rho * math.cos(th), 0.0, -rho * math.sin(th))
+            lead = 10.0
+            dv = RR.transfer_dv(RR.prop(s, lead), dl - lead, tgt)
+            self.say("FLYAROUND leg %d/%d: at x %.0f y %.0f z %.0f ft (range %.0f), rates %+.2f %+.2f %+.2f; to x %.0f z %.0f in %.0f s: %+.2f %+.2f %+.2f ft/s"
+                     % (k + 1, legs, *s[:3], math.sqrt(s[0] ** 2 + s[2] ** 2), *s[3:], tgt[0], tgt[2], dl - lead, *dv))
+            t_end = t_fa + (k + 1) * dl
+            if float(np.linalg.norm(dv)) > 0.05:
+                self.thc_burn(tuple(dv), "fa-leg%d" % (k + 1))
+            while self.truth()["gmt"] < t_end - 25.0:
+                s = self.lvlh_state()
+                p = self.p_for(s[0], s[2], p_now)
+                if p != p_now:
+                    self.set_p(p, "fa-p%d-%d" % (p, k + 1))
+                    p_now = p
+                    self.say("FLYAROUND: x %.0f z %.0f ft (range %.0f), P %d" % (s[0], s[2], math.sqrt(s[0] ** 2 + s[2] ** 2), p))
+                self.wait_sim(15)
+        s = self.lvlh_state()
+        self.say("FLYAROUND done: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f, range %.0f ft"
+                 % (s[0], s[2], s[3], s[5], math.sqrt(s[0] ** 2 + s[2] ** 2)))
+
     def sep1(self):
         """SEP1 BURN [8C]: 1.5 ft/s radially up (the jets' +X in the Mission Report), DAP TRANS NORM,
         THC, then A/AUTO/VERN, TRANS PULSE.  TIG 05:06:02."""
@@ -466,7 +524,11 @@ class Undock(R.Rendezvous):
                  % (*s[:3], *s[3:], np.linalg.norm(s[:3])))
         s2 = RR.prop(s, RR.T["SEP2"] - self.truth()["gmt"])
         ref = RR.ref()
-        d2 = RR.targeted_dv(s2, RR.T["SEP2"], RR.T["NH2"], ref["nh2_pos"])
+        if FLOWN:
+            d2 = np.array(RR.FLOWN_SEP2)
+            ref = dict(ref, nh2_pos=np.zeros(3))
+        else:
+            d2 = RR.targeted_dv(s2, RR.T["SEP2"], RR.T["NH2"], ref["nh2_pos"])
         nominal = ref["sep2"]
         self.say("SEP2: the ground's solution %+.2f %+.2f %+.2f ft/s (LVLH, |%.2f|), aimed at the reference NH2 point x %.0f z %.0f ft; "
                  "the nominal chain's is %+.2f %+.2f %+.2f"
@@ -491,8 +553,12 @@ class Undock(R.Rendezvous):
         self.wait_gmt(RR.T["NH2"] - 450)
         s = self.lvlh_state()
         s_t = RR.prop(s, RR.T["NH2"] - self.truth()["gmt"])
-        ref = RR.ref()
-        dv = RR.targeted_dv(s_t, RR.T["NH2"], RR.T["NSR"], ref["nsr_pos"])
+        if FLOWN:
+            ref = dict(nsr_pos=np.array(RR.NSR_POINT))
+            dv = np.array(RR.FLOWN_NH2)
+        else:
+            ref = RR.ref()
+            dv = RR.targeted_dv(s_t, RR.T["NH2"], RR.T["NSR"], ref["nsr_pos"])
         rep = RR.chain(RR.kick(s_t, dv), RR.T["NH2"])
         rep["z_nsr"] = float(ref["nsr_pos"][2])
         self.say("NH2: state x %.0f z %.0f ft; at TIG x %.0f z %.0f; solution %+.2f %+.2f %+.2f ft/s (|%.2f|, the book 2.0), aimed at the "
@@ -516,7 +582,10 @@ class Undock(R.Rendezvous):
         self.wait_gmt(RR.T["MC5"] - 600)
         s = self.lvlh_state()
         s_t = RR.prop(s, RR.T["MC5"] - self.truth()["gmt"])
-        dv = RR.mc5_dv(s_t, self._z_nsr())
+        if FLOWN:
+            dv = RR.targeted_dv(s_t, RR.T["MC5"], RR.T["NSR"], RR.NSR_POINT)       # on-board Lambert to the NSR point
+        else:
+            dv = RR.mc5_dv(s_t, self._z_nsr())
         mag = float(np.linalg.norm(dv))
         self.say("MC5: at TIG x %.0f z %.0f ft; the correction %+.2f %+.2f %+.2f ft/s (|%.2f|)" % (s_t[0], s_t[2], *dv, mag))
         if mag < 0.1:
