@@ -888,6 +888,9 @@ class Flight:
         prplt = kg / 0.45359237 * (1.0 - math.exp(-dv / 10136.8))
         return dict(tig=tig, ei=ei, theta=theta, c1=c1, c2=c2, ht=ht, prplt=prplt)
 
+    def deorbit_hook(self, where):
+        """A place for a subclass to look at (or capture) the vehicle during the deorbit sequence."""
+
     def deorbit(self):
         t = self.deorbit_targets()
         self.tgt = t
@@ -951,8 +954,12 @@ class Flight:
         self.wait_gmt(tig - 25 * 60.0)
         self.play(OPS302, "ops302")
         self.wait_gmt(tig - 20 * 60.0)
+        self.deorbit_hook("pre-mnvr")
         self.play(DEORB_MNVR, "deorb-mnvr")
+        self.script_done("deorb-mnvr", 120)
+        self.deorbit_hook("post-mnvr")
         self.wait_gmt(tig - 15.0)
+        self.deorbit_hook("pre-exec")
         self.play("+0     keys EXEC\n", "deorb-exec")
         self.say("crew: EXEC at TIG-15 s (TIG GMT %.1f)" % tig)
         # the burn (about 2.5 min), the trim of the residuals, then MM 303 and
