@@ -44,6 +44,13 @@ import rerndz as RR
 import rndz_instruments as ins
 
 FLOWN = bool(os.environ.get("UNDOCK_FLOWN"))      # UNDOCK_FLOWN=1: SEP2/NH2 as flown open-loop (rerndz.py) -- tried 2026-10-19, NH2 came out 10,000 ft off and MC5 asked 8.4 ft/s: the flown values were targeted from the real state, not ours; default: the CW designs of c1/c2
+# THE FLY-AROUND'S RADIUS: the Rendezvous book gives 650 ft (+-50) CG-CG from the +V-bar at 04:20:00, but Figure 21.1's curve from
+# SEP1 is, to a Clohessy-Wiltshire fit (11 points read off the figure, 81 ft rms, 2026-10-19), a trajectory that starts at x +836 ft,
+# z -56 ft with xdot -0.03, zdot -3.2 ft/s up: a circle of ~800 ft turning at the 1.98 n rate (1.9 ft/s) plus the 1.5 ft/s SEP1.  The
+# circle therefore opens from the book's 650 ft to 820 ft over its revolution, so that it ends where the figure's curve begins.  The
+# fit is of a drawn curve and good to ~100 ft; the book's 650 is the planned radius, the figure's the reference trajectory.  Ledger #316.
+FA_RHO0, FA_RHO1 = 650.0, 820.0
+FA_P_LEAD = 31.0           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
 HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
@@ -243,16 +250,20 @@ class Undock(R.Rendezvous):
         return (ex, ey, ez), tru["q"]
 
     def p_for(self, x, z, current=None):
-        """UNIV PTG's P (BODY VECT 5, TGT ID 2) whose quarter turn has the bay (-Z) nearest the ISS:
-        P 180 for the ISS behind, 90 below, 0 ahead, 270 above -- with 8 deg of hysteresis."""
-        ang = math.degrees(math.atan2(-z, -x)) % 360.0        # the ISS's direction from the Orbiter, from +x toward +z(down)
-        # bay directions in the (x, z) plane: P 180 -> 180 deg, P 90 -> 90 (down), P 0 -> 0 (ahead), P 270 -> 270 (up)
+        """UNIV PTG's P (BODY VECT 5, TGT ID 2) for the fly-around's next quarter turn: P 180 for the ISS behind, 90
+        below, 0 ahead, 270 above (the book's P 180 +VBAR, 90 -RBAR, 0 -VBAR, 270 +RBAR).  The quarter turn is
+        flown at the DAP's vernier rate, 0.19 deg/s (f8: the error fell 28 deg in 446 s), which takes 474 s,
+        62 deg of the circle, so it is started FA_P_LEAD deg of the circle after the crossing -- the turn then
+        straddles the quadrant and the bay stays within ~15 deg of the ISS (the book's +-15 deg vertical on the
+        centreline camera, [9A] 1).  f8 changed P at the quadrant's end (53 deg after the crossing) and the bay
+        was 22 to 53 deg off for the whole revolution."""
+        ang = (math.degrees(math.atan2(-z, -x)) - FA_P_LEAD) % 360.0   # the ISS's direction from the Orbiter, +x toward +z(down), less the lead
         want = {180: 180.0, 90: 90.0, 0: 0.0, 270: 270.0}
         def dist(p):
             d = abs((ang - want[p] + 180.0) % 360.0 - 180.0)
             return d
         best = min(want, key=dist)
-        if current is not None and current in want and dist(current) <= dist(best) + 8.0:
+        if current is not None and current in want and dist(current) <= dist(best) + 2.0:
             return current
         return best
 
@@ -278,13 +289,20 @@ class Undock(R.Rendezvous):
         self.script_done(name, 90)
         self.wait_sim(2)
 
-    def thc_burn(self, dv, label):
+    def thc_burn(self, dv, label, tig=None):
         """A THC burn of dv (ft/s, LVLH) flown as continuous holds on the aft THC, DAP A/AUTO/PRI, TRANS
         NORM: each body axis held for its share of the time (the acceleration seeded from the MC burns,
         scaled to this Orbiter's mass), checked against the truth's relative rates and finished with one
-        correcting hold.  Returns the delta-V got (ft/s, LVLH)."""
+        correcting hold.  Returns the delta-V got (ft/s, LVLH).
+        tig: the GMT the first hold starts at.  The DAP keying takes ~25 s of simulated time, so the caller
+        starts the burn that long before TIG; without tig the keying comes first and the burn after it
+        (f8: SEP1 started 26 s after its TIG)."""
         dv = np.array(dv, float)
         self.dap_both(("a", "auto", "pri", "x_norm", "y_norm", "z_norm"), label + "-norm")
+        if tig is not None:
+            if self.truth()["gmt"] > tig + 2.0:
+                self.say("%s: the DAP keying ran %.0f s past TIG" % (label, self.truth()["gmt"] - tig))
+            self.wait_gmt(tig)
         s0 = self.lvlh_state()
         want = dv.copy()
         mass_scale = 120.7 / 97.4
@@ -468,7 +486,7 @@ class Undock(R.Rendezvous):
         CW legs of 230 s, each burned from the truth's state to the next point of the circle (~0.35 ft/s each,
         4 ft/s in all, the range held within ~15 ft by the geometry).  Ledger #316: the earlier half-orbit ellipse
         ended on the -V-bar, which put SEP2 3,200 ft from Figure 21.1's."""
-        n, rho, legs = RR.N_ISS, 650.0, 12
+        n, legs = RR.N_ISS, 12
         tf = RR.T["SEP1"] - t_fa
         w = 2.0 * math.pi / tf
         dl = tf / legs
@@ -479,6 +497,7 @@ class Undock(R.Rendezvous):
         for k in range(legs):
             s = self.lvlh_state()
             th = w * (k + 1) * dl
+            rho = FA_RHO0 + (FA_RHO1 - FA_RHO0) * th / (2.0 * math.pi)
             tgt = (rho * math.cos(th), 0.0, -rho * math.sin(th))
             lead = 10.0
             dv = RR.transfer_dv(RR.prop(s, lead), dl - lead, tgt)
@@ -487,7 +506,7 @@ class Undock(R.Rendezvous):
             t_end = t_fa + (k + 1) * dl
             if float(np.linalg.norm(dv)) > 0.05:
                 self.thc_burn(tuple(dv), "fa-leg%d" % (k + 1))
-            while self.truth()["gmt"] < t_end - 25.0:
+            while self.truth()["gmt"] < t_end - (75.0 if k == legs - 1 else 25.0):      # the last leg: SEP1's keying (~25 s) is done by TIG
                 s = self.lvlh_state()
                 p = self.p_for(s[0], s[2], p_now)
                 if p != p_now:
@@ -501,12 +520,24 @@ class Undock(R.Rendezvous):
 
     def sep1(self):
         """SEP1 BURN [8C]: 1.5 ft/s radially up (the jets' +X in the Mission Report), DAP TRANS NORM,
-        THC, then A/AUTO/VERN, TRANS PULSE.  TIG 05:06:02."""
-        self.wait_gmt(RR.T["SEP1"] - 10)
+        THC, then A/AUTO/VERN, TRANS PULSE.  TIG 05:06:02 -- the first hold starts AT TIG (the keying is done
+        before it).  The fly-around ends on its circle: the burn is the 1.5 ft/s on top of the circle's own rate
+        at the +V-bar (rho w, up), so the legs' position-only aim leaves no short rate behind it (f8: the
+        circle ended at 1.27 ft/s up against its 1.48, and SEP1 came 0.2 ft/s short of Figure 21.1's)."""
+        tig = RR.T["SEP1"]
+        self.wait_gmt(tig - 70)
         s = self.lvlh_state()
-        self.say("SEP1: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f at GMT %.0f" % (s[0], s[2], s[3], s[5], self.truth()["gmt"]))
-        self.wait_gmt(RR.T["SEP1"])
-        got = self.thc_burn((0.0, 0.0, -RR.PLAN["SEP1"]), "sep1")
+        dt = tig - self.truth()["gmt"]
+        st = RR.prop(s, dt)
+        w = 2.0 * math.pi / (tig - RR.T["FA"])
+        v_circ = (0.0, 0.0, -FA_RHO1 * w)
+        trim = np.array([v_circ[0] - st[3], -st[4], v_circ[2] - st[5]])
+        dv = trim + np.array([0.0, 0.0, -RR.PLAN["SEP1"]])
+        self.say("SEP1: x %.0f z %.0f ft, xdot %+.2f zdot %+.2f at GMT %.0f; at TIG x %.0f z %.0f xdot %+.2f zdot %+.2f; the circle's rate "
+                 "%+.2f up, trim %+.2f %+.2f %+.2f + the book's 1.5 = %+.2f %+.2f %+.2f ft/s"
+                 % (s[0], s[2], s[3], s[5], self.truth()["gmt"], st[0], st[2], st[3], st[5], -v_circ[2], *trim, *dv))
+        got = self.thc_burn(tuple(dv), "sep1", tig=tig)
+        self.set_p(90, "sep1-p90")        # [9A] 6: the next quarter turn (-RBAR), so the bay follows the ISS as the Orbiter climbs
         self.uplink()
         self.rr_burns = getattr(self, "rr_burns", {})
         self.rr_burns["SEP1"] = [float(x) for x in got]
@@ -675,11 +706,10 @@ class Undock(R.Rendezvous):
 
     def sep3(self):
         """SEP3 (1.0 ft/s retrograde, 08:38:36, 15 min after TDA), DAP A, NORM Z, in the target track."""
-        self.wait_gmt(RR.T["SEP3"] + self.tpi_shift() - 20)
+        self.wait_gmt(RR.T["SEP3"] + self.tpi_shift() - 60)
         if lowz_on(self):
             D.dap_modes(self, "a", False)
-        self.wait_gmt(RR.T["SEP3"] + self.tpi_shift())
-        got = self.thc_burn(tuple(RR.sep3_dv()), "sep3")
+        got = self.thc_burn(tuple(RR.sep3_dv()), "sep3", tig=RR.T["SEP3"] + self.tpi_shift())
         self.rr_burns = getattr(self, "rr_burns", {})
         self.rr_burns["SEP3"] = [float(x) for x in got]
         self.wait_sim(120)
