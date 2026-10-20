@@ -71,7 +71,7 @@ D.A7L_LIGHT.update({"HOOKS 1 OPEN": (0, 0x0400), "HOOKS 2 OPEN": (0, 0x0200), "U
 
 
 class Undock(R.Rendezvous):
-    # The re-rendezvous' -Z AXIS TARGET TRACK [11A] (book p. 2-10) is DAP A/AUTO/VERN(ALT), not [12A]'s B/AUTO/ALT that the
+    # The re-rendezvous' -Z AXIS TARGET TRACK [11A] (book p. 2-11, PDF p. 43) is DAP A/AUTO/VERN(ALT), not [12A]'s B/AUTO/ALT that the
     # rendezvous phase's TRACK_KEYS has: the B/ALT primaries left ~0.2 ft/s of net translation when the maneuver stopped
     # (f6, GMT 12978870: a step of -0.21 ft/s in RDOT; SEP2's solution then needed a -0.9 ft/s radial part).  Ledger #316.
     TRACK_KEYS = ("+3     keys ITEM 2 1 EXEC\n"
