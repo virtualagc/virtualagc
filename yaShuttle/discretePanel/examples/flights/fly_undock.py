@@ -50,6 +50,10 @@ FLOWN = bool(os.environ.get("UNDOCK_FLOWN"))      # UNDOCK_FLOWN=1: SEP2/NH2 as 
 # circle therefore opens from the book's 650 ft to 820 ft over its revolution, so that it ends where the figure's curve begins.  The
 # fit is of a drawn curve and good to ~100 ft; the book's 650 is the planned radius, the figure's the reference trajectory.  Ledger #316.
 FA_RHO0, FA_RHO1 = 650.0, 820.0
+# UNDOCK_NO_VERN=1: the book's substitutes for the vernier DAP everywhere the checklist says VERN(...) (RNDZ failure/response summary, p. 1-4,
+# "Loss of VRCS"): A/AUTO/PRI in place of VERN(PRI) -- the fly-around [9A] and SEP1 [8C] -- and A/AUTO/ALT in place of VERN(ALT) -- the
+# track [11A] and the track holds after every burn, the undock/sep and the approach outside 2,000 ft; inside 2,000 ft (TDA) PRI again.
+NO_VERN = bool(os.environ.get("UNDOCK_NO_VERN"))
 FA_P_LEAD = 31.0           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
 HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
@@ -80,8 +84,24 @@ class Undock(R.Rendezvous):
                   "+3     keys ITEM 1 7 + 0 EXEC\n"
                   "+3     dap c3 a\n"
                   "+2     dap c3 auto\n"
-                  "+2     dap c3 vern\n"
-                  "+3     keys ITEM 1 9 EXEC\n")
+                  "+2     dap c3 %s\n"
+                  "+3     keys ITEM 1 9 EXEC\n") % os.environ.get("UNDOCK_TRACK_JETS", "alt" if NO_VERN else "vern")      # UNDOCK_TRACK_JETS=alt|pri: the experiment (f12, f13)
+
+    def track_complete(self, name, limit=1200.0):
+        """The base class ends the track maneuver with DAP A/AUTO/VERN; with UNDOCK_NO_VERN the hold is A/AUTO/ALT ([11A]'s
+        VERN(ALT) with its substitute).  (The base class's log line still says VERN.)"""
+        if not NO_VERN:
+            return super().track_complete(name, limit)
+        orig = self.play
+        self.play = lambda text, nm, *a, **k: orig(text.replace("dap c3 vern", "dap c3 alt"), nm, *a, **k)
+        try:
+            return super().track_complete(name, limit)
+        finally:
+            del self.play
+
+    def press_jets(self, opt, name):
+        """DAP A/AUTO/<opt> on C3 (NO_VERN's substitutes where dock_autopilot's dap_modes presses VERN)."""
+        self.do(name, "+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 %s\n" % opt, 2)
 
     # --- helpers --------------------------------------------------------------
     def do(self, name, text, settle=8, dump=None, timeout=180):
@@ -343,7 +363,8 @@ class Undock(R.Rendezvous):
         got = self.lvlh_state()[3:] - s0[3:]
         self.say("%s: delta-V got %+.2f %+.2f %+.2f ft/s (|%.2f|), wanted %+.2f %+.2f %+.2f (|%.2f|)"
                  % (label, *got, np.linalg.norm(got), *dv, np.linalg.norm(dv)))
-        self.dap_both(("vern", "x_pulse", "y_pulse", "z_pulse"), label + "-after")
+        after = os.environ.get("UNDOCK_FA_JETS") or (("pri" if label.startswith(("fa-", "sep1")) else "alt") if NO_VERN else "vern")
+        self.dap_both((after, "x_pulse", "y_pulse", "z_pulse"), label + "-after")      # UNDOCK_FA_JETS=pri: the book's loss-of-VRCS substitute for VERN(PRI) ([9A], [8C]; p. 1-4)
         return got
 
     def gburn(self, name, tig_gmt, dv, lead=420.0):
@@ -400,6 +421,8 @@ class Undock(R.Rendezvous):
         SEP1.  The ISS is not in the Ku radar's lock at the end here, nor in the TCS."""
         t_fa = RR.T["FA"]
         self.reselect_fwd_up_jets()
+        if NO_VERN:
+            self.press_jets("alt", "fa-alt")          # [6A] 4: VERN(ALT) after the separation, ALT for it
         n = RR.N_ISS
         # 1. THE TRANSFER to 650 ft ahead on the +V-bar, arriving at T_FA: along-track speed on the V-bar costs
         #    height (zddot = -2 n xdot, ~500 ft in 20 min at 0.3 ft/s), so the burn is the CW one for the point
@@ -696,6 +719,8 @@ class Undock(R.Rendezvous):
                     self.say("TDA: braking gate %d ft: range %.0f, RDOT %+.2f ft/s (gate %+.1f)" % (g, rng, rdot, rd))
                     if g == 1000.0 and not lowz:
                         D.dap_modes(self, "a", True)
+                        if NO_VERN:
+                            self.press_jets("pri", "tda-pri")           # inside 2,000 ft: PRI for VERN
                         lowz = True
                     if rdot < rd:
                         u = s[:3] / rng
@@ -709,6 +734,8 @@ class Undock(R.Rendezvous):
         self.wait_gmt(RR.T["SEP3"] + self.tpi_shift() - 60)
         if lowz_on(self):
             D.dap_modes(self, "a", False)
+            if NO_VERN:
+                self.press_jets("alt", "sep3-alt")
         got = self.thc_burn(tuple(RR.sep3_dv()), "sep3", tig=RR.T["SEP3"] + self.tpi_shift())
         self.rr_burns = getattr(self, "rr_burns", {})
         self.rr_burns["SEP3"] = [float(x) for x in got]
