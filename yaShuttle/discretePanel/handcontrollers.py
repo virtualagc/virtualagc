@@ -473,6 +473,7 @@ class ScriptInput:
                 if len(w) == 4 and w[0] == "thc" and w[1] == self.thc_name:
                     with self.lock:
                         self.thc[w[2].upper()] = now + float(w[3])
+                    log("thc %s taken at vehicle %.3f s for %s s" % (w[2].upper(), now, w[3]))
                 elif len(w) == 5 and w[0] == "rhc" and w[1] == self.rhc_name \
                         and w[2] in RHC_AXES:
                     with self.lock:
@@ -490,6 +491,9 @@ class ScriptInput:
         """(bits, counts) with whatever a script is holding added in."""
         now = self.clock.now()
         with self.lock:
+            for d_, t_ in self.thc.items():
+                if t_ <= now:
+                    log("thc %s released at vehicle %.3f s (deadline %.3f, %.3f s late)" % (d_, now, t_, now - t_))
             self.thc = dict((d, t) for d, t in self.thc.items() if t > now)
             self.rhc = dict((a, v) for a, v in self.rhc.items() if v[1] > now)
             held, defl = set(self.thc), dict((a, v[0]) for a, v in self.rhc.items())
