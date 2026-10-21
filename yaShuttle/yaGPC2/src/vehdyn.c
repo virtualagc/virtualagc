@@ -258,6 +258,7 @@ static int histHead, histCount;
  * GMT -- to set beside its navigation state (CGNV_R_FILT_LFE and the rest,
  * read from a memory snapshot with tools/pasvar.py). */
 static void ascent_log(void);
+static void tgt_state_log(void);
 static void state_log(void) {
     static double every = -1.0, next = 0.0;
     if (every < 0.0) {
@@ -271,6 +272,7 @@ static void state_log(void) {
                     "mass_kg=%.1f\n", st.t, g,
             st.r[0] / 0.3048, st.r[1] / 0.3048, st.r[2] / 0.3048,
             st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass);
+    tgt_state_log();
     ascent_log();
     /* in orbit: the osculating apsides -- nmi above the equatorial radius
      * and above the WGS-84 ellipsoid under each -- and the inclination to
@@ -308,6 +310,20 @@ static double prop[5];                 /* kg left: RCS F, L, R; OMS L, R */
 static double cgB[3];                  /* current CG, as an offset from the dry CG, body m */
 static bool on[VEHDYN_NJETS];
 static double onSec[VEHDYN_NJETS];
+/* THE 15 ms TAIL-ON/TAIL-OFF TRANSIENT of every RCS firing (JSC-10511 Rev B p. 7-2: "a 15-millisecond tail-on/tail-off transient regardless of cycle
+ * duration"; p. 7-7: effective steady-state duration = on time - 0.015 s, so the 80 ms minimum pulse delivers 65 ms).  Modelled as a dead time at
+ * the start of each firing: no thrust and no flow until the jet has been commanded on for this long.  YAGPC_VEHDYN_JET_DELAY_MS, default 0 (the
+ * old square wave) until the model is verified. */
+static double jetAge[VEHDYN_NJETS];    /* s the jet has been commanded on */
+static double jetDelayS = -1.0;
+static double jet_delay_s(void) {
+    if (jetDelayS < 0.0) {
+        const char *e = yagpc_getenv("YAGPC_VEHDYN_JET_DELAY_MS");
+        jetDelayS = (e != NULL) ? atof(e) / 1000.0 : 0.0;
+        if (jetDelayS < 0.0) jetDelayS = 0.0;
+    }
+    return jetDelayS;
+}
 static double sensedDv[3];             /* inertial, m/s */
 static bool haveTime;
 static long fireChanges;
@@ -1801,6 +1817,7 @@ static void jet_loads(double f[3], double tau[3], double *mdot) {
     for (int m = 0; m < NMOD; m++) mdot[m] = 0.0;
     for (int k = 0; k < VEHDYN_NJETS; k++) {
         if (!on[k]) continue;
+        if (jetAge[k] < jet_delay_s()) continue;    /* still in the 15 ms tail-on */
         const Jet *j = &JETS[k];
         int mod = jet_module(j);
         if (prop[mod] <= 0.0) continue;             /* a dry module fires nothing */
@@ -2062,6 +2079,14 @@ static struct Tgt {
     double portB[3], portAx[3], portUp[3];
 } tgt[TGT_MAX];
 static int tgtN = -1;         /* -1: the file not read yet */
+/* The first target's own state (M50, ft) at ITS clock, beside "vehdyn-state": the exact relative state needs no re-propagation of the
+ * target (which an outside tool gets wrong -- phys_gravity is the full harmonic field of date, not J2 about the frame's z). */
+static void tgt_state_log(void) {
+    if (tgtN > 0 && tgt[0].placed)
+        fprintf(stderr, "vehdyn-tgt: t=%.3f r_ft=%.1f %.1f %.1f v_fts=%.3f %.3f %.3f\n", tgt[0].t,
+                tgt[0].r[0] / 0.3048, tgt[0].r[1] / 0.3048, tgt[0].r[2] / 0.3048,
+                tgt[0].v[0] / 0.3048, tgt[0].v[1] / 0.3048, tgt[0].v[2] / 0.3048);
+}
 
 static const double J2000_TO_M50[3][3] = {        /* as startrk.c */
     {  0.9999256782,  0.0111820610,  0.0048579479 },
@@ -3192,8 +3217,10 @@ void vehdyn_advance(double sharedUs) {
             ground_forces(f, tau);
             if (aeroOn != was) phys_set_drag(aeroOn ? 0.0 : 2.2, 40.0, 220.0, 360.0);
         }
+        bool anyOn = false;                         /* a jet in its tail-on makes no flow yet, but the steps must stay short */
+        for (int k = 0; k < VEHDYN_NJETS && !anyOn; k++) anyOn = on[k] && jet_delay_s() > 0.0;
         bool firing = (mdot[0] + mdot[1] + mdot[2] + mdot[3] + mdot[4]) > 0.0 ||
-                      asc != ASC_NONE || aeroOn;
+                      asc != ASC_NONE || aeroOn || anyOn;
         double dt = t - st.t;
         double maxDt = firing ? STEP_S : 1.0;
         if (dt > maxDt) dt = maxDt;
@@ -3223,6 +3250,8 @@ void vehdyn_advance(double sharedUs) {
                 for (int i = 0; i < 3; i++) sensedDv[i] += fi[i] / st.mass * dt;
             for (int k = 0; k < VEHDYN_NJETS; k++)
                 if (on[k] && prop[jet_module(&JETS[k])] > 0.0) onSec[k] += dt;
+            for (int k = 0; k < VEHDYN_NJETS; k++)
+                if (on[k]) jetAge[k] += dt;
             for (int e = 0; e < 2; e++)
                 if (oms[e].fire && prop[3 + e] > 0.0) oms[e].onSec += dt;
             for (int m = 0; m < NMOD; m++) {
@@ -3286,6 +3315,7 @@ void vehdyn_set_fire_words(const uint16_t ff[5], const uint16_t fa[5], double sh
         uint16_t w = (j->mdm == 'F') ? ff[j->unit] : fa[j->unit];
         bool now = (w & j->bit) != 0;
         if (now != on[k]) changed = true;
+        if (now && !on[k]) jetAge[k] = 0.0;
         on[k] = now;
     }
     if (changed) {
