@@ -2095,15 +2095,19 @@ the radar (above) or MCC.  No further search was added.
 
 **Not done.**  More seeds; the trial on through MC2-MC4 and the manual phase.
 
-**The owner's decision, pending.**  5k and 5l together leave the choice of
-default for rendezvous runs open.  With the radar ahead of the final Ti
-targeting, `--dass-iloads all` with `YAGPC_STARTRK_MOUNT=flown` and
-`--onboard-error flown` recovers on both seeds; Mac-portview's recommendation
-is that combination.  The tracker mounting is in yaGPC2 (startrk.c, peer-passed
-at 6e767035f) but opt-in, the tape's mounting the default.  `all` less
-#PCGEIPD with the flown mounting reproduces the baseline when PASS is started
-with the true state.  Also still the owner's: the default volume
-(Mac-portview suggests `-rndz2.mmv`) and the IGOAL radiator white plate.
+**The owner's decision (2026-10-10, via Mac-portview).**  The default volume
+is `-rndz2.mmv` (83990ee41; `fly_rndz134 --tape` defaults to
+`~/sts134-runs/rendezvous/...-rndz2.mmv`).  The default GNC stays **option A**
+(rndz2: the tape's tracker mounting, PASS started with the true state).
+**Option B** is one switch, `--flight-gnc`: a `-gnc` volume with STS-134's GNC
+I-loads except the ascent/abort guidance (#PCGGCOM), plus
+`YAGPC_STARTRK_MOUNT=flown` and `--onboard-error flown` (branch
+`review/flight-gnc`, plan 5n, being flown).  B may become the default later,
+if it flies well and the owner agrees.  **IGOAL radiator white plate:
+closed.**  It is the real 2008 S1 radiator face-sheet peel, there for STS-134;
+the geometry is kept and retextured with the panel's own texture instead of
+IGOAL's white edge texel (29575bad0, `fetch_assets.prepare_iss_radiator_damage`),
+at the owner's request.
 
 ## 5m. Docking, and the aft flight station (2026-10-09/10, Linux)
 
@@ -2147,10 +2151,10 @@ aft,cctv,rpop`):
 
 **Open.**
 
-- SPEC 23 F1F/F2F deselect, and the angular flyout.
+- The angular flyout (contingency only).
 - The crew's commands to the APDS, beyond the A7L sequence.
 - The stack's shared momentum at contact, and the post-contact thruster
-  firing (PCT).
+  firing (PCT; it needs the F2/F4 SPDBK/THROT pushbutton, not modelled).
 - The 4 deg angular capture limit is a model choice, not documented.
 - The virtual RHC/THC shows its red "inactive" message while scripted input
   visibly moves the controllers.  It should not show while scripted input
@@ -2158,6 +2162,10 @@ aft,cctv,rpop`):
 - For the video: a layout per station, switched by the script at the handover
   to the aft station, and SimpleScreenRecorder driven through its stdin
   (`record-start`, `record-save`).  Agreed with the owner; not started.
+
+**Backlog closed (a0d55bfd9, 2026-10-10).**  KU FOR COMM at 110 ft and GNC 23
+JET DES F1F/F2F at 75 ft are done, per CC 9-5 and 9-8.  The post5 test capture
+docked 0.14 / 0.17 ft off axis with a hard mate, and the [22A] sequence ran.
 
 ## 5n. Option B: the flight's GNC, as one switch (2026-10-10, macOS)
 
@@ -2318,6 +2326,129 @@ propellant. B starts the manual phase 210 ft out of plane, where A starts
 
 Runs: `gnc-run2`, `optA-run650`; the bisect probes `bisA-full`, `bisA-a`,
 `bisB-repro`, `bisB-tapemount`, `bisB-fresh`, `bisB-rbaratt`, `bisB-att`.
+
+## 5o. Entry: the nominal, RTLS and TAL re-flies (2026-10-11, Linux)
+
+Entry I-loads `sts134-entry-iloads.json` (#PCGGC03, as flown) on `-full3`
+(09123320), re-flown from the abort and orbit captures.
+
+- **Nominal, KSC** (`entry-full3/run1`, orbit capture retagged, coast at rate
+  4): lands at **196.5 kt, 3.9 ft/s**, OGS q about 200 psf.  The flown entry
+  set is safe for the nominal case.
+- **Entry aero** (review/ops1-lps, not master): subsonic speedbrake
+  increments now come from the CP-2283 Fig 5 flight data
+  (`tools/entryaero.py`, `src/entryaero.h` regenerated); the RTLS re-fly lands
+  at 223 kt / 3.2 ft/s.  The nominal entry has not been re-flown with it.
+- **TAL:** MECO is on PASS's targets (361 kft over the ellipsoid, gamma 0 at
+  363 kft at ET SEP, as JSC-10559).  The remaining defect is a post-pull-out
+  low-q roll (129 deg) and beta the DAP cannot hold.  Ruled out: the entry
+  I-loads, the fc filters, the MECO targets, aero L/D, damping derivatives,
+  the Ny sign, the alpha-34 lateral hold, jet scale 0.6-1.6x, and Ixz.
+  - JSC-10559 p.3.3-67 says the early S-turn roll reversals are designed.
+  - The entry DAP builds beta deliberately and lets Cl_beta roll the vehicle
+    (abort9 trace).  OA98 M10.3 alpha 40 gives Cl_beta -0.0023, Cn_beta
+    -0.0018 against vehdyn's held -0.0021 / -0.00134: about 1.2x harder for
+    the jets than vehdyn, so the aero hold is not the cause.
+  - Jet scale (Mac-portview local harness, `~/sts134-runs/ascent/tal-jet*`):
+    beta above M7 is monotonic in jet scale (0.6x mean 1.7, 1.0x 2.7, 1.6x
+    4.7 deg), and x1.6 makes the beta cycle worse (M15-30 max 17 against
+    11.8).  Per-side yaw duty is unchanged at 0.6x (~80-95 jet-s per 50 s)
+    while beta halves: demand side, not jet efficiency.  The ~5,040 aft
+    jet-seconds at every scale only mean the pods emptied (vehdyn counts
+    jet-seconds only while a module has propellant, vehdyn.c:~3072).  Real
+    TAL entry also flies aft jets on pod propellant (SPEC 51 ICNCT inhibited
+    in OPS 3, JSC-10559 3.1-38).
+  - abort21 and the 0.6x trace: aft yaw firing balanced and alternating,
+    aileron trim about 0, up/down jets about 0 above q 20; runs median 2.9 s
+    (L) and 3.0 s (R), gaps 0.16 s, jets on about 90%, r swinging +/-1.8
+    deg/s with period about 6.5 s: a relay limit cycle.  Jets fire in the
+    damping direction and the 6.4 s cycle matches vehdyn's Dutch roll, which
+    points at the airframe model.
+  - vehdyn's inertia has no products of inertia (vehdyn.c:131-134); STS-134's
+    flown I-loads give Ixz about 273,803 slug-ft2 (~371,000 kg m2).  Adding
+    +/-371,227 kg m2 did **not** damp the cycle (M15-30 mean |beta| 2.58 /
+    2.57 against 2.73).  Still worth adding for realism, not the cause.
+  - **Next:** capture PASS through one cycle (yaw-rate command,
+    DAB/DELTA_AB, aileron command, NYP_LAT_ACCEL; GCDAER.hal:587) against
+    vehdyn's aileron deflection and moments, for the lagging or wrong-sign
+    link in the DAP lateral feedback; a plume-interaction model (TM-4500
+    figs 15/16/26, TP-1011) is the fallback.
+- **RTLS** (abort24/26; site-table fix 054ef3cbb gives a normal touchdown at
+  233 kt / 3.7 ft/s): OGS q is still about 360-370 psf on final with the
+  speedbrake at 98.6.  TAEM energy matches PASS's reference at handover (EOW
+  +0.6k) but the altitude is **1,690 ft above** TAEM HREF (12,897 against
+  14,587 ft at t=2254): high and slow.  The A/L pushes over to -27 deg
+  (PREFINAL at its Nz floor, NZC -0.5 g, DNZC -0.73) to capture the -18 deg
+  RTLS OGS (GAMSGS_RTLS -18, X_AIM_PT 1000, V_REF 506 fps) and gains about 90
+  fps it cannot shed (vehdyn full-SB L/D 2.55 against 3.08 needed).  TAEM
+  began 27 kft low on EOW at Mach 2.5 (186k against 214k).  IPHASE 1 (ACQ) at
+  t=1894/2000, 3 (PREFINAL) at 2254/2270.  Dump time is not the cause.
+  **Open:** the TAEM altitude/airspeed split (Nz limits, handover criteria)
+  and vehdyn's subsonic CL (alpha 9-10) and full-SB CD against LA66/TP-1779
+  (alpha 6-12, SB 0-98.6, M 0.4-0.9).
+
+## 5p. Approach timing against the flights, propellant, and the RPOP predictors (2026-10-16/17, Linux)
+
+### Time from the RPM to contact, against the flown range
+
+CROSS-FLIGHT COMPARISON, ISS FD3 RENDEZVOUS (Mission Reports STS-126..134, local mirror; owner's idea 2026-10-16).  RPM start -> initial contact/capture (min): 126 53.2, 127 51.1, 128 50.4, 129 58.6, 130 65.2, 131 56.0, 132 61.3, 133 58.6, 134 58.4: mean 57.0, SD 4.5, range 50.4-65.2.  RPM end -> contact: 42.8-56.7, mean ~49.7 (134: ~50).  Sim (tuned): RPM turn start -> capture 63.6 (full-C), 66.4 (full-D), 65.5 (test-B), 66.3 (from approach-start): at or just beyond the slow end of the flown range, ~7-9 min above the mean and 5-8 above STS-134; post-RPM -> contact ~55 min vs flown ~50 (43-57): TORVA (settle), the VBAR attitude step, the hold and DOCK30 are where to trim.
+
+The sim's slowness was a stop-and-hold at 100 ft that the VBAR cue card does not have; the closing law now runs through 100 ft (`3183cf79e`, ledger `5f8cc0280`; `--stop-at-100` gives the HOLD demo).  `full-G` (a fresh start, 3X) then took 58.2 min, and `confirm-J` (TORVA to STAY at 3X, 2026-10-17, below) 58.4 min, equal to STS-134's 58.4 and inside the flown 50.4-65.2 range (without STS-130, which had laser trouble: 50.4-61.3, mean 56.0).
+
+Contact to hard mate (capture-latches or hooks-closed time from the Mission Reports, STS-116 to 134, where the text yields it), in minutes: 134 12.9, 117 13.4, 116 14.6, 120 14.7, 124 14.7, 132 14.9, 123 15.1, 122 15.9, 129 16.8, 121 18.5, 127 19.4, 118 22.0, 126 44.6, 130 50.3; median about 15.5.  The sim takes about 10.5 min (STS-134 flown: hook drive 8:59 after contact, hard mate 3:55 after that; the sim about 6.5 and 3.5 min), so it is faster than every flown case; the difference is the dwell before the hook drive, which the sim does not model as the crew's steps and ground holds.  Not measured: Ti-to-contact across the fleet (STS-134 155.7 min; the sim 159.5 in `confirm-J`).
+
+### Ring offset at the end of TORVA (fixed)
+
+TORVA's goal used to put the CG on the origin's V-bar, so flipping to the docking attitude left the ring about 63 ft off the PMA-2 axis (Z -63 at 277 ft).  `rndz_manual.torva_end_offset(tru, tgt)` now returns the CG offset (dy, dz) that puts the ring on PMA-2's axis in the docking attitude (the ring is about 40 ft above the CG and 7.5 ft toward the ISS in LVLH; PMA-2's axis is 51.4 ft ahead of and 18.2 ft below the ISS origin), and `torva()` blends it in over the arc (`fa18a6cd3`; the log line reads "TORVA: ring ... ft from the CG ..., the CG is aimed 0.0 ft right and 58.3 ft down of the origin's V-bar").  `confirm-I`: VBAR starts at Z +2.6 ft and TORVA takes 13.5 min against about 17.  `confirm-J` (TORVA to STAY): contact about 138/10:17:29 and hard mate about 10:28 (report 10:13:52 and 10:26:47); capture 0.15 ft off the axis at 0.000 ft/s; RCS (lb, forward/left/right) 1,144 / 1,762 / 1,764 at the DOCK30 capture and 1,126 / 1,746 / 1,748 at hard mate.  A `dock_dap_stored` carried in `mc-state.json` from a previous run keyed the DAP late and threw the approach off (Z excursion 55 ft against 11 ft); `fly_rndz134` now ignores it when starting at or before ARRIVAL (`45c178ca8`).
+
+### RCS propellant
+
+Reference for the approach (Mission Report pp.39-44), for judging 'remaining after docking'.  Loads (ox+fuel, lb): forward 1178.5+728.1 = 1906.6, left 1525.0+961.6 = 2486.6, right 1523.7+961.8 = 2485.5 (the sim's RCS_LOAD_LB).  RESIDUALS AT LANDING (PASS model): forward 25.7+6.3 = 32 lb, left 662.9+418.2 = 1081, right 637.2+410.6 = 1048.  The FORWARD RCS WAS DUMPED (152/05:45:06.7, 11.04 s) before entry, so the report's forward 'consumption' 1508.6 lb includes the dump and is NOT use; left 1133.5 and right 1165.2 are use.  Firing totals: verniers 6421 firings / 14,915.84 s, primaries 3254 / 976.04 s; reboost verniers F5L 713.3 s, F5R 782.2 s, L5D 414.8 s, R5D 414.4 s.  Calibrating 3,807 lb of consumption to these totals gives ~2.7 lb/s per primary and ~0.076 lb/s per vernier.
+- Expected remaining at hard mate = landing residual + what was spent after docking: from the report's post-docking jet lists (~128 forward and ~134 per aft pod primary jet-seconds, reboost verniers, undock/hot-fire/entry), aft about 1,500-1,800 lb per pod (60-72%), forward about 610-1,015 lb including the dump.  Full-C (current code, from the flown loads, ascent use not subtracted in that capture) has 1,335 / 2,036 / 2,033 lb at DOCK30: aft near the top of the range once the FD1-3 coast the sim does not fly (~250 lb per module at the sim's own rate, 4x the owner's 0.07 %/h) is counted; forward about 225+ lb above the range.  Open: a start-of-rendezvous offset for the unflown FD1-3 use; the forward gap.
+
+Whole-mission use, ox plus fuel, in lb (the forward figure includes the pre-entry forward dump, which burns 12.2 lb/s with four thrusters -- STS-133 18.72 s = 228.3 lb, STS-128 43.2 s = 527 lb, STS-129 30.24 s = 368.9 lb): forward 126 1813, 127 1832 (dump 31.7 s ~387), 128 1883 (527), 129 1772 (369), 130 1510, 131 1523 (38.4 s ~468), 132 1766, 133 1499 (228), 134 1509 (11.04 s ~135); forward net of the dump where known: 1445, 1356, 1403, 1055, 1270, 1374 (mean 1317, STS-134 1374).  Left+right: 126 2586, 127 2181, 128 2967, 129 1788, 130 2558, 131 2653, 132 2207, 133 2301, 134 2299 (mean 2393).  STS-134 is in the middle of the range on every measure.  Use vs rendezvous time over the flights: r = -0.23 (forward net, n=6), -0.32 (aft, n=9): no real relation, but the totals include undock, re-rendezvous, reboost and entry, so they cannot isolate the approach.
+
+### RPOP's predictors
+
+`rpop.py` now has --predictor hold|coast (default hold, a straight line along the relative velocity; coast = Clohessy-Wiltshire free drift, exact against two-body motion). Owner (2026-10-16): hold is more useful for guidance but a straight line is known to be wrong for a sophisticated user, and coast is probably wrong too -- the real RPOP's predictor rule is not public. JSC-63400 Fig 25.31 (p249, receding at 0.34 ft/s) digits curve UP, fitting CW within ~8 px at 45 s spacing (x spacing fits 55-65 s; pixel readings from a recreation). Figs 25.14/25.19/25.32 do not discriminate; 25.23 (p243) has no predictors, its state is corrupted (Xdot -5.13) so CW marks would fall off-window. Open: the real increment (45-65 s?) and whether the real predictors are CW. TORVA goal puts the CG on the V-bar, so the flip to docking attitude leaves the ring ~63 ft off the axis (Z -63 at 277 ft): the ring-offset fix is above.
+
+Sources (Mac-portview, who built rpop.py; full citations in rpop-findings.md and the Dropbox docs/): NO source states what the predictors assume. Only words: "time-graduated coasting trajectory predictions" and "predicted trajectory in one-minute increments" (Foster/Brazzel/Spehar/Clark/Eldridge AAS preprint, NTRS 20130003242, pp.1-2, 10; its figures were never inserted). Default 9 at 60 s = JSC-63400 Rev 3 Fig 20.4 digits plus "one-minute increments". RNDZ 7-24: Predictors takes "number and/or time increment", no default; 7-23..7-27 beyond the checklist's own pages not available. The CW-coast choice was Mac-portview's inference from "coasting", not documented; it did not use Fig 25.31 p249. NESC-RP-11-00753 s6.1, AIAA 2011 NTRS 20110014833 Fig IV.4, NTRS 20110012267, AAS 03-014 (NTRS 20030105395, abstract only) do not describe the predictor rule. Position: hold|coast as an option (default hold) is the honest one.
+
+## 5q. After docking: undock, STORRM re-rendezvous, deorbit and landing (2026-10-18 to 2026-10-20, Linux)
+
+Applied from the staging log (Full Documentation Sync, 2026-10-22); entries in date order.
+
+[2026-10-18]
+- dock_autopilot.py FROZEN (owner, 2026-10-18) as a verification/demo tool: it showed the MMU tapes and yaGPC2 fly the STS-134 docking at the flight's timing and propellant; users are expected to dock by hand. Final form verified by confirm-L (100 ft capture -> capture -> hard mate; DOCK30 max err 5.0/1.2/1.7 ft). Ledger #306 holds the DOCK30 cause (control loop quiet during setup, not a jet runaway) and the open items (Z overshoot, 2x CW, blocking dap_load / 75 ft switch). The CC 9-9 angular flyout was ported from Codex and TESTED (confirm-M): it turned a 0.3 degree misalignment into 15 degrees (TGT ID 1 aims at the ISS state vector, not PMA-2), so it is NOT in master (ledger #307); Codex's other docking work not merged either. Only a docstring commit (d30efc816). Next topic: undocking and the remaining legs, from the hard-mate capture (approach-mine/sts134r-dock); open design question: the ~12 days from docking to undocking (advance the clock/state, or a prepared checkpoint at the undock GMT).
+- Starting points for users who dock by hand: approach-mine/sts134r-hold (138/10:04 GMT, ring 100 ft), sts134r-dock30 (10:17, 30 ft), sts134r-dock (10:38, after hard mate); hand controllers via handcontrollers.py with ~/.config/nsts/joysticks.json (Logitech Extreme 3D Pro = RHC, Thrustmaster T.16000M = THC).
+
+[2026-10-18]
+- Post-docking plan approved (Phase 0 start state, 1 undock-SEP2, 2 STORRM to SEP3, 3 FD16 coast to landing); notes in ~/sts134-runs/undock/phase0-notes.txt.  UNIV PTG undock attitude is TGT ID 2, BODY VECT 5, P 180, OM 0 = tail to Earth, nose zenith, bay to the ISS (the VBAR attitude the sim already flies); earlier "belly down" reading was wrong.  Mission Report FD15 has six internal discrepancies, listed in the notes.  Needed: day 149-150 ISS TLEs.
+
+[2026-10-18]
+- Undock Phase 0 done (master cfe0845fe: tools/undock_start.py, examples/flights/undock_gate.py; ledger #308, #309).  Start-state gate PASSED by the fresh-boot overlay: boot PASS at the date (fly_rndz134 --start-utc, to UPLINK), overlay the docked stack's vehdyn.json (undock_start.py --base), uplink sv/tsv, RNDZ NAV ENA: clocks equal, orbiter nav error under 15 ft, target 1 ft, attitude 0.08 deg.  A hand-edited restore does NOT work: the GPC clock stays at the capture's time.  Start chosen 150/03:19:40 (after the stack reached the undock attitude at 03:18:31).  Mass/prop at undock in ~/sts134-runs/undock/phase0-notes.txt; corrected approach captures in ~/sts134-runs/approach-mass-corrected.  Not yet: the UNIV PTG undock attitude is not set in PASS (DAP attitude error -55 deg pitch until keyed), vehdyn undocking model, driver fly_undock.py (Phase 1).
+
+[2026-10-18]
+- Undock Phase 1, step A done (master faca38169): examples/flights/fly_undock.py SEPCFG.  From the 150/03:19:40 start it uplinks the state vectors, RNDZ NAV ENA + SV SEL FLTR, DAP A12/B12 (this tape's generic I-loads, not the flight's) A/AUTO/VERN LO Z, deselects F1L F3L F2R F4R F1U F3U F2U on SPEC 23, keys UNIV PTG TGT ID 2 / BODY VECT 5 / P 180 / Y 0 / OM 0 (DAP error 0.01 deg: the docked stack IS in the book's undock attitude), loads ORBIT MNVR EXEC (TIG 13/14:58:54, WT 214,621 lb), powers the APDS.  Captures in ~/sts134-runs/undock-captures (README there).  Key lines are digit-by-digit (ITEM 1 3, never ITEM 13).  Next: vehdyn undocking model (C, peer review), then UNDOCK/FLYAROUND/SEP1/SEP2 phases.
+
+[2026-10-18]
+- Post-docking plan (all three phases) flown end to end on branch undock-model (C: vehdyn undocking, 127 s hook drive; head in /mnt/STORAGE/forClaude/undock/RELAY-TO-peers-undock.txt; NOT on master until Mac/Win11/WSL pass).  Phase 1/2: fly_undock.py UNDOCK -> FLYAROUND -> SEP1 -> SEP2 -> NH2 -> MC5 -> NSR -> TPI -> TDA -> SEP3 (rerndz.py: CW solutions aimed at reference points of the record's chain; run c2: NH2 1.80, NSR 1.98, TPI 1.81 ft/s, TPI range 7,684 ft, TDA 919 ft).  Phase 3: make_return_start.py (coast tools/vehdyn_coast.c, fresh boot at 2011-06-01T03:20, orbit_overlay.py with the REPORT's tanks/mass) -> fly_return.py ORBIT/DEORBIT/ENTRY/LAND: deorbit TIG 05:33:41 (report 05:29:03), touchdown 06:34:21 (06:34:50), wheels stop 06:35:13 (06:35:33).  Ledger #308-#314.  Owner rule 2026-10-18: pre-ISS and post-ISS simulations are independent; use documented values (tanks, mass, TLE), never the other leg's residuals.  Lessons: (1) a correction applied to a lineage must be the DIFFERENCE from what the lineage already has (#309: 250/300/300 lb taken off twice); tools/propellant_table.py; (2) a driver must check that a burn happened before going on (#313: WT 0 on a fresh boot, the burn never fired, LAND 'ran out of time' 335 km up).  Not flown: FCS checkout, RCS hot-fire, RAMBO, dumps, STORRM sensor, Ku/TCS lock, TEA, the ISS reacting to the undocking.
+
+[2026-10-19]
+- Re-rendezvous re-flown against History ch.21 (JSC-63400 pp.149-154) and Fig 21.1 (branch undock-model 83503e346, run ~/sts134-runs/undock/f8): the fly-around is ONE full 650 ft revolution ending on the +V-bar (book 9A), not a half-orbit ellipse; SEPCFG must leave the forward jets selected (book "(no *)": f-mask FFFF, my first version deselected them); [11A] track DAP is A/AUTO/VERN; NH2/NSR reference points are Fig 21.1's (-23000,-3500)/(-21000,+4600). Flown solutions (History p.153-154): SEP2 +1.5,0,0; NH2 -1.8,0,0; MC5 .1,0,.5; NSR -2.5,.1,0; TPI .3,.1,-3.4 (elevation Lambert 42 deg, TIG 33 s early). f8 delivered SEP2 1.94 NH2 1.92 NSR 2.49 TPI 1.13 (TPI fires at fixed time, 27 deg elevation: needs elevation trigger). Open: ~0.1-0.2 ft/s unplanned push when the -Z track maneuver ends (not drag, not frame, not ISS); submitted to codex-yaGPC2 for independent review (mailbox msg 147). Not yet in the ledger (#316 reserved).
+
+[2026-10-19]
+- STS-134 re-rendezvous, SEP1 to SEP2 (fly_undock.py, branch undock-model 526def256; f11): SEP1 now fires at TIG with the circle's own rate under it; fly-around opens 650 -> 820 ft to end at Figure 21.1's SEP1 (CW fit x +836 z -56, 3.2 ft/s up); UNIV PTG P switched 14 deg of the circle after each crossing (quarter turn = 474 s at 0.19 deg/s) so the bay stays <=17 deg off the ISS (f8: 22-53, then 76 before the track maneuver); P 90 after SEP1 ([9A] 6). f11 SEP2 solution +1.60 0 -0.46 ft/s (flown +1.5 0 0), SEP2 TIG z -2353 vs figure -2850 (f8 -1608). Remaining ~0.27 ft/s push toward the ISS at the -Z track maneuver's spin-up and stop: unpaired D-firing verniers push along -Z (PASS REF_FORCE); not a code bug. Mission Report burn times are ignition times ("initiated at", OMS table "Time of ignition").
+
+[2026-10-19]
+- Re-rendezvous burns (Mission Report p. 42 lists the jets; all PRIMARY, none vernier): the sim's PASS selects exactly the reported sets (SEP1 L1A+R1A; SEP2 F2F F3F F1D F2D L2D L3D R2D R3D; NH2 L1A R1A L2U R2U F1U) from per-jet on-time diffs of the captures. The report's duration is the SUM of sequential per-axis THC holds (CC 9-26 step 5: "Z, X seq"), so all-listed-jets-on overstates dV ~2:1 for the multi-axis burns. In the -Z track attitude the flown NH2 (-1.8,0,0) is body (+0.33,0,+1.77): X hold 1.3 s + Z hold 4.5 s = 5.8 s vs the reported 6.72 s; the sim's NH2 asked +1.43 radial (state error after the SEP2 overshoot +0.09..0.35 ft/s and the 0.127 ft/s vernier push at 12980324) = 10.9 s. Vernier push: unbalanced D-firing verniers along -Z at each rotation spin-up/stop (f15 per-jet trace); UNDOCK_NO_VERN=1 (f17) uses the book's substitutes (PRI for VERN(PRI) in [9A]/[8C]/TDA, ALT for VERN(ALT)), RNDZ failure summary p. 1-4.
+
+[2026-10-20]
+- STORRM DTO overlay is now from logged data only (design/overlay_logged.py, logged_track.py; figure_curve.py digitizes Fig 21.1; compare_fig.py scores path within +-200 ft and burn-start markers). Owner's standard: Fig 21.1 is good to ~+-200 ft. f18 (flown NH2 -1.8, MC5 0.1/0/0.5, UNDOCK_FLOWN_BURNS=1) = 71% of path within 200 ft, 93% within 400; f19 (NH2 -1.9) 62%/91% -- larger NH2 not better. Checklist p.1-9 table: planned times match flown except NH2 (+5 min); a CW fit of Fig 21.1's NH2/MC5/NSR markers at the report times leaves ~370-450 ft rms for ANY NH2 (best -1.92), so the markers are not mutually consistent beyond ~400 ft. Driver's "truth's delta-V" includes CW coupling (2n*zdot*dt ~ +0.5 ft/s at MC5): not delivered thrust; net-thrust (netthrust.py) shows MC5/SEP2/NH2 delivered within ~0.1 ft/s. Fly-around: book says 650+-50 ft CG-CG, Mission Report Ku lock ~600 ft at 04:49:20; the 650->820 ft spiral (FA_RHO1) is my fit to Fig 21.1 only; f20 runs the plain 650 ft circle (UNDOCK_FA_RHO1=650).
+
+[2026-10-20]
+- Fly-around is documented (Stuit AIAA STORRM DTO paper p.12/Fig.10; JSC-49686 s6.17 p.114): start 450+-50 ft ahead, 2n lap (46 min), open to 650+-50 ft in ~100 deg, SEP1 1.5 fps radial up at 650 ft. The 650->820 spiral (#316) was a figure fit, not documented; fly_undock.py defaults now 450->650 over 100 deg (UNDOCK_FA_RHO0/RHO1/OPEN_DEG). f21 (plain 650, VERN after SEP1) SEP2 start 1,314 ft off the old figure's marker; f22 (450 start) running.
+- Stuit's figure (~/Desktop/trajectorySTORMMDTO2.png) is now the default for overlay_logged.py/figure_curve.py/compare_fig.py (FIGURE_OLD=1 and figure_curve_old.npy keep the first). f18 on it: 75.5% within 200 ft, 100% within 400, rms 148 ft; MC5->NSR leg is the weak one (9%).
 
 ## 6. The stages
 

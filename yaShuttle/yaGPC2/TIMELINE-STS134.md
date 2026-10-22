@@ -2,7 +2,7 @@
 
 This is the flight being flown in yaGPC2: one GPC running PASS OI-34 (tape
 `OI340700-v44boot` with STS-134's OPS 1 overlay I-loads), from IPL on LC-39A
-to the orbit after OMS 2.
+to the orbit after OMS 2 and on to OPS 201.
 
 **T = 0 is SRB ignition** (the MECs fire SRM IGNITION; the hold-down posts let
 go). STS-134's was **136/12:56:27.994 GMT** on 2011-05-16 (JSC 37461,
@@ -155,6 +155,36 @@ Not uplinkable, so they are on the tape instead (`yaGPC2/tools/mission_reconfig.
 | +516.72 | MEC: ET umbilical unlatch fired | |
 | **+523.96** | **ET separation** (`sts134f`; `sts134e` +524.08).  Post-MECO orbit 120.9 × 25.9 nmi osculating above the equatorial radius (`sts134e` 124.1 × 25.7; PASS's display, J2-mean, 125.3 × 25.1) | ET sep +522; MOD FRR: "insertion altitude 122 nm" |
 
+**A flight by the owner, run `ascent2` (2026-10-12).**  Restored from the
+T-5 minute capture with the **170 s** OMS assist (the 165.4 s the flight used
+is in the later `count165c` capture), on the model after the APU and OMS load
+changes.  Times are PASS's command-accepted instants, from
+`tools/missionaudit.py` on the run's `yaGPC2.log`; T is SRB ignition and the
+flown column is JSC 37461 Appendix A:
+
+| Event | `ascent2` | Flown |
+|---|---|---|
+| SSME 3 / 2 / 1 start | −6.6 / −6.4 / −6.3 | the same |
+| Throttle up to 104.5% | +3.8 | +4.1 |
+| Throttle down to 72% | +39.0 | +39.5 |
+| Throttle up to 104.5% | +51.0 | +51.3 |
+| SRB separation command | +125.1 | +125.0 |
+| 3-g throttle-down | +442.2 | +440.0 |
+| Throttle to 67% | +503.9 | +494.7 |
+| SSME shutdown, MECO command | +504.0 | +501.0 |
+| ET separation command | +525.2 | +522.0 |
+
+Its MECO and ET separation are about 1.2 s later than the `sts134f` rows
+above (+502.8, +523.96), likely the 170 s assist and the mass-model changes
+since; the rows above are left as they are until a flight from the 165.4 s
+capture is measured.  Max-q, the SRB arming time, OMS 2 and the orbit are not
+read from this run (no vehicle trace in its log).  The flown OMS 2 ignition
+is MET 0:36:57 (2,217.4 s), burn 168.6 s.
+
+The run raised one SM alert tone (PASS's alert-tone bit, panel t=127.6 s,
+136/12:52:15) and no backup C&W alarm: the C&W unit's own sensor channels are
+not simulated, so a nominal ascent is nearly silent.
+
 The truth's velocity budget to ET separation (vehdyn, `sts134f`): 30,356 ft/s
 of thrust, of it 27,500 along the velocity; drag loss 377 ft/s; gravity loss
 2,641 ft/s (`sts134e`: 30,353, 27,542, 424, 2,634).
@@ -208,7 +238,12 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 | ET sep + 600 s | 0:18:44 | CREW | `dap c3 auto`, `OPS 105 PRO`, TRIM LOAD `ITEM 6 +0.4 −5.7 +5.7 EXEC`, LOAD `ITEM 22`, TIMER `ITEM 23`, MNVR `ITEM 27 EXEC` |
 | — | — | SIM | OMS engines ARM/PRESS (`YAGPC_OMS_ARMED=1`; the checklist's TIG−2 switch) |
 | +2,272.1 | 0:37:52 | CREW | `EXEC` at TIG−8 s |
-| **+2,280.1** | **0:38:00** | PASS | **OMS 2 ignition** (TIG = ET separation + 1,756 s), about 164 s.  STS-134: ignition MET 0:37:58, 168.6 s, 259.2 ft/s. |
+| **+2,280.1** | **0:38:00** | PASS | **OMS 2 ignition** (TIG = ET separation + 1,756 s), about 164 s.  STS-134: ignition 136/13:33:25.4 = MET 0:36:57 (JSC 37461 Appendix A; this row read 0:37:58 before), 168.6 s, 259.2 ft/s. |
+
+Since the row above, the flight has not flown OMS 1 (the Mission Report: "Not
+Required") and the driver's OMS-2 TIG is ET separation + 1,695 s, ignition at
++2,220 (0:37:00), 2.6 s after the flown one: see "The owner's flight to OPS
+201" below.
 
 ### Result: the orbit after OMS 2
 
@@ -224,6 +259,107 @@ The crew's actions are from the STS-134 Ascent Checklist (ASC/134/FIN), pp. 3-3 
 | OMS-2 burn | 264.6 ft/s | 259.2 ft/s |
 
 Osculating apsides move about ±5.5 nmi around an orbit (J2).
+
+### The owner's flight to OPS 201 (run `ascent2`, 2026-10-12)
+
+The simulated flight did not stop at OMS 2: the owner's run continued through
+the post-insertion transitions to OPS 201 (ORBIT), 53 minutes after liftoff.
+Times are from the panel's script log and the truth log against the vehicle
+clock (T = SRB ignition; ±2 s, since the panel's clock is mapped to the
+vehicle's through ET separation).  The crew's actions are from the Ascent
+Checklist (ASC/134/FIN) FB 2-5 and 3-3 to 3-7 and the POST INSERTION
+procedures.
+
+| T | MET | GMT 136/ | Who | Event |
+|---|---|---|---|---|
+| +525.3 | 0:08:45 | 13:05:13 | CREW | MSG RESET after ET separation |
+| +527.3 | 0:08:47 | 13:05:15 | CREW | ORBIT PFD on CRT 2 (`edgekey crt2 3`) |
+| +549.9 | 0:09:10 | 13:05:38 | CREW | **OMS 1 not required** (the Mission Report: "Not Required"): OMS ENG LEFT and RIGHT to OFF, then on to POST OMS 1 (checklist FB 2-5) |
+| +1,131 | 0:18:51 | 13:15:19 | CREW | `OPS 105 PRO` after `dap c3 auto` and the OMS ENG ARM/PRESS (the OMS 2 setup, ASC 3-3 to 3-7) |
+| +2,210 | 0:36:50 | 13:33:18 | CREW | `EXEC` at TIG − 8 s |
+| **≈ +2,220** | **0:37:00** | **13:33:28** | PASS | **OMS 2 ignition**: TIG = ET separation + 1,695 s (OMS 1 not flown, so no delay for it).  STS-134: MET 0:36:57, GMT 13:33:25.4 |
+| ≈ +2,401 | 0:40:01 | 13:36:29 | PASS | OMS 2 cutoff, a burn of about 181 s against the flown 168.6 s (136/13:33:25.4 to 13:36:14.1).  The propellant used was 7,040 lb. |
+| +2,518 | 0:41:58 | 13:38:26 | CREW | OMS ENG LEFT and RIGHT to OFF |
+| +2,523 | 0:42:03 | 13:38:31 | CREW | `OPS 106 PRO`: the post-insertion major mode |
+| +2,998 | 0:49:58 | 13:46:26 | CREW | `SPEC 0 PRO`, then GPC MEMORY: `ITEM 1 +2` (configuration 2, GN&C), GPC 1 for the strings and buses, and every item to its OPS 2 setting, about 8 s apart |
+| +3,158 | 0:52:38 | 13:49:06 | CREW | `OPS 201 PRO`: ORBIT |
+| +3,177 | 0:52:57 | 13:49:25 | PASS | The panel set changes from GNC OPS 1 to GNC OPS 2 (A7L added) |
+| +3,215 | 0:53:35 | 13:50:03 | SIM | Capture `sts134-ops2` (the start of the orbital phase) |
+
+OMS 2's orbit in this run, from the truth state (osculating apsides of the
+vehicle, above the equatorial radius and above the mean radius of 6,371 km):
+
+| | Above the equatorial radius | Above the mean radius | STS-134 |
+|---|---|---|---|
+| ET separation, T+526 | 124.1 × 27.7 nmi | 128.0 × 31.6 | |
+| Just before OMS 2 | 126.4 × 32.2 | 130.2 × 36.1 | |
+| Just after OMS 2 (T+2,411) | 171.6 × 121.7 | **175.5 × 125.6** | 175.8 × 124.3 |
+| At OPS 201 (T+3,200) | 164.2 × 120.7 | 168.1 × 124.6 | |
+
+The apogee is 0.3 nmi low and the perigee 1.3 nmi high, with a burn 12.8 s
+(7.6%) longer than flown: the OMS 2 differences listed under "Known
+differences".
+
+### Beyond the simulated flight: what STS-134 did next
+
+The simulation ends at OPS 201; none of the following is in the driver's
+scripts, though STS-134 did them (JSC 37461 Appendix A; times from SRB ignition):
+
+| T | MET | Event |
+|---|---|---|
+| +844.6, +858.9, +871.1 | 0:14:05, 0:14:19, 0:14:31 | APU 1, 2, 3 deactivated (the gas generator chamber pressure falls) |
+| +5,322.0, +5,403.0 | 1:28:42, 1:30:03 | Payload bay doors open, right then left |
+| +10,337.1 to +10,397.3 | 2:52:17 to 2:53:17 | OMS 3 |
+| +62,783.7 to +62,798.3 | 17:26:24 to 17:26:38 | OMS 4 (right engine only) |
+| +148,259.5 to +148,270.5 | 41:11:00 to 41:11:10 | OMS 5 |
+| +153,705.1 to +153,716.3 | 42:41:45 to 42:41:56 | OMS 6 |
+| +161,033 | 44:43:53 | Docking: capture, to the ISS |
+
+The rendezvous from the OMS-2 orbit to capture is `RENDEZVOUS_PLAN.md`
+sections 5 to 5n, and the return is `TIMELINE-STS134-ENTRY.md`.
+
+### After docking: undocking, the STORRM re-rendezvous and the night landing (reference, not simulated)
+
+- Reference only (owner, 2026-10-16: NOT current work).  Owner's decisions: the ISS stay is uninteresting for the PASS emulation; undocking/flyaround/separation is a demo video in its own right, run by itself (no timeline problem); the night landing (below) is welcome because it differs from the RTLS video.  Current work stays: fix the ISS approach and hard-dock at about the Mission Report's time.
+- Mission Report (FD15-17), GMT: Orbiter DAP resumes attitude control 150/02:35:28; maneuver to undocking attitude 02:46:28-03:18:31; FREE drift 03:52:28; hook drive 03:53:08 (~2 min 7 s); flyaround start (+X pulses L1A/R1A) 04:20; Ku RADAR 04:49:20 (lock ~600 ft); SEP1 05:06:02 (6.48 s +X); SEP2 05:34:06 (5.2 s); STORRM re-rendezvous: NH2 06:39:38, MC5 06:59:08, NSR 07:24:08, TPI 07:57:34, closest approach 955 ft CG-CG 08:24:25 (TDA not required), SEP3 08:38:36; FCS checkout 151/02:24:36; RCS hot-fire 151/03:30:57; deorbit burn 152/05:29:03 (orbit 248, dual-engine, 158.3 s, 298.4 ft/s, resulting orbit 23.2 x 188.5 nmi); EI 152/06:03:06; KSC runway 15 main gear 152/06:34:50 (2011-06-01, about 02:35 EDT = NIGHT landing), nose gear 06:35:00, wheels stop 06:35:33.
+- Orbit before the deorbit burn: apogee 188.5 nmi unchanged by the burn, so about 188.5 nmi near-circular (the ISS's orbit, 51.6 deg); the exact elements would come from the ISS TLE for 2011-05-31/06-01 (the targets file has NORAD 25544's 2011-05-18 TLE only).
+- What the sim lacks: UNDOCKING in vehdyn.c (listed NOT MODELLED), a mated-stack attitude model (the Orbiter DAP controls the stack from 02:35:28; ISS mass/inertia and DAP configuration for it; whether the ISS gyros were used is not established), a TIME-WARP capture (propagate truth, re-seed PASS state vector and clocks) for the 11.7-day stay and the ~42 h after SEP3, night lighting in portview.  Rendezvous document sections: UNDOCKING PREP, UNDOCK OPS, UNDOCKING/TORS/TORF/INITIAL SEPARATION (p.1-9), STORRM DTO RE-RENDEZVOUS (p.1-10, SEP1 1.5, SEP2 1.5, NH2 2.0, NSR 2.4, TPI 3.4, SEP3 1.0 ft/s), UNDOCKING/SEPARATION TIMELINE (pp.2-x).
+
+### Undock to SEP3: measurements and findings (2026-10-21/22)
+
+Applied from the staging log (Full Documentation Sync, 2026-10-22); entries in date order.
+
+[2026-10-21]
+- RCS pulse/thrust check (JSC-10511 Rev B pp. 7-5..7-7, Table 7-IV; TD0340): min on/off cycle 80 ms (was 40), 15 ms tail-on/tail-off transient per firing regardless of duration, effective duration = on-time - 0.015 s; PRCS 870 lbf, VRCS 24 lbf. vehdyn.c jet_loads() is a square wave (no 15 ms loss), so a minimum pulse over-delivers impulse (and propellant) by ~23%; negligible for multi-second burns.
+- Table 7-IV +X translation (L3A,R3A pair; 200K lb Orbiter): 0.279 ft/s^2 x, 0.049 z (z/x 0.176). Sim REF_FORCE 1713.6/302.2 lbf gives 0.2757 ft/s^2 at 200K lb and z/x 0.176: thrust magnitude agrees with the handbook to ~1%. SEP1 6.48 s -> 1.69 ft/s; the plan's 1.5 ft/s is not what 6.48 s delivers. The earlier "sim 12-16% too hot" inference (planned dV vs MR durations) is retracted.
+
+[2026-10-21]
+- SEP1->SEP2 reproducibility (undock-model, uncommitted): SEP1 is now ONE +X THC hold of 6.48 s (fly_undock.py thc_burn(fixed_hold=); UNDOCK_SEP1_JETS=1, UNDOCK_SEP1_HOLD overrides; handcontrollers.py logs each THC hold's start/release in vehicle s). f31b/f32a/f32b are identical to the last pulse (+0.25 ahead, -1.69 up; post-burn DAP pulses net body +0.052/+0.006/-0.107 ft/s) -> the sim is deterministic once the burn is. Old SEP1 spread (1.08..1.76 up) was the sized-hold + 0.12 ft/s correction floor + hold truncation, not physics. One DAP-cycle (80 ms) difference in THC release = 0.04 ft/s.
+- CW from the sim's own pre-SEP1 state (x 635 z -39, v -0.24 -1.45) + the flown burn lands within 20 ft of the SEP2 marker; the 400 ft miss (guard stops at GMT 12979519) comes from post-burn DAP pulses (L2D+R2D pair at ~12978769 carries 0.11 ft/s) -- 0.1 ft/s = 160-240 ft at SEP2.
+- Jet physics vs JSC-10511 Rev B Table 7-IV/7-V: primary-jet translation accelerations agree to 1-3%, +Pitch/-Pitch torque ratio 0.64 both, implied Iyy ~7.0e6 slug ft^2 = vehdyn's; vernier -P/+P torque ratio 0.50 vs 0.44. Not a force/inertia error. Mission Report FD15 table labels NSR/MC5 swapped vs durations (9.12 s = NSR 2.4, 1.6 s = MC5).
+- Stalls at the SEP1/SEP2 capture were host I/O: a forgotten `find /` (bfs) read the whole filesystem for 2.5 h (IO pressure 26%); killed. Runs now go on the NVMe (/var/tmp/undock-runs/<run>, symlinked); design/sysmon.sh logs load/PSI/swap every 10 s to design/sysmon.log. All overlays now in ~/Desktop/Overlays/.
+- vehdyn.c (undock-model, NOT built yet): YAGPC_VEHDYN_JET_DELAY_MS (default 0) dead-time model of the 15 ms tail-on transient (jetAge, jet_delay_s, anyOn keeps steps short).
+
+[2026-10-21]
+- MEASUREMENT ERROR FOUND: design/logged_track.py, overlay_logged.py and deviation_guard.py rebuilt the ISS between captures with a J2-about-frame-z RK4; the sim uses the full harmonic field of date (phys_gravity), so that reconstruction drifted 12 -> 655 ft over 1,100 s and produced the "400 ft off" guard stops and the 66% scores for f31b/f32a/f32c/f33a. vehdyn.c now logs "vehdyn-tgt:" (target r,v at ITS clock, lags the Orbiter's by ~26 ms = 650 ft, corrected in exact_track()); with it, f34a (as-flown SEP1: one +X hold of 6.48 s, primary DAP) scores 97.5% within +-200 ft of the figure, rms 58 ft, worst 265 ft, SEP1->SEP2. Exact track agrees with the driver's truth range to ~30 ft. Runs made before this have no vehdyn-tgt lines and cannot be re-scored exactly.
+- 15 ms dead time (YAGPC_VEHDYN_JET_DELAY_MS=15, f34b): 97.1%, rms 78 ft -- no meaningful change SEP1->SEP2. Forward jets deselected (f32c) and VERN (f33a) were judged with the bad track; re-judge.
+
+[2026-10-21]
+- DETERMINISM: SEP1->SEP2 runs at --rate 1 are identical to the last pulse run to run (f31b = f32a = f32b = f34a: same +0.25/-1.69 SEP1, same post-burn pulses, same 403-ft artifact). At --rate 2 with host load 20-27 the SAME configuration scatters by 0.5 ft/s at SEP2 (f35b SEP2 miss 90 ft, f37b 828 ft; both primary DAP + 15 ms dead time) -- the keystroke/CRT-wait steps after SEP1 (p90 UNIV PTG) land at different vehicle times. Compare configurations only at rate 1.
+- compare_fig.py: TIMING now at the commanded TIG (the detected burn start wandered by tens of seconds); LEG VELOCITY ERROR block = equivalent (x,z) velocity error at each leg's start that explains the miss at the next diamond (CW, targeted burns so no carry), with the figure's resolution floor ~100 ft / T. figure_curve.npy gap-filled where the curve runs along the axes; equal-scale base (design/trajectorySTORMMDTO2-equal.png, equal_base.py) is the overlay default; no current-<run>.png links.
+
+[2026-10-22]
+- TEST ERROR FOUND: runs with UNDOCK_FLOWN_BURNS=1 burn NH2 and MC5 with the flown FIXED vectors (-1.8 0 0; 0.1 0 0.5), never re-aimed from the actual state as the ground's solutions were, so any SEP2 error compounded (f40c/f46c: MC5 2.1 kft, NSR 5.8 kft, TPI 8.9 kft off). Without it (targeted NH2/MC5/NSR/TPI) f50b, restarted from f46c's SEP2 capture: NH2 576, MC5 961, NSR 822, TPI 517 ft off the diamonds; solutions NSR 2.4/TPI 3.36 ft/s vs the book 2.4/3.4, range at TPI 6,308 ft (book ~6,860); closest approach 984 ft at GMT 12990391 vs the Mission Report's 955 ft.
+- DAP: tape's stored A9/B9 and A7/B7 are generic I-loads, not p. 6-2's (e.g. A9 VERN ROT RATE 0.2000 vs 0.130, ATT DB 5.00 vs 2.00, P/Y OPTION ALL vs TAIL); UNDOCK_DAP62=1 corrects them (A9/B9 at the undock, A7/B7 at SEP2 Preliminary), read back 'every item as 6-2'. With it the vernier firing SEP1->SEP2 fell from ~160 to ~74 jet-seconds (net z kick -0.35 -> -0.16 ft/s), concentrated in the first ~6 min after SEP1 (the quarter turn/track acquisition).
+- OPEN: SEP1 burn direction depends on the attitude reached by TIG, which is not reproducible: +0.56 ahead (f44-f47), -1.49 (f48a, no early P 90), +1.68 (f49a), -1.61 (f52a), -1.72 (f52b); needed ~+0.1..0.3. The checklist burns +X up in the P 90 (-RBAR) attitude. Next: log the vehicle quaternion beside vehdyn-state (body axes in LVLH every 10 s) before more timing tests; the fly-around attitude is not deterministic at host load > ~15.
+- Stroke-width criterion (owner 2026-10-21): 'visually indistinguishable' = centerlines within ~5 px of Stuit's figure = ~165 ft in x but ~50 ft in z, i.e. ~0.015-0.03 ft/s per long leg; compare_fig.py prints the pixel score and the equivalent leg velocity error.
+
+[2026-10-22]
+- Stuit (AIAA STORRM DTO paper p. 13): SEP1 is ALWAYS a radial-up 1.5 fps with a small posigrade component from the +X engines' cant; the fly-around leaves a residual dV (~1.5 fps radial up nominally) that "can vary significantly" with dispersions; the SEP2 targeting "can compensate for that difference". So Figure 21.1 is the NOMINAL plan: SEP2's position is not expected to match it (fly-around dispersions of tenths of ft/s = 160-240 ft per 0.1 ft/s at SEP2). Test the targeted chain instead (burn sizes, NH2/NSR/TPI positions, closest approach): f50b NSR 2.39/TPI 3.36/MC5 0.40 ft/s vs 2.4/3.4/0.4, misses 576/822/517 ft, closest approach 984 ft vs 955 ft.
+- SEP1 attitude (attitude_series.py, vehdyn-state q): the vehicle slews at ~0.125 deg/s (the 6-2 A9 vernier rotation rate 0.130 barely exceeds the 0.127 deg/s ISS bearing rate), so the attitude at TIG is a phase of that slew set by the P-step times: -Z to ISS 10-15 deg for leads 45-100 deg (burn +0.50..+0.57 ahead), 81 deg for lead 140 (burn backward).  f60 = the corrected simulator on defaults only (committed 238ce91c8): SEP1 +0.56/-1.61, SEP2 614 ft off, then targeted burns.
+
+[2026-10-22]
+- f60 = corrected simulator on defaults only (commit 238ce91c8), SEPCFG -> SEP3 at rate 1: misses at the burns SEP2 614 / NH2 643 / MC5 176 / NSR 164 / TPI 207 ft; TPI 6,860 ft range (book ~6,860), burn 3.40 ft/s (book 3.4); NSR 2.43, MC5 ~0.4; closest approach 1,081 ft at 12990325 (mission 955 ft at ~12990265); pixel scores within 5 px: SEP1->SEP2 22%, SEP2->NH2 7%, NH2->MC5 53%, MC5->NSR 52%, NSR->TPI 92%, TPI->SEP3 63%. Equivalent leg velocity errors: 0.26, 0.29, 0.17, 0.15, 0.07, 0.09 ft/s (SEP3 0.75, driver's SEP3 not re-aimed). Early legs inherit SEP1's direction (attitude phase of the 0.125 deg/s slew) and the fly-around dispersion, which Stuit says SEP2 compensates.
 
 ### Cross-check: STS-135 with the same model
 
