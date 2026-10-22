@@ -588,6 +588,10 @@ class Undock(R.Rendezvous):
         n, legs = RR.N_ISS, 12
         tf = RR.T["SEP1"] - t_fa
         w = 2.0 * math.pi / tf
+        end = os.environ.get("UNDOCK_FA_END", "633,90")      # "x,z" ("" = the +V-bar crossing, the old behaviour): where on the circle SEP1 fires; Stuit's Fig 22/23 diamond is x 633 z +90 (the Orbiter is still 90 ft below the +V-bar), not the crossing
+        if end:
+            ex, ez = (float(c) for c in end.split(","))
+            w = (math.atan2(-ez, ex) % (2.0 * math.pi)) / tf
         dl = tf / legs
         self.wait_gmt(t_fa - 40.0)
         self.uplink()
@@ -598,6 +602,8 @@ class Undock(R.Rendezvous):
             th = w * (k + 1) * dl
             rho = FA_RHO0 + (FA_RHO1 - FA_RHO0) * min(th / FA_OPEN, 1.0)
             tgt = (rho * math.cos(th), 0.0, -rho * math.sin(th))
+            if end and k == legs - 1:
+                tgt = (ex, 0.0, ez)
             lead = 10.0
             dv = RR.transfer_dv(RR.prop(s, lead), dl - lead, tgt)
             self.say("FLYAROUND leg %d/%d: at x %.0f y %.0f z %.0f ft (range %.0f), rates %+.2f %+.2f %+.2f; to x %.0f z %.0f in %.0f s: %+.2f %+.2f %+.2f ft/s"
