@@ -61,9 +61,11 @@ FA_OPEN = math.radians(float(os.environ.get("UNDOCK_FA_OPEN_DEG", "100")))
 # "Loss of VRCS"): A/AUTO/PRI in place of VERN(PRI) -- the fly-around [9A] and SEP1 [8C] -- and A/AUTO/ALT in place of VERN(ALT) -- the
 # track [11A] and the track holds after every burn, the undock/sep and the approach outside 2,000 ft; inside 2,000 ft (TDA) PRI again.
 NO_VERN = bool(os.environ.get("UNDOCK_NO_VERN"))
-SEP1_JETS = bool(os.environ.get("UNDOCK_SEP1_JETS"))      # SEP1 as flown: 6.48 s of L1A+R1A (1.67 up, 0.30 ahead) instead of the planned 1.5 ft/s radial up with the circle's trim
+SEP1_JETS = os.environ.get("UNDOCK_SEP1_JETS", "1") not in ("0", "")     # DEFAULT ON since 2026-10-22: SEP1 as the Mission Report flew it (UNDOCK_SEP1_JETS=0: the old planned-1.5 burn)
+DAP62 = os.environ.get("UNDOCK_DAP62", "1") not in ("0", "")             # DEFAULT ON since 2026-10-22: the tape's generic A9/B9 and A7/B7 made p. 6-2's (dap_to_62 / dap_config)
+os.environ.setdefault("YAGPC_VEHDYN_JET_DELAY_MS", "15")           # DEFAULT 15 since 2026-10-22: the 15 ms tail-on/tail-off transient of every RCS firing (JSC-10511 Rev B p. 7-2)      # SEP1 as flown: 6.48 s of L1A+R1A (1.67 up, 0.30 ahead) instead of the planned 1.5 ft/s radial up with the circle's trim
 SEP1_VERN = bool(os.environ.get("UNDOCK_SEP1_VERN"))      # with NO_VERN: the checklist's A/AUTO/VERN after SEP1 [8C] and for the SEP2 track [11A] (f21); every other leg keeps the substitutes
-FA_P_LEAD = float(os.environ.get("UNDOCK_FA_P_LEAD", "31"))     # (UNDOCK_FA_P_LEAD)           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
+FA_P_LEAD = float(os.environ.get("UNDOCK_FA_P_LEAD", "60"))     # (UNDOCK_FA_P_LEAD)           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
 HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
@@ -204,7 +206,7 @@ class Undock(R.Rendezvous):
     def undock(self):
         self.say("UNDOCK: GMT %.1f; FREE drift at %d, hook drive at %d, the +Z pulse at %d"
                  % (self.truth()["gmt"], FREE_GMT, HOOK_GMT, UNDOCK_GMT))
-        if os.environ.get("UNDOCK_DAP62"):
+        if DAP62:
             # the stored A9 / B9 made 6-2's NOW (the edit takes ~8 min of vehicle time), the stack back on A12/B12 until the book's A9/B9 at PET -3:00
             self.dap_to_62(9, self.DAP_PROX, "A9B9-undock")
             self.do("und-dap12", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
@@ -320,6 +322,8 @@ class Undock(R.Rendezvous):
             d = abs((ang - want[p] + 180.0) % 360.0 - 180.0)
             return d
         best = min(want, key=dist)
+        if getattr(self, "_p90_at_done", False):
+            return 90                   # the settled P 90 stays: no further stepping before the burn
         if os.environ.get("UNDOCK_FA_NO_P90") and best == 90 and current is not None:
             return current              # the burn is done "in +Vbar attitude" ([9A] 7): the next quarter turn (P 90) is commanded AFTER SEP1, not during the last leg
         if current is not None and current in want and dist(current) <= dist(best) + 2.0:
@@ -330,7 +334,8 @@ class Undock(R.Rendezvous):
         """UNDOCK_P90_T=s: the final quarter turn (P 90, -RBAR) commanded exactly s seconds before SEP1's TIG ([9A] 6 'prior to +Vbar crossing'; [8C] burns +X up in the P 90 attitude),
         so it is settled by the burn at any rate; used with UNDOCK_FA_NO_P90.  Returns the P now in force."""
         t = float(os.environ.get("UNDOCK_P90_T", "0"))
-        if t > 0 and p_now != 90 and self.truth()["gmt"] >= RR.T["SEP1"] - t:
+        if t > 0 and not getattr(self, "_p90_at_done", False) and self.truth()["gmt"] >= RR.T["SEP1"] - t:
+            self._p90_at_done = True
             self.set_p(90, "fa-p90-at")
             self.say("FLYAROUND: P 90 commanded at TIG -%.0f s" % (RR.T["SEP1"] - self.truth()["gmt"]))
             return 90
@@ -474,7 +479,7 @@ class Undock(R.Rendezvous):
         (rerndz.flyaround_dv), the UNIV PTG pitch stepped to keep the bay toward the ISS, ending just before
         SEP1.  The ISS is not in the Ku radar's lock at the end here, nor in the TCS."""
         t_fa = RR.T["FA"]
-        if os.environ.get("UNDOCK_DAP62") and os.environ.get("UNDOCK_DAP62_AT_FA"):    # a run that starts HERE (the undock capture's A9/B9 are the tape's generic ones)
+        if DAP62 and os.environ.get("UNDOCK_DAP62_AT_FA"):    # a run that starts HERE (the undock capture's A9/B9 are the tape's generic ones)
             self.dap_to_62(9, self.DAP_PROX, "A9B9-fa")
         self.reselect_fwd_up_jets()
         self.deselect_fwd_jets()
@@ -686,7 +691,7 @@ class Undock(R.Rendezvous):
         if not getattr(self, "_ku_low_done", False):
             self._ku_low_done = True
             self.ku_switches("ku-output-low", radar_output="LOW")      # RADAR OUTPUT LOW at ~700 ft, thrown here in sequence (under the panel lock)
-        if os.environ.get("UNDOCK_DAP62") and os.environ.get("UNDOCK_DAP62_AT_SEP1"):   # only for a run started AT SEP1: it delays the burn by ~8 min
+        if DAP62 and os.environ.get("UNDOCK_DAP62_AT_SEP1"):   # only for a run started AT SEP1: it delays the burn by ~8 min
             self.dap_to_62(9, self.DAP_PROX, "A9B9-sep1")
         if os.environ.get("UNDOCK_DAP_DUMP"):                       # read back the DAP configuration actually in effect (SPEC 20: the active A and B columns)
             pg = self.spec20_page("dap-spec20-sep1")
@@ -727,7 +732,7 @@ class Undock(R.Rendezvous):
         """RE-RENDEZVOUS: the -Z axis target track [11A] after SEP1, the ground's SEP2 solution (rerndz:
         the direction for which NSR comes to 2.4 and TPI 3.4 ft/s), loaded and burned at 05:34:06."""
         self.wait_gmt(RR.T["SEP1"] + 240)
-        if os.environ.get("UNDOCK_DAP62"):
+        if DAP62:
             self.dap_config("[SEP2 Preliminary]")     # [GNC_20_DAP_CONFIG] Config DAP A, B to A7, B7 (checklist p. 2-9), the tape's generic A7/B7 made 6-2's
         self.uplink()                     # MCC UPLINK ORB SV, TGT SV
         self.wait_sim(10)

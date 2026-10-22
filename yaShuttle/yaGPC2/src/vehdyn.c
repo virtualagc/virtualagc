@@ -269,9 +269,10 @@ static void state_log(void) {
     next = (floor(st.t / every) + 1.0) * every;
     double g = (gmtZero >= 0.0) ? gmtZero + st.t : -1.0;
     fprintf(stderr, "vehdyn-state: t=%.3f gmt=%.3f r_ft=%.1f %.1f %.1f v_fts=%.3f %.3f %.3f "
-                    "mass_kg=%.1f\n", st.t, g,
+                    "mass_kg=%.1f q=%.6f %.6f %.6f %.6f\n", st.t, g,
             st.r[0] / 0.3048, st.r[1] / 0.3048, st.r[2] / 0.3048,
-            st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass);
+            st.v[0] / 0.3048, st.v[1] / 0.3048, st.v[2] / 0.3048, st.mass,
+            st.q[0], st.q[1], st.q[2], st.q[3]);
     tgt_state_log();
     ascent_log();
     /* in orbit: the osculating apsides -- nmi above the equatorial radius
