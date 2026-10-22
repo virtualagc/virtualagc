@@ -2660,21 +2660,26 @@ wait crt 1 title 2011/ timeout 600
         if vgo is None:
             self.say("VGO NULL (%s): VGO not readable; nothing flown" % label)
             return None
+        # UNDOCK_<LABEL>_UNDERBURN=f: the crew burns each axis down to f ft/s of VGO and stops ("the crew slightly under-burned the VGOs in both
+        # axes, as is typically the case for multi-axis maneuvers, since they normally burn down to the trim limits", Stuit on STS-134's SEP2,
+        # residuals about 0.1 in both axes); no pulse trim after it.
+        under = float(os.environ.get("UNDOCK_%s_UNDERBURN" % label.upper(), "0.1" if label == "sep2" else "0") or 0)      # SEP2 (undocking day only): 0.1 as flown; UNDOCK_SEP2_UNDERBURN=0 for the old full null
+        tol = TRIM_TOL_FPS if under <= 0 else under + 0.05
         for n in range(passes + 1):
-            if all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
+            if all(abs(v) < tol for v in vgo.values()):
                 break
             if n == passes:
                 self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f -- not all < %.1f fps after %d passes"
-                         % (label, vgo["x"], vgo["y"], vgo["z"], TRIM_TOL_FPS, passes))
+                         % (label, vgo["x"], vgo["y"], vgo["z"], tol, passes))
                 break
             order = "zxy" if vgo["z"] < 0 else "xyz"
             holds = []
             for ax in order:
                 v = vgo[ax]
-                if abs(v) < TRIM_TOL_FPS:
+                if abs(v) < tol:
                     continue
                 key = ("+" if v > 0 else "-") + ax
-                holds.append((ax, key, v, min(max(abs(v) / acc[key], 0.1), 12.0)))
+                holds.append((ax, key, v, min(max((abs(v) - under) / acc[key], 0.1), 12.0)))
             lines, gap = [], 0.0
             for ax, key, v, hold in holds:
                 lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
@@ -2694,7 +2699,7 @@ wait crt 1 title 2011/ timeout 600
                     measured.setdefault(key, []).append(dv / hold)
                     acc[key] = min(max(dv / hold, 0.05), 3.0)
             vgo = new
-        if label != "ti" and self.a.pulse_trim > 0 and vgo and all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
+        if label != "ti" and under <= 0 and self.a.pulse_trim > 0 and vgo and all(abs(v) < TRIM_TOL_FPS for v in vgo.values()):
             vgo = self.pulse_trim(label, vgo, read_vgo)
         count1 = w.get("CGNV_DV_COUNT")
         self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f ft/s%s; THC acceleration measured (ft/s^2): %s; PASS's "
