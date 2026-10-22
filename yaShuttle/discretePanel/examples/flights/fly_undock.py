@@ -100,6 +100,19 @@ class Undock(R.Rendezvous):
                   "+2     dap c3 %s\n"
                   "+3     keys ITEM 1 9 EXEC\n") % os.environ.get("UNDOCK_TRACK_JETS", "alt" if NO_VERN else "vern")      # UNDOCK_TRACK_JETS=alt|pri: the experiment (f12, f13)
 
+    def ops201_track(self, name, limit=1200.0):
+        """UNDOCK_TRACK_ONCE=1: the -Z AXIS TARGET TRACK [11A] is keyed ONCE, at SEP2 -00:20 (the re-rendezvous timeline has it nowhere else: pages 2-10 to 2-26);
+        the base class re-keys it (OPS 201, UNIV PTG items, TRK) after every burn and again before each burn.  After a burn the book's cards go OPS 201 PRO and
+        the DAP back to A/AUTO/VERN, nothing more, so with the option only that is keyed and no track maneuver is restarted."""
+        if os.environ.get("UNDOCK_TRACK_ONCE") and getattr(self, "_track_keyed", False):
+            dap = "".join(l + "\n" for l in self.TRACK_KEYS.splitlines() if "dap c3" in l)
+            self.play("+1     keys OPS 2 0 1 PRO\nwait crt 1 title 2011/ timeout 180\n" + dap, name)
+            self.script_done(name, 300)
+            self.say("crew: OPS 201 and the DAP back to VERN; the -Z track is already on ([11A] is performed once)")
+            return
+        self._track_keyed = True
+        return super().ops201_track(name, limit)
+
     def track_complete(self, name, limit=1200.0):
         """The base class ends the track maneuver with DAP A/AUTO/VERN; with UNDOCK_NO_VERN the hold is A/AUTO/ALT ([11A]'s
         VERN(ALT) with its substitute).  (The base class's log line still says VERN.)"""
