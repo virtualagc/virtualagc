@@ -593,10 +593,15 @@ class Undock(R.Rendezvous):
             ex, ez = (float(c) for c in end.split(","))
             w = (math.atan2(-ez, ex) % (2.0 * math.pi)) / tf
         dl = tf / legs
+        p0 = float(os.environ.get("UNDOCK_FA_P0_T", "90"))      # s before 04:20:00 that the first quarter turn is commanded: the turns run at the DAP's 0.130 deg/s (6-2) back to back, so the lap's
+        p_now = 180                                             # last turn (the +Vbar attitude of [8C]) is only done at TIG +70 s if the first one starts at 04:20:00; 0 = the old behaviour
+        if p0 > 0:
+            self.wait_gmt(t_fa - p0)
+            self.set_p(90, "fa-p90-0")
+            p_now = 90
         self.wait_gmt(t_fa - 40.0)
         self.uplink()
         self.wait_gmt(t_fa)
-        p_now = 180
         for k in range(legs):
             s = self.lvlh_state()
             th = w * (k + 1) * dl

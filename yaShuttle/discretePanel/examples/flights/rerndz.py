@@ -197,8 +197,19 @@ def ref():
 
 
 def targeted_dv(s, t_from, t_to, pos, n=N_ISS):
-    """The burn at t_from, from the state s there, that puts the Orbiter at pos at t_to."""
-    return transfer_dv(np.asarray(s, float), t_to - t_from, pos, n)
+    """The burn at t_from, from the state s there, that puts the Orbiter at pos at t_to.  IN-PLANE: the flown re-rendezvous burns all have Y 0.0
+    (Stuit, Table 1); the out-of-plane position is brought back by the orbit itself (y is a free oscillation, nt ~ pi over a 45 minute transfer,
+    where aiming y at 0 is ill-conditioned -- f67a's NH2 and NSR solutions carried Y +0.41/+0.45 ft/s and put the Orbiter 372 ft out of plane
+    at MC5).  RERNDZ_OOP=1 restores the full 3-D aim."""
+    s = np.asarray(s, float)
+    if os.environ.get("RERNDZ_OOP"):
+        return transfer_dv(s, t_to - t_from, pos, n)
+    P = phi(t_to - t_from, n)
+    ix = [0, 2]
+    A = P[:3, 3:][np.ix_(ix, ix)]
+    rhs = np.asarray(pos, float)[ix] - (P[:3, :3] @ s[:3])[ix]
+    v = np.linalg.solve(A, rhs)
+    return np.array([v[0] - s[3], 0.0, v[1] - s[5]])
 
 
 def mc5_dv(s, z_nsr, n=N_ISS):
