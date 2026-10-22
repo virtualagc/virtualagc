@@ -63,7 +63,7 @@ FA_OPEN = math.radians(float(os.environ.get("UNDOCK_FA_OPEN_DEG", "100")))
 NO_VERN = bool(os.environ.get("UNDOCK_NO_VERN"))
 SEP1_JETS = bool(os.environ.get("UNDOCK_SEP1_JETS"))      # SEP1 as flown: 6.48 s of L1A+R1A (1.67 up, 0.30 ahead) instead of the planned 1.5 ft/s radial up with the circle's trim
 SEP1_VERN = bool(os.environ.get("UNDOCK_SEP1_VERN"))      # with NO_VERN: the checklist's A/AUTO/VERN after SEP1 [8C] and for the SEP2 track [11A] (f21); every other leg keeps the substitutes
-FA_P_LEAD = 31.0           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
+FA_P_LEAD = float(os.environ.get("UNDOCK_FA_P_LEAD", "31"))     # (UNDOCK_FA_P_LEAD)           # deg of the circle: the next quarter turn starts 14 deg after the crossing (45 less half of the 62 deg the turn lasts)
 HOOK_GMT = 150 * 86400 + 3 * 3600 + 53 * 60 + 8             # the hook-drive command (Mission Report)
 UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission Report (03:55:22)
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
@@ -204,6 +204,11 @@ class Undock(R.Rendezvous):
     def undock(self):
         self.say("UNDOCK: GMT %.1f; FREE drift at %d, hook drive at %d, the +Z pulse at %d"
                  % (self.truth()["gmt"], FREE_GMT, HOOK_GMT, UNDOCK_GMT))
+        if os.environ.get("UNDOCK_DAP62"):
+            # the stored A9 / B9 made 6-2's NOW (the edit takes ~8 min of vehicle time), the stack back on A12/B12 until the book's A9/B9 at PET -3:00
+            self.dap_to_62(9, self.DAP_PROX, "A9B9-undock")
+            self.do("und-dap12", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
+                                 "+3     keys ITEM 1 + 1 2 EXEC\n+3     keys ITEM 2 + 1 2 EXEC\n+3     keys RESUME\n", 6, "SPEC 20, back on A12 B12")
         # [GNC_20] Config DAP A,B to A9,B9 -- UNDOCK PET -3:00 (the book), before the FREE drift
         self.wait_gmt(FREE_GMT - 150)
         self.do("und-dap9", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
@@ -315,9 +320,21 @@ class Undock(R.Rendezvous):
             d = abs((ang - want[p] + 180.0) % 360.0 - 180.0)
             return d
         best = min(want, key=dist)
+        if os.environ.get("UNDOCK_FA_NO_P90") and best == 90 and current is not None:
+            return current              # the burn is done "in +Vbar attitude" ([9A] 7): the next quarter turn (P 90) is commanded AFTER SEP1, not during the last leg
         if current is not None and current in want and dist(current) <= dist(best) + 2.0:
             return current
         return best
+
+    def p90_at(self, p_now):
+        """UNDOCK_P90_T=s: the final quarter turn (P 90, -RBAR) commanded exactly s seconds before SEP1's TIG ([9A] 6 'prior to +Vbar crossing'; [8C] burns +X up in the P 90 attitude),
+        so it is settled by the burn at any rate; used with UNDOCK_FA_NO_P90.  Returns the P now in force."""
+        t = float(os.environ.get("UNDOCK_P90_T", "0"))
+        if t > 0 and p_now != 90 and self.truth()["gmt"] >= RR.T["SEP1"] - t:
+            self.set_p(90, "fa-p90-at")
+            self.say("FLYAROUND: P 90 commanded at TIG -%.0f s" % (RR.T["SEP1"] - self.truth()["gmt"]))
+            return 90
+        return p_now
 
     def set_p(self, p, name):
         """UNIV PTG: BODY VECT 5 at pitch P, TRK."""
@@ -457,6 +474,8 @@ class Undock(R.Rendezvous):
         (rerndz.flyaround_dv), the UNIV PTG pitch stepped to keep the bay toward the ISS, ending just before
         SEP1.  The ISS is not in the Ku radar's lock at the end here, nor in the TCS."""
         t_fa = RR.T["FA"]
+        if os.environ.get("UNDOCK_DAP62") and os.environ.get("UNDOCK_DAP62_AT_FA"):    # a run that starts HERE (the undock capture's A9/B9 are the tape's generic ones)
+            self.dap_to_62(9, self.DAP_PROX, "A9B9-fa")
         self.reselect_fwd_up_jets()
         self.deselect_fwd_jets()
         if NO_VERN:
@@ -518,6 +537,7 @@ class Undock(R.Rendezvous):
         next_trim = self.truth()["gmt"] + 240.0
         while self.truth()["gmt"] < RR.T["SEP1"] - 90.0:
             s = self.lvlh_state()
+            p_now = self.p90_at(p_now)
             p = self.p_for(s[0], s[2], p_now)
             if p != p_now:
                 self.set_p(p, "fa-p%d" % p)
@@ -569,6 +589,7 @@ class Undock(R.Rendezvous):
                 self.thc_burn(tuple(dv), "fa-leg%d" % (k + 1))
             while self.truth()["gmt"] < t_end - (75.0 if k == legs - 1 else 25.0):      # the last leg: SEP1's keying (~25 s) is done by TIG
                 s = self.lvlh_state()
+                p_now = self.p90_at(p_now)
                 p = self.p_for(s[0], s[2], p_now)
                 if p != p_now:
                     self.set_p(p, "fa-p%d-%d" % (p, k + 1))
@@ -665,12 +686,16 @@ class Undock(R.Rendezvous):
         if not getattr(self, "_ku_low_done", False):
             self._ku_low_done = True
             self.ku_switches("ku-output-low", radar_output="LOW")      # RADAR OUTPUT LOW at ~700 ft, thrown here in sequence (under the panel lock)
-        if os.environ.get("UNDOCK_DAP62"):                          # A9/B9 as 6-2 has them (the tape's are generic), before the burn's keying
+        if os.environ.get("UNDOCK_DAP62") and os.environ.get("UNDOCK_DAP62_AT_SEP1"):   # only for a run started AT SEP1: it delays the burn by ~8 min
             self.dap_to_62(9, self.DAP_PROX, "A9B9-sep1")
         if os.environ.get("UNDOCK_DAP_DUMP"):                       # read back the DAP configuration actually in effect (SPEC 20: the active A and B columns)
             pg = self.spec20_page("dap-spec20-sep1")
             self.dump_screen("SPEC 20 DAP CONFIG at SEP1 (A12/B12 in effect)")
         self.deselect_fwd_jets()          # a no-op if the fly-around already did it
+        p90_lead = float(os.environ.get("UNDOCK_P90_LEAD", "0"))   # [9A] 6: "prior to +Vbar crossing ... P +90 (-RBAR)": the quarter turn commanded this many s BEFORE TIG (0: after the burn, as before)
+        if p90_lead > 0:
+            self.wait_gmt(tig - p90_lead)
+            self.set_p(90, "sep1-p90-early")
         self.wait_gmt(tig - 70)
         s = self.lvlh_state()
         dt = tig - self.truth()["gmt"]
@@ -692,7 +717,8 @@ class Undock(R.Rendezvous):
                  % (s[0], s[2], s[3], s[5], self.truth()["gmt"], st[0], st[2], st[3], st[5], -v_circ[2], *trim, *dv))
         flown_hold = float(os.environ.get("UNDOCK_SEP1_HOLD", "6.48")) if SEP1_JETS else 0.0
         got = self.thc_burn(tuple(dv), "sep1", tig=tig, fixed_hold=(flown_hold or None))      # UNDOCK_SEP1_HOLD=0: the old sized holds + corrections
-        self.set_p(90, "sep1-p90")        # [9A] 6: the next quarter turn (-RBAR), so the bay follows the ISS as the Orbiter climbs
+        if not float(os.environ.get("UNDOCK_P90_LEAD", "0")) > 0:
+            self.set_p(90, "sep1-p90")        # [9A] 6: the next quarter turn (-RBAR), so the bay follows the ISS as the Orbiter climbs
         self.uplink()
         self.rr_burns = getattr(self, "rr_burns", {})
         self.rr_burns["SEP1"] = [float(x) for x in got]
@@ -701,6 +727,8 @@ class Undock(R.Rendezvous):
         """RE-RENDEZVOUS: the -Z axis target track [11A] after SEP1, the ground's SEP2 solution (rerndz:
         the direction for which NSR comes to 2.4 and TPI 3.4 ft/s), loaded and burned at 05:34:06."""
         self.wait_gmt(RR.T["SEP1"] + 240)
+        if os.environ.get("UNDOCK_DAP62"):
+            self.dap_config("[SEP2 Preliminary]")     # [GNC_20_DAP_CONFIG] Config DAP A, B to A7, B7 (checklist p. 2-9), the tape's generic A7/B7 made 6-2's
         self.uplink()                     # MCC UPLINK ORB SV, TGT SV
         self.wait_sim(10)
         if SEP1_VERN:
