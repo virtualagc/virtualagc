@@ -219,11 +219,17 @@ class Undock(R.Rendezvous):
     def undock(self):
         self.say("UNDOCK: GMT %.1f; FREE drift at %d, hook drive at %d, the +Z pulse at %d"
                  % (self.truth()["gmt"], FREE_GMT, HOOK_GMT, UNDOCK_GMT))
-        if DAP62:
+        prefree = os.environ.get("UNDOCK_PREFREE", "")      # "save": do the DAP prep, capture "prefree" ~3 min before the book's A9/B9 step and stop (a start for a recorded run); "skip": a run restored from that capture
+        if DAP62 and prefree != "skip":
             # the stored A9 / B9 made 6-2's NOW (the edit takes ~8 min of vehicle time), the stack back on A12/B12 until the book's A9/B9 at PET -3:00
             self.dap_to_62(9, self.DAP_PROX, "A9B9-undock")
             self.do("und-dap12", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
                                  "+3     keys ITEM 1 + 1 2 EXEC\n+3     keys ITEM 2 + 1 2 EXEC\n+3     keys RESUME\n", 6, "SPEC 20, back on A12 B12")
+        if prefree == "save":
+            self.wait_gmt(FREE_GMT - 175)
+            self.snapshot("prefree")
+            self.say("UNDOCK: capture 'prefree' taken at GMT %.0f (150/%s); stopping" % (self.truth()["gmt"], __import__("time").strftime("%H:%M:%S", __import__("time").gmtime(self.truth()["gmt"] - 150 * 86400))))
+            raise SystemExit(0)
         # [GNC_20] Config DAP A,B to A9,B9 -- UNDOCK PET -3:00 (the book), before the FREE drift
         self.wait_gmt(FREE_GMT - 150)
         self.do("und-dap9", "+1     keys SPEC 2 0 PRO\nwait crt 1 title /020/ timeout 120\n"
@@ -452,7 +458,31 @@ class Undock(R.Rendezvous):
         self.dap_both((after, "x_pulse", "y_pulse", "z_pulse"), label + "-after")      # UNDOCK_FA_JETS=pri: the book's loss-of-VRCS substitute for VERN(PRI) ([9A], [8C]; p. 1-4)
         return got
 
-    def gburn(self, name, tig_gmt, dv, lead=420.0):
+    def truth_trim(self, label, t_next, aim, tol=0.06, passes=3):
+        """After a burn, correct what the burn did NOT deliver: the burn's own error (the DAP's attitude jets in the hold, the hold's acceleration, PASS's VGO
+        against the truth: 0.05-0.15 ft/s, 15 kft per ft/s over the next leg) is measured on the TRUTH -- the state now, flown to the aim at t_next -- and made up
+        with THC pulses (the DAP's 0.1 ft/s PRI pulse), up to `passes` times, until the remaining solution is under `tol` ft/s.  The coasts themselves are ballistic
+        to ~0.03 ft/s (the 3-point test, f75a/f76a), so this is where a burn's error enters.  UNDOCK_TRUTH_TRIM=1 turns it on (off by default until tested; the f80a run started with it on)."""
+        if os.environ.get("UNDOCK_TRUTH_TRIM", "0") in ("0", ""):
+            return
+        self.do(label.lower() + "-ttrim-mode", "+1     dap c3 x_pulse\n+2     dap c3 y_pulse\n+2     dap c3 z_pulse\n", 2)
+        for k in range(passes):
+            s = self.lvlh_state()
+            now = self.truth()["gmt"]
+            if t_next == "coell":      # NSR: the coelliptic state -- no radial rate, and the along-track rate 1.5 n z that holds the height (no secular drift): f76a's NSR left 0.11 ft/s short and the height drifted 4,631 -> 4,041 ft by TPI (the flight's 4,524 -> 4,733)
+                dv = np.array([1.5 * RR.N_ISS * s[2] - s[3], 0.0, -s[5]])
+                tgt_txt = "the coelliptic state"
+            else:
+                dv = RR.targeted_dv(s, now, t_next, aim)
+                tgt_txt = "the aim at GMT %.0f" % t_next
+            mag = float(np.linalg.norm(dv))
+            self.say("%s truth trim %d: the state at GMT %.0f needs %+.2f %+.2f %+.2f ft/s (|%.2f|) to reach %s" % (label, k, now, *dv, mag, tgt_txt))
+            if mag < tol:
+                break
+            self.lvlh_pulses(tuple(dv), label.lower() + "-ttrim%d" % k, nmax=8)
+            self.wait_sim(8)
+
+    def gburn(self, name, tig_gmt, dv, lead=420.0, aim=None):
         """RE-RNDZ RCS BURN (+X, -X, Multi-axis) (CC 9-26) with MCC's solution: OPS 202 PRO, RCS SEL (ITEM 4),
         WT (ITEM 9), TIG (ITEM 10) and the EXT delta-Vs (ITEMs 19-21, LVLH) keyed, LOAD (22), TIMER (23); at
         TIG - 30 s DAP A/AUTO/PRI, TRANS NORM; at TIG the burn flown on the THC to null VGO (null_vgo, as the
@@ -488,6 +518,8 @@ class Undock(R.Rendezvous):
         self.say("%s: TIG, state x %.0f y %.0f z %.0f ft, rates %+.2f %+.2f %+.2f" % (name, *s0[:3], *s0[3:]))
         vgo = self.null_vgo(name.lower(), 6)
         self.wait_sim(5)
+        if aim is not None:
+            self.truth_trim(name, aim[0], aim[1])
         s1 = self.lvlh_state()
         got = s1[3:] - s0[3:]
         self.say("%s: the truth's delta-V %+.2f %+.2f %+.2f ft/s (LVLH, |%.2f|) against the %+.2f %+.2f %+.2f asked; VGO left %s"
@@ -819,7 +851,7 @@ class Undock(R.Rendezvous):
                  "the nominal chain's is %+.2f %+.2f %+.2f"
                  % (*d2, float(np.linalg.norm(d2)), ref["nh2_pos"][0], ref["nh2_pos"][2], *nominal))
         self.rr_plan = dict(SEP2=list(d2))
-        self.gburn("SEP2", RR.T["SEP2"], d2)
+        self.gburn("SEP2", RR.T["SEP2"], d2, aim=(RR.T["NH2"], tuple(float(c) for c in ref["nh2_pos"])))
         self.restore_fwd_jets()
 
 
@@ -859,7 +891,7 @@ class Undock(R.Rendezvous):
         self.rr_plan = getattr(self, "rr_plan", {})
         self.rr_plan["z_nsr"] = rep["z_nsr"]
         json.dump({"z_nsr": rep["z_nsr"]}, open(os.path.join(self.a.logs, "rr-plan.json"), "w"))
-        self.gburn("NH2", RR.T["NH2"], dv)
+        self.gburn("NH2", RR.T["NH2"], dv, aim=(RR.T["NSR"], tuple(float(c) for c in ref["nsr_pos"])))
 
     def _z_nsr(self):
         try:
@@ -896,7 +928,7 @@ class Undock(R.Rendezvous):
         dv = RR.coelliptic_dv(s_t)
         self.say("NSR: at TIG x %.0f y %.0f z %.0f ft, rates %+.2f %+.2f %+.2f; the coelliptic burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
                  % (*s_t[:3], *s_t[3:], *dv, float(np.linalg.norm(dv))))
-        self.gburn("NSR", RR.T["NSR"], dv)
+        self.gburn("NSR", RR.T["NSR"], dv, aim=("coell", None))
 
     def tpi_shift(self):
         """Seconds TPI slipped from the Mission Report's time (the book's TPI is Lambert-targeted on the 42 deg elevation
@@ -939,7 +971,7 @@ class Undock(R.Rendezvous):
                  "rates %+.2f %+.2f %+.2f; the burn %+.2f %+.2f %+.2f ft/s (|%.2f|)"
                  % (math.degrees(math.atan2(*(lambda q: (q[2], -q[0]))(RR.prop(s, RR.T["TPI"] - now)))), self._tpi_shift,
                     *s_t[:3], float(np.linalg.norm(s_t[:3])), *s_t[3:], *dv, float(np.linalg.norm(dv))))
-        self.gburn("TPI", tig, dv)
+        self.gburn("TPI", tig, dv, aim=(RR.T["TDA"], tuple(RR.TDA_POINT)))
 
     GATES = ((2000.0, -3.7), (1500.0, -2.9), (1000.0, -1.8), (600.0, 0.0))       # ft, the closing rate to brake to (ft/s)
 
