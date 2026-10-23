@@ -86,9 +86,9 @@ def gmt(h, m, s):
 
 T = dict(FA=gmt(4, 20, 0), SEP1=gmt(5, 6, 2), SEP2=gmt(5, 34, 6), NH2=gmt(6, 39, 38), MC5=gmt(6, 59, 8),
          NSR=gmt(7, 24, 8), TPI=gmt(7, 57, 34), TDA=gmt(8, 24, 25), SEP3=gmt(8, 38, 36))
-TDA_POINT = (-333.0, 0.0, 1000.0)       # 1,000 ft below and 333 ft behind (the plan)
-if os.environ.get("RERNDZ_AIM") != "plan":
-    TDA_POINT = (-83.0, 0.0, 947.0)     # the AS-FLOWN stall point at closest approach (Stuit p. 27: -83 ft X, 947 ft Z, range 952 ft; the target was -333/1,000)
+TDA_POINT = (-333.0, 0.0, 1000.0)       # 1,000 ft below and 333 ft behind: the TARGET of the TPI solution (the flown stall point, -83/947, Stuit p. 27, was an OUTCOME of a TPI that fired late)
+if os.environ.get("RERNDZ_AIM") == "flowntda":
+    TDA_POINT = (-83.0, 0.0, 947.0)
 PLAN = dict(SEP1=1.5, SEP2=1.5, NH2=2.0, MC5=0.0, NSR=2.4, TPI=3.4, SEP3=1.0)       # ft/s, the Rendezvous book
 TPI_RANGE_FT = 6860.0
 # THE FLOWN SOLUTIONS (History of Space Shuttle Rendezvous, JSC-63400 ch. 21, pp. 153-154; LVLH ft/s): SEP2 +1.5 0.0 0.0,
