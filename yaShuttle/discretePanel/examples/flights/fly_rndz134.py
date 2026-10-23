@@ -364,6 +364,7 @@ THC_X_ACC_FPS2 = 1.5 / 6.0
 # VGO over the hold): the checklist's +X figure (0.25) proved low, and -Z,
 # whose jets give the most, was 5x it -- a first -Z hold from 0.25 overshot
 # 0.8 ft/s by 3.9.  The holds go on measuring and replace these.
+UNDER_ACC = {"-x": 0.235, "+x": 0.256, "-z": 0.38, "+z": 0.40, "+y": 0.40, "-y": 0.40}      # SEP2's THC accelerations (ft/s^2, the -Z track attitude, ~214,000 lb) from the holds that were not corrupted by a stale VGO read: f68a/f70a/f72a/f72b -X 0.227-0.239, f68a -Z 0.376
 THC_ACC_SEED = {"+x": 0.43, "-x": 0.42, "+y": 0.44, "-y": 0.38, "+z": 0.65, "-z": 1.22}
 
 
@@ -2665,7 +2666,11 @@ wait crt 1 title 2011/ timeout 600
         # residuals about 0.1 in both axes); no pulse trim after it.
         under = float(os.environ.get("UNDOCK_%s_UNDERBURN" % label.upper(), "0.1" if label == "sep2" else "0") or 0)      # SEP2 (undocking day only): 0.1 as flown; UNDOCK_SEP2_UNDERBURN=0 for the old full null
         tol = TRIM_TOL_FPS if under <= 0 else under + 0.05
+        if under > 0:
+            acc = dict(acc, **UNDER_ACC)      # fixed for an under-burn; not learned (see below)
         for n in range(passes + 1):
+            if n > 0 and under > 0:
+                tol = 0.35          # an under-burn is ONE hold per axis: PASS's VGO is only summed once per 3.84 s cycle, so a read taken 1.5 s after the hold is stale by up to a cycle and shows MORE left than there is; trimming to it overshoots (f71a/f71b: -X 2.63 s then 3.96 s / 5.32 s, then +X 1.85 s back)
             if all(abs(v) < tol for v in vgo.values()):
                 break
             if n == passes:
@@ -2679,7 +2684,7 @@ wait crt 1 title 2011/ timeout 600
                 if abs(v) < tol:
                     continue
                 key = ("+" if v > 0 else "-") + ax
-                holds.append((ax, key, v, min(max((abs(v) - under - (0.15 if n == 0 and under > 0 else 0.0)) / acc[key], 0.1), 12.0)))      # first pass leaves 0.15 more: the hold's acceleration is only known to ~15%, an overshoot cannot be undone, and the next pass trims to the residual
+                holds.append((ax, key, v, min(max((abs(v) - under) / acc[key], 0.1), 12.0)))
             lines, gap = [], 0.0
             for ax, key, v, hold in holds:
                 lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
@@ -2695,7 +2700,7 @@ wait crt 1 title 2011/ timeout 600
             new = read_vgo() or vgo
             for ax, key, v, hold in holds:
                 dv = abs(v - new[ax])
-                if dv > 0.03:
+                if dv > 0.03 and under <= 0:        # the same staleness corrupts the learned acceleration: f71a's -X 0.397 -> 0.181, f71b's 0.150 against 0.23-0.24 when measured over a whole hold
                     measured.setdefault(key, []).append(dv / hold)
                     acc[key] = min(max(dv / hold, 0.05), 3.0)
             vgo = new

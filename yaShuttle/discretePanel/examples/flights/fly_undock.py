@@ -745,6 +745,19 @@ class Undock(R.Rendezvous):
                  "%+.2f up, trim %+.2f %+.2f %+.2f + the book's 1.5 = %+.2f %+.2f %+.2f ft/s"
                  % (s[0], s[2], s[3], s[5], self.truth()["gmt"], st[0], st[2], st[3], st[5], -v_circ[2], *trim, *dv))
         flown_hold = float(os.environ.get("UNDOCK_SEP1_HOLD", "6.48")) if SEP1_JETS else 0.0
+        # SEP1 IS RECALCULATED LIKE EVERY OTHER BURN: from this run's own state at TIG, the burn that puts the Orbiter at the flown SEP2 position
+        # (Stuit Fig 23: x -6009, z -2452 at 16:37:36) at SEP2's time.  The +X hold (L1A/R1A, 1.672 ft/s radial in 6.48 s) is scaled to the vertical part
+        # of that solution; the ahead part is what the jets' cant and the attitude give (0.295 ft/s at 6.48 s).  UNDOCK_SEP1_TARGET="" restores the fixed
+        # 6.48 s burn.  Flown pre-burn velocity differs from the circle's (f68a: the flown SEP2 needs a post-SEP1 velocity of (+0.19,-2.83) ft/s from any of our SEP1 states, 0.25-0.3 ft/s less up than the fixed burn gives).
+        tgt = os.environ.get("UNDOCK_SEP1_TARGET", "-6009,-2452")
+        if tgt and SEP1_JETS and not os.environ.get("UNDOCK_SEP1_DV"):
+            tx, tz = (float(q) for q in tgt.split(","))
+            dv_t = RR.targeted_dv(st, tig, RR.T["SEP2"], (tx, 0.0, tz))
+            scale = float(min(max(-dv_t[2] / 1.672, 0.5), 1.3))
+            flown_hold = float(os.environ.get("UNDOCK_SEP1_HOLD", "6.48")) * scale
+            self.say("SEP1 recalculated to hit the flown SEP2 point (%.0f, %.0f): dV %+.2f %+.2f %+.2f ft/s from the state at TIG; +X hold %.2f s (x%.3f of the 6.48 s burn)"
+                     % (tx, tz, *dv_t, flown_hold, scale))
+            dv = np.array([0.295 * scale, 0.0, -1.672 * scale])
         got = self.thc_burn(tuple(dv), "sep1", tig=tig, fixed_hold=(flown_hold or None))      # UNDOCK_SEP1_HOLD=0: the old sized holds + corrections
         if not float(os.environ.get("UNDOCK_P90_LEAD", "0")) > 0:
             self.set_p(90, "sep1-p90")        # [9A] 6: the next quarter turn (-RBAR), so the bay follows the ISS as the Orbiter climbs
