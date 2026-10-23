@@ -2679,7 +2679,7 @@ wait crt 1 title 2011/ timeout 600
                 if abs(v) < tol:
                     continue
                 key = ("+" if v > 0 else "-") + ax
-                holds.append((ax, key, v, min(max((abs(v) - under) / acc[key], 0.1), 12.0)))
+                holds.append((ax, key, v, min(max((abs(v) - under - (0.15 if n == 0 and under > 0 else 0.0)) / acc[key], 0.1), 12.0)))      # first pass leaves 0.15 more: the hold's acceleration is only known to ~15%, an overshoot cannot be undone, and the next pass trims to the residual
             lines, gap = [], 0.0
             for ax, key, v, hold in holds:
                 lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
