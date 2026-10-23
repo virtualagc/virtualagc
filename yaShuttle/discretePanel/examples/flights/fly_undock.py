@@ -787,13 +787,20 @@ class Undock(R.Rendezvous):
         """RE-RENDEZVOUS: the -Z axis target track [11A] after SEP1, the ground's SEP2 solution (rerndz:
         the direction for which NSR comes to 2.4 and TPI 3.4 ft/s), loaded and burned at 05:34:06."""
         self.wait_gmt(RR.T["SEP1"] + 240)
-        if DAP62:
-            self.dap_config("[SEP2 Preliminary]")     # [GNC_20_DAP_CONFIG] Config DAP A, B to A7, B7 (checklist p. 2-9), the tape's generic A7/B7 made 6-2's
+        a7_first = bool(os.environ.get("UNDOCK_A7_FIRST"))
+        if DAP62 and a7_first:
+            self.dap_config("[SEP2 Preliminary]")     # the old order: A7/B7 BEFORE the track maneuver
         self.uplink()                     # MCC UPLINK ORB SV, TGT SV
         self.wait_sim(10)
         if SEP1_VERN:
             self.TRACK_KEYS = self.TRACK_KEYS.replace("dap c3 alt", "dap c3 vern")
-        self.ops201_track("sep2-track", 300.0)
+        # [11A]: "When maneuver to -Z axis TGT TRK complete, Config DAP A, B to A7, B7": the track maneuver is made at A9/B9's 0.130 deg/s; A7's vernier rate is
+        # 0.0160 deg/s, and with A7 first the maneuver crawled (and the driver's "stopped turning" test called it complete 39 deg off the ISS: at SEP2 TIG
+        # the -Z axis was 19-31 deg from the ISS in f68a/f70a/f75a; the flight's attitude fits the track to within ~+-10 deg)
+        self.track_still_max_deg = 8.0
+        self.ops201_track("sep2-track", 1200.0)
+        if DAP62 and not a7_first:
+            self.dap_config("[SEP2 Preliminary]")
         if SEP1_VERN:
             del self.TRACK_KEYS
         self.wait_gmt(RR.T["SEP2"] - 420)

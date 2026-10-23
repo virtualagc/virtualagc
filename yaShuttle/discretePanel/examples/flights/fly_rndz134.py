@@ -2245,7 +2245,8 @@ wait crt 1 title 2011/ timeout 600
             # at 0.02 never came: mc-run6's MC4 waited 20 min and missed TIG)
             tru = self.ears.snap()[0]
             el = self.truth()["t"] - t0
-            if tru and el > 60 and math.degrees(vnorm(tru["w"])) < 0.1:
+            if tru and el > 60 and math.degrees(vnorm(tru["w"])) < 0.1 and (getattr(self, "track_still_max_deg", None) is None or c is None
+                                                                           or c["minusZ_to_iss_deg"] < self.track_still_max_deg):      # Undock: only when the -Z axis is near the ISS (below)
                 still += 1
                 if still >= 3:
                     self.say("TRACK: the vehicle has stopped turning with -Z %.2f deg from the ISS (PASS's own "
