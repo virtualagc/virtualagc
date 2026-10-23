@@ -364,7 +364,7 @@ THC_X_ACC_FPS2 = 1.5 / 6.0
 # VGO over the hold): the checklist's +X figure (0.25) proved low, and -Z,
 # whose jets give the most, was 5x it -- a first -Z hold from 0.25 overshot
 # 0.8 ft/s by 3.9.  The holds go on measuring and replace these.
-UNDER_ACC = {"-x": 0.235, "+x": 0.256, "-z": 0.38, "+z": 0.40, "+y": 0.40, "-y": 0.40}      # SEP2's THC accelerations (ft/s^2, the -Z track attitude, ~214,000 lb) from the holds that were not corrupted by a stale VGO read: f68a/f70a/f72a/f72b -X 0.227-0.239, f68a -Z 0.376
+UNDER_ACC = {"-x": 0.26, "+x": 0.256, "-z": 0.46, "+z": 0.40, "+y": 0.40, "-y": 0.40}      # SEP2's THC accelerations (ft/s^2, the -Z track attitude, ~214,000 lb) from the holds that were not corrupted by a stale VGO read: f68a/f70a/f72a/f72b -X 0.227-0.239, f68a -Z 0.376 (these were read back through a stale VGO, so low: re-derived from the single-hold overshoots, f73a/f73b/f78a: -X 0.26, -Z 0.46)
 THC_ACC_SEED = {"+x": 0.43, "-x": 0.42, "+y": 0.44, "-y": 0.38, "+z": 0.65, "-z": 1.22}
 
 
