@@ -376,7 +376,7 @@ class Undock(R.Rendezvous):
         self.script_done(name, 90)
         self.wait_sim(2)
 
-    def thc_burn(self, dv, label, tig=None, fixed_hold=None):
+    def thc_burn(self, dv, label, tig=None, fixed_hold=None, trim_lvlh=None):
         """A THC burn of dv (ft/s, LVLH) flown as continuous holds on the aft THC, DAP A/AUTO/PRI, TRANS
         NORM: each body axis held for its share of the time (the acceleration seeded from the MC burns,
         scaled to this Orbiter's mass), checked against the truth's relative rates and finished with one
@@ -415,6 +415,19 @@ class Undock(R.Rendezvous):
             if fixed_hold is not None:
                 st_ax, pos = D.AFT_STICK["x"]
                 lines, gap, plan = ["+0.00   thc aft %s %.2f" % (pos + st_ax, fixed_hold)], fixed_hold + 0.3, ["+X %.2f s (as flown)" % fixed_hold]
+                if trim_lvlh is not None and abs(trim_lvlh) >= 0.04:      # the part of the solution the +X hold's cant does not give: a short hold on the body axis nearest the V-bar
+                    mt = [float(sum(np.array([trim_lvlh, 0.0, 0.0])[kk] * axes[kk][i] for kk in range(3))) for i in range(3)]
+                    bt = ins.to_body(ins.qmat(q), mt)
+                    kz = max(range(1, 3), key=lambda i: abs(bt[i])) if abs(bt[2]) >= abs(bt[1]) else 1
+                    axn = "xyz"[kz]
+                    keyz = ("+" if bt[kz] > 0 else "-") + axn
+                    accz = (getattr(self, "thc_acc", None) or {}).get(keyz) or R.THC_ACC_SEED[keyz] * mass_scale
+                    holdz = min(max(abs(bt[kz]) / accz, 0.1), 3.0)
+                    st_z, pos_z = D.AFT_STICK[axn]
+                    neg_z = "+" if pos_z == "-" else "-"
+                    lines.append("+%.2f   thc aft %s %.2f" % (gap, (pos_z if bt[kz] > 0 else neg_z) + st_z, holdz))
+                    plan.append("%s %.2f s (trim %+.2f ft/s along the V-bar)" % (keyz.upper(), holdz, trim_lvlh))
+                    gap = gap + holdz + 0.3
             if not lines:
                 break
             self.say("%s: THC burn pass %d: want %+.2f %+.2f %+.2f ft/s (LVLH) = body %+.2f %+.2f %+.2f; holds %s"
@@ -758,7 +771,12 @@ class Undock(R.Rendezvous):
             self.say("SEP1 recalculated to hit the flown SEP2 point (%.0f, %.0f): dV %+.2f %+.2f %+.2f ft/s from the state at TIG; +X hold %.2f s (x%.3f of the 6.48 s burn)"
                      % (tx, tz, *dv_t, flown_hold, scale))
             dv = np.array([0.295 * scale, 0.0, -1.672 * scale])
-        got = self.thc_burn(tuple(dv), "sep1", tig=tig, fixed_hold=(flown_hold or None))      # UNDOCK_SEP1_HOLD=0: the old sized holds + corrections
+        trim_ahead = None
+        if tgt and SEP1_JETS and not os.environ.get("UNDOCK_SEP1_DV"):
+            trim_ahead = float(dv_t[0]) - 0.295 * scale          # what the solution wants ahead less what the +X hold's cant gives
+            if not os.environ.get("UNDOCK_SEP1_TRIM"):      # opt-in, untested: f75a hit the flown SEP2 within 62 ft without it
+                trim_ahead = None
+        got = self.thc_burn(tuple(dv), "sep1", tig=tig, fixed_hold=(flown_hold or None), trim_lvlh=trim_ahead)      # UNDOCK_SEP1_HOLD=0: the old sized holds + corrections
         if not float(os.environ.get("UNDOCK_P90_LEAD", "0")) > 0:
             self.set_p(90, "sep1-p90")        # [9A] 6: the next quarter turn (-RBAR), so the bay follows the ISS as the Orbiter climbs
         self.uplink()
