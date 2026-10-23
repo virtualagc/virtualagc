@@ -1379,6 +1379,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
                # window for that station is running")
                "--rhc", self.a.rhc]
+        if os.environ.get("SIM_SCALE"):
+            cmd += ["--scale", os.environ["SIM_SCALE"]]
         if resume and self.a.zero_sensor_bias:
             self.zero_sensor_bias(resume)
         if resume and self.a.lambert_mc:
