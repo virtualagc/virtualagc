@@ -2678,14 +2678,16 @@ wait crt 1 title 2011/ timeout 600
                 self.say("VGO NULL (%s): VGO %+.2f %+.2f %+.2f -- not all < %.1f fps after %d passes"
                          % (label, vgo["x"], vgo["y"], vgo["z"], tol, passes))
                 break
-            order = "zxy" if vgo["z"] < 0 else "xyz"
+            order = getattr(self, "null_order", "") or ("zxy" if vgo["z"] < 0 else "xyz")      # the card's order unless the driver says otherwise
             holds = []
             for ax in order:
                 v = vgo[ax]
                 if abs(v) < tol:
                     continue
                 key = ("+" if v > 0 else "-") + ax
-                holds.append((ax, key, v, min(max((abs(v) - under) / acc[key], 0.1), 12.0)))
+                # null_first_scale < 1 under-aims the first pass: the learned accelerations are good to only ~+-50 % (a stale VGO read, the
+                # axes' coupling), and an overshoot has to be flown back, so TPI's first pass thrusted 8.5 ft/s for 3.1 net (undock run f75a)
+                holds.append((ax, key, v, min(max((abs(v) - under) / acc[key] * (getattr(self, "null_first_scale", 1.0) if n == 0 and under <= 0 else 1.0), 0.1), 12.0)))
             lines, gap = [], 0.0
             for ax, key, v, hold in holds:
                 lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
@@ -2697,7 +2699,7 @@ wait crt 1 title 2011/ timeout 600
             self.play("\n".join(lines) + "\n", name)
             self.script_done(name, 120)
             self.thc_moved_check(label)
-            self.wait_sim(holds[-1][3] + 1.5)       # the last hold runs on after the script ends
+            self.wait_sim(holds[-1][3] + getattr(self, "null_read_wait", 1.5))       # the last hold runs on after the script ends; a read sooner than PASS's 3.84 s cycle after it is stale
             new = read_vgo() or vgo
             for ax, key, v, hold in holds:
                 dv = abs(v - new[ax])

@@ -86,6 +86,9 @@ D.A7L_LIGHT.update({"HOOKS 1 OPEN": (0, 0x0400), "HOOKS 2 OPEN": (0, 0x0200), "U
 
 
 class Undock(R.Rendezvous):
+    null_read_wait = float(os.environ.get("UNDOCK_NULL_READ_WAIT", "1.5"))      # s after a pass's last hold before VGO is read: the last axis was learned 0.139 for 0.27 ft/s^2 at 1.5 s (TPI, f75a)
+    null_order = os.environ.get("UNDOCK_NULL_ORDER", "")      # "xyz" to fly X before Z: a -X hold after a -Z hold gave 0.138 ft/s^2, before it 0.268 (TPI, f75a and two tests)
+    null_first_scale = float(os.environ.get("UNDOCK_NULL_FIRST", "0.7"))      # the first VGO-nulling pass flies this fraction of the aim (UNDOCK_NULL_FIRST=1 for the old)
     ku_low = True        # the Ku RADAR OUTPUT LOW switch is NOT thrown by rr_watch_output's thread (it fires the moment range < 700 ft -- at SEP1's ~640 ft that is
                          # mid-keying, and its script REPLACED the DAP keying: f36a, f38a, f38c died at 'dap a6u z_norm' never appeared); sep1() throws it first, in order
     # The re-rendezvous' -Z AXIS TARGET TRACK [11A] (book p. 2-11, PDF p. 43) is DAP A/AUTO/VERN(ALT), not [12A]'s B/AUTO/ALT that the
