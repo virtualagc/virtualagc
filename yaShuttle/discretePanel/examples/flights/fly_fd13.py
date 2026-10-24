@@ -203,7 +203,9 @@ def snapshot_truth(capture_dir):
 def can_resume_result(status, completed_burn, checkpoint_recorded=False):
     """Allow a recorded pre-NC1 checkpoint or a completed-burn checkpoint."""
     if completed_burn is None:
-        return status in ("running", "failed") and checkpoint_recorded
+        return (status in ("running", "failed", "short-test-complete",
+                           "partial-stage-complete", "full-stage-complete")
+                and checkpoint_recorded)
     if status == "running":
         return True
     if status == "short-test-complete":
@@ -227,7 +229,9 @@ def resume_result_at_checkpoint(prior_result, capture_path, completed_burn, rate
         raise ValueError("resume capture is not recorded in sibling RESULT.json")
     result["snapshots"] = captures[:index + 1]
     if completed_burn is None:
-        if result.get("burns"):
+        checkpoint_gmt = capture_gmt(captures[index])
+        if any(float(item.get("tig_gmt", float("inf"))) <= checkpoint_gmt
+               for item in result.get("burns", [])):
             raise ValueError("a pre-NC1 resume cannot follow a recorded burn")
         result["burns"] = []
         result.pop("targeting", None)
@@ -624,8 +628,7 @@ class FD13(rndz.Rendezvous):
             burn = next((b for b in prior_result.get("burns", [])
                          if b.get("name") == completed), None) if completed else None
             if completed is None:
-                recoverable = (capture is not None and not prior_result.get("burns")
-                               and not prior_result.get("errors"))
+                recoverable = capture is not None and not prior_result.get("errors")
             else:
                 recoverable = (capture is not None and burn is not None
                                and not prior_result.get("errors")

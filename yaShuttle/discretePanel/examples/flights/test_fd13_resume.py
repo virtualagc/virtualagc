@@ -338,6 +338,8 @@ class ResumeSelectionTests(unittest.TestCase):
 
     def test_completed_nc1_short_test_can_continue_to_nc4(self):
         self.assertTrue(can_resume_result("short-test-complete", "NC1"))
+        self.assertTrue(can_resume_result("short-test-complete", None,
+                                          checkpoint_recorded=True))
 
     def test_completion_status_distinguishes_partial_stages(self):
         self.assertEqual(completed_status("NC1"), "short-test-complete")
@@ -784,8 +786,9 @@ class CompletedShortResumeTests(unittest.TestCase):
             (capture / "vehdyn.json").write_text(json.dumps({"vehdyn": [0.0] * 228}) + "\n")
             nc1_gmt = fly_fd13.gmt_of_unix(fly_fd13.event_unix(fly_fd13.TIGS[0]))
             prior = {
-                "status": "failed", "error": "KeyboardInterrupt", "rate": 2.0,
-                "errors": [], "burns": [],
+                "status": "short-test-complete", "rate": 2.0,
+                "errors": [], "burns": [{"name": "NC1", "tig_gmt": nc1_gmt}],
+                "targeting": [{"burn": "NC1", "controls_mps_lvlh": [[1.0, 0.0, 0.0]] * 4}],
                 "snapshots": [{"name": "coast-003", "path": str(capture),
                                "gmt": nc1_gmt - 600.0}],
             }
@@ -808,6 +811,7 @@ class CompletedShortResumeTests(unittest.TestCase):
             self.assertEqual(flight.result["resume"], {
                 "after": None, "capture": str(capture), "rate": 2.0,
                 "prior_rate": 2.0})
+            self.assertNotIn("targeting", flight.result)
             self.assertNotIn("error", flight.result)
 
     def test_pre_nc1_resume_rejects_post_nc1_capture(self):
