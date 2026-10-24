@@ -2726,7 +2726,8 @@ class VehicleLayer(object):
     target = 'earth'
     SUN_E = 2.0 * math.pi               # as the Earth's ground
     MODEL_PX = 1.5
-    FADE_PX = 10.0
+    FADE_PX = 3.0      # was 10: from 1.5 px the model is drawn, so a point as well would double the vehicle -- a lit
+                       # ISS at 5 km is magnitude -13, which saturated to a white disk behind its own model
     MAG_1000KM = -1.8
 
     def __init__(self, models, exposure):
