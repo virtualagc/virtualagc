@@ -1110,6 +1110,7 @@ uniform vec2 uTan;
 uniform float uMagRef;
 uniform float uCore;        // core radius, physical pixels
 uniform float uCut;         // relative brightness below which a star is skipped
+uniform float uMaxPx;       // the largest a point may grow to (its glare), physical pixels across
 out vec3 vCol;
 void main() {
     vec3 d = uJ2kToCam * aDir;
@@ -1121,8 +1122,10 @@ void main() {
     }
     gl_Position = vec4(d.xy / d.z / uTan, 0.0, 1.0);
     float grow = clamp(pow(L, 0.2), 1.0, 3.5);   // Sirius ~2, Venus ~3: points, not disks
-    gl_PointSize = 2.0 * uCore * grow + 2.0;
-    vCol = aCol * L / (grow * grow);
+    float sz = max(min(2.0 * uCore * grow + 2.0, uMaxPx), 2.0 * uCore + 2.0);
+    float g = (sz - 2.0) / (2.0 * uCore);       // the growth it was allowed: the light stays the same
+    gl_PointSize = sz;
+    vCol = aCol * L / (g * g);
 }
 """
 
@@ -1554,7 +1557,7 @@ class Resources(object):
         self.milkyway = None                   # on the GPU now
         self.starProg = compile_program(STARS_VS, STARS_FS)
         self.starU = uniforms(self.starProg, "uJ2kToCam", "uTan", "uMagRef",
-                              "uCore", "uCut")
+                              "uCore", "uCut", "uMaxPx")
         self.starVbo = GL.glGenBuffers(1)
         self.starCount = len(self.stars)
         self.planetVbo = GL.glGenBuffers(1)
@@ -1876,6 +1879,7 @@ class PointLayer(object):
     (J2000 direction, magnitude, linear colour) and a vertex array per view."""
     MAG_REF = 3.0                       # just fills its core at EV 0
     CUT = 1e-3                          # skip points fainter than this, relative
+    MAX_GLARE_DEG = 0.1                 # a bright point never grows past this across
 
     def __init__(self, exposure, key):
         self.exposure = exposure
@@ -1901,6 +1905,10 @@ class PointLayer(object):
         GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
         GL.glUniform1f(u["uCore"], 1.0 * view.devicePixelRatioF())
         GL.glUniform1f(u["uCut"], self.CUT)
+        # a bright point's glare is limited in ANGLE, not pixels: a planet is under an arcminute, and a blob
+        # of the Moon's size (0.5 deg) is not what an eye sees of Venus
+        GL.glUniform1f(u["uMaxPx"], max(2.0, math.radians(self.MAX_GLARE_DEG) * (view.view_size()[0] / 2.0) / view.tanX
+                                           * view.devicePixelRatioF()))
         GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)
         GL.glEnable(GL.GL_BLEND)
         GL.glBlendFunc(GL.GL_ONE, GL.GL_ONE)
