@@ -52,14 +52,15 @@ import argparse, calendar, json, math, shutil, sys
 from pathlib import Path
 
 TARGETS = "/mnt/STORAGE/forClaude/mc1/sts134-targets-undock.txt"
-# F, L, R RCS; L, R OMS.  The RCS figures follow the FD15 shift reports (STS-134 D14_S3 / D15_S1, 2026-10-24):
-# the PFS read forward 16.8 / 14.6 % (oxidizer / fuel), left 64.8 / 65.0, right 62.8 / 63.8 at about 150/09:00,
-# 20 minutes after SEP3.  Forward is about 350 lb on the Mission Report's residual scale and 437 on its loading
-# scale; to that add the listed burns' use after the undock (F 399 lb; phase0-notes item 9) and the unlisted use
-# (undock pulse, fly-around).  Forward ~850 lb, against 555 lb before: that was a choice, not a measurement
-# (phase0-notes item 11), and it left 3 % at SEP3 where the flight had 16 %.  Aft: 1,428 / 1,390 lb at 09:00 on the
-# residual scale plus 313 / 349 lb of listed burns gives >= 1,741 lb; 1,750 lb each.
-PROP_KG = (385.0, 794.0, 794.0, 1937.0, 1992.0)
+# F, L, R RCS; L, R OMS.  Forward follows the FD15 shift reports (STS-134 D14_S3 / D15_S1, 2026-10-24): the PFS read
+# forward 16.8 / 14.6 % (oxidizer / fuel) at about 150/09:00, 20 minutes after SEP3, which is 350 lb on the Mission
+# Report's residual scale and 437 lb on its loading scale.  The burns after the undock then used 205-315 lb forward
+# (12.3 ft/s of listed burns is ~316 lb of propellant ideally across all three modules, 1.3-2x with attitude control,
+# about half of it forward -- NOT the burn spans times the listed jets, which overcounts: those are the union of the
+# jets fired over the span), so the undock held 560-750 lb forward.  655 lb = 297 kg, the middle; the Phase 0 figure
+# (555 lb) was at the bottom of the range.  Aft left at the Phase 0 values: 1,428 / 1,390 lb at 09:00 on the residual
+# scale (1,603 / 1,561 on the loading scale) plus ~100-160 lb per pod of use puts the undock at 1,560-1,740 lb.
+PROP_KG = (297.0, 767.0, 766.0, 1937.0, 1992.0)
 MASS_KG = 97376.0
 GMT = "2011-05-30T03:52:00"
 IDX_GMT, IDX_DRY, IDX_PROP = 126, 167, 16
