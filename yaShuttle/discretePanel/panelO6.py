@@ -5810,6 +5810,9 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
         except OSError:
             pass          # a progress report is never worth failing a run for
 
+    def log_vehicle_key(name, sent_monotonic):
+        log("vehicle-key: %s monotonic=%.9f" % (name.upper(), sent_monotonic))
+
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
                                      wait_user=panel.wait_for_click,
@@ -5817,7 +5820,8 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                                      screens=panel.screens,
                                      progress=show_progress,
                                      source=source, marks=marks,
-                                     plan=plan, circle=panel.lead_circle)
+                                     plan=plan, circle=panel.lead_circle,
+                                     key_trace=log_vehicle_key)
     panel.player.start()
     if quit_after_ms is not None:
         root.after(quit_after_ms, root.quit)

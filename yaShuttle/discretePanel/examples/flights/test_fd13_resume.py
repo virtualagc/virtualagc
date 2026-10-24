@@ -11,6 +11,7 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
+import crewscript
 import fly_fd13
 import fly_sts134
 import fly_rndz134 as rndz
@@ -528,7 +529,44 @@ class FlightAcceptanceTests(unittest.TestCase):
             "sample_age_s=0.004 rate=3.000 [t=9107.9]")
         self.assertEqual(trace, {'vehicle_t':7100.123,'sample_t':7100.1,
                                  'sample_age_s':0.004,'rate':3.0})
+        direct = parse_vehicle_key_trace(
+            'panelO6: vehicle-key: EXEC monotonic=12345.678901234 [t=9107.9]')
+        self.assertEqual(direct, {'host_monotonic':12345.678901234})
         self.assertIsNone(parse_vehicle_key_trace('panelO6: script complete'))
+
+    def test_scripted_key_trace_records_successful_send_time(self):
+        sent = []
+        traces = []
+
+        class FakeBus:
+            def send_key(self, key):
+                sent.append(key)
+
+        player = crewscript.Player.__new__(crewscript.Player)
+        player.stopped = False
+        player.bus = FakeBus()
+        player.key_trace = lambda name, mono: traces.append((name, mono))
+        player.after = lambda _ms, _callback: None
+        player.gap = (0.3, 0.3)
+        player.log = lambda _message: None
+        key = ('kb', 1, [0x0040], 'EXEC')
+        player._type(0, [key], 0)
+        self.assertEqual(sent, [key])
+        self.assertEqual(len(traces), 1)
+        self.assertEqual(traces[0][0], 'EXEC')
+        self.assertGreater(traces[0][1], 0.0)
+
+    def test_vehicle_clock_interpolates_script_key_time_from_truth_feed(self):
+        ears = rndz.Ears.__new__(rndz.Ears)
+        ears.lock = rndz.threading.Lock()
+        ears.hist_clock = [(10.0, 100.0, 1000.0), (11.0, 102.0, 1002.0)]
+        trace = ears.vehicle_clock_at(10.25)
+        self.assertAlmostEqual(trace['vehicle_t'], 100.5)
+        self.assertAlmostEqual(trace['vehicle_gmt'], 1000.5)
+        self.assertAlmostEqual(trace['sample_t'], 100.0)
+        self.assertAlmostEqual(trace['sample_age_s'], 0.25)
+        self.assertAlmostEqual(trace['rate'], 2.0)
+        self.assertIsNone(ears.vehicle_clock_at(9.0))
 
     def test_large_predicted_terminal_miss_is_returned_for_reporting(self):
         import numpy as np

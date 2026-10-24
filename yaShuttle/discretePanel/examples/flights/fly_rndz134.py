@@ -398,6 +398,7 @@ class Ears(object):
         self.tru = None
         self.tgt = None
         self.hist_o, self.hist_t = [], []      # (gmt, r, v), the last couple of minutes
+        self.hist_clock = []                   # (host monotonic, vehicle t, gmt) for event timing
         self.dl = {}
         self.dl_t = {}
         self.cycle, self._cyc = None, {}       # PASS's two states from one downlist cycle
@@ -414,11 +415,14 @@ class Ears(object):
             except socket.timeout:
                 continue
             if d[:4] == b"TRU1" and len(d) >= 4 + 8 * 15:
+                received_monotonic = time.monotonic()
                 n = (len(d) - 4) // 8
                 v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
                 with self.lock:
                     self.tru = {"t": v[0], "gmt": v[1], "q": v[2:6], "w": v[6:9], "r": v[9:12], "v": v[12:15],
                                 "cg": v[27:30] if n >= 30 else (0.0, 0.0, 0.0)}
+                    self.hist_clock.append((received_monotonic, v[0], v[1]))
+                    del self.hist_clock[:-3000]
                     self.hist_o.append((v[1], v[9:12], v[12:15]))
                     del self.hist_o[:-3000]
 
@@ -484,6 +488,24 @@ class Ears(object):
             name, _, body = d.decode("utf-8", "replace").partition("\n")
             with self.lock:
                 self.screens[name.strip().lower()] = body
+
+    def vehicle_clock_at(self, host_monotonic):
+        """Interpolate vehicle time at a host-monotonic event timestamp."""
+        event = float(host_monotonic)
+        with self.lock:
+            history = list(self.hist_clock)
+        before = next((x for x in reversed(history) if x[0] <= event), None)
+        after = next((x for x in history if x[0] >= event), None)
+        if before is None or after is None or after[0] <= before[0]:
+            return None
+        rate = (after[1] - before[1]) / (after[0] - before[0])
+        if not 0.1 <= rate <= 10.0:
+            return None
+        fraction = (event - before[0]) / (after[0] - before[0])
+        return {"vehicle_t": before[1] + fraction * (after[1] - before[1]),
+                "vehicle_gmt": before[2] + fraction * (after[2] - before[2]),
+                "sample_t": before[1], "sample_age_s": event - before[0],
+                "rate": rate}
 
     def truth_at(self, which, gmt):
         """A vehicle's truth (r, v, m and m/s) at a GMT of the last minutes,

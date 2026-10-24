@@ -305,6 +305,8 @@ def parse_vehicle_key_trace(text, key="EXEC"):
                 name, value = word.split("=", 1)
                 fields[name] = value
         try:
+            if "monotonic" in fields:
+                return {"host_monotonic": float(fields["monotonic"])}
             return {name: float(fields[name]) for name in
                     ("vehicle_t", "sample_t", "sample_age_s", "rate")}
         except (KeyError, ValueError):
@@ -989,7 +991,7 @@ class FD13(rndz.Rendezvous):
             self.play("+0     keys EXEC\n", name.lower() + "-exec")
             self.script_done(name.lower() + "-exec", 120)
             exec_key_trace = self.vehicle_key_trace("EXEC")
-            if exec_key_trace is not None:
+            if exec_key_trace is not None and "vehicle_t" in exec_key_trace:
                 exec_event_gmt = exec_state["gmt"] + (
                     exec_key_trace["vehicle_t"] - exec_state["t"])
                 exec_offset_s = exec_event_gmt - (tig - 15.0)
@@ -998,7 +1000,10 @@ class FD13(rndz.Rendezvous):
                      % (name, exec_state["gmt"], exec_state["gmt"] - tig, *values,
                         math.sqrt(sum(x * x for x in values))))
             if exec_key_trace is None:
-                self.say("%s: actual EXEC key event has no vehicle-clock trace" % name)
+                self.say("%s: actual EXEC key event has no panel trace" % name)
+            elif "vehicle_t" not in exec_key_trace:
+                self.say("%s: EXEC key send time recorded; vehicle-clock mapping deferred until after burn"
+                         % name)
             else:
                 self.say("%s: actual EXEC key event GMT %.3f (%+.3f s from TIG-15); "
                          "truth sample age %.3f s at %.3f simulated s/s"
@@ -1064,6 +1069,18 @@ class FD13(rndz.Rendezvous):
         post_gmt = self.take_snapshot(post_name)
         if post_gmt is None:
             post_gmt = post_state["gmt"]
+        if exec_key_trace is not None and "host_monotonic" in exec_key_trace:
+            vehicle_clock = self.ears.vehicle_clock_at(exec_key_trace["host_monotonic"])
+            if vehicle_clock is not None:
+                exec_key_trace = vehicle_clock
+                exec_event_gmt = vehicle_clock["vehicle_gmt"]
+                exec_offset_s = exec_event_gmt - (tig - 15.0)
+                self.say("%s: actual EXEC key event GMT %.3f (%+.3f s from TIG-15); "
+                         "truth sample age %.3f s at %.3f simulated s/s"
+                         % (name, exec_event_gmt, exec_offset_s,
+                            vehicle_clock["sample_age_s"], vehicle_clock["rate"]))
+            else:
+                self.say("%s: panel EXEC trace has no bracketing vehicle-clock samples" % name)
         before = self.vehdyn_capture(pre_name)
         after = self.vehdyn_capture(post_name)
         flown = None
