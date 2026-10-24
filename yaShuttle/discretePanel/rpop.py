@@ -995,7 +995,14 @@ class View(QtWidgets.QWidget):
         r = float(np.linalg.norm(pos))
         rdot = float(pos @ vel) / r if r > 1e-6 else 0.0
         self.text(p, 262, 34, "R", 28, GREEN, bold=True)
-        self.text(p, 358, 34, "%.0f" % r, 28, GREEN, bold=True, align="r")
+        # the range is right-aligned at 358: with five digits (beyond 9,999 ft) it would run into the "R" at 262,
+        # so the figure shrinks to the room there is
+        rtxt = "%.0f" % r
+        room = 358 - (262 + QtGui.QFontMetricsF(self.font(28, True)).horizontalAdvance("R") + 6)
+        rpx = 28
+        while rpx > 14 and QtGui.QFontMetricsF(self.font(rpx, True)).horizontalAdvance(rtxt) > room:
+            rpx -= 1
+        self.text(p, 358, 34, rtxt, rpx, GREEN, bold=True, align="r")
         self.text(p, 404, 34, "R", 28, GREEN, bold=True)
         self.dot(p, 413, 8, GREEN, 2.5)
         self.text(p, 545, 34, ("%.2f" if abs(rdot) < 10 else "%.1f") % rdot, 28, GREEN, bold=True,
