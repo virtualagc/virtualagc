@@ -323,7 +323,8 @@ class Flight:
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
-               "--snapshot-dir", self.a.logs, "--duration", "20000"]
+               "--snapshot-dir", self.a.logs, "--duration", str(getattr(self.a, "duration", 20000)),
+               "--rhc", "lh", "--input", "virtual"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:                   # simulated seconds per wall second
             cmd += ["--rt-factor", "%g" % self.a.rate]
