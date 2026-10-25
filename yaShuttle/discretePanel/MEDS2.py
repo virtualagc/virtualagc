@@ -2832,6 +2832,19 @@ class Object3D(object):
         p = self.position
         r = self.rotation
         s = self.scale
+        # REMEMBERED while position, rotation and scale are what they were: the
+        # renderer asks for every object's matrix every frame (some 1,400 a frame,
+        # two np.eye each, about a fifth of the render time on the owner's display),
+        # and almost none of them move.  Callers only multiply by it.
+        key = (p.x, p.y, p.z, r.x, r.y, r.z, r.order, s.x, s.y, s.z)
+        hit = self.__dict__.get('_lm')
+        if hit is not None and hit[0] == key:
+            return hit[1]
+        m = self._localMatrixUncached(p, r, s)
+        self._lm = (key, m)
+        return m
+
+    def _localMatrixUncached(self, p, r, s):
         if r.x == 0.0 and r.y == 0.0 and r.z == 0.0:
             rm = np.eye(3, dtype=np.float64)
         else:
