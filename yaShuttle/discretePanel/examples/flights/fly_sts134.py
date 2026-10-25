@@ -505,11 +505,16 @@ class Flight:
         raise SystemExit("fly_sts134: no truth state for five minutes")
 
     def wait_gmt(self, gmt):
+        # The sleep is WALL seconds and the gap is SIM seconds: half the gap in wall
+        # seconds is 1.5 times the gap at rate 3, so each wait overshot by up to half
+        # of what was left, and the deorbit's EXEC at TIG-15 s went in after TIG
+        # (deorb-2, 2026-10-25: the burn never fired).  Divide by the rate.
+        rate = max(1.0, float(getattr(self.a, "rate", 1.0) or 1.0))
         while True:
             now = self.truth()["gmt"]
             if now >= gmt:
                 return
-            time.sleep(min(30.0, max(0.5, (gmt - now) / 2.0)))
+            time.sleep(min(30.0, max(0.5, (gmt - now) / (2.0 * rate))))
 
     def wait_sim(self, dt):
         t0 = self.truth()["t"]
