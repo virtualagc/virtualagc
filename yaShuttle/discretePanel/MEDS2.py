@@ -15266,7 +15266,12 @@ def main(argv=None):
     fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CoreProfile)
     fmt.setDepthBufferSize(24)
     fmt.setStencilBufferSize(8)
-    fmt.setSamples(int(os.environ.get("NSTS_MEDS_SAMPLES", "4")))   # three.js's `antialias: true`
+    # three.js's `antialias: true`.  With NSTS_MEDS_CACHE the page is drawn into our own
+    # multisampled framebuffer and copied, so the WIDGET's surface needs no multisampling: Qt
+    # resolved and composed its 4x surface (at QT_SCALE_FACTOR 2, four times the pixels) on every
+    # paint, 85 ms of a 170 ms window update on the owner's NVS 510.  The picture is the same.
+    fmt.setSamples(0 if _MEDS_CACHE and not os.environ.get("NSTS_MEDS_WIDGET_SAMPLES")
+                   else int(os.environ.get("NSTS_MEDS_WIDGET_SAMPLES") or os.environ.get("NSTS_MEDS_SAMPLES", "4")))
     fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)
     # NSTS_MEDS_SWAP=0 stops each swap waiting for the display's vertical blank (the
     # default is 1): a TEST, for a flash that is irregular while the beats are regular.
