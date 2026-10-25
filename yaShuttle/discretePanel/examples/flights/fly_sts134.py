@@ -935,7 +935,12 @@ class Flight:
         d, rem = divmod(met, 86400.0)
         hh, rem = divmod(rem, 3600.0)
         mm, ss = divmod(rem, 60.0)
-        script = ("+1     keys ITEM 1 0 + %s + %s + %s + %s EXEC\n"
+        # ITEM 1 FIRST: OMS BOTH.  The engine selection is a PASS variable that survives
+        # the OPS changes; a run that had flown RCS burns (the STORRM re-rendezvous: ITEM 4,
+        # RCS SEL) came to the deorbit with RCS SEL starred, a 9 min RCS burn at TGO 9:15,
+        # and no OMS ever lit (deorb-2, deorb-3, 2026-10-25).  Deorbit Prep keys it too.
+        script = ("+1     keys ITEM 1 EXEC\n"
+                  "+4     keys ITEM 1 0 + %s + %s + %s + %s EXEC\n"
                   % (" ".join("%d" % d), " ".join("%d" % hh), " ".join("%d" % mm), " ".join("%.1f" % ss)))
         # ONE ITEM AT A TIME, C1 first.  The five-field entry "ITEM 14 C1 C2
         # HT THETA PRPLT EXEC" was refused as a whole on 2026-10-06 (PEG 4
