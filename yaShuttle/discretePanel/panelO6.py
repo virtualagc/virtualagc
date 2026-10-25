@@ -707,17 +707,49 @@ SLOW_MS = float(os.environ.get("NSTS_PANEL_SLOW_MS", "200"))
 STALL_DUMP_S = float(os.environ.get("NSTS_PANEL_STALL_DUMP_S", "3"))
 
 
+# NSTS_PANEL_TCLTRACE=1: time every Tcl command the Tk thread runs, by command
+# (create, font, update, winfo ...), and say where a slow step's time went.
+# About a microsecond a call; off unless asked for.
+_TCL_TIME = collections.defaultdict(lambda: [0, 0.0])
+
+
+class _TclTimer(object):
+    """Stands in for the interpreter (root.tk): times .call and passes the
+    rest through."""
+
+    def __init__(self, tk_):
+        self._tk = tk_
+
+    def __getattr__(self, name):
+        return getattr(self._tk, name)
+
+    def call(self, *args):
+        t0 = time.perf_counter()
+        try:
+            return self._tk.call(*args)
+        finally:
+            key = " ".join(str(a) for a in args[:2] if isinstance(a, str))
+            key = key if not key.startswith(".") else key.split(" ", 1)[-1] if " " in key else "widget"
+            e = _TCL_TIME[key[:30]]
+            e[0] += 1
+            e[1] += time.perf_counter() - t0
+
+
 class _Slow(object):
     def __init__(self, what):
         self.what = what
 
     def __enter__(self):
         self.t0 = time.monotonic()
+        _TCL_TIME.clear()
 
     def __exit__(self, *exc):
         ms = (time.monotonic() - self.t0) * 1000.0
         if ms > SLOW_MS:
             log("SLOW %s: %.0f ms" % (self.what, ms))
+            if _TCL_TIME:
+                top = sorted(_TCL_TIME.items(), key=lambda kv: -kv[1][1])[:4]
+                log("  in Tcl: " + "; ".join("%s x%d %.0f ms" % (k, n, t * 1000.0) for k, (n, t) in top))
         return False
 
 
@@ -6079,6 +6111,8 @@ def main(argv=None):
 
     import macdock; macdock.set_app_name("Panel")                     # its Dock name
     root = tk.Tk()
+    if os.environ.get("NSTS_PANEL_TCLTRACE"):
+        root.tk = _TclTimer(root.tk)          # widgets made from here on share it
     import windowLayout; windowLayout.claim(root)   # whose window this is
     panel = PanelO6(root, size=args.size, gpc_id=args.gpc_id)
     geom = args.geometry or os.environ.get("NSTS_O6_GEOMETRY")
