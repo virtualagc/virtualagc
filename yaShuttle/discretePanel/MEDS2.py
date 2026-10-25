@@ -4293,6 +4293,10 @@ class MDUGLWidget(QOpenGLWidget):
             self.disp.renderFrame()
             return
         t0 = time.monotonic()
+        _rq = getattr(self.disp, '_reqAt', None)
+        if _rq is not None:
+            _beat_gaps.setdefault('paint request lag', []).append((t0 - _rq) * 1000.0)
+            self.disp._reqAt = None
         if _RENDER_PROFILE is not None:
             _RENDER_PROFILE.enable()
             try:
@@ -14622,6 +14626,20 @@ def _vd_attach(self, win):
     self._pump = QTimer(win)
     self._pump.timeout.connect(self._tick)
     self._pump.start(16)
+    if _BEAT_TRACE:
+        # IS THE GUI THREAD BLOCKED?  A 10 ms timer whose lateness is logged: if it
+        # runs hundreds of ms late while a frame takes 15 ms to render, the thread is
+        # stuck somewhere else (a buffer swap waiting on a slow X server, another event).
+        self._probeLast = [time.monotonic()]
+        self._probe = QTimer(win)
+        self._probe.setTimerType(Qt.TimerType.PreciseTimer)
+
+        def probe():
+            now = time.monotonic()
+            _beat_gaps.setdefault('gui loop late', []).append(max(0.0, (now - self._probeLast[0]) * 1000.0 - 10.0))
+            self._probeLast[0] = now
+        self._probe.timeout.connect(probe)
+        self._probe.start(10)
     if _MEDS_CACHE:
         # THE FLASH'S EDGES ON THEIR OWN TIMER (NSTS_MEDS_CACHE).  The phase used to
         # change when a heartbeat message happened to reach the GUI thread, 125 ms
@@ -14636,6 +14654,7 @@ def _vd_attach(self, win):
             c = self._cache
             if c is not None and c.get('blinks'):
                 self.blinkPaint = True
+                self._reqAt = time.monotonic()
                 self.widget.update()
             f = time.time() % 1.0
             nxt = (0.625 - f) if f < 0.625 else (1.0 - f)
