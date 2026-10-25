@@ -56,6 +56,28 @@ _beat_last = {}
 _beat_gaps = {}
 _beat_report = [0.0]
 
+# NSTS_MEDS_PROFILE=1 (with the beat trace): where does a frame's render time go?
+# cProfile around renderFrame; each minute the 12 functions with the most own
+# time, as a "MEDS2: render profile" block.  It slows rendering by about half.
+_RENDER_PROFILE = None
+_render_profile_at = [0.0]
+if _BEAT_TRACE and os.environ.get("NSTS_MEDS_PROFILE"):
+    import cProfile
+    _RENDER_PROFILE = cProfile.Profile()
+
+
+def _render_profile_report(now):
+    if now - _render_profile_at[0] < 60.0:
+        return
+    if _render_profile_at[0]:
+        import io
+        import pstats
+        buf = io.StringIO()
+        pstats.Stats(_RENDER_PROFILE, stream=buf).sort_stats("tottime").print_stats(12)
+        print("MEDS2: render profile\n" + buf.getvalue(), flush=True)
+        _RENDER_PROFILE.clear()
+    _render_profile_at[0] = now
+
 
 def _beat_seen(where, now):
     last = _beat_last.get(where)
@@ -4141,7 +4163,15 @@ class MDUGLWidget(QOpenGLWidget):
             self.disp.renderFrame()
             return
         t0 = time.monotonic()
-        self.disp.renderFrame()
+        if _RENDER_PROFILE is not None:
+            _RENDER_PROFILE.enable()
+            try:
+                self.disp.renderFrame()
+            finally:
+                _RENDER_PROFILE.disable()
+            _render_profile_report(t0)
+        else:
+            self.disp.renderFrame()
         t1 = time.monotonic()
         _beat_seen('paint gap', t0)
         _beat_gaps.setdefault('paint render', []).append((t1 - t0) * 1000.0)
