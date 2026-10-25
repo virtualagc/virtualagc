@@ -45,6 +45,32 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer, QPoint, QPointF, QRectF, QSocketNotifier
 from PyQt6.QtGui import QSurfaceFormat, QColor
+
+
+# NSTS_MEDS_BEATTRACE=1: how regular are the IDP's heartbeats, where they are
+# sent (the bus-pump thread) and where they are used (the GUI thread, which
+# draws the flash)?  A line each minute: count, mean, 99th percentile and
+# longest gap, in ms, for each end.  Off unless asked for.
+_BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
+_beat_last = {}
+_beat_gaps = {}
+_beat_report = [0.0]
+
+
+def _beat_seen(where, now):
+    last = _beat_last.get(where)
+    _beat_last[where] = now
+    if last is not None:
+        _beat_gaps.setdefault(where, []).append((now - last) * 1000.0)
+    if now - _beat_report[0] >= 60.0:
+        if _beat_report[0]:
+            for w, g in sorted(_beat_gaps.items()):
+                g = sorted(g)
+                if g:
+                    print("MEDS2: heartbeat %s: n=%d mean %.0f p99 %.0f max %.0f ms (125 nominal)"
+                          % (w, len(g), sum(g) / len(g), g[int(len(g) * 0.99)], g[-1]), flush=True)
+        _beat_gaps.clear()
+        _beat_report[0] = now
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtOpenGL import (QOpenGLVersionProfile, QOpenGLVersionFunctionsFactory)
 
@@ -6246,11 +6272,19 @@ class Screen_DPS(MDUScreen):
         return targetGroup
 
     def blinkTick(self):
-        self._blinkBeats = (self._blinkBeats or 0) + 1
-        if self._blinkBeats < (self.BLINK_ON_BEATS if self._blinkOn else self.BLINK_OFF_BEATS):
+        """Called on each IDP heartbeat.  The phase is the clock's, not a count
+        of beats: counting five on and three off made the flash exactly as
+        regular as the beats' arrival, and the GUI thread gets them late and in
+        bursts whenever it is busy drawing (the flash then looked irregular).
+        5/8 s lit then 3/8 s dark; a late or bunched beat finds the right phase."""
+        # The wall clock's second, so every CRT (each its own process) flashes
+        # in step as well.
+        on = (time.time() % 1.0) < (self.BLINK_ON_BEATS / 8.0)
+        if _BEAT_TRACE:
+            _beat_seen('recv', time.monotonic())
+        if on == self._blinkOn:
             return
-        self._blinkBeats = 0
-        self._blinkOn = not self._blinkOn
+        self._blinkOn = on
         showing = [0]
 
         def visit(o):
@@ -12931,8 +12965,10 @@ class IDP(LRU):
         the DEU flash's 5/8 : 3/8 duty cycle."""
         if self._hbTimer is not None:
             return
-        beat = lambda: self._sendMDU(MDUMsg.HEARTBEAT,
-                                     [self._idNum(), self._kybdBars()])
+        def beat():
+            if _BEAT_TRACE:
+                _beat_seen('send', time.monotonic())
+            self._sendMDU(MDUMsg.HEARTBEAT, [self._idNum(), self._kybdBars()])
         if self.threaded:
             # IDP POWER ON arrives on the pump thread, which has no Qt event
             # loop for a QTimer to run in.
