@@ -54,6 +54,10 @@ from PyQt6.QtGui import QSurfaceFormat, QColor
 _BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
 _MEDS_CACHE = bool(os.environ.get("NSTS_MEDS_CACHE")) and os.environ.get("NSTS_MEDS_CACHE") != "0"
 _MEDS_CACHE_FAILED = [False]
+if os.environ.get("NSTS_MEDS_SWITCH"):
+    # NSTS_MEDS_SWITCH=0.0005: how often (s) Python offers the interpreter lock to a waiting
+    # thread (default 0.005).  A test for a GUI thread starved by the bus-pump thread.
+    sys.setswitchinterval(float(os.environ["NSTS_MEDS_SWITCH"]))
 _MEDS_BATCH = bool(os.environ.get("NSTS_MEDS_BATCH")) and os.environ.get("NSTS_MEDS_BATCH") != "0"
 _beat_last = {}
 _beat_gaps = {}
@@ -82,6 +86,34 @@ def _render_profile_report(now):
     _render_profile_at[0] = now
 
 
+_thread_cpu_last = {}
+
+
+def _thread_cpu_report():
+    """CPU each Python thread used since the last report (ms), from /proc: who is
+    holding the interpreter lock while the GUI thread waits for it."""
+    try:
+        tick = os.sysconf('SC_CLK_TCK')
+        names = {t.native_id: t.name for t in threading.enumerate()}
+        rows = []
+        for tid in os.listdir('/proc/self/task'):
+            st = open('/proc/self/task/%s/stat' % tid).read()
+            f = st[st.rindex(')') + 2:].split()
+            cpu = (int(f[11]) + int(f[12])) * 1000.0 / tick         # utime + stime, ms
+            last = _thread_cpu_last.get(tid, 0.0)
+            _thread_cpu_last[tid] = cpu
+            if cpu - last >= 50.0:
+                tn = names.get(int(tid), 'main' if int(tid) == os.getpid() else 'native')
+                rows.append((cpu - last, tn, tid))
+        rows.sort(reverse=True)
+        py = [r for r in rows if r[1] != 'native']
+        nat = [r for r in rows if r[1] == 'native']        # the graphics driver's own threads
+        print("MEDS2: thread cpu ms/min: " + "; ".join("%s(%s) %.0f" % (n, t, c) for c, n, t in py[:8])
+              + "  | driver threads: %d using %.0f ms" % (len(nat), sum(r[0] for r in nat)), flush=True)
+    except Exception as e:                       # a trace must never be what breaks the program
+        print("MEDS2: thread cpu report failed: %r" % (e,), flush=True)
+
+
 def _beat_seen(where, now):
     last = _beat_last.get(where)
     _beat_last[where] = now
@@ -89,6 +121,7 @@ def _beat_seen(where, now):
         _beat_gaps.setdefault(where, []).append((now - last) * 1000.0)
     if now - _beat_report[0] >= 60.0:
         if _beat_report[0]:
+            _thread_cpu_report()
             for w, g in sorted(_beat_gaps.items()):
                 g = sorted(g)
                 if g:
