@@ -74,19 +74,35 @@ def _both(font):
     return real, ref
 
 
+_metrics = {}
+
+
+def _metric(font, what):
+    """font.metrics(what), remembered.  Tk answers it with a round trip to the
+    X server -- 1 to 5 ms an idle display, tens of ms when the server is busy
+    drawing or being screen-grabbed -- and a redraw asks hundreds of times, so
+    uncached a single panel redraw took seconds (f75a demo, 2026-10-24).  The
+    key holds what can change a named font's answer."""
+    key = (str(font), what, font.cget("size"), font.cget("family"), font.cget("weight"))
+    v = _metrics.get(key)
+    if v is None:
+        v = _metrics[key] = int(font.metrics(what))
+    return v
+
+
 def ascent(font):
     both = _both(font) if FAKE else None
-    return int(font.metrics("ascent")) if both is None else both[1][0]
+    return _metric(font, "ascent") if both is None else both[1][0]
 
 
 def descent(font):
     both = _both(font) if FAKE else None
-    return int(font.metrics("descent")) if both is None else both[1][1]
+    return _metric(font, "descent") if both is None else both[1][1]
 
 
 def linespace(font):
     both = _both(font) if FAKE else None
-    return int(font.metrics("linespace")) if both is None else both[1][0] + both[1][1]
+    return _metric(font, "linespace") if both is None else both[1][0] + both[1][1]
 
 
 def lift(font, anchor="c"):

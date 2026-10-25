@@ -4221,7 +4221,7 @@ class PanelO6:
         cx = (x0 + x1) / 2.0
         self._text(cx, y_title, "INTEGRATED DISPLAY PROCESSOR", size=10)
         self._text(cx, y_load, "LOAD", size=SETTING_SIZE)
-        tw = self._tkfont(SETTING_SIZE).measure("LOAD") / max(self.s, 0.01)
+        tw = self._mw(self._tkfont(SETTING_SIZE), "LOAD") / max(self.s, 0.01)
         tx = cx + tw / 2.0 + 5
         t = ths * 0.45
         self._poly([(tx, y_load - t), (tx + 2 * t, y_load - t),
@@ -4611,6 +4611,14 @@ class PanelO6:
             px = self._measure[key] = f.measure(text)
         return px / max(self.s, 0.01)
 
+    def _mw(self, f, text):
+        """f.measure(text), remembered (a round trip to the X server each time)."""
+        key = (str(f), text)
+        px = self._measure.get(key)
+        if px is None:
+            px = self._measure[key] = f.measure(text)
+        return px
+
     def _linespace(self, size):
         f = self._tkfont(size)
         key = (str(f), None)
@@ -4713,12 +4721,12 @@ class PanelO6:
         ascent = float(helvetica.ascent(f))
         descent = float(helvetica.descent(f))
         digit_em, cap_em = font_em(FONT_FAMILY)
-        em = f.measure("0123456789") / (10 * digit_em)
+        em = self._mw(f, "0123456789") / (10 * digit_em)
         cap = cap_em * em
         s = max(self.s, 0.01)
         d = cap / s
         gap = 0.5 * d
-        tw = f.measure(caption) / s
+        tw = self._mw(f, caption) / s
         tx = gx - (tw + gap + d) / 2.0
         self._text(tx, y, caption, size=size, anchor="w")
         # anchor w centres the linespace; the baseline is (a - d)/2 below.
@@ -4908,7 +4916,7 @@ class PanelO6:
         # Linux, nearly -- and left the numerals 2.5 points low on macOS.)
         f = self._tkfont(14)
         digit_em, cap_em = font_em(FONT_FAMILY)
-        cap = cap_em * f.measure("0123456789") / (10 * digit_em)
+        cap = cap_em * self._mw(f, "0123456789") / (10 * digit_em)
         y_fix = (cap / 2.0 - (helvetica.ascent(f) - helvetica.descent(f)) / 2.0) \
             / max(self.s, 0.01)
         self._text((x1 + x2) / 2.0 + dx, (iy1 + iy2) / 2.0 + y_fix,
