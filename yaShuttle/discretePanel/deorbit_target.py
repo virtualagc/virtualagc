@@ -159,11 +159,20 @@ def main():
     ap.add_argument("--tff", type=float, default=30.0, help="TIG to EI, minutes")
     ap.add_argument("--runway", type=int, default=1, help="the site file's runway slot")
     ap.add_argument("--max-crossrange", type=float, default=550.0)
+    ap.add_argument("--gamma-ei", type=float, default=None,
+                    help="the inertial flight-path angle at EI the target line is to give, degrees (negative): C1 is set so that VR = C1 + C2 VH is "
+                         "VH tan(gamma) at VH 25,830 ft/s.  The default C1 15310 (STS-1) gives -1.38 deg here; STS-134's own burn (296.9 ft/s, 23.2 x 188.5 n.mi. "
+                         "after it, JSC-37461) implies -1.17")
+    ap.add_argument("--ei-gmt", type=float, default=None,
+                    help="GMT (s of the year) wanted for entry interface: REI is adjusted until EI is there (STS-134: 152/06:03:06); --rei is then only the start")
     ap.add_argument("--near-gmt", type=float, default=None,
                     help="GMT (seconds of the year, as PASS counts them) of the landing wanted: take the pass whose closest approach to the "
                          "runway is nearest it, not the first -- the opportunity the real flight took (STS-134: orbit 248, 152/06:34:50)")
     a = ap.parse_args()
 
+    global C1
+    if a.gamma_ei is not None:
+        C1 = 25830.0 * math.tan(math.radians(a.gamma_ei)) - C2 * 25830.0
     vd = json.load(open(os.path.join(a.capture, "vehdyn.json")))["vehdyn"]
     r = [x / FT for x in vd[3:6]]
     v = [x / FT for x in vd[6:9]]
@@ -212,28 +221,50 @@ def main():
     # 2. TIG: about (tff + ~31 min entry) before the closest approach; then
     #    THETA T so that the EI point is REI from the runway, and TIG slid so
     #    that TIG -> EI is TFF
-    tig_off = -(a.tff + 31.0) * 60.0
-    for _ in range(12):
-        rt, vt, gt = coast(rc, vc, gmt_close, tig_off)
-        theta = solve_theta(rt, vt, gt, lat_rw, lon_rw, a.rei)
-        if theta is None:
-            print("no THETA T gives REI %.0f n.mi. from this TIG" % a.rei)
+    def design(rei):
+        tig_off = -(a.tff + 31.0) * 60.0
+        for _ in range(12):
+            rt, vt, gt = coast(rc, vc, gmt_close, tig_off)
+            theta = solve_theta(rt, vt, gt, lat_rw, lon_rw, rei)
+            if theta is None:
+                return None
+            vdd, dv, ei = fly(rt, vt, gt, theta)
+            tff = ei[3] / 60.0
+            if abs(tff - a.tff) < 0.05:
+                break
+            tig_off += (tff - a.tff) * 60.0      # too long a coast: burn later, nearer the site
+        return rt, vt, gt, theta, vdd, dv, ei
+
+    rei = a.rei
+    for _ in range(8):
+        res = design(rei)
+        if res is None:
+            print("no THETA T gives REI %.0f n.mi. from this TIG" % rei)
             return 1
-        vdd, dv, ei = fly(rt, vt, gt, theta)
-        tff = ei[3] / 60.0
-        if abs(tff - a.tff) < 0.05:
+        if a.ei_gmt is None:
             break
-        tig_off += (tff - a.tff) * 60.0      # too long a coast: burn later, nearer the site
+        err = res[6][2] - a.ei_gmt          # EI later than wanted: more range from EI to the runway (0.265 s of EI time per n.mi. of REI)
+        if abs(err) < 1.0:
+            break
+        rei += err / 0.265
+    rt, vt, gt, theta, vdd, dv, ei = res
     re, ve, ge, tfree = ei
     la, lo, _ = geodetic(to_earth(re, ge))
     vh = norm(cross(re, ve)) / norm(re)
     vr = dot(re, ve) / norm(re)
+    rn = norm(rt)
+    a_ = 1.0 / (2.0 / rn - dot(vdd, vdd) / MU)
+    e_ = norm(add(scale(dot(vdd, vdd) / MU - 1.0 / rn, rt), scale(-dot(rt, vdd) / MU, vdd)))
     print("TIG GMT %s  (%.1f s after the capture)" % (fmt_gmt(gt), gt - vd[126]))
+    print("  post-burn orbit %.1f x %.1f n.mi. above the equatorial radius, osculating (STS-134 flew 188.5 x 23.2 above the ellipsoid)"
+          % ((a_ * (1 + e_) - RE) / NMI, (a_ * (1 - e_) - RE) / NMI))
     print("  C1 %.0f  C2 %+.4f  HT %.3f  THETA T %.3f   (items 14, 15, 16, 17)" % (C1, C2, HT, theta))
     print("  impulsive dV %.1f ft/s; coast to EI %.2f min" % (dv, tfree / 60.0))
     print("EI GMT %s  lat %.2f lon %.2f  V %.0f ft/s inertial  gamma %.3f deg  REI %.0f n.mi."
           % (fmt_gmt(ge), math.degrees(la), math.degrees(lo), norm(ve),
              math.degrees(math.atan2(vr, vh)), surface_range(la, lo, lat_rw, lon_rw)))
+    if a.ei_gmt is not None:
+        print("  (REI solved for EI at GMT %s: %.0f n.mi.)" % (fmt_gmt(a.ei_gmt), rei))
     return 0
 
 
