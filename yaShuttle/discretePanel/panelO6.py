@@ -2367,13 +2367,20 @@ class PanelO6:
         # window, with whole-point fonts, bounced the small panels 20-30
         # times each and held Tk 11 s at startup.
         measuring = win.natural is not None and not win._measured
+        old_items = ()
         try:
             if measuring:
                 self.s = self._size / float(FULL_SIZE)
                 self.ox = self.oy = 0.0
             else:
                 self._scale()
-            self.cv.delete("all")
+            # The old items go AFTER the new ones are drawn: Tk keeps a colour, font
+            # or GC only while an item uses it, so deleting first made every redraw
+            # fetch them all again, a round trip to the X server each -- 4 ms an
+            # idle display, 300 ms with the server busy (a screen recorder), a
+            # whole O3 redraw a second.  Drawn over the old, the new items find
+            # them still held.
+            old_items = self.cv.find_all()
             self._hits = []
             self._marks = []
             self._bp_cache = {}
@@ -2400,6 +2407,8 @@ class PanelO6:
             self._fit("_ref_w", win.ref0[0], right + MARGIN)
             self._fit("_ref_h", win.ref0[1], bottom + MARGIN)
         finally:
+            if old_items:
+                self.cv.delete(*old_items)
             if prev is not None:
                 self.w = prev
 
