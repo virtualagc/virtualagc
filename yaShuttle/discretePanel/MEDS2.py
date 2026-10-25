@@ -4517,7 +4517,13 @@ class VectorDisplay(object):
                 o.visible = True
             if _BEAT_TRACE:
                 _beat_gaps.setdefault('cache rebuild', []).append((time.perf_counter() - t0) * 1000.0)
-        lit = (time.time() % 1.0) < 0.625
+        _now = time.time()
+        lit = (_now % 1.0) < 0.625
+        if _BEAT_TRACE and c['blinks'] and getattr(self, '_shownLit', None) is not None \
+                and lit != self._shownLit:
+            # how long after the edge this paint is (ms): the app's part of the flash's error
+            late = ((_now % 1.0) if lit else ((_now % 1.0) - 0.625)) * 1000.0
+            _beat_gaps.setdefault('flash edge late', []).append(late)
         src = c['on'] if (lit or not c['blinks']) else c['off']
         dst = self.widget.defaultFramebufferObject()
         f.glBindFramebuffer(0x8CA8, src.handle())          # GL_READ_FRAMEBUFFER
@@ -14616,6 +14622,26 @@ def _vd_attach(self, win):
     self._pump = QTimer(win)
     self._pump.timeout.connect(self._tick)
     self._pump.start(16)
+    if _MEDS_CACHE:
+        # THE FLASH'S EDGES ON THEIR OWN TIMER (NSTS_MEDS_CACHE).  The phase used to
+        # change when a heartbeat message happened to reach the GUI thread, 125 ms
+        # apart and as late as the thread was busy.  The wall clock's phase is lit for
+        # the first 5/8 s of each second; a one-shot timer fires at each edge and asks
+        # for the repaint, which only copies a texture.
+        self._edge = QTimer(win)
+        self._edge.setSingleShot(True)
+        self._edge.setTimerType(Qt.TimerType.PreciseTimer)
+
+        def edge():
+            c = self._cache
+            if c is not None and c.get('blinks'):
+                self.blinkPaint = True
+                self.widget.update()
+            f = time.time() % 1.0
+            nxt = (0.625 - f) if f < 0.625 else (1.0 - f)
+            self._edge.start(max(1, int(nxt * 1000.0) + 1))
+        self._edge.timeout.connect(edge)
+        edge()
 
 
 # NSTS_GUI_STALL_MS=<ms>: A TEST OF BusPump.  Every redraw tick holds the GUI
