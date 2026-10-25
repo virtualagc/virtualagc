@@ -1373,7 +1373,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
-               "--snapshot-dir", self.a.logs, "--duration", "20000",
+               "--snapshot-dir", self.a.logs, "--duration", os.environ.get("FLY_DURATION", "20000"),   # wall s: a 40-hour coast at 3x needs ~50000
                # the commander's station, for the THC that trims the Ti burn's
                # residuals: without a hand-controller window a script's `thc`
                # moves nothing (m1b-run3, 2026-10-08: "no hand-controller
