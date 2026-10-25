@@ -75,7 +75,13 @@ class Return(U.Undock):
     # then designed from the simulated state, the ground's way (deorbit_target.py), so TIG and the burn differ by the run's dispersion.
     # The target line is the one that reproduces the flown post-burn orbit (23.2 x 188.5 n.mi. -> EI gamma -1.17 deg; STS-1's C1 gives -1.38 and
     # 394 ft/s where the flight burned 297), and EI is put at the flown 06:03:06 by the range from EI to the runway (REI solved, 4,438 n.mi.).
-    DEORBIT_ARGS = ["--tff", "34.05", "--gamma-ei", "-1.10", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
+    # TFF 31.0, NOT the flown 34.05: this Orbiter's own orbit (188.8 x 183.4 n.mi. at the capture) is not the flown one, and the burn size is very
+    # sensitive to where on the orbit TIG falls (the post-burn apogee sits above the radius at TIG, so the burn needs a radial part).  Scanned on
+    # deorb-4's capture (gamma_t -1.10, EI pinned at 06:03:06): TFF 34.05 gives 334 ft/s and 190.3 x 24.4; 31.0 gives 297.5 ft/s (flown 296.9-298.4),
+    # 186.9 x 23.9, EI gamma -1.181 (the flown orbit implies -1.17) and TIG 05:32:05.6, 3 min after the flown 05:29:03.1.  The propellant then matches
+    # too (6,103 lb flown), so the landing weight comes to the documented 204,463 lb.  The along-track phase of this orbit puts touchdown 50-60 s
+    # before the flown 06:34:50 whatever is chosen here (TD barely moves with TFF or REI).
+    DEORBIT_ARGS = ["--tff", "31.0", "--gamma-ei", "-1.10", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
                     "--near-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 34 * 60.0 + 50.0)]
     RAMBO_PULSES = 3
     RAMBO_S = 10.0
