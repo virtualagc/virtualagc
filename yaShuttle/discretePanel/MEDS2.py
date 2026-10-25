@@ -3551,12 +3551,15 @@ class GLRenderer(object):
             for ch in o.children:
                 walk(ch, wm)
 
+        _t0 = time.perf_counter()
         walk(scene, np.eye(4, dtype=np.float64))
+        _t1 = time.perf_counter()
 
         # three.js painterSortStable / reversePainterSortStable
         opaque.sort(key=lambda it: (it[0].renderOrder, it[0].material.id,
                                     it[2], it[0].id))
         transparent.sort(key=lambda it: (it[0].renderOrder, -it[2], it[0].id))
+        _t2 = time.perf_counter()
 
         self._curProg = None
         self._curMat = None
@@ -3565,6 +3568,17 @@ class GLRenderer(object):
             for o, wm, _z in lst:
                 self._draw(o, wm, proj, view)
         f.glDepthMask(True)
+        if _BEAT_TRACE:
+            _t3 = time.perf_counter()
+            # NSTS_MEDS_FINISH=1 waits for the GPU to be done (glFinish), which
+            # stalls the pipeline: only to tell GPU time from driver call time.
+            if os.environ.get("NSTS_MEDS_FINISH"):
+                f.glFinish()
+            _t4 = time.perf_counter()
+            for k, v in (('frame walk', _t1 - _t0), ('frame sort', _t2 - _t1),
+                         ('frame draw calls', _t3 - _t2), ('frame glFinish', _t4 - _t3)):
+                _beat_gaps.setdefault(k, []).append(v * 1000.0)
+            _beat_gaps.setdefault('frame objects', []).append(float(len(opaque) + len(transparent)))
 
     def _setAttrs(self, pr, info):
         f = self.f
