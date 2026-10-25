@@ -82,6 +82,7 @@ Usage:
 
 import argparse
 import collections
+import faulthandler
 from collections import OrderedDict
 import json
 import math
@@ -693,6 +694,31 @@ def log(msg):
     anything already matching these lines from the start keeps working.
     """
     print("panelO6: %s  [t=%.1f]" % (msg, time.monotonic() - _LOG_T0), flush=True)
+
+
+# WHERE THE TK THREAD'S TIME GOES.  One thread draws every panel, republishes
+# the lamps and runs every scripted release, so one slow callback freezes them
+# all: the O3 clock stopped for 33 s, and a scripted button press never showed
+# (f75a, the Tk tick 29166 ms late).  _Slow logs any step that takes more than
+# NSTS_PANEL_SLOW_MS (default 200); and once a tick is more than
+# NSTS_PANEL_STALL_DUMP_S (default 3, 0 = off) overdue, faulthandler writes
+# every thread's stack to stdout, which shows what the Tk thread is stuck in.
+SLOW_MS = float(os.environ.get("NSTS_PANEL_SLOW_MS", "200"))
+STALL_DUMP_S = float(os.environ.get("NSTS_PANEL_STALL_DUMP_S", "3"))
+
+
+class _Slow(object):
+    def __init__(self, what):
+        self.what = what
+
+    def __enter__(self):
+        self.t0 = time.monotonic()
+
+    def __exit__(self, *exc):
+        ms = (time.monotonic() - self.t0) * 1000.0
+        if ms > SLOW_MS:
+            log("SLOW %s: %.0f ms" % (self.what, ms))
+        return False
 
 
 def _active_window():
@@ -1919,11 +1945,15 @@ class PanelO6:
             self._stall = None
             now = time.monotonic()
         self._tick_last = now
-        self._panels_follow()
-        self._talkbacks_follow()
-        self._idp_adopt()
-        self._lamps_follow()
-        self._sub1_follow()
+        if STALL_DUMP_S > 0:          # re-armed every tick: it fires only if this one never comes
+            try:
+                faulthandler.dump_traceback_later(STALL_DUMP_S, file=sys.stdout)
+            except (ValueError, OSError, AttributeError):
+                pass
+        for step in ("_panels_follow", "_talkbacks_follow", "_idp_adopt",
+                     "_lamps_follow", "_sub1_follow"):
+            with _Slow("tick " + step):
+                getattr(self, step)()
         self.tone_cw.poll()                  # a player at the end of its file starts again
         self.tone_sm.poll()
         with self._rx_lock:
@@ -2292,6 +2322,10 @@ class PanelO6:
                 self._redraw_win(win)
 
     def _redraw_win(self, win):
+        with _Slow("redraw " + win.name):
+            self._redraw_win_untimed(win)
+
+    def _redraw_win_untimed(self, win):
         prev = self.__dict__.get("w")
         self.w = win
         win._sig = self._win_sig(win)
