@@ -3523,14 +3523,15 @@ class GLRenderer(object):
         return geom._glinfo
 
     # -- the frame ----------------------------------------------------------
-    def render(self, scene, camera, fbw, fbh):
+    def render(self, scene, camera, fbw, fbh, clear=True, rootMatrix=None):
         f = self.f
         GLResources.sweep(self)
         f.glViewport(0, 0, int(fbw), int(fbh))
         c = self.clearColor
         f.glClearColor(c.r, c.g, c.b, 1.0)
         f.glDepthMask(True)
-        f.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        if clear:
+            f.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         proj = camera.projectionMatrix
         view = camera.viewMatrix()
@@ -3554,7 +3555,7 @@ class GLRenderer(object):
                 walk(ch, wm)
 
         _t0 = time.perf_counter()
-        walk(scene, np.eye(4, dtype=np.float64))
+        walk(scene, np.eye(4, dtype=np.float64) if rootMatrix is None else rootMatrix)
         _t1 = time.perf_counter()
 
         # three.js painterSortStable / reversePainterSortStable
@@ -4392,17 +4393,28 @@ class VectorDisplay(object):
             t0 = time.perf_counter()
             self.dirty = False                   # a change DURING the build asks for another
             blink = []
-            self.scene.traverse(lambda o: blink.append(o) if o.userData.get('deuBlink') else None)
+            live = []
+            def collect(o):
+                if o.userData.get('deuBlink'):
+                    blink.append(o)
+                if o.userData.get('deuLive'):
+                    live.append(o)
+            self.scene.traverse(collect)
             c['blinks'] = any(len(o.children) > 0 for o in blink)
+            c['live'] = live
             for key, lit in (('on', True), ('off', False)):
                 if key == 'off' and not c['blinks']:
                     break
                 for o in blink:
                     o.visible = lit
+                for o in live:
+                    o.visible = False          # drawn over the copy, each paint
                 c['ms'].bind()
                 self.renderer.render(self.scene, self.camera, w, h)
                 QOpenGLFramebufferObject.blitFramebuffer(c[key], c['ms'])
             c['ms'].release()
+            for o in live:
+                o.visible = True
             if _BEAT_TRACE:
                 _beat_gaps.setdefault('cache rebuild', []).append((time.perf_counter() - t0) * 1000.0)
         lit = (time.time() % 1.0) < 0.625
@@ -4412,6 +4424,20 @@ class VectorDisplay(object):
         f.glBindFramebuffer(0x8CA9, dst)                   # GL_DRAW_FRAMEBUFFER
         f.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, 0x2600)   # GL_NEAREST
         f.glBindFramebuffer(0x8D40, dst)                   # GL_FRAMEBUFFER
+        # THE LIVE OBJECTS (the header clock, which changes every second) are drawn
+        # now, over the copy, with their own parents' transforms: a change to them
+        # is a repaint, not a rebuild of both textures.
+        liveNow = []
+        self.scene.traverse(lambda o: liveNow.append(o) if o.userData.get('deuLive') else None)
+        byParent = {}
+        for o in liveNow:
+            if o.parent is not None and o.visible:
+                byParent.setdefault(id(o.parent), (o.parent, []))[1].append(o)
+        for parent, objs in byParent.values():
+            box = Object3D()
+            box.children = objs                # not add(): they keep their real parents
+            self.renderer.render(box, self.camera, w, h, clear=False,
+                                 rootMatrix=parent.matrixWorld)
         err = f.glGetError()
         if err:
             raise RuntimeError("the blit to the widget's framebuffer gave GL error 0x%x" % err)
@@ -6571,6 +6597,7 @@ class Screen_DPS(MDUScreen):
         fcws = (self.makeDFB(self._clockText(missionSecs), {'xy': [39, 1]})
                 + self.makeDFB(self._clockText(eventSecs), {'xy': [39, 2]}))
         self.geo_dps_time = self.drawFCWS(fcws, self.geo_dps_time)
+        self.geo_dps_time.userData['deuLive'] = True       # NSTS_MEDS_CACHE: drawn over the cached page
         # What the header now shows.  Cleared wherever geo_dps_time is made
         # afresh, so a rebuilt screen always gets its clock drawn.
         self._clockDrawn = text
@@ -12595,7 +12622,11 @@ class MDU(LRU):
                     evt |= int(msg.data16[5]) << 16
                 if scr.setClock(mis, evt, int(msg.data16[3])) is not False:
                     _clock_log("draw mission=%d" % mis)
-                    t.redraw()
+                    if (_MEDS_CACHE and not _MEDS_CACHE_FAILED[0] and t.disp is not None
+                            and t.disp._cache is not None and t.disp._cache.get('live')):
+                        t.disp.blinkPaint = True    # the clock alone changed: repaint
+                    else:
+                        t.redraw()
         elif tag == MDUMsg.RESET_SPL:
             if scr is not None:
                 if scr.spl is not None:
