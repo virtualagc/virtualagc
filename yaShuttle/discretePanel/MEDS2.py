@@ -54,6 +54,7 @@ from PyQt6.QtGui import QSurfaceFormat, QColor
 _BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
 _MEDS_CACHE = bool(os.environ.get("NSTS_MEDS_CACHE")) and os.environ.get("NSTS_MEDS_CACHE") != "0"
 _MEDS_CACHE_FAILED = [False]
+_MEDS_BATCH = bool(os.environ.get("NSTS_MEDS_BATCH")) and os.environ.get("NSTS_MEDS_BATCH") != "0"
 _beat_last = {}
 _beat_gaps = {}
 _beat_report = [0.0]
@@ -3567,9 +3568,20 @@ class GLRenderer(object):
         self._curProg = None
         self._curMat = None
         self._state = {}
+        temp = []
+        nObj = len(opaque) + len(transparent)
+        nDraw = 0
         for lst in (opaque, transparent):
+            if _MEDS_BATCH:
+                _tb = time.perf_counter()
+                lst = self._batched(lst, temp)
+                if _BEAT_TRACE:
+                    _beat_gaps.setdefault('frame merge', []).append((time.perf_counter() - _tb) * 1000.0)
+            nDraw += len(lst)
             for o, wm, _z in lst:
                 self._draw(o, wm, proj, view)
+        for g in temp:
+            g.dispose()
         f.glDepthMask(True)
         if _BEAT_TRACE:
             _t3 = time.perf_counter()
@@ -3581,7 +3593,95 @@ class GLRenderer(object):
             for k, v in (('frame walk', _t1 - _t0), ('frame sort', _t2 - _t1),
                          ('frame draw calls', _t3 - _t2), ('frame glFinish', _t4 - _t3)):
                 _beat_gaps.setdefault(k, []).append(v * 1000.0)
-            _beat_gaps.setdefault('frame objects', []).append(float(len(opaque) + len(transparent)))
+            _beat_gaps.setdefault('frame objects', []).append(float(nObj))
+            _beat_gaps.setdefault('frame draws', []).append(float(nDraw))
+
+    # NSTS_MEDS_BATCH=1: ONE DRAW PER RUN OF OBJECTS THAT SHARE A MATERIAL.  The sorted
+    # list draws about 730 objects a frame (every character of a DEU page is one), each
+    # a draw call of its own: some 35 ms of Python and driver time and about 40 ms of
+    # GPU time on the NVS 510.  The vertex shaders use an object's matrix only to move
+    # its vertices (position, endA, endB), so a run of consecutive objects with the same
+    # material and render order can have its transform applied on the CPU and be drawn
+    # as one geometry: the same triangles in the same order, the same state, the same
+    # pixels, and a few dozen draws.
+    _MERGE_ATTRS = {'sdf': (('position', 3), ('endA', 3), ('endB', 3), ('corner', 2), ('segDist', 2)),
+                    'basic': (('position', 3),)}
+    _MERGE_XFORM = ('position', 'endA', 'endB')
+
+    def _batched(self, lst, temp):
+        out = []
+        run = []
+        runKey = [None]
+
+        def flush():
+            if len(run) == 1:
+                out.append(run[0])
+            elif run:
+                m = self._mergeRun(run)
+                if m is None:
+                    out.extend(run)
+                else:
+                    temp.append(m.geometry)
+                    out.append((m, _IDENT4, run[0][2]))
+            del run[:]
+            runKey[0] = None
+
+        for item in lst:
+            o = item[0]
+            mat = o.material
+            g = o.geometry
+            kind = mat.kind if mat.isShaderMaterial else 'basic'
+            ok = (g is not None and not g._disposed and g.index is not None
+                  and all(n in g.attributes for n, _ in self._MERGE_ATTRS[kind]))
+            if not ok:
+                flush()
+                out.append(item)
+                continue
+            key = (o.renderOrder, id(mat))
+            if key != runKey[0]:
+                flush()
+                runKey[0] = key
+            run.append(item)
+        flush()
+        return out
+
+    def _mergeRun(self, run):
+        o0 = run[0][0]
+        mat = o0.material
+        kind = mat.kind if mat.isShaderMaterial else 'basic'
+        attrs = self._MERGE_ATTRS[kind]
+        cols = {n: [] for n, _ in attrs}
+        counts = []
+        idxs = []
+        A = []
+        T = []
+        for o, wm, _z in run:
+            at = o.geometry.attributes
+            for n, size in attrs:
+                cols[n].append(at[n].array.reshape(-1, size))
+            counts.append(cols['position'][-1].shape[0])
+            idxs.append(o.geometry.index)
+            A.append(wm[:3, :3])
+            T.append(wm[:3, 3])
+        cnt = np.array(counts)
+        who = np.repeat(np.arange(len(run)), cnt)
+        Astack = np.array(A)
+        Tall = np.array(T)[who]
+        # nearly every object is only moved (rotation none, scale 1): add its offset
+        translateOnly = bool(np.all(Astack == np.eye(3)))
+        Aall = None if translateOnly else Astack[who]
+        g = BufferGeometry()
+        for n, size in attrs:
+            a = np.concatenate(cols[n])
+            if n in self._MERGE_XFORM:
+                if translateOnly:
+                    a = a + Tall.astype(np.float32)
+                else:
+                    a = np.einsum('nij,nj->ni', Aall, a.astype(np.float64)) + Tall
+            g.setAttribute(n, BufferAttribute(np.ascontiguousarray(a, dtype=np.float32).reshape(-1), size))
+        offs = np.concatenate(([0], np.cumsum(cnt)[:-1]))
+        g.index = np.concatenate([ix.astype(np.uint32) + np.uint32(off) for ix, off in zip(idxs, offs)])
+        return Mesh(g, mat)
 
     def _setAttrs(self, pr, info):
         f = self.f
