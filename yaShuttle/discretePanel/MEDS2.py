@@ -52,6 +52,8 @@ from PyQt6.QtGui import QSurfaceFormat, QColor
 # draws the flash)?  A line each minute: count, mean, 99th percentile and
 # longest gap, in ms, for each end.  Off unless asked for.
 _BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
+_MEDS_CACHE = bool(os.environ.get("NSTS_MEDS_CACHE")) and os.environ.get("NSTS_MEDS_CACHE") != "0"
+_MEDS_CACHE_FAILED = [False]
 _beat_last = {}
 _beat_gaps = {}
 _beat_report = [0.0]
@@ -4336,6 +4338,8 @@ class VectorDisplay(object):
         self.renderer = GLRenderer()
         self.widget = MDUGLWidget(self)
         self._dbSize = [0.0, 0.0]
+        self.blinkPaint = False        # the flash changed phase: repaint, nothing rebuilt
+        self._cache = None             # NSTS_MEDS_CACHE: the page rendered lit and dark
 
     # -- the frame ----------------------------------------------------------
     def renderFrame(self):
@@ -4349,8 +4353,70 @@ class VectorDisplay(object):
             self.pxRatioU['value'] = w / self.widthPx
             self.dirty = True
         self.renderer.clearColor = Color(self.c2h['black'])
+        if _MEDS_CACHE and not _MEDS_CACHE_FAILED[0]:
+            try:
+                self._renderCached(int(w), int(h))
+                return
+            except Exception:
+                _MEDS_CACHE_FAILED[0] = True
+                traceback.print_exc()
+                print("MEDS2: NSTS_MEDS_CACHE failed; drawing every frame in full again", flush=True)
         self.renderer.render(self.scene, self.camera, w, h)
         self.dirty = False
+
+    # THE PAGE, RENDERED TWICE ON A CHANGE (NSTS_MEDS_CACHE=1).  A repaint used to
+    # draw every object again, some 730 draw calls and about 70 ms on the NVS 510,
+    # about three times a second, mostly for the 1 Hz flash of a few strings.  Now a
+    # change of CONTENT (self.dirty) renders the scene into two textures, flashing
+    # text lit and dark (one when nothing flashes), and every repaint is a copy of the
+    # one the wall clock's phase calls for.  The flash is then a blit: regular, and
+    # nearly free.  A display that changes every frame (the ADI) pays one more copy.
+    def _renderCached(self, w, h):
+        from PyQt6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
+        f = self.renderer.f
+        c = self._cache
+        if c is None or c['size'] != (w, h):
+            if c is not None:
+                for k in ('ms', 'on', 'off'):
+                    c[k] = None
+            samples = max(0, int(os.environ.get("NSTS_MEDS_SAMPLES", "4")))
+            fm = QOpenGLFramebufferObjectFormat()
+            fm.setAttachment(QOpenGLFramebufferObject.Attachment.CombinedDepthStencil)
+            fm.setSamples(samples)
+            plain = QOpenGLFramebufferObjectFormat()
+            c = self._cache = {'size': (w, h), 'ms': QOpenGLFramebufferObject(w, h, fm),
+                               'on': QOpenGLFramebufferObject(w, h, plain),
+                               'off': QOpenGLFramebufferObject(w, h, plain), 'blinks': False}
+            self.dirty = True
+        if self.dirty:
+            t0 = time.perf_counter()
+            self.dirty = False                   # a change DURING the build asks for another
+            blink = []
+            self.scene.traverse(lambda o: blink.append(o) if o.userData.get('deuBlink') else None)
+            c['blinks'] = any(len(o.children) > 0 for o in blink)
+            for key, lit in (('on', True), ('off', False)):
+                if key == 'off' and not c['blinks']:
+                    break
+                for o in blink:
+                    o.visible = lit
+                c['ms'].bind()
+                self.renderer.render(self.scene, self.camera, w, h)
+                QOpenGLFramebufferObject.blitFramebuffer(c[key], c['ms'])
+            c['ms'].release()
+            if _BEAT_TRACE:
+                _beat_gaps.setdefault('cache rebuild', []).append((time.perf_counter() - t0) * 1000.0)
+        lit = (time.time() % 1.0) < 0.625
+        src = c['on'] if (lit or not c['blinks']) else c['off']
+        dst = self.widget.defaultFramebufferObject()
+        f.glBindFramebuffer(0x8CA8, src.handle())          # GL_READ_FRAMEBUFFER
+        f.glBindFramebuffer(0x8CA9, dst)                   # GL_DRAW_FRAMEBUFFER
+        f.glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, 0x2600)   # GL_NEAREST
+        f.glBindFramebuffer(0x8D40, dst)                   # GL_FRAMEBUFFER
+        err = f.glGetError()
+        if err:
+            raise RuntimeError("the blit to the widget's framebuffer gave GL error 0x%x" % err)
+        self.blinkPaint = False
+        self._shownLit = lit
 
     def clear(self):
         for child in list(reversed(self.scene.children)):
@@ -6360,7 +6426,10 @@ class Screen_DPS(MDUScreen):
         self.group.traverse(visit)
         # Only ask for a frame when something is actually blinking.
         if showing[0] > 0:
-            self.d.dirty = True
+            if _MEDS_CACHE and not _MEDS_CACHE_FAILED[0]:
+                self.d.blinkPaint = True       # the cached page for the new phase is copied
+            else:
+                self.d.dirty = True
 
     # THE FCW3 PALETTE INDEX -> AN RGB COLOUR.  The 64-entry table is in
     # MG070100A1012E2, the MEDS IDP Software Requirements Specification,
@@ -14436,7 +14505,7 @@ def _vd_tick(self):
                 pass
         else:
             time.sleep(_GUI_STALL_S)
-    if self.dirty:
+    if self.dirty or self.blinkPaint:
         self.widget.update()
 
 
