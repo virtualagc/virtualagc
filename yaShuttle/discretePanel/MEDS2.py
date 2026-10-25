@@ -87,6 +87,7 @@ def _render_profile_report(now):
 
 
 _thread_cpu_last = {}
+_EVT_REPORT = [None]
 
 
 def _thread_cpu_report():
@@ -122,6 +123,8 @@ def _beat_seen(where, now):
     if now - _beat_report[0] >= 60.0:
         if _beat_report[0]:
             _thread_cpu_report()
+            if _EVT_REPORT[0] is not None:
+                _EVT_REPORT[0]()
             for w, g in sorted(_beat_gaps.items()):
                 g = sorted(g)
                 if g:
@@ -15275,7 +15278,36 @@ def main(argv=None):
     import macdock
     macdock.set_app_name(next((n.upper() for n in (opts.get('lrus') or [])
                                if n.lower().startswith(("crt", "mdu"))), "MEDS2"))
-    app = QtWidgets.QApplication(sys.argv[:1])
+    if _BEAT_TRACE:
+        # EVERY EVENT'S DELIVERY TIMED: which event, delivered to which object, keeps the GUI
+        # thread away from its other events?  Totals and the longest per (receiver, event type),
+        # a block each minute.  (Qt's own work between events does not show; its delivery does.)
+        _evt = {}
+
+        class TracedApp(QtWidgets.QApplication):
+            def notify(self, receiver, event):
+                t0 = time.perf_counter()
+                try:
+                    return QtWidgets.QApplication.notify(self, receiver, event)
+                finally:
+                    dt = (time.perf_counter() - t0) * 1000.0
+                    key = (type(receiver).__name__, int(event.type()))
+                    e = _evt.setdefault(key, [0, 0.0, 0.0])
+                    e[0] += 1
+                    e[1] += dt
+                    if dt > e[2]:
+                        e[2] = dt
+
+        def _evt_report():
+            rows = sorted(_evt.items(), key=lambda kv: -kv[1][1])[:7]
+            if rows:
+                print("MEDS2: event delivery per minute (receiver, event type: n, total ms, longest ms): "
+                      + "; ".join("%s,%d: %d, %.0f, %.0f" % (k[0], k[1], v[0], v[1], v[2]) for k, v in rows), flush=True)
+            _evt.clear()
+        _EVT_REPORT[0] = _evt_report
+        app = TracedApp(sys.argv[:1])
+    else:
+        app = QtWidgets.QApplication(sys.argv[:1])
     app.setApplicationName('MEDS2')
     app.setQuitOnLastWindowClosed(True)
 
