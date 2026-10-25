@@ -53,6 +53,7 @@ CREATE TABLE mass_items(id INTEGER PRIMARY KEY, doc_id INTEGER, category TEXT, i
 CREATE TABLE mass_summary(id INTEGER PRIMARY KEY, doc_id INTEGER, description TEXT, weight_lb REAL, x_in REAL, y_in REAL, seq INTEGER);
 CREATE TABLE discrepancies(id INTEGER PRIMARY KEY, topic TEXT, value_a TEXT, source_a TEXT, value_b TEXT, source_b TEXT, reading TEXT);
 CREATE TABLE sim_impact(id INTEGER PRIMARY KEY, topic TEXT, datum TEXT, affects TEXT, action TEXT, status TEXT);
+CREATE TABLE attitudes(id INTEGER PRIMARY KEY, gmt TEXT, unix REAL, attitude TEXT, dap TEXT, note TEXT, source TEXT);
 CREATE TABLE sources(id INTEGER PRIMARY KEY, name TEXT, path TEXT, note TEXT);
 CREATE VIEW v_timeline AS SELECT gmt, unix, kind, text, first_doc FROM events ORDER BY unix, id;
 CREATE INDEX events_unix ON events(unix); CREATE INDEX prop_unix ON propellant(unix);
@@ -165,6 +166,16 @@ def noise(l):
     return len(s) <= 3 and not s.isdigit()
 
 
+# Shift reports whose header has no usable period; the periods are those of the neighbouring shifts (S2 starts at 16:00 GMT,
+# S3 at the end of S2; the ascent report ends where FD01_S2 begins).  INFERRED, not read.
+PERIOD_GUESS = {
+    "STS-134 FD01_S1.pdf": ((136, 12, 0), (136, 15, 0)),
+    "STS-134 FD02_S1.pdf": ((137, 8, 15), (137, 16, 0)),
+    "STS-134 FD03_S1.pdf": ((138, 8, 15), (138, 16, 0)),
+    "STS-134 FD06_S1.pdf": ((141, 8, 0), (141, 16, 0)),
+    "STS-134 FD09_S1.pdf": ((144, 8, 0), (144, 16, 0)),
+}
+
 # -------------------------------------------------------------------------------------------------- build
 def build(cache, dbpath):
     if dbpath.exists():
@@ -177,6 +188,9 @@ def build(cache, dbpath):
         text = read_text(p)
         fd, sh = doc_fd_shift(p.name)
         ps, pe, us, ue = period_of(text)
+        if ps is None and p.name in PERIOD_GUESS:            # the header gives "16:yy" or none: the sibling shifts bound it
+            a, b = PERIOD_GUESS[p.name]
+            ps, pe, us, ue = fmt(*a), fmt(*b), unix(*a, 0), unix(*b, 0)
         cur = db.execute("INSERT INTO documents(path,name,kind,fd,shift,period_start,period_end,start_unix,end_unix) VALUES(?,?,?,?,?,?,?,?,?)",
                          (str(p), p.name, doc_kind(p), fd, sh, ps, pe, us, ue))
         did = cur.lastrowid
@@ -484,7 +498,32 @@ SIM_IMPACT = [
 ]
 
 
+# Attitudes and DAP states the documents give.  GMT is the time the document says the state began.
+ATTITUDES = [
+    ((149, 4, 41, 44), "attitude control handover to the Orbiter", None, "ISS CMG control -> Orbiter DAP for the reboost", "FD13_S3 ORBIT 1"),
+    ((149, 4, 47, 32), "14 deg maneuver from the mated TEA to the reboost attitude", None, "starts 04:47:28 in the GNC paragraph", "FD13_S3 ORBIT 2"),
+    ((149, 5, 3, 29), "reboost attitude, configuration 3 (VRCS) burn 14 min", "VRCS", "F5L 713.32 s (7 pulses), F5R 782.16 s (5), L5D 414.76 s (3), R5D 414.4 s (3), R5R 34.8 s (1), L5L 0", "FD13_S3 ORBIT 3"),
+    ((149, 5, 23, 53), "15 deg maneuver back to the mated TEA", None, "complete 06:07:27; max attitude error excursion in the reboost 0.14 deg in pitch", "FD13_S3 ORBIT 4, GNC"),
+    ((149, 5, 54, 19), "DAP B13 for the direct deadband collapse, FREE at 06:07:27", "B13", "ISS CMG momentum peaked about 74 % after handoff", "FD13_S3 Integrated GNC"),
+    ((150, 2, 35, 28), "Orbiter takes control; DAP to Auto for the maneuver to the undock attitude", "Auto", "start of undock preparation", "FD14_S3 ORBIT 1"),
+    ((150, 2, 46, 28), "maneuver to the undock attitude begins (complete 03:18:31)", "Auto", "the MR also dates the table 02:35:28", "FD14_S3 Integrated GNC"),
+    ((150, 3, 20, 21), "DAP B12 (hold) selected", "B12", None, "FD14_S3 Integrated GNC"),
+    ((150, 3, 35, 30), "DAP Free Drift (logic configuration)", "Free", None, "FD14_S3 ORBIT 3"),
+    ((150, 3, 38, 49), "DAP Auto", "Auto", None, "FD14_S3 ORBIT 5"),
+    ((150, 3, 52, 28), "DAP Free Drift (driver configuration), undock - 3 min", "Free", None, "FD14_S3 ORBIT 7"),
+    ((150, 3, 53, 0), "DAP B/ALT/No Low Z", "B/ALT/NoLowZ", "primary drivers on 03:52:41", "FD14_S3 ORBIT 9"),
+    ((150, 3, 55, 22), "undock: +Z pulse L2U R2U", "B/ALT/NoLowZ", "ISS attitude errors at separation -0.14, -0.81, +0.78 deg; 4 DAP B +pitch firings to stop the initial pitch rate", "FD14_S3 ORBIT 10, ODS text"),
+    ((150, 4, 2, 4), "DAP A/Low Z", "A/LowZ", None, "FD14_S3 ORBIT 12"),
+    ((150, 5, 34, 6), "burns in DAP A/Auto/Pri", "A/AUTO/PRI", "'DAP used for all burns was A/Auto/Pri'", "FD14_S3 Integrated GNC"),
+    ((150, 9, 10, 19), "DAP to LVLH for the conclusion of the STORRM DTO", "LVLH", "ExPkg ORB ATT -ZLV +YVV (water dump)", "FD15_S1 ORBIT 23; FD15 Execute Package"),
+    ((150, 11, 43, 18), "MAUI: MNVR (TRK) -ZLV -XVV, TG=2 BV=3 OM=0", "A1/AUTO/VERN", "MAUI TIG planned MET 13/22:46:38; flown 22:46:50 (150/11:43:18)", "FD15 Execute Package"),
+    ((151, 8, 15, 0), "top Earth, tail on the velocity vector; solar beta +15.5 deg", None, "passive thermal paragraph of FD16_S1", "FD16_S1 Passive Thermal"),
+]
+
+
 def curated(db):
+    for (d, h, m, sec), att, dap, note, src in ATTITUDES:
+        db.execute("INSERT INTO attitudes(gmt,unix,attitude,dap,note,source) VALUES(?,?,?,?,?,?)", (fmt(d, h, m, sec), unix(d, h, m, sec), att, dap, note, src))
     for r in DISCREPANCIES:
         db.execute("INSERT INTO discrepancies(topic,value_a,source_a,value_b,source_b,reading) VALUES(?,?,?,?,?,?)", r)
     for r in SIM_IMPACT:
