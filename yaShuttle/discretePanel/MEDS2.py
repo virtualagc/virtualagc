@@ -4137,7 +4137,14 @@ class MDUGLWidget(QOpenGLWidget):
         self.disp.dirty = True
 
     def paintGL(self):
+        if not _BEAT_TRACE:
+            self.disp.renderFrame()
+            return
+        t0 = time.monotonic()
         self.disp.renderFrame()
+        t1 = time.monotonic()
+        _beat_seen('paint gap', t0)
+        _beat_gaps.setdefault('paint render', []).append((t1 - t0) * 1000.0)
 
 
 class VectorDisplay(object):
@@ -14921,8 +14928,12 @@ def main(argv=None):
     fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CoreProfile)
     fmt.setDepthBufferSize(24)
     fmt.setStencilBufferSize(8)
-    fmt.setSamples(4)                 # three.js's `antialias: true`
+    fmt.setSamples(int(os.environ.get("NSTS_MEDS_SAMPLES", "4")))   # three.js's `antialias: true`
     fmt.setSwapBehavior(QSurfaceFormat.SwapBehavior.DoubleBuffer)
+    # NSTS_MEDS_SWAP=0 stops each swap waiting for the display's vertical blank (the
+    # default is 1): a TEST, for a flash that is irregular while the beats are regular.
+    if os.environ.get("NSTS_MEDS_SWAP") not in (None, ""):
+        fmt.setSwapInterval(int(os.environ["NSTS_MEDS_SWAP"]))
     QSurfaceFormat.setDefaultFormat(fmt)
 
     # Its Dock name on macOS, from the display it shows ("CRT1").
