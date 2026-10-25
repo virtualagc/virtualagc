@@ -60,7 +60,12 @@ TARGETS = "/mnt/STORAGE/forClaude/mc1/sts134-targets-undock.txt"
 # jets fired over the span), so the undock held 560-750 lb forward.  655 lb = 297 kg, the middle; the Phase 0 figure
 # (555 lb) was at the bottom of the range.  Aft left at the Phase 0 values: 1,428 / 1,390 lb at 09:00 on the residual
 # scale (1,603 / 1,561 on the loading scale) plus ~100-160 lb per pod of use puts the undock at 1,560-1,740 lb.
-PROP_KG = (297.0, 767.0, 766.0, 1937.0, 1992.0)
+# The Cooper shift reports (FD10-FD15, 2026-10-24) give the PFS % as a series: forward 49.6/47.8 (145/16:10), 37.2/35.8 (149/08:14, after the
+# reboost), 37.0/36.0 (149/16:00), 17.0/15.8 (150/09:18), 16.8/14.6 (150/09:19+).  The reboost's ~135 lb forward (F5L 713 s + F5R 782 s)
+# plus ~110 lb of quiet holds over the 12.4 points since 145/16:10 puts a point at ~21 lb: 37 % is ~770 lb at 149/16:00 and 16.8/14.6 % ~340 lb
+# at 09:00.  The simulated burns from the SEP-config capture to SEP3 now use ~390 lb forward (the TPI fix, 7fce43f80), so the start is
+# 340 + 390 = ~730 lb forward (333 kg); from 14:00 the same route gives 770 less the undock-attitude maneuvers, ~735 lb.
+PROP_KG = (333.0, 767.0, 766.0, 1937.0, 1992.0)
 MASS_KG = 97376.0
 GMT = "2011-05-30T03:52:00"
 IDX_GMT, IDX_DRY, IDX_PROP = 126, 167, 16
