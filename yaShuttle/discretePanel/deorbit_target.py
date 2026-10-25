@@ -159,6 +159,9 @@ def main():
     ap.add_argument("--tff", type=float, default=30.0, help="TIG to EI, minutes")
     ap.add_argument("--runway", type=int, default=1, help="the site file's runway slot")
     ap.add_argument("--max-crossrange", type=float, default=550.0)
+    ap.add_argument("--near-gmt", type=float, default=None,
+                    help="GMT (seconds of the year, as PASS counts them) of the landing wanted: take the pass whose closest approach to the "
+                         "runway is nearest it, not the first -- the opportunity the real flight took (STS-134: orbit 248, 152/06:34:50)")
     a = ap.parse_args()
 
     vd = json.load(open(os.path.join(a.capture, "vehdyn.json")))["vehdyn"]
@@ -190,8 +193,14 @@ def main():
             K = [math.cos(lat_rw) * math.cos(lon_rw), math.cos(lat_rw) * math.sin(lon_rw), math.sin(lat_rw)]
             xr = math.degrees(math.asin(dot(he, K) / norm(he))) * 60.0
             if abs(xr) <= a.max_crossrange:
-                best = prev[-2] + (xr,)
-                break
+                cand = prev[-2] + (xr,)
+                if a.near_gmt is None:
+                    best = cand
+                    break
+                if best is None or abs(cand[4] - a.near_gmt) < abs(best[4] - a.near_gmt):
+                    best = cand
+                if cand[4] > a.near_gmt + 3000.0:
+                    break
         prev = prev[-3:]
     if best is None:
         print("no pass within %.0f n.mi. crossrange in 30 h" % a.max_crossrange)

@@ -863,7 +863,7 @@ class Flight:
         deorbit_target.py, standing in for Mission Control's tracking."""
         cap = os.path.join(self.a.logs, FL["name"] + "-orbit")
         site = os.path.join(PANEL, "..", "yaGPC2", "tools", "sites", "ksc.json")
-        out = subprocess.run([sys.executable, os.path.join(PANEL, "deorbit_target.py"), cap, site],
+        out = subprocess.run([sys.executable, os.path.join(PANEL, "deorbit_target.py"), cap, site] + list(getattr(self, "DEORBIT_ARGS", [])),
                              check=True, capture_output=True, text=True).stdout
         for line in out.strip().splitlines():
             self.say("ground: " + line.strip())
