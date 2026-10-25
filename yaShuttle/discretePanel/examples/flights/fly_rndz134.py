@@ -1358,7 +1358,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    # to Ti is not in the record and is not included.
                    YAGPC_VEHDYN_OMS_USED_LB=st["oms_used"],
                    YAGPC_VEHDYN_RCS_USED_LB=st["rcs_used"],
-                   YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG="10",
+                   YAGPC_RNP="%d,%d" % RNP, YAGPC_VEHDYN_STATELOG=os.environ.get("FLY_STATELOG", "10"),
                    YAGPC_VEHDYN_TARGETS=self.a.targets, YAGPC_VEHDYN_START_REL=rel,
                    YAGPC_MTU_MET_EPOCH="%.3f" % MET_ZERO_UNIX,
                    # every row of the DPS page, not just the title (MEDS2's
@@ -2680,8 +2680,18 @@ wait crt 1 title 2011/ timeout 600
                 break
             order = getattr(self, "null_order", "") or ("zxy" if vgo["z"] < 0 else "xyz")      # the card's order unless the driver says otherwise
             holds = []
+            eff = dict(vgo)
+            couple = getattr(self, "null_couple", None) if under <= 0 else None
+            if couple:
+                # THE THC HOLDS ARE NOT ORTHOGONAL: a -Z hold also pushes +0.2 ft/s along body X per ft/s of Z, and a -X hold +0.2 along Z (truth state, TPI,
+                # tpi-test6: Z 5.8 s gave x +0.57 z -2.91, X 4.75 s gave x -1.29 z +0.26).  Read as a shortfall, the first -X hold taught 0.14 ft/s^2 for a
+                # true 0.27, and the next pass overshot.  Solve the pair together: delivered = [1 kxz; kzx 1] (X, Z) for the main-axis deliveries X, Z.
+                kxz, kzx = couple
+                xr, zr = (vgo[c] if abs(vgo[c]) >= tol else 0.0 for c in "xz")
+                det = 1.0 - kxz * kzx
+                eff["x"], eff["z"] = (xr - kxz * zr) / det, (zr - kzx * xr) / det
             for ax in order:
-                v = vgo[ax]
+                v = eff[ax]
                 if abs(v) < tol:
                     continue
                 key = ("+" if v > 0 else "-") + ax
@@ -2701,8 +2711,21 @@ wait crt 1 title 2011/ timeout 600
             self.thc_moved_check(label)
             self.wait_sim(holds[-1][3] + getattr(self, "null_read_wait", 1.5))       # the last hold runs on after the script ends; a read sooner than PASS's 3.84 s cycle after it is stale
             new = read_vgo() or vgo
+            if os.environ.get("UNDOCK_NULL_PROBE"):      # diagnostic: how VGO settles after a pass (is the first read stale, or is the burn short?)
+                seen = [("%.1f" % (holds[-1][3] + getattr(self, "null_read_wait", 1.5)), new)]
+                for k in range(8):
+                    self.wait_sim(1.0)
+                    r = read_vgo()
+                    seen.append(("+%d" % (k + 1), r))
+                self.say("VGO PROBE (%s) pass %d: " % (label, n) + "; ".join("%s %s" % (t, "%+.2f %+.2f %+.2f" % tuple(r[c] for c in "xyz") if r else "?") for t, r in seen))
+                new = read_vgo() or new
+            if couple:
+                kxz, kzx = couple
+                gx, gz = vgo["x"] - new["x"], vgo["z"] - new["z"]
+                det = 1.0 - kxz * kzx
+                got = {"x": (gx - kxz * gz) / det, "z": (gz - kzx * gx) / det, "y": vgo["y"] - new["y"]}
             for ax, key, v, hold in holds:
-                dv = abs(v - new[ax])
+                dv = abs(got[ax]) if couple else abs(v - new[ax])
                 if dv > 0.03 and under <= 0:        # the same staleness corrupts the learned acceleration: f71a's -X 0.397 -> 0.181, f71b's 0.150 against 0.23-0.24 when measured over a whole hold
                     measured.setdefault(key, []).append(dv / hold)
                     acc[key] = min(max(dv / hold, 0.05), 3.0)
