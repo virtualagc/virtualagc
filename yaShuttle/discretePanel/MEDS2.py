@@ -6599,7 +6599,7 @@ class Screen_DPS(MDUScreen):
         # Only ask for a frame when something is actually blinking.
         if showing[0] > 0:
             if _MEDS_CACHE and not _MEDS_CACHE_FAILED[0]:
-                self.d.blinkPaint = True       # the cached page for the new phase is copied
+                pass        # the display's own edge timer asks for this repaint, once, on the edge
             else:
                 self.d.dirty = True
 
