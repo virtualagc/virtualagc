@@ -54,7 +54,7 @@ on F1U/F2U/F3U, ET separation maneuver 6 s with ten jets, ET photo +X 10 s, OMS-
 **FD1-3 flight (Codex, `fly_fd13.py`).**  The burn table in the database is acceptance data: NC1 66.7 s / 93.6 fps,
 NC2 14.4 s / 11.2 (right engine, interconnect from 137/05:39:00), NC3 an RCS +X burn 11.5 s / 2.7 fps on the right
 interconnect, NC4 138/06:07:27.4 10.6 s / 8.2, Ti 07:38:13 10.8 s / 8.6, MC1 0.54, MC2 0.96, MC4 1.7 fps, RPM
-09:15:31.  Sent to Codex by mailbox (message 163).
+09:15:31.  Sent to Codex by mailbox (message 163) and as `/mnt/STORAGE/forClaude/cooper/sts134-fd1-3-cooper.json` (message 165: burns, events, orbits, propellant, consumables, thrusters, discrepancies and sim_impact for liftoff to 138/12:00).  Codex's `fly_fd13.py` carries the NC1-NC4 table; its use of the rest is for Codex to say (message 171).
 
 **Docking.**  Contact 138/10:13:52 (the daily's 1:13:52 is a typo), hook drive 10:22:52, hard mate 10:26:47, Ku
 RADAR on at 06:53:26 with the ISS acquired at 140,000 ft and back to COMM at 09:54:24 at 147 ft.
@@ -74,36 +74,36 @@ use, 462 lb forward in the demo run and 414 lb with the VGO-nulling fix, sits at
 blocker: MAUI (150/11:43:18; four firings totalling 144 s, direction and split unknown; 144 s of two aft jets would be
 38 ft/s), the RCS hot-fire (151/03:30:57, procedure not in hand), the FCS checkout, the water dumps and FES dumps
 (no model; about 0.3 % of the mass), FRCS drivers off at 150/11:50:46 (no panel control).  The payload bay doors are
-closed throughout in the simulation, so their closing at 152/02:48:24 and 02:49:45 is not a state change.
+closed throughout in the simulation, so their closing at 152/02:48:24 and 02:49:45 is not a state change.  Flown as `coast-3`, `coast-4` and `coast-5` (the simulator's hard 20,000 s wall-clock limit stopped the first two, which resumed from their own 4-hour checkpoints; `FLY_DURATION` now lifts it): SEP3 to 152/01:29:03 at 2 to 3 times real time, PASS's orbiter position error 1.6 kft at the last check before the uplinks and 1.45 ft after them, the RAMBO firings and the water-dump attitude flown.  The ORBIT capture `sts134r-orbit` (152/01:32:39, 96,829 kg, osculating orbit 188.8 x 183.4 n.mi. above the equatorial radius) starts the deorbit.
 
-**Deorbit, entry, landing (`fly_sts134` phases, driven by `fly_return.py`).**  The ground now designs the burn for the
-opportunity the Orbiter took (orbit 248, KSC 15), from the simulated state: `deorbit_target.py --tff 34.05
---ei-gmt 152/06:03:06 --near-gmt 152/06:34:50 --gamma-ei -1.10`.  Two choices are calibrations to the record: the target
-line's flight-path angle (STS-1's C1 gives EI gamma -1.38 deg and 394 ft/s where STS-134 burned 297 and left 23.2 x 188.5
-n.mi., which implies about -1.17 deg), and the range from EI to the runway (4,438-4,481 n.mi., solved so EI falls at 06:03:06).
+**Deorbit, entry, landing (`fly_sts134` phases, driven by `fly_return.py`).**  The ground designs the burn for the opportunity the Orbiter took (orbit 248, KSC 15) from the simulated state, `deorbit_target.py` standing in for Mission Control.  The flown values it is read against: TIG 152/05:29:03.1, burn 296.9-298.4 ft/s (158.3 s, 6,103 lb), EI 06:03:06, main gear 06:34:50, nose 06:35:00, wheels stop 06:35:33, landing weight 204,463 lb.
 
-Run `deorb-1`, from the earlier physics-carried orbit capture (152/03:32), 2026-10-24:
+*The orbit reference.*  The Mission Report's orbit heights are above a 6,371 km sphere, 3.854 n.mi. below the equatorial radius that the tool prints (TIMELINE-STS134.md, Apsis conventions).  The flown post-burn 188.5 x 23.2 is therefore **184.6 x 19.3 above the equatorial radius**, and the EI flight-path angle it implies is about -1.20 deg (first read as -1.17).  The first runs below were compared with it in the wrong reference.
 
-| | Simulated | Flown (Mission Report) |
-|---|---|---|
-| TIG | 152/05:29:02.4 | 05:29:03.1 |
-| burn delta-V; propellant | 335 ft/s; 6,860 lb at WT 211,123 | 296.9-298.4 ft/s; 6,103 lb |
-| orbit after the burn | 349 x 41 km (188.4 x 22 n.mi.) | 188.5 x 23.2 n.mi. |
-| EI | 06:03:05 | 06:03:06 |
-| main gear touchdown | 06:34:11.9, 211 kt | 06:34:50 |
-| nose gear | 06:34:25.7 | 06:35:00 |
+| Run (all from a physics-carried or coast capture, 2026-10-24/25) | Design TFF / target-line gamma | Burn | TIG | Post-burn orbit (equatorial ref.) | EI gamma | Main gear |
+|---|---|---|---|---|---|---|
+| deorb-1 (r2, 152/03:32) | 34.05 min / -1.10 | 335 ft/s, 6,860 lb | 05:29:02.4 | 188.4 x 22 (truth) | -1.197 | 06:34:11.9, 211 kt |
+| deorb-4 (the coast's own capture, first complete) | 34.05 / -1.10 | 334 ft/s | 05:29:02 | 348 x 40 km (truth) | -1.197 | 06:33:50, 217 kt |
+| deorb-5 | 31.0 / -1.10 | 297.5 ft/s | 05:32:05.6 | 186.9 x 23.9 design; 346 x 37 km truth | -1.181 | 06:33:46, 220 kt; nose 06:34:00; wheels stop about 06:34:49 |
+| deorb-6 (the design in `fly_return.py` now) | 30.0 / -1.14 | 297.9 ft/s (design) | 05:33:05.7 | 186.6 x 21.4 (design) | -1.207 | flown after this was written: see the log |
+| flown | | 296.9-298.4 ft/s | 05:29:03.1 | 184.6 x 19.3 | about -1.20 | 06:34:50; nose 06:35:00; stop 06:35:33 |
 
-EI to touchdown is 31:07 against the flown 31:44.  The 38 ft/s of extra delta-V is the open difference: the orbit
-before the burn is the simulation's own.
+*Why 334, and why TFF is not the flown 34.05 min.*  The burn size follows where on its orbit TIG falls and what apogee the target line asks for.  At TIG this Orbiter's radius (6,722.8 km) is 7.7 km below a post-burn apogee of 190.3 n.mi., so the design needed 283 ft/s retro plus about 180 ft/s radial (root-sum 334); the flown orbit's apogee is about 4 km above its burn radius.  By hand, a tangential burn at apogee from the capture's 188.8 x 183.4 to the flown 184.6 x 19.3 is 293 ft/s, consistent with the flown 297.  Scanning TFF and the target-line angle on the capture (EI pinned at 06:03:06) against the flown burn, orbit and EI angle (scaled 1 ft/s, 1 n.mi., 1 n.mi., 0.01 deg) puts the best at TFF 30.0 / -1.14: the flown burn size, 186.6 x 21.4, EI gamma -1.207.  TIG then falls 4 minutes after the flown one.  Touchdown barely moves with TFF or the EI-to-runway range (about 64 s before the flown 06:34:50 in every run): it is the Orbiter's own orbital phase.  None of this can be closed without the flown pre-burn state, which no document in the cache or the Mission Report gives.
+
+*The tolerance.*  The STS-134 Flight Plan, Final (a one-page overview timeline, launch 2011-04-19 23:48:53 GMT, "14+1+2" days) puts KSC landing at MET 13/17:39; with the two extension days that is 15/17:39, and the flown landing was 15/17:38: the real flight landed one minute from its plan.  Other flown-against-planned differences on the same mission: maximum dynamic pressure 734 psf against 745; FD15 burns SEP2 1.53 against 1.5, NH2 1.83 against 2.0, NSR 2.49 against 2.4, TPI 3.38 against 3.4 ft/s with a 33 s TIG slip; MC2 flown 7.8 minutes after its nominal TIG.  The owner accepted a touchdown 64 s early as close enough (2026-10-25), adding that his own autonomous-landing runs arrive too fast.  End mass in deorb-5 was 93,508 kg = 206,151 lb, 1,688 lb above the documented 204,463 lb (the mass budget is good to about 2,000 lb).
+
+*Three defects found on the way,* all fixed on `undock-model`: `simulatePASS --duration` was a hard 20,000 wall seconds in `fly_rndz134.py` (`FLY_DURATION` is read now); `wait_gmt` slept half the sim-second gap in wall seconds, overshooting by half at rate 3, so the EXEC at TIG-15 s could go in after TIG; and the deorbit never keyed `ITEM 1` (OMS BOTH), while `RCS SEL` from the STORRM burns survived the coast, so PASS planned a 9-minute RCS burn and the OMS never lit (perigee stayed 342 km).
 
 ## Open
 
-- The coast has been flown to the first six hours at the time of writing; the full run (`coast-3`) was started
-  2026-10-24 22:53 and takes about 14 hours.  Its result, and the deorbit from its own capture, are logged in
-  `CLAUDE_LOG.md`.
-- PASS's position drifts about 35 ft/min without an update (340 ft to 2,400 ft in 2.5 h); six-hourly uplinks leave
-  tens of kft before each, and the flight had GPS 2 on throughout.
-- The forward RCS dump after the burn (152/05:45:06.7, 11.04 s) is not flown; its procedure is not in hand.
-- `fly_sts134` still follows the Entry Checklist from TIG-75; the Deorbit Prep checklist (Rev Q) puts OPS 3 at TIG-2:20,
-  IMU/IMU alignment at TIG-1:10 and the PLBD closing at TIG-2:40.
+- PASS's position drifts about 35 ft/min without an update (340 ft to 2,400 ft in 2.5 h); six-hourly uplinks leave a few kft before each, and the flight had GPS 2 on throughout.
+- The forward RCS dump after the burn (152/05:45:06.7, 11.04 s) is not flown; its procedure is not in hand.  MAUI (four primary firings totalling 144 s, direction and split unknown), the RCS hot-fire (151/03:30:57), the FCS checkout, the water and FES dumps and the FRCS driver power-down (150/11:50:46) are not flown either (no procedure or no model).
+- `fly_sts134` still follows the Entry Checklist from TIG-75; the Deorbit Prep checklist (Rev Q) puts OPS 3 at TIG-2:20, IMU/IMU alignment at TIG-1:10 and the PLBD closing at TIG-2:40.
+- The deorbit design against the flown values: the flown pre-burn state is the missing datum.
+- The 0.4-0.65 ft/s bias between delivered and asked delta-V in LVLH X on MC5 and TPI is not explained.
 - Aft start loads (1,691/1,689 lb) come from the mass budget; the PFS scale gives 1,530 +- 200 lb.
+- Codex: message 171 asks which of the FD1-3 data it has applied and what it still needs; unanswered while its FD13 flight runs.
+
+## Side findings from the same sessions (2026-10-25)
+
+The O6 clock froze for 30 s and the MEDS flash was irregular in the owner's demo run.  Measured causes and what was pushed (details in problems.md 8.79-8.81): the X server and the NVS 510 GPU shared with portview, and font metrics and canvas colours that Tk fetched from the X server on every redraw.  `panelO6.py` and `helvetica.py` now cache font metrics and draw new items before deleting the old; `MEDS2.py` follows the wall clock's second for the flash and has a render cache (`NSTS_MEDS_CACHE`) and draw batching (`NSTS_MEDS_BATCH`), on by default since origin/master 3b0bf0182 (`=0` turns them off).  The owner's 30 fps recording of the flash: lit 0.626 s, dark 0.375 s, period 1.000 s, sd 0.030 s over 69 cycles.  The Mac, WSL and Windows 11 peers passed the series (the cache byte-exact everywhere; batching exact on Linux and Windows, 1-2 levels on isolated edge pixels on macOS).  The Windows KVM window-restore is on master as 1412eec.
