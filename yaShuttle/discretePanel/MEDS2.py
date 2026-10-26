@@ -5861,6 +5861,7 @@ class Screen_DPS(MDUScreen):
     def __init__(self, d):
         self.fcw = None
         self.spl = None
+        self._splLate = False     # the GPC reset the line while this echo still held an unfinished entry
         self.bgFCWS = None
         self._blinkOn = None
         self._blinkBeats = 0
@@ -6791,7 +6792,17 @@ class Screen_DPS(MDUScreen):
     def recvKey(self, k):
         if self.spl is None:
             self.spl = SPL({'pollFail': self.data()['pollFail']})
-        self.spl.press(k['gpcCode'])
+        code = k['gpcCode'] & 0x1f
+        # This echo and the IDP's own entry take the same keystroke from the bus on
+        # different threads, so under load the IDP can finish the entry, the GPC
+        # accept it and reset the line (MDUMsg.RESET_SPL) before this echo has seen
+        # the closing PRO/EXEC.  That key then lands on an empty line and is flagged
+        # as illegal -- a flashing ERR over a page that did change (STS-134 undock
+        # demo, 150/03:51:31).  It is the entry's own terminator: swallow it once.
+        late, self._splLate = self._splLate, False
+        if late and not self.spl.line.strip() and (code in TERMINATORS or code in COMMAND_KEYS):
+            return
+        self.spl.press(code)
         self.updateScratchpad()
 
     def init(self):
@@ -12785,6 +12796,7 @@ class MDU(LRU):
         elif tag == MDUMsg.RESET_SPL:
             if scr is not None:
                 if scr.spl is not None:
+                    scr._splLate = bool(scr.spl.line.strip() and not scr.spl.complete and not scr.spl.err)
                     scr.spl.clear()
                 scr.setSyntaxError(False)
                 scr.updateScratchpad()
