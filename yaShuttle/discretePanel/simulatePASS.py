@@ -1431,6 +1431,107 @@ def wslg_redraw_watcher(stop_event, start_scale=1):
                 start_scale = now
 
 
+# WINDOWS FORGETS ITS MONITORS WHEN A KVM SWITCHES AWAY, and when they come
+# back it leaves this run's windows wherever it piled them meanwhile (see
+# windowLayout.win_monitors).  So on Windows a thread remembers, for each
+# arrangement of monitors it has seen this run, where every window of the
+# run was while that arrangement held; when the monitors change to one seen
+# before, the windows are put back where they were in it.  What the owner
+# asked for (2026-10-25): the windows back "where they should have stayed
+# all along" -- and no warning about the KVM, which he knows he used.
+#
+# A RUN STARTED WHILE THE KVM WAS AWAY was sized at start-up for 96 dpi
+# (win_scale), and when the real monitors arrive Windows enlarges its
+# windows by half but not their text.  Nothing here can enlarge the text of
+# a running program: the Tk programs measure their fonts once, and Qt's
+# scale is fixed when MEDS2 starts.  So that is said, once, in this log.
+WIN_SETTLE_S = 3.0              # the monitors arrive in several changes
+WIN_RECHECKS = 3                # polls after a restore that put back what moved again
+
+
+class MonitorMemory(object):
+    """The bookkeeping, apart from Windows so that it can be tested:
+    monitors() gives the arrangement's key (windowLayout.win_monitors),
+    rects() {id: (rect, role)} of the run's windows, put(id, rect, size)
+    moves one.  poll() is called about once a second."""
+
+    def __init__(self, monitors, rects, put, log, now=time.monotonic):
+        self.monitors, self.rects, self.put, self.log, self.now = monitors, rects, put, log, now
+        self.key = monitors()
+        self.start_dpis = set(m[4] for m in self.key or ())
+        self.changed_at = None          # when the key last changed; None while settled
+        self.saved = {}                 # key -> {id: (rect, role)}
+        self.rechecks = 0
+        self.told = set()
+
+    def poll(self):
+        key = self.monitors()
+        t = self.now()
+        if key is None:
+            return
+        if key != self.key:
+            self.key, self.changed_at, self.rechecks = key, t, 0
+            return
+        if self.changed_at is not None:
+            if t - self.changed_at < WIN_SETTLE_S:
+                return
+            self.changed_at = None
+            if key in self.saved:
+                n = self._put_back(key)
+                self.log("the monitors are as they were before; %d window(s) put back where "
+                         "they were then" % n)
+                self.rechecks = WIN_RECHECKS
+            else:
+                # Only monitors finer than the run was sized for: the KVM
+                # going away from a run started with them is not news.
+                dpis = set(m[4] for m in key)
+                if max(dpis) > max(self.start_dpis or {96}) and key not in self.told:
+                    self.told.add(key)
+                    self.log("the monitors are now at %s dpi, but this run sized its windows' "
+                             "text at start-up for %s dpi, and a running program's text "
+                             "cannot be resized; to have it right, save a capture and resume "
+                             "it, or restart, with these monitors present"
+                             % ("/".join(map(str, sorted(dpis))),
+                                "/".join(map(str, sorted(self.start_dpis)))))
+            return
+        if self.rechecks:
+            # A window that took a dpi change on its way back may have been
+            # resized by its toolkit after it was put back; put it back again.
+            self.rechecks -= 1
+            self._put_back(key)
+            return
+        seen = self.rects()
+        if self.monitors() != key:
+            return                      # changed while measuring: not this arrangement's
+        mine = self.saved.setdefault(key, {})
+        mine.update(seen)
+
+    def _put_back(self, key):
+        want = self.saved[key]
+        n = 0
+        for wid, (rect, role) in self.rects().items():
+            if wid not in want or want[wid][0] == rect:
+                continue
+            # NOT THE CAPTION BOX'S SIZE: subtitles.py grows its own height to
+            # the caption, and takes a size it did not ask for as the user's.
+            if self.put(wid, want[wid][0], role != "subtitles") is not None:
+                n += 1
+        return n
+
+
+def win_monitor_watcher(stop_event):
+    """Thread: MonitorMemory for this run's windows, once a second."""
+    pids = lambda: windowLayout.descendants(os.getpid())
+    mem = MonitorMemory(windowLayout.win_monitors,
+                        lambda: windowLayout.win_outer_rects(pids()),
+                        windowLayout.win_set_outer, log)
+    while not stop_event.wait(1.0):
+        try:
+            mem.poll()
+        except Exception as e:                  # never let the watcher end the run
+            log("monitor watcher: %s" % e)
+
+
 def left_inset():
     """How far in from the screen's left edge a window may start, in points
     (macOS only): the Dock's width when it is on the left, else 0.  macOS
@@ -2676,6 +2777,9 @@ def main():
             log("released: the vehicle is running")
         if wsl:
             threading.Thread(target=wslg_redraw_watcher, args=(stop_event, wslg_raw),
+                             daemon=True).start()
+        if os.name == "nt":
+            threading.Thread(target=win_monitor_watcher, args=(stop_event,),
                              daemon=True).start()
         if args.keys:
             threading.Thread(target=send_keys_thread,
