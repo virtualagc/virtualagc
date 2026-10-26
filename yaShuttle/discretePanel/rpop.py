@@ -1494,10 +1494,11 @@ def main(argv=None):
     ap.add_argument("--met-zero", default=MET_ZERO, metavar="DDD/HH:MM:SS",
                     help="GMT of MET zero (default STS-134's, %s)" % MET_ZERO)
     ap.add_argument("--seed", type=int, default=134, help="the instruments' noise seed")
-    ap.add_argument("--predictor", choices=("hold", "coast"), default="hold",
+    ap.add_argument("--predictor", choices=("hold", "coast"), default=os.environ.get("NSTS_RPOP_PREDICTOR", "hold"),
                     help="what the predictors assume: hold (default) the relative velocity, a "
                          "straight line; coast, no thrust (Clohessy-Wiltshire, which curves); "
-                         "also in RPOP Configuration")
+                         "also in RPOP Configuration; the environment variable NSTS_RPOP_PREDICTOR sets the "
+                         "default, for a run whose RPOP is started by simulatePASS")
     ap.add_argument("--snapshot", metavar="PNG", help="save the window after --snapshot-after s and exit")
     ap.add_argument("--snapshot-after", type=float, default=5.0, metavar="S")
     args = ap.parse_args(argv)
