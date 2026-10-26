@@ -76,13 +76,14 @@ class Return(U.Undock):
     # The target line is the one that reproduces the flown post-burn orbit (23.2 x 188.5 n.mi. above a 6,371 km sphere = 19.3 x 184.6 above the equatorial radius,
     # the reference deorbit_target.py prints -> EI gamma about -1.20 deg, not the -1.17 first read; STS-1's C1 gives -1.38 and
     # 394 ft/s where the flight burned 297), and EI is put at the flown 06:03:06 by the range from EI to the runway (REI solved, 4,438 n.mi.).
-    # TFF 31.0, NOT the flown 34.05: this Orbiter's own orbit (188.8 x 183.4 n.mi. at the capture) is not the flown one, and the burn size is very
-    # sensitive to where on the orbit TIG falls (the post-burn apogee sits above the radius at TIG, so the burn needs a radial part).  Scanned on
-    # deorb-4's capture (gamma_t -1.10, EI pinned at 06:03:06): TFF 34.05 gives 334 ft/s and 190.3 x 24.4; 31.0 gives 297.5 ft/s (flown 296.9-298.4),
-    # 186.9 x 23.9, EI gamma -1.181 (the flown orbit implies -1.17) and TIG 05:32:05.6, 3 min after the flown 05:29:03.1.  The propellant then matches
-    # too (6,103 lb flown), so the landing weight comes to the documented 204,463 lb.  The along-track phase of this orbit puts touchdown 50-60 s
-    # before the flown 06:34:50 whatever is chosen here (TD barely moves with TFF or REI).
-    DEORBIT_ARGS = ["--tff", "31.0", "--gamma-ei", "-1.10", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
+    # TFF 30.0 and gamma_t -1.14, NOT the flown 34.05: this Orbiter's own orbit (188.8 x 183.4 n.mi. at the capture) is not the flown one, and the burn
+    # size is very sensitive to where on the orbit TIG falls (the post-burn apogee sits above the radius at TIG, so the burn needs a radial part).
+    # The flown post-burn orbit, in the reference the tool prints (equatorial radius), is 184.6 x 19.3 n.mi. (the Mission Report's 188.5 x 23.2 is above
+    # a 6,371 km sphere), its burn 296.9-298.4 ft/s, its EI gamma about -1.20.  Scanned on deorb-4's capture with EI pinned at 06:03:06 against those four
+    # (scaled 1 ft/s, 1 n.mi., 1 n.mi., 0.01 deg): TFF 30.0 / -1.14 gives 297.9 ft/s, 186.6 x 21.4, EI gamma -1.207, TIG 05:33:05.7 (flown 05:29:03.1,
+    # the orbit's own phase); the earlier TFF 31.0 / -1.10 gave 297.5, 186.9 x 23.9, -1.181, TIG 05:32:05.6.  Touchdown barely moves with TFF or REI
+    # (about 64 s before the flown 06:34:50 either way).
+    DEORBIT_ARGS = ["--tff", "30.0", "--gamma-ei", "-1.14", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
                     "--near-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 34 * 60.0 + 50.0)]
     RAMBO_PULSES = 3
     RAMBO_S = 10.0
