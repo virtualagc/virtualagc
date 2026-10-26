@@ -73,7 +73,8 @@ class Return(U.Undock):
     # THE OPPORTUNITY THE ORBITER TOOK: orbit 248, KSC 15, wheels stopped 152/06:35:33, main gear 06:34:50 (Mission Report); TIG to EI
     # 34:03 (TIG 05:29:03, EI 06:03:06).  The pass is chosen by its closest approach to the runway nearest that landing; the burn is
     # then designed from the simulated state, the ground's way (deorbit_target.py), so TIG and the burn differ by the run's dispersion.
-    # The target line is the one that reproduces the flown post-burn orbit (23.2 x 188.5 n.mi. -> EI gamma -1.17 deg; STS-1's C1 gives -1.38 and
+    # The target line is the one that reproduces the flown post-burn orbit (23.2 x 188.5 n.mi. above a 6,371 km sphere = 19.3 x 184.6 above the equatorial radius,
+    # the reference deorbit_target.py prints -> EI gamma about -1.20 deg, not the -1.17 first read; STS-1's C1 gives -1.38 and
     # 394 ft/s where the flight burned 297), and EI is put at the flown 06:03:06 by the range from EI to the runway (REI solved, 4,438 n.mi.).
     # TFF 31.0, NOT the flown 34.05: this Orbiter's own orbit (188.8 x 183.4 n.mi. at the capture) is not the flown one, and the burn size is very
     # sensitive to where on the orbit TIG falls (the post-burn apogee sits above the radius at TIG, so the burn needs a radial part).  Scanned on

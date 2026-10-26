@@ -162,7 +162,7 @@ def main():
     ap.add_argument("--gamma-ei", type=float, default=None,
                     help="the inertial flight-path angle at EI the target line is to give, degrees (negative): C1 is set so that VR = C1 + C2 VH is "
                          "VH tan(gamma) at VH 25,830 ft/s.  The default C1 15310 (STS-1) gives -1.38 deg here; STS-134's own burn (296.9 ft/s, 23.2 x 188.5 n.mi. "
-                         "after it, JSC-37461) implies -1.17")
+                         "after it, JSC-37461: heights above a 6,371 km sphere, so 19.3 x 184.6 above the equatorial radius) implies about -1.20")
     ap.add_argument("--ei-gmt", type=float, default=None,
                     help="GMT (s of the year) wanted for entry interface: REI is adjusted until EI is there (STS-134: 152/06:03:06); --rei is then only the start")
     ap.add_argument("--near-gmt", type=float, default=None,
@@ -256,7 +256,7 @@ def main():
     a_ = 1.0 / (2.0 / rn - dot(vdd, vdd) / MU)
     e_ = norm(add(scale(dot(vdd, vdd) / MU - 1.0 / rn, rt), scale(-dot(rt, vdd) / MU, vdd)))
     print("TIG GMT %s  (%.1f s after the capture)" % (fmt_gmt(gt), gt - vd[126]))
-    print("  post-burn orbit %.1f x %.1f n.mi. above the equatorial radius, osculating (STS-134 flew 188.5 x 23.2 above the ellipsoid)"
+    print("  post-burn orbit %.1f x %.1f n.mi. above the equatorial radius, osculating (STS-134 flew 188.5 x 23.2 above a 6,371 km sphere = 184.6 x 19.3 above the equatorial radius)"
           % ((a_ * (1 + e_) - RE) / NMI, (a_ * (1 - e_) - RE) / NMI))
     print("  C1 %.0f  C2 %+.4f  HT %.3f  THETA T %.3f   (items 14, 15, 16, 17)" % (C1, C2, HT, theta))
     print("  impulsive dV %.1f ft/s; coast to EI %.2f min" % (dv, tfree / 60.0))
