@@ -52,13 +52,17 @@ from PyQt6.QtGui import QSurfaceFormat, QColor
 # draws the flash)?  A line each minute: count, mean, 99th percentile and
 # longest gap, in ms, for each end.  Off unless asked for.
 _BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
-_MEDS_CACHE = bool(os.environ.get("NSTS_MEDS_CACHE")) and os.environ.get("NSTS_MEDS_CACHE") != "0"
+# ON BY DEFAULT (owner, 2026-10-25, after the Mac, WSL and Windows 11 peer pass): NSTS_MEDS_CACHE=0 and
+# NSTS_MEDS_BATCH=0 restore the old paths.  The cache is byte-exact on all three platforms; the batch can differ
+# by 1-2 levels on isolated glyph-edge pixels on macOS (float rounding of the pre-transformed vertices).
+_MEDS_CACHE = os.environ.get("NSTS_MEDS_CACHE", "1") not in ("", "0")
 _MEDS_CACHE_FAILED = [False]
 if os.environ.get("NSTS_MEDS_SWITCH"):
     # NSTS_MEDS_SWITCH=0.0005: how often (s) Python offers the interpreter lock to a waiting
     # thread (default 0.005).  A test for a GUI thread starved by the bus-pump thread.
     sys.setswitchinterval(float(os.environ["NSTS_MEDS_SWITCH"]))
-_MEDS_BATCH = bool(os.environ.get("NSTS_MEDS_BATCH")) and os.environ.get("NSTS_MEDS_BATCH") != "0"
+_MEDS_BATCH = os.environ.get("NSTS_MEDS_BATCH", "1") not in ("", "0")
+_MEDS_BATCH_FAILED = [False]
 _beat_last = {}
 _beat_gaps = {}
 _beat_report = [0.0]
@@ -3608,9 +3612,14 @@ class GLRenderer(object):
         nObj = len(opaque) + len(transparent)
         nDraw = 0
         for lst in (opaque, transparent):
-            if _MEDS_BATCH:
+            if _MEDS_BATCH and not _MEDS_BATCH_FAILED[0]:
                 _tb = time.perf_counter()
-                lst = self._batched(lst, temp)
+                try:
+                    lst = self._batched(lst, temp)
+                except Exception:
+                    _MEDS_BATCH_FAILED[0] = True      # draw this frame, and every later one, object by object
+                    traceback.print_exc()
+                    print("MEDS2: NSTS_MEDS_BATCH failed; drawing every object separately again", flush=True)
                 if _BEAT_TRACE:
                     _beat_gaps.setdefault('frame merge', []).append((time.perf_counter() - _tb) * 1000.0)
             nDraw += len(lst)
