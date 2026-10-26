@@ -1749,6 +1749,8 @@ SPL_LAST = SPL_LENGTH - 1       # ...and the last is never filled
 SPL_MAX = 39                    # characters, the leading blank included
 SPL_MAX_POLL_FAIL = 29          # ...when POLL FAIL shares the line
 ERR_TEXT = ' ERR '
+SPL_HOLD_MS = 250                # the closing key stays on the line this long after a GPC reset that beat it
+SPL_HOLD_LATE_MS = 600          # ...and a held reset that its key never follows is applied after this long
 
 # What each key draws.  ACK, MSG RESET and CLEAR have no entry.
 KEY_LABEL = {}
@@ -5861,7 +5863,8 @@ class Screen_DPS(MDUScreen):
     def __init__(self, d):
         self.fcw = None
         self.spl = None
-        self._splLate = False     # the GPC reset the line while this echo still held an unfinished entry
+        self._splHoldId = 0
+        self._splHeld = False     # a GPC reset of the line is being held until the entry's closing key is echoed
         self.bgFCWS = None
         self._blinkOn = None
         self._blinkBeats = 0
@@ -6794,16 +6797,42 @@ class Screen_DPS(MDUScreen):
             self.spl = SPL({'pollFail': self.data()['pollFail']})
         code = k['gpcCode'] & 0x1f
         # This echo and the IDP's own entry take the same keystroke from the bus on
-        # different threads, so under load the IDP can finish the entry, the GPC
-        # accept it and reset the line (MDUMsg.RESET_SPL) before this echo has seen
-        # the closing PRO/EXEC.  That key then lands on an empty line and is flagged
-        # as illegal -- a flashing ERR over a page that did change (STS-134 undock
-        # demo, 150/03:51:31).  It is the entry's own terminator: swallow it once.
-        late, self._splLate = self._splLate, False
-        if late and not self.spl.line.strip() and (code in TERMINATORS or code in COMMAND_KEYS):
-            return
+        # different threads, so the IDP can finish the entry, the GPC accept it and
+        # reset the line (MDUMsg.RESET_SPL) before this echo has seen the closing
+        # PRO/EXEC.  resetSpl() then holds the reset: the closing key is echoed, so
+        # the entry is seen complete, as on the real unit (which shows SPEC 33 PRO
+        # until the GPC answers), and the line clears a moment later.
+        held = self._splHeld
         self.spl.press(code)
         self.updateScratchpad()
+        if held:
+            if code in TERMINATORS or code in COMMAND_KEYS:
+                hid = self._splHoldId
+                QTimer.singleShot(SPL_HOLD_MS, lambda: self._splRelease(hid))
+            else:
+                self._splHeld = False
+
+    def resetSpl(self, now=False):
+        """The GPC reset the line.  An entry this echo has not finished (the closing
+        key is still on its way in) keeps its line, up to SPL_HOLD_LATE_MS, so the
+        key can be echoed first."""
+        spl = self.spl
+        if spl is not None and not now and spl.line.strip() and not spl.complete and not spl.err:
+            self._splHeld = True
+            self._splHoldId += 1
+            hid = self._splHoldId
+            QTimer.singleShot(SPL_HOLD_LATE_MS, lambda: self._splRelease(hid))
+            return
+        self._splHeld = False
+        if spl is not None:
+            spl.clear()
+        self.setSyntaxError(False)
+        self.updateScratchpad()
+
+    def _splRelease(self, hid):
+        # a timer of a hold that a later key or reset has already ended does nothing
+        if self._splHeld and hid == self._splHoldId:
+            self.resetSpl(True)
 
     def init(self):
         self.fcw = FCW()
@@ -12795,11 +12824,7 @@ class MDU(LRU):
                         t.redraw()
         elif tag == MDUMsg.RESET_SPL:
             if scr is not None:
-                if scr.spl is not None:
-                    scr._splLate = bool(scr.spl.line.strip() and not scr.spl.complete and not scr.spl.err)
-                    scr.spl.clear()
-                scr.setSyntaxError(False)
-                scr.updateScratchpad()
+                scr.resetSpl()
             t.redraw()
 
     def _pollHeard(self):
