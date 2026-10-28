@@ -146,6 +146,21 @@ static const Valve V[] = {
                                      { 'A', U(1)|U(2)|U(3)|U(4), 15, 0, 0x0800 } },
       { { 'A', U(1)|U(2)|U(3)|U(4), 7, 0, 0x0800 }, { 'A', U(1)|U(2)|U(3)|U(4), 15, 0, 0x1000 } },
       false, false, 5.0, 0.3, { { 'A', U(1)|U(2)|U(3)|U(4), 23, 0x0002 } }, {{0}} },
+    /* THE MPS TVC ISOLATION VALVES 1-3, which put hydraulic pressure on the main engines' gimbal actuators for the
+     * SSME reposition to the drag-chute position in OPS 3 (GSHHYD.hal GSH.2-GSH.4, from a ground relative velocity
+     * of 3,500 ft/s).  PASS commands them open (an enable and an open bit, FA k for valve k), reads the OPEN
+     * indicator 5 s later (GSH_TVC_VLV_OP_DLY_TIME), and takes a valve whose indicator is off as its hydraulic
+     * system unavailable: with these unreported every system was unavailable, the reposition was stopped and the
+     * crew got "SSME REPOS FAIL".  Open: DSCRT3 (3;14) FA1 card 7 ch 2, DSCRT6 (1;16) FA2 card 12 ch 0, DSCRT8 (2;16)
+     * FA3 card 15 ch 1; close the next bit up; indicators SEG5 DSCRT5 (16) on FA1, DSCRT8 (9) on FA2, DSCRT7 (2) on
+     * FA3 (HFE read words 22, 25, 24).  The stroke is an estimate.  Last in the table, so that a capture saved
+     * before they existed still loads (valve_load). */
+    { "MPS TVC ISOL VALVE 1", { { 'A', U(1), 7, 2, 0x0004 } }, { { 'A', U(1), 7, 2, 0x0008 } },
+      false, false, 1.0, 0.0, { { 'A', U(1), 22, 0x0001 } }, {{0}} },
+    { "MPS TVC ISOL VALVE 2", { { 'A', U(2), 12, 0, 0x0001 } }, { { 'A', U(2), 12, 0, 0x0002 } },
+      false, false, 1.0, 0.0, { { 'A', U(2), 25, 0x0080 } }, {{0}} },
+    { "MPS TVC ISOL VALVE 3", { { 'A', U(3), 15, 1, 0x0001 } }, { { 'A', U(3), 15, 1, 0x0002 } },
+      false, false, 1.0, 0.0, { { 'A', U(3), 24, 0x4000 } }, {{0}} },
 };
 #define NV (int)(sizeof V / sizeof V[0])
 
@@ -218,9 +233,9 @@ int valve_save(double *b, int max) {
 }
 
 void valve_load(const double *b, int n) {
-    if (n != NV) return;
+    if (n < 1 || n > NV) return;
     started = true;
-    for (int i = 0; i < NV; i++) pos[i] = b[i];
+    for (int i = 0; i < NV; i++) pos[i] = i < n ? b[i] : V[i].padPos;     /* a capture from a shorter table: the rest at their pad state */
     lastT = -1.0;
 }
 

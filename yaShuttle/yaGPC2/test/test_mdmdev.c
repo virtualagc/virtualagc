@@ -30,6 +30,7 @@
 #include "../src/mdmdev.h"
 #include "../src/startrk.h"
 #include "../src/startable.h"
+#include "../src/valvemodel.h"
 #include <math.h>
 
 static struct MtuModel *m;
@@ -145,6 +146,12 @@ static double st_ang(const double a[3], const double b[3]) {
     double c = (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]) /
                sqrt((a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) * (b[0] * b[0] + b[1] * b[1] + b[2] * b[2]));
     return acos(c > 1 ? 1 : c < -1 ? -1 : c) * 180.0 / 3.14159265358979323846;
+}
+
+/* The output words the valve model reads, for the TVC isolation valve test below: set by unit/card/channel. */
+static uint16_t tvc_out[5][16][3];
+static uint16_t tvc_src(char mdm, int unit, unsigned card, unsigned ch) {
+    return (mdm == 'A' && unit >= 1 && unit <= 4 && card < 16 && ch < 3) ? tvc_out[unit][card][ch] : 0;
 }
 
 int main(void) {
@@ -901,6 +908,41 @@ int main(void) {
         char file[600];
         snprintf(file, sizeof file, "%s/vehdyn.json", dir);
         if (remove(file) != 0 || rmdir(dir) != 0) printf("could not remove %s\n", dir);
+    }
+
+    /* THE MPS TVC ISOLATION VALVES (GSHHYD.hal GSH.2-GSH.4): PASS opens them for the SSME reposition and reads the
+     * three OPEN indicators 5 s later; with them reading off all three hydraulic systems were unavailable and the
+     * crew got "SSME REPOS FAIL".  FA k's open command drives valve k and its close command shuts it; the
+     * indicators are FA1 word 22 bit 16, FA2 word 25 bit 9 and FA3 word 24 bit 2 (HFE read). */
+    {
+        uint16_t u1[54] = {0}, u2[54] = {0}, u3[54] = {0};
+        valve_set_output_source(tvc_src);
+        valve_update(5000.0);
+        valve_inputs('A', 1, u1, 54); valve_inputs('A', 2, u2, 54); valve_inputs('A', 3, u3, 54);
+        check((u1[22] & 0x0001u) == 0 && (u2[25] & 0x0080u) == 0 && (u3[24] & 0x4000u) == 0,
+              "tvc isolation valves: no open indication at rest");
+        tvc_out[1][7][2] = 0x0004u; tvc_out[2][12][0] = 0x0001u; tvc_out[3][15][1] = 0x0001u;     /* ENA & OPEN */
+        valve_update(5000.0 + 0.5);
+        memset(u1, 0, sizeof u1);
+        valve_inputs('A', 1, u1, 54);
+        check((u1[22] & 0x0001u) == 0, "tvc isolation valve 1: not open half way through its stroke");
+        valve_update(5000.0 + 5.0);
+        memset(u1, 0, sizeof u1); memset(u2, 0, sizeof u2); memset(u3, 0, sizeof u3);
+        valve_inputs('A', 1, u1, 54); valve_inputs('A', 2, u2, 54); valve_inputs('A', 3, u3, 54);
+        check((u1[22] & 0x0001u) != 0 && (u2[25] & 0x0080u) != 0 && (u3[24] & 0x4000u) != 0,
+              "tvc isolation valves 1-3 read OPEN 5 s after the open command");
+        tvc_out[1][7][2] = 0x0008u; tvc_out[2][12][0] = 0x0002u; tvc_out[3][15][1] = 0x0002u;     /* ENA & CLOSE */
+        valve_update(5000.0 + 10.0);
+        memset(u1, 0, sizeof u1); memset(u2, 0, sizeof u2); memset(u3, 0, sizeof u3);
+        valve_inputs('A', 1, u1, 54); valve_inputs('A', 2, u2, 54); valve_inputs('A', 3, u3, 54);
+        check((u1[22] & 0x0001u) == 0 && (u2[25] & 0x0080u) == 0 && (u3[24] & 0x4000u) == 0,
+              "tvc isolation valves read not-open after the close command");
+        /* a capture from before they existed: the shorter list loads and the new valves stand closed */
+        double sv[512];
+        int n = valve_save(sv, 512);
+        valve_load(sv, n - 3);
+        check(valve_open_fraction("MPS TVC ISOL VALVE 1") == 0.0 && valve_open_fraction("L RCS TK ISOL 1/2") == sv[0],
+              "valve table: a capture saved before the TVC valves loads, and they stand closed");
     }
 
     mtumodel_free(m);
