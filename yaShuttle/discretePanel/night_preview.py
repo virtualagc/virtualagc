@@ -30,6 +30,15 @@ useful range (past it things still work, but are blown out, invisible or slow):
                            lamp fades from the display's white at about 5 km)
     hirl_spacing_m 45.7    the runway edge lamps' spacing (the FAA's maximum is 61): 15 - 100 (under 10 is slow)
     approach_rows 5        the amber approach rows (the photographs show 3 or 5): 1 - 9
+    edge_elev_deg 10       the edge lamps shine across the runway, this far above the horizontal: 0 - 45
+    edge_n 3               their beam, cos^N off that axis (3 = 40 deg to half power, 10 = 22, 0 = every way): 0 - 30
+    edge_spill 0.02        what they send every way, as a fraction of the beam's peak (what is seen from far off): 0 - 0.3
+    center_elev_deg 75     the centreline lamps' axis, above the horizontal, tilted toward the approach: 0 - 90
+    center_n 6             their beam: 0 - 30
+    center_spill 0.01      their leak: 0 - 0.3
+    approach_elev_deg 25   the approach lamps' axis, above the horizontal, tilted toward the approach: 0 - 90
+    approach_n 20          their beam (20 = 8 deg to half power): 0 - 60
+    approach_spill 0.01    their leak: 0 - 0.3
     night_terrain 0.1      the moonless terrain glow, a fraction of an overhead full Moon's: 0 (flat black) - 1
     show                   the values now;  quit
 """
