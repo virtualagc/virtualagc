@@ -12972,8 +12972,16 @@ class MDU(LRU):
             return
         self._fcFieldsJson = js
         self.fcFields = fields
+        mm = fields.get('majorMode')
+        if mm is not None:
+            # ORBIT PFD gives way to the A/E PFD as the flight software enters MM 304 (once: the crew may reselect it)
+            if mm == 304 and self._lastMM not in (None, 304) and self.curDisplay == 'ORBIT_PFD':
+                self.setCurrentDisplay('AE_PFD', 1)
+            self._lastMM = mm
         if self.curDisplay in self.PFD_SCREENS:
             self._fcApply(self.curDisplay)
+
+    _lastMM = None
 
     def _fcApply(self, scrName):
         """A PFD screen takes the selected bus's fields: when shown, and when
