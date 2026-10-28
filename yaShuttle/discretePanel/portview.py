@@ -2589,6 +2589,12 @@ FLOOD_HEIGHT_M = 3.0
 FLOOD_BACK_M = 20.0                                                 # and this far before the threshold
 FLOOD_SPILL = 1.0e-3                                                # the light a lamp sends every way, as a fraction of its peak (seen from behind)
 FLOOD_VISIBLE = 1                                                   # the lamps drawn as points (0: only their light on the ground)
+# How each kind of lamp is aimed (the owner's reading of the photographs: the edge lamps shine across the runway, the
+# centreline and approach lamps mostly upward, none with much light to be seen from miles off): the elevation of the beam
+# axis above the horizontal, the beam (cos^N of the angle off the axis) and the fraction sent every way.
+EDGE_ELEV_DEG, EDGE_N, EDGE_SPILL = 10.0, 3.0, 0.02                 # axis: across the runway, inward
+CENTER_ELEV_DEG, CENTER_N, CENTER_SPILL = 75.0, 6.0, 0.01           # axis: up, tilted toward the approach
+APPROACH_ELEV_DEG, APPROACH_N, APPROACH_SPILL = 25.0, 20.0, 0.01    # axis: up and toward the approach
 FLOOD_TILT_DEG = 0.3                                                # and aimed this far below the horizontal there
 FLOOD_GAIN = float(os.environ.get("NSTS_FLOOD_GAIN", "0.03"))       # display per lux of a unit albedo / pi (the Moon's is 1.68: the camera's exposure, not the eye's)
 LUX_MAG0 = 2.54e-6
@@ -2619,14 +2625,21 @@ class SlfLights(object):
         L = []                                                           # (pos, colour, candela, aim, n)
         white, warm, green, red, amber = ((1.0, 0.95, 0.85), (1.0, 0.85, 0.6), (0.15, 1.0, 0.3), (1.0, 0.1, 0.05),
                                            (1.0, 0.6, 0.18))
+        def lamp(pos, col, cd, aim, n, spill):                           # a beam, and what leaks every way
+            L.append((pos, col, cd, aim, n))
+            if spill > 0.0:
+                L.append((pos, col, cd * spill, aim, 0.0))
+        el = lambda deg: (math.cos(math.radians(deg)), math.sin(math.radians(deg)))
+        ce, se = el(EDGE_ELEV_DEG)
         s = 0.0
-        while s <= length + 1e-6:                                       # edge lamps, both ways
+        while s <= length + 1e-6:                                       # edge lamps, across the runway
             for side in (-1.0, 1.0):
-                L.append((t + s * u + side * (half + 1.5) * v + 0.4 * up, white, 8000.0, u, -3.0))
+                lamp(t + s * u + side * (half + 1.5) * v + 0.4 * up, white, 8000.0, -side * v * ce + up * se, EDGE_N, EDGE_SPILL)
             s += HIRL_SPACING_M
+        cc, sc = el(CENTER_ELEV_DEG)
         s = CENTERLINE_SPACING_M / 2.0
         while s < length:                                                # centreline, in the pavement
-            L.append((t + s * u + 0.05 * up, warm, 400.0, u, -5.0))
+            lamp(t + s * u + 0.05 * up, warm, 400.0, -u * cc + up * sc, CENTER_N, CENTER_SPILL)
             s += CENTERLINE_SPACING_M
         for k in range(4):                                               # threshold (green) and runway end (red)
             for side in (-1.0, 1.0):
@@ -2634,12 +2647,13 @@ class SlfLights(object):
                 L.append((t - 0.6 * u + lat_off * v + 0.3 * up, green, 1500.0, -u, 6.0))
                 L.append((t + (length + 0.6) * u + lat_off * v + 0.3 * up, red, 800.0, -u, 6.0))
         rows = [(i - (APPROACH_ROWS - 1) / 2.0) * APPROACH_ROW_SPACING_M for i in range(APPROACH_ROWS)]
-        aim = -u * math.cos(math.radians(3.0)) + up * math.sin(math.radians(3.0))
+        ca, sa = el(APPROACH_ELEV_DEG)
+        aim = -u * ca + up * sa
         s = 30.5
         while s <= APPROACH_LENGTH_M:                                    # the approach rows, lamp pairs
             for r in rows:
                 for pair in (-0.6, 0.6):
-                    L.append((t - s * u + (r + pair) * v + 0.4 * up, amber, 3000.0, aim, 30.0))
+                    lamp(t - s * u + (r + pair) * v + 0.4 * up, amber, 3000.0, aim, APPROACH_N, APPROACH_SPILL)
             s += APPROACH_LAMP_SPACING_M
         # eight xenon lamps at the head, two clusters of four 3 m apart, each aimed at the centreline FLOOD_AIM_M
         # down the runway (so the near ground is out of the beam, and the touchdown zone is in it)
@@ -2671,7 +2685,10 @@ LIGHT_KNOBS = {'flood_gain': 'FLOOD_GAIN', 'flood_exp': 'FLOOD_EXP', 'flood_aim_
                'flood_tilt_deg': 'FLOOD_TILT_DEG', 'flood_lat_m': 'FLOOD_LAT_M', 'flood_height_m': 'FLOOD_HEIGHT_M',
                'flood_back_m': 'FLOOD_BACK_M', 'flood_spill': 'FLOOD_SPILL', 'flood_visible': 'FLOOD_VISIBLE',
                'flood_cd': 'FLOOD_CD', 'lamp_gain': 'LAMP_GAIN', 'hirl_spacing_m': 'HIRL_SPACING_M',
-               'approach_rows': 'APPROACH_ROWS', 'night_terrain': 'NIGHT_AMB'}
+               'approach_rows': 'APPROACH_ROWS', 'night_terrain': 'NIGHT_AMB',
+               'edge_elev_deg': 'EDGE_ELEV_DEG', 'edge_n': 'EDGE_N', 'edge_spill': 'EDGE_SPILL',
+               'center_elev_deg': 'CENTER_ELEV_DEG', 'center_n': 'CENTER_N', 'center_spill': 'CENTER_SPILL',
+               'approach_elev_deg': 'APPROACH_ELEV_DEG', 'approach_n': 'APPROACH_N', 'approach_spill': 'APPROACH_SPILL'}
 
 
 def light_tweaks(site):
