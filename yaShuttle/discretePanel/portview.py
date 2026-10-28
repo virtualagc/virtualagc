@@ -1975,6 +1975,10 @@ EARTH_A = 6378137.0                   # PASS's ellipsoid (vehdyn.c; GNKGEO)
 EARTH_F = 1.0 / 298.3
 EARTH_B = EARTH_A * (1.0 - EARTH_F)
 ATMOS_TOP = 100e3                     # m above the ellipsoid
+# The moonless terrain glow is brighter from orbit (NIGHT_AMB_HIGH) than near the ground (EarthLayer.NIGHT_AMB, the landing
+# site): the same glow that is a hint of land from 400 km is too much on the approach.
+NIGHT_AMB_HIGH = float(os.environ.get("NSTS_NIGHT_TERRAIN_HIGH", "0.3"))
+NIGHT_ALT_LO_KM, NIGHT_ALT_HI_KM = 15.0, 80.0
 RAYLEIGH = np.array([5.802e-6, 13.558e-6, 33.1e-6])     # scattering, 1/m
 RAYLEIGH_H = 8000.0
 MIE_SCAT, MIE_EXT, MIE_H, MIE_G = 3.996e-6, 4.440e-6, 1200.0, 0.8
@@ -2540,7 +2544,11 @@ class EarthLayer(object):
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
         GL.glUniform1f(U["uMoonGain"], self.MOON_GAIN)
-        GL.glUniform1f(U["uNightAmb"], self.NIGHT_AMB)
+        # the terrain's night glow: NIGHT_AMB near the ground (the landing site), NIGHT_AMB_HIGH from orbit, between
+        # them by height (smoothly, NIGHT_ALT_LO_KM to NIGHT_ALT_HI_KM above the ellipsoid)
+        t = min(max((float(np.linalg.norm(o_s)) - EARTH_A) / 1000.0 - NIGHT_ALT_LO_KM, 0.0)
+                / max(NIGHT_ALT_HI_KM - NIGHT_ALT_LO_KM, 1e-3), 1.0)
+        GL.glUniform1f(U["uNightAmb"], self.NIGHT_AMB + (NIGHT_AMB_HIGH - self.NIGHT_AMB) * t * t * (3.0 - 2.0 * t))
         GL.glUniform1f(U["uLit"], 1.0)
         slf = slf_lights(res.site) if res.site is not None and RUNWAY_LIGHTS['on'] else None
         GL.glUniform1i(U["uFloodOn"], 1 if slf is not None else 0)
@@ -2685,7 +2693,8 @@ LIGHT_KNOBS = {'flood_gain': 'FLOOD_GAIN', 'flood_exp': 'FLOOD_EXP', 'flood_aim_
                'flood_tilt_deg': 'FLOOD_TILT_DEG', 'flood_lat_m': 'FLOOD_LAT_M', 'flood_height_m': 'FLOOD_HEIGHT_M',
                'flood_back_m': 'FLOOD_BACK_M', 'flood_spill': 'FLOOD_SPILL', 'flood_visible': 'FLOOD_VISIBLE',
                'flood_cd': 'FLOOD_CD', 'lamp_gain': 'LAMP_GAIN', 'hirl_spacing_m': 'HIRL_SPACING_M',
-               'approach_rows': 'APPROACH_ROWS', 'night_terrain': 'NIGHT_AMB',
+               'approach_rows': 'APPROACH_ROWS', 'night_terrain': 'NIGHT_AMB', 'night_terrain_high': 'NIGHT_AMB_HIGH',
+               'night_alt_lo_km': 'NIGHT_ALT_LO_KM', 'night_alt_hi_km': 'NIGHT_ALT_HI_KM',
                'edge_elev_deg': 'EDGE_ELEV_DEG', 'edge_n': 'EDGE_N', 'edge_spill': 'EDGE_SPILL',
                'center_elev_deg': 'CENTER_ELEV_DEG', 'center_n': 'CENTER_N', 'center_spill': 'CENTER_SPILL',
                'approach_elev_deg': 'APPROACH_ELEV_DEG', 'approach_n': 'APPROACH_N', 'approach_spill': 'APPROACH_SPILL'}
