@@ -84,6 +84,7 @@ def main():
     ap.add_argument("--speed-kt", type=float, default=300.0)
     ap.add_argument("--alpha-deg", type=float, default=3.0)
     ap.add_argument("--hold", action="store_true")
+    ap.add_argument("--level", action="store_true", help="the nose level (alpha only), for a low pass over the runway")
     ap.add_argument("--port-base", type=int, default=44700)
     a, extra = ap.parse_known_args()
     extra = [x for x in extra if x != "--"]
@@ -105,7 +106,7 @@ def main():
     gamma = math.radians(19.0)
     v_ms = a.speed_kt * 1852.0 / 3600.0
     run_s = a.dist_nmi * nm / v_ms
-    pitch = -gamma + math.radians(a.alpha_deg)          # nose attitude: along the glide path, plus alpha
+    pitch = math.radians(a.alpha_deg) if a.level else -gamma + math.radians(a.alpha_deg)   # nose: along the glide path plus alpha, or level
     wall0 = time.monotonic()
     veh_t = 0.0
     print("night_preview: portview starting (about a minute to load); the approach to KSC%s, %s UTC, night terrain %.2f"

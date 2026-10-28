@@ -1576,7 +1576,7 @@ class Resources(object):
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
                                "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2",
                                "uHgtOn", "uHgt", "uHgtP", "uPatchHgt", "uSiteEF", "uSiteH",
-                               "uInvR", "uHgtMax")
+                               "uInvR", "uHgtMax", "uFloodPos", "uFloodAim", "uFloodCd", "uFloodExp", "uFloodGain", "uFloodOn")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -2028,6 +2028,10 @@ uniform vec3 uSun;              // the Sun's direction, Earth-fixed
 uniform vec2 uTan;
 uniform sampler2D uDay, uNight, uTrans, uWater;
 uniform float uSunE, uNightGain, uLit, uMoonGain, uNightAmb;
+uniform vec3 uFloodPos[8];          // the Shuttle Landing Facility's xenon floodlights, site east-north-up (m)
+uniform vec3 uFloodAim[8];
+uniform float uFloodCd, uFloodExp, uFloodGain;
+uniform int uFloodOn;
 uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses; moonlight)
 uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
 // A landing site's imagery: four nested rings, finest first.  Rings 0 and 1
@@ -2332,7 +2336,22 @@ void main() {
         // And a faint terrain by starlight and airglow, a fraction of an overhead full Moon's, so that a
         // moonless night still shows the coast, the fields and the runway rather than flat black.
         vec3 ambient = albedo / PI * uNightAmb * uMoonGain;
-        vec3 night = (lights + moonlit + ambient) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
+        // The runway floodlights (8 xenon lamps at the head of the lit runway, aimed along it): each lamp's
+        // candela falls off as a power of the cosine of the angle off its aim, onto the ground by Lambert's law.
+        vec3 flood = vec3(0.0);
+        if (uFloodOn == 1 && uSiteOn == 1) {
+            vec3 pe = uCamEnu + uEfToEnu * rel;
+            float fe = 0.0;
+            for (int i = 0; i < 8; i++) {
+                vec3 tl = uFloodPos[i] - pe;
+                float fd = length(tl);
+                vec3 fw = tl / fd;
+                fe += uFloodCd * pow(max(dot(-fw, uFloodAim[i]), 0.0), uFloodExp) * max(fw.z, 0.0) / (fd * fd);
+            }
+            flood = albedo / PI * fe * uFloodGain;
+        }
+        vec3 night = (lights + moonlit + ambient) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus))
+                     + flood * (1.0 - smoothstep(-0.1, 0.02, mus));
         vec3 surf = (direct + sky + spec * ts) * uSunE * uLit + night;
         color += surf * trans;
         fragColor = vec4(color, 1.0);
@@ -2519,6 +2538,14 @@ class EarthLayer(object):
         GL.glUniform1f(U["uMoonGain"], self.MOON_GAIN)
         GL.glUniform1f(U["uNightAmb"], self.NIGHT_AMB)
         GL.glUniform1f(U["uLit"], 1.0)
+        slf = slf_lights(res.site) if res.site is not None and RUNWAY_LIGHTS['on'] else None
+        GL.glUniform1i(U["uFloodOn"], 1 if slf is not None else 0)
+        if slf is not None:
+            GL.glUniform3fv(U["uFloodPos"], 8, slf.flood_pos.astype(f32))
+            GL.glUniform3fv(U["uFloodAim"], 8, slf.flood_aim.astype(f32))
+            GL.glUniform1f(U["uFloodCd"], FLOOD_CD)
+            GL.glUniform1f(U["uFloodExp"], FLOOD_EXP)
+            GL.glUniform1f(U["uFloodGain"], FLOOD_GAIN)
         for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
                                  (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
             GL.glActiveTexture(GL.GL_TEXTURE0 + unit_)
@@ -2526,6 +2553,161 @@ class EarthLayer(object):
             GL.glUniform1i(U[name], unit_)
         GL.glActiveTexture(GL.GL_TEXTURE0)
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+
+
+# --------------------------------------------------------------------------
+# The Shuttle Landing Facility's lights, for a night landing.  Lamps are points of candela (a direction and a
+# beam), drawn through the star program as magnitudes -- the eye's illuminance I / d^2 in lux, mag 0 being
+# 2.54e-6 lux -- into the Earth's buffer; the xenon floodlights light the ground instead (EARTH_FS, uFlood*),
+# since they point down the runway, away from a pilot on final.  The geometry is from the runway's two threshold
+# I-loads (PASS's navaids) and the FAA's runway lighting standards (ARP quick reference, HIRL runway: edge lamps
+# 0.6-3 m outside the pavement, at most 200 ft apart; eight threshold/end lamps in two groups of four, 3 m
+# apart, green to the approach and red to the runway's far end).  What the photographs of STS-134's landing
+# show, and no document gives, is a judgement here: the HIRL spacing (about the Orbiter's length), the amber
+# approach rows (3 or 5 rows, pairs of lamps across the runway), the lamps' candela.
+
+SLF_THRESHOLDS = {'15': (0.49973583221435547, -1.4085865020751953, 2.6178817749023438),     # lat, lon (rad), landing azimuth
+                  '33': (0.49911224842071533, -1.4081783294677734, 5.7594738006591797)}
+RUNWAY_LIGHTS = {'on': True, 'runway': '15'}
+RUNWAY_WIDTH_M = 91.44                                              # 300 ft
+HIRL_SPACING_M = float(os.environ.get("NSTS_HIRL_SPACING", "45.7"))
+CENTERLINE_SPACING_M = 60.96                                        # 200 ft
+APPROACH_ROWS = int(os.environ.get("NSTS_APPROACH_ROWS", "5"))      # 3 or 5, by the photographs of the era
+APPROACH_ROW_SPACING_M = 15.0
+APPROACH_LAMP_SPACING_M = 30.5
+APPROACH_LENGTH_M = 915.0
+LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "1.0"))
+FLOOD_CD = 1.0e9                                                    # each of the 8 xenon lamps, peak candela
+FLOOD_EXP = float(os.environ.get("NSTS_FLOOD_EXP", "600"))          # beam: cos^600 (about 3 deg to half power)
+FLOOD_AIM_M = 450.0                                                 # each lamp toed in to the centreline this far down the runway
+FLOOD_TILT_DEG = 0.3                                                # and aimed this far below the horizontal there
+FLOOD_GAIN = float(os.environ.get("NSTS_FLOOD_GAIN", "0.03"))       # display per lux of a unit albedo / pi (the Moon's is 1.68: the camera's exposure, not the eye's)
+LUX_MAG0 = 2.54e-6
+
+
+def geodetic_ef(lat, lon, h):
+    e2 = 1.0 - (EARTH_B / EARTH_A) ** 2
+    n = EARTH_A / math.sqrt(1.0 - e2 * math.sin(lat) ** 2)
+    return np.array([(n + h) * math.cos(lat) * math.cos(lon), (n + h) * math.cos(lat) * math.sin(lon),
+                     (n * (1.0 - e2) + h) * math.sin(lat)])
+
+
+class SlfLights(object):
+    """The lit runway's lamps in the site's east-north-up frame (m) and in Earth-fixed: position, colour, peak
+    candela, aim and beam exponent (negative: both ways along the aim, as a runway edge lamp)."""
+
+    def __init__(self, site, runway):
+        lat, lon, hdg = SLF_THRESHOLDS[runway]
+        other = SLF_THRESHOLDS['33' if runway == '15' else '15']
+        to_enu = lambda la, lo: site.ef_to_enu @ (geodetic_ef(la, lo, site.height) - site.ef)
+        t = to_enu(lat, lon)
+        length = float(np.linalg.norm(to_enu(other[0], other[1]) - t))
+        t[2] = 0.0
+        u = np.array([math.sin(hdg), math.cos(hdg), 0.0])               # down the runway
+        v = np.array([math.cos(hdg), -math.sin(hdg), 0.0])              # to the pilot's right
+        up = np.array([0.0, 0.0, 1.0])
+        half = RUNWAY_WIDTH_M / 2.0
+        L = []                                                           # (pos, colour, candela, aim, n)
+        white, warm, green, red, amber = ((1.0, 0.95, 0.85), (1.0, 0.85, 0.6), (0.15, 1.0, 0.3), (1.0, 0.1, 0.05),
+                                           (1.0, 0.6, 0.18))
+        s = 0.0
+        while s <= length + 1e-6:                                       # edge lamps, both ways
+            for side in (-1.0, 1.0):
+                L.append((t + s * u + side * (half + 1.5) * v + 0.4 * up, white, 8000.0, u, -3.0))
+            s += HIRL_SPACING_M
+        s = CENTERLINE_SPACING_M / 2.0
+        while s < length:                                                # centreline, in the pavement
+            L.append((t + s * u + 0.05 * up, warm, 400.0, u, -5.0))
+            s += CENTERLINE_SPACING_M
+        for k in range(4):                                               # threshold (green) and runway end (red)
+            for side in (-1.0, 1.0):
+                lat_off = side * (half - 0.6 - 3.0 * k)
+                L.append((t - 0.6 * u + lat_off * v + 0.3 * up, green, 1500.0, -u, 6.0))
+                L.append((t + (length + 0.6) * u + lat_off * v + 0.3 * up, red, 800.0, -u, 6.0))
+        rows = [(i - (APPROACH_ROWS - 1) / 2.0) * APPROACH_ROW_SPACING_M for i in range(APPROACH_ROWS)]
+        aim = -u * math.cos(math.radians(3.0)) + up * math.sin(math.radians(3.0))
+        s = 30.5
+        while s <= APPROACH_LENGTH_M:                                    # the approach rows, lamp pairs
+            for r in rows:
+                for pair in (-0.6, 0.6):
+                    L.append((t - s * u + (r + pair) * v + 0.4 * up, amber, 3000.0, aim, 30.0))
+            s += APPROACH_LAMP_SPACING_M
+        self.pos = np.array([l[0] for l in L])
+        self.col = np.array([l[1] for l in L], float)
+        self.cd = np.array([l[2] for l in L], float)
+        self.aim = np.array([l[3] for l in L])
+        self.n = np.array([l[4] for l in L], float)
+        self.pos_ef = site.ef + self.pos @ site.ef_to_enu              # rows: (R^T p)^T = p^T R
+        self.aim_ef = self.aim @ site.ef_to_enu
+        # eight xenon lamps at the head, two clusters of four 3 m apart, 3 m up, each aimed at the centreline FLOOD_AIM_M
+        # down the runway (so the near ground is out of the beam, and the touchdown zone is in it)
+        fl, aims = [], []
+        for side in (-1.0, 1.0):
+            for k in range(4):
+                lat_off = side * 55.0 + 3.0 * (k - 1.5)
+                fl.append(t - 20.0 * u + lat_off * v + 3.0 * up)
+                a = (FLOOD_AIM_M + 20.0) * u - lat_off * v - (FLOOD_AIM_M + 20.0) * math.tan(math.radians(FLOOD_TILT_DEG)) * up
+                aims.append(a / np.linalg.norm(a))
+        self.flood_pos = np.array(fl)
+        self.flood_aim = np.array(aims)
+
+
+def slf_lights(site):
+    lights = getattr(site, '_slf', None)
+    if lights is None or lights[0] != RUNWAY_LIGHTS['runway']:
+        lights = site._slf = (RUNWAY_LIGHTS['runway'], SlfLights(site, RUNWAY_LIGHTS['runway']))
+    return lights[1]
+
+
+class LampLayer(PointLayer):
+    """The lit runway's lamps as points in the Earth's buffer (colour 0 only: the transparency target is
+    left as the ground wrote it)."""
+    target = 'earth'
+    MAX_GLARE_DEG = 0.1
+
+    def __init__(self, exposure):
+        super().__init__(exposure, 'lamps')
+
+    def draw(self, res, view, fs):
+        site = res.site
+        if not RUNWAY_LIGHTS['on'] or site is None:
+            return
+        m = fs.m50_to_ef
+        if m is None and fs.unix is not None:
+            m = gmst_matrix(fs.unix)
+        if m is None:
+            return
+        o_ef = m @ view_eye(view, fs)
+        if np.linalg.norm(o_ef - site.ef) > 80e3:
+            return
+        lamps = slf_lights(site)
+        rel = lamps.pos_ef - o_ef
+        d = np.linalg.norm(rel, axis=1)
+        w = rel / d[:, None]
+        cosang = -np.sum(w * lamps.aim_ef, axis=1)
+        factor = np.where(lamps.n < 0.0, np.abs(cosang) ** np.abs(lamps.n), np.clip(cosang, 0.0, 1.0) ** lamps.n)
+        fade = 1.0
+        if fs.sky is not None:
+            sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
+            mus = float(np.dot(site.ef / np.linalg.norm(site.ef), sun))
+            t = min(max((mus + 0.1) / 0.15, 0.0), 1.0)
+            fade = 0.05 + 0.95 * (1.0 - t * t * (3.0 - 2.0 * t))        # lamps in daylight: faint
+        lux = lamps.cd * factor * LAMP_GAIN * fade / (d * d)
+        keep = lux > 1e-12
+        if not np.any(keep):
+            return
+        data = np.empty((int(np.count_nonzero(keep)), 7), np.float32)
+        data[:, 0:3] = (w[keep] @ m) @ J2000_TO_M50                    # J2000, as the star program wants
+        data[:, 3] = -2.5 * np.log10(lux[keep] / LUX_MAG0)
+        data[:, 4:7] = lamps.col[keep]
+        if getattr(res, 'lampVbo', None) is None:
+            res.lampVbo = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, res.lampVbo)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, data.nbytes, data, GL.GL_DYNAMIC_DRAW)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+        GL.glDrawBuffers(1, [GL.GL_COLOR_ATTACHMENT0])
+        self.draw_points(res, view, fs, res.lampVbo, data.shape[0])
+        GL.glDrawBuffers(2, [GL.GL_COLOR_ATTACHMENT0, GL.GL_COLOR_ATTACHMENT1])
 
 
 # --------------------------------------------------------------------------
@@ -3394,6 +3576,10 @@ def main(argv=None):
     ap.add_argument("--night-terrain", type=float, metavar="F", default=EarthLayer.NIGHT_AMB,
                     help="the terrain's glow on a moonless night, as a fraction of an overhead full Moon's "
                          "(default 0.1, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
+    ap.add_argument("--runway-lights", choices=('on', 'off'), default='on',
+                    help="the Shuttle Landing Facility's lights and floodlights at night (default on)")
+    ap.add_argument("--lit-runway", choices=('15', '33'), default='15',
+                    help="the runway whose lights and head-of-runway floodlights are on (default 15)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--thin-gain", type=float, metavar="G",
@@ -3503,6 +3689,7 @@ def main(argv=None):
     site = None
     TERRAIN['on'] = args.terrain == 'on'
     EarthLayer.NIGHT_AMB = args.night_terrain
+    RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway=args.lit_runway)
     MSAA['samples'] = args.msaa
     THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
     if args.site != 'none':
@@ -3567,7 +3754,7 @@ def main(argv=None):
         models[args.pad] = Model(GANTRY_MODEL, point=False)
         ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_M, heading, offset=GANTRY_STACK))
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
-              SunLayer(), MoonLayer(), EarthLayer(), VehicleLayer(models, exposure)]
+              SunLayer(), MoonLayer(), EarthLayer(), LampLayer(exposure), VehicleLayer(models, exposure)]
     views = []
     app = Portview(args, feed, views, exposure, ephemeris)
     app.ground = ground
