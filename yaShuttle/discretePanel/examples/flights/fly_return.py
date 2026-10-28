@@ -252,6 +252,7 @@ class Return(U.Undock):
         t = json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
         self.tgt = t
         tig = t["tig"]
+        self.pfd_on_crt2()          # the capture has IDP 2 off (the DEORBIT phase never powers it), so no 8-ball on CRT 2
         self.wait_gmt(tig - 15.0)
         self.deorbit_hook("pre-exec")
         self.play("+0     keys EXEC\n", "deorb-exec")
