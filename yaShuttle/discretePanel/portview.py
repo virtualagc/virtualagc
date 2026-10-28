@@ -2574,16 +2574,16 @@ SLF_THRESHOLDS = {'15': (0.49973583221435547, -1.4085865020751953, 2.61788177490
                   '33': (0.49911224842071533, -1.4081783294677734, 5.7594738006591797)}
 RUNWAY_LIGHTS = {'on': True, 'runway': '15'}
 RUNWAY_WIDTH_M = 91.44                                              # 300 ft
-HIRL_SPACING_M = float(os.environ.get("NSTS_HIRL_SPACING", "45.7"))
+HIRL_SPACING_M = float(os.environ.get("NSTS_HIRL_SPACING", "30"))
 CENTERLINE_SPACING_M = 60.96                                        # 200 ft
 APPROACH_ROWS = int(os.environ.get("NSTS_APPROACH_ROWS", "5"))      # 3 or 5, by the photographs of the era
 APPROACH_ROW_SPACING_M = 15.0
 APPROACH_LAMP_SPACING_M = 30.5
 APPROACH_LENGTH_M = 915.0
-LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "0.0005"))      # a lamp at its real candela is a star of magnitude -4 at 10 km: far past what the display can show
+LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "0.01"))      # a lamp at its real candela is a star of magnitude -4 at 10 km: far past what the display can show
 FLOOD_CD = 1.0e9                                                    # each of the 8 xenon lamps, peak candela
-FLOOD_EXP = float(os.environ.get("NSTS_FLOOD_EXP", "600"))          # beam: cos^600 (about 3 deg to half power)
-FLOOD_AIM_M = 450.0                                                 # each lamp toed in to the centreline this far down the runway
+FLOOD_EXP = float(os.environ.get("NSTS_FLOOD_EXP", "10"))           # beam: cos^10 (about 23 deg to half power)
+FLOOD_AIM_M = 1000.0                                                # each lamp toed in to the centreline this far down the runway
 FLOOD_LAT_M = 55.0                                                  # the two clusters, this far either side of the centreline
 FLOOD_HEIGHT_M = 3.0
 FLOOD_BACK_M = 20.0                                                 # and this far before the threshold
@@ -2596,7 +2596,7 @@ EDGE_ELEV_DEG, EDGE_N, EDGE_SPILL = 10.0, 3.0, 0.02                 # axis: acro
 CENTER_ELEV_DEG, CENTER_N, CENTER_SPILL = 75.0, 6.0, 0.01           # axis: up, tilted toward the approach
 APPROACH_ELEV_DEG, APPROACH_N, APPROACH_SPILL = 25.0, 20.0, 0.01    # axis: up and toward the approach
 FLOOD_TILT_DEG = 0.3                                                # and aimed this far below the horizontal there
-FLOOD_GAIN = float(os.environ.get("NSTS_FLOOD_GAIN", "0.03"))       # display per lux of a unit albedo / pi (the Moon's is 1.68: the camera's exposure, not the eye's)
+FLOOD_GAIN = float(os.environ.get("NSTS_FLOOD_GAIN", "0.003"))       # display per lux of a unit albedo / pi (the Moon's is 1.68: the camera's exposure, not the eye's)
 LUX_MAG0 = 2.54e-6
 
 

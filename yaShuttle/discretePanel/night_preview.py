@@ -14,10 +14,10 @@ level with --level.  No flight computer, no simulation: the picture is portview'
 
 WHILE IT FLIES, type a knob and a value in this terminal (portview rereads them within a second).  Default, and a
 useful range (past it things still work, but are blown out, invisible or slow):
-    flood_gain 0.03        the xenon floodlights' light on the ground, display per lux: 0.003 - 1 (1.68 is the Moon's)
-    flood_exp 600          the beam, cos^N of the angle off the aim: 600 = 3 deg to half power, 300 = 4, 100 = 7,
-                           30 = 13, 10 = 23, 0 = every way; 10 - 2000
-    flood_aim_m 450        each lamp toed in to the centreline this far down the runway: 100 - 3000
+    flood_gain 0.003       the xenon floodlights' light on the ground, display per lux: 0.0003 - 1 (1.68 is the Moon's)
+    flood_exp 10           the beam, cos^N of the angle off the aim: 600 = 3 deg to half power, 300 = 4, 100 = 7,
+                           30 = 13, 10 = 23, 0 = every way; 3 - 2000
+    flood_aim_m 1000       each lamp toed in to the centreline this far down the runway: 100 - 3000
     flood_tilt_deg 0.3     and this far below the horizontal there: 0 - 2
     flood_lat_m 55         the two clusters' distance either side of the centreline: 0 - 150
     flood_height_m 3       their height: 1 - 30
@@ -25,10 +25,10 @@ useful range (past it things still work, but are blown out, invisible or slow):
     flood_spill 0.001      what a lamp sends every way, as a fraction of its peak (what a pilot behind it sees): 0 - 0.1
     flood_visible 1        1: the lamps drawn as points, 0: only their light on the ground
     flood_cd 1e9           each lamp's peak candela (it scales the light on the ground and the points alike)
-    lamp_gain 0.0005       every drawn lamp's brightness, edge, centreline, threshold, approach and floodlights: 0.0001 - 0.05
+    lamp_gain 0.01         every drawn lamp's brightness, edge, centreline, threshold, approach and floodlights: 0.0001 - 0.05
                            (the lamps' real candela is far beyond the display's range: this puts the distance at which a
-                           lamp fades from the display's white at about 5 km)
-    hirl_spacing_m 45.7    the runway edge lamps' spacing (the FAA's maximum is 61): 15 - 100 (under 10 is slow)
+                           lamp fades from the display's white at about 20 km at 0.01, 5 km at 0.0005)
+    hirl_spacing_m 30      the runway edge lamps' spacing (the FAA's maximum is 61): 15 - 100 (under 10 is slow)
     approach_rows 5        the amber approach rows (the photographs show 3 or 5): 1 - 9
     edge_elev_deg 10       the edge lamps shine across the runway, this far above the horizontal: 0 - 45
     edge_n 3               their beam, cos^N off that axis (3 = 40 deg to half power, 10 = 22, 0 = every way): 0 - 30
