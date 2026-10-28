@@ -1073,8 +1073,17 @@ class Flight:
         last, done = None, set()
         log0 = len(self.log_text())
         stopped_since = None
+        pace = [time.time(), self.truth()["t"], 1.0]
         while True:
             tr = self.truth()
+            # THE PACE the simulation is running at now (the owner changes it from the Manager): a press takes about
+            # two wall seconds to go in, which is eight sim seconds at 4x, so the gear commands are given from
+            # that much higher up (a rate-4 run of 2026-10-28 pressed ARM at 1,692 ft and DN at 66 ft).  This
+            # is about command timing only: that run's gear-up touchdown was a dive at 296 kt, which no
+            # gear command could have prevented.
+            if time.time() - pace[0] >= 3.0:
+                pace = [time.time(), tr["t"], max(1.0, (tr["t"] - pace[1]) / (time.time() - pace[0]))]
+            k = pace[2]
             if tr["t"] >= t_end:
                 self.say("land: time is up")
                 return
@@ -1085,10 +1094,10 @@ class Flight:
                 last = st
                 self.say("land: t=%.0f h=%.0f ft (wheels %.0f) M=%.3f alpha=%.1f q=%.0f GS %.0f kt"
                          % (st["t"], st["h"], wh, st["M"], st.get("alpha", 0), st.get("q", 0), kgs))
-            if "arm" not in done and wh < self.GEAR_ARM_FT:
+            if "arm" not in done and wh < self.GEAR_ARM_FT * k:
                 self.play("+0     press gear_arm\n", "gear-arm"); done.add("arm")
                 self.say("crew: LANDING GEAR ARM at %.0f ft" % wh)
-            if "dn" not in done and "arm" in done and wh < self.GEAR_DN_FT:
+            if "dn" not in done and "arm" in done and wh < self.GEAR_DN_FT * k:
                 self.play("+0     press gear_dn\n", "gear-dn"); done.add("dn")
                 self.say("crew: LANDING GEAR DN at %.0f ft, %.0f KGS" % (wh, kgs))
             if "chute" not in done and "MAIN gear TOUCHDOWN" in text:
