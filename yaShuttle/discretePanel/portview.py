@@ -2434,7 +2434,7 @@ class EarthLayer(object):
     MOON_GAIN = 1.4
     # The terrain's night glow with no Moon (starlight, airglow), as a fraction of an overhead full Moon's
     # (0 = flat black).  NSTS_NIGHT_TERRAIN in the environment, or --night-terrain.
-    NIGHT_AMB = float(os.environ.get("NSTS_NIGHT_TERRAIN", "0.25"))
+    NIGHT_AMB = float(os.environ.get("NSTS_NIGHT_TERRAIN", "0.1"))
 
     def draw(self, res, view, fs):
         m = fs.m50_to_ef
@@ -3393,7 +3393,7 @@ def main(argv=None):
                          "none with reduced textures)")
     ap.add_argument("--night-terrain", type=float, metavar="F", default=EarthLayer.NIGHT_AMB,
                     help="the terrain's glow on a moonless night, as a fraction of an overhead full Moon's "
-                         "(default 0.25, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
+                         "(default 0.1, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--thin-gain", type=float, metavar="G",
