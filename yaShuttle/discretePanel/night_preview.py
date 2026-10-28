@@ -2,7 +2,7 @@
 """A night view of the landing, in about a minute: portview fed by a synthetic flight down the final approach.
 
     python3 night_preview.py [--night-terrain F] [--views front,left] [--utc 2011-06-01T06:30:00]
-                             [--runway 15|33] [--dist-nmi 6] [--hold] [--alt-ft H] [--level]
+                             [--runway 15|33] [--dist-nmi 6] [--hold] [--alt-ft H] [--level] [--pitch-deg D]
                              [--set knob=value ...] [--port-base 44700] [-- more portview options]
 
 Starts portview and sends it the TRU1 datagrams yaGPC2 would (portview.py, DATA), for an Orbiter landing at KSC at
@@ -40,6 +40,8 @@ useful range (past it things still work, but are blown out, invisible or slow):
     approach_n 20          their beam (20 = 8 deg to half power): 0 - 60
     approach_spill 0.01    their leak: 0 - 0.3
     night_terrain 0.1      the moonless terrain glow, a fraction of an overhead full Moon's: 0 (flat black) - 1
+    night_terrain_high 0.3 the same from orbit, fading to night_terrain between night_alt_hi_km (80) and night_alt_lo_km (15)
+                           above the ground (this preview flies low, so only night_terrain shows)
     show                   the values now;  quit
 """
 import argparse
@@ -166,6 +168,7 @@ def main():
     ap.add_argument("--alt-ft", type=float, default=None)
     ap.add_argument("--hold", action="store_true")
     ap.add_argument("--level", action="store_true", help="with --hold: the nose level (alpha only)")
+    ap.add_argument("--pitch-deg", type=float, default=None, help="with --hold: the nose this far above the horizontal (negative: down)")
     ap.add_argument("--set", action="append", default=[], metavar="KNOB=VALUE")
     ap.add_argument("--port-base", type=int, default=44700)
     a, extra = ap.parse_known_args()
@@ -204,7 +207,8 @@ def main():
                 x = x0
                 h = a.alt_ft * 0.3048 if a.alt_ft is not None else wheel_height(x0)
                 v_g, slope = 0.0, 0.0
-                pitch = math.radians(5.0) if a.level else math.radians(-19.0 + 12.0)
+                pitch = (math.radians(a.pitch_deg) if a.pitch_deg is not None else
+                         math.radians(5.0) if a.level else math.radians(-19.0 + 12.0))
             else:
                 # the profile, stepped: speed by distance, height by distance, the nose along the path plus alpha
                 if x > PREFLARE_X:
