@@ -1571,7 +1571,7 @@ class Resources(object):
         self.moon = None
         self.earthProg = compile_program(FULLSCREEN_VS, EARTH_FS)
         self.earthU = uniforms(self.earthProg, "uCamToEF", "uOrigin", "uSun", "uTan", "uDay",
-                               "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit", "uMoonGain",
+                               "uNight", "uTrans", "uWater", "uSunE", "uNightGain", "uLit", "uMoonGain", "uNightAmb",
                                "uMoonEF", "uCTop", "uCGround", "uSiteOn", "uCamEnu", "uEfToEnu",
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
                                "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2",
@@ -2027,7 +2027,7 @@ uniform vec3 uOrigin;           // the eye, Earth-fixed, m
 uniform vec3 uSun;              // the Sun's direction, Earth-fixed
 uniform vec2 uTan;
 uniform sampler2D uDay, uNight, uTrans, uWater;
-uniform float uSunE, uNightGain, uLit, uMoonGain;
+uniform float uSunE, uNightGain, uLit, uMoonGain, uNightAmb;
 uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses; moonlight)
 uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
 // A landing site's imagery: four nested rings, finest first.  Rings 0 and 1
@@ -2329,7 +2329,10 @@ void main() {
         float fresm = 0.02 + 0.98 * pow(1.0 - max(dot(-dirEF, hm), 0.0), 5.0);
         float specm = water * fresm * pow(max(dot(n, hm), 0.0), 200.0) * 8.0 / PI * step(0.0, mum);
         vec3 moonlit = (albedo / PI * max(mum, 0.0) + specm) * tm * phase * uMoonGain;
-        vec3 night = (lights + moonlit) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
+        // And a faint terrain by starlight and airglow, a fraction of an overhead full Moon's, so that a
+        // moonless night still shows the coast, the fields and the runway rather than flat black.
+        vec3 ambient = albedo / PI * uNightAmb * uMoonGain;
+        vec3 night = (lights + moonlit + ambient) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus));
         vec3 surf = (direct + sky + spec * ts) * uSunE * uLit + night;
         color += surf * trans;
         fragColor = vec4(color, 1.0);
@@ -2429,6 +2432,9 @@ class EarthLayer(object):
     # Full-moonlit ground against the city lights, as in VIIRS night images:
     # albedo-0.3 ground under a full Moon overhead shows ~0.04, a town ~0.1.
     MOON_GAIN = 1.4
+    # The terrain's night glow with no Moon (starlight, airglow), as a fraction of an overhead full Moon's
+    # (0 = flat black).  NSTS_NIGHT_TERRAIN in the environment, or --night-terrain.
+    NIGHT_AMB = float(os.environ.get("NSTS_NIGHT_TERRAIN", "0.25"))
 
     def draw(self, res, view, fs):
         m = fs.m50_to_ef
@@ -2511,6 +2517,7 @@ class EarthLayer(object):
         GL.glUniform1f(U["uSunE"], self.SUN_E)
         GL.glUniform1f(U["uNightGain"], self.NIGHT_GAIN)
         GL.glUniform1f(U["uMoonGain"], self.MOON_GAIN)
+        GL.glUniform1f(U["uNightAmb"], self.NIGHT_AMB)
         GL.glUniform1f(U["uLit"], 1.0)
         for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
                                  (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
@@ -3384,6 +3391,9 @@ def main(argv=None):
     ap.add_argument("--msaa", type=int, default=4, metavar="N",
                     help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
                          "none with reduced textures)")
+    ap.add_argument("--night-terrain", type=float, metavar="F", default=EarthLayer.NIGHT_AMB,
+                    help="the terrain's glow on a moonless night, as a fraction of an overhead full Moon's "
+                         "(default 0.25, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--thin-gain", type=float, metavar="G",
@@ -3492,6 +3502,7 @@ def main(argv=None):
     moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
     site = None
     TERRAIN['on'] = args.terrain == 'on'
+    EarthLayer.NIGHT_AMB = args.night_terrain
     MSAA['samples'] = args.msaa
     THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
     if args.site != 'none':
