@@ -2580,6 +2580,11 @@ LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "1.0"))
 FLOOD_CD = 1.0e9                                                    # each of the 8 xenon lamps, peak candela
 FLOOD_EXP = float(os.environ.get("NSTS_FLOOD_EXP", "600"))          # beam: cos^600 (about 3 deg to half power)
 FLOOD_AIM_M = 450.0                                                 # each lamp toed in to the centreline this far down the runway
+FLOOD_LAT_M = 55.0                                                  # the two clusters, this far either side of the centreline
+FLOOD_HEIGHT_M = 3.0
+FLOOD_BACK_M = 20.0                                                 # and this far before the threshold
+FLOOD_SPILL = 1.0e-3                                                # the light a lamp sends every way, as a fraction of its peak (seen from behind)
+FLOOD_VISIBLE = 1                                                   # the lamps drawn as points (0: only their light on the ground)
 FLOOD_TILT_DEG = 0.3                                                # and aimed this far below the horizontal there
 FLOOD_GAIN = float(os.environ.get("NSTS_FLOOD_GAIN", "0.03"))       # display per lux of a unit albedo / pi (the Moon's is 1.68: the camera's exposure, not the eye's)
 LUX_MAG0 = 2.54e-6
@@ -2632,27 +2637,70 @@ class SlfLights(object):
                 for pair in (-0.6, 0.6):
                     L.append((t - s * u + (r + pair) * v + 0.4 * up, amber, 3000.0, aim, 30.0))
             s += APPROACH_LAMP_SPACING_M
+        # eight xenon lamps at the head, two clusters of four 3 m apart, each aimed at the centreline FLOOD_AIM_M
+        # down the runway (so the near ground is out of the beam, and the touchdown zone is in it)
+        fl, aims = [], []
+        for side in (-1.0, 1.0):
+            for k in range(4):
+                lat_off = side * FLOOD_LAT_M + 3.0 * (k - 1.5)
+                fl.append(t - FLOOD_BACK_M * u + lat_off * v + FLOOD_HEIGHT_M * up)
+                a = (FLOOD_AIM_M + FLOOD_BACK_M) * u - lat_off * v - (FLOOD_AIM_M + FLOOD_BACK_M) * math.tan(math.radians(FLOOD_TILT_DEG)) * up
+                aims.append(a / np.linalg.norm(a))
+        self.flood_pos = np.array(fl)
+        self.flood_aim = np.array(aims)
+        if FLOOD_VISIBLE:                                # the lamps themselves, seen in the beam and, faintly, from any side
+            for p_, a_ in zip(self.flood_pos, self.flood_aim):
+                L.append((p_, (0.9, 0.95, 1.0), FLOOD_CD, a_, FLOOD_EXP))
+                L.append((p_, (0.9, 0.95, 1.0), FLOOD_CD * FLOOD_SPILL, a_, 0.0))
         self.pos = np.array([l[0] for l in L])
         self.col = np.array([l[1] for l in L], float)
         self.cd = np.array([l[2] for l in L], float)
         self.aim = np.array([l[3] for l in L])
         self.n = np.array([l[4] for l in L], float)
-        self.pos_ef = site.ef + self.pos @ site.ef_to_enu              # rows: (R^T p)^T = p^T R
+        self.pos_ef = site.ef + self.pos @ site.ef_to_enu
         self.aim_ef = self.aim @ site.ef_to_enu
-        # eight xenon lamps at the head, two clusters of four 3 m apart, 3 m up, each aimed at the centreline FLOOD_AIM_M
-        # down the runway (so the near ground is out of the beam, and the touchdown zone is in it)
-        fl, aims = [], []
-        for side in (-1.0, 1.0):
-            for k in range(4):
-                lat_off = side * 55.0 + 3.0 * (k - 1.5)
-                fl.append(t - 20.0 * u + lat_off * v + 3.0 * up)
-                a = (FLOOD_AIM_M + 20.0) * u - lat_off * v - (FLOOD_AIM_M + 20.0) * math.tan(math.radians(FLOOD_TILT_DEG)) * up
-                aims.append(a / np.linalg.norm(a))
-        self.flood_pos = np.array(fl)
-        self.flood_aim = np.array(aims)
+
+
+LIGHTS_FILE = os.environ.get("NSTS_LIGHTS_FILE")
+_lights_seen = [0.0, 0.0]                                           # (mtime, last check)
+LIGHT_KNOBS = {'flood_gain': 'FLOOD_GAIN', 'flood_exp': 'FLOOD_EXP', 'flood_aim_m': 'FLOOD_AIM_M',
+               'flood_tilt_deg': 'FLOOD_TILT_DEG', 'flood_lat_m': 'FLOOD_LAT_M', 'flood_height_m': 'FLOOD_HEIGHT_M',
+               'flood_back_m': 'FLOOD_BACK_M', 'flood_spill': 'FLOOD_SPILL', 'flood_visible': 'FLOOD_VISIBLE',
+               'flood_cd': 'FLOOD_CD', 'lamp_gain': 'LAMP_GAIN', 'hirl_spacing_m': 'HIRL_SPACING_M',
+               'approach_rows': 'APPROACH_ROWS', 'night_terrain': 'NIGHT_AMB'}
+
+
+def light_tweaks(site):
+    """NSTS_LIGHTS_FILE: a JSON object of the knobs above (night_preview.py writes it as you type), re-read when it
+    changes, so the lights can be tuned while the picture moves."""
+    if not LIGHTS_FILE:
+        return
+    now = time.monotonic()
+    if now - _lights_seen[1] < 0.3:
+        return
+    _lights_seen[1] = now
+    try:
+        mt = os.stat(LIGHTS_FILE).st_mtime
+        if mt == _lights_seen[0]:
+            return
+        import json
+        with open(LIGHTS_FILE) as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        return
+    _lights_seen[0] = mt
+    g = globals()
+    for k, v in d.items():
+        name = LIGHT_KNOBS.get(k)
+        if name == 'NIGHT_AMB':
+            EarthLayer.NIGHT_AMB = float(v)
+        elif name:
+            g[name] = type(g[name])(v)
+    site._slf = None
 
 
 def slf_lights(site):
+    light_tweaks(site)
     lights = getattr(site, '_slf', None)
     if lights is None or lights[0] != RUNWAY_LIGHTS['runway']:
         lights = site._slf = (RUNWAY_LIGHTS['runway'], SlfLights(site, RUNWAY_LIGHTS['runway']))
