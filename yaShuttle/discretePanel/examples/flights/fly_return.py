@@ -243,6 +243,31 @@ class Return(U.Undock):
         self.say("crew: OPS 303, MNVR to EI attitude")
         self.check_burn()
 
+    def tig1(self):
+        """The capture sts134r-tig1 (TIG-60 s) itself, taken inside DEORBIT; nothing to do."""
+
+    def exec(self):
+        """--from EXEC: from sts134r-tig1, the burn (EXEC at TIG-15 s), OPS 303 and the maneuver to the EI attitude, then
+        ENTRY and LAND in the same run (their captures are written as they would be from DEORBIT)."""
+        t = json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
+        self.tgt = t
+        tig = t["tig"]
+        self.wait_gmt(tig - 15.0)
+        self.deorbit_hook("pre-exec")
+        self.play("+0     keys EXEC\n", "deorb-exec")
+        self.say("crew: EXEC at TIG-15 s (TIG GMT %.1f)" % tig)
+        self.wait_gmt(tig + 6 * 60.0)
+        self.play("+1     keys OPS 3 0 3 PRO\nwait crt 1 title 3031/ timeout 120\n+3     keys ITEM 2 7 EXEC\n", "ops303")
+        self.script_done("ops303", 180)
+        self.say("crew: OPS 303, MNVR to EI attitude")
+        self.check_burn()
+        self.snapshot("deorbit")
+        self.say("== ENTRY")
+        self.entry()
+        self.snapshot("entry")
+        self.say("== LAND")
+        self.land()
+
     def check_burn(self):
         tru = self.ears.snap()[0]
         r, v = list(tru["r"]), list(tru["v"])
@@ -267,6 +292,11 @@ class Return(U.Undock):
         self.dump_screen("deorbit %s" % where)
         c = self.compare() or {}
         self.say("DEORBIT %s: DAP attitude error %s, %s" % (where, c.get("dap_att_err"), c.get("dap_state")))
+        if where == "post-mnvr":
+            # the restore point for --from EXEC: the burn attitude held, TIG a minute off, EXEC not yet keyed
+            self.wait_gmt(self.tgt["tig"] - 60.0)
+            self.snapshot("tig1")
+            self.say("DEORBIT: captured sts134r-tig1 at TIG-60 s (TIG GMT %.1f); --from EXEC resumes from it" % self.tgt["tig"])
 
     def __init__(self, a):
         # the arguments fly_sts134's own parser gives its phases and fly_rndz134's does not
@@ -281,7 +311,7 @@ def main():
     R.Rendezvous = Return
     setattr(Return, "pre-mnvr", lambda self: None)       # the capture --from BURN restores
     for ph in ("START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3",      # fly_undock's, so that COAST resumes from sts134r-sep3
-               "COAST", "READY", "ORBIT", "DEORBIT", "ENTRY", "LAND", "PRE-MNVR", "BURN"):
+               "COAST", "READY", "ORBIT", "DEORBIT", "ENTRY", "LAND", "PRE-MNVR", "BURN", "TIG1", "EXEC"):
         if ph not in R.PHASES:
             R.PHASES.append(ph)
     for a, v in (("--rhc", "both"), ("--station", "all"), ("--input", "virtual")):
