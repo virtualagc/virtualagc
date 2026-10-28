@@ -25,7 +25,9 @@ useful range (past it things still work, but are blown out, invisible or slow):
     flood_spill 0.001      what a lamp sends every way, as a fraction of its peak (what a pilot behind it sees): 0 - 0.1
     flood_visible 1        1: the lamps drawn as points, 0: only their light on the ground
     flood_cd 1e9           each lamp's peak candela (it scales the light on the ground and the points alike)
-    lamp_gain 1            every drawn lamp's brightness, edge, centreline, threshold, approach and floodlights: 0.1 - 10
+    lamp_gain 0.0005       every drawn lamp's brightness, edge, centreline, threshold, approach and floodlights: 0.0001 - 0.05
+                           (the lamps' real candela is far beyond the display's range: this puts the distance at which a
+                           lamp fades from the display's white at about 5 km)
     hirl_spacing_m 45.7    the runway edge lamps' spacing (the FAA's maximum is 61): 15 - 100 (under 10 is slow)
     approach_rows 5        the amber approach rows (the photographs show 3 or 5): 1 - 9
     night_terrain 0.1      the moonless terrain glow, a fraction of an overhead full Moon's: 0 (flat black) - 1

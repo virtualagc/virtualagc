@@ -1111,6 +1111,7 @@ uniform float uMagRef;
 uniform float uCore;        // core radius, physical pixels
 uniform float uCut;         // relative brightness below which a star is skipped
 uniform float uMaxPx;       // the largest a point may grow to (its glare), physical pixels across
+uniform float uGrowExp, uGrowMax;   // how a point grows with its brightness: L^exp, to at most this many cores across
 out vec3 vCol;
 void main() {
     vec3 d = uJ2kToCam * aDir;
@@ -1121,7 +1122,7 @@ void main() {
         return;
     }
     gl_Position = vec4(d.xy / d.z / uTan, 0.0, 1.0);
-    float grow = clamp(pow(L, 0.2), 1.0, 3.5);   // Sirius ~2, Venus ~3: points, not disks
+    float grow = clamp(pow(L, uGrowExp), 1.0, uGrowMax);   // Sirius ~2, Venus ~3: points, not disks
     float sz = max(min(2.0 * uCore * grow + 2.0, uMaxPx), 2.0 * uCore + 2.0);
     float g = (sz - 2.0) / (2.0 * uCore);       // the growth it was allowed: the light stays the same
     gl_PointSize = sz;
@@ -1557,7 +1558,7 @@ class Resources(object):
         self.milkyway = None                   # on the GPU now
         self.starProg = compile_program(STARS_VS, STARS_FS)
         self.starU = uniforms(self.starProg, "uJ2kToCam", "uTan", "uMagRef",
-                              "uCore", "uCut", "uMaxPx")
+                              "uCore", "uCut", "uMaxPx", "uGrowExp", "uGrowMax")
         self.starVbo = GL.glGenBuffers(1)
         self.starCount = len(self.stars)
         self.planetVbo = GL.glGenBuffers(1)
@@ -1880,6 +1881,7 @@ class PointLayer(object):
     MAG_REF = 3.0                       # just fills its core at EV 0
     CUT = 1e-3                          # skip points fainter than this, relative
     MAX_GLARE_DEG = 0.1                 # a bright point never grows past this across
+    GROW_EXP, GROW_MAX = 0.2, 3.5       # a point's size grows as brightness^0.2, to 3.5 cores across
 
     def __init__(self, exposure, key):
         self.exposure = exposure
@@ -1905,6 +1907,8 @@ class PointLayer(object):
         GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
         GL.glUniform1f(u["uCore"], 1.0 * view.devicePixelRatioF())
         GL.glUniform1f(u["uCut"], self.CUT)
+        GL.glUniform1f(u["uGrowExp"], self.GROW_EXP)
+        GL.glUniform1f(u["uGrowMax"], self.GROW_MAX)
         # a bright point's glare is limited in ANGLE, not pixels: a planet is under an arcminute, and a blob
         # of the Moon's size (0.5 deg) is not what an eye sees of Venus
         GL.glUniform1f(u["uMaxPx"], max(2.0, math.radians(self.MAX_GLARE_DEG) * (view.view_size()[0] / 2.0) / view.tanX
@@ -2576,7 +2580,7 @@ APPROACH_ROWS = int(os.environ.get("NSTS_APPROACH_ROWS", "5"))      # 3 or 5, by
 APPROACH_ROW_SPACING_M = 15.0
 APPROACH_LAMP_SPACING_M = 30.5
 APPROACH_LENGTH_M = 915.0
-LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "1.0"))
+LAMP_GAIN = float(os.environ.get("NSTS_LAMP_GAIN", "0.0005"))      # a lamp at its real candela is a star of magnitude -4 at 10 km: far past what the display can show
 FLOOD_CD = 1.0e9                                                    # each of the 8 xenon lamps, peak candela
 FLOOD_EXP = float(os.environ.get("NSTS_FLOOD_EXP", "600"))          # beam: cos^600 (about 3 deg to half power)
 FLOOD_AIM_M = 450.0                                                 # each lamp toed in to the centreline this far down the runway
@@ -2711,7 +2715,8 @@ class LampLayer(PointLayer):
     """The lit runway's lamps as points in the Earth's buffer (colour 0 only: the transparency target is
     left as the ground wrote it)."""
     target = 'earth'
-    MAX_GLARE_DEG = 0.1
+    MAX_GLARE_DEG = 0.25                # a lamp's glare, in angle: bigger as it nears
+    GROW_EXP, GROW_MAX = 0.3, 8.0
 
     def __init__(self, exposure):
         super().__init__(exposure, 'lamps')
@@ -2733,7 +2738,7 @@ class LampLayer(PointLayer):
         d = np.linalg.norm(rel, axis=1)
         w = rel / d[:, None]
         cosang = -np.sum(w * lamps.aim_ef, axis=1)
-        factor = np.where(lamps.n < 0.0, np.abs(cosang) ** np.abs(lamps.n), np.clip(cosang, 0.0, 1.0) ** lamps.n)
+        factor = np.where(lamps.n < 0.0, np.abs(cosang) ** np.abs(lamps.n), np.clip(cosang, 0.0, 1.0) ** np.maximum(lamps.n, 0.0))
         fade = 1.0
         if fs.sky is not None:
             sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
