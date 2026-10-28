@@ -75,7 +75,7 @@ def quat_of(m):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--night-terrain", type=float, default=float(os.environ.get("NSTS_NIGHT_TERRAIN", "0.25")))
+    ap.add_argument("--night-terrain", type=float, default=float(os.environ.get("NSTS_NIGHT_TERRAIN", "0.1")))
     ap.add_argument("--views", default="front")
     ap.add_argument("--utc", default="2011-06-01T06:30:00")
     ap.add_argument("--runway", default="15", choices=("15", "33"))
