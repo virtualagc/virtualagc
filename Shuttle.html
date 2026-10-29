@@ -16,8 +16,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
     <h1>Table of Contents </h1>
     <ul>
       <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
-      <li><a moz-do-not-send="true" href="#simulatorTour">A Brief Tour
-          of PASS in the Simulator</a></li>
+      <li><a moz-do-not-send="true" href="#simulatorTour">A Brief Visual
+          Tour: Simulating STS-134</a><a moz-do-not-send="true"
+          href="#simulatorTour"><br>
+        </a></li>
       <li><a moz-do-not-send="true" href="#References">References</a></li>
       <li><a moz-do-not-send="true" href="#PASS">PASS, BFS, and Other
           Shuttle Source Code</a></li>
@@ -30,6 +32,11 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       <li><a moz-do-not-send="true" href="#Display">Multi-Function
           Display Formatting and Versioning</a></li>
       <li><a moz-do-not-send="true" href="#Messaging">Computer-to-Peripheral
+
+
+
+
+
 
 
 
@@ -167,6 +174,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -203,6 +215,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
+
           Assembly Language (BAL)</i>.<br>
         <blockquote><font size="-1"><b>Aside:</b>&nbsp; To be perfectly
             <strike>pedantic</strike>accurate, the GPCs were originally
@@ -220,6 +237,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
+
+
+
 
 
 
@@ -327,12 +349,22 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
+
+
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+
+
+
+
 
 
 
@@ -493,82 +525,367 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     </div>
     <ul>
     </ul>
-    <h1><a name="simulatorTour"></a>A Brief Tour of PASS in the
-      Simulator</h1>
-    <p><i>(This section is under construction, and there's nothing much
-        to see yet.)</i><br>
+    <h1><a name="simulatorTour"></a>A Brief Visual Tour: Simulating
+      STS-134<br>
+    </h1>
+    As I explained earlier, we provide an emulator in which the
+    Shuttle's flight software can be run by executing the actual
+    software, on an emulated GPC. Of course, to actually see what's
+    happening, you can't get by with <i>just</i> a GPC, you need
+    emulations of other peripheral devices as well, such displays,
+    keyboards, a control panel, an Inertial Measurement Unit (IMU), and
+    so on.&nbsp; A full range of such emulated devices will only be
+    available, I'm sure, when the emulated GPC is integrated into actual
+    spaceflight-simulation systems like Orbiter or FlightGear.&nbsp; But
+    for demonstration purposes only, we've nevertheless thrown together
+    a set of emulated peripherals that a least allow us to run the GPC
+    emulator through its paces and give you a good idea that it probably
+    works.&nbsp; What I propose to do in this section is to show you the
+    end result, by running simulations of various aspects of the flight
+    of STS-134 on our makeshift Orbiter simulator, and then presenting
+    videos of the simulations.<br>
+    <p>STS-134, the next-to-last flight of the entire STS program, was
+      an International Space Station (ISS) mission, having (from <i>my</i>
+      perspective) the following basic phases:<br>
     </p>
-    <p>I explained earlier that we provide an emulator in which the
-      Shuttle's flight software can be run by executing the actual
-      software on an emulated GPC. Of course, you can't get by with <i>just</i>
-      a GPC, you need emulations of other peripheral devices as well,
-      such a displays, keyboards, a control panel, an Inertial
-      Measurement Unit (IMU), and so on.&nbsp; A full range of such
-      emulated devices will only be available, I'm sure, when the
-      emulated GPC is integrated into actual spaceflight-simulation
-      systems.&nbsp; Be we've nevertheless thrown together a set of
-      emulated peripherals that a least allow us to walk through various
-      display screens PASS wants to show you, and perform manipulations
-      via the keyboards and control panel.&nbsp; We don't need a full
-      5-GPC set to do that, so we'll just make it as simple as possible,
-      with a single GPC, display, keyboard, and portions of a control
-      panel ... along with a few peripherals that have no visual
-      interface, and so are just chugging along behind the scenes.
-      Because a full Orbiter control panel is quite a large thing, we've
-      economized a little bit by showing just the portions of the
-      control panel needed at any given time; I should also warn that in
-      order to save as much screen space as possible, the control panels
-      are stylized and the positions of the controls have been moved
-      around somewhat, so don't expect to see exactly what an actual
-      Orbiter pilot would see.<br>
+    <ol>
+      <li>Prelaunch: i.e., Initial Program Load (IPL) and various other
+        setups.</li>
+      <li><b>Launch &amp; ascent to orbit.</b></li>
+      <li>Climbing to the ISS orbit and matching it.</li>
+      <li><b>Approach &amp; docking with the ISS.</b></li>
+      <li>Staying docked with the ISS for a long, long time.</li>
+      <li><b>Undocking &amp; some associated maneuvers immediately
+          thereafter.</b></li>
+      <li>Orbit changes and other preparation for getting back home
+        again.</li>
+      <li><b>Deorbit, entry, &amp; landing.</b></li>
+    </ol>
+    <p>Plus some other fun but counterfactual stuff, like <b>aborting
+        the ascent after launch</b>.&nbsp; We've simulated all of that
+      stuff ourselves, so we know it works.&nbsp; But that doesn't mean
+      that it's all equally interesting to the casual bystander. The
+      phases I've emphasized in boldface seem like the interesting ones
+      — and not coincidentally, the ones that <i>take less time</i> —,
+      so we'll just confine ourselves to videos of those. Otherwise, I'd
+      be posting videos of days on end of nothing obvious happening
+      except drifting around in space and occasionally adjusting orbits
+      or attitudes somewhat.&nbsp; Then too, we don't need a full 5-GPC
+      set to for this tour, so we'll economize a bit: We'll just use a
+      single GPC and as few peripheral devices as we can get away with.
+      For example, because a full Orbiter control panel is quite a large
+      thing, and screen space is quite tight in comparison, we'll show
+      only small, stylized portions of it. If you want to see
+      fully-synchronized sets of GPCs operating in tandem, you'll get a
+      chance to see it elsewhere.<br>
     </p>
+    <blockquote>
+      <p><b><font size="-1">Aside:</font></b><font size="-1"> Just to be
+          clear, <i>our</i> purpose in performing these simulations was
+          to insure that the GPC emulator was as accurate as we were
+          capable of making it, and <i>not</i> to produce cute (albeit
+          rather lengthy) videos. That we were able to produce a video
+          record of it for you was merely a happy (from <i>our</i>
+          perspective) side effect.</font><br>
+      </p>
+    </blockquote>
     <blockquote>
       <p><font size="-1"><b>Note:</b> It's important to give credit
           where credit is due, so let me say at the outside that Don
           Schmidt has made a very outsized contribution to what I'm
           about to show you. More about his work will be described
           later, but for now let me just say that without that
-          contribution there would actually be very little to show you
-          at the time I'm writing this.</font><br>
+          contribution there would actually be very little to show you.</font><br>
       </p>
     </blockquote>
-    In the video below, we start up after an Initial Program Load (IPL)
-    has been performed to load OPS 0 into the GPC, and we'll proceed
-    from there.&nbsp; Realize that there many more display screens in
-    PASS than those I'm going to show you today, in the interest of
-    keeping the video to a finite size! <br>
-    <p><video controls="controls" style="height:600px; width:auto;
-        display:block; margin:0 auto"> 
-        <source src="briefTourPASS.mp4" type="video/mp4"> 
-        <track src="briefTourPASS.vtt" kind="captions" srclang="eng"</track>
-    </video></p>
-    <p><br>
-      So, I hope you thought that was fun! Even so, it is ultimately
-      just a survey of a lot of menu screens, without much evidence they
-      actually <i>do</i> anything aside from looking pretty ...
-      depending on your personal aesthetics, of course, as to what
-      prettiness might be. Fortunately, we do have enough of a
-      simulation built to do a bit of orbital maneuvering for you, so
-      that's what the video below demonstrates. In it we run OPS 2,
-      along with models of simulated physics, thrusters, Inertial
-      Measurement Unit (IMU), to changing the attitude of the spacecraft
-      and perform small orbit changes.<br>
+    The prelaunch process takes several hours of more-than-usual tedium,
+    so let's just skip past that.&nbsp; First up will therefore be
+    launch and ascent to orbit! We'll pick up the story at around T-4:30
+    (i.e., 4 minutes and 30 seconds before launch).&nbsp; The whole
+    thing is more-or-less autonomous, although the "crew" will do a few
+    little things along the way.&nbsp; By "the crew", of course, I mean
+    a script we've written to flip control-panel switches or make keypad
+    entries at appropriate times, since I didn't want to have to do that
+    myself.&nbsp; By the way, this might look better if you watch it
+    directly at YouTube rather than in the embedded viewer below; watch
+    it in HD (4K or more, if you have it), expand it to fill the whole
+    screen, and be sure to enable CC (subtitles) or else you won't get
+    my wonderfully witty explanations of what's going on.<br>
+    <br>
+    <center><iframe src="https://www.youtube.com/embed/sSQANSYAtTs"
+        title="Space Shuttle Simulation STS-134, Launch and Ascent to
+        Orbit" allow="accelerometer; autoplay; clipboard-write;
+        encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="1881" height="759" frameborder="0"></iframe></center>
+    <br>
+    If you know more about it than I do — which believe me, wouldn't be
+    difficult! — let me know of anything that needs to be corrected. If
+    it's easy enough and important enough, I might actually do it.
+    Probably not, though, because it's a big hassle to produce these
+    things. I already even have a better version of this simulation,
+    made after a number of bug fixes, but the hassle factor is so great
+    that it's just sitting on my local computer rather than at YouTube,
+    and is likely to remain there.<br>
+    <br>
+    And as long as we're still more-or-less near the launch pad, let's
+    see what it might have looked like if an abort would have occurred.
+    In this next simulation, we start out at about T-00:08 and then
+    launch, but a couple of minutes later force a left-engine fail. This
+    results in the flight being aborted and returning to Kennedy Space
+    Center (KSC), or more accurately going to the Shuttle Landing
+    Facility (SLF), and landing there.&nbsp; This is almost entirely
+    autonomous as well, although in this case that's unrealistic: Beyond
+    the fact that the abort never occurred in STS-134, or in any other
+    flight, flight rules didn't allow the Orbiter to land autonomously
+    after an abort, so the pilots would have taken over. Nevertheless,
+    the Orbiter was technically <i>capable</i> of landing autonomously,
+    and I'm certainly no pilot, so an autonomous landing is what you
+    get.<br>
+    <br>
+    <center><iframe src="https://www.youtube.com/embed/q8-4RGaGgdA"
+        title="Simulation of Hypothetical Abort and Return To Launch
+        Site of STS-134" allow="accelerometer; autoplay;
+        clipboard-write; encrypted-media; gyroscope; picture-in-picture;
+        web-share" referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="1881" height="759" frameborder="0">&amp;amp;amp;lt;br&amp;amp;amp;gt;
+
+
+
+
+      </iframe></center>
+    <br>
+    After the launch &amp; ascent we saw earlier, it took STS-134 close
+    to 44 hours to get into the vicinity of the ISS, in an appropriate
+    orbit, so we'll just skip that. If someone requests a 44-hour video
+    of that ... well, who knows? Perhaps I'd make it for you without
+    subtitles, to reduce my own hassle factor. Why does it take so long?
+    Mostly, I expect, because the ISS is not in a roughly equatorial
+    orbit; rather, its orbit is highly tilted, so that it varies in
+    latitude between something like N60° to S60° on each roughly 90
+    minute orbit. So you can't just gut it out and blast directly from
+    Cape Canaveral into a matching orbit. It takes some finessing ...
+    and in space, finessing takes a lot of time.&nbsp; It's like taking
+    an airplane trip (or bus trip) in which you have to change planes
+    (or buses) a lot of times: the trip itself may be short in distance,
+    but all of those changeovers really eat up the time.<br>
+    <br>
+    Instead, we'll proceed to the <i>next</i> phase after that long
+    coast to the ISS, namely approaching and docking with the ISS.
+    Unlike flight phases we saw in the videos above, the Orbiter is not
+    technically capable of docking with the ISS, and <i>requires</i> a
+    pilot. Which is a dilemma, since in spite of all the time you spent
+    watching the videos above, I still have not turned into a pilot in
+    the meantime. The workaround is that we've written a piloting app
+    that we can run alongside the simulation. The app can manipulate the
+    various Orbiter controls just like the pilot can, as well as
+    assessing the data provided to the pilot.&nbsp; In fact, all it
+    actually does is make small adjustments using the aft Translational
+    Hand Controller (THC).&nbsp; Make no mistake: The piloting app is
+    not as good as the pilot. But it's good enough to perform the
+    docking, just barely, so it's what you get in the simulation videoed
+    below.&nbsp; One reason it works is that docking is something that
+    happens very, veeerrrrrrry slllooooowwwwwwwllllllllllyyyyyyyy. We
+    start out about 4300 feet (less than a mile, though more than a
+    kilometer) from the ISS, moving towards it at the pace of a brisk
+    walk (about 6.6 feet/second).&nbsp; It slows down rapidly from that
+    point onward, and the hard dock is nearly two hours later!<br>
+    <br>
+    And in spite of what I said earlier, this is one case in which
+    bug-fixes resulted in a significantly improved simulation, so you
+    actually do get an updated video here. Lucky you! Although when I
+    say "significantly improved", I mean that it's significant in my own
+    obsessed little mind. The plain truth is that if you saw the
+    original video, you don't need to watch this one, and indeed might
+    not even notice the differences.<br>
+    <br>
+    <center><iframe src="https://www.youtube.com/embed/SS_3_b36yAs"
+        title="(Updated) Simulation of Space Shuttle Orbiter
+        Approach/Dock with the ISS in Flight STS-134"
+        allow="accelerometer; autoplay; clipboard-write;
+        encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="1920" height="1080" frameborder="0">&amp;lt;br&amp;gt;
+
+
+      </iframe></center>
+    <br>
+    <a href="laptopRPOP.jpg"><img moz-do-not-send="true"
+        src="laptopRPOP.jpg" title="Click to enlarge" alt="" width="200"
+        height="134" align="left" border="2"></a>The docking video
+    above, and the undocking video below, mark the first appearance of
+    RPOP.&nbsp; RPOP is a program for a laptop computer that the Orbiter
+    pilots used during the docking and undocking operations.&nbsp; RPOP
+    stands for Rendezvous and Proximity Operations Program, and it began
+    to be used in STS-71, in which the Orbiter rendezvoused with Mir. In
+    other words, it's <i>not</i> part of the Orbiter's control panel
+    and doesn't run PASS or be controlled in any way by PASS, though it
+    does have a cabling connection by which it gets data from the
+    Orbiter. As I write this, very few people have seen any of these
+    simulations, but the few who have and who seem compelled to comment
+    about them invariably point to RPOP as being the coolest part of the
+    whole thing. Funny story about RPOP ... I used Claude Code AI agents
+    (and to a much smaller extent Codex and Grok Build agents) to help
+    me create this makeshift Orbiter simulator. One Claude Code agent
+    was tasked with creating the program that displays the views out of
+    the "windows", and the first time I saw RPOP was when I demoed the
+    out-the-window views for myself. My eyes Ron-popped out of my head —
+    get it? RPOP'd? —, because not only hadn't I <i>asked</i> for RPOP,
+    in point of fact I had never even <i>heard</i> of it before then.
+    Upon inquiry, Claude informed me that, yes it was a real
+    thing.&nbsp; Claude had read about it in the documentation and
+    created RPOP of its own accord, just because it seemed like the
+    right thing to do.&nbsp; And no we didn't actually have any of the
+    software for it, but Claude had merely followed the documentation,
+    and came out with something that indeed looks pretty close to the
+    real thing. I've asked for a few tweaks since then, some of them
+    very wrong-headed and requiring reversal, but basically RPOP remains
+    as Claude created it, entirely on its own without any suggestion by
+    me.&nbsp; True story.&nbsp; On my wish list is actually running that
+    STS-71 rendezvous scenario with Mir, with RPOP, but albeit not
+    likely with the correct PASS version for it. Perhaps someday; we've
+    already prepared the 3D model of Mir for it and it looks pretty
+    good!&nbsp; <img moz-do-not-send="true" src="smiley.png" alt=""
+      width="16" height="16">&nbsp; But I digress.<br>
+    <p><a href="STS-134-flyaround.png"><img moz-do-not-send="true"
+          src="STS-134-flyaround.png" alt="" title="Click to enlarge"
+          width="200" height="147" align="left" border="2"></a><a
+        href="STS-134-STORRMDTO-ref-dispersion.png"><img
+          moz-do-not-send="true"
+          src="STS-134-STORRMDTO-ref-dispersion.png" title="Click to
+          enlarge" alt="" width="200" height="145" align="right"
+          border="2"></a><a
+        href="file:///home/rburkey/git/virtualagc-web/STS-134-STORRMDTO.png"><img
+          moz-do-not-send="true" src="STS-134-STORRMDTO.png"
+          title="Click to enlarge" alt="" width="200" height="148"
+          align="right" border="2"></a>Once docked with the ISS on
+      Flight Day 3 (FD 3), the Orbiter stays there quite a while, until
+      FD 15.&nbsp; We don't bother simulating any of that.&nbsp; Also,
+      we didn't simulate some interesting preparation for undocking, in
+      that the Orbiter adjusts the attitude of the ISS somewhat. I'll
+      repeat that: The <i>Orbiter</i> adjusts the attitude of the <i>ISS</i>.
+      We have not bothered to model any of that in the simulation
+      because it didn't seem to be worth the effort of implementing the
+      peripherals involved, modeling the dynamics of the ISS, and so on.
+      Perhaps someday we'll do so anyway. At any rate, the undocking
+      itself takes place about an hour after that, and simply assumes
+      that the ISS is already in the appropriate orientation.&nbsp;
+      Nevertheless, undocking has some other interesting stuff going on
+      that we do simulate.&nbsp; Immediately after undocking, the
+      Orbiter does a "fly-around" of the ISS, which is nominally a
+      circle with a radius of roughly 650-700 feet. There's a graphic of
+      that to the left.&nbsp; (The ISS is at 0,0, and isn't shown; note
+      that the horizontal and vertical scales are different, which is
+      why you don't see anything that looks like a circle.) And then
+      after that, STS-134 performed a maneuver known as the STORRM DTO,
+      which is a big, roughly kidney-bean shaped loop that's about 5
+      miles long by 2 miles wide, continually adjusting the attitude of
+      the Orbiter so that the bay opening is towards the ISS. The first
+      of the graphics to the right depicts the as-flown STORRM DTO
+      trajectory. (Again, note not only that the vertical and horizontal
+      scalings differ, but that they differ from the other graph as
+      well. Both graphics are from <a moz-do-not-send="true"
+        href="Shuttle/20110014805.pdf">an analysis by Stuitt</a>.) The
+      STORRM DTO was part of a continuing series of tests, spread across
+      a number of flights, for testing instruments intended for the
+      prospective Orion spacecraft. But for our purposes today, all that
+      really matters is that the trajectory and attitude of the Orbiter
+      are correct with respect to what STS-134 actually flew. Achieving
+      that turned out to be quite the adventure, and in fact we've never
+      managed fully to do so. There are a number of reasons why that
+      turns out to be tricky, but one big factor is that STS-134's
+      as-flown trajectory as shown in the figure didn't fully match the
+      planned reference trajectory. In fact even contemporary
+      simulations show that a very wide range of outcomes that can be
+      expected in trying to fly it. In the second of the two figures on
+      the right is the <i>planned</i> reference trajectory, with the
+      yellow circles depicting 3σ deviations of the actual positions of
+      the various milestone positions in the trajectory. Quite a wide
+      dispersion! But you can't expect our modern simulator to do any
+      better than NASA was able to do back in 2011, and indeed it will
+      not do so; in other words, our simulated STORRM trajectory will
+      match neither the planned trajectory nor STS-134's as-flown
+      trajectory, and if we run it again we'll get yet some other
+      trajectory for our troubles. Of course, they'll all look the same
+      to the naked eye. Only after milestone SEP3 in the STORRM DTO has
+      been reached does the Orbiter begin to shape orbit for home, and
+      that's where the video below leaves off.&nbsp; Beware: The video
+      is nearly 5 hours long, because the Orbiter traverses the entire
+      thing (15 miles?) at roughly walking speed!<br>
     </p>
-    <p align="center">TBD<br>
+    <br>
+    <center><iframe src="https://www.youtube.com/embed/OPBxSuZQB9k"
+        title="Simulation of Space Shuttle STS-134 undocking from the
+        ISS and subsequent flyaround/STORRM" allow="accelerometer;
+        autoplay; clipboard-write; encrypted-media; gyroscope;
+        picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="1920" height="1080" frameborder="0">&lt;br&gt;
+
+      </iframe></center>
+    <p>After that, there's nearly 45 hours of orbit changes in
+      preparation for being in a position to land. We'll skip past that,
+      just like we skipped over the 40+ hours between ascent and
+      approaching the ISS. Instead, we'll just jump ahead to the
+      deorbit/entry/landing phase of the mission.&nbsp; Like the abort
+      we saw in an earlier video, the Orbiter lands autonomously. This
+      wouldn't normally have happened, because it was deemed that human
+      control would always be safer in the case of events like sudden
+      bursts of wind, but strictly speaking wasn't disallowed by the
+      flight rules. For us, though, it's a necessity, since
+      really-and-truly, I'm still not a pilot. <br>
     </p>
-    <p>TBD<br>
+    <p>It is visually different from the earlier abort video, though.
+      For one thing, STS-134 landed on SLF runway KSC 15, whereas we
+      forced the abort simulation earlier to instead land on runway KSC
+      33. For another, our abort was a day landing, while STS-134's
+      actual landing was at night. The landing is rather exciting in
+      some ways too. The orbiter performed a sequence of very steep
+      rolls, from side to side, in which the wings would be almost
+      vertical, which weren't necessary in the recovery from the abort.
+      This maneuver allowed it to lose altitude very quickly, but if you
+      don't know it's supposed to happen, it looks like a mistake by the
+      simulation; it's, not, though. The Orbiter also comes in quite
+      fast — faster than a human pilot would, I think — so that you have
+      to wonder if it will manage to pull up in time to keep from
+      smacking into the ground at a rather high speed. (Spoiler: No
+      Orbiters were harmed in the making of this video ... just scared
+      into retirement. I did smack it into the ground once at 250
+      feet/second, and we've never been able to figure out why.)&nbsp;
+      If you want an incentive to watch the video, that's all I have on
+      tap at the moment.<br>
+    </p>
+    <br>
+    <center><iframe src="https://www.youtube.com/embed/LxH1t9YdwP4"
+        title="Simulation of STS-134 Deorbiting, Reentry, and Landing at
+        KSC Shuttle Landing Facility (SLF)" allow="accelerometer;
+        autoplay; clipboard-write; encrypted-media; gyroscope;
+        picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen="" width="1920" height="1080" frameborder="0">&lt;br&gt;
+
+      </iframe></center>
+    <p><i>(This remainder of this section is under construction, and
+        there's you shouldn't yet believe anything it has to say.)</i><br>
     </p>
     <p>If you're one of the lucky to whom I've provided the necessary
       passwords for one or the other of the MMU tapes we've prepared,
       you can in fact try out the simulation for yourself, and maybe
-      make your own videos if you're so inclined.&nbsp; <br>
+      make your own videos if you're so inclined.&nbsp; Or try
+      simulating a different mission altogether!&nbsp; Of more practical
+      immediate value, I think, would be some explanation of how the
+      flight software is structured, and how you use the keypads to
+      maneuver through the menus. Here's a little tour of that, although
+      there are so very many menu screens that we haven't the time or
+      energy to look at every single one of them:<br>
     </p>
-    <p>TBD<br>
-    </p>
-    This has just been a very brief foretaste of what's covered in a lot
-    more detail in a whole series of pages dedicated to the various
-    stages stretching from just having flight-software source code to
-    actually running it:<br>
+    <div align="center">TBD<br>
+    </div>
+    <br>
+    This has just been a very brief visual foretaste of what's covered
+    in a lot more detail in a whole series of pages dedicated to the
+    various stages stretching from just having flight-software source
+    code to actually running it:<br>
     <ol start="0">
       <li>(Optional.) <a moz-do-not-send="true" href="XPL-I.html">XPL/I
           and its compiler</a>.&nbsp; XPL/I is the high-level computer
@@ -580,6 +897,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       <li><a moz-do-not-send="true" href="ASM101S.html">AP-101S linker</a>.
         For turning AP-101S object files into executable memory images.</li>
       <li><a moz-do-not-send="true" href="emulation-shuttle.html#yaGPC2">AP-101S
+
+
+
+
+
 
 
           emulator</a>. For running AP-101S executable memory images on
@@ -594,12 +916,22 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       <li><a moz-do-not-send="true" href="BuildingPASS.html#compilePASS">Compiling,
 
 
+
+
+
+
+
           assembling, and linking PASS</a>. I.e., creating memory images
         of an entire "memory configuration" of Space Shuttle flight
         software ... a much harder task than doing so for a simple,
         non-flight-software HAL/S or AP-101S program!<br>
       </li>
       <li><a moz-do-not-send="true" href="BuildingPASS.html#taping">Building
+
+
+
+
+
 
 
           "tapes" of flight software</a>. Real Space Shuttle software is
@@ -627,10 +959,20 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 href="Shuttle/Crew%20Training/Shuttle%20Crew%20Operations%20Manual%20OI-29.pdf">Shuttle
 
 
+
+
+
+
+
             Crew Operations Manual, OI-29</a>.<br>
         </li>
         <li><a moz-do-not-send="true"
             href="Shuttle/Space%20Shuttle%20Crew%20Operations%20Manual%20OI-32.pdf">Shuttle
+
+
+
+
+
 
 
             Crew Operations Manual, OI-32</a>.</li>
@@ -638,9 +980,19 @@ href="Shuttle/Crew%20Training/Shuttle%20Crew%20Operations%20Manual%20OI-29.pdf">
             href="Shuttle/Space%20Shuttle%20Crew%20Operations%20Manual.pdf">Shuttle
 
 
+
+
+
+
+
             Crew Operations Manual, OI-33</a>.</li>
         <li><a moz-do-not-send="true"
 href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%2020040714.pdf">Data
+
+
+
+
+
 
 
             Processing System Dictionary, OI-30 and subsequent</a>.<br>
@@ -652,6 +1004,11 @@ href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%
       of the Space Shuttle's onboard computer systems and their software
       have been collected on <b><a moz-do-not-send="true"
           href="links-shuttle.html">our Space Shuttle Library page</a></b>.&nbsp;
+
+
+
+
+
 
 
 
@@ -736,6 +1093,11 @@ href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%
 
 
 
+
+
+
+
+
           Hollis's Space Shuttle page</a>.</li>
       <li><a moz-do-not-send="true" href="https://ntrs.nasa.gov/">The
           NASA Technical Reports Server (NTRS)</a>.</li>
@@ -773,6 +1135,11 @@ href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%
     </p>
     <p>Here's a rough summary of the Shuttle flight software that I do
       have on hand <a moz-do-not-send="true" href="HAL.html#wildThings">(see
+
+
+
+
+
 
 
 
@@ -822,6 +1189,11 @@ href="Shuttle/JSC-48017%20Rev%20K%20-%20Data%20Processing%20System%20Dictionary%
       <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS
         and BFS.&nbsp; More specifically, <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC
+
+
+
+
+
 
 
 
@@ -929,12 +1301,22 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
+
+
+
           y</tt>" in the original HAL/S source code or documentation,
         we'd expect "<tt>x ~= y</tt>" instead! </li>
       <li>A compiler directive of the form "<tt>D VERSION <i>v</i></tt>"
         was sometimes used in original HAL/S source code or
         template-library files.&nbsp; Here, "<i><tt>v</tt></i>" is a
         numerical version code in the range of 1 through 255, <i>represented
+
+
+
+
+
 
 
 
@@ -2329,6 +2711,11 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
+
+
+
+
     </i>sequences 0xC2 0xAC and 0xC2 0xA2, respectively, and they don't
     appear at all among the 128 characters of ASCII, but do appear among
     the 256 characters of <i>some</i> versions of EBCDIC.<br>
@@ -2364,6 +2751,11 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
+
+
+
+
 
 
 
@@ -2455,12 +2847,22 @@ style="background:#F8F8F8;height:2em;font-size:small;height:22pt;line-height:1">
 
 
 
+
+
+
+
+
           in HAL/S</a>" by Michael Ryer, which was intended as an
         introduction to programming in HAL/S and is organized as a
         tutorial.</li>
       <li>A great supplement to Ryer is the course material for "<a
           moz-do-not-send="true"
 href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic
+
+
+
+
+
 
 
 
@@ -2480,6 +2882,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
         of the language, and recommends proceeding afterward to the <a
           moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
+
+
+
+
 
 
 
@@ -2553,9 +2960,19 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
+
+
+
 
 
 
@@ -2631,6 +3048,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
+
+
+
+
 
 
 
@@ -2742,6 +3164,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -2754,6 +3181,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -2810,6 +3242,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -2817,6 +3254,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -2912,6 +3354,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -2940,7 +3387,17 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -2997,10 +3454,20 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -3090,6 +3557,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
     <br>
     <br>
     And '<tt>-</tt>' isn't the only datatype-related character that can
@@ -3114,6 +3586,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <blockquote><tt>&nbsp; CORNERS: PROGRAM;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE SCALAR,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+
 
 
 
@@ -3221,6 +3698,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -3232,6 +3714,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
+
+
+
+
 
 
 
@@ -3610,6 +4097,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -3622,6 +4114,11 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
           that said, there's actually quite a lot of information PASS
           source code about display-screen formats.&nbsp; <a
             moz-do-not-send="true" href="HAL.html#morePreprocessors">Refer
+
+
+
+
+
 
 
 
@@ -3719,11 +4216,21 @@ href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Bas
 
 
 
+
+
+
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
+
+
+
 
 
 
@@ -3835,6 +4342,11 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
+
+
+
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -3861,7 +4373,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2026-10-04<br>
+          2026-10-29<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
