@@ -37,6 +37,7 @@ import os
 import sys
 import time
 
+import entry_iloads
 import fly_sts134
 import fly_undock as U
 import fly_rndz134 as R
@@ -298,6 +299,10 @@ class Return(U.Undock):
             self.wait_gmt(self.tgt["tig"] - 60.0)
             self.snapshot("tig1")
             self.say("DEORBIT: captured sts134r-tig1 at TIG-60 s (TIG GMT %.1f); --from EXEC resumes from it" % self.tgt["tig"])
+            # OPS 3 came from the volume's generic G3 during this phase; the flown entry I-loads go into the capture and the
+            # run continues from it, as --from EXEC would (ledger #306)
+            if entry_iloads.apply(os.path.join(self.a.logs, "sts134r-tig1"), self.say)[0]:
+                self.restart_from("tig1")
 
     def __init__(self, a):
         # the arguments fly_sts134's own parser gives its phases and fly_rndz134's does not
@@ -308,8 +313,23 @@ class Return(U.Undock):
         super().__init__(a)
 
 
+# the capture each --from restores, where OPS 3 is already resident (MM 302 onward), so its G3 is never reloaded from the volume
+OPS3_CAPTURES = {"EXEC": "tig1", "TIG1": "tig1", "BURN": "pre-mnvr", "ENTRY": "deorbit", "LAND": "entry"}
+
+
+def flown_entry_iloads():
+    """Write STS-134's flown G3 entry I-loads into the capture --from restores (ledger #306), when that capture has OPS 3."""
+    argv = sys.argv
+    if "--from" not in argv or "--logs" not in argv:
+        return
+    cap = OPS3_CAPTURES.get(argv[argv.index("--from") + 1])
+    if cap:
+        entry_iloads.apply(os.path.join(os.path.expanduser(argv[argv.index("--logs") + 1]), "sts134r-" + cap))
+
+
 def main():
     R.Rendezvous = Return
+    flown_entry_iloads()
     setattr(Return, "pre-mnvr", lambda self: None)       # the capture --from BURN restores
     for ph in ("START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3",      # fly_undock's, so that COAST resumes from sts134r-sep3
                "COAST", "READY", "ORBIT", "DEORBIT", "ENTRY", "LAND", "PRE-MNVR", "BURN", "TIG1", "EXEC"):
