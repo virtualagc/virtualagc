@@ -18,3 +18,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - #310: driver never keyed G51 SEL ATMOSPHERE (June = item 24); drag-H used index 0. Keyed now; run20 nav err -795 ft at 15.8 kft (was -1222), drag-H residual -258 ft.
+
+### [2026-10-30] Target: CAUSES.md
+- #311: GPS TO NAV AUTO (SPEC 50 ITEM 42) after the V=7K incorporate holds nav to +-30 ft and removes the 16 kft snap; touchdown 200.3 kt / 2.1 ft/s. STS-134 checklist has GPS INH; whether flown AUTO is unverified. FLY_GPS_AUT=1 is dev-only.

@@ -1033,10 +1033,10 @@ class Flight:
         self.play(GPS_INCORPORATE, "gps-incorporate-entry")
         self.script_done("gps-incorporate-entry", 60)
         self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
-        if os.environ.get("FLY_GPS_AUT"):      # DEVELOPMENT: NAV GPS to AUT (SPEC 50 ITEM 43), GPS as the TACAN's replacement
-            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 3 EXEC\n+8     keys RESUME\n", "gps-aut")
+        if os.environ.get("FLY_GPS_AUT"):      # DEVELOPMENT: NAV GPS to AUT (SPEC 50 ITEM 42), GPS as the TACAN's replacement
+            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 2 EXEC\n+8     keys RESUME\n", "gps-aut")
             self.script_done("gps-aut", 60)
-            self.say("crew: NAV GPS to AUT (SPEC 50 ITEM 43), development")
+            self.say("crew: NAV GPS to AUT (SPEC 50 ITEM 42), development")
         self.play(AIR_DATA, "air-data")
         self.script_done("air-data", 60)
         self.air_data_done = True
