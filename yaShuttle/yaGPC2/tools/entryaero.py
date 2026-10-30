@@ -102,7 +102,41 @@ def _sub_incr(a, de):
 # ---------- the shape at any Mach, before the OFP level is applied ----------
 LOGM_SUB, LOGM_HYP = math.log(0.29), math.log(5.25)
 
+# SUBSONIC SPEEDBRAKE DRAG.  LA66 has the speedbrake at 25 degrees only, and the
+# hypersonic increments faded out left it with essentially NO effect below Mach
+# 0.9 (CD 0.0875 -> 0.0892 from closed to full), so A/L could not hold V_REF and
+# arrived fast with the brake saturated (ledger #307).  NASA CP-2283 (Kirsten et
+# al., "Shuttle Performance: Lessons Learned" Pt 1, 1983) fig 14, p 307: the
+# subsonic axial-force increment against speedbrake angle, about the 25-degree
+# baseline (flight ALT 4/5 and STS-1/2 against the data book's prediction, Mach
+# ~0.47-0.5, alpha 5, elevon 5).  Read from the plotted STS-1/2 prediction
+# lines, good to about +-0.001.  Above 75 degrees (the plot ends there; 100% is
+# 98.6) it continues as a projected-area law, 0.0796 * sin(d/2), which fits
+# the curve from 25 to 75 degrees (FLAGGED: extrapolated).  Applied at Mach
+# <= 0.6 and faded out to 1.0, above which the OFP calibration stands alone.
+SB_DCA = [(0.0, -0.0085), (5.0, -0.0065), (10.0, -0.0050), (15.0, -0.0033), (20.0, -0.0016),
+          (25.0, 0.0), (30.0, 0.0035), (35.0, 0.0063), (40.0, 0.0095), (45.0, 0.0125),
+          (50.0, 0.0150), (55.0, 0.0178), (60.0, 0.0210), (65.0, 0.0245), (70.0, 0.0285),
+          (75.0, 0.0325)]
+SB_DCA_FADE = (0.6, 1.0)
+
+def sb_dca(M, dsb):
+    """Subsonic axial-force increment from the speedbrake, about the 25-degree LA66 baseline."""
+    if M >= SB_DCA_FADE[1]:
+        return 0.0
+    if dsb <= SB_DCA[-1][0]:
+        v = _interp([x for x, y in SB_DCA], [y for x, y in SB_DCA], dsb)
+    else:
+        v = SB_DCA[-1][1] + 0.0796 * (math.sin(math.radians(dsb) / 2) - math.sin(math.radians(SB_DCA[-1][0]) / 2))
+    f = 1.0 if M <= SB_DCA_FADE[0] else (SB_DCA_FADE[1] - M) / (SB_DCA_FADE[1] - SB_DCA_FADE[0])
+    return v * f
+
 def shape(M, a, de, dbf, dsb):
+    out = _shape(M, a, de, dbf, dsb)
+    out[1] += sb_dca(M, dsb)
+    return out
+
+def _shape(M, a, de, dbf, dsb):
     """Tunnel CN, CA, CM about the MRP: hypersonic interpolated between 5.25
     and 10.27 (held beyond), subsonic below 0.29, and between the two a blend
     in log Mach.  Subsonic has no body flap or speedbrake data yet: those
@@ -298,7 +332,7 @@ H_MACH = sorted(set([0.29, 0.4, 0.5] + [round(p['M'], 3) for p in OFP] +
 H_ALPHA = [float(a) for a in range(-4, 47, 2)]
 H_DE = [-40.0, -30.0, -20.0, -10.0, -5.0, 0.0, 5.0, 10.0, 15.0, 20.0]
 H_DBF = [-11.7, 0.0, 8.0, 16.3, 22.5]
-H_DSB = [0.0, 25.0, 55.0, 85.0, 98.6]
+H_DSB = [0.0, 25.0, 40.0, 55.0, 70.0, 85.0, 98.6]
 
 def write_header(path):
     def arr(name, xs):

@@ -1494,6 +1494,21 @@ static bool entry_aero(double f[3], double tau[3]) {
     double de = 0.25 * (surfPos[SURF_LIB] + surfPos[SURF_LOB] + surfPos[SURF_RIB] + surfPos[SURF_ROB]);
     double c[3];
     ea_coeffs(mach, al, de, bfPos, surfPos[SURF_SB], c);
+    /* the gear's drag: L/D 4.5 -> ~3.95 at alpha 7 deg, i.e. CD +0.010 (FPH-ALR fig 4-14, read from the figure: LOW
+     * confidence); none of the aero tables has it.  Follows the strut travel, so it ramps over the 5 s deployment. */
+    c[1] += 0.010 * gearPos;
+    /* GROUND EFFECT: "powerful aerodynamic ground effects of the orbiter ... grow exponentially as the altitude decreases, and the
+     * resulting increase in L/D is approximately 25 percent" (JSC-23266 FPH-ALR appendix B.4); without it the sink rate at
+     * touchdown is "marginally acceptable".  The 25% is the handbook's, split evenly between lift up (+12%) and drag down (-11%);
+     * the 30 ft e-folding height above the wheels' touchdown height (16 ft below the c.g.) is MY ASSUMPTION, no source gives it
+     * (FLAGGED).  Normal force carries the lift, axial force the drag. */
+    {
+        double hw = geodetic_h_ft(st.r) - (groundFt < -1e8 ? 8.3 : groundFt) - 16.0;
+        if (hw < 0.0) hw = 0.0;
+        double ge = exp(-hw / 30.0);
+        c[0] *= 1.0 + 0.12 * ge;
+        c[1] *= 1.0 - 0.11 * ge;
+    }
     double qs = q * ASC_SREF_M2;
     /* lateral-directional, per degree, at this Mach (log interpolation):
      * aileron (left - right)/2, elevon pairs; rudder + trailing edge left */
