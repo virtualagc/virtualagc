@@ -1023,6 +1023,10 @@ class Flight:
         self.script_done("air-data", 60)
         self.air_data_done = True
         self.say("crew: V = 7K, ADTA PROBES DEPLOY; ADTA to G&C AUT (SPEC 50 ITEM 28)")
+        if os.environ.get("FLY_ADTA_H_AUT"):   # DEVELOPMENT: NAV ADTA H to AUT (SPEC 50 ITEM 26), as for a site without MLS
+            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 2 6 EXEC\n+8     keys RESUME\n", "adta-h-aut")
+            self.script_done("adta-h-aut", 60)
+            self.say("crew: NAV ADTA H to AUT (SPEC 50 ITEM 26), development")
         self.wait_gmt(t["ei"] + 25 * 60.0)
 
     def last_entry_state(self):

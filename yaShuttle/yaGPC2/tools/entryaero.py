@@ -271,12 +271,35 @@ def _stab_gains(M):
     _STAB_CACHE[key] = out
     return out
 
+# FLOWN L/D, MACH 2.2-4.5.  The OFP calibration is the 1979 design trajectory; the STS-2 flight L/D
+# (NASA CP-2283 Pt 1, Schlosser & Eaton Fig 34, flight vs flex and rigid ADDB, which agree) is about
+# 1.85 from Mach 2 to 5, while the model between its OFP points was 1.65-1.79.  Read off a plot, +-0.1;
+# STS-1 (CR-003561 Fig III-5h) reads 1.6-2.0 over the same Mach.  The L/D is pulled to 1.85 at constant CL
+# (so the lift, trim and alpha schedule are untouched), faded in from Mach 1.6 and out by Mach 5.0.
+# Added 2026-10-30 at the owner's request, to test whether PASS's drag-altitude measurement (GND_DRAG_MEAS,
+# C_D = f(alpha) only) stops seeing 5-12% more drag than it expects (ledger #309).
+FLIGHT_LD = 1.85
+def _flight_ld_weight(M):
+    if M <= 1.6 or M >= 5.0: return 0.0
+    if M < 2.2: x = (M - 1.6) / 0.6
+    elif M <= 4.5: return 1.0
+    else: x = (5.0 - M) / 0.5
+    return x * x * (3.0 - 2.0 * x)
+
 def coeffs(M, a, de, dbf, dsb):
     """CN, CA, CM (about the MRP) at Mach M, alpha a, deflections in degrees."""
     cn, ca, cm = _calibrated(M, a, de, dbf, dsb)
     w, ka, kd, kb, a0, de0, bf0 = _stab_gains(M)
     if w:
         cm += w * (ka * (a - a0) + kd * (de - de0) + kb * (dbf - bf0))
+    wl = _flight_ld_weight(M)
+    if wl:
+        # drag pulled to the flown L/D at constant CL: dCN = -dCD sin a, dCA = -dCD cos a
+        cl, cd = lift_drag(cn, ca, a)
+        dd = wl * (cl / FLIGHT_LD - cd)
+        r = math.radians(a)
+        cn += dd * math.sin(r)
+        ca += dd * math.cos(r)
     return cn, ca, cm
 
 def _interp_clamped(xs, ys, x):

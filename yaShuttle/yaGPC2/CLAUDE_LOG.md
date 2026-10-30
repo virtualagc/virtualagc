@@ -12,3 +12,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - Ledger #308: the KSC VERT SIT snap at ~16 kft is the first MSBLS processing correcting a nav altitude that drifts ~-1.8 kft after drag-H aiding ends at 85.2 kft (GPS incorporated once per checklist); the middle line is a fixed polyline, not HREF; NAV EDIT ALT not reproduced. MLS_AZ_COVER_DEG 15 unsourced.
+
+### [2026-10-30] Target: CAUSES.md
+- #309: entry nav drift is drag-H (GND_DRAG_MEAS) accepting a residual biased by truth CD vs PASS C_D(alpha) fit; not atmosphere (run17), not fixed by ADTA H AUT (run18); entryaero.py now pulls L/D to the flown 1.85 at M2.2-4.5 (run19: nav err -1.22 kft vs -1.74 at 16 kft, touchdown 207 kt / 2.2 ft/s); remainder is PASS fit 5-10% under flight CD below M3.5; TACAN nav not modelled (STS-134 checklist has none).
