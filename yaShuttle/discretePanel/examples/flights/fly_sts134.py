@@ -205,6 +205,16 @@ GPS_INCORPORATE = ("+1     keys SPEC 5 0 PRO\n"
 METERING_OVERRIDE = ("+1     keys SPEC 5 5 PRO\n"
                      "+3     keys ITEM 3 8 EXEC\n"
                      "+3     keys RESUME\n")
+# G51 SEL ATMOSPHERE (ENT/134/FIN FS 3-7): the drag-altitude measurement's density model, one of three
+# (CGNV_ATM_INDEX = item - 22 here; GKMRMS CASE15).  Inclination <= 50: item 22.  Above 50: by month and
+# the hemisphere/pass, the table below; STS-134 (51.6 deg) lands on a northern descending pass.
+ATM_ITEM_N_DESC = [23, 23, 23, 23, 22, 24, 24, 24, 22, 23, 23, 23]    # Jan .. Dec
+def atmosphere_item(gmt_s):
+    day = int(gmt_s // 86400.0)                       # day of the (non-leap) year, 0 = Jan 1
+    ends = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
+    month = next(i for i, e in enumerate(ends) if day < e)
+    return ATM_ITEM_N_DESC[month]
+
 # V = 7K, ENT/134/FIN FS 3-34: "ADTA PROBES - DEPLOY (HEAT)"; and ADTA to
 # G&C AUT (SPEC 50 ITEM 28, the checklist's "ADTA AUT 28"), so PASS takes the
 # probes' air data into guidance and control once V < 2500 ft/s ("M = 2.0
@@ -1009,6 +1019,10 @@ class Flight:
         self.play(ENTRY_OPS304, "ops304")
         self.script_done("ops304", 180)
         self.say("crew: OPS 304 at EI-5")
+        item = atmosphere_item(t["ei"])
+        self.play("+1     keys SPEC 5 1 PRO\n+8     keys ITEM %d %d EXEC\n+8     keys RESUME\n" % (item // 10, item % 10), "atmosphere")
+        self.script_done("atmosphere", 60)
+        self.say("crew: G51 SEL ATMOSPHERE, ITEM %d (ENT/134/FIN FS 3-7, inclination > 50 deg, N descending)" % item)
         self.pfd_on_crt2()
         # V = 7K: GPS INCORPORATE (Entry Checklist FS 3-34)
         while True:
@@ -1019,6 +1033,10 @@ class Flight:
         self.play(GPS_INCORPORATE, "gps-incorporate-entry")
         self.script_done("gps-incorporate-entry", 60)
         self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
+        if os.environ.get("FLY_GPS_AUT"):      # DEVELOPMENT: NAV GPS to AUT (SPEC 50 ITEM 43), GPS as the TACAN's replacement
+            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 3 EXEC\n+8     keys RESUME\n", "gps-aut")
+            self.script_done("gps-aut", 60)
+            self.say("crew: NAV GPS to AUT (SPEC 50 ITEM 43), development")
         self.play(AIR_DATA, "air-data")
         self.script_done("air-data", 60)
         self.air_data_done = True
