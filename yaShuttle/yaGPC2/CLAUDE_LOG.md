@@ -21,3 +21,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - #311: GPS TO NAV AUTO (SPEC 50 ITEM 42) after the V=7K incorporate holds nav to +-30 ft and removes the 16 kft snap; touchdown 200.3 kt / 2.1 ft/s. STS-134 checklist has GPS INH; whether flown AUTO is unverified. FLY_GPS_AUT=1 is dev-only.
+
+### [2026-10-30] Target: CAUSES.md
+- #312: OV-105 has no TACAN; GPS is prime for entry navigation (STS-118 MOD FRR). Driver now keys GPS TO NAV AUTO (SPEC 50 item 42) after the V=7K incorporate by default; FLY_GPS_INH=1 for the old behaviour.

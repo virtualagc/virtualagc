@@ -1033,10 +1033,13 @@ class Flight:
         self.play(GPS_INCORPORATE, "gps-incorporate-entry")
         self.script_done("gps-incorporate-entry", 60)
         self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
-        if os.environ.get("FLY_GPS_AUT"):      # DEVELOPMENT: NAV GPS to AUT (SPEC 50 ITEM 42), GPS as the TACAN's replacement
+        # OV-105 has no TACAN (STS-118 on); "GPS will be prime navigational tool during entry" (STS-118 MOD FRR, Three
+        # String GPS), so after the V = 7K INCORPORATE (item 44, one update) GPS stays in navigation: GPS TO NAV AUTO
+        # (SPEC 50 item 42).  FLY_GPS_INH=1 leaves it inhibited, as the checklist's HORIZ SIT config alone would.
+        if not os.environ.get("FLY_GPS_INH"):
             self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 2 EXEC\n+8     keys RESUME\n", "gps-aut")
             self.script_done("gps-aut", 60)
-            self.say("crew: NAV GPS to AUT (SPEC 50 ITEM 42), development")
+            self.say("crew: NAV GPS to AUTO (SPEC 50 ITEM 42): GPS prime for entry navigation on OV-105")
         self.play(AIR_DATA, "air-data")
         self.script_done("air-data", 60)
         self.air_data_done = True
