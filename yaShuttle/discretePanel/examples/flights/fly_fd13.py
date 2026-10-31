@@ -80,6 +80,14 @@ DV_BOUNDS_FPS = [150.0, 100.0, 40.0, 100.0]
 # remaining full-rate trajectories or trim converge; the earlier 32-pass run
 # spent substantially more propellant without a useful reduction in residual.
 RCS_VGO_NULL_PASSES = 8
+# Weight of the (u - prior)/scale term in the targeting solve, against residual
+# scales of 100 m and 0.1 m/s.  The solve has twelve unknowns and six terminal
+# constraints; at the earlier weight of 0.01 it never converged (600 evaluations
+# in every recorded NC1 solve) and a 100 ft change in the input state moved the
+# NC2 vector by 34 ft/s, which is the source of the 1X/3X disagreement.  At 1.0
+# it converges and the same perturbations move every vector by under 0.1 ft/s
+# while the terminal miss stays under 20 ft.
+DESIGN_REG_WEIGHT = 1.0
 TIG_NAMES = tuple(x["name"] for x in TIGS)
 
 
@@ -327,6 +335,23 @@ def oms_burn_duration_s(engine, dv_fts, weight_lbf):
     mass_slugs = float(weight_lbf) / G_FT_S2
     return mass_slugs * OMS_VE_FT_S / (engines * OMS_THRUST_LBF) * (
         1.0 - math.exp(-dv / OMS_VE_FT_S))
+
+
+MU_M3_S2 = 3.986004418e14
+MEAN_RADIUS_M = 6371000.0
+NMI_M = 1852.0
+
+
+def orbit_hp_ha_nmi(r, v):
+    """Osculating perigee and apogee altitude (nmi) above the 6371 km sphere."""
+    rn = math.sqrt(sum(x * x for x in r))
+    v2 = sum(x * x for x in v)
+    h = [r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0]]
+    ev = [((v2 - MU_M3_S2 / rn) * r[i] - sum(r[k] * v[k] for k in range(3)) * v[i]) / MU_M3_S2
+          for i in range(3)]
+    e = math.sqrt(sum(x * x for x in ev))
+    a = 1.0 / (2.0 / rn - v2 / MU_M3_S2)
+    return ((a * (1.0 - e) - MEAN_RADIUS_M) / NMI_M, (a * (1.0 + e) - MEAN_RADIUS_M) / NMI_M)
 
 
 def planned_burn_timing(controls_mps_lvlh, initial, schedule):
@@ -741,7 +766,9 @@ class FD13(rndz.Rendezvous):
         self.ears = rndz.Ears(self.base)
         self.cw_start()
 
-    def trajectory(self, controls, initial, schedule, final_time, step=45.0):
+    def trajectory(self, controls, initial, schedule, final_time, step=45.0, orbits=None):
+        """Propagate the plan to final_time.  If orbits is a list, append each
+        burn's post-impulse (hp, ha) in nmi above the 6371 km sphere."""
         np, _ = optimizer()
         r, v, now = list(initial["r"]), list(initial["v"]), initial["unix"]
         q = list(initial.get("q", (1.0, 0.0, 0.0, 0.0)))
@@ -777,6 +804,8 @@ class FD13(rndz.Rendezvous):
             mass_kg *= math.exp(-dv_mps / (9.80665 * isp_s))
             inertial = [sum(rows[k][j] * dv[k] for k in range(3)) for j in range(3)]
             v = [v[j] + inertial[j] for j in range(3)]
+            if orbits is not None:
+                orbits.append(orbit_hp_ha_nmi(r, v))
         if final_time <= now:
             raise ValueError("final targeting time must follow all included burn midpoints")
         sim_time = float(initial["t"]) + now - float(initial["unix"])
@@ -855,7 +884,7 @@ class FD13(rndz.Rendezvous):
         prior = np.clip(prior, -bounds, bounds)
         def residual(u):
             end = self.trajectory(u, current, schedule, self.target["unix"])
-            return np.r_[(end - target) / scale_state, (u - prior) / scales * 0.01]
+            return np.r_[(end - target) / scale_state, (u - prior) / scales * DESIGN_REG_WEIGHT]
         solution = least_squares(residual, prior, bounds=(-bounds, bounds), max_nfev=600, diff_step=1e-4,
                                  x_scale=scales, xtol=1e-9, ftol=1e-9, gtol=1e-9)
         miss = self.trajectory(solution.x, current, schedule, self.target["unix"]) - target
