@@ -62,6 +62,14 @@ import sys
 import threading
 import time
 
+# CRT pages carry Greek letters (MEDS2 maps 0x7b to sigma); a redirected stdout on Windows is cp1252 and
+# a print of such a page ended a flight (Win11-native, 2026-10-31).  Never let a log line do that.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError, OSError):
+        pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 PANEL = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, PANEL)
