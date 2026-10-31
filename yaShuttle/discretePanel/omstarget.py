@@ -157,6 +157,10 @@ def main():
     d.add_argument("hp", type=float)
     d.add_argument("ha", type=float)
     d.add_argument("--thetat", type=float)
+    d.add_argument("--ahead", type=float,
+                   help="fix the target at this many degrees ahead of the burn point instead of searching: the search picks "
+                        "the cheapest of many near-equal (HT, THETA T) pairs, so a tiny change of state changed the winner "
+                        "by 2 degrees and every run flew a different OMS-2")
     lg = sub.add_parser("fromlog", help="make STATE.json from a flight's log")
     lg.add_argument("log")
     lg.add_argument("dtig", type=float, help="TIG, seconds after ET separation")
@@ -179,6 +183,7 @@ def main():
     # --thetat, or searched for over the half orbit ahead with its height
     _, here = target_position(0.0, 0.0, r, v, st["r_liftoff"])
     thetas = ([a.thetat] if a.thetat is not None else
+              [(-here + a.ahead) % 360.0] if a.ahead is not None else
               [(-here + d) % 360.0 for d in [60.0 + 0.5 * i for i in range(481)]])
     best = None
     for theta in thetas:

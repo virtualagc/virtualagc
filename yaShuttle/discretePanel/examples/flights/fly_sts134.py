@@ -70,6 +70,12 @@ for _stream in (sys.stdout, sys.stderr):
     except (AttributeError, ValueError, OSError):
         pass
 
+# Where the OMS-2 burn aims its apsis, in degrees ahead of the burn point.  omstarget.py used to search 60-300 degrees
+# for the cheapest of many near-equal solutions; a state differing by a fraction of a foot per second chose a target
+# anywhere from 166 to 194 degrees ahead (THETA T 296 to 324), so every run flew a different OMS-2 and ended 5 ft/s
+# from the last (cross-platform pass, 2026-10-31).  190.5 is what the search chose for the reference run.
+OMS2_AHEAD_DEG = 190.5
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 PANEL = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, PANEL)
@@ -832,7 +838,7 @@ class Flight:
         # otherwise, and taken so it designs to 262.0 (flight sts134d)
         mr = (6378137.0 - 6371000.0) / 1852.0
         out = subprocess.run([sys.executable, omst, "design", state, "%.2f" % (FL["oms2_hp"] - mr),
-                              "%.2f" % (FL["oms2_ha"] - mr)], check=True,
+                              "%.2f" % (FL["oms2_ha"] - mr), "--ahead", "%.1f" % OMS2_AHEAD_DEG], check=True,
                              capture_output=True, text=True).stdout
         m = re.search(r"HT ([\d.]+)\s+THETA T ([\d.]+)", out)
         ht, th = float(m.group(1)), float(m.group(2))
