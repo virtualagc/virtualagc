@@ -24,3 +24,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - #312: OV-105 has no TACAN; GPS is prime for entry navigation (STS-118 MOD FRR). Driver now keys GPS TO NAV AUTO (SPEC 50 item 42) after the V=7K incorporate by default; FLY_GPS_INH=1 for the old behaviour.
+
+### [2026-10-30] Target: CAUSES.md
+- #313: vehdyn touchdown sink was geocentric not geodetic (low by 0.8 ft/s); true 2.9 ft/s vs design 3, flown 1.21; TD range 1550 ft vs 2500 design / 3186 flown is not ground effect (fade height tested 30-90 ft: no change).

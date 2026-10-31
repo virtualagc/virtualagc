@@ -697,6 +697,20 @@ static double geodetic_h_ft(const double r[3]) {
     }
     return h / 0.3048;
 }
+/* The vertical speed (m/s, + up) of a velocity relative to the turning Earth, along the GEODETIC normal of PASS's
+ * ellipsoid -- the runway's vertical, and what PASS's altitude rate is.  The geocentric radial differs from it by up to
+ * 0.19 deg (0.16 deg at KSC), which at a landing's 340 ft/s ground speed on a runway heading 150 deg is 0.8 ft/s of
+ * "sink" that is not there (the touchdown and flare logs used the radial until 2026-10-30). */
+static double geodetic_up_speed(const double r[3], const double vr[3]) {
+    double p[3];
+    phys_earth_pole(p);
+    double a = 20925646.3255 * 0.3048, b = a * (1.0 - 1.0 / 298.3), k2 = a * a / (b * b) - 1.0;
+    double z = r[0] * p[0] + r[1] * p[1] + r[2] * p[2], n[3], nn = 0.0, vu = 0.0;
+    for (int i = 0; i < 3; i++) { n[i] = r[i] + k2 * z * p[i]; nn += n[i] * n[i]; }
+    nn = sqrt(nn);
+    for (int i = 0; i < 3; i++) vu += vr[i] * n[i] / nn;
+    return vu;
+}
 /* THE DAY'S AIR: a radiosonde sounding, YAGPC_VEHDYN_SOUNDING naming its
  * file in the University of Wyoming archive's CSV form (pressure hPa,
  * geopotential height m, temperature and dew point C, mixing ratio g/kg,
@@ -1248,7 +1262,8 @@ static void wow_log(const int was[3]) {
         vr[2] = st.v[2] - wE * (p[0] * st.r[1] - p[1] * st.r[0]);
         for (int i = 0; i < 3; i++) rn += st.r[i] * st.r[i];
         rn = sqrt(rn);
-        for (int i = 0; i < 3; i++) { up[i] = st.r[i] / rn; vu += vr[i] * up[i]; }
+        for (int i = 0; i < 3; i++) up[i] = st.r[i] / rn;
+        vu = geodetic_up_speed(st.r, vr);
         for (int i = 0; i < 3; i++) vh += (vr[i] - vu * up[i]) * (vr[i] - vu * up[i]);
         fprintf(stderr, "vehdyn: %s gear %s at t=%.2f: ground speed %.1f kt, sink %.1f ft/s\n",
                 NAME[g], now[g] ? "TOUCHDOWN" : "lift-off", st.t, sqrt(vh) / 0.514444, -vu / 0.3048);
@@ -1553,7 +1568,8 @@ static bool entry_aero(double f[3], double tau[3]) {
  * the coefficients and the surfaces. */
 static void entry_log(void) {
     static double last = -1e9;
-    if (!aeroOn || st.t - last < 5.0) return;
+    double hFt = geodetic_h_ft(st.r) - (groundFt < -1e8 ? 8.3 : groundFt);
+    if (!aeroOn || st.t - last < (hFt < 400.0 ? 0.25 : 5.0)) return;   /* the flare and touchdown at 4 Hz */
     last = st.t;
     double r = aeroAl / (180.0 / VD_PI);
     double cl = eaCN * cos(r) - eaCA * sin(r), cd = eaCN * sin(r) + eaCA * cos(r);
@@ -1562,6 +1578,18 @@ static void entry_log(void) {
             st.t, height_m(st.r) / 0.3048, eaMach, aeroAl, aeroBe, aeroQ / 47.880259, cl, cd,
             cd != 0.0 ? cl / cd : 0.0, eaCM, surfPos[SURF_LIB], surfPos[SURF_LOB], surfPos[SURF_RIB],
             surfPos[SURF_ROB], surfPos[SURF_SB], surfPos[SURF_RUD], bfPos, bfDrive);
+    if (hFt < 400.0) {            /* the flare: c.g. height above the runway, its sink, the pitch rate (+ nose up) */
+        double p[3], wE = phys_earth_rate(), vr[3], rn = 0.0, vu = 0.0;
+        phys_earth_pole(p);
+        vr[0] = st.v[0] - wE * (p[1] * st.r[2] - p[2] * st.r[1]);
+        vr[1] = st.v[1] - wE * (p[2] * st.r[0] - p[0] * st.r[2]);
+        vr[2] = st.v[2] - wE * (p[0] * st.r[1] - p[1] * st.r[0]);
+        for (int i = 0; i < 3; i++) rn += st.r[i] * st.r[i];
+        rn = sqrt(rn);
+        vu = geodetic_up_speed(st.r, vr);
+        fprintf(stderr, "vehdyn-flare: t=%.2f hcg=%.1f ft sink=%.2f ft/s pitch_rate=%.2f deg/s\n", st.t, hFt, -vu / 0.3048,
+                st.w[1] * (180.0 / VD_PI));
+    }
 }
 
 /* The gimbals follow their commands at TVC_RATE_DEG_S, inside their limits. */
