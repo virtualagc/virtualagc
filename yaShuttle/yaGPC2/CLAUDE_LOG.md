@@ -30,3 +30,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - #314: tools/flown_iloads.py applies all flown #PC* I-load cells (7,645 differ in G3, 6,287 were missing) to a volume and to captures; run30 touchdown 1.7 s from the flown GMT (was +8.7 s), 190 kt, 3.3 ft/s, X ~2,800 ft; X_ZERO(1) 6,500 vs flown 7,500 caused the low/fast pullup (run28 -> run29).
+
+### [2026-10-31] Target: CAUSES.md
+- #315: flown_iloads on G16: CGGB_EF_PLANE_SW (flown OFF, placeholder GMTLO_REF) dives the ascent; CDUV_NSP_VEHICLE_ILOAD (2->5) stops the OMS-2 burn (unexplained); both NEVER_SET; rest of G16 fine; flown2 chain ET sep MET 520.5 s, OMS-2 fires, 170.5x121.6 nmi.

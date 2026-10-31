@@ -52,6 +52,15 @@ def dumps(cfg):
     return a, b, json.load(open(MAFGEN + "csects-%s.json" % cfg))
 
 
+# CELLS THE FLOWN DUMP HOLDS BUT A FLIGHT'S LOAD MUST NOT SET HERE, each found by a run that failed:
+#   CGGB_EF_PLANE_SW      the dump's OFF makes guidance take the orbit plane from CGGS_T_GMTLO_REF, which the dump
+#                         holds as a placeholder (day 210); the day-of-launch uplink supplies the real plane.  Applied,
+#                         the ascent dives (run flown1) -- left generic (ON) it flies normally (bisect T1).
+#   CDUV_NSP_VEHICLE_ILOAD  2 -> 5, a downlink header word.  Applied, the OMS-2 burn never fires, cause not understood
+#                         (bisect K1; every run that held it failed, every one that did not, burned).
+NEVER_SET = ("CGGB_EF_PLANE_SW", "CDUV_NSP_VEHICLE_ILOAD")
+
+
 def cells(cfg, include, exclude):
     """[(start, generic words, flown words, csect)] -- runs of differing halfwords inside the chosen csects."""
     a, b, cs = dumps(cfg)
@@ -77,7 +86,19 @@ def cells(cfg, include, exclude):
             cur = [i, i, name[i]]
     if cur:
         runs.append(cur)
-    return [(s, a[s:e + 1].copy(), b[s:e + 1].copy(), k) for s, e, k in runs], a, b
+    out = []
+    nm = None
+    for s, e, k in runs:
+        was, new = a[s:e + 1].copy(), b[s:e + 1].copy()
+        if k.startswith("#P"):
+            if nm is None:
+                nm = var_resolver(MAFGEN + "pure-" + cfg + ".fcm", cfg, None)
+            for i in range(len(new)):
+                if was[i] != new[i] and nm(s + i, k) in NEVER_SET:
+                    new[i] = was[i]
+        if any(was[i] != new[i] for i in range(len(new))):
+            out.append((s, was, new, k))
+    return out, a, b
 
 
 def digest(path):
@@ -207,7 +228,40 @@ def patch_volume(args, cfgs, include, exclude):
     return args.out
 
 
+def var_resolver(capture_mem, cfg, csect_ranges):
+    """addr -> variable name, from tools/pasvar.py's compool listings (cached per csect)."""
+    import subprocess
+    import bisect
+    cache = {}
+
+    def listing(comp):
+        if comp in cache:
+            return cache[comp]
+        o = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pasvar.py"),
+                            capture_mem, "--list-compool", comp, "--config", cfg],
+                           capture_output=True, text=True).stdout
+        L = []
+        for l in o.splitlines():
+            m = re.match(r"\s+(\d+)\s+@([0-9a-f]+)\s+(\d+) hw\s+(\S+)", l)
+            if m:
+                L.append((int(m[2], 16), m[4]))
+        L.sort()
+        cache[comp] = (L, [x[0] for x in L])
+        return cache[comp]
+
+    def name(addr, csect):
+        if not csect.startswith("#P"):
+            return ""
+        L, st = listing(csect[2:])
+        j = bisect.bisect_right(st, addr) - 1
+        return L[j][1] if j >= 0 else ""
+    return name
+
+
 def patch_capture(args, cfgs, include, exclude):
+    revert = getattr(args, "revert", False)
+    varpats = getattr(args, "var", None)
+    novar = getattr(args, "novar", None)
     memfiles = sorted(f for f in os.listdir(args.capture) if re.match(r"gpc\d+\.mem\.bin$", f))
     for mf in memfiles:
         path = os.path.join(args.capture, mf)
@@ -216,12 +270,27 @@ def patch_capture(args, cfgs, include, exclude):
         setn = skip = same = 0
         for cfg in cfgs:
             runs, a, b = cells(cfg, include, exclude)
+            vname = var_resolver(path, cfg, None) if (varpats or novar) else None
             for s, was, new, csect in runs:
                 for i in range(len(was)):
                     if int(was[i]) == int(new[i]):
                         continue
+                    if varpats or novar:
+                        nm = vname(s + i, csect)
+                        if varpats and not any(fnmatch.fnmatch(nm, p) for p in varpats):
+                            continue
+                        if novar and any(fnmatch.fnmatch(nm, p) for p in novar):
+                            continue
                     v = int(M[s + i])
-                    if v == int(new[i]):
+                    if revert:
+                        if v == int(new[i]):
+                            M[s + i] = int(was[i])
+                            setn += 1
+                        elif v == int(was[i]):
+                            same += 1
+                        else:
+                            skip += 1
+                    elif v == int(new[i]):
                         same += 1
                     elif v == int(was[i]):
                         M[s + i] = int(new[i])
@@ -251,6 +320,9 @@ def main():
     ap.add_argument("--exclude", action="append", default=None)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--var", action="append", help="with --capture: only cells of variables matching these patterns")
+    ap.add_argument("--novar", action="append", help="with --capture: skip cells of variables matching these patterns (CGGB_EF_PLANE_SW is the first: see the ledger)")
+    ap.add_argument("--revert", action="store_true", help="with --capture: put the GENERIC value back (bisecting which csects matter)")
     a = ap.parse_args()
     include = a.include or ["#PC*"]
     exclude = a.exclude if a.exclude is not None else ["#PCGN13R", "#PFCMGPT"]
