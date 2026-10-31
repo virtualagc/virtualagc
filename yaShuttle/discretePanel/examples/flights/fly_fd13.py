@@ -527,10 +527,20 @@ def optimizer():
     """Load the system SciPy with the system NumPy, avoiding user-site shadows."""
     import site
     user_site = site.getusersitepackages()
-    if user_site in sys.path:
+    removed = user_site in sys.path
+    if removed:
         sys.path.remove(user_site)
-    import numpy as np
-    from scipy.optimize import least_squares
+    try:
+        import numpy as np
+        from scipy.optimize import least_squares
+    except ImportError:
+        # numpy (or scipy) exists only in the user site on this machine (macOS user installs);
+        # the shadowing this avoids is the lesser evil there
+        if not removed:
+            raise
+        sys.path.append(user_site)
+        import numpy as np
+        from scipy.optimize import least_squares
     return np, least_squares
 
 
@@ -1186,6 +1196,7 @@ class FD13(rndz.Rendezvous):
         return post_gmt
 
     def run_fd13(self):
+        optimizer()          # numpy and scipy must import before the flight starts, not at the NC1 design an hour in
         schedule = []
         for i, raw in enumerate(TIGS):
             e = dict(raw)
