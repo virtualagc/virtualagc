@@ -1304,7 +1304,7 @@ class Player(object):
     def __init__(self, entries, after, panel, talkback, log, bus=None, wait_user=None,
                  screens=None, on_done=None, progress=None, counter=None,
                  source=None, gap=None, snaps=None, unattended=False, marks=None,
-                 plan=None, circle=None, clock=None):
+                 plan=None, circle=None, clock=None, key_trace=None):
         from scriptclock import ScriptClock
         self.clock = clock or ScriptClock()
         self.entries, self.after, self.panel = entries, after, panel
@@ -1312,6 +1312,7 @@ class Player(object):
         self.plan, self.circle = plan, circle
         self._plan_end = 0          # entries before this are planned (_plan)
         self.talkback, self.log = talkback, log
+        self.key_trace = key_trace
         self.wait_user = wait_user
         self.unattended = unattended
         self.screens = screens
@@ -1524,8 +1525,14 @@ class Player(object):
         if self.stopped:
             return
         if i < len(keys):
+            sent_monotonic = time.monotonic()
             try:
                 self.bus.send_key(keys[i])
+                if self.key_trace is not None:
+                    try:
+                        self.key_trace(keys[i][3], sent_monotonic)
+                    except Exception as err:
+                        self.log("cannot trace key %s: %s" % (keys[i][3], err))
             except OSError as err:
                 self.log("cannot send key %s: %s" % (keys[i][3], err))
             self.clock.schedule(self.after, self.gap[0], lambda: self._type(k, keys, i + 1))

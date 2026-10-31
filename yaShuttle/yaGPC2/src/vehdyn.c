@@ -1617,11 +1617,11 @@ static void ascent_log(void) {
         up[i] = (R[0][i] * st.r[0] + R[1][i] * st.r[1] + R[2][i] * st.r[2]) / rn;
     const double D = 180.0 / VD_PI;
     fprintf(stderr, "vehdyn-asc: t=%.2f w=%.2f %.2f %.2f up_b=%.3f %.3f %.3f "
-                    "alpha=%.2f beta=%.2f q=%.0f nz=%.3f ny=%.3f "
+                    "alpha=%.2f beta=%.2f q=%.0f nz=%.3f ny=%.3f nx=%.3f "
                     "me_p=%.2f %.2f %.2f me_y=%.2f %.2f %.2f srb_rt=%.2f %.2f %.2f %.2f "
                     "h_ft=%.0f hdot_fts=%.1f\n",
             st.t, st.w[0] * D, st.w[1] * D, st.w[2] * D, up[0], up[1], up[2],
-            aeroAl, aeroBe, aeroQ / 47.880259, -sfB[2] / 9.80665, sfB[1] / 9.80665,
+            aeroAl, aeroBe, aeroQ / 47.880259, -sfB[2] / 9.80665, sfB[1] / 9.80665, sfB[0] / 9.80665,
             tvcPos[0][0], tvcPos[1][0], tvcPos[2][0], tvcPos[0][1], tvcPos[1][1], tvcPos[2][1],
             tvcPos[3][0], tvcPos[3][1], tvcPos[4][0], tvcPos[4][1], geodetic_h_ft(st.r),
             (st.r[0] * st.v[0] + st.r[1] * st.v[1] + st.r[2] * st.v[2]) / rn / 0.3048);

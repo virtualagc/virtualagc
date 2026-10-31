@@ -463,6 +463,7 @@ class Ears(object):
         self.tru = None
         self.tgt = None
         self.hist_o, self.hist_t = [], []      # (gmt, r, v), the last couple of minutes
+        self.hist_clock = []                   # (host monotonic, vehicle t, gmt) for event timing
         self.dl = {}
         self.dl_t = {}
         self.cycle, self._cyc = None, {}       # PASS's two states from one downlist cycle
@@ -479,11 +480,14 @@ class Ears(object):
             except socket.timeout:
                 continue
             if d[:4] == b"TRU1" and len(d) >= 4 + 8 * 15:
+                received_monotonic = time.monotonic()
                 n = (len(d) - 4) // 8
                 v = struct.unpack(">%dd" % n, d[4:4 + 8 * n])
                 with self.lock:
                     self.tru = {"t": v[0], "gmt": v[1], "q": v[2:6], "w": v[6:9], "r": v[9:12], "v": v[12:15],
                                 "cg": v[27:30] if n >= 30 else (0.0, 0.0, 0.0)}
+                    self.hist_clock.append((received_monotonic, v[0], v[1]))
+                    del self.hist_clock[:-3000]
                     self.hist_o.append((v[1], v[9:12], v[12:15]))
                     del self.hist_o[:-3000]
 
@@ -549,6 +553,24 @@ class Ears(object):
             name, _, body = d.decode("utf-8", "replace").partition("\n")
             with self.lock:
                 self.screens[name.strip().lower()] = body
+
+    def vehicle_clock_at(self, host_monotonic):
+        """Interpolate vehicle time at a host-monotonic event timestamp."""
+        event = float(host_monotonic)
+        with self.lock:
+            history = list(self.hist_clock)
+        before = next((x for x in reversed(history) if x[0] <= event), None)
+        after = next((x for x in history if x[0] >= event), None)
+        if before is None or after is None or after[0] <= before[0]:
+            return None
+        rate = (after[1] - before[1]) / (after[0] - before[0])
+        if not 0.1 <= rate <= 10.0:
+            return None
+        fraction = (event - before[0]) / (after[0] - before[0])
+        return {"vehicle_t": before[1] + fraction * (after[1] - before[1]),
+                "vehicle_gmt": before[2] + fraction * (after[2] - before[2]),
+                "sample_t": before[1], "sample_age_s": event - before[0],
+                "rate": rate}
 
     def truth_at(self, which, gmt):
         """A vehicle's truth (r, v, m and m/s) at a GMT of the last minutes,
@@ -1237,6 +1259,7 @@ FAULT_SUMMARY_HW = 0x1D02          # CDL_FAULT_SUMMARY_PAGE
 
 class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
     def __init__(self, a):
+        os.makedirs(a.logs, exist_ok=True)
         super().__init__(a)
         os.makedirs(a.logs, exist_ok=True)      # a new --logs directory, as a GUI run names one
         self.checklog = open(os.path.join(a.logs, "rndz-check.log"), "a", encoding="utf-8")
@@ -1338,8 +1361,23 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
 
     # --- the vehicle ------------------------------------------------------
     def start(self, resume=None):
-        rel = os.environ.get("YAGPC_VEHDYN_START_REL")
-        if not rel:
+        # A continuous FD1--FD3 run has already advanced the vehicle to the
+        # NC4 handoff.  Resume that saved vehicle directly and let UPLINK
+        # establish the rendezvous target; do not synthesize a replacement
+        # START_REL state over the captured truth.
+        fd13 = getattr(self.a, "from_fd13", None)
+        if fd13:
+            source = os.path.abspath(os.path.expanduser(fd13))
+            # I-load selection for rendezvous is patched into the resumed GPC
+            # image below.  Keep the FD13 terminal capture immutable so it
+            # remains valid acceptance evidence and can be resumed again.
+            os.makedirs(self.a.logs, exist_ok=True)
+            resume = os.path.join(self.a.logs, "resume-fd13")
+            if os.path.exists(resume):
+                raise FileExistsError("refusing to overwrite rendezvous resume copy: " + resume)
+            shutil.copytree(source, resume)
+        rel = None if fd13 else os.environ.get("YAGPC_VEHDYN_START_REL")
+        if not rel and not fd13:
             out = subprocess.run([sys.executable, os.path.join(YAGPC2, "tools", "rndz_start.py"), "start",
                                   "--targets", self.a.targets, "--ti", TI_TIG, "--start", EPOCH],
                                  check=True, capture_output=True, text=True).stdout
@@ -1347,7 +1385,9 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
             rel = re.search(r"YAGPC_VEHDYN_START_REL=(\S+)", out).group(1)
             for line in out.strip().splitlines():
                 self.say("start: " + line)
-        st = ascent_end_state(self.a.ascent_state, self.say)
+        # a resumed capture carries its own propellant (the START_REL env below is only read by a fresh start)
+        st = (ascent_end_state(getattr(self.a, "ascent_state", ""), self.say) if not (fd13 or resume)
+              else dict(rcs_used="0,0,0", oms_used="0,0", orbiter_kg=ORBITER_KG))
         env = dict(os.environ, YAGPC_MDM_DEVICES="1", YAGPC_VEHDYN="1",
                    YAGPC_VEHDYN_ORBITER_KG="%.1f" % st["orbiter_kg"], YAGPC_OMS_ARMED="1",
                    # The propellant is the vehicle's own, carried from the
@@ -1370,6 +1410,10 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    # (a held start's windows to arrange)
                    NSTS_PANEL_OPS="GNC,2",
                    PYTHONUNBUFFERED="1")
+        if rel:
+            env["YAGPC_VEHDYN_START_REL"] = rel
+        else:
+            env.pop("YAGPC_VEHDYN_START_REL", None)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
                "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
@@ -2593,15 +2637,20 @@ wait crt 1 title 2011/ timeout 600
 
     def vehdyn_capture(self, name):
         """The truth in a capture: the sensed delta-V (m/s, M50) and each OMS
-        engine's burning seconds (vehdyn_save's order)."""
+        engine's propellant, fire state, and burning seconds (vehdyn_save's order)."""
         try:
-            b = json.load(open(os.path.join(self.a.logs, "sts134r-" + name, "vehdyn.json")))["vehdyn"]
+            with open(os.path.join(self.a.logs, "sts134r-" + name, "vehdyn.json")) as f:
+                b = json.load(f)["vehdyn"]
         except (OSError, ValueError, KeyError):
             return None
+        propellant = b[16:21]                     # RCS F/L/R, then OMS L/R (kg)
         i = 3 + 3 + 3 + 4 + 3 + 5                # version, have, t, r, v, q, w, propellant
         sensed = b[i:i + 3]
         i += 3 + 2 * 44                           # on[], onSec[]
-        return {"sensed": sensed, "oms_s": (b[i + 6], b[i + 13])}
+        return {"sensed": sensed,
+                "oms_propellant_kg": propellant[3:5],
+                "oms_fire": (bool(b[i]), bool(b[i + 7])),
+                "oms_s": (b[i + 6], b[i + 13])}
 
     def trim_residuals(self):
         return self.null_vgo("ti", 6)
@@ -2623,10 +2672,10 @@ wait crt 1 title 2011/ timeout 600
                              "station is running (--rhc %s); stopping rather than flying a burn that "
                              "delivers nothing" % (label, self.a.rhc))
                     raise SystemExit(2)
-        except OSError:
+        except (OSError, AttributeError):    # no panel log yet, or none to read (a test's stand-in)
             pass
 
-    def null_vgo(self, label, passes):
+    def null_vgo(self, label, passes, initial_vgo=None):
         """Null VGO with the THC, DAP TRANS NORM: the Ti burn's residuals
         ("Trim Residuals: ... Orbit: All axes < 0.2 fps", OMS 2/ORBIT OMS
         BURNS) and the whole of a multi-axis RCS burn (RCS BURN, CC 9-3, step
@@ -2653,14 +2702,24 @@ wait crt 1 title 2011/ timeout 600
         measured = {}
         count0 = w.get("CGNV_DV_COUNT")
 
-        def read_vgo():
+        def read_vgo(probe_if_missing=True):
             v = [w.get("CGZV_VGO$%d" % i) for i in (1, 2, 3)]
             if all(isinstance(x, float) for x in v):
                 return dict(zip("xyz", v))
+            if not probe_if_missing:
+                return None
             mem = self.probe("%s-vgo" % label)
             return dict(zip("xyz", mem.svec(mem.A["VGO_BODY"]))) if mem else None
 
-        vgo = read_vgo()
+        # Prefer current downlist data. If it is unavailable at TIG, use the
+        # already captured preburn VGO rather than taking a blocking snapshot
+        # before the first control dispatch.
+        vgo = read_vgo(probe_if_missing=False)
+        if vgo is None and initial_vgo is not None:
+            vgo = dict(initial_vgo)
+            self.say("VGO NULL (%s): live VGO unavailable; using preburn capture" % label)
+        if vgo is None:
+            vgo = read_vgo()
         if vgo is None:
             self.say("VGO NULL (%s): VGO not readable; nothing flown" % label)
             return None
@@ -2703,7 +2762,12 @@ wait crt 1 title 2011/ timeout 600
             lines, gap = [], 0.0
             for ax, key, v, hold in holds:
                 lines.append("+%.2f   thc fwd %s %.2f" % (gap, key, hold))
-                gap = hold + 0.3
+                # Both crew-script offsets and THC hold expirations use
+                # ScriptClock, which follows vehicle time when telemetry is
+                # available. Keep the next axis after the prior hold in
+                # vehicle seconds; dividing by the requested rate makes the
+                # holds overlap at accelerated rates.
+                gap += hold + 0.3
             self.say("VGO NULL (%s) pass %d: VGO %+.2f %+.2f %+.2f ft/s; THC %s"
                      % (label, n, vgo["x"], vgo["y"], vgo["z"],
                         ", ".join("%s %.2f s (%.3f ft/s^2)" % (k.upper(), h, acc[k]) for _, k, _, h in holds)))
@@ -3321,6 +3385,8 @@ def main():
                          "is pressed here -- time to arrange the windows first")
     ap.add_argument("--to", choices=PHASES)
     ap.add_argument("--from", dest="from_", choices=PHASES[1:])
+    ap.add_argument("--from-fd13", metavar="DIR",
+                    help="resume rendezvous from fly_fd13.py's NC4+2 min capture; UPLINK starts next")
     ap.add_argument("--crts", type=int, default=1)
     ap.add_argument("--coast-min", type=float, default=76.9,
                     help="COAST: minutes after Ti to fly before stopping (default 76.9, to T2)")
@@ -3413,6 +3479,57 @@ def main():
     ap.add_argument("--check-every", type=float, default=30.0,
                     help="seconds of vehicle time between rndz-check.log comparisons (default 30)")
     a = ap.parse_args()
+    if a.from_fd13:
+        if a.from_:
+            ap.error("--from-fd13 cannot be combined with --from")
+        a.from_fd13 = os.path.abspath(os.path.expanduser(a.from_fd13))
+        if not all(os.path.isfile(os.path.join(a.from_fd13, name))
+                   for name in ("vehicle.json", "vehdyn.json")):
+            ap.error("--from-fd13 needs a capture directory containing vehicle.json and vehdyn.json")
+        prior_result = os.path.join(os.path.dirname(a.from_fd13), "RESULT.json")
+        try:
+            with open(prior_result) as result_file:
+                fd13_result = json.load(result_file)
+        except (OSError, ValueError) as e:
+            ap.error("--from-fd13 needs its completed sibling RESULT.json: %s" % e)
+        final = fd13_result.get("final")
+        if fd13_result.get("status") != "full-stage-complete" or not isinstance(final, dict):
+            ap.error("--from-fd13 requires a completed full FD13 stage")
+        if not isinstance(final.get("acceptance"), dict) or final["acceptance"].get("accepted") is not True:
+            ap.error("--from-fd13 requires an NC4+2-minute state within 5000 ft and 5 ft/s")
+        if final.get("gmt_utc") != "2011-05-18T06:10:00" or abs(float(final.get("gmt", 0)) - 11945400.0) > 5.0:
+            ap.error("--from-fd13 requires the FD13 terminal state at 2011-05-18 06:10 UTC")
+        source_snapshot = next((s for s in fd13_result.get("snapshots", [])
+                                if s.get("name") == "nc4-plus-2-min"
+                                and os.path.realpath(s.get("path", "")) == os.path.realpath(a.from_fd13)), None)
+        if source_snapshot is None:
+            ap.error("--from-fd13 must name the FD13 nc4-plus-2-min capture")
+        try:
+            with open(os.path.join(a.from_fd13, "vehdyn.json")) as capture_file:
+                saved_vehdyn = json.load(capture_file)["vehdyn"]
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            ap.error("--from-fd13 cannot read the NC4 OMS state: %s" % e)
+        if len(saved_vehdyn) != 228:
+            ap.error("--from-fd13 requires a 228-field vehdyn capture (found %d)" % len(saved_vehdyn))
+        # NC4 uses the left OMS engine (ITEM 2); its fire flag is vehdyn[112].
+        if len(saved_vehdyn) <= 112 or saved_vehdyn[112] != 0:
+            ap.error("--from-fd13 capture is not after NC4 OMS cutoff")
+        a.from_ = "UPLINK"
+        # The FD13 stage uses the ascent tape.  Before rendezvous UPLINK, load
+        # STS-134's rendezvous targeting/navigation I-loads into the restored
+        # GPC image unless the caller explicitly selected another DASS group.
+        # dass_iloads() patches the capture's memory image, leaving the tape
+        # unchanged so the continuous-flight snapshot remains resumable.
+        if a.dass_iloads is None:
+            a.dass_iloads = "rndz"
+        # fly_fd13 records which combined ascent/rendezvous tape it used.
+        # Reuse that exact tape by default so simulatePASS's snapshot digest
+        # check succeeds without requiring a second, easily missed option.
+        if a.tape is None:
+            saved_tape = fd13_result.get("tape")
+            if not saved_tape or not os.path.isfile(os.path.expanduser(saved_tape)):
+                ap.error("--from-fd13 could not find the recorded flight tape: %s" % saved_tape)
+            a.tape = os.path.expanduser(saved_tape)
     if a.tape is None:
         a.tape = GNC_VOLUME if a.flight_gnc else RNDZ_VOLUME
     if a.flight_gnc:
