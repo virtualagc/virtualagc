@@ -208,6 +208,9 @@ METERING_OVERRIDE = ("+1     keys SPEC 5 5 PRO\n"
 # G51 SEL ATMOSPHERE (ENT/134/FIN FS 3-7): the drag-altitude measurement's density model, one of three
 # (CGNV_ATM_INDEX = item - 22 here; GKMRMS CASE15).  Inclination <= 50: item 22.  Above 50: by month and
 # the hemisphere/pass, the table below; STS-134 (51.6 deg) lands on a northern descending pass.
+# KTTS (the Shuttle Landing Facility) METARs bracketing the 152/06:34:50 GMT touchdown: 010600Z and 010700Z both A3001
+# (SLP 1016.2 / 1016.1 mb), as supplied by the owner 2026-10-30.  STS-134 specific.
+ALTIMETER_INHG = ["3", "0", ".", "0", "1"]
 ATM_ITEM_N_DESC = [23, 23, 23, 23, 22, 24, 24, 24, 22, 23, 23, 23]    # Jan .. Dec
 def atmosphere_item(gmt_s):
     day = int(gmt_s // 86400.0)                       # day of the (non-leap) year, 0 = Jan 1
@@ -1019,6 +1022,12 @@ class Flight:
         self.play(ENTRY_OPS304, "ops304")
         self.script_done("ops304", 180)
         self.say("crew: OPS 304 at EI-5")
+        # HORIZ SIT ITEM 9, "ALTM": the landing field's altimeter setting (ENT/134/FIN FS 3-7, GKFHOR CASE1 key 3 ->
+        # CGZV_BARO -> GYAADT's pressure-altitude correction, HPC = HPU - BARO).  Default 29.9213.
+        self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 9 + %s EXEC\n+8     keys RESUME\n" %
+                  " ".join(ALTIMETER_INHG), "altimeter")
+        self.script_done("altimeter", 60)
+        self.say("crew: HORIZ SIT ITEM 9, altimeter setting %s inHg" % "".join(ALTIMETER_INHG))
         item = atmosphere_item(t["ei"])
         self.play("+1     keys SPEC 5 1 PRO\n+8     keys ITEM %d %d EXEC\n+8     keys RESUME\n" % (item // 10, item % 10), "atmosphere")
         self.script_done("atmosphere", 60)

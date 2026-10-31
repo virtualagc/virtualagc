@@ -27,3 +27,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-30] Target: CAUSES.md
 - #313: vehdyn touchdown sink was geocentric not geodetic (low by 0.8 ft/s); true 2.9 ft/s vs design 3, flown 1.21; TD range 1550 ft vs 2500 design / 3186 flown is not ground effect (fade height tested 30-90 ft: no change).
+
+### [2026-10-30] Target: CAUSES.md
+- #314: tools/flown_iloads.py applies all flown #PC* I-load cells (7,645 differ in G3, 6,287 were missing) to a volume and to captures; run30 touchdown 1.7 s from the flown GMT (was +8.7 s), 190 kt, 3.3 ft/s, X ~2,800 ft; X_ZERO(1) 6,500 vs flown 7,500 caused the low/fast pullup (run28 -> run29).
