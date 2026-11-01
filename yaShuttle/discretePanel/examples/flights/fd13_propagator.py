@@ -11,7 +11,9 @@ import hashlib
 import math
 import os
 import shlex
+import shutil
 import subprocess
+import sys
 import tempfile
 
 
@@ -57,6 +59,42 @@ def pass_rnp(year, day):
             (sy, -sx * cy, cx * cy))
 
 
+def _build_physics_msvc(source_dir, source, output):
+    """Build physics.c into a DLL with MSVC (Windows has no cc).
+
+    cl must be on PATH, or vswhere must find a Visual Studio whose vcvars64.bat
+    can be run first.  The four entry points the propagator calls are exported
+    on the link line, so physics.c needs no dllexport.
+    """
+    exports = ["/EXPORT:" + name for name in
+               ("phys_set_gravity", "phys_set_drag", "phys_set_earth", "phys_advance_to")]
+    cl = ["cl", "/nologo", "/O2", "/LD", "/I", source_dir, source,
+          "/Fo" + output + ".obj", "/Fe" + output, "/link"] + exports
+    prefix = ""
+    if shutil.which("cl") is None:
+        vswhere = os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
+                               "Microsoft Visual Studio", "Installer", "vswhere.exe")
+        found = subprocess.run([vswhere, "-latest", "-products", "*", "-property",
+                                "installationPath"], capture_output=True, text=True)
+        root = found.stdout.strip() if found.returncode == 0 else ""
+        vcvars = os.path.join(root, "VC", "Auxiliary", "Build", "vcvars64.bat")
+        if not root or not os.path.isfile(vcvars):
+            raise RuntimeError("no C compiler: cl is not on PATH and vswhere found no "
+                               "Visual Studio; run from a Developer Command Prompt")
+        prefix = 'call "%s" >nul && ' % vcvars
+    try:
+        subprocess.run(prefix + subprocess.list2cmdline(cl), shell=True, check=True,
+                       capture_output=True, text=True)
+    finally:
+        for extra in (output + ".obj",):
+            if os.path.exists(extra):
+                os.unlink(extra)
+        base = os.path.splitext(output)[0]
+        for extra in (base + ".lib", base + ".exp"):
+            if os.path.exists(extra):
+                os.unlink(extra)
+
+
 def _load_physics():
     source_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                               "../../../yaGPC2/src"))
@@ -66,14 +104,19 @@ def _load_physics():
         digest = hashlib.sha256(stream.read()).hexdigest()[:20]
     with open(header, "rb") as stream:
         digest = hashlib.sha256((digest.encode() + stream.read())).hexdigest()[:20]
-    library_path = os.path.join(tempfile.gettempdir(), "libfd13-physics-%s.so" % digest)
+    windows = sys.platform == "win32"
+    library_path = os.path.join(tempfile.gettempdir(), "libfd13-physics-%s.%s"
+                                % (digest, "dll" if windows else "so"))
     if not os.path.isfile(library_path):
         temporary = library_path + ".%d.tmp" % os.getpid()
-        command = shlex.split(os.environ.get("CC", "cc")) + [
-            "-O3", "-std=c11", "-fPIC", "-shared", "-I", source_dir,
-            "-o", temporary, source, "-lm"]
         try:
-            subprocess.run(command, check=True, capture_output=True, text=True)
+            if windows:
+                _build_physics_msvc(source_dir, source, temporary)
+            else:
+                command = shlex.split(os.environ.get("CC", "cc")) + [
+                    "-O3", "-std=c11", "-fPIC", "-shared", "-I", source_dir,
+                    "-o", temporary, source, "-lm"]
+                subprocess.run(command, check=True, capture_output=True, text=True)
             try:
                 os.replace(temporary, library_path)
             except OSError:
