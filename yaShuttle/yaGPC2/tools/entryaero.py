@@ -293,16 +293,15 @@ def _flight_ld_weight(M):
 # axial force above the prediction at 55 deg, "underpredicted by ~60 counts": +25-35% at 55-65 deg) and fig 5 (STS-2 flight
 # sweep at Mach 0.5, about 10% above prediction at the top, 87 deg), i.e. a factor of 1.1-1.35 depending on the angle; and the
 # Orbiter design requirement (Young & Underwood, NTRS-19850008600 Table 1: peak subsonic L/D >= 4.4 closed and >= 2.5 at 85 deg
-# open), which implies ~2x.  With the increment as modelled PASS's approach arrived 2,000 ft above its outer glide slope and
-# 20 KEAS fast with the speedbrake saturated at 98.6 deg, dived at 27-30 deg and hit the ground short of the runway at
-# 280-300 kt with the gear unlocked (ledger #316; replays of the STS-134 entry capture, 2026-11-02).  Scaling the increment from
-# closed by SB_SCALE at Mach <= 0.6 (faded out to 1.0 like sb_dca) puts PASS on its reference: 1.0 -> 2,000 ft above the glide
-# slope / 37 ft/s fast / gear-up at 298 kt; 1.25 -> 490 ft / 26 ft/s, lands hard; 1.35 -> 200 ft / 12 ft/s; 1.4 -> -8 ft /
-# -0.6 ft/s, a nominal 18 deg speedbrake, 194-197 kt (flown 195.3); 1.5 -> -1 ft / -4 ft/s.  1.4 is therefore ABOVE the
-# flight-supported 1.1-1.35 at the angles PASS uses; the excess stands in for a drag or energy shortfall elsewhere that is not
-# yet identified (the design requirement allows up to ~2x, and the handbook's glide-slope numbers imply ~8% more drag at the
-# nominal brake setting).  FLAGGED: a calibration, not a measurement; its Mach dependence above 0.5 is an assumption.
-SB_SCALE = 1.4
+# open), which implies ~2x.  SB_SCALE is the flight-evidence value, 1.25 (the middle of 1.1-1.35), applied to the increment
+# from closed at Mach <= 0.6 and faded out to 1.0 by Mach 1.0 like sb_dca; the only data are at Mach 0.5.
+# HISTORY: this was first 1.4, calibrated on entry replays that arrived 2,000 ft above the glide slope with the speedbrake
+# saturated and crashed short.  That was NOT an aerodynamic shortfall: PASS's GPS had stopped in those captures, its altitude
+# was 6-9 kft low through TAEM and it dived late (ledger: the stale-GPS entry; tools/capgps.py).  With live GPS PASS is on its
+# own reference with any value here; the replays and the full chain land gear-down at 197-201 kt, 1.7-3.0 ft/s (flown 195.3 kt,
+# 1.2 ft/s) and the speedbrake factor moves the touchdown by a few knots only.  1.25 is kept for the flight data's sake, not
+# to make a landing.  FLAGGED: its Mach dependence above 0.5 is an assumption.
+SB_SCALE = 1.25
 SB_SCALE_FADE = (0.6, 1.0)
 
 def _sb_scale(M):
