@@ -298,13 +298,13 @@ def _flight_ld_weight(M):
 # 0.5-0.6) puts PASS near its reference.  Replays of the STS-134 entry capture, all else unchanged: 1.0 -> 2,000 ft above
 # the glide slope / 37 ft/s fast / gear-up at 298 kt; 1.25 -> 490 ft / 26 ft/s, lands hard (4.4 ft/s); 1.35 -> 200 ft /
 # 12 ft/s, 194 kt, 2.6 ft/s; 1.4 -> -8 ft / -0.6 ft/s, 196 kt, 2.6 ft/s (flown 195.3 kt / 1.2 ft/s); 1.5 -> -1 ft /
-# -4 ft/s.  The flight evidence supports 1.2-1.35: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24,
-# the flight-modified against the original data-book prediction at Mach 0.6, puts the speedbrake drag increment 8-14%
-# higher; CP-2283 figs 5 and 14 put it 17-30% higher (flight above prediction); the design requirement (~2x) is the upper
-# bound.  1.35 is the top of the flight-supported range.  FLAGGED: a calibration inside that documented range, chosen so
-# that the flown-load guidance flies near its own reference; it is not a measurement, and its Mach dependence above 0.5
-# is an assumption.
-SB_SCALE = 1.35
+# -4 ft/s.  The documented range is 1.2-2.0: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24, the
+# flight-modified against the original data-book prediction at Mach 0.6, puts the speedbrake drag increment 8-14% higher;
+# CP-2283 figs 5 and 14 put it 17-30% higher (flight above prediction); the design requirement (~2x) is the upper bound.
+# 1.4 is where PASS is on its own reference (glide-slope error ~0, speed error ~0, a nominal 18 deg speedbrake) and the
+# touchdown speed is the flown one.  FLAGGED: a calibration inside that range, not a measurement; its Mach dependence
+# above 0.5 is an assumption.
+SB_SCALE = 1.4
 SB_SCALE_FADE = (0.6, 1.0)
 
 def _sb_scale(M):
