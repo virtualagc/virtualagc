@@ -15,9 +15,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def times(capdir):
-    out = subprocess.run([sys.executable, os.path.join(HERE, "pasvar.py"), "--config", "G3",
+    run = subprocess.run([sys.executable, os.path.join(HERE, "pasvar.py"), "--config", "G3",
                           os.path.join(capdir, "gpc1.mem.bin"), "CGPV_T_GPS_NEW$(1)", "CGMV_IMU_TIME_LFE"],
-                         capture_output=True, text=True).stdout
+                         capture_output=True, text=True)
+    out = run.stdout
+    if run.returncode != 0 and run.stderr.strip():
+        print("pasvar.py failed (it needs the SDF library, see its usage):\n  " + run.stderr.strip().splitlines()[-1])
     got = {}
     for line in out.splitlines():
         m = re.match(r"\s+(CG\w+)(?:\$\(1\))?\s+@\w+\s+.*?\s(-?\d+\.\d+)\s*$", line)
