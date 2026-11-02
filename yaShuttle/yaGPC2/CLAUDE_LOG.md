@@ -33,3 +33,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-10-31] Target: CAUSES.md
 - #315: flown_iloads on G16: CGGB_EF_PLANE_SW (flown OFF, placeholder GMTLO_REF) dives the ascent; CDUV_NSP_VEHICLE_ILOAD (2->5) stops the OMS-2 burn (unexplained); both NEVER_SET; rest of G16 fine; flown2 chain ET sep MET 520.5 s, OMS-2 fires, 170.5x121.6 nmi.
+
+### [2026-11-02] Target: TIMELINE-STS134-ENTRY.md
+- Landing "too fast and too low" (owner's long-standing impression) = gear-up contacts at 280-300 kt (Linux E1, Mac run5b, replays L1/L2/X0). Root cause (ledger #316): the subsonic speedbrake drag increment was the data book's prediction, faded to zero by Mach 1; PASS arrived 2,000 ft above the OGS and 20 KEAS fast with the brake saturated and dived. Fix: tools/entryaero.py SB_SCALE 1.35 (M<=0.6). Replays now land at 189-190 kt / 2.8-3.1 ft/s (flown 195.3 / 1.2); EXEC->wheels stop chain lands. Gear deploy time (vehdyn.c GEAR_DEPLOY_S 10, PROVISIONAL) still open: FPH says 4 s aero / >=5 s before touchdown; owner cites ~6 s.
