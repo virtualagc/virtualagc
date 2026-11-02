@@ -286,7 +286,44 @@ def _flight_ld_weight(M):
     else: x = (5.0 - M) / 0.5
     return x * x * (3.0 - 2.0 * x)
 
+# SPEEDBRAKE EFFECTIVENESS, FLIGHT AND DESIGN LEVEL.  The subsonic speedbrake increments above (SB_DCA) were read from the
+# data book's PREDICTION lines.  The flight data run higher: CP-2283 Pt 1 fig 14 (STS-1/2 flight points about +0.006 in axial
+# force above the prediction at 55 deg, "underpredicted by ~60 counts") and the STS-2 flight sweep at Mach 0.5 (fig 5,
+# alpha 6, elevon 6: about 0.050-0.060 at 87 deg against this model's ~0.047 from closed, i.e. 20-30% low); and the Orbiter
+# design requirement (Young & Underwood, NTRS-19850008600 Table 1: peak subsonic L/D >= 4.4 closed and >= 2.5 at 85 deg
+# open) implies an increment about twice this model's.  With the increment as modelled PASS's approach arrived 2,000 ft above
+# its outer glide slope and 20 KEAS fast with the speedbrake saturated at 98.6 deg, dived at 27-30 deg and hit the ground
+# short of the runway at 280-300 kt with the gear unlocked (ledger; replays of the STS-134 entry capture, 2026-11-02).
+# Scaling the increment from closed by SB_SCALE at Mach <= 0.6 (faded out to 1.0 like sb_dca; the only data are at Mach
+# 0.5-0.6) puts PASS near its reference.  Replays of the STS-134 entry capture, all else unchanged: 1.0 -> 2,000 ft above
+# the glide slope / 37 ft/s fast / gear-up at 298 kt; 1.25 -> 490 ft / 26 ft/s, lands hard (4.4 ft/s); 1.35 -> 200 ft /
+# 12 ft/s, 194 kt, 2.6 ft/s; 1.4 -> -8 ft / -0.6 ft/s, 196 kt, 2.6 ft/s (flown 195.3 kt / 1.2 ft/s); 1.5 -> -1 ft /
+# -4 ft/s.  The flight evidence supports 1.2-1.35: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24,
+# the flight-modified against the original data-book prediction at Mach 0.6, puts the speedbrake drag increment 8-14%
+# higher; CP-2283 figs 5 and 14 put it 17-30% higher (flight above prediction); the design requirement (~2x) is the upper
+# bound.  1.35 is the top of the flight-supported range.  FLAGGED: a calibration inside that documented range, chosen so
+# that the flown-load guidance flies near its own reference; it is not a measurement, and its Mach dependence above 0.5
+# is an assumption.
+SB_SCALE = 1.35
+SB_SCALE_FADE = (0.6, 1.0)
+
+def _sb_scale(M):
+    if M >= SB_SCALE_FADE[1]:
+        return 1.0
+    f = 1.0 if M <= SB_SCALE_FADE[0] else (SB_SCALE_FADE[1] - M) / (SB_SCALE_FADE[1] - SB_SCALE_FADE[0])
+    return 1.0 + (SB_SCALE - 1.0) * f
+
 def coeffs(M, a, de, dbf, dsb):
+    """CN, CA, CM (about the MRP) at Mach M, alpha a, deflections in degrees: the speedbrake's increment from closed
+    scaled by _sb_scale(M)."""
+    c = _coeffs_unscaled(M, a, de, dbf, dsb)
+    k = _sb_scale(M)
+    if k == 1.0 or dsb == 0.0:
+        return c
+    c0 = _coeffs_unscaled(M, a, de, dbf, 0.0)
+    return tuple(c0[j] + k * (c[j] - c0[j]) for j in range(3))
+
+def _coeffs_unscaled(M, a, de, dbf, dsb):
     """CN, CA, CM (about the MRP) at Mach M, alpha a, deflections in degrees."""
     cn, ca, cm = _calibrated(M, a, de, dbf, dsb)
     w, ka, kd, kb, a0, de0, bf0 = _stab_gains(M)
