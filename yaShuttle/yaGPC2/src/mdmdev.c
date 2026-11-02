@@ -1572,7 +1572,20 @@ static void fa_mfe(int k, uint16_t *w, int n) {
 #define GPS_READ  0x26C5Fu    /* FIOGPSRD: mode 9, card 11 ch 2, 32 words */
 #define GPS_WRITE 0x22C5Fu    /* FIOGPSWT: mode 8, card 11 ch 2, 32 words */
 #define GPS_LAG_S 0.05
-#define GPS_OFFSET_S (504403200.0 + 11.0)
+#define GPS_OFFSET_DEFAULT_S 504403200.0   /* CGNS_T_GPS_OFFSET_SECS of the generic volume */
+/* PASS's CGNS_T_GPS_OFFSET_SECS is the origin it subtracts from a receiver's seconds (GPBGPS.hal:926-932).  The flown I-load
+ * (946252800) differs from the generic one, and a receiver that sends the other convention is rejected by PASS's 0.48 s
+ * time-tag test forever (the stale-GPS entry captures).  YAGPC_GPS_T_OFFSET_SECS names the value the loaded memory carries. */
+static double gps_offset_s(void) {
+    static double v = -1.0;
+    if (v < 0.0) {
+        const char *e = yagpc_getenv("YAGPC_GPS_T_OFFSET_SECS");
+        v = (e != NULL && *e) ? atof(e) : GPS_OFFSET_DEFAULT_S;
+        v += 11.0;
+    }
+    return v;
+}
+#define GPS_OFFSET_S gps_offset_s()
 
 typedef struct {
     bool haveCmd;

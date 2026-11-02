@@ -58,7 +58,14 @@ def dumps(cfg):
 #                         the ascent dives (run flown1) -- left generic (ON) it flies normally (bisect T1).
 #   CDUV_NSP_VEHICLE_ILOAD  2 -> 5, a downlink header word.  Applied, the OMS-2 burn never fires, cause not understood
 #                         (bisect K1; every run that held it failed, every one that did not, burned).
-NEVER_SET = ("CGGB_EF_PLANE_SW", "CDUV_NSP_VEHICLE_ILOAD")
+#   CGNS_T_GPS_OFFSET_SECS  504403200 -> 946252800, the GPS-seconds origin PASS subtracts to turn a receiver's time into GMT
+#                         (GPBGPS.hal:926-932).  mdmdev.c's receivers send GPS_OFFSET_S (504403200 + 11), so with the flown
+#                         value PASS reads every fix as 14 years off, fails the 0.48 s time-tag test and takes no GPS at all:
+#                         navigation then runs on the last fix plus the IMU, arrives at TAEM 6-9 kft low in altitude and dives
+#                         (the entry captures that crashed, ledger "stale GPS entry").  Probe: the shared tig1 with only this
+#                         cell put back keeps GPS live.  Left generic here; YAGPC_GPS_T_OFFSET_SECS makes the receivers match
+#                         a memory that already carries the flown value.
+NEVER_SET = ("CGGB_EF_PLANE_SW", "CDUV_NSP_VEHICLE_ILOAD", "CGNS_T_GPS_OFFSET_SECS")
 
 
 def cells(cfg, include, exclude):
