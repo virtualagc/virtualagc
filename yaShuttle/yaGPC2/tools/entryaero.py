@@ -286,24 +286,22 @@ def _flight_ld_weight(M):
     else: x = (5.0 - M) / 0.5
     return x * x * (3.0 - 2.0 * x)
 
-# SPEEDBRAKE EFFECTIVENESS, FLIGHT AND DESIGN LEVEL.  The subsonic speedbrake increments above (SB_DCA) were read from the
-# data book's PREDICTION lines.  The flight data run higher: CP-2283 Pt 1 fig 14 (STS-1/2 flight points about +0.006 in axial
-# force above the prediction at 55 deg, "underpredicted by ~60 counts") and the STS-2 flight sweep at Mach 0.5 (fig 5,
-# alpha 6, elevon 6: about 0.050-0.060 at 87 deg against this model's ~0.047 from closed, i.e. 20-30% low); and the Orbiter
-# design requirement (Young & Underwood, NTRS-19850008600 Table 1: peak subsonic L/D >= 4.4 closed and >= 2.5 at 85 deg
-# open) implies an increment about twice this model's.  With the increment as modelled PASS's approach arrived 2,000 ft above
-# its outer glide slope and 20 KEAS fast with the speedbrake saturated at 98.6 deg, dived at 27-30 deg and hit the ground
-# short of the runway at 280-300 kt with the gear unlocked (ledger; replays of the STS-134 entry capture, 2026-11-02).
-# Scaling the increment from closed by SB_SCALE at Mach <= 0.6 (faded out to 1.0 like sb_dca; the only data are at Mach
-# 0.5-0.6) puts PASS near its reference.  Replays of the STS-134 entry capture, all else unchanged: 1.0 -> 2,000 ft above
-# the glide slope / 37 ft/s fast / gear-up at 298 kt; 1.25 -> 490 ft / 26 ft/s, lands hard (4.4 ft/s); 1.35 -> 200 ft /
-# 12 ft/s, 194 kt, 2.6 ft/s; 1.4 -> -8 ft / -0.6 ft/s, 196 kt, 2.6 ft/s (flown 195.3 kt / 1.2 ft/s); 1.5 -> -1 ft /
-# -4 ft/s.  The documented range is 1.2-2.0: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24, the
-# flight-modified against the original data-book prediction at Mach 0.6, puts the speedbrake drag increment 8-14% higher;
-# CP-2283 figs 5 and 14 put it 17-30% higher (flight above prediction); the design requirement (~2x) is the upper bound.
-# 1.4 is where PASS is on its own reference (glide-slope error ~0, speed error ~0, a nominal 18 deg speedbrake) and the
-# touchdown speed is the flown one.  FLAGGED: a calibration inside that range, not a measurement; its Mach dependence
-# above 0.5 is an assumption.
+# SPEEDBRAKE EFFECTIVENESS ABOVE THE DATA-BOOK TABLE.  The subsonic speedbrake increments above (SB_DCA) match NASA TM-81371
+# (Preliminary Analysis of STS-2 Entry Flight Data) fig 24(b), the MODIFIED data-book prediction at Mach 0.6, alpha 5 (0.0095 at
+# 40 deg, 0.021 at 60, 0.035 at 80, about the 25-deg baseline); that modified prediction is 6-18% BELOW the original one, so that
+# figure gives NO support for more speedbrake drag.  What does: CP-2283 Pt 1 fig 14 (STS-1/2 flight points about +0.006 in
+# axial force above the prediction at 55 deg, "underpredicted by ~60 counts": +25-35% at 55-65 deg) and fig 5 (STS-2 flight
+# sweep at Mach 0.5, about 10% above prediction at the top, 87 deg), i.e. a factor of 1.1-1.35 depending on the angle; and the
+# Orbiter design requirement (Young & Underwood, NTRS-19850008600 Table 1: peak subsonic L/D >= 4.4 closed and >= 2.5 at 85 deg
+# open), which implies ~2x.  With the increment as modelled PASS's approach arrived 2,000 ft above its outer glide slope and
+# 20 KEAS fast with the speedbrake saturated at 98.6 deg, dived at 27-30 deg and hit the ground short of the runway at
+# 280-300 kt with the gear unlocked (ledger #316; replays of the STS-134 entry capture, 2026-11-02).  Scaling the increment from
+# closed by SB_SCALE at Mach <= 0.6 (faded out to 1.0 like sb_dca) puts PASS on its reference: 1.0 -> 2,000 ft above the glide
+# slope / 37 ft/s fast / gear-up at 298 kt; 1.25 -> 490 ft / 26 ft/s, lands hard; 1.35 -> 200 ft / 12 ft/s; 1.4 -> -8 ft /
+# -0.6 ft/s, a nominal 18 deg speedbrake, 194-197 kt (flown 195.3); 1.5 -> -1 ft / -4 ft/s.  1.4 is therefore ABOVE the
+# flight-supported 1.1-1.35 at the angles PASS uses; the excess stands in for a drag or energy shortfall elsewhere that is not
+# yet identified (the design requirement allows up to ~2x, and the handbook's glide-slope numbers imply ~8% more drag at the
+# nominal brake setting).  FLAGGED: a calibration, not a measurement; its Mach dependence above 0.5 is an assumption.
 SB_SCALE = 1.4
 SB_SCALE_FADE = (0.6, 1.0)
 
