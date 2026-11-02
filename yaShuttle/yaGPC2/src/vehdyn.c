@@ -1111,7 +1111,10 @@ void vehdyn_aerosurf_pos(double pos[7]) {
 #define HW_ADP_L_STOW   0x0040u
 #define HW_ADP_R_STOW   0x0020u
 #define PROBE_TRAVEL_S  10.0   /* PROVISIONAL: stowed to deployed */
-#define GEAR_DEPLOY_S 10.0     /* PROVISIONAL: DN to down-and-locked */
+/* DN to down-and-locked.  The SCOM says "up to 10 seconds" (the upper bound this used to take); flight design's aero model deploys
+ * the gear in 4 s (a 1 s door delay and 3 s of travel, JSC-23266 4.5.2, "based on visual timings"), and video analysis of the
+ * flights puts it at about 6 s (owner, citing aviation.stackexchange.com 1109, a secondary source).  6 s, between the two. */
+#define GEAR_DEPLOY_S 6.0
 static bool gearArmed, gearDeploying, chuteArmed, chuteOut, chuteGone;
 static double gearPos;         /* 0 stowed .. 1 down and locked */
 static double chuteOutT = -1.0;
@@ -1510,7 +1513,7 @@ static bool entry_aero(double f[3], double tau[3]) {
     double c[3];
     ea_coeffs(mach, al, de, bfPos, surfPos[SURF_SB], c);
     /* the gear's drag: L/D 4.5 -> ~3.95 at alpha 7 deg, i.e. CD +0.010 (FPH-ALR fig 4-14, read from the figure: LOW
-     * confidence); none of the aero tables has it.  Follows the strut travel, so it ramps over the 5 s deployment. */
+     * confidence); none of the aero tables has it.  Follows the strut travel, so it ramps over the deployment (GEAR_DEPLOY_S). */
     c[1] += 0.010 * gearPos;
     /* GROUND EFFECT, from the flight-modified prediction: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24(c),
      * the increments in lift and drag coefficient against H/B (B = the 78.06 ft span; alpha 8 deg, elevon 0), read from the
