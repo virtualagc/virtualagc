@@ -256,6 +256,17 @@ which portview follows from TRU1's attitude with no special handling.
   pads).  The FSS is an open lattice in the model; the RSS is solid, as its
   clad walls were.
 
+## Night lighting (2026-10-28)
+
+Applied from the staging log (Full Documentation Sync, 2026-11-02).
+
+- Terrain glow through the dark Earth: NIGHT_AMB 0.1 near the ground and 0.3 from orbit, fading 80 -> 15 km.
+- The Shuttle Landing Facility's lights: edge lamps aimed across the runway, centreline and approach lamps up, thresholds green, end red, five amber approach rows of lamp pairs, threshold/end 8 lamps per FAA ARP.  They are drawn as star-program points.
+- Eight xenon floodlights as ground lighting (not drawn from behind except a 0.001 spill).
+- Defaults the owner settled: flood_gain 0.003, flood_exp 10, flood_aim_m 1000, hirl_spacing_m 30, lamp_gain 0.01.
+- Guessed, not documented: lamp candelas, beam widths, floodlight placement, HIRL spacing.
+- `night_preview.py` flies the Shuttle's landing profile on a loop with live knobs (NSTS_LIGHTS_FILE); `--pitch-deg` gives orbit views.
+
 ## Phases
 
 - **P0 — coordinate with PASS-IDLE:** done 2026-10-07 (see "Data in").

@@ -10492,6 +10492,14 @@ The owner's demo recording showed the O6 clock frozen from MET 013:14:55:25 to 0
 
 `5gpc-3crt-subtitled.script` lines 211 and 231 play `/usr/share/sounds/freedesktop/stereo/complete.oga`; stock WSL Ubuntu lacks the file, and `simulatePASS` refuses the whole script ("no such file ... nothing started").  WSL-integration's suggestion, not done: a missing audio file should be a warning.  `test_hc_combined` has two errors on `origin/master` (`'SimpleNamespace' object has no attribute 'keys'` in `handcontrollers.run_virtual`, line 942): the test's stub arguments lack the `keys` attribute the `--hc-keys` change (3faf16e) added; not from the MEDS patches (reproduced on master without them).
 
+### 8.82 "SSME REPOS FAIL" on every OPS 3 entry, and the fault summary's I/O ERROR CRT1 lines (2026-10-28)
+
+Applied from the staging log (Full Documentation Sync, 2026-11-02).
+
+"SSME REPOS FAIL" (class 3, CGA3MC copy 148) appeared on every OPS 3 entry.  GSHHYD.hal commands the MPS TVC isolation valves open at 3,500 ft/s relative velocity, reads the three OPEN indicators (HFE SEG5 DSCRT5 bit 16 FA1, DSCRT8 bit 9 FA2, DSCRT7 bit 2 FA3) 5 s later, and a valve reading off makes its hydraulic system unavailable, which sets the REPOS_STOP flag and raises the message.  Fixed in `valvemodel.c`: three valves, last in the table; `valve_load` accepts a shorter saved list.  Commit ec3f911e4 on demo-v2 (local; C, so the peers have not yet run it).  Verified: the valves open at t = 3117.5 and close 25 s later, no REPOS FAIL, normal landing.
+
+The fault summary page carries 15 "I/O ERROR CRT1 1" entries in every run from this volume's restore.  They are not displayed unless FAULT SUMM is pressed.  Not yet investigated.
+
 ## Methodology and caveats
 
 **Section 1** items were found during `yaGPC`'s original CoffeeScript→C
