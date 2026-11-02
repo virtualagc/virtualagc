@@ -1512,17 +1512,30 @@ static bool entry_aero(double f[3], double tau[3]) {
     /* the gear's drag: L/D 4.5 -> ~3.95 at alpha 7 deg, i.e. CD +0.010 (FPH-ALR fig 4-14, read from the figure: LOW
      * confidence); none of the aero tables has it.  Follows the strut travel, so it ramps over the 5 s deployment. */
     c[1] += 0.010 * gearPos;
-    /* GROUND EFFECT: "powerful aerodynamic ground effects of the orbiter ... grow exponentially as the altitude decreases, and the
-     * resulting increase in L/D is approximately 25 percent" (JSC-23266 FPH-ALR appendix B.4); without it the sink rate at
-     * touchdown is "marginally acceptable".  The 25% is the handbook's, split evenly between lift up (+12%) and drag down (-11%);
-     * the 30 ft e-folding height above the wheels' touchdown height (16 ft below the c.g.) is MY ASSUMPTION, no source gives it
-     * (FLAGGED).  Normal force carries the lift, axial force the drag. */
+    /* GROUND EFFECT, from the flight-modified prediction: NASA TM-81371 (Preliminary Analysis of STS-2 Entry Flight Data) fig 24(c),
+     * the increments in lift and drag coefficient against H/B (B = the 78.06 ft span; alpha 8 deg, elevon 0), read from the
+     * figure (+-0.005 in dCL, +-0.001 in dCD).  "Powerful aerodynamic ground effects ... grow exponentially as the altitude
+     * decreases, and the resulting increase in L/D is approximately 25 percent" (JSC-23266 FPH-ALR appendix B.4).  It replaces a
+     * flat +12% lift / -11% drag with a 30 ft e-folding height, which was this file's own assumption: that gave a third of the
+     * documented lift gain below 15 ft, and the Orbiter came down short and hard.  H is taken as the wheel height (the c.g.
+     * less 16 ft, the wheels' touchdown height), the nearest the data allow: the figure does not define it.  Lift along the
+     * wind-axis normal, drag along the flow, as body normal and axial force. */
     {
+        static const double hb[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0};
+        static const double dcl[] = {0.150, 0.082, 0.037, 0.021, 0.014, 0.010, 0.003, 0.0};
+        static const double dcd[] = {-0.0125, -0.0087, -0.0059, -0.0036, -0.0017, 0.0, 0.0, 0.0};
         double hw = geodetic_h_ft(st.r) - (groundFt < -1e8 ? 8.3 : groundFt) - 16.0;
         if (hw < 0.0) hw = 0.0;
-        double ge = exp(-hw / 30.0);
-        c[0] *= 1.0 + 0.12 * ge;
-        c[1] *= 1.0 - 0.11 * ge;
+        double x = hw / 78.06;
+        if (x < 1.0) {
+            int i = 0;
+            while (i < 6 && x > hb[i + 1]) i++;
+            double f = (x - hb[i]) / (hb[i + 1] - hb[i]);
+            double dl = dcl[i] + f * (dcl[i + 1] - dcl[i]), dd = dcd[i] + f * (dcd[i + 1] - dcd[i]);
+            double r = al / D2;
+            c[0] += dl * cos(r) + dd * sin(r);
+            c[1] += -dl * sin(r) + dd * cos(r);
+        }
     }
     double qs = q * ASC_SREF_M2;
     /* lateral-directional, per degree, at this Mach (log interpolation):
