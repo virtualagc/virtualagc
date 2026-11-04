@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A start-up splash, in front of everything until simulatePASS says it is up.
 
-    splash.py [--image FILE] [--size PX]
+    splash.py [--image FILE]
 
 Reads lines from stdin:
 
@@ -10,9 +10,7 @@ Reads lines from stdin:
 
 and closes when stdin does.  Without --image it is a small plain window; with
 one (PNG, GIF or, with Pillow, JPEG) the picture IS the splash and the step is
-one line beneath it.  --size is the run's window size (simulatePASS --size, in
-this platform's Tk pixels, as the other windows get it): the picture is drawn
-SPLASH_PER_SIZE times as wide, so it follows the desktop scaling as they do.  It sits on the PRIMARY monitor, never straddling two.
+one line beneath it.  It sits on the PRIMARY monitor, never straddling two.
 Without a display or Tk it exits at once, so a headless run is unaffected.
 """
 import argparse
@@ -31,7 +29,6 @@ except Exception:
 
 BG, FG, DIM, OK = "#202020", "#e8e8e8", "#8a8a8a", "#7ec87e"
 HERE = os.path.dirname(os.path.abspath(__file__))
-SPLASH_PER_SIZE = 2.9        # the picture's width over --size: 1116 px, its own width, at --size 384
 
 
 def primary_monitor(root):
@@ -71,30 +68,9 @@ def load_image(path):
         return None
 
 
-def scaled(img, path, width):
-    """The picture `width` pixels wide: smoothly with Pillow, else by the nearest small ratio of Tk's zoom/subsample."""
-    if width == img.width() or width <= 0:
-        return img
-    try:
-        from PIL import Image, ImageTk
-        pic = Image.open(path)
-        return ImageTk.PhotoImage(pic.resize((width, max(1, round(pic.height * width / pic.width))),
-                                             Image.LANCZOS))
-    except Exception:
-        pass
-    from fractions import Fraction
-    f = Fraction(width, img.width()).limit_denominator(8)
-    if f.numerator > 4 * f.denominator:
-        f = Fraction(4)
-    return img.zoom(f.numerator, f.numerator).subsample(f.denominator, f.denominator)
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--image")
-    ap.add_argument("--size", type=int, default=0, metavar="PX",
-                    help="the run's window size in Tk pixels: the picture is %.1f times as wide (0: its own size)"
-                         % SPLASH_PER_SIZE)
     args = ap.parse_args()
     try:
         root = tk.Tk()
@@ -118,10 +94,10 @@ def main():
         img = load_image(path)
     FONT = ("Helvetica", 15, "italic")
     if img is not None:
-        # the picture follows --size, and is never larger than 80% of the monitor
-        want = int(round(args.size * SPLASH_PER_SIZE)) if args.size > 0 else img.width()
-        want = min(want, int(mw * 0.8), int(mh * 0.8 * img.width() / img.height()))
-        img = scaled(img, path, want)
+        # no larger than 80% of the monitor
+        k = max(1, -(-img.width() // int(mw * 0.8)), -(-img.height() // int(mh * 0.8)))
+        if k > 1:
+            img = img.subsample(k, k)
         w, h = img.width(), img.height()
         cv = tk.Canvas(root, width=w, height=h, bd=0, highlightthickness=0, bg=BG)
         cv.pack()
