@@ -315,13 +315,14 @@ class Splash(object):
     tell the user at startup that he has to wait?").  Any failure -- no
     display, no Tk -- leaves the run as it was."""
 
-    def __init__(self, enabled):
+    def __init__(self, enabled, size=0):
         self.p = None
         if not enabled or (os.name != "nt" and not os.environ.get("DISPLAY")
                            and sys.platform != "darwin"):
             return
         try:
-            self.p = subprocess.Popen([sys.executable, os.path.join(HERE, "splash.py")],
+            self.p = subprocess.Popen([sys.executable, os.path.join(HERE, "splash.py"),
+                                       "--size", str(size)],
                                       stdin=subprocess.PIPE, text=True, bufsize=1,
                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except OSError:
@@ -2107,7 +2108,7 @@ def main():
         raise SystemExit("simulatePASS: --snapshot-resume %s is not a directory"
                          % args.snapshot_resume)
     L = Launcher(logs)
-    splash = Splash(not args.no_splash)
+    splash = Splash(not args.no_splash, tk_px(args.size))
     LP = layout_positions(args.layout) if args.layout and not args.auto_place else {}
     splash.stage("Starting")
     stop_event = threading.Event()
