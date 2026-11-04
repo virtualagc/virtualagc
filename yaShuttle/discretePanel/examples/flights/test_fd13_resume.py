@@ -7,6 +7,7 @@ import os
 import pathlib
 import sys
 import tempfile
+import types
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -1514,6 +1515,29 @@ class FromFd13MainTests(unittest.TestCase):
                     fly_sts134.FL.pop("name", None)
                 else:
                     fly_sts134.FL["name"] = old_name
+
+
+class Nc4AimTests(unittest.TestCase):
+    """Option 2 (ledger #325): only the NC4-only solve aims downstream, at Ti."""
+
+    def flight(self, aim=None):
+        flight = fly_fd13.FD13.__new__(fly_fd13.FD13)
+        if aim is not None:
+            flight.a = types.SimpleNamespace(nc4_aim=aim)
+        return flight
+
+    def test_only_the_nc4_alone_solve_aims_at_ti(self):
+        flight = self.flight("ti")
+        current = {"r": [0.0] * 3, "v": [0.0] * 3, "unix": 0.0, "t": 0.0}
+        self.assertIsNone(flight.downstream_aim(current, [{"name": "NC3"}]))
+        self.assertIsNone(flight.downstream_aim(current, [{"name": "NC3"}, {"name": "NC4"}]))
+
+    def test_final_option_keeps_the_06_10_state(self):
+        flight = self.flight("final")
+        self.assertIsNone(flight.downstream_aim({}, [{"name": "NC4"}]))
+
+    def test_ti_is_after_06_10(self):
+        self.assertGreater(fly_fd13.unix_of(fly_fd13.NC4_AIM_UTC), fly_fd13.unix_of(fly_fd13.START_UTC))
 
 
 if __name__ == "__main__":

@@ -68,6 +68,14 @@ TAPE = os.path.expanduser("~/workspace/pass-run/rtls-fix/full2-kscG16.mmv")
 OPS2 = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2")
 TARGETS = os.path.expanduser("~/sts134-runs/approach-snaps/sts134-targets.txt")
 START_UTC = "2011-05-18T06:10:00"
+# Option 2 (ledger #325): NC4 has three controls against a six-component state 2.5 min after its TIG, so it cannot absorb the
+# along-track phasing error the 14 h NC3-to-NC4 coast accumulates (the attitude-hold jets' unmodelled delta-V and the NC3 trim
+# residual: 5-24 kft by run).  As in the mission, where NC4 and the burns after it aim at the Ti point, the NC4 solve aims at the
+# design STATE at Ti (position 100 m, velocity 0.5 m/s scales): 90 min of coast lets NC4's three controls trade phasing against
+# velocity, so the same 5 kft / 5 ft/s limits are reachable there (FIX4: 1.9 kft / 4.8 ft/s, against 24 kft / 23 ft/s at 06:10).
+NC4_AIM_UTC = "2011-05-18T07:38:00"
+NC4_AIM_POSITION_SCALE_M = 100.0
+NC4_AIM_VELOCITY_SCALE_MPS = 0.5      # 0: position only; the velocity term keeps NC4 from buying the position with a wrong orbit
 TIGS = [
     {"name": "NC1", "doy": 136, "h": 15, "m": 48, "s": 38.1, "duration": 66.7, "engine": 1},
     {"name": "NC2", "doy": 137, "h": 6, "m": 22, "s": 51.6, "duration": 14.4, "engine": 3},
@@ -892,6 +900,31 @@ class FD13(rndz.Rendezvous):
             previous = (truth, sampled_wall)
             time.sleep(gmt_poll_delay(remaining, nominal_rate))
 
+    def downstream_aim(self, current, schedule):
+        """The Ti-point aim for the NC4-only solve, or None for the 06:10 state.
+
+        The design state at 06:10 (self.target) is coasted with the planner's own physics to NC4_AIM_UTC, so the aim is
+        consistent with the model that predicts the miss."""
+        if len(schedule) != 1 or schedule[0].get("name") != "NC4":
+            return None
+        if getattr(getattr(self, "a", None), "nc4_aim", "ti") != "ti":
+            return None
+        ti_unix = unix_of(NC4_AIM_UTC)
+        cached = getattr(self, "_nc4_aim", None)
+        if cached is not None and cached["unix"] == ti_unix:
+            return cached
+        propagator = getattr(self, "_fd13_propagator", None)
+        if propagator is None:
+            propagator = fd13_propagator.FD13Propagator(current, rndz.RNP)
+            self._fd13_propagator = propagator
+        sim_time = float(current["t"]) + self.target["unix"] - float(current["unix"])
+        r, v, _, _ = propagator.advance(
+            list(self.target["r"]), list(self.target["v"]), sim_time, ti_unix - self.target["unix"],
+            list(current.get("q", (1.0, 0.0, 0.0, 0.0))), [0.0, 0.0, 0.0],
+            float(current.get("mass_kg", 113000.0)))
+        self._nc4_aim = {"unix": ti_unix, "r": list(r), "v": list(v)}
+        return self._nc4_aim
+
     def design(self, current, schedule, prior=None):
         """Weighted multiple-burn differential corrector in inertial M50."""
         np, least_squares = optimizer()
@@ -906,15 +939,25 @@ class FD13(rndz.Rendezvous):
             prior = np.asarray(prior, dtype=float)
         # Older saved plans can predate the engine-specific bounds.
         prior = np.clip(prior, -bounds, bounds)
+        aim = self.downstream_aim(current, schedule)
+        aim_unix = self.target["unix"] if aim is None else aim["unix"]
+        if aim is not None:
+            target = np.asarray(aim["r"] + aim["v"])
         def residual(u):
-            end = self.trajectory(u, current, schedule, self.target["unix"])
+            end = self.trajectory(u, current, schedule, aim_unix)
+            if aim is not None:
+                terms = [(end[:3] - target[:3]) / NC4_AIM_POSITION_SCALE_M]
+                if NC4_AIM_VELOCITY_SCALE_MPS:
+                    terms.append((end[3:] - target[3:]) / NC4_AIM_VELOCITY_SCALE_MPS)
+                return np.r_[np.concatenate(terms), (u - prior) / scales * DESIGN_REG_WEIGHT]
             return np.r_[(end - target) / scale_state, (u - prior) / scales * DESIGN_REG_WEIGHT]
         solution = least_squares(residual, prior, bounds=(-bounds, bounds), max_nfev=600, diff_step=1e-4,
                                  x_scale=scales, xtol=1e-9, ftol=1e-9, gtol=1e-9)
-        miss = self.trajectory(solution.x, current, schedule, self.target["unix"]) - target
+        miss = self.trajectory(solution.x, current, schedule, aim_unix) - target
         controls = [solution.x[3 * i:3 * i + 3].tolist() for i in range(count)]
         return {"controls_mps_lvlh": controls, "position_miss_m": float(np.linalg.norm(miss[:3])),
                 "velocity_miss_mps": float(np.linalg.norm(miss[3:])), "cost": float(solution.cost),
+                "aim": "Ti state" if aim is not None else "06:10 state",
                 "trajectory_model": "physics.c EGM96 4x4 with PASS RNP/rotation, Cd=2.2 drag at fixed measured attitude, OMS/RCS rocket-equation mass updates",
                 "position_miss_within_1000_ft": bool(np.linalg.norm(miss[:3]) <= 1000 * FT),
                 "control_bounds_fts": [DV_BOUNDS_FPS[e["index"]] for e in schedule],
@@ -1225,6 +1268,11 @@ class FD13(rndz.Rendezvous):
             self.play("+1     keys SPEC 5 5 PRO\n+8     keys ITEM 3 7 EXEC\n+20    keys ITEM 3 5 EXEC\n+8     keys RESUME\n", "gps-aut")
             self.script_done("gps-aut", 180)
             self.say("crew: GPS TO NAV FORCE then AUTO (SPEC 55 ITEMS 37, 35); FD13_GPS_INH=1 leaves it inhibited")
+        if os.environ.get("FD13_DAP_FREE"):
+            # DIAGNOSTIC (ledger #325): DAP FREE shuts the attitude jets off, so the coast carries no attitude-hold delta-V.
+            self.play("+1     dap c3 a\n+2     dap c3 free\n", "dap-free")
+            self.script_done("dap-free", 60)
+            self.say("crew: DAP FREE (FD13_DAP_FREE diagnostic)")
         schedule = []
         for i, raw in enumerate(TIGS):
             e = dict(raw)
@@ -1336,8 +1384,34 @@ class FD13(rndz.Rendezvous):
                                      "error_ft_fts": [x / FT for x in error],
                                      "acceptance": terminal_state_acceptance([x / FT for x in error]),
                                      "desired_relative_state_m_mps": self.target["relative_m"]}
+            if getattr(self.a, "nc4_aim", "ti") == "ti":
+                self.result["final"]["acceptance_06_10_state"] = self.result["final"]["acceptance"]
+                self.result["final"]["downstream_ti"] = self.downstream_miss(final_truth)
+                self.result["final"]["acceptance"] = self.result["final"]["downstream_ti"]["acceptance"]
+                self.result["final"]["acceptance_basis"] = "Ti state (NC4 aims at Ti, ledger #325)"
         self.result["status"] = completed_status(self.a.to)
         self.save_result()
+
+    def downstream_miss(self, truth):
+        """Coast the post-NC4 truth state to Ti with the planner and compare it with the design Ti point (the NC4 aim)."""
+        import math
+        initial = targeting_state(truth, float(truth.get("mass_kg", 113000.0)) / 0.45359237)
+        aim = self.downstream_aim(initial, [{"name": "NC4"}])
+        end = self.trajectory([], initial, [], aim["unix"])
+        r, v = list(end[:3]), list(end[3:])
+        dr = [(r[i] - aim["r"][i]) / FT for i in range(3)]
+        dv = [(v[i] - aim["v"][i]) / FT for i in range(3)]
+        position = math.sqrt(sum(x * x for x in dr))
+        ref_r, ref_v = rndz_start.propagate(self.target["reference_r"], self.target["reference_v"],
+                                            aim["unix"] - self.target["unix"], True, step=30.0)
+        actual = rndz_start.m50_to_lvc(ref_r, ref_v, r, v)
+        desired = rndz_start.m50_to_lvc(ref_r, ref_v, aim["r"], aim["v"])
+        return {"utc": NC4_AIM_UTC, "position_error_ft": position,
+                "velocity_error_fts": math.sqrt(sum(x * x for x in dv)),
+                "position_error_m50_ft": dr, "velocity_error_m50_fts": dv,
+                "relative_state_ft_fts": [x / FT for x in actual],
+                "desired_relative_state_ft_fts": [x / FT for x in desired],
+                "acceptance": terminal_state_acceptance(dr + dv)}
 
     def preflight_resume_setup(self, checkpoint_dir):
         """Reject a too-late checkpoint before creating a simulator process."""
@@ -1383,6 +1457,9 @@ def main():
     ap.add_argument("--pulse-trim", type=float, default=DEFAULT_RCS_PULSE_TRIM_FPS, metavar="FPS",
                     help="after the card's <0.2 ft/s RCS VGO null, trim residual axes at or above FPS "
                          "with TRANS PULSE; use 0 for the card's limit alone (default %(default)s)")
+    ap.add_argument("--nc4-aim", choices=("ti", "final"), default="ti",
+                    help="what the NC4 solve aims at: the design position at Ti, 07:38 (default; NC4 cannot null the "
+                         "coast's phasing error against the 06:10 state), or the 06:10 state itself")
     a = ap.parse_args()
     if a.snap_every <= 0 or a.rate <= 0 or a.pulse_trim < 0:
         ap.error("--snap-every and --rate must be positive; --pulse-trim cannot be negative")
