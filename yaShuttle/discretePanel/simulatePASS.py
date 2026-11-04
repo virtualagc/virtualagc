@@ -1620,6 +1620,10 @@ def main():
     ap.add_argument("--portview-views", default=None, metavar="LIST",
                     help="portview.py's --views: comma-separated, from front, up, left, right, "
                          "aft, cl (its default is front alone)")
+    ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), default=None,
+                    help="portview.py's --textures: force reduced (about 0.5 GB) textures on a GPU that "
+                         "crashes or exits with the full ones, e.g. a shared-memory Intel GPU that reports "
+                         "no memory size (default: portview's own auto)")
     ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="which flight station's panels, displays and keyboards to show: "
                          "forward, the aft flight deck (rendezvous, docking, RMS), all "
@@ -2230,6 +2234,8 @@ def main():
             if start_portview and (pv_views or not want_rpop):
                 pv_argv = [py, "portview.py", "--port-base", str(args.port_base),
                            "--size", str(args.portview_size)]
+                if args.portview_textures:
+                    pv_argv += ["--textures", args.portview_textures]
                 if pv_views:
                     pv_argv += ["--views", pv_views]
                     # each view opens at its layout place and size.  The layout
@@ -2428,6 +2434,7 @@ def main():
                             "--hc-size", str(tk_px(size)),
                             "--portview-size", str(args.portview_size),
                             "--portview-views", args.portview_views or "",
+                            "--portview-textures", args.portview_textures or "auto",
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.

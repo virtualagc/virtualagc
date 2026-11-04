@@ -398,6 +398,8 @@ class Flight:
             cmd += ["--no-portview"]
         elif self.a.portview_views:              # which windows (portview's default: front)
             cmd += ["--portview-views", self.a.portview_views]
+        if self.a.portview and getattr(self.a, "portview_textures", None):
+            cmd += ["--portview-textures", self.a.portview_textures]
         if self.a.hold_start:                    # windows up, the vehicle held
             cmd += ["--hold-start"]
         if self.a.layout:                        # the windows where this file says
@@ -1263,6 +1265,9 @@ def main():
                     help="with --abort TAL: the ground at this TAL site's runway height "
                          "(default %s, the site PASS flies on this tape; the crew's site "
                          "selection is not changed)" % TAL_DEFAULT)
+    ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), metavar="MODE",
+                    help="with --portview: portview's --textures; 'reduced' for a GPU that crashes with the full "
+                         "textures (a shared-memory Intel GPU reports no memory size)")
     ap.add_argument("--portview-views", metavar="LIST",
                     help="with --portview: the windows to open, e.g. front,up,left,right "
                          "(portview's default is front alone)")

@@ -1552,6 +1552,10 @@ class Resources(object):
                 "%s, %s free" % ("%.1f GB" % (kb / 1048576.0) if kb is not None else "total unreported",
                                  "%.1f GB" % (free / 1048576.0) if free is not None else "none said"),
                 TEXTURES['mode']))
+            if kb is None and free is None:
+                # no automatic action: a shared-memory GPU (Mesa Intel) may still manage full textures
+                print("portview: WARNING: GPU memory is unreported.  If out-of-window views are not seen "
+                      "(or portview exits), then the '--textures reduced' command-line switch may be needed.")
         if TEXTURES['mode'] == 'reduced':
             self.milkyway = halve(self.milkyway).astype(np.float16)
         self.mwTex = upload("Milky Way", make_float_texture, self.milkyway)
