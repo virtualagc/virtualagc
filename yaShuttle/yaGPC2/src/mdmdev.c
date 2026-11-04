@@ -1581,7 +1581,10 @@ static double gps_offset_s(void) {
     if (v < 0.0) {
         const char *e = yagpc_getenv("YAGPC_GPS_T_OFFSET_SECS");
         v = (e != NULL && *e) ? atof(e) : GPS_OFFSET_DEFAULT_S;
-        v += 11.0;
+        /* GPBS_LEAP_SEC_CORR: 11 in the generic volume, 15 in the flown OPS 1/2 I-loads; PASS subtracts it, so the receiver
+         * must add the same value or every fix fails the time-tag test.  YAGPC_GPS_LEAP_SEC names the loaded value. */
+        const char *l = yagpc_getenv("YAGPC_GPS_LEAP_SEC");
+        v += (l != NULL && *l) ? atof(l) : 11.0;
     }
     return v;
 }

@@ -53,7 +53,17 @@ DEFAULT_RCS_PULSE_TRIM_FPS = 0.08
 # 0.015 ft/s endpoint residual).  The mission's 11.5 s duration is not a
 # useful RCS midpoint: null_vgo() distributes the corrections over several
 # passes.  Keep this empirical center separate from that nominal duration.
+# That 102 s belongs to a 24.6 ft/s burn and is only a CAP: applied to the
+# 2.4-4 ft/s NC3 vectors the targeting actually produces it put the modeled
+# impulse 70-90 s too late.  NC3 is the last burn with a long lever arm, and a
+# 2.4 ft/s impulse placed 80 s wrong is ~200 ft of position (an energy error),
+# which the 14 h NC3-to-NC4 coast turns into 15-40 kft along-track: the NC4
+# terminal miss of every recorded stage (ledger: pre-ISS NC4 explosion).  The
+# measured impulse centroids (vehdyn-state, 10 s samples minus the coast
+# prediction) of the three recorded stages were 19.6 s (2.55 ft/s), 28.3 s
+# (3.95 ft/s) and 10.6 s (2.37 ft/s), i.e. about 6.7 s per ft/s of vector.
 RCS_EFFECTIVE_MIDPOINT_OFFSET_S = 102.0
+RCS_MIDPOINT_S_PER_FPS = 6.7
 TAPE = os.path.expanduser("~/workspace/pass-run/rtls-fix/full2-kscG16.mmv")
 OPS2 = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2")
 TARGETS = os.path.expanduser("~/sts134-runs/approach-snaps/sts134-targets.txt")
@@ -371,7 +381,8 @@ def planned_burn_timing(controls_mps_lvlh, initial, schedule):
         modeled = oms_burn_duration_s(event["engine"], dv_fts, weight)
         duration = (max(float(event["duration"]), modeled)
                     if event["engine"] != 4 else float(event["duration"]))
-        midpoint_offset = (RCS_EFFECTIVE_MIDPOINT_OFFSET_S
+        midpoint_offset = (min(RCS_EFFECTIVE_MIDPOINT_OFFSET_S,
+                               RCS_MIDPOINT_S_PER_FPS * magnitude_fts)
                            if event["engine"] == 4 else duration / 2.0)
         timings.append({"burn": event["name"], "weight_lbf": weight,
                         "duration_s": duration,
@@ -747,7 +758,10 @@ class FD13(rndz.Rendezvous):
                 "YAGPC_MDM_DEVICES": "1", "YAGPC_VEHDYN": "1", "YAGPC_OMS_ARMED": "1",
                 "YAGPC_VEHDYN_ORBITER_KG": str(fly_sts134.FL["orbiter_kg"]),
                 "YAGPC_VEHDYN_STATELOG": "10", "YAGPC_VEHDYN_TARGETS": self.a.targets,
-                "YAGPC_RNP": "2011,136", "YAGPC_MTU_MET_EPOCH": "%.3f" % rndz.MET_ZERO_UNIX}
+                "YAGPC_RNP": "2011,136", "YAGPC_MTU_MET_EPOCH": "%.3f" % rndz.MET_ZERO_UNIX,
+                # The flown OPS 2 I-load GPBS_LEAP_SEC_CORR is 15 (the generic 11); a receiver clock that disagrees is
+                # rejected by PASS's time-tag test, so the whole stage flew without a GPS state (ledger #322).
+                "YAGPC_GPS_LEAP_SEC": "15"}
 
     def resume_copy(self):
         if self.a.from_launch:
@@ -984,6 +998,15 @@ class FD13(rndz.Rendezvous):
         self.play(script, name.lower() + "-load")
         self.script_done(name.lower() + "-load", 600)
 
+    def return_to_coast(self, event):
+        """Leave OPS 202 as the crew does after a burn.  In MM 202 PASS does not apply GPS TO NAV AUTO (GL1ORB.hal
+        (1052)), and the stage used to stay there for the rest of the coast: nav then drifted ~0.25 ft/s of NC1 delta-V
+        error into 41 kft along-track by NC2 and 213 kft by NC4 (ledger #323)."""
+        name = event["name"].lower() + "-ops201"
+        self.play("+1     keys OPS 2 0 1 PRO\nwait crt 1 title 2011/ timeout 180\n", name)
+        self.script_done(name, 240)
+        self.say("crew: back to OPS 201 after %s" % event["name"])
+
     def execute_and_measure(self, event, dv, pre_name):
         name, tig = event["name"], event["gmt"]
         values = [x / FT for x in dv]
@@ -1197,6 +1220,11 @@ class FD13(rndz.Rendezvous):
 
     def run_fd13(self):
         optimizer()          # numpy and scipy must import before the flight starts, not at the NC1 design an hour in
+        if not self.a.resume_from and not os.environ.get("FD13_GPS_INH"):
+            # Orbit Ops 7-37, GPS INCORPORATION: SPEC 55, GPS TO NAV FORCE (item 37, one incorporate) then AUTO (item 35).
+            self.play("+1     keys SPEC 5 5 PRO\n+8     keys ITEM 3 7 EXEC\n+20    keys ITEM 3 5 EXEC\n+8     keys RESUME\n", "gps-aut")
+            self.script_done("gps-aut", 180)
+            self.say("crew: GPS TO NAV FORCE then AUTO (SPEC 55 ITEMS 37, 35); FD13_GPS_INH=1 leaves it inhibited")
         schedule = []
         for i, raw in enumerate(TIGS):
             e = dict(raw)
@@ -1272,6 +1300,7 @@ class FD13(rndz.Rendezvous):
             next_snap = next_snapshot_after_event(pre_gmt, next_snap, self.a.snap_every)
             post_gmt = self.execute_and_measure(event, dv, pre_name)
             next_snap = next_snapshot_after_event(post_gmt, next_snap, self.a.snap_every)
+            self.return_to_coast(event)
             # Re-target at every burn from the actual postburn truth.
             latest = self.truth()
             initial = targeting_state(latest, self.orbiter_lb())
