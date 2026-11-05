@@ -97,6 +97,22 @@ CAUTIONS:
   (sequence of events) in the report and the Mir-flight sections of JSC-63400 before reusing the numbering.
 - Day-of-year 012 liftoff matches OMS-2 on day 012, but several RCS times above are on days 013/014; the MET column is the cross-check.
 
+## Launch site and lighting (Ron, 2026-11-04)
+
+- STS-81 launched from PAD 39B (Missions Summary: KSC Pad 39B, MLP-2, pad 39B-36), not 39A as STS-134 did.
+- In 1997 the two pads looked essentially identical to a casual observer, so the existing pad 3D models can be reused for 39B.
+- They are at different physical positions, so the rendered terrain around the pad will differ slightly (new position, and the
+  azimuth to landmarks and the horizon change).
+- Concrete pad elevation (Ron): 39A is 48 ft above sea level, 39B is 55 ft.  The 7 ft difference matters wherever the sim takes
+  the pad altitude (launch-site altitude in the truth model, terrain/height-above-ground for the portview views, the start of
+  the countdown/ascent state).  UNVERIFIED: where in the code the 39A altitude and position are set; grep before changing.
+- STS-81 was a NIGHT launch (Missions Summary: liftoff 4:27:23 AM EST on 12 January 1997 = 09:27:23 UTC; "Shuttle night launch
+  #15").  A launch simulation of it needs night lighting modelled: pad floodlighting/xenon searchlights, the exhaust plume and
+  SRB flame as the light sources, illumination of the vehicle and the ground, no sun.  Ron had not asked for a launch
+  simulation before; he finds this more interesting because a night launch looks visually distinct from STS-134.
+  (The post-ISS entry run already got a night-lighting treatment; see TIMELINE-STS134-ENTRY and the portview night code before
+  designing a new one.)
+
 ## Gaps (what is NOT in hand)
 
 - Mir flight data file procedures (rendezvous book).  The rendezvous books we have start at STS-113.  Burn sizes/times would be
