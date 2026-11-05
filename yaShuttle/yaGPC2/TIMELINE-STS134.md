@@ -318,6 +318,20 @@ scripts, though STS-134 did them (JSC 37461 Appendix A; times from SRB ignition)
 The rendezvous from the OMS-2 orbit to capture is `RENDEZVOUS_PLAN.md`
 sections 5 to 5n, and the return is `TIMELINE-STS134-ENTRY.md`.
 
+### Pre-ISS coast (NC1 to NC4, flight day 13): why the residuals exploded, and the fixes (2026-11-03 to 11-05)
+
+Applied from the staging log (Full Documentation Sync, 2026-11-05).  The stage is flown by `fly_fd13.py`; the ledger entries are #321 to #327 in `gpc-causes.db`, and the per-platform results are in `PHASES.md`.
+
+- **The symptom.**  NC1 and NC2 closed to a predicted miss of 15 ft and 5 ft, but the state at NC4 ended 13 to 41 kft and 12 to 39 ft/s from the design at the old 06:10 UTC aim.  Along-track error is about 3 x dv x t: about 16 kft per ft/s over the 88 min from NC4 to Ti, and about 150 kft per ft/s over the 14.4 h coast from NC3 to NC4.
+- **Causes found and fixed.**
+  - The NC3 RCS impulse centroid was taken as a fixed 102 s; for a 2.4 to 4 ft/s burn it is 10 to 28 s (#321).
+  - The driver stayed in OPS 202 after each burn, where PASS refuses GPS TO NAV AUTO, so navigation drifted (#323).  The receivers added 11 leap seconds against the flown 15, so PASS rejected the fixes (#322; environment `YAGPC_GPS_LEAP_SEC`).
+  - Attitude-hold RCS jet delta-V in the coast, about 100 pulses, 0.44 to 0.63 ft/s per coast and different in every run (#325).
+  - The NC4 solve aimed at 06:10 although the next target is Ti (07:38 UTC).  NC4 now aims at the design state at Ti (position error/100 m plus velocity error/0.5 m/s).
+  - An NC4 execution error of about 1 ft/s, from the burn-attitude maneuver and the steering jets (about 10.5 kg of RCS propellant in 190 s).  A small NC3-style RCS trim, "NC4T", about 20 min after the 06:10 sample and aimed at Ti, closes it.
+- **Refuted; do not retest.**  The NC1 "1 degree pointing offset" was an analysis artifact: I had taken the frame at EXEC, 15 s before TIG, and the frame turns 0.97 degrees in that time; at TIG the angle is 0.01 to 0.03 degrees (#324).  Also refuted: a vernier hold in the coast (#326), a finer DAP B pulse trim (#327), DAP FREE as a fix, the attitude quaternion choice, the Earth angle, the gravity degree, a constant inertial acceleration, and a position-only Ti aim.  The planner's physics is correct: with the jets off the coast holds to 552 ft over 14 h.
+- **Results at Ti, gate 5 kft and 5 ft/s** (build `fd13-codex-5`, `ac4aa874`): Linux 356 ft / 1.87 ft/s (FIX9) and 1272 ft / 4.38 ft/s (FIX10, 13.2 kft / 16.5 ft/s before the trim); Mac 1334 ft / 3.47 ft/s (resumed from `coast-086` after a power loss; 1229 ft / 3.23 ft/s before the trim, so the trim added error there).  The trim is about 0.9 ft/s, which is the level below which PASS treats sensed RCS delta-V as hold noise.  Under the old 06:10 aim the platforms ended at 24.1 kft (Linux), 11.4 (Win11), 17.8 (WSL) and 5.1 (Mac).  WSL and Win11 were lost to a host power loss on 2026-11-05 at 08:57 and are being resumed from NC3.
+
 ### After docking: undocking, the STORRM re-rendezvous and the night landing (reference, not simulated)
 
 - Reference only (owner, 2026-10-16: NOT current work).  Owner's decisions: the ISS stay is uninteresting for the PASS emulation; undocking/flyaround/separation is a demo video in its own right, run by itself (no timeline problem); the night landing (below) is welcome because it differs from the RTLS video.  Current work stays: fix the ISS approach and hard-dock at about the Mission Report's time.
