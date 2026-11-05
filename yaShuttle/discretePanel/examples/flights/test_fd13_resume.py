@@ -1532,6 +1532,12 @@ class Nc4AimTests(unittest.TestCase):
         self.assertIsNone(flight.downstream_aim(current, [{"name": "NC3"}]))
         self.assertIsNone(flight.downstream_aim(current, [{"name": "NC3"}, {"name": "NC4"}]))
 
+    def test_the_post_nc4_trim_aims_at_ti_too(self):
+        flight = self.flight("ti")
+        ti = fly_fd13.unix_of(fly_fd13.NC4_AIM_UTC)
+        flight._nc4_aim = {"unix": ti, "r": [1.0, 2.0, 3.0], "v": [4.0, 5.0, 6.0]}
+        self.assertIs(flight.downstream_aim({}, [{"name": "NC4T"}]), flight._nc4_aim)
+
     def test_final_option_keeps_the_06_10_state(self):
         flight = self.flight("final")
         self.assertIsNone(flight.downstream_aim({}, [{"name": "NC4"}]))

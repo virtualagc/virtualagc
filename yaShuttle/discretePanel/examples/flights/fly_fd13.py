@@ -75,6 +75,7 @@ START_UTC = "2011-05-18T06:10:00"
 # velocity, so the same 5 kft / 5 ft/s limits are reachable there (FIX4: 1.9 kft / 4.8 ft/s, against 24 kft / 23 ft/s at 06:10).
 NC4_AIM_UTC = "2011-05-18T07:38:00"
 NC4_AIM_POSITION_SCALE_M = 100.0
+NC4_TRIM_LEAD_S = 1200.0              # the NC4 trim is an NC3-style RCS burn this long after the 06:10 state
 NC4_AIM_VELOCITY_SCALE_MPS = 0.5      # 0: position only; the velocity term keeps NC4 from buying the position with a wrong orbit
 TIGS = [
     {"name": "NC1", "doy": 136, "h": 15, "m": 48, "s": 38.1, "duration": 66.7, "engine": 1},
@@ -905,7 +906,7 @@ class FD13(rndz.Rendezvous):
 
         The design state at 06:10 (self.target) is coasted with the planner's own physics to NC4_AIM_UTC, so the aim is
         consistent with the model that predicts the miss."""
-        if len(schedule) != 1 or schedule[0].get("name") != "NC4":
+        if len(schedule) != 1 or schedule[0].get("name") not in ("NC4", "NC4T"):
             return None
         if getattr(getattr(self, "a", None), "nc4_aim", "ti") != "ti":
             return None
@@ -1389,6 +1390,8 @@ class FD13(rndz.Rendezvous):
                 self.result["final"]["downstream_ti"] = self.downstream_miss(final_truth)
                 self.result["final"]["acceptance"] = self.result["final"]["downstream_ti"]["acceptance"]
                 self.result["final"]["acceptance_basis"] = "Ti state (NC4 aims at Ti, ledger #325)"
+            if getattr(self.a, "nc4_aim", "ti") == "ti" and getattr(self.a, "nc4_trim", False):
+                self.nc4_trim(next_snap)
         self.result["status"] = completed_status(self.a.to)
         self.save_result()
 
@@ -1412,6 +1415,43 @@ class FD13(rndz.Rendezvous):
                 "relative_state_ft_fts": [x / FT for x in actual],
                 "desired_relative_state_ft_fts": [x / FT for x in desired],
                 "acceptance": terminal_state_acceptance(dr + dv)}
+
+    def nc4_trim(self, next_snap):
+        """An RCS trim after NC4, aimed at the Ti state (ledger #325).  NC4 is executed ~1 ft/s off (the OMS burn, the
+        maneuver to and from its attitude, the jets that steer it); the 88 min coast to Ti turns that into ~13 kft.
+        Flown like NC3: ground solve from the post-NC4 truth, LOAD in OPS 202, THC VGO null."""
+        truth = self.truth()
+        tig_gmt = math.ceil((truth["gmt"] + NC4_TRIM_LEAD_S) / 10.0) * 10.0
+        initial = targeting_state(truth, self.orbiter_lb())
+        event = {"name": "NC4T", "engine": 4, "duration": 11.5, "index": 2, "gmt": tig_gmt,
+                 "unix": initial["unix"] + (tig_gmt - truth["gmt"])}
+        plan = self.design(initial, [event], None)
+        dv = plan["controls_mps_lvlh"][0]
+        magnitude = math.sqrt(sum(x * x for x in dv)) / FT
+        self.say("NC4T: trim LVLH DV %+.3f %+.3f %+.3f ft/s (%.3f total); predicted Ti miss %.0f ft, %.3f ft/s"
+                 % (*[x / FT for x in dv], magnitude, plan["position_miss_m"] / FT, plan["velocity_miss_mps"] / FT))
+        event["targeting"] = plan
+        self.result["nc4_trim_plan"] = {"tig_gmt": tig_gmt, "dv_lvlh_fts": [x / FT for x in dv],
+                                        "predicted_ti_position_miss_ft": plan["position_miss_m"] / FT,
+                                        "predicted_ti_velocity_miss_fts": plan["velocity_miss_mps"] / FT}
+        self.save_result()
+        self.load_burn(event, dv)
+        next_snap = self.coast_to(tig_gmt - 60.0, next_snap, self.a.snap_every)
+        pre_name = "nc4t-minus-60"
+        pre_gmt = self.take_snapshot(pre_name)
+        next_snap = next_snapshot_after_event(pre_gmt, next_snap, self.a.snap_every)
+        post_gmt = self.execute_and_measure(event, dv, pre_name)
+        self.return_to_coast(event)
+        final = self.result["final"]
+        final["acceptance_before_trim"] = final["acceptance"]
+        final["downstream_ti_before_trim"] = final["downstream_ti"]
+        after = self.truth()
+        final["downstream_ti"] = self.downstream_miss(after)
+        final["acceptance"] = final["downstream_ti"]["acceptance"]
+        final["acceptance_basis"] = "Ti state after the NC4 RCS trim (ledger #325)"
+        self.save_result()
+        self.say("NC4T: Ti position error %.0f ft, velocity error %.3f ft/s after the trim"
+                 % (final["downstream_ti"]["position_error_ft"], final["downstream_ti"]["velocity_error_fts"]))
 
     def preflight_resume_setup(self, checkpoint_dir):
         """Reject a too-late checkpoint before creating a simulator process."""
@@ -1457,6 +1497,8 @@ def main():
     ap.add_argument("--pulse-trim", type=float, default=DEFAULT_RCS_PULSE_TRIM_FPS, metavar="FPS",
                     help="after the card's <0.2 ft/s RCS VGO null, trim residual axes at or above FPS "
                          "with TRANS PULSE; use 0 for the card's limit alone (default %(default)s)")
+    ap.add_argument("--no-nc4-trim", dest="nc4_trim", action="store_false",
+                    help="skip the RCS trim after NC4 (with --nc4-aim ti it is on by default)")
     ap.add_argument("--nc4-aim", choices=("ti", "final"), default="ti",
                     help="what the NC4 solve aims at: the design position at Ti, 07:38 (default; NC4 cannot null the "
                          "coast's phasing error against the 06:10 state), or the 06:10 state itself")
