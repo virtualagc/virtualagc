@@ -57,7 +57,7 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Mac | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
 | Win11 | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
 | WSL | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
-| Linux | PASS | P1 (postiss/P1) | fd13-codex worktree, src 2411261 | main gear 194.5 kt/1.9 ft/s (flown 195.3/1.2), wheels stop, GPS fresh in all captures; TIG 05:33:05.7 vs flown 05:29:03; touchdown X not extracted | ~/sts134-runs/postiss/P1/RUN-NOTE.txt; ledger #320 | was UNVERIFIED (stale-GPS runs) |
+| Linux | PASS | P1 (postiss/P1) | fd13-codex worktree, src 2411261 | main gear 194.5 kt/1.9 ft/s, X +2859 ft past KSC15 threshold (Y -4), stopped X +9287 ft (flown 195.3 kt/1.2 ft/s/3186 ft/9782 ft); GPS fresh; TIG 05:33:05.7 vs flown 05:29:03 | ~/sts134-runs/postiss/P1/RUN-NOTE.txt; ledger #320; tools/touchdown_x.py | was UNVERIFIED (stale-GPS runs) |
 
 ## Landing runs on disk (from the logs)
 
