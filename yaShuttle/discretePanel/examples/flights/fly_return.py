@@ -77,14 +77,16 @@ class Return(U.Undock):
     # The target line is the one that reproduces the flown post-burn orbit (23.2 x 188.5 n.mi. above a 6,371 km sphere = 19.3 x 184.6 above the equatorial radius,
     # the reference deorbit_target.py prints -> EI gamma about -1.20 deg, not the -1.17 first read; STS-1's C1 gives -1.38 and
     # 394 ft/s where the flight burned 297), and EI is put at the flown 06:03:06 by the range from EI to the runway (REI solved, 4,438 n.mi.).
-    # TFF 30.0 and gamma_t -1.14, NOT the flown 34.05: this Orbiter's own orbit (188.8 x 183.4 n.mi. at the capture) is not the flown one, and the burn
-    # size is very sensitive to where on the orbit TIG falls (the post-burn apogee sits above the radius at TIG, so the burn needs a radial part).
-    # The flown post-burn orbit, in the reference the tool prints (equatorial radius), is 184.6 x 19.3 n.mi. (the Mission Report's 188.5 x 23.2 is above
-    # a 6,371 km sphere), its burn 296.9-298.4 ft/s, its EI gamma about -1.20.  Scanned on deorb-4's capture with EI pinned at 06:03:06 against those four
-    # (scaled 1 ft/s, 1 n.mi., 1 n.mi., 0.01 deg): TFF 30.0 / -1.14 gives 297.9 ft/s, 186.6 x 21.4, EI gamma -1.207, TIG 05:33:05.7 (flown 05:29:03.1,
-    # the orbit's own phase); the earlier TFF 31.0 / -1.10 gave 297.5, 186.9 x 23.9, -1.181, TIG 05:32:05.6.  Touchdown barely moves with TFF or REI
-    # (about 64 s before the flown 06:34:50 either way).
-    DEORBIT_ARGS = ["--tff", "30.0", "--gamma-ei", "-1.14", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
+    # TFF 34.05 and gamma_t -0.96 (2026-11-05, ledger #328).  The flown burn is TIG 05:29:03.1, EI 06:03:06, so TIG to EI is 34:03, and the
+    # same 34:03 appears in every ISS-era deorbit of JSC-37461 and its siblings (STS-121 35:54, -126 33:56, -129 35:30, -133 33:39,
+    # -135 36:09) with a burn near the Hohmann dV.  A horizontal retrograde burn from a circular orbit at the ISS's height gets to EI in
+    # 29.7 min; the long coast belongs to a burn pitched ~20-25 deg above the local horizon.  The earlier TFF 30.0 / gamma_t -1.14 was fitted
+    # to the flown burn size and post-burn apsides alone, in the family of near-horizontal burns, and put TIG 05:33:05.7 (4 min late); the
+    # flown TFF 34.05 with gamma_t -1.10 (deorb-1) costs 335 ft/s.  The pitched-up family at gamma_t -0.96 (achieved EI gamma -1.08) gives,
+    # on this capture's orbit, TIG 05:29:02.5, 301.6 ft/s (flown 296.9-298.4), EI 06:03:06.0, REI 4,393 n.mi.  The post-burn apsides of the
+    # impulsive design (188.3 x 32.1 n.mi. above the equatorial radius) are the state at TIG, not at the end of a 158 s burn, so they are not
+    # comparable with the report's 188.5 x 23.2 to better than a few n.mi.; the reference of the report's heights is not documented.
+    DEORBIT_ARGS = ["--tff", "34.05", "--gamma-ei", "-0.96", "--ei-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 3 * 60.0 + 6.0),
                     "--near-gmt", "%.1f" % (152 * 86400.0 + 6 * 3600.0 + 34 * 60.0 + 50.0)]
     RAMBO_PULSES = 3
     RAMBO_S = 10.0
