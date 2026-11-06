@@ -297,10 +297,14 @@ class Return(U.Undock):
         c = self.compare() or {}
         self.say("DEORBIT %s: DAP attitude error %s, %s" % (where, c.get("dap_att_err"), c.get("dap_state")))
         if where == "post-mnvr":
-            # the restore point for --from EXEC: the burn attitude held, TIG a minute off, EXEC not yet keyed
-            self.wait_gmt(self.tgt["tig"] - 60.0)
+            # the restore point for --from EXEC: the burn attitude held, TIG minutes off, EXEC not yet keyed.  A restart
+            # costs the driver about 25 wall seconds before it can key anything (the sim runs on meanwhile): 75-100
+            # sim seconds at rate 3, so a capture at TIG-60 s had EXEC go in after TIG and the burn start 37 s late
+            # (P1, P2 of 2026-11-05, ledger #329).  Capture 45 wall seconds' worth of sim time earlier than that.
+            lead = 60.0 + 45.0 * max(1.0, float(getattr(self.a, "rate", 1.0) or 1.0))
+            self.wait_gmt(self.tgt["tig"] - lead)
             self.snapshot("tig1")
-            self.say("DEORBIT: captured sts134r-tig1 at TIG-60 s (TIG GMT %.1f); --from EXEC resumes from it" % self.tgt["tig"])
+            self.say("DEORBIT: captured sts134r-tig1 at TIG-%.0f s (TIG GMT %.1f); --from EXEC resumes from it" % (lead, self.tgt["tig"]))
             # OPS 3 came from the volume's generic G3 during this phase; the flown entry I-loads go into the capture and the
             # run continues from it, as --from EXEC would (ledger #306)
             if entry_iloads.apply(os.path.join(self.a.logs, "sts134r-tig1"), self.say)[0]:
