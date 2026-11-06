@@ -23,15 +23,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Win11 | PASS | run5b | MSVC, entry/run-gps | 195.5 kt/1.8 ft/s/about 2730 ft, wheels stop | ledger #320; results-win11-native/run5b | Win11 has no SUMMARY.txt; figures from the ledger and the run log |
 | WSL | NOT-REQUIRED | run5 (pre-fix), rerun stopped |  | pre-fix run5: wheels stop 181.6 kt/4.0 ft/s but burn lit 134 s late (window placement), does not count | results-wsl/SUMMARY.txt | run 5 waived by PASS-IDLE while the display stays small; not run on the GPS-fixed capture [was NOT-RUN] |
 
-## Post-ISS coast, deorbit, entry, landing (from undock/coast-5)
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | UNVERIFIED | undock/deorb-1..6, 2026-10-24/25 | before the stale-GPS fix | 211-220 kt, 4.1-4.3 ft/s (stale-GPS artifact); no landing log newer than 2026-10-28 from this start | ledger #319 says the shared entry captures were affected; whether undock/coast-5 carries the same flown GPS I-loads is NOT checked | must be re-run or its captures checked with capgps.py before it is called passing. Separate open item: post-ISS burn timing (design TIG 05:33:05.7 vs flown 05:29:03.1) |
-| Mac | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
-| Win11 | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
-| WSL | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
-
 ## Ascent to OMS-2 (peer run 1)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -58,6 +49,15 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | WSL | PASS | run4 | 7837f7d71 | reached SEP3, 3.00X | results-wsl/SUMMARY.txt |  |
 | Linux | UNRECORDED |  |  |  |  |  |
 | Win11 | UNRECORDED |  |  |  |  | run4 exists in results-win11-native; no summary |
+
+## Post-ISS coast, deorbit, entry, landing (from undock/coast-5)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Mac | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
+| Win11 | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
+| WSL | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
+| Linux | PASS | P1 (postiss/P1) | fd13-codex worktree, src 2411261 | main gear 194.5 kt/1.9 ft/s (flown 195.3/1.2), wheels stop, GPS fresh in all captures; TIG 05:33:05.7 vs flown 05:29:03; touchdown X not extracted | ~/sts134-runs/postiss/P1/RUN-NOTE.txt; ledger #320 | was UNVERIFIED (stale-GPS runs) |
 
 ## Landing runs on disk (from the logs)
 
