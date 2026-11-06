@@ -1448,7 +1448,12 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         # overnight run stalled with every window up (owner, 2026-10-13).
         hold = bool(self.a.hold_start) and not getattr(self, "_held_once", False)
         self._held_once = True
-        if hold:
+        # EVERY RESTORE IS HELD UNTIL THE DRIVER IS READY, and then released with 'go' (ledger #329).  A restored vehicle
+        # used to run on while this driver came up, about 25 wall seconds: 75-100 sim seconds at rate 3, so a command
+        # scheduled within that of the capture (EXEC at TIG-15 s from a capture at TIG-60 s) went in late and the
+        # deorbit burn lit 37 s after TIG.  The hold is released by this driver, not by a person.
+        auto_hold = bool(resume) and not hold and not getattr(self.a, "attach", False)
+        if hold or auto_hold:
             cmd += ["--hold-start"]
         if self.a.station != "all":
             cmd += ["--station", self.a.station]
@@ -1470,6 +1475,11 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                                      stdin=subprocess.DEVNULL, cwd=PANEL)
         self.leave_nothing_running()
         self.wait_file(outp, "session commands on port", 180)
+        if auto_hold:
+            self.wait_file(outp, "HELD:", 300)
+            fly_sts134.crewscript.send_session("go", self.base)
+            self.wait_file(outp, "released: the vehicle is running", 60)
+            self.say("restored and held until now; released")
         if hold:
             # --hold-start: every window up and placed, the vehicle not yet
             # started -- the person watching arranges the windows, then says go
