@@ -123,9 +123,9 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
-| Mac | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
-| Win11 | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
-| WSL | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
+| Mac | PASS | peer unit test | patch on fd13-codex-5 ac4aa8744 (same pre-image blobs as 8b652edda) | build clean; test_mdmdev 100/100; every unit test passed | peer report 2026-11-07; ledger #330 | no simulation or T2 docking run (no tape) |
+| Win11 | PASS | peer unit test | patch on fd13-codex-5 ac4aa8744 (same pre-image blobs as 8b652edda) | build clean; test_mdmdev 100/100; every unit test passed | peer report 2026-11-07; ledger #330 | no simulation or T2 docking run (no tape) |
+| WSL | PASS | peer unit test | patch on fd13-codex-5 ac4aa8744 (bf06b754d) | make -j8 clean 0 warnings; test_mdmdev 100/100; make test every stage passed; test_fd13_resume.py OK | peer report 2026-11-07; ledger #330 | no simulation (no tape yet); T2 now on the share |
 
 ## Landing runs on disk (from the logs)
 
