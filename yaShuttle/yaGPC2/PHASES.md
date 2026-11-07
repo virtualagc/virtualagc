@@ -118,6 +118,9 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | DK-T2c (DK-T2b failed without the fix) | fd13-codex 8b652edda (= c56484594 + injector fix 1544d477f picked; DK-T2c ran the same code in ~/work/t2test) | DK-T2b on fd13-codex without the INJ_WARM change: manual phase failed, hold start 3.7 kft from port; DK-T2c with it reached sts134r-dock | ledger #330; DK-T2b/DK-T2c RUN-NOTE.txt | fix owner-approved and committed on fd13-codex; Mac/Win11/WSL asked to build and unit-test, results pending; not on master |
+| Mac | PENDING | peer docking run requested | fd13-codex-5 + injector patch 8b652edda |  | /mnt/STORAGE/forClaude/t2-injector/RELAY-TO-peers-t2-docking.md; ledger #330 | T2 tape and retaped start capture put on the share by owner OK 2026-11-07 |
+| Win11 | PENDING | peer docking run requested | fd13-codex-5 + injector patch 8b652edda |  | /mnt/STORAGE/forClaude/t2-injector/RELAY-TO-peers-t2-docking.md; ledger #330 | T2 tape and retaped start capture put on the share by owner OK 2026-11-07 |
+| WSL | PENDING | peer docking run requested | fd13-codex-5 + injector patch 8b652edda |  | /mnt/STORAGE/forClaude/t2-injector/RELAY-TO-peers-t2-docking.md; ledger #330 | T2 tape and retaped start capture put on the share by owner OK 2026-11-07 |
 
 ## Injector fix 8b652edda (mdmdev INJ_WARM 20000)
 
