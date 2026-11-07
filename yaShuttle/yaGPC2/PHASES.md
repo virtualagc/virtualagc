@@ -117,7 +117,7 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
-| Linux | PASS | AB6-T2-tal | fd13-codex c56484594 + uncommitted --gps-auto-at-land; no YAGPC_GPS_T_OFFSET_SECS override | main gear 190.0 kt / 3.0 ft/s at +1,811 ft of ZZA30, 14 ft right of centerline, wheels stop at 8,024 ft; GPS live FOM 75 | ledger #330; AB6-T2-tal/RUN-NOTE.txt | AB3/AB4 crash was the GPS time-offset mismatch (#319). T2-vs-abort-tape TAL identity still to be shown by a control with the same settings |
+| Linux | PASS | AB6-T2-tal (controls AB7, AB8 crash) | fd13-codex c56484594 + uncommitted --gps-auto-at-land; no GPS override | T2: main gear 190.0 kt / 3.0 ft/s at +1,811 ft of ZZA30, 14 ft right, wheels stop 8,024 ft. Controls with the same settings: abort tape full2-kscG16 (AB7) crash 225 nmi short; full3 (AB8) crash 209 nmi short | ledger #330; AB6/AB7/AB8 RUN-NOTE.txt | Not identical to the three-tape setup: T2 succeeds where both old abort tapes fail. Differing I-load not isolated |
 
 ## Landing runs on disk (from the logs)
 
