@@ -107,17 +107,17 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB2-T2-ato | fd13-codex c56484594 | ME2 out +330 s: OMS-1 4406 kg/250 s, OMS-2 1017 kg/58 s, OPS 201 reached | ledger #330; ~/sts134-runs/singletape/AB2-T2-ato/RUN-NOTE.txt |  |
 
-## Single tape T2: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | PASS | OP1/OT runs | T2-no136, T2-ops09 from tools/abridge_volume.py | no136: OPS 201 runs, OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6 | ledger #330 | OPS 8 and direct OPS 6 positive tests inconclusive: neither comes up on the full T2 with these scripts |
-
 ## Single tape T2: TAL abort to Zaragoza
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB6-T2-tal (controls AB7, AB8 crash) | fd13-codex c56484594 + uncommitted --gps-auto-at-land; no GPS override | T2: main gear 190.0 kt / 3.0 ft/s at +1,811 ft of ZZA30, 14 ft right, wheels stop 8,024 ft. Controls with the same settings: abort tape full2-kscG16 (AB7) crash 225 nmi short; full3 (AB8) crash 209 nmi short | ledger #330; AB6/AB7/AB8 RUN-NOTE.txt | Not identical to the three-tape setup: T2 succeeds where both old abort tapes fail. Differing I-load not isolated |
+
+## Single tape T2: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | OP1/OT5-OT8 runs | T2-no136, T2-ops09 from tools/abridge_volume.py; fd13-codex | no136: OPS 201 and OPS 801 (8011/ FCS/DED DIS C/O) run like T1 and T2; OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6. OPS 4 request refused identically on T1/T2/no136 | ledger #330; OT5-OT8 RUN-NOTE.txt | OPS 6 positive test is the RTLS abort on the full T2 (AB2-T2-rtls); not askable directly on any tape |
 
 ## Landing runs on disk (from the logs)
 
