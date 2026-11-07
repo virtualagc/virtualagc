@@ -106,6 +106,7 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | OP1/OT5-OT8 runs | T2-no136, T2-ops09 from tools/abridge_volume.py; fd13-codex | no136: OPS 201 and OPS 801 (8011/ FCS/DED DIS C/O) run like T1 and T2; OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6. OPS 4 request refused identically on T1/T2/no136 | ledger #330; OT5-OT8 RUN-NOTE.txt | OPS 6 positive test is the RTLS abort on the full T2 (AB2-T2-rtls); not askable directly on any tape |
+| Win11 | PASS | OPS 8 from OPS 2 on T2 (spot check) | build 2650e1a6c (injector patch on ac4aa8744), MSVC | OPS 201 reached UNIV PTG after 17 s; OPS 8 0 1 PRO reached 8011/ FCS/DED DIS C/O after 11 s; same as Linux | Win11-native report 2026-11-07 |  |
 
 ## Single tape T2: RTLS abort
 
