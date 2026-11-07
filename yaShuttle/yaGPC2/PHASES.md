@@ -95,12 +95,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | ER2-T2 vs ER2-flown | current build, #329 restore hold, YAGPC_GPS_T_OFFSET_SECS=946252800 | T2 X +2236 ft, stop +8387; ksc6-flown X +2272, stop +8374 (36 ft / 13 ft apart); OMS left 534.9 kg both | ledger #330 |  |
 
-## Single tape T2: RTLS abort
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | PASS | AB2-T2-rtls | fd13-codex c56484594, K_CMD_STG2 106 (abort tape 104) | main gear 207.3 kt / 1.8 ft/s, no bounce, wheels stop (abort tape rtls33-rerun: 221.7 kt / 9.7 ft/s then bounce) | ledger #330; ~/sts134-runs/singletape/AB2-T2-rtls/RUN-NOTE.txt |  |
-
 ## Single tape T2: ATO abort
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -118,6 +112,12 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | OP1/OT5-OT8 runs | T2-no136, T2-ops09 from tools/abridge_volume.py; fd13-codex | no136: OPS 201 and OPS 801 (8011/ FCS/DED DIS C/O) run like T1 and T2; OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6. OPS 4 request refused identically on T1/T2/no136 | ledger #330; OT5-OT8 RUN-NOTE.txt | OPS 6 positive test is the RTLS abort on the full T2 (AB2-T2-rtls); not askable directly on any tape |
+
+## Single tape T2: RTLS abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB2-T2-rtls (control AB9-ctl-rtls) | fd13-codex c56484594 | T2 main gear 207.3 kt / 1.8 ft/s, no bounce; abort tape full2-kscG16 on the same build 207.2 kt / 1.8 ft/s, no bounce (identical) | ledger #330; AB2-T2-rtls, AB9-ctl-rtls RUN-NOTE.txt | the older recorded 221.7 kt / 9.7 ft/s bounce was an older build |
 
 ## Landing runs on disk (from the logs)
 
