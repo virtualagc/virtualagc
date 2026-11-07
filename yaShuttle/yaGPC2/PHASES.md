@@ -59,6 +59,66 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | WSL | NOT-REQUIRED |  |  |  |  | not requested of the peers [was NOT-RUN] |
 | Linux | PASS | P4 | fd13-codex + fly_return.py tig1 lead and tff 34.05/gamma -0.96 (ledger #328) | TIG 05:29:02.5 (flown 05:29:03.1); EI 06:03:00; touchdown 195.4 kt/1.8 ft/s, X +2824 ft, stop +9019 ft | ~/sts134-runs/postiss/P4/RUN-NOTE.txt |  |
 
+## Single tape T2: ascent to ET sep
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | restored ascent | fd13-codex, T2 = T1 + CGGS_K_CMD_STG2 held at 106 | ET sep GMT 11797508.293 exactly = ksc6-flown2 control; end-of-ascent dr 108 ft vs 77 ft, dv 0.63 vs 0.68 ft/s | ledger #330 (K_CMD_STG2 bisect) |  |
+
+## Single tape T2: pre-ISS coast (NC1-NC4)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | FD-T2 | fd13-codex 172548a6d dirty, fly_fd13 --to NC4 --rate 3 | Ti 780 ft / 1.820 ft/s (gate 5 kft / 5 ft/s; three-tape FIX9 356 ft / 1.87 ft/s); EXEC within 0.29 s of TIG-15 on all 5 burns | ledger #330; ~/sts134-runs/singletape/FD-T2/RUN-NOTE.txt | sensed-vs-designed DV per burn not separately checked |
+
+## Single tape T2: docking (MC1 to STAY)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | DK-T2c (DK-T2b failed) | ~/work/t2test = fd13-codex c56484594 + injector fix 1544d477f (NOT on fd13-codex) | DK-T2b on fd13-codex: manual phase failed, hold start 3.7 kft from port; DK-T2c with the fix reached sts134r-dock | ledger #330; ~/sts134-runs/singletape/DK-T2c/RUN-NOTE.txt | passes only with the injector fix, which needs owner approval and Mac/Win11/WSL tests |
+
+## Single tape T2: undock to SEP3
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | UD-T2 | fd13-codex + injector fix (scratch) | SEP1, SEP2, SEP3 reached, capture taken | ledger #330; ~/sts134-runs/singletape/UD-T2/RUN-NOTE.txt |  |
+
+## Single tape T2: post-ISS coast, deorbit, entry, landing
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | PI-T2 | ~/work/t2test = fd13-codex + 1544d477f | TIG 152/05:29:02.539 (gate 05:29:02.5); EI 06:03:05.997; touchdown 191.1 kt / 1.2 ft/s; X +2439 ft (three-tape P4 195.4 kt / 1.8 ft/s / +2824 ft; flown 195.3 / 1.2 / +3186 ft) | ledger #330; ~/sts134-runs/singletape/PI-T2/RUN-NOTE.txt | speed 4.3 kt under P4, same as E6 (191.0 kt); position gate 5 kft met |
+
+## Single tape T2: entry from TIG-1 capture
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | ER2-T2 vs ER2-flown | current build, #329 restore hold, YAGPC_GPS_T_OFFSET_SECS=946252800 | T2 X +2236 ft, stop +8387; ksc6-flown X +2272, stop +8374 (36 ft / 13 ft apart); OMS left 534.9 kg both | ledger #330 |  |
+
+## Single tape T2: RTLS abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB2-T2-rtls | fd13-codex c56484594, K_CMD_STG2 106 (abort tape 104) | main gear 207.3 kt / 1.8 ft/s, no bounce, wheels stop (abort tape rtls33-rerun: 221.7 kt / 9.7 ft/s then bounce) | ledger #330; ~/sts134-runs/singletape/AB2-T2-rtls/RUN-NOTE.txt |  |
+
+## Single tape T2: ATO abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB2-T2-ato | fd13-codex c56484594 | ME2 out +330 s: OMS-1 4406 kg/250 s, OMS-2 1017 kg/58 s, OPS 201 reached | ledger #330; ~/sts134-runs/singletape/AB2-T2-ato/RUN-NOTE.txt |  |
+
+## Single tape T2: TAL abort to Zaragoza
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | FAIL | AB3-T2-tal, AB4-T2-tal | fd13-codex c56484594 + uncommitted --gps-auto-at-land, ZZA beacons, GPS AUTO | overhead approach arrives at the HAC at 441 kt / 30 kft AGL, wide turn, final intercepted at 12 kft AGL 12 nmi out, stalls 3.8 nmi short; gear-up impact 296 ft/s | ledger #330; AB4-T2-tal/RUN-NOTE.txt | no control on the abort tape (104) finished, so T2-vs-tape identity for TAL is NOT established |
+
+## Single tape T2: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | OP1/OT runs | T2-no136, T2-ops09 from tools/abridge_volume.py | no136: OPS 201 runs, OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6 | ledger #330 | OPS 8 and direct OPS 6 positive tests inconclusive: neither comes up on the full T2 with these scripts |
+
 ## Landing runs on disk (from the logs)
 
 Eras: **stale-gps** = PASS navigated on a stale GPS fix (#319), speeds say nothing about the aerodynamics; **probe** = 2026-11-02 experiments, purpose not recorded; **fixed** = GPS live (#320); **rtls** = a different phase.  Flown: 195.3 kt, 1.2 ft/s, 3,186 ft past the threshold.
