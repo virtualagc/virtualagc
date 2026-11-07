@@ -568,7 +568,7 @@ class Flight:
     def ipl(self):
         nbat = "\n".join("+8     keys ITEM %s EXEC" % i for i in NBAT_ITEMS)
         nbat1 = "+11    keys ITEM 1 + 1 EXEC\n" + nbat
-        self.play(IPL_SCRIPT.format(panel=PANEL, nbat1=nbat1, nbat=nbat), "ipl")
+        self.play(IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), nbat1=nbat1, nbat=nbat), "ipl")
         self.script_done("ipl", 900)
         self.wait_sim(10)
 

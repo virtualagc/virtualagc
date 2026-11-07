@@ -2061,7 +2061,7 @@ wait crt 1 title 2011/ timeout 600
 
     def ipl(self):
         four = getattr(self.a, "crts", 1) >= 4
-        self.play(self.IPL_SCRIPT.format(panel=PANEL, idp4=self.IPL_IDP4 if four else "",
+        self.play(self.IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), idp4=self.IPL_IDP4 if four else "",
                                          nbat_crt4=self.IPL_NBAT_CRT4 if four else ""), "ipl")
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
