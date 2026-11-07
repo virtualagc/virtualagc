@@ -129,7 +129,7 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
-| Linux | PASS | AB6-T2-tal (controls AB7, AB8 crash; AB10 explains) | fd13-codex c56484594 + uncommitted --gps-auto-at-land (now committed 2982dd94b); no GPS override | T2: main gear 190.0 kt / 3.0 ft/s at +1,811 ft of ZZA30, 14 ft right, wheels stop 8,024 ft. Old tapes with the same settings crash (full2-kscG16 225 nmi, full3 209 nmi short). full3 + all flown G3 I-loads (AB10) lands 189.3 kt / 2.9 ft/s, stop 8,217 ft | ledger #330; AB6/AB7/AB8/AB10 RUN-NOTE.txt | T2 equals the old abort tape once the flown G3 I-loads are applied; the old tapes lacked them |
+| Linux | PASS | AB6-T2-tal; AB10 (full3+G3), AB11 (full2-kscG16+G3) explain the old crashes | fd13-codex c56484594 / 8b652edda, --gps-auto-at-land (2982dd94b); no GPS override | T2: main gear 190.0 kt / 3.0 ft/s, stop 8,109 ft. Old tapes plain (AB7 full2-kscG16, AB8 full3): crash 225 / 209 nmi short. With the flown G3 I-loads added: full3 189.3 kt / 2.9 ft/s, 8,217 ft (AB10); full2-kscG16 189.0 kt / 2.9 ft/s, 8,295 ft (AB11) | ledger #330; AB6/AB7/AB8/AB10/AB11 RUN-NOTE.txt | T2 = the old abort tape with the I-loads it lacked; the three results agree within 1 kt / 190 ft |
 
 ## Landing runs on disk (from the logs)
 
