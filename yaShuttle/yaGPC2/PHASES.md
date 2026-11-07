@@ -107,17 +107,17 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB2-T2-ato | fd13-codex c56484594 | ME2 out +330 s: OMS-1 4406 kg/250 s, OMS-2 1017 kg/58 s, OPS 201 reached | ledger #330; ~/sts134-runs/singletape/AB2-T2-ato/RUN-NOTE.txt |  |
 
-## Single tape T2: TAL abort to Zaragoza
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | FAIL | AB3-T2-tal, AB4-T2-tal | fd13-codex c56484594 + uncommitted --gps-auto-at-land, ZZA beacons, GPS AUTO | overhead approach arrives at the HAC at 441 kt / 30 kft AGL, wide turn, final intercepted at 12 kft AGL 12 nmi out, stalls 3.8 nmi short; gear-up impact 296 ft/s | ledger #330; AB4-T2-tal/RUN-NOTE.txt | no control on the abort tape (104) finished, so T2-vs-tape identity for TAL is NOT established |
-
 ## Single tape T2: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | OP1/OT runs | T2-no136, T2-ops09 from tools/abridge_volume.py | no136: OPS 201 runs, OPS 301 and 101 do not (full T2: 3011 and 1011); ops09: OPS 901 runs, 101 does not, 201 halts at 0xC6C6 | ledger #330 | OPS 8 and direct OPS 6 positive tests inconclusive: neither comes up on the full T2 with these scripts |
+
+## Single tape T2: TAL abort to Zaragoza
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB6-T2-tal | fd13-codex c56484594 + uncommitted --gps-auto-at-land; no YAGPC_GPS_T_OFFSET_SECS override | main gear 190.0 kt / 3.0 ft/s at +1,811 ft of ZZA30, 14 ft right of centerline, wheels stop at 8,024 ft; GPS live FOM 75 | ledger #330; AB6-T2-tal/RUN-NOTE.txt | AB3/AB4 crash was the GPS time-offset mismatch (#319). T2-vs-abort-tape TAL identity still to be shown by a control with the same settings |
 
 ## Landing runs on disk (from the logs)
 
