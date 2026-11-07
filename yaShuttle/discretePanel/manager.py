@@ -1526,6 +1526,8 @@ class Manager(object):
         argv = [sys.executable, script, "--port-base", str(self.args.port_base),
                 "--size", str(self.args.portview_size),
                 "--textures", self.args.portview_textures]
+        if self.args.portview_site:
+            argv += ["--site", self.args.portview_site]
         # the run's own views unless a station asked for others: Start gave
         # only the forward view to a run begun with "aft,cctv" (owner)
         views = views or windowLayout.split_views(self.args.portview_views)[0]
@@ -1721,6 +1723,9 @@ def main(argv=None):
                          "--portview-views; empty: portview's default)")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), default="auto",
                     help="portview.py's --textures for Start under WINDOW VIEWS (simulatePASS --portview-textures)")
+    ap.add_argument("--portview-site", default="", metavar="SITE",
+                    help="portview.py's --site for Start under WINDOW VIEWS (simulatePASS --portview-site; "
+                         "empty: portview's default, ksc)")
     ap.add_argument("--portview-size", type=int, metavar="N", default=368,
                     help="portview.py's --size for Start under WINDOW VIEWS (default 368)")
     ap.add_argument("--hc-size", type=int, metavar="N", default=384,

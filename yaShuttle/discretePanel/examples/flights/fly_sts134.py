@@ -400,6 +400,8 @@ class Flight:
             cmd += ["--portview-views", self.a.portview_views]
         if self.a.portview and getattr(self.a, "portview_textures", None):
             cmd += ["--portview-textures", self.a.portview_textures]
+        if self.a.portview and getattr(self.a, "portview_site", None):
+            cmd += ["--portview-site", self.a.portview_site]
         if self.a.hold_start:                    # windows up, the vehicle held
             cmd += ["--hold-start"]
         if self.a.layout:                        # the windows where this file says
@@ -1274,6 +1276,10 @@ def main():
                     help="with --abort TAL: the ground at this TAL site's runway height "
                          "(default %s, the site PASS flies on this tape; the crew's site "
                          "selection is not changed)" % TAL_DEFAULT)
+    ap.add_argument("--portview-site", metavar="SITE",
+                    help="with --portview: portview's --site, the landing site whose close-up imagery to load "
+                         "(default: the TAL site of --abort TAL, zza unless --abort-site says otherwise; "
+                         "otherwise portview's own, ksc)")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), metavar="MODE",
                     help="with --portview: portview's --textures; 'reduced' for a GPU that crashes with the full "
                          "textures (a shared-memory Intel GPU reports no memory size)")
@@ -1295,6 +1301,8 @@ def main():
     a = ap.parse_args()
     if a.abort == "TAL":                    # vehdyn's ground at the TAL runway
         site = a.abort_site or TAL_DEFAULT
+        if not a.portview_site:             # and portview's imagery at the same place
+            a.portview_site = site.lower()
         os.environ["YAGPC_GROUND_ALT_FT"] = "%g" % TAL_SITES[site]
         print("fly_sts134: TAL to %s: ground at %g ft above the ellipsoid"
               % (site, TAL_SITES[site]), flush=True)

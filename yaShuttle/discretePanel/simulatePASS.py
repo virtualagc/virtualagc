@@ -1620,6 +1620,9 @@ def main():
     ap.add_argument("--portview-views", default=None, metavar="LIST",
                     help="portview.py's --views: comma-separated, from front, up, left, right, "
                          "aft, cl (its default is front alone)")
+    ap.add_argument("--portview-site", default=None, metavar="SITE",
+                    help="portview.py's --site, the landing site whose close-up imagery to load "
+                         "(default: portview's own, ksc; e.g. zza for a Zaragoza TAL)")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), default=None,
                     help="portview.py's --textures: force reduced (about 0.5 GB) textures on a GPU that "
                          "crashes or exits with the full ones, e.g. a shared-memory Intel GPU that reports "
@@ -2236,6 +2239,8 @@ def main():
                            "--size", str(args.portview_size)]
                 if args.portview_textures:
                     pv_argv += ["--textures", args.portview_textures]
+                if args.portview_site:
+                    pv_argv += ["--site", args.portview_site]
                 if pv_views:
                     pv_argv += ["--views", pv_views]
                     # each view opens at its layout place and size.  The layout
@@ -2435,6 +2440,7 @@ def main():
                             "--portview-size", str(args.portview_size),
                             "--portview-views", args.portview_views or "",
                             "--portview-textures", args.portview_textures or "auto",
+                            "--portview-site", args.portview_site or "",
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.
