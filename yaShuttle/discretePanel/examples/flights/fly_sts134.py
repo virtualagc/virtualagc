@@ -1114,6 +1114,12 @@ class Flight:
             self.script_done("air-data", 60)
             self.air_data_done = True
             self.say("crew: ADTA PROBES DEPLOY; ADTA to G&C AUT (at the start of LAND)")
+        if self.a.gps_auto_at_land:
+            # an abort's entry skips the V = 7K steps above; flight rules keep autolands out of aborts, but
+            # where there is no (or no usable) navaid the autoland needs GPS in navigation: GPS TO NAV AUTO
+            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 2 EXEC\n+8     keys RESUME\n", "gps-auto-land")
+            self.script_done("gps-auto-land", 60)
+            self.say("crew: NAV GPS to AUTO (SPEC 50 ITEM 42) at the start of LAND (--gps-auto-at-land)")
         if self.a.incorporate_at_land:
             self.play(GPS_INCORPORATE, "gps-incorporate-land")
             self.script_done("gps-incorporate-land", 60)
@@ -1257,6 +1263,9 @@ def main():
     ap.add_argument("--attach", action="store_true",
                     help="with --from DEORBIT: drive the vehicle ALREADY RUNNING on --port-base "
                          "(a driver that stopped after sending OPS 301) instead of starting one")
+    ap.add_argument("--gps-auto-at-land", action="store_true",
+                    help="DEVELOPMENT: GPS TO NAV AUTO (SPEC 50 item 42) as LAND starts; an abort's entry otherwise "
+                         "never sends the V = 7K GPS steps")
     ap.add_argument("--abort", choices=["RTLS", "TAL", "ATO"],
                     help="ASCENT: on the first engine failure (YAGPC_SSME_FAIL), the crew's "
                          "ABORT MODE rotary and ABORT pb; RTLS and TAL then go from ET SEP "
