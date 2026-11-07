@@ -71,12 +71,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | FD-T2 | fd13-codex 172548a6d dirty, fly_fd13 --to NC4 --rate 3 | Ti 780 ft / 1.820 ft/s (gate 5 kft / 5 ft/s; three-tape FIX9 356 ft / 1.87 ft/s); EXEC within 0.29 s of TIG-15 on all 5 burns | ledger #330; ~/sts134-runs/singletape/FD-T2/RUN-NOTE.txt | sensed-vs-designed DV per burn not separately checked |
 
-## Single tape T2: docking (MC1 to STAY)
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | UNVERIFIED | DK-T2c (DK-T2b failed) | ~/work/t2test = fd13-codex c56484594 + injector fix 1544d477f (NOT on fd13-codex) | DK-T2b on fd13-codex: manual phase failed, hold start 3.7 kft from port; DK-T2c with the fix reached sts134r-dock | ledger #330; ~/sts134-runs/singletape/DK-T2c/RUN-NOTE.txt | passes only with the injector fix, which needs owner approval and Mac/Win11/WSL tests |
-
 ## Single tape T2: undock to SEP3
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -118,6 +112,20 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB2-T2-rtls (control AB9-ctl-rtls) | fd13-codex c56484594 | T2 main gear 207.3 kt / 1.8 ft/s, no bounce; abort tape full2-kscG16 on the same build 207.2 kt / 1.8 ft/s, no bounce (identical) | ledger #330; AB2-T2-rtls, AB9-ctl-rtls RUN-NOTE.txt | the older recorded 221.7 kt / 9.7 ft/s bounce was an older build |
+
+## Single tape T2: docking (MC1 to STAY)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | DK-T2c (DK-T2b failed without the fix) | fd13-codex 8b652edda (= c56484594 + injector fix 1544d477f picked; DK-T2c ran the same code in ~/work/t2test) | DK-T2b on fd13-codex without the INJ_WARM change: manual phase failed, hold start 3.7 kft from port; DK-T2c with it reached sts134r-dock | ledger #330; DK-T2b/DK-T2c RUN-NOTE.txt | fix owner-approved and committed on fd13-codex; Mac/Win11/WSL asked to build and unit-test, results pending; not on master |
+
+## Injector fix 8b652edda (mdmdev INJ_WARM 20000)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Mac | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
+| Win11 | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
+| WSL | PENDING | unit test requested | fd13-codex 8b652edda |  | ledger #330; /mnt/STORAGE/forClaude/t2-injector/injector-3125v.patch |  |
 
 ## Landing runs on disk (from the logs)
 
