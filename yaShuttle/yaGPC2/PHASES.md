@@ -89,12 +89,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | ER2-T2 vs ER2-flown | current build, #329 restore hold, YAGPC_GPS_T_OFFSET_SECS=946252800 | T2 X +2236 ft, stop +8387; ksc6-flown X +2272, stop +8374 (36 ft / 13 ft apart); OMS left 534.9 kg both | ledger #330 |  |
 
-## Single tape T2: ATO abort
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | PASS | AB2-T2-ato | fd13-codex c56484594 | ME2 out +330 s: OMS-1 4406 kg/250 s, OMS-2 1017 kg/58 s, OPS 201 reached | ledger #330; ~/sts134-runs/singletape/AB2-T2-ato/RUN-NOTE.txt |  |
-
 ## Single tape T2: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -133,6 +127,12 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Win11 | PENDING | peer TAL run: Windows IPL path bug found, patched, rerun requested | t2-tal 766727874 (injector + gps-auto-at-land) + windows-ipl-panel-path patch (fd13-codex b163c6fbd) | first attempt failed at IPL (70 s, sim time 0): driver bug, not a flight result | Win11-native report 2026-11-07; ledger #330 | {panel} backslashes eaten by shlex.split in crewscript; fixed in fly_sts134.py and fly_rndz134.py (b163c6fbd) |
 | WSL | PASS | WSL T2 Zaragoza TAL from IPL, port base 45000 | fd13-codex-5 ac4aa8744 + injector patch + gps-auto-at-land.patch; T2 sha 6aafb23ce259a4e3; no GPS override | ME2 out +250 s, TAL, ET sep GMT 11797609.009, MM 304; LEFT MAIN 190.4 kt / 3.0 ft/s, RIGHT MAIN 190.3 / 2.7; nose 136.6 kt; WHEELS STOP ~t=7374; Linux AB6 190.0 / 3.0 | WSL-integration report 2026-11-07; ledger #330 | small gear skip ~1 s after first contact (second main touchdown at ~1 ft/s, second nose touchdown): same in every Linux TAL and RTLS landing |
 | Mac | PASS | Mac T2 Zaragoza TAL, ascent capture to land capture | fd13-codex-5 ac4aa8744 + injector patch (26ffa79f7) + gps-auto-at-land.patch (e0d4762f8), macOS arm64; T2 sha 6aafb23ce259a4e3; no GPS override | ME2 out +250 s, TAL, ET sep GMT 11797608.778; MAIN gear 189.6 kt / 3.0 ft/s at X +1,841 ft, Y +14 ft of the ZZA30 threshold; WHEELS STOP at X +8,231 ft; Linux AB6 190.0 / 3.0, +1,811 ft, stop 8,024 ft | Mac-integrate report 2026-11-07; ledger #330; forClaude/t2-injector/results-admins-Mac-Studio/tal1 | same small gear skip as Linux and WSL |
+
+## Single tape T2: ATO abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB2-T2-ato (control AB12-ctl-ato) | fd13-codex c56484594 / 8b652edda | T2: OMS-1 TIG MET 0:11:33.3, OMS-2 0:55:51.3, OMS L/R left 1447.7/1441.4 kg, OPS 201 reached. Abort tape (104%): OMS-1 TIG 0:11:37.6, OMS-2 0:55:55.6, OMS left 1283.7/1277.3 kg (164 kg more used), OPS 201 reached | ledger #330; AB2-T2-ato, AB12-ctl-ato RUN-NOTE.txt | K_CMD_STG2 106 vs 104 shifts MECO 4.3 s and OMS use 1.5%: documented dispersion |
 
 ## Landing runs on disk (from the logs)
 
