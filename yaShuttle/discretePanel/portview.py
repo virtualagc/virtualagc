@@ -1526,11 +1526,14 @@ class Resources(object):
     """Programs, textures and buffers, made once in the first view's context."""
     _instance = None
 
-    def __init__(self, milkyway, stars, moon, site):
+    def __init__(self, milkyway, stars, moon, site, others=()):
         self.milkyway = milkyway
         self.stars = stars
         self.moon = moon
-        self.site = site                       # Site, or None
+        self.site = site                       # the Site whose imagery is on the GPU now, or None
+        self.allSites = ([site] if site is not None else []) + list(others)    # --site ksc,zza: taken in turn
+        self.stream = None                     # SiteStream, while another site's textures are on their way
+        self.tickFs = None
         self.starsEpoch = None
         self.ready = False
 
@@ -1612,6 +1615,7 @@ class Resources(object):
                     k += 1
             site.heights = site.patch_heights = None
         self.hgtPTex = make_height_array(np.stack(ph) if ph else empty)
+        self.emptyHgt = (make_height_array(empty), make_height_array(empty))    # in place of a dropped site's
         self.earthDayTex = None
         self.earthMonth = None
         self.preloadMonth = None               # the flight's month, loaded in build()
@@ -1650,6 +1654,68 @@ class Resources(object):
         self.earthDayTex = upload("Blue Marble", make_earth_texture, load_rgb(bluemarble_path(use)))
         self.earthMonth = month
         print("portview: Blue Marble month %d loaded" % month)
+
+    def site_tick(self, o_ef, fs):
+        """Once a frame (the views share it): move to the nearest site's imagery when the eye has left the one on
+        the GPU.  The old site's textures are deleted once the eye is beyond its outer ring, and the new site's are
+        uploaded over the following frames (SiteStream); until they are all there the ground is Blue Marble."""
+        if len(self.allSites) < 2 or fs is self.tickFs or not self.ready:
+            return
+        self.tickFs = fs
+        st = self.stream
+        if st is not None:
+            try:
+                done = st.step(SITE_BUDGET_S)
+            except Exception as e:
+                st.delete()
+                self.stream = None
+                if not TEXTURES.get('nocompress'):       # a driver that will not take sub-images of a compressed
+                    TEXTURES['nocompress'] = True        # texture (upload() does the same): uncompressed, 6x the memory
+                    print("portview: site %s: %s; trying again without on-upload compression (from here on)" % (
+                        st.site.name, e), file=sys.stderr, flush=True)
+                    self.stream = SiteStream(st.site)
+                    return
+                print("portview: SITE %s FAILED to load: %s; the Earth near it is Blue Marble only" % (
+                    st.site.name, e), file=sys.stderr, flush=True)
+                self.allSites = [x for x in self.allSites if x is not st.site]
+                return
+            if done:
+                self.site = st.site
+                self.ringTex, self.patchTex = st.ring_tex, st.patch_tex
+                self.hgtTex = st.hgt_tex or self.emptyHgt[0]
+                self.hgtPTex = st.hgt_ptex or self.emptyHgt[1]
+                self.hgtMax = st.hgt_max
+                self.patchHgtLayer = st.patch_hgt_layer
+                self.stream = None
+                print("portview: site %s on the GPU after %.0f s (worst step %.0f ms)" % (
+                    st.site.name, time.monotonic() - st.t_start, st.worst * 1000.0), flush=True)
+            return
+        # Leave a site only when the eye is beyond its outer ring; then take the other site whose ring the eye is
+        # nearest to, once it is within SITE_LOAD_MARGIN of that ring.
+        if self.site is not None and float(np.linalg.norm(o_ef - self.site.ef)) <= self.site.reach:
+            return
+        gap = [(float(np.linalg.norm(o_ef - x.ef)) - x.reach, x) for x in self.allSites if x is not self.site]
+        g, target = min(gap, key=lambda c: c[0])
+        if g < SITE_LOAD_MARGIN:
+            self.drop_site()
+            self.stream = SiteStream(target)
+            print("portview: leaving the imagery of %s; %s streaming in" % (
+                "none" if self.siteName is None else self.siteName, target.name), flush=True)
+
+    def drop_site(self):
+        """Delete the imagery of the site on the GPU: the ground there is Blue Marble from now."""
+        self.siteName = None if self.site is None else self.site.name
+        ids = list(self.ringTex) + list(getattr(self, 'patchTex', []))
+        if ids:
+            GL.glDeleteTextures(ids)
+        for t, e in ((self.hgtTex, self.emptyHgt[0]), (self.hgtPTex, self.emptyHgt[1])):
+            if t != e:
+                GL.glDeleteTextures([t])
+        self.ringTex, self.patchTex = [], []
+        self.hgtTex, self.hgtPTex = self.emptyHgt
+        self.hgtMax = 0.0
+        self.patchHgtLayer = [-1, -1, -1]
+        self.site = None
 
     def set_star_epoch(self, year):
         """Carry the catalogue (epoch J1991.25) to the given year."""
@@ -2410,10 +2476,13 @@ def gmst_matrix(unix):
 class Site(object):
     """A landing site's ring imagery (portview/fetch_assets.py) and its place:
     the centre on PASS's ellipsoid at the runway's height, the east-north-up
-    frame there, and the rings' mappings."""
+    frame there, and the rings' mappings.  Site(path, eager=False) reads only
+    the place and the mappings (cheap); the images and heights then come from
+    load_images / load_heights, which SiteStream calls on a thread."""
 
-    def __init__(self, path):
+    def __init__(self, path, eager=True):
         import json
+        self.path = path
         with open(os.path.join(path, "ring.json")) as f:
             meta = json.load(f)
         if len(meta['rings']) != 4:
@@ -2439,21 +2508,266 @@ class Site(object):
             else:
                 far.append([math.radians(v) for v in r['bounds']])
         self.near, self.far = np.array(near), np.array(far)
-        self.images = [load_rgb(os.path.join(path, r['file'])) for r in meta['rings']]
         # Fine patches: the runway's (ringF), then any others (the launch
         # pads); at most three.
         patches = ([meta['fine']] if meta.get('fine') else []) + list(meta.get('patches', {}).values())
         patches = patches[:3]
         self.patches = np.array([near_map(p['bounds']) for p in patches]).reshape(-1, 4)
-        self.patch_images = [load_rgb(os.path.join(path, p['file'])) for p in patches]
+        self.inv_r = (0.5 / (Nr + h), 0.5 / (Mr + h))
+        # How far from the site its imagery matters: the outer ring's half extent on the ground, and a margin.
+        # Beyond it the ground is Blue Marble anyway, so another site's imagery may take the GPU's memory.
+        lon0, lat0, lon1, lat1 = meta['rings'][3]['bounds']
+        half = max(abs(lon1 - lon0) / 2.0 * math.cos(lat), abs(lat1 - lat0) / 2.0)
+        self.reach = 1.15 * math.radians(half) * EARTH_A
+        self._meta, self._h = meta, h
+        self._ring_files = [r['file'] for r in meta['rings']]
+        self._patch_files = [p['file'] for p in patches]
+        self._patch_hfiles = [p.get('height') for p in patches]
+        self.images = self.patch_images = self.heights = self.patch_heights = None
+        if eager:
+            self.images = list(self.load_images(rings=True))
+            self.patch_images = list(self.load_images(rings=False))
+            self.load_heights()
+
+    def load_images(self, rings):
+        """The ring images (rings=True) or the fine patches', one at a time."""
+        for f in (self._ring_files if rings else self._patch_files):
+            yield load_rgb(os.path.join(self.path, f))
+
+    def load_heights(self):
         # The ground's heights (3DEP, sea level) under rings 0-2 and some
         # patches, as metres from the site's height; None without them.
-        self.inv_r = (0.5 / (Nr + h), 0.5 / (Mr + h))
+        meta, h, path = self._meta, self._h, self.path
         self.heights = None
         if meta.get('heights') and TERRAIN['on']:
             self.heights = np.stack([np.load(os.path.join(path, f)) for f in meta['heights']]) - h
-        self.patch_heights = [np.load(os.path.join(path, p['height'])) - h
-                              if TERRAIN['on'] and p.get('height') else None for p in patches]
+        self.patch_heights = [np.load(os.path.join(path, f)) - h if TERRAIN['on'] and f else None
+                              for f in self._patch_hfiles]
+
+
+# --------------------------------------------------------------------------
+# Several sites in one run (--site ksc,zza).  One site's rings and patches take about a gigabyte of the GPU's
+# memory, so two do not fit on a 2 GB card; and one gigabyte uploaded in a single call stops the window for seconds,
+# which a recording shows as a frozen frame.  So the sites are taken in turn, as the eye moves between them: once it
+# is beyond the outer ring of the site it has, that site's textures are deleted (the ground there is Blue Marble
+# anyway) and the next site's are uploaded a band of rows at a time, a few milliseconds of each frame, while the eye
+# is still too far from it to see any of its imagery.  The images are decoded, and their mip levels made, on a
+# thread.  The mip levels are made here and uploaded like the rest because glGenerateMipmap of an 8192 x 8192 level
+# is one call that stalls the frame.
+
+SITE_BAND_PX = 200000                   # pixels one upload call carries (about 5 ms on a 2 GB NVIDIA card)
+SITE_BUDGET_S = 0.004                   # the most the streaming takes of a frame, after its first call
+SITE_LOAD_MARGIN = 2.0e6                # m: stream a site in once the eye is this near the edge of its outer ring
+SITE_WAIT = object()                    # what the upload generator yields while it waits for the decoding thread
+
+
+def _srgb_tables():
+    i = np.arange(256, dtype=np.float64) / 255.0
+    lin = np.where(i <= 0.04045, i / 12.92, ((i + 0.055) / 1.055) ** 2.4).astype(np.float32)
+    x = np.arange(4096, dtype=np.float64) / 4095.0
+    enc = np.where(x <= 0.0031308, x * 12.92, 1.055 * x ** (1.0 / 2.4) - 0.055)
+    return lin, np.clip(np.round(enc * 255.0), 0, 255).astype(np.uint8)
+
+
+_SRGB = {}
+
+
+def mip_down(a):
+    """The next mip level of an 8-bit sRGB image: 2 x 2 boxes averaged in linear light, as the driver's
+    glGenerateMipmap does for an sRGB texture; in strips, so that the float copy stays small."""
+    if not _SRGB:
+        _SRGB['lin'], _SRGB['enc'] = _srgb_tables()
+    lin, enc = _SRGB['lin'], _SRGB['enc']
+    h, w, c = a.shape
+    nh, nw = max(1, h // 2), max(1, w // 2)
+    sh, sw = (2 if h > 1 else 1), (2 if w > 1 else 1)
+    out = np.empty((nh, nw, c), np.uint8)
+    for y in range(0, nh, 128):
+        y1 = min(nh, y + 128)
+        blk = lin[a[y * sh:y1 * sh, :nw * sw]].reshape(y1 - y, sh, nw, sw, c).mean(axis=(1, 3))
+        out[y:y1] = enc[np.minimum((blk * 4095.0 + 0.5).astype(np.int32), 4095)]
+    return out
+
+
+def mip_chain(a):
+    """a and all its smaller levels down to 1 x 1."""
+    levels = [a]
+    while max(a.shape[:2]) > 1:
+        a = mip_down(a)
+        levels.append(a)
+    return levels
+
+
+class SiteStream(object):
+    """One site's textures on their way to the GPU.  A thread decodes the images and makes their mip levels;
+    step() in the GL thread allocates each texture and fills it a band at a time.  Done when `done` is True; the
+    textures are then ring_tex, patch_tex, hgt_tex, hgt_ptex (0 for none), hgt_max and patch_hgt_layer."""
+
+    def __init__(self, site):
+        import threading
+        self.site = site
+        self.chains = []                         # (kind, index, mip levels), as the thread finishes them
+        self.error = None
+        self.finished_decoding = False
+        self.slots = threading.Semaphore(2)      # the thread stays two textures ahead, not a whole site
+        self.thread = threading.Thread(target=self._decode, daemon=True, name="site-%s" % site.name)
+        self.thread.start()
+        self.gen = None
+        self.done = False
+        self.ring_tex, self.patch_tex = [], []
+        self.hgt_tex = self.hgt_ptex = 0
+        self.cur_tid = 0                         # the texture being filled
+        self.hgt_max = 0.0
+        self.patch_hgt_layer = [-1, -1, -1]
+        self.t_start = time.monotonic()
+        self.worst = 0.0                         # the longest a step took, s: the frame it cost
+
+    def _decode(self):
+        try:
+            s = self.site
+            for rings in (True, False):
+                for k, img in enumerate(s.load_images(rings)):
+                    self.slots.acquire()
+                    self.chains.append(('ring' if rings else 'patch', k, mip_chain(img)))
+            s.load_heights()
+        except Exception as e:                   # reported by step(), in the GL thread
+            self.error = e
+        self.finished_decoding = True
+
+    def _texture(self, chain, compress):
+        """An empty mipmapped sRGB texture of the chain's sizes: the same parameters as make_ring_texture."""
+        tid = GL.glGenTextures(1)
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+        compress = (compress or TEXTURES['mode'] == 'reduced') and not TEXTURES.get('nocompress')
+        ifmt = 0x8C4C if compress else GL.GL_SRGB8
+        for lv, a in enumerate(chain):
+            GL.glTexImage2D(GL.GL_TEXTURE_2D, lv, ifmt, a.shape[1], a.shape[0], 0, GL.GL_RGB,
+                            GL.GL_UNSIGNED_BYTE, None)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_BASE_LEVEL, 0)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_LEVEL, len(chain) - 1)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        for wrap in (GL.GL_TEXTURE_WRAP_S, GL.GL_TEXTURE_WRAP_T):
+            GL.glTexParameteri(GL.GL_TEXTURE_2D, wrap, GL.GL_CLAMP_TO_EDGE)
+        try:
+            GL.glTexParameterf(GL.GL_TEXTURE_2D, 0x84FE, min(8.0, GL.glGetFloatv(0x84FF)))
+        except GL.GLError:
+            pass
+        return tid
+
+    def _check(self, what):
+        errs = gl_errors()
+        if errs:
+            raise RuntimeError("%s: %s" % (what, ", ".join(errs)))
+
+    def _fill(self, kind, k, chain, tid):
+        """Upload the chain into the texture, a band of rows a step, finest level first.  The views draw between
+        the steps and bind their own textures, so each band binds this one again."""
+        for lv in range(len(chain)):
+            a = chain[lv]
+            h, w = a.shape[:2]
+            rows = max(4, SITE_BAND_PX // w // 4 * 4)       # a multiple of 4: a compressed block's height
+            for y in range(0, h, rows):
+                y1 = min(h, y + rows)
+                GL.glActiveTexture(GL.GL_TEXTURE0)
+                GL.glBindTexture(GL.GL_TEXTURE_2D, tid)
+                GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
+                GL.glTexSubImage2D(GL.GL_TEXTURE_2D, lv, 0, y, w, y1 - y, GL.GL_RGB, GL.GL_UNSIGNED_BYTE,
+                                   np.ascontiguousarray(a[y:y1]))
+                GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+                self._check("%s %d level %d rows %d-%d" % (kind, k, lv, y, y1))
+                if h > rows:
+                    yield
+            chain[lv] = None                                # the CPU's copy is no longer needed
+
+    def _upload(self):
+        s = self.site
+        want = len(s._ring_files) + len(s._patch_files)
+        for _ in range(want):
+            while not self.chains:
+                if self.error is not None:
+                    raise self.error
+                yield SITE_WAIT                             # waiting for the thread
+            kind, k, chain = self.chains.pop(0)
+            self.slots.release()
+            tid = self.cur_tid = self._texture(chain, compress=(kind == 'ring' and k > 0))
+            yield from self._fill(kind, k, chain, tid)
+            (self.ring_tex if kind == 'ring' else self.patch_tex).append(tid)
+            self.cur_tid = 0
+        while not self.finished_decoding:
+            yield SITE_WAIT
+        if self.error is not None:
+            raise self.error
+        if s.heights is not None:
+            self.hgt_max = float(s.heights.max()) + 1.0
+            tid_box = []
+            for _ in self._height_array_steps(s.heights, tid_box):
+                yield
+            self.hgt_tex = tid_box[0]
+        ph = []
+        for i, a in enumerate(s.patch_heights):
+            if a is not None:
+                self.patch_hgt_layer[i] = len(ph)
+                self.hgt_max = max(self.hgt_max, float(a.max()) + 1.0)
+                ph.append(a)
+        if ph:
+            tid_box = []
+            for _ in self._height_array_steps(np.stack(ph), tid_box):
+                yield
+            self.hgt_ptex = tid_box[0]
+        s.heights = s.patch_heights = None
+        GL.glFlush()                                        # visible to the other views' contexts
+
+    def _height_array_steps(self, layers, box):
+        n, h, w = layers.shape
+        tid = GL.glGenTextures(1)
+        box.append(tid)
+        GL.glActiveTexture(GL.GL_TEXTURE0)
+        GL.glBindTexture(GL.GL_TEXTURE_2D_ARRAY, tid)
+        GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 4)
+        GL.glTexImage3D(GL.GL_TEXTURE_2D_ARRAY, 0, GL.GL_R32F, w, h, n, 0, GL.GL_RED, GL.GL_FLOAT, None)
+        for p, v in ((GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR), (GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR),
+                     (GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE), (GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE)):
+            GL.glTexParameteri(GL.GL_TEXTURE_2D_ARRAY, p, v)
+        for i in range(n):
+            GL.glActiveTexture(GL.GL_TEXTURE0)
+            GL.glBindTexture(GL.GL_TEXTURE_2D_ARRAY, tid)
+            GL.glTexSubImage3D(GL.GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, w, h, 1, GL.GL_RED, GL.GL_FLOAT,
+                               np.ascontiguousarray(layers[i], dtype=np.float32))
+            self._check("heights layer %d" % i)
+            yield
+
+    def step(self, budget_s):
+        """Run upload calls until the budget is spent (always at least one).  True when everything is on the GPU."""
+        if self.done:
+            return True
+        if self.gen is None:
+            self.gen = self._upload()
+        gl_errors()                                         # not ours: clear them
+        t0 = time.monotonic()
+        while True:
+            t1 = time.monotonic()
+            try:
+                r = next(self.gen)
+            except StopIteration:
+                self.done = True
+                break
+            now = time.monotonic()
+            self.worst = max(self.worst, now - t1)
+            if r is SITE_WAIT or now - t0 >= budget_s:
+                break
+        return self.done
+
+    def delete(self):
+        """Give back whatever was allocated (an abandoned or failed stream)."""
+        ids = self.ring_tex + self.patch_tex + ([self.cur_tid] if self.cur_tid else [])
+        if ids:
+            GL.glDeleteTextures(ids)
+        arr = [t for t in (self.hgt_tex, self.hgt_ptex) if t]
+        if arr:
+            GL.glDeleteTextures(arr)
+        self.ring_tex, self.patch_tex, self.hgt_tex, self.hgt_ptex = [], [], 0, 0
 
 
 class EarthLayer(object):
@@ -2494,6 +2808,7 @@ class EarthLayer(object):
         # In double precision here, so the shader never subtracts big numbers.
         o_ef = m @ eye
         o_s = o_ef * np.array([1.0, 1.0, EARTH_A / EARTH_B])
+        res.site_tick(o_ef, fs)
         site = res.site
         # The ground's heights near the site, while the eye is within ~60 km
         # of the ground there (from higher, the relief is a few pixels).
@@ -3652,7 +3967,8 @@ def main(argv=None):
                     help="the launch pad whose structures to draw (default lc39a, STS-134's)")
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
-                         "none for none)")
+                         "none for none).  A list, ksc,zza, loads the first now and each other one once the "
+                         "eye has left the one before, uploaded over many frames")
     ap.add_argument("--msaa", type=int, default=4, metavar="N",
                     help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
                          "none with reduced textures)")
@@ -3775,13 +4091,18 @@ def main(argv=None):
     RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway=args.lit_runway)
     MSAA['samples'] = args.msaa
     THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
+    others = []
     if args.site != 'none':
-        path = os.path.join(SITES_DIR, args.site)
-        if os.path.exists(os.path.join(path, "ring.json")):
-            site = Site(path)
-        else:
-            print("portview: no imagery for site %r (python3 portview/fetch_assets.py "
-                  "--sites %s); the Earth near it is Blue Marble only" % (args.site, args.site))
+        for name in args.site.split(','):       # ksc,zza: the first is on the GPU at the start, the others follow
+            path = os.path.join(SITES_DIR, name)
+            if os.path.exists(os.path.join(path, "ring.json")):
+                if site is None:
+                    site = Site(path)
+                else:
+                    others.append(Site(path, eager=False))
+            else:
+                print("portview: no imagery for site %r (python3 portview/fetch_assets.py "
+                      "--sites %s); the Earth near it is Blue Marble only" % (name, name))
 
     QtCore.QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     fmt = QtGui.QSurfaceFormat()
@@ -3796,7 +4117,7 @@ def main(argv=None):
         pass
     qapp = QtWidgets.QApplication(sys.argv[:1])
     TEXTURES['mode'] = args.textures
-    Resources._instance = Resources(milkyway, stars, moon, site)
+    Resources._instance = Resources(milkyway, stars, moon, site, others)
     Resources._instance.preloadMonth = preload_month(args.month)
 
     unix0 = None
