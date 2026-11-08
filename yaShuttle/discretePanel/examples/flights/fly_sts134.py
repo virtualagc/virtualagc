@@ -1278,8 +1278,8 @@ def main():
                          "selection is not changed)" % TAL_DEFAULT)
     ap.add_argument("--portview-site", metavar="SITE",
                     help="with --portview: portview's --site, the landing site whose close-up imagery to load "
-                         "(default: the TAL site of --abort TAL, zza unless --abort-site says otherwise; "
-                         "otherwise portview's own, ksc)")
+                         "(default: with --abort TAL and --from ENTRY or LAND, the TAL site, zza unless --abort-site says "
+                         "otherwise; otherwise portview's own, ksc -- one site's imagery serves the whole run)")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), metavar="MODE",
                     help="with --portview: portview's --textures; 'reduced' for a GPU that crashes with the full "
                          "textures (a shared-memory Intel GPU reports no memory size)")
@@ -1301,7 +1301,9 @@ def main():
     a = ap.parse_args()
     if a.abort == "TAL":                    # vehdyn's ground at the TAL runway
         site = a.abort_site or TAL_DEFAULT
-        if not a.portview_site:             # and portview's imagery at the same place
+        # portview loads ONE site's imagery for the whole run, so the TAL site's is only right when the run starts
+        # at the entry; from IPL the launch is at KSC, where the TAL site's rings leave the ground a blur
+        if not a.portview_site and a.from_ and PHASES.index(a.from_) >= PHASES.index("ENTRY"):
             a.portview_site = site.lower()
         os.environ["YAGPC_GROUND_ALT_FT"] = "%g" % TAL_SITES[site]
         print("fly_sts134: TAL to %s: ground at %g ft above the ellipsoid"
