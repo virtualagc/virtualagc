@@ -151,6 +151,8 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB14-T1-tal | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) + --gps-auto-at-land (2982dd94b) | ME2 out +250 s, main gear 191.0 kt / 3.0 ft/s left, 190.9 / 2.7 right, nose 136.3 kt, wheels stop; T2 190.0 / 3.0. Runway position not computed (touchdown_x.py is KSC only). | ledger #332; ~/sts134-runs/singletape/AB14-T1-tal/RUN-NOTE.txt |  |
+| Mac | PASS | Mac T1 TAL (results-admins-Mac-Studio/tal-t1) | fd13-codex ac4aa8744 + injector 26ffa79f7 + gps-auto-at-land e0d4762f8, macOS arm64, rate 3, T1 (K_CMD_STG2 104), 2026-11-08 | ME2 out t=5404.9, TAL, ET sep GMT 11797613.528 (+4.75 s vs Mac T2), MM 304; left main 189.9 kt / 3.0 ft/s, right 189.8 / 2.7 at X +1,821 ft, Y +14 ft; nose 132.5 kt; stopped X +7,933 ft | Mac-integrate message 2026-11-08; ledger #332 |  |
+| WSL | PASS | WSL T1 TAL (~/peer-pass/t1-tal) | fd13-codex-5 ac4aa8744 + injector bf06b754d + gps-auto-at-land 51cb3b132, rate 3, T1 (K_CMD_STG2 104), 2026-11-08 | ME2 out t=5404.0, TAL, ET sep GMT 11797612.168 (+3.16 s vs WSL T2), MM 304; left main 189.4 kt / 3.0 ft/s, right 189.3 / 2.7; nose 134.0 kt; wheels stop | WSL-integration message 2026-11-08; ledger #332 |  |
 
 ## Single tape T1: ATO abort
 
