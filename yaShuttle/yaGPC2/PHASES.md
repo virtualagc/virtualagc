@@ -134,6 +134,66 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB2-T2-ato (control AB12-ctl-ato) | fd13-codex c56484594 / 8b652edda | T2: OMS-1 TIG MET 0:11:33.3, OMS-2 0:55:51.3, OMS L/R left 1447.7/1441.4 kg, OPS 201 reached. Abort tape (104%): OMS-1 TIG 0:11:37.6, OMS-2 0:55:55.6, OMS left 1283.7/1277.3 kg (164 kg more used), OPS 201 reached | ledger #330; AB2-T2-ato, AB12-ctl-ato RUN-NOTE.txt | K_CMD_STG2 106 vs 104 shifts MECO 4.3 s and OMS use 1.5%: documented dispersion |
 
+## Single tape T1: ascent to ET sep
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | RC-T1 (restored ascent) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | ET sep GMT 11797513.093, +4.800 s against the 106% ascents (ksc6-flown2 / T2 11797508.293): the flown 104 throttle flies a longer second stage; OPS 201 reached via ATO (AB14-T1-ato). Documented dispersion. | ledger #332, #330 (K_CMD_STG2 bisect) | The 12 recorded ascents flew the generic 106; they are not the reference for T1. |
+
+## Single tape T1: RTLS abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB14-T1-rtls | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | main gear 206.7 kt / 1.3 ft/s then 202.8 kt / 0.3 ft/s, nose 136.5 kt, wheels stop; T2 207.3 / 1.8, abort tape 207.2 / 1.8 (same build) | ledger #332; ~/sts134-runs/singletape/AB14-T1-rtls/RUN-NOTE.txt |  |
+
+## Single tape T1: TAL abort to Zaragoza
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB14-T1-tal | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) + --gps-auto-at-land (2982dd94b) | ME2 out +250 s, main gear 191.0 kt / 3.0 ft/s left, 190.9 / 2.7 right, nose 136.3 kt, wheels stop; T2 190.0 / 3.0. Runway position not computed (touchdown_x.py is KSC only). | ledger #332; ~/sts134-runs/singletape/AB14-T1-tal/RUN-NOTE.txt |  |
+
+## Single tape T1: ATO abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PENDING | AB14-T1-ato; control repeat AB15-ctl-ato | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | OPS 201 reached. OMS-1 TIG MET 0:11:38.6, 5186 kg / 295 s; OMS-2 0:55:56.6, 1034 kg / 63 s. Abort-tape control AB12: 0:11:37.6, 4727 kg / 275 s; 0:55:55.6, 1024 kg / 62 s. TIG within 1 s, OMS-1 burn 459 kg / 20 s longer, unexplained (three sims at once); AB15 repeats the control alone. | ledger #332 |  |
+
+## Single tape T1: pre-ISS coast (NC1-NC4)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: undock to SEP3
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: post-ISS coast, deorbit, entry, landing
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: entry from TIG-1 capture
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: docking (MC1 to STAY)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: cut-down tapes (no OPS 1/3/6; OPS 0/9 only)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
 ## Landing runs on disk (from the logs)
 
 Eras: **stale-gps** = PASS navigated on a stale GPS fix (#319), speeds say nothing about the aerodynamics; **probe** = 2026-11-02 experiments, purpose not recorded; **fixed** = GPS live (#320); **rtls** = a different phase.  Flown: 195.3 kt, 1.2 ft/s, 3,186 ft past the threshold.
