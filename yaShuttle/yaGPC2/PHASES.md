@@ -155,12 +155,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | WSL | PASS | WSL T1 TAL (~/peer-pass/t1-tal) | fd13-codex-5 ac4aa8744 + injector bf06b754d + gps-auto-at-land 51cb3b132, rate 3, T1 (K_CMD_STG2 104), 2026-11-08 | ME2 out t=5404.0, TAL, ET sep GMT 11797612.168 (+3.16 s vs WSL T2), MM 304; left main 189.4 kt / 3.0 ft/s, right 189.3 / 2.7; nose 134.0 kt; wheels stop | WSL-integration message 2026-11-08; ledger #332 |  |
 | Win11 | PASS | Win11 T1 TAL (results-win11-native/t1-tal) | t2-tal bbcc1d892 (injector + gps-auto-at-land + IPL path fix), MSVC, rate 2.546, T1 (K_CMD_STG2 104), 2026-11-08 | ME2 out t=5402.8, TAL, ET sep GMT 11797613.391 (+4.41 s vs Win11 T2), MM 304; left main 188.5 kt / 3.0 ft/s, right 188.4 / 2.8; nose 137.7 kt; wheels stop | Win11-native message 2026-11-08; ledger #332 |  |
 
-## Single tape T1: ATO abort
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | PENDING | AB14-T1-ato; control repeat AB15-ctl-ato | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | OPS 201 reached. OMS-1 TIG MET 0:11:38.6, 5186 kg / 295 s; OMS-2 0:55:56.6, 1034 kg / 63 s. Abort-tape control AB12: 0:11:37.6, 4727 kg / 275 s; 0:55:55.6, 1024 kg / 62 s. TIG within 1 s, OMS-1 burn 459 kg / 20 s longer, unexplained (three sims at once); AB15 repeats the control alone. | ledger #332 |  |
-
 ## Single tape T1: pre-ISS coast (NC1-NC4)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -196,6 +190,12 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
+
+## Single tape T1: ATO abort
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB16-T1-ato (alone), AB14-T1-ato; controls AB12, AB15 | fd13-codex c947daaaa, T1 (K_CMD_STG2 104), 2026-11-08 | OPS 201 reached. T1 alone: OMS-1 TIG MET 0:11:37.6, 5012 kg / 292 s; OMS-2 0:55:55.6, 1032 kg / 66 s. Abort-tape controls (alone): 0:11:37.6 / 0:11:37.7, 4727-4744 kg / 275 s; 0:55:55.6, 1024-1026 kg / 62-64 s. TIG identical; T1 OMS-1 burns 270-290 kg / 17 s longer, repeatable: T1 carries the flown ascent I-loads the abort tape lacks. Documented dispersion; cause within those I-loads not isolated. | ledger #332 |  |
 
 ## Landing runs on disk (from the logs)
 
