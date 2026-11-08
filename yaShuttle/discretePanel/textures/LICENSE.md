@@ -21,7 +21,8 @@ of the Virtual AGC project (<https://www.ibiblio.org/apollo/Downloads/portview-t
 
 (900 MiB; sha256 `a6fac80c77b5bc6071a0e9c093e6702d0eb4a6fdf13961dfea7c4beb02488ae7`.)  It holds everything `portview.py` needs to run that is not in git: a `textures/` directory
 (which merges with this one) and a `portview/cache/` directory with the data that are not textures (listed at the end).
-**The archive is the supported source.**  `python3 portview/fetch_assets.py` is the record of how each file was made from
+The mission-specific items (the ISS model, the pad structures and KSC's imagery) are single snapshots, those of STS-134,
+and are marked so in the tables; no other date is available.  **The archive is the supported source.**  `python3 portview/fetch_assets.py` is the record of how each file was made from
 its public source, and can remake them into `portview/cache/`, but the sources are web sites that can change or vanish;
 nobody should have to depend on them.  `portview.py` looks in `textures/` first and then in `portview/cache/`.
 
@@ -31,7 +32,7 @@ nobody should have to depend on them.  `portview.py` looks in `textures/` first 
 | `nightlights.jpg` | NASA Earth Observatory, *Black Marble* 2016 (3 km), city lights only. |
 | `watermask.png` | From the GEBCO bathymetry and elevation maps that NASA publishes with *Blue Marble Next Generation*. |
 | `milkyway_8k.npy` | NASA Scientific Visualization Studio 4851, *Deep Star Maps 2020* (`milkyway_2020_8k.exr`); float16 RGB, J2000. |
-| `sites/ksc/` | `ringF.jpg`, `ring0.jpg` and the pad patches `patch_lc39a.jpg`, `patch_lc39b.jpg`: USDA NAIP, KSC's from the flight of 2010-05-02.  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless (below). |
+| `sites/ksc/` | `ringF.jpg`, `ring0.jpg` and the pad patches `patch_lc39a.jpg`, `patch_lc39b.jpg`: USDA NAIP, KSC's from the flight of 2010-05-02 (**the STS-134 snapshot**: the site and the pads as they were then).  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless (below). |
 | `sites/nor/` | `ringF.jpg`, `ring0.jpg`: USDA NAIP through the USGS National Map.  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless. |
 | `sites/edw/` | `ring0.jpg` to `ring3.jpg`: Sentinel-2 cloudless (Edwards has no NAIP). |
 | `sites/*/ring.json` | The rings' bounds, and each site's centre and height (from the airfield reference points and yaGPC2's navaids). |
@@ -70,6 +71,6 @@ heights (`height0.npy` to `height2.npy`) are from the AWS terrain tiles (SRTM / 
 |---|---|
 | `hipparcos.npy` | ESA Hipparcos main catalogue (CDS I/239), prepared; free to use with acknowledgement. |
 | `de440s.bsp` | JPL planetary ephemeris DE440s (NAIF); used as downloaded. |
-| `models/iss/` | The ISS as at STS-134, from NASA 3D Resources "International Space Station (ISS) (D) (IGOAL)" (NASA JSC IGOAL), decoded and trimmed, with its base-colour textures as JPEG.  A US Government work. |
-| `models/gantry/`, `models/gantry.glb` | Launch Complex 39's pad structures, NASA 3D Resources "Gantry".  A US Government work. |
+| `models/iss/` | **The STS-134 snapshot** (May 2011); not right for other dates.  The ISS as at STS-134, from NASA 3D Resources "International Space Station (ISS) (D) (IGOAL)" (NASA JSC IGOAL), decoded and trimmed, with its base-colour textures as JPEG.  A US Government work. |
+| `models/gantry/`, `models/gantry.glb` | **The Shuttle-era snapshot**, as for STS-134.  Launch Complex 39's pad structures, NASA 3D Resources "Gantry".  A US Government work. |
 | `models/<spacecraft>/` | The other vehicles (HST, Mir, SPAS, LDEF and so on), built by `portview/vehicles/*.py` from this repository's own code: GPL v2. |
