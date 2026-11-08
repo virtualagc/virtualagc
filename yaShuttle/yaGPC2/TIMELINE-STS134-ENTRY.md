@@ -242,6 +242,23 @@ landing parameters (measured from main-gear touchdown).
 | Stop, past the threshold | 7,895 ft | 9,782 ft |
 | Weight at landing | 248,388 lb (vehdyn) | 204,477 lb |
 
+### The deorbit-to-landing run from the simulated state (2026-10-24/25)
+
+Applied from the staging log (Full Documentation Sync, 2026-10-25).  The later, final form of this run (the coast lineage, the corrected orbit reference, the adopted design) is in COOPER-DATA.md.
+
+[2026-10-25]
+- Deorbit-to-landing run deorb-1 (2026-10-24, fly_return.py --from DEORBIT, targeting from the simulated state with --tff 34.05 --gamma-ei -1.10 --ei-gmt 152/06:03:06 --near-gmt 152/06:34:50): TIG 152/05:29:02.4 (flown 05:29:03.1), 335 ft/s and 6,860 lb at WT 211,123 (flown 296.9-298.4 ft/s, 6,103 lb), orbit after 349 x 41 km = 188.4 x 22 nmi (flown 188.5 x 23.2), EI 06:03:05 (06:03:06), main gear 06:34:11.9 at 211 kt (06:34:50), nose 06:34:25.7 (06:35:00); EI to touchdown 31:07 vs 31:44.  Used the earlier physics-carried orbit capture (r2, 152/03:32).  STS-1's C1/C2 would give EI gamma -1.38 deg and 394 ft/s.  Documented in COOPER-DATA.md (new file).
+- Full flown coast coast-3 started 2026-10-24 22:53 CDT (SEP3 150/08:44 to 152/01:29:03, ~2.4x real time, ~16 h); checkpoints sts134r-coast-NN every 4 sim-h resume with RETURN_COAST_FROM=DIR.  PASS position error 340 ft at 09:22 -> 3 kft at 11:27 without updates.
+
+### Deorbit, entry and landing from the post-ISS coast (2026-10-28)
+
+Applied from the staging log (Full Documentation Sync, 2026-11-02).
+
+- The run starts at the post-ISS coast (`undock/coast-5`, `sts134r-orbit`, GMT 152/01:29): `fly_return.py --from DEORBIT`.  DEORBIT writes a TIG-60 s capture, `sts134r-tig1`; `--from EXEC` burns, then flies ENTRY and LAND, with CRT 2 brought up on the A/E PFD at its start.
+- Seven headless replays from it (CRT 2; portview plus four windows; rate 1 -> 2 -> 4 as flown; `--hold-start`; rate 1, 3 and 4 from the entry capture) all landed normally: main gear 216-221 kt, sink 4.0-4.1 ft/s.
+- One owner run at 4X dived nose-first at 296 kt (253 ft/s sink) from a state already off by Mach 2.  Not reproduced, cause unknown.  The owner's keyboard log had manual MSG RESET / FAULT SUMM / RESUME presses, none of which are in the replays.
+- Landing-leg attitude, recorded at 20 Hz (TRU1): rate-independent (1X, 3X and 4X agree to 0.1 deg).  Nose -23 deg at 3,000 ft to +5 deg at 50 ft, with a ~1.5 s pause in the pitch-up at 1,900-1,600 ft (the preflare start).  The owner reported a pitch-down/up near 1,000 ft; the record shows none there (owner: suppose not).
+
 ### Cross-check: STS-1's nominal TAEM interface
 
 The STS-1 descent OFP's nominal entry: Tables 6.3-I and 6.4-I, as digitized
