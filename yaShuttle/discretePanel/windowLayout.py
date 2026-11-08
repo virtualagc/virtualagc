@@ -369,6 +369,77 @@ def _win_place(wid, x, y, w=None, h=None, verbose=False):
     return (x - now[0], y - now[1])
 
 
+# A KVM SWITCH TAKES WINDOWS' MONITORS AWAY.  Switched to another machine,
+# the owner's KVM leaves Windows with one make-believe 3840x2160 monitor at
+# 96 dpi in place of his two 2560x1440 ones at 150%; Linux and macOS keep
+# theirs, and no setting of Windows' own was found that does (owner,
+# 2026-10-25).  Windows then piles the windows onto that one monitor, and
+# rescales them by the dpi change, and when the KVM comes back it does not
+# put them back.  What is wanted is that it be recognised that the monitors
+# are as they were, and the windows put back where they were then.  These
+# three are what simulatePASS.py's watcher does that with.
+
+def win_monitors():
+    """The monitors as a key that is equal exactly when the arrangement is:
+    a sorted tuple of (left, top, right, bottom, dpi), in real pixels.  None
+    off Windows, or if Windows will not say."""
+    if not WIN:
+        return None
+    ctypes, wintypes, u, _d, _proc = _win()
+    found = []
+    mproc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HMONITOR, wintypes.HDC,
+                               ctypes.POINTER(wintypes.RECT), wintypes.LPARAM)
+
+    def each(mon, _hdc, rect, _lparam):
+        r = rect.contents
+        dpi = wintypes.UINT(96)
+        dpi_y = wintypes.UINT(96)
+        try:
+            # MDT_EFFECTIVE_DPI: 144 at 150%
+            ctypes.windll.shcore.GetDpiForMonitor(mon, 0, ctypes.byref(dpi), ctypes.byref(dpi_y))
+        except (AttributeError, OSError):
+            pass
+        found.append((r.left, r.top, r.right, r.bottom, int(dpi.value)))
+        return True
+    u.EnumDisplayMonitors.argtypes = [wintypes.HDC, ctypes.c_void_p, mproc, wintypes.LPARAM]
+    if not u.EnumDisplayMonitors(None, None, mproc(each), 0) or not found:
+        return None
+    return tuple(sorted(found))
+
+
+def win_outer_rects(only_pids):
+    """{window id: ((left, top, right, bottom), role)}: the outer rectangle
+    of every shown, unminimised top-level window of these processes."""
+    ctypes, wintypes, u, _d, _proc = _win()
+    out = {}
+    for w in _win_windows():
+        if w["pid"] not in only_pids or w["min"]:
+            continue
+        r = wintypes.RECT()
+        if u.GetWindowRect(_win_hwnd(w["id"]), ctypes.byref(r)):
+            out[w["id"]] = ((r.left, r.top, r.right, r.bottom), w["role"])
+    return out
+
+
+def win_set_outer(wid, rect, size=True):
+    """Put a window's outer rectangle back to rect, as GetWindowRect gave it.
+    Returns what it then is (None if the window has gone).  Not
+    _win_place's measured placing of a window's inside: the rectangle being
+    put back was this very window's, frame and all."""
+    ctypes, wintypes, u, _d, _proc = _win()
+    hwnd = _win_hwnd(wid)
+    if not u.IsWindow(hwnd):
+        return None
+    SWP_NOSIZE, SWP_NOZORDER, SWP_NOACTIVATE = 0x0001, 0x0004, 0x0010
+    flags = SWP_NOZORDER | SWP_NOACTIVATE | (0 if size else SWP_NOSIZE)
+    left, top, right, bottom = rect
+    u.SetWindowPos(hwnd, None, left, top, right - left, bottom - top, flags)
+    r = wintypes.RECT()
+    if not u.GetWindowRect(hwnd, ctypes.byref(r)):
+        return None
+    return (r.left, r.top, r.right, r.bottom)
+
+
 def run(cmd, timeout=10):
     """Never wait on a window that will not answer: every call is bounded."""
     try:
