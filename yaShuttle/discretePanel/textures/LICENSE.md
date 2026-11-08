@@ -15,15 +15,15 @@ its origin is noted.
 
 The large textures are not in git.  They are in one archive, **`portview-textures.7z`**, kept with the other downloads
 of the Virtual AGC project (<https://www.ibiblio.org/apollo/Downloads/portview-textures.7z>).  Unpack it in
-`yaShuttle/discretePanel` (it contains a `textures/` directory, which merges with this one):
+`yaShuttle/discretePanel`:
 
     7z x portview-textures.7z
 
-(832 MiB; sha256 `62fd8bf372ef10776a49bf502b18a79c24d048953419823f1553e856159c8516`.)
-
-`python3 portview/fetch_assets.py` makes the same files from their public sources, into `portview/cache/`; `portview.py`
-looks here first and then there.  The data that are not textures (the DE440s ephemeris, the Hipparcos catalogue, the
-ISS model) are only made by `fetch_assets.py`.
+(900 MiB; sha256 `a6fac80c77b5bc6071a0e9c093e6702d0eb4a6fdf13961dfea7c4beb02488ae7`.)  It holds everything `portview.py` needs to run that is not in git: a `textures/` directory
+(which merges with this one) and a `portview/cache/` directory with the data that are not textures (listed at the end).
+**The archive is the supported source.**  `python3 portview/fetch_assets.py` is the record of how each file was made from
+its public source, and can remake them into `portview/cache/`, but the sources are web sites that can change or vanish;
+nobody should have to depend on them.  `portview.py` looks in `textures/` first and then in `portview/cache/`.
 
 | In the archive | Source |
 |---|---|
@@ -63,3 +63,13 @@ us and the offending texture will be removed, or if you prefer, attributed to yo
 
 For those four sites the outer rings (`ring2.jpg`, `ring3.jpg`) are Sentinel-2 cloudless (CC BY 4.0, above), and the
 heights (`height0.npy` to `height2.npy`) are from the AWS terrain tiles (SRTM / EU-DEM, about 30 m), which are open data.
+
+## Also in the archive, in `portview/cache/` (not textures)
+
+| File | Source |
+|---|---|
+| `hipparcos.npy` | ESA Hipparcos main catalogue (CDS I/239), prepared; free to use with acknowledgement. |
+| `de440s.bsp` | JPL planetary ephemeris DE440s (NAIF); used as downloaded. |
+| `models/iss/` | The ISS as at STS-134, from NASA 3D Resources "International Space Station (ISS) (D) (IGOAL)" (NASA JSC IGOAL), decoded and trimmed, with its base-colour textures as JPEG.  A US Government work. |
+| `models/gantry/`, `models/gantry.glb` | Launch Complex 39's pad structures, NASA 3D Resources "Gantry".  A US Government work. |
+| `models/<spacecraft>/` | The other vehicles (HST, Mir, SPAS, LDEF and so on), built by `portview/vehicles/*.py` from this repository's own code: GPL v2. |
