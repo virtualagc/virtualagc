@@ -40,7 +40,7 @@ Skyfield, at the Unix time in TRU1 [17] (until yaGPC2 sends it, they are
 hidden and the status line says NO DATE), seen from the Orbiter itself (the
 Moon's parallax from LEO is up to a degree), at their true angular sizes:
   - the Sun, a white disk far brighter than anything else;
-  - the Moon, portview/moon.jpg (north up, the near side), its phase and the
+  - the Moon, textures/moon.jpg (north up, the near side), its phase and the
     tilt of its terminator from the Sun's direction, lit by the Lommel-
     Seeliger law, dimmed and reddened by the Earth's shadow in a lunar
     eclipse, with earthshine on the night side.  It is shown as an eye
@@ -112,17 +112,18 @@ def preflight():
     missing = [pip for mod, pip in need if importlib.util.find_spec(mod) is None]
     if missing:
         return "%s missing; pip install %s" % (", ".join(missing), " ".join(missing))
-    cache = os.path.join(os.path.dirname(os.path.abspath(__file__)), "portview", "cache")
+    here = os.path.dirname(os.path.abspath(__file__))
+    dirs = [os.path.join(here, "textures"), os.path.join(here, "portview", "cache")]
+    def have(f):
+        return any(os.path.exists(os.path.join(d, f)) for d in dirs)
     files = ("milkyway_8k.npy", "hipparcos.npy", "de440s.bsp", "nightlights.jpg",
              "watermask.png")
-    absent = [f for f in files if not os.path.exists(os.path.join(cache, f))]
-    if not any(f.startswith("bluemarble_") for f in (os.listdir(cache) if os.path.isdir(cache)
-                                                    else [])):
+    absent = [f for f in files if not have(f)]
+    if not any(f.startswith("bluemarble_") for d in dirs if os.path.isdir(d) for f in os.listdir(d)):
         absent.append("bluemarble_MM.jpg")
     if absent:
-        return ("its prepared assets are missing from portview/cache (%s); unpack the "
-                "portview cache tarball there, or run python3 portview/fetch_assets.py"
-                % ", ".join(absent))
+        return ("its prepared assets are missing (%s); unpack portview-textures.7z in this directory "
+                "(see textures/LICENSE.md), or run python3 portview/fetch_assets.py" % ", ".join(absent))
     return None
 
 
@@ -188,9 +189,24 @@ def print(*args, **kw):               # noqa: A001 -- deliberately shadows
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, "portview", "cache")
-MILKYWAY = os.path.join(CACHE, "milkyway_8k.npy")
+# The textures: textures/ in the repository (the small ones) and, unpacked there from portview-textures.7z, the large
+# ones (textures/LICENSE.md says what each is and where it came from).  portview/cache/ is where fetch_assets.py
+# prepares them (and the data that are not textures: the ephemeris, the star catalogue, the ISS model); a texture
+# found in neither place is looked for in the first.
+TEXTURES_DIR = os.path.join(HERE, "textures")
+
+
+def texture_path(*parts):
+    for base in (TEXTURES_DIR, CACHE):
+        p = os.path.join(base, *parts)
+        if os.path.exists(p):
+            return p
+    return os.path.join(TEXTURES_DIR, *parts)
+
+
+MILKYWAY = texture_path("milkyway_8k.npy")
 HIPPARCOS = os.path.join(CACHE, "hipparcos.npy")
-SITES_DIR = os.path.join(CACHE, "sites")
+SITES_DIR = texture_path("sites")
 ISS_MODEL = os.path.join(CACHE, "models", "iss")
 def vehicle_models(chosen=()):
     """{key: NORAD id} for the prepared vehicle models (portview/vehicles/,
@@ -242,13 +258,13 @@ GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
 PAD_SURFACE_M = 48 * 0.3048
 PADS = {'lc39a': (28.608524, -80.604092, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
-MOON_IMAGE = os.path.join(HERE, "portview", "moon.jpg")
-NIGHTLIGHTS = os.path.join(CACHE, "nightlights.jpg")
-WATERMASK = os.path.join(CACHE, "watermask.png")
+MOON_IMAGE = texture_path("moon.jpg")
+NIGHTLIGHTS = texture_path("nightlights.jpg")
+WATERMASK = texture_path("watermask.png")
 
 
 def bluemarble_path(month):
-    return os.path.join(CACHE, "bluemarble_%02d.jpg" % month)
+    return texture_path("bluemarble_%02d.jpg" % month)
 
 FULL_SIZE = 768                    # --size units: 768 is the design (full) window
 FRAME_PX = 4                       # the frame drawn around each view, logical px, any --size

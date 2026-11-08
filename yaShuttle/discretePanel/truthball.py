@@ -26,7 +26,7 @@ right, roll right wing down).  The ball is fixed in the reference frame,
 and the marking at the face's centre is the (pitch, yaw) of the direction
 the nose points, d = Ry(P) Rz(Y) X; roll turns the ball about the line of
 sight.  The texture, adi_ball.png from the Space Shuttle Ultra add-on for
-the Orbiter simulator (samples/, a local copy -- not in the repository; a
+the Orbiter simulator (GPL v2; textures/, see textures/LICENSE.md; a
 plain ball in the same layout is drawn when it is absent), maps 360 deg of pitch along its 1800-pixel
 height (180 at both ends, 0 in the middle) and yaw -90..+90 across its 900
 pixels, onto a sphere whose longitude runs about the model's Y axis; worked
@@ -60,7 +60,7 @@ except ImportError:
     sys.exit(1)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TEXTURE = os.path.join(HERE, "samples", "adi_ball.png")
+TEXTURE = os.path.join(HERE, "textures", "adi_ball.png")
 MCAST_GROUP = "239.255.1.1"
 FC_INSTR_OFFSET = 97
 TRUTH_OFFSET = 98
@@ -171,7 +171,7 @@ class Feeds(object):
 
 def procedural_ball():
     """The ball's map drawn here, in the texture's own layout, for when
-    adi_ball.png (third-party artwork, not in the repository) is absent:
+    adi_ball.png (textures/, from Space Shuttle Ultra) is absent:
     1800 rows of pitch at 5 per degree, 180 at both ends and 0 in the
     middle, the positive half white and the negative dark; 900 columns of
     yaw, -90 to +90; pitch lines and labels every 30 deg, yaw meridians every
