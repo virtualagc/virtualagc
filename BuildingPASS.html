@@ -186,6 +186,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
           right down to the <i>other</i> dreadful, nerdy stuff</a>.<br>
       </p>
     </blockquote>
@@ -229,9 +230,11 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         into <font color="#009900"><i><b>scratch</b></i></font>. <br>
       </li>
       <li>For OI-34.06:&nbsp; copy the directory <font color="#009900"><i><b>PFS</b></i></font>/OI340600
+
 
 
 
@@ -254,6 +257,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         into <font color="#009900"><i><b>scratch</b></i></font>,
         renaming it OI340700. Then copy the directory <font
           color="#009900"><i><b>PFS</b></i></font>/OI340700 into <font
@@ -262,6 +266,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
         OI-34.06 and OI-34.07 source code is so similar, <font
           color="#009900"><i><b>PFS</b></i></font>/OI340700 stores only
         the files that are <i>different</i> from <font color="#009900"><i><b>PFS</b></i></font>/OI340600.
+
 
 
 
@@ -294,8 +299,10 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle Flight Software")
 
 
 
+
         Code"/PASS.REL32V0/RUNASM</li>
       <li><font color="#009900"><i><b>virtualagc</b></i></font>/yaShuttle/"Source
+
 
 
 
@@ -372,26 +379,68 @@ compilePASS<br></pre>
     </p>
     <p>TBD<br>
     </p>
-    <p>Depending on the particular contents of the tape and the current
-      legal thinking on the matter, it may be better for distribution
-      purposes to keep the tape in a compressed, encrypted form rather
-      than in the raw form as described above.&nbsp; My recommendation
-      at the moment is to use the <b>7z</b> format.&nbsp; In Linux, the
-      compression step would look like this:<br>
+    <p>For legal reasons, I'm thinking of adopting the following dodge
+      in <i>distributing</i> tapes:<br>
     </p>
-    <blockquote>
-      <pre>7z a -t7z -mhe=on -p <i>TAPE</i>.7z <i>TAPE</i>.mmv</pre>
-    </blockquote>
-    <p>On Mac OS and Windows it might be carried out differently.&nbsp;
-      The <code>-mhe=on</code> switch means to compress header as well
-      as data. The emulator itself recognizes that a compressed,
-      encrypted format has been used by the filename extension (".7z")
-      rather than the usual (".mmv"), and in the encrypted case prompts
-      for a password (with no echoing to the screen) or optionally lets
-      you input a password from a command-line option or an environment
-      variable, depending on how paranoid you may be about security. In
-      any case, the "tape" obtained from decrypting only ever exists in
-      memory, and not ever in the filesystem.<br>
+    <ul>
+      <li>Tapes would be provided only in compressed, <i>encrypted</i>
+        form.<br>
+      </li>
+      <li>For any given flight-software version (OI<i>XXXXXX</i>), there
+        would be three separate versions of the tape:</li>
+      <ul>
+        <li>OI<i>XXXXXX</i>-OPS1.7z — a complete build from which an
+          entire mission could be simulated.</li>
+        <li>OI<i>XXXXXX</i>-OPS2.7z — an abridged build from which OPS
+          1, OPS 3, and OPS 6 has been removed, but all other OPS (and
+          the boot loader) are still present. This means that
+          launch/ascent and entry/landing (and aborts) couldn't be
+          simulated, but any other flight phase could be. In particular,
+          since OPS 2 is present, orbital maneuvers, docking, and
+          undocking would be available.</li>
+        <li>OI<i>XXXXXX</i>-OPS0.7z — an abridged build in which only
+          the boot loader, OPS 0 (system software), and OPS 9
+          (mass-memory utility) is present.</li>
+      </ul>
+      <li>Each version of the tape would have a separate password, and
+        which password you'd be provided with would depend on whether
+        you are qualified to receive the code or not.<br>
+      </li>
+      <li>Virtual AGC simulation software accepts the encrypted files
+        directly and asks you for a password. Of course, once you have
+        the tape there's nothing to stop you from
+        decrypting/decompressing the tape and using it in that form, and
+        in that case you would not be prompted for a password.&nbsp;
+        Exactly how you'd decompress/decrypt it depends on the specific
+        utilities available on your operating system.</li>
+    </ul>
+    <p>At this writing, no passwords have yet been provided to anybody,
+      because I haven't yet assured myself that the approach I've
+      described walks legal and ethical tightropes in a foolproof way,
+      but the basic idea is that the OPS0 tape could be available
+      essentially to everybody and doesn't even really need any
+      encryption, while the OPS1 tape would be available only after ITAR
+      vetting of the recipients. <br>
+    </p>
+    <p>OPS2 is the most-questionable case, but just think about it for a
+      minute: Without OPS 1, 3, and 6, you couldn't use it for a launch
+      vehicle nor for targeting something on the ground.&nbsp; There's
+      no support in the flight software for something like finding a
+      satellite and homing in on it to ram it, so there's no practical
+      way you could use an Orbiter as a satellite killer.&nbsp; In
+      principle you could use an orbital maneuver to initiate an orbit
+      with a very small perigee that coincided with a target on the
+      ground, but without OPS 3 the aerodynamics isn't modeled, so
+      you're not actually going to hit that ground target; in fact, all
+      that would happen — as past tragedies have made all too clear — is
+      that the Orbiter would break up or explode in the atmosphere. In
+      short, there's really nothing of a "weapons system" nature you can
+      do with the OPS2 tape. That being the case, my inclination is that
+      the the OPS2 tape should also have unrestricted distribution. <br>
+    </p>
+    <p>That's not a promise, but merely my current thinking on the
+      subject! I'm afraid you'll just have to wait and see if it really
+      pans out that way.<br>
     </p>
     <h1><a name="emulationFromTape"></a>Step 6: Emulation and IPL from
       Tape</h1>
@@ -438,6 +487,7 @@ compilePASS<br></pre>
       are possible.&nbsp; If you want to know more, <a
         moz-do-not-send="true"
         href="Shuttle/PASS%20USER%20GUIDE%20-%20OI32.pdf#page=52">the <i>OI-32
+
 
 
 
