@@ -92,8 +92,10 @@ class Return(U.Undock):
     RAMBO_S = 10.0
 
     def start(self, resume=None):
-        """RETURN_COAST_FROM=DIR: resume the coast from one of its own captures (sts134r-coast-NN)."""
-        alt = os.environ.get("RETURN_COAST_FROM")
+        """RETURN_COAST_FROM=DIR: resume the coast from one of its own captures (sts134r-coast-NN).
+        RETURN_RESUME_FROM=DIR: start from any capture, e.g. --from DEORBIT from sts134r-pre-ops301 (the ORBIT capture
+        must still be in --logs: the ground's deorbit targets are made from it)."""
+        alt = os.environ.get("RETURN_COAST_FROM") or os.environ.get("RETURN_RESUME_FROM")
         return super().start(alt or resume)
 
     # --- the coast: SEP3 to the deorbit preparations, flown ---------------------------------------------------

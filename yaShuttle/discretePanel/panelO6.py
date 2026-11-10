@@ -5905,7 +5905,16 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
             pass          # a progress report is never worth failing a run for
 
     def log_vehicle_key(name, sent_monotonic):
-        log("vehicle-key: %s monotonic=%.9f" % (name.upper(), sent_monotonic))
+        # WHAT EACH CRT SHOWED WHEN THE KEY WENT IN (its top two lines, as last announced), so that a key PASS
+        # appears to have ignored can be read against the screen it met: OPS on a page that does not take OPS.
+        seen = ""
+        try:
+            for mdu, (text, _) in sorted(panel.screens.all().items()):
+                if mdu.startswith("crt"):
+                    seen += " [%s: %s]" % (mdu, text[:60])
+        except Exception:
+            pass
+        log("vehicle-key: %s monotonic=%.9f%s" % (name.upper(), sent_monotonic, seen))
 
     panel.player = crewscript.Player(entries, root.after, do,
                                      lambda gpc: panel.mode_tb(gpc - 1), log,
