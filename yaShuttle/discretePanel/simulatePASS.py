@@ -851,7 +851,7 @@ def seeded_idps(snapdir, logs, crts):
     return dest
 
 
-def snapshot_tape_problem(snapdir, tape):
+def snapshot_tape_problem(snapdir, tape, ignore_digest=False):
     """Whether `tape` is the mass memory `snapdir` was taken with: None if it
     is, ("warn", why) if the snapshot does not say, ("fail", why) if it is not.
 
@@ -860,7 +860,15 @@ def snapshot_tape_problem(snapdir, tape):
     reads mass memory for every OPS transition, not only at IPL, and a crew
     can re-IPL any computer.  So the restored vehicle needs the volume it was
     flying with, and another volume under the same memory image is a vehicle
-    that never existed: refused, not degraded."""
+    that never existed: refused, not degraded.
+
+    A snapshot may name more than one volume it runs with: `tapeSha256Also`
+    in vehicle.json lists the digests of other volumes it is known to work
+    with (tools/stamp_snapshots.py writes it, after checking the volumes), so
+    one snapshot set can serve, say, the OPS 2-only tier and the full tier.
+    `ignore_digest` (--ignore-tape-digest) turns a refusal into a warning, at
+    the user's own risk: the resident memory is the snapshot's, while every
+    later OPS load reads THIS volume."""
     try:
         with open(os.path.join(snapdir, "vehicle.json")) as fh:
             v = json.load(fh)
@@ -874,11 +882,15 @@ def snapshot_tape_problem(snapdir, tape):
                         "(taken before snapshots did); assuming %s"
                         % os.path.basename(tape))
     have = tape_digest(tape)
-    if have != want:
-        return ("fail", "it was taken with %s (sha256 %s...) and this run's "
-                        "volume is %s (sha256 %s...)"
-                        % (os.path.basename(v.get("tape", "?")), want[:12],
-                           os.path.basename(tape), (have or "unreadable")[:12]))
+    if have != want and have not in (v.get("tapeSha256Also") or []):
+        why = ("it was taken with %s (sha256 %s...) and this run's "
+               "volume is %s (sha256 %s...)"
+               % (os.path.basename(v.get("tape", "?")), want[:12],
+                  os.path.basename(tape), (have or "unreadable")[:12]))
+        if ignore_digest and have:
+            return ("warn", "IGNORING THE MISMATCH (--ignore-tape-digest), at "
+                            "your own risk: " + why)
+        return ("fail", why)
     return None
 
 
@@ -1693,6 +1705,11 @@ def main():
                     help="start from this snapshot instead of IPLing: each "
                          "computer loads its own pair, the panel comes up with "
                          "the switches it had, and the MEDS clock continues")
+    ap.add_argument("--ignore-tape-digest", action="store_true",
+                    help="restore a snapshot even though its volume is not the one given by "
+                         "--tape (a warning, not a refusal).  AT YOUR OWN RISK: the restored "
+                         "memory is the snapshot's, while every later OPS load reads this volume, "
+                         "and a volume whose layout differs can crash the run")
     ap.add_argument("--gpcs", type=parse_gpcs, default=[1], metavar="LIST",
                     help="which GPCs: 1 (default), 1,2, 1-3, 1-4")
     ap.add_argument("--tape", metavar="FILE",
@@ -1962,7 +1979,8 @@ def main():
             sys.exit("simulatePASS: %s would not open -- wrong password?  "
                      "Nothing started." % os.path.basename(tape))
     if args.snapshot_resume:
-        problem = snapshot_tape_problem(args.snapshot_resume, tape)
+        problem = snapshot_tape_problem(args.snapshot_resume, tape,
+                                         args.ignore_tape_digest)
         if problem and problem[0] == "fail":
             sys.exit("simulatePASS: will not restore %s: %s"
                      % (args.snapshot_resume, problem[1]))
@@ -2887,7 +2905,8 @@ def main():
                         "fail resume %s is not a directory" % snapdir,
                         args.port_base)
                     continue
-                problem = snapshot_tape_problem(snapdir, tape)
+                problem = snapshot_tape_problem(snapdir, tape,
+                                                 args.ignore_tape_digest)
                 if problem and problem[0] == "fail":
                     log("resume: will not restore %s: %s; the run is untouched"
                         % (snapdir, problem[1]))

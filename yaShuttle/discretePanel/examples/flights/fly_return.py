@@ -289,6 +289,14 @@ class Return(U.Undock):
 
     def deorbit_hook(self, where):
         """The page and the DAP at the points of the sequence where the maneuver should start (r2: it never did)."""
+        if where == "pre-ops301":
+            # the last OPS 2 moment of the deorbit preparations: the request for OPS 301 is the next key.  RETURN_STOP_AT_OPS301=1
+            # ends the run here (a tape without OPS 3, such as the OPS 2-only tier, cannot go on).
+            self.snapshot("pre-ops301")
+            if os.environ.get("RETURN_STOP_AT_OPS301"):
+                self.say("DEORBIT: captured sts134r-pre-ops301 (TIG-75 min); stopping before the OPS 301 request")
+                raise SystemExit(0)
+            return
         if where == "pre-mnvr":
             self.snapshot("pre-mnvr")
             self.key_weight()

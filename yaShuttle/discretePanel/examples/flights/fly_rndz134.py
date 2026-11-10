@@ -3519,8 +3519,8 @@ def main():
                 saved_vehdyn = json.load(capture_file)["vehdyn"]
         except (OSError, ValueError, KeyError, TypeError) as e:
             ap.error("--from-fd13 cannot read the NC4 OMS state: %s" % e)
-        if len(saved_vehdyn) != 228:
-            ap.error("--from-fd13 requires a 228-field vehdyn capture (found %d)" % len(saved_vehdyn))
+        if len(saved_vehdyn) not in (228, 230):    # 230: the entry bank-angle/rate log fields (review/entry-bank-log)
+            ap.error("--from-fd13 requires a 228- or 230-field vehdyn capture (found %d)" % len(saved_vehdyn))
         # NC4 uses the left OMS engine (ITEM 2); its fire flag is vehdyn[112].
         if len(saved_vehdyn) <= 112 or saved_vehdyn[112] != 0:
             ap.error("--from-fd13 capture is not after NC4 OMS cutoff")

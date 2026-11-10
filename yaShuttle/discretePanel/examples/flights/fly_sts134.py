@@ -935,6 +935,7 @@ class Flight:
         json.dump(t, open(os.path.join(self.a.logs, "deorbit-targets.json"), "w"), indent=1)
         tig = t["tig"]
         self.wait_gmt(tig - 75 * 60.0)
+        self.deorbit_hook("pre-ops301")
         if self.a.attach:
             # --attach: the running vehicle's OPS 301 script was sent by the
             # driver that stopped; wait for that one, from where it was played.
