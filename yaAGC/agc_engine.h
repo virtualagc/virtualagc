@@ -363,6 +363,39 @@ extern char *DocumentationURL;
 typedef void ProcessDownlinkList_t (DownlinkListSpec_t *Spec);
 
 //--------------------------------------------------------------------------
+// ODYSSEY-AGC (state isolation, milestone 4):  simulated-peripheral state that
+// used to be file-scope or function-local `static` variables in agc_engine.c,
+// and therefore shared by EVERY agc_t in a process.  It describes one
+// computer's simulated IMU/CDU/gyro/PIPA hardware, so it belongs to that
+// computer.  The fields, types and meanings are unchanged from the former
+// statics; only their storage moved.  See odyssey/docs/STATE-ISOLATION-AUDIT.md.
+
+// Fake FIFO on the triggers to the CDUX,Y,Z counters (see agc_engine.c, the
+// comment block above PushCduFifo()).  Moved here, unchanged, from agc_engine.c.
+#define MAX_CDU_FIFO_ENTRIES 128
+#define NUM_CDU_FIFOS 3			// Increase to 5 to include OPTX, OPTY.
+typedef struct
+{
+  int Ptr;				// Index of next entry being pulled.
+  int Size;				// Number of entries.
+  int IntervalType;			// 0,1,2,0,1,2,...
+  uint64_t NextUpdate;	// Cycle count at which next counter update occurs.
+  int32_t Counts[MAX_CDU_FIFO_ENTRIES];
+} CduFifo_t;
+
+typedef struct
+{
+  CduFifo_t CduFifos[NUM_CDU_FIFOS];	// Was: static CduFifo_t CduFifos[]; registers 032-034
+  int CduChecker;			// Was: static int CduChecker; 0..NUM_CDU_FIFOS-1, cycling
+  int CountCDUX, CountCDUY, CountCDUZ;	// Was: static locals in BurstOutput()
+  unsigned GyroCount;			// Was: static unsigned GyroCount
+  unsigned OldChannel14;		// Was: static unsigned OldChannel14
+  unsigned GyroTimer;			// Was: static unsigned GyroTimer
+  uint64_t ImuCduCount;			// Was: static uint64_t ImuCduCount
+  unsigned ImuChannel14;		// Was: static unsigned ImuChannel14
+} agc_periph_t;
+
+//--------------------------------------------------------------------------
 // Each instance of the AGC CPU simulation has a data structure of type agc_t
 // that contains the CPU's internal states, the complete memory space, and any
 // other little handy items needed to track execution by the CPU.
@@ -430,6 +463,9 @@ typedef struct
   unsigned DskyTimer;           // Timer for DSKY-related timing
   unsigned DskyFlash;           // DSKY flash counter (0 = flash occurring)
   unsigned DskyChannel163;      // Copy of the fake DSKY channel 163
+  // ODYSSEY-AGC: per-computer simulated IMU/CDU/gyro/PIPA state (formerly
+  // process-wide statics in agc_engine.c).  Zeroed by agc_engine_init().
+  agc_periph_t Periph;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.

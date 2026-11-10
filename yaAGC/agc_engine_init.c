@@ -310,6 +310,11 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->DskyFlash = 0;
   State->DskyChannel163 = 0;
 
+  // ODYSSEY-AGC: simulated IMU/CDU/gyro state used to be process-wide statics
+  // (zero at process start, never reset).  It is now per-computer, so it is
+  // reset here with the rest of the CPU state.
+  memset (&State->Periph, 0, sizeof (State->Periph));
+
   State->TookBZF = 0;
   State->TookBZMF = 0;
 

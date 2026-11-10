@@ -1183,7 +1183,10 @@ NegateSP (int16_t Value)
 // and return 1 on overflow.
 
 #include <stdio.h>
-static int TrapPIPA = 0;
+// ODYSSEY-AGC: TrapPIPA is a debug-print guard whose only setters are
+// commented out below (see UnprogrammedIncrement), so it is always 0.  Made
+// const so it is provably process-wide immutable rather than shared state.
+static const int TrapPIPA = 0;
 
 // 1's-complement increment
 int
@@ -1382,19 +1385,8 @@ InterruptRequests (agc_t * State, int16_t Address10, int Sum)
 // - counts.  For example, if it held 7,-5,10, it would mean to apply 7 PCDUs,
 // followed by 5 MCDUs, followed by 10 PCDUs.  If there are too many sign-changes
 // buffered, triggers will be transparently dropped.
-#define MAX_CDU_FIFO_ENTRIES 128
-#define NUM_CDU_FIFOS 3			// Increase to 5 to include OPTX, OPTY.
+// (MAX_CDU_FIFO_ENTRIES, NUM_CDU_FIFOS and CduFifo_t now live in agc_engine.h.)
 #define FIRST_CDU 032
-typedef struct
-{
-  int Ptr;				// Index of next entry being pulled.
-  int Size;				// Number of entries.
-  int IntervalType;			// 0,1,2,0,1,2,...
-  uint64_t NextUpdate;	// Cycle count at which next counter update occurs.
-  int32_t Counts[MAX_CDU_FIFO_ENTRIES];
-} CduFifo_t;
-static CduFifo_t CduFifos[NUM_CDU_FIFOS];// For registers 032, 033, and 034.
-static int CduChecker = 0;		// 0, 1, ..., NUM_CDU_FIFOS-1, 0, 1, ...
 
 // Here's an auxiliary function to add a count to a CDU FIFO.  The only allowed
 // increment types are:
@@ -1440,7 +1432,7 @@ PushCduFifo (agc_t *State, int Counter, int IncType)
   if (CduLog != NULL)
     fprintf (CduLog, "< " FORMAT_64U " %o %02o\n", State->CycleCounter, Counter,
 	     IncType);
-  CduFifo = &CduFifos[Counter - FIRST_CDU];
+  CduFifo = &State->Periph.CduFifos[Counter - FIRST_CDU];
   // It's a little easier if the FIFO is completely empty.
   if (CduFifo->Size == 0)
     {
@@ -1492,12 +1484,12 @@ ServiceCduFifo (agc_t *State)
   int16_t *Ch;
   // See if there are any pending PCDU or MCDU counts we need to apply.  We only
   // check one of the CDUs, and the CDU to check is indicated by CduChecker.
-  CduFifo = &CduFifos[CduChecker];
+  CduFifo = &State->Periph.CduFifos[State->Periph.CduChecker];
 
   if (CduFifo->Size > 0 && State->CycleCounter >= CduFifo->NextUpdate)
     {
       // Update the counter.
-      Ch = &State->Erasable[0][CduChecker + FIRST_CDU];
+      Ch = &State->Erasable[0][State->Periph.CduChecker + FIRST_CDU];
       Count = CduFifo->Counts[CduFifo->Ptr];
       HighRate = (Count & 0x80000000);
       DownCount = (Count & 0x40000000);
@@ -1506,14 +1498,14 @@ ServiceCduFifo (agc_t *State)
 	  CounterMCDU (Ch);
 	  if (CduLog != NULL)
 	    fprintf (CduLog, ">\t\t" FORMAT_64U " %o 03\n", State->CycleCounter,
-		     CduChecker + FIRST_CDU);
+		     State->Periph.CduChecker + FIRST_CDU);
 	}
       else
 	{
 	  CounterPCDU (Ch);
 	  if (CduLog != NULL)
 	    fprintf (CduLog, ">\t\t" FORMAT_64U " %o 01\n", State->CycleCounter,
-		     CduChecker + FIRST_CDU);
+		     State->Periph.CduChecker + FIRST_CDU);
 	}
       Count--;
       // Update the FIFO.
@@ -1555,9 +1547,9 @@ ServiceCduFifo (agc_t *State)
       RetVal = 1;
     }
 
-  CduChecker++;
-  if (CduChecker >= NUM_CDU_FIFOS)
-    CduChecker = 0;
+  State->Periph.CduChecker++;
+  if (State->Periph.CduChecker >= NUM_CDU_FIFOS)
+    State->Periph.CduChecker = 0;
 
   return (RetVal);
 }
@@ -1619,7 +1611,7 @@ UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
       // an interrupt.  Take care of setting the interrupt request here.
 
     }
-  TrapPIPA = 0;
+  // (TrapPIPA is const 0 -- see its declaration.)
 }
 
 //----------------------------------------------------------------------------
@@ -1629,14 +1621,14 @@ UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
 static int
 BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 {
-  static int CountCDUX = 0, CountCDUY = 0, CountCDUZ = 0; // In target CPU format.
+  // (CountCDUX/Y/Z, "in target CPU format", are per-computer: State->Periph.)
   int DriveCount = 0, DriveBit, Direction = 0, Delta, DriveCountSaved;
   if (CounterRegister == RegCDUXCMD)
-    DriveCountSaved = CountCDUX;
+    DriveCountSaved = State->Periph.CountCDUX;
   else if (CounterRegister == RegCDUYCMD)
-    DriveCountSaved = CountCDUY;
+    DriveCountSaved = State->Periph.CountCDUY;
   else if (CounterRegister == RegCDUZCMD)
-    DriveCountSaved = CountCDUZ;
+    DriveCountSaved = State->Periph.CountCDUZ;
   else
     return (0);
   // Driving this axis?
@@ -1677,11 +1669,11 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
   if (Direction)
     DriveCountSaved = -DriveCountSaved;
   if (CounterRegister == RegCDUXCMD)
-    CountCDUX = DriveCountSaved;
+    State->Periph.CountCDUX = DriveCountSaved;
   else if (CounterRegister == RegCDUYCMD)
-    CountCDUY = DriveCountSaved;
+    State->Periph.CountCDUY = DriveCountSaved;
   else if (CounterRegister == RegCDUZCMD)
-    CountCDUZ = DriveCountSaved;
+    State->Periph.CountCDUZ = DriveCountSaved;
   return (DriveCountSaved);
 }
 
@@ -1855,8 +1847,6 @@ SimulateDV(agc_t *State, uint16_t divisor)
 // fast as the regular 1600 pps counters.
 #define GYRO_OVERFLOW 160
 #define GYRO_DIVIDER (2 * 3)
-static unsigned GyroCount = 0;
-static unsigned OldChannel14 = 0, GyroTimer = 0;
 
 // Coarse-alignment.
 // The IMU CDU drive emits bursts every 600 ms.  Each cycle is 
@@ -1864,8 +1854,6 @@ static unsigned OldChannel14 = 0, GyroTimer = 0;
 // emitted every 51200 CPU cycles, but we multiply it out below
 // to make it look pretty
 #define IMUCDU_BURST_CYCLES ((600 * 1024000) / (1000 * 12 * COARSE_SMOOTH))
-static uint64_t ImuCduCount = 0;
-static unsigned ImuChannel14 = 0;
 
 int
 agc_engine (agc_t * State)
@@ -2325,16 +2313,16 @@ agc_engine (agc_t * State)
 
 #ifdef GYRO_TIMING_SIMULATED
   // Update the 3200 pps gyro pulse counter.
-  GyroTimer += GYRO_DIVIDER;
-  while (GyroTimer >= GYRO_OVERFLOW)
+  State->Periph.GyroTimer += GYRO_DIVIDER;
+  while (State->Periph.GyroTimer >= GYRO_OVERFLOW)
     {
-      GyroTimer -= GYRO_OVERFLOW;
+      State->Periph.GyroTimer -= GYRO_OVERFLOW;
       // We get to this point 3200 times per second.  We increment the 
       // pulse count only if the GYRO ACTIVITY bit in channel 014 is set.
       if (0 != (State->InputChannel[014] & 01000) &&
 	  State->Erasable[0][RegGYROCTR] > 0)
 	{
-	  GyroCount++;
+	  State->Periph.GyroCount++;
 	  State->Erasable[0][RegGYROCTR]--;
 	  if (State->Erasable[0][RegGYROCTR] == 0)
 	  State->InputChannel[014] &= ~01000;
@@ -2344,11 +2332,11 @@ agc_engine (agc_t * State)
   // If 1/4 second (nominal gyro pulse count of 800 decimal) or the gyro 
   // bits in channel 014 have changed, output to channel 0177.
   i = (State->InputChannel[014] & 01740);// Pick off the gyro bits.
-  if (i != OldChannel14 || GyroCount >= 800)
+  if (i != State->Periph.OldChannel14 || State->Periph.GyroCount >= 800)
     {
-      j = ((OldChannel14 & 0740) << 6) | GyroCount;
-      OldChannel14 = i;
-      GyroCount = 0;
+      j = ((State->Periph.OldChannel14 & 0740) << 6) | State->Periph.GyroCount;
+      State->Periph.OldChannel14 = i;
+      State->Periph.GyroCount = 0;
       ChannelOutput (State, 0177, j);
     }
 #else // GYRO_TIMING_SIMULATED
@@ -2359,32 +2347,32 @@ agc_engine (agc_t * State)
       {
 	// If any torquing is still pending, do it all at once before
 	// setting up a new torque counter.
-	while (GyroCount)
+	while (State->Periph.GyroCount)
 	  {
-	    j = GyroCount;
+	    j = State->Periph.GyroCount;
 	    if (j > 03777)
 	      j = 03777;
-	    ChannelOutput (State, 0177, OldChannel14 | j);
-	    GyroCount -= j;
+	    ChannelOutput (State, 0177, State->Periph.OldChannel14 | j);
+	    State->Periph.GyroCount -= j;
 	  }
 	// Set up new torque counter.
-	GyroCount = State->Erasable[0][RegGYROCTR];
+	State->Periph.GyroCount = State->Erasable[0][RegGYROCTR];
 	State->Erasable[0][RegGYROCTR] = 0;
-	OldChannel14 = ((State->InputChannel[014] & 0740) << 6);
-	GyroTimer = GYRO_OVERFLOW * GYRO_BURST - GYRO_DIVIDER;
+	State->Periph.OldChannel14 = ((State->InputChannel[014] & 0740) << 6);
+	State->Periph.GyroTimer = GYRO_OVERFLOW * GYRO_BURST - GYRO_DIVIDER;
       }
   // Update the 3200 pps gyro pulse counter.
-  GyroTimer += GYRO_DIVIDER;
-  while (GyroTimer >= GYRO_BURST * GYRO_OVERFLOW)
+  State->Periph.GyroTimer += GYRO_DIVIDER;
+  while (State->Periph.GyroTimer >= GYRO_BURST * GYRO_OVERFLOW)
     {
-      GyroTimer -= GYRO_BURST * GYRO_OVERFLOW;
-      if (GyroCount)
+      State->Periph.GyroTimer -= GYRO_BURST * GYRO_OVERFLOW;
+      if (State->Periph.GyroCount)
 	{
-	  j = GyroCount;
+	  j = State->Periph.GyroCount;
 	  if (j > GYRO_BURST2)
 	    j = GYRO_BURST2;
-	  ChannelOutput (State, 0177, OldChannel14 | j);
-	  GyroCount -= j;
+	  ChannelOutput (State, 0177, State->Periph.OldChannel14 | j);
+	  State->Periph.GyroCount -= j;
 	}
     }
 #endif // GYRO_TIMING_SIMULATED
@@ -2395,31 +2383,31 @@ agc_engine (agc_t * State)
 
 #if 0  
   i = (State->InputChannel[014] & 070000);	// Check IMU CDU drive bits.
-  if (ImuChannel14 == 0 && i != 0)// If suddenly active, start drive.
-  ImuCduCount = IMUCDU_BURST_CYCLES;
-  if (i != 0 && ImuCduCount >= IMUCDU_BURST_CYCLES)// Time for next burst.
+  if (State->Periph.ImuChannel14 == 0 && i != 0)// If suddenly active, start drive.
+  State->Periph.ImuCduCount = IMUCDU_BURST_CYCLES;
+  if (i != 0 && State->Periph.ImuCduCount >= IMUCDU_BURST_CYCLES)// Time for next burst.
     {
       // Adjust the cycle counter.
-      ImuCduCount -= IMUCDU_BURST_CYCLES;
+      State->Periph.ImuCduCount -= IMUCDU_BURST_CYCLES;
       // Determine how many pulses are wanted on each axis this burst.
-      ImuChannel14 = BurstOutput (State, 040000, RegCDUXCMD, 0174);
-      ImuChannel14 |= BurstOutput (State, 020000, RegCDUYCMD, 0175);
-      ImuChannel14 |= BurstOutput (State, 010000, RegCDUZCMD, 0176);
+      State->Periph.ImuChannel14 = BurstOutput (State, 040000, RegCDUXCMD, 0174);
+      State->Periph.ImuChannel14 |= BurstOutput (State, 020000, RegCDUYCMD, 0175);
+      State->Periph.ImuChannel14 |= BurstOutput (State, 010000, RegCDUZCMD, 0176);
     }
   else
-  ImuCduCount++;
+  State->Periph.ImuCduCount++;
 #else // 0
   i = (State->InputChannel[014] & 070000);	// Check IMU CDU drive bits.
-  if (ImuChannel14 == 0 && i != 0)	// If suddenly active, start drive.
-    ImuCduCount = State->CycleCounter - IMUCDU_BURST_CYCLES;
-  if (i != 0 && (State->CycleCounter - ImuCduCount) >= IMUCDU_BURST_CYCLES) // Time for next burst.
+  if (State->Periph.ImuChannel14 == 0 && i != 0)	// If suddenly active, start drive.
+    State->Periph.ImuCduCount = State->CycleCounter - IMUCDU_BURST_CYCLES;
+  if (i != 0 && (State->CycleCounter - State->Periph.ImuCduCount) >= IMUCDU_BURST_CYCLES) // Time for next burst.
     {
       // Adjust the cycle counter.
-      ImuCduCount += IMUCDU_BURST_CYCLES;
+      State->Periph.ImuCduCount += IMUCDU_BURST_CYCLES;
       // Determine how many pulses are wanted on each axis this burst.
-      ImuChannel14 = BurstOutput (State, 040000, RegCDUXCMD, 0174);
-      ImuChannel14 |= BurstOutput (State, 020000, RegCDUYCMD, 0175);
-      ImuChannel14 |= BurstOutput (State, 010000, RegCDUZCMD, 0176);
+      State->Periph.ImuChannel14 = BurstOutput (State, 040000, RegCDUXCMD, 0174);
+      State->Periph.ImuChannel14 |= BurstOutput (State, 020000, RegCDUYCMD, 0175);
+      State->Periph.ImuChannel14 |= BurstOutput (State, 010000, RegCDUZCMD, 0176);
     }
 #endif // 0
 
