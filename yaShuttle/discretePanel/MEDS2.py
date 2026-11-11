@@ -13535,10 +13535,17 @@ class IDP(LRU):
         self._clearMDUs()
 
     def recvKYBD(self, t, busID, msg, remote):
+        # A DROPPED KEY IS LOGGED, with the reason: a command that seems not to have been heard must be
+        # distinguishable from one that never got here.
         if not t.powered:
+            t.unit.log("IDP%s: %s keyboard message DROPPED -- IDP POWER is OFF (%d scan code(s): %s)"
+                       % (t.id, busID, len(msg.data16), " ".join("0x%x" % (int(w) & 0xffff) for w in msg.data16)))
             return
         bit = {'_KYBD1': 1, '_KYBD2': 2}.get(busID)
         if t.kybdSel is not None and bit is not None and not (t.kybdSel & bit):
+            t.unit.log("IDP%s: %s keyboard message DROPPED -- IDP/CRT SEL has keyboard select %d, not this keyboard "
+                       "(%d scan code(s): %s)"
+                       % (t.id, busID, t.kybdSel, len(msg.data16), " ".join("0x%x" % (int(w) & 0xffff) for w in msg.data16)))
             return                       # IDP/CRT SEL has that keyboard elsewhere
         for w in msg.data16:
             k = KYBD.byScan(int(w))
