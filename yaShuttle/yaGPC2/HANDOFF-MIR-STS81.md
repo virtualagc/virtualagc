@@ -6,12 +6,52 @@ or measured on the element file; items marked UNVERIFIED are my expectations, no
 
 Ron's standard: NOT the STS-134 level of fidelity.  The Orbiter has to reach Mir and dock at roughly the time the Mission
 Report documents.  Procedures may be modified so that OI-34 can stand in for OI-25 (STS-81 flew OI-25).
+**SUPERSEDED 2026-11-11: Ron now wants the flight software to be OI-30 (OI301700), not OI-34 -- see "Revision" below.**
 
 ## Verdict
 
 Realistic.  STS-81 is the best candidate.  The flown rendezvous burn table, docking times, Mir element history and a detailed
 Mir 3D model are all already on this machine.  What is missing is Mir docking-port geometry in the model's frame, STS-81
 ascent I-loads, and Mir-flight rendezvous procedures (see Gaps).
+
+## Revision 2026-11-11: fly STS-81 on OI-30 (OI301700)
+
+Ron's decision (2026-11-11): OI-34 was only a stand-in because it is the version we can run.  He would much rather fly STS-81 on
+OI-30, which is nearer to what STS-81 flew (OI-25) than OI-34 is.  UNVERIFIED by me: how close OI-30 is to OI-25 in the
+rendezvous/orbit-ops/DAP functions the mission uses; the OI-25 CSOM and DPS Dictionary (item 5 below) are the check.  This makes
+STS-81 depend on a prerequisite that is a project in its own right: **an OI-30 flight computer that can be IPLed and run.**
+That prerequisite is NOT started; nothing below has been run.
+
+Where OI301700 stands (measured from the handoffs, not this session; re-measure before relying):
+- HAL/S: the full OI301700 corpus compiles (`successful == attempts`, the 939-module count in the dass-handoff DB, section 1).
+- AP-101S assembly: 272 of 272 modules assemble byte for byte against their listings, 0 bytes mismatched (HANDOFF-ASM101S).
+- NOT done: link (lnk101), the load-module/CSECT layout, tape build (mass memory volume with OPS load modules), IPL, run.
+  The OI340600 link-and-compare work (HANDOFF-OI340600, `modules/sdfpkg`) and `HANDOFF-OI340700-BUILD.md` are the templates:
+  OI340600 was assembled and linked, then compared to DASS dumps; OI340700 was then built into the taped volumes
+  (`OI340700-OPS*.7z`) that every STS-134 run uses.
+- The source is RECOVERED FROM LISTINGS (`~/workspace/PFS/OI301700/`, `OI301700 as received/`): the HAL/S was extracted from the
+  output-writer reports, so extraction errors are possible (dass-handoff section 4: "the extractor is the root of every OI301700
+  artifact"), and column-1 conditional-compilation letters were lost (memory: oi301700 col 1 is pre-resolved).
+- A BIG DIFFERENCE from OI-34: the DASS dumps (`~/workspace/PFS/mafgen/*.fcm`) are STS-134 / Endeavour software.  There is no
+  external memory image to compare an OI-30 link against, so link correctness has to be established by other means (the "as
+  received" listings' own link/CSECT information, if they have it -- UNVERIFIED; self-consistency checks; IPL and behaviour).
+  Ron's standing rule applies: no tape is an original, so a tape of ours cannot be a control.
+
+What this changes for the STS-81 work (everything not about the flight software is unchanged):
+1. A new first stage, before any Mir work: get OI301700 linked, taped and IPLed to GPC MEMORY / OPS 1 on yaGPC2.  A draft
+   requirements note by the Codex agent exists (`~/workspace-codex/virtualagc/yaShuttle/yaGPC2/Requirements-OI30.md`, untracked
+   there; Ron had speculated about the task and never started it; a Codex agent was stopped 2026-11-11) -- read it for the toolchain
+   pointers (HALSFC, ASM101S, the PFS source layout), then discard what is out of date.
+2. Everything in "Existing machinery" assumes the OI-34 memory map: the I-load tooling (`sts134-dolilu.json`, DASS patch
+   summaries), the address-based scrub, the display/keyboard model (OPS/SPEC numbers differ between OI-25/30/34), the GPS inputs
+   (1997 had no GPS on OV-104; OI-34 expects it -- this may be easier on OI-30, UNVERIFIED), the ADTA/TACAN set.  Each is a port
+   item for OI-30, not a given.
+3. STS-134 I-loads are not valid for STS-81 (different flight, different software).  The I-loads would come from OI-30's own source
+   defaults plus whatever STS-81 values the Mission Report and FDF give; the DASS patch summaries give nothing for it.
+4. Consequently "decide whether to fly OI-34 with Mir as the target" (last step below) is replaced by: fly OI-30 once it runs;
+   OI-34 remains the fallback if the OI-30 bring-up stalls (the Mir geometry, ephemeris and burn-table work is software-independent
+   and can proceed in parallel with the OI-30 bring-up).
+5. Ledger: no entries yet.  A new area (suggest `flight-sw`, config `OI301700`) when work starts.
 
 ## What exists, and where
 
