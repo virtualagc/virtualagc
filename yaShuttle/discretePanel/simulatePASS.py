@@ -70,6 +70,7 @@ typing on as if the GPC were ready.
 """
 
 import argparse
+import atexit
 import datetime
 import getpass
 import hashlib
@@ -849,6 +850,18 @@ def seeded_idps(snapdir, logs, crts):
     log("restore: IDP %s loaded from IDP 1's state in a copy of the snapshot (%s)"
         % (", ".join(str(k) for k, _ in todo), dest))
     return dest
+
+
+def snapshot_from_archive(spec):
+    """ARCHIVE.7z::SET/NAME -> a temporary directory holding that snapshot (removed at exit), taken out of the
+    encrypted snapshot set by tools/snapshot_bundle.py, with the password asked for as for the tapes."""
+    archive, _, name = spec.partition("::")
+    sys.path.insert(0, os.path.join(YAGPC_DIR, "tools"))
+    import snapshot_bundle
+    where = tempfile.mkdtemp(prefix="snapshot-")
+    atexit.register(shutil.rmtree, where, True)
+    pw = os.environ.get("YAGPC_TAPE_PASSWORD") or snapshot_bundle.getpass.getpass("snapshot set password: ")
+    return snapshot_bundle.extract_one(archive, name, where, pw)
 
 
 def snapshot_tape_problem(snapdir, tape, ignore_digest=False):
@@ -1704,7 +1717,9 @@ def main():
     ap.add_argument("--snapshot-resume", metavar="DIR", default=None,
                     help="start from this snapshot instead of IPLing: each "
                          "computer loads its own pair, the panel comes up with "
-                         "the switches it had, and the MEDS clock continues")
+                         "the switches it had, and the MEDS clock continues.  ARCHIVE.7z::SET/NAME takes "
+                         "the snapshot out of the encrypted snapshot set (tools/snapshot_bundle.py; the "
+                         "password as for --tape)")
     ap.add_argument("--ignore-tape-digest", action="store_true",
                     help="restore a snapshot even though its volume is not the one given by "
                          "--tape (a warning, not a refusal).  AT YOUR OWN RISK: the restored "
@@ -1978,6 +1993,8 @@ def main():
         if tape_digest(tape) is None:
             sys.exit("simulatePASS: %s would not open -- wrong password?  "
                      "Nothing started." % os.path.basename(tape))
+    if args.snapshot_resume and ".7z::" in args.snapshot_resume.lower():
+        args.snapshot_resume = snapshot_from_archive(args.snapshot_resume)
     if args.snapshot_resume:
         problem = snapshot_tape_problem(args.snapshot_resume, tape,
                                          args.ignore_tape_digest)

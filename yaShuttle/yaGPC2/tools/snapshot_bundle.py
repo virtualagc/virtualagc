@@ -189,16 +189,22 @@ def cmd_list(a):
         print("%-52s %-15s %-13s %s" % (r["name"], r.get("gmt", "-"), r.get("met", "-"), r.get("next", "")))
 
 
+def extract_one(archive, name, to, pw):
+    """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path."""
+    r = subprocess.run([sevenz(), "x", "-y", "-bso0", "-bsp0", "-o" + to, archive, name + "/*"],
+                       input=(pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    path = os.path.join(to, name)
+    if r.returncode != 0 or not os.path.isfile(os.path.join(path, "vehicle.json")):
+        sys.exit("snapshot_bundle: could not extract %s -- wrong password, or no such snapshot (`list`)\n%s"
+                 % (name, r.stderr.decode(errors="replace")[-300:]))
+    return path
+
+
 def cmd_extract(a):
     pw = read_password(False)
     os.makedirs(a.to, exist_ok=True)
     for name in a.names:
-        r = subprocess.run([sevenz(), "x", "-y", "-bso0", "-bsp0", "-o" + a.to, a.archive, name + "/*"],
-                           input=(pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if r.returncode != 0 or not os.path.isfile(os.path.join(a.to, name, "vehicle.json")):
-            sys.exit("snapshot_bundle: could not extract %s -- wrong password, or no such snapshot (`list`)\n%s"
-                     % (name, r.stderr.decode(errors="replace")[-300:]))
-        print("%s/%s" % (a.to, name))
+        print(extract_one(a.archive, name, a.to, pw))
 
 
 def main():
