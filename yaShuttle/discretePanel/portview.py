@@ -132,7 +132,7 @@ if __name__ == "__main__":
     if "--check" in sys.argv[1:]:
         print("portview: ready" if _why is None else "portview: not started -- " + _why)
         sys.exit(0 if _why is None else 1)
-    if _why is not None:
+    if _why is not None and not {"-h", "--help"} & set(sys.argv[1:]):     # --help needs no assets
         print("portview: not started -- " + _why)
         sys.exit(1)
 
