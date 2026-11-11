@@ -347,6 +347,12 @@ def flown_entry_iloads():
 
 
 def main():
+    # THE LANDING AIDS (runways, MLS) are not optional: a run without them lands blind on PASS's own nav -- the same chain
+    # that touched down at 191 kt / 1.2 ft/s with them floated to 127.6 kt / 12 ft/s without (AB21, AB22, 2026-11-10).
+    # A caller's own YAGPC_NAVAIDS (another site) wins.
+    navaids = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "yaGPC2", "tools", "sites", "ksc-navaids.txt")
+    if os.path.exists(navaids):
+        os.environ.setdefault("YAGPC_NAVAIDS", os.path.normpath(navaids))
     R.Rendezvous = Return
     flown_entry_iloads()
     setattr(Return, "pre-mnvr", lambda self: None)       # the capture --from BURN restores
