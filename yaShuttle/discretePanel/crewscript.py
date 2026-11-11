@@ -1746,6 +1746,14 @@ class Player(object):
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped  [%s: %s]"
                      % (e["timeout"], e["text"], e["mdu"],
                         cur[0] if cur is not None else "nothing heard"))
+            # All an announcement carries is a display's top two lines, so that is
+            # the most a dump can show -- of every display, to see whether the page
+            # the wait wanted is up on another one.
+            try:
+                for mdu, (text, _) in sorted(self.screens.all().items()):
+                    self.log("  screen at timeout  [%s: %s]" % (mdu, text))
+            except Exception:
+                pass
             self.stopped = True
         else:
             self.after(WAIT_POLL_MS, lambda: self._poll_screen(k, e, begun, base))
