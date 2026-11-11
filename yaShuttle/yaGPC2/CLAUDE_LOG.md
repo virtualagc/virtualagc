@@ -22,3 +22,5 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-11] Target: yaShuttle/yaGPC2/PHASES.md
 - Peer gate on unify a5dd3cb64 (relay: forClaude/unify/RELAY-TO-peers-unify.md): Mac, Win11-native, WSL all pass build, C tests, Python checks, snapshot_bundle round trip, and Zaragoza TAL on T1 (left main 189.9/191.6/190.0 kt, 3.0/2.9/2.9 ft/s). T1 docking not run on any peer: the only dock-start capture is T2-based and the tape-digest guard refuses it (docking passes on T2 stand). portview --help fixed afterwards (a617b1735, Linux-only check).
+### [2026-11-11] Target: HANDOFF-snapshot-bundles.md
+- AB25: T1-no136-set snapshot nc4-plus-2-min (stamped for T1) run on the full T1 tape through Ti, MC1-MC4, approach, DOCK30: HARD MATE TCS 5.4 ft +0.006 ft/s (ST4 on T1-no136: 5.5 ft +0.001 ft/s); == STAY, no Traceback. Docking on T1 verified from a mid-set snapshot. Run dir ~/sts134-runs/singletape/AB25-T1-dock-from-nc4.
