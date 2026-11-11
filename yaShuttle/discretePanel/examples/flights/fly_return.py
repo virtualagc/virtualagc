@@ -95,7 +95,10 @@ class Return(U.Undock):
         """RETURN_COAST_FROM=DIR: resume the coast from one of its own captures (sts134r-coast-NN).
         RETURN_RESUME_FROM=DIR: start from any capture, e.g. --from DEORBIT from sts134r-pre-ops301 (the ORBIT capture
         must still be in --logs: the ground's deorbit targets are made from it)."""
-        alt = os.environ.get("RETURN_COAST_FROM") or os.environ.get("RETURN_RESUME_FROM")
+        # ONLY THE FIRST START: restart_from() (the OPS 3 I-load restart at sts134r-tig1) calls start() again, and
+        # restoring the env var's capture there put the vehicle back at TIG-75 min (AB18, AB20, 2026-11-10)
+        alt = None if getattr(self, "_started_once", False) else (os.environ.get("RETURN_COAST_FROM") or os.environ.get("RETURN_RESUME_FROM"))
+        self._started_once = True
         return super().start(alt or resume)
 
     # --- the coast: SEP3 to the deorbit preparations, flown ---------------------------------------------------
@@ -323,7 +326,7 @@ class Return(U.Undock):
     def __init__(self, a):
         # the arguments fly_sts134's own parser gives its phases and fly_rndz134's does not
         for k, v in (("g3_from_mm", False), ("abort", None), ("attach", False), ("incorporate_at_land", False),
-                     ("land_time", 900.0)):
+                     ("land_time", 900.0), ("gps_auto_at_land", False)):
             if not hasattr(a, k):
                 setattr(a, k, v)
         super().__init__(a)
