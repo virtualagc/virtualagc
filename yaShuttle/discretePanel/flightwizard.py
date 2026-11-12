@@ -66,6 +66,11 @@ if not os.path.isfile(SNAPSHOT_ARCHIVE):    # a copy kept under local/ (tests, o
 SNAPSHOT_DIR = os.path.join(LOCAL, "snapshots", "unpacked")
 TEXTURES_ARCHIVE = os.path.join(LOCAL, "portview-textures.7z")
 KEYPAD = os.path.join(HERE, "examples", "keys-keypad.json")
+MYKEYS = os.path.join(LOCAL, "hand-keys.json")      # written by --hand-controllers
+
+
+def keys_file():
+    return MYKEYS if os.path.isfile(MYKEYS) else KEYPAD
 TARGETS = os.path.join(FLIGHTS, "sts134-targets.txt")
 TARGETS_UNDOCK = os.path.join(FLIGHTS, "sts134-targets-undock-0320.txt")
 SITES = os.path.join(YAGPC2, "tools", "sites")
@@ -79,7 +84,7 @@ OPTIONS = {
     "views":    ("Which views, comma separated (front,up,left,right,aft,cctv,rpop)", str, "front,up,left,right"),
     "station":  ("Crew station windows (fwd, aft, all, auto)", str, "all"),
     "input":    ("Hand controllers (virtual = the keypad, auto, joystick, both)", str, "virtual"),
-    "keypad":   ("Use the keypad key file for the hand controllers", bool, True),
+    "keypad":   ("Use the keyboard hand-controller layout (yours from --hand-controllers if you made one, else the keypad layout)", bool, True),
     "hold":     ("Bring the windows up and hold the vehicle until you press Enter (time to arrange windows)", bool, True),
     "layout":   ("Window layout file from this directory (blank for none)", str, ""),
     "predictor": ("RPOP predictor (coast or hold)", str, "coast"),
@@ -417,8 +422,8 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         for k in ("station", "input"):
             if o.get(k):
                 argv += ["--" + k, o[k]]
-        if o.get("keypad") and os.path.isfile(KEYPAD):
-            argv += ["--hc-keys", KEYPAD]
+        if o.get("keypad") and os.path.isfile(keys_file()):
+            argv += ["--hc-keys", keys_file()]
         if o.get("hold"):
             argv += ["--hold-start"]
         if o.get("layout"):
@@ -434,8 +439,8 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
     for k, flag in (("station", "--station"), ("input", "--input")):
         if o.get(k):
             argv += [flag, o[k]]
-    if o.get("keypad") and os.path.isfile(KEYPAD):
-        argv += ["--hc-keys", KEYPAD]
+    if o.get("keypad") and os.path.isfile(keys_file()):
+        argv += ["--hc-keys", keys_file()]
     if o.get("hold"):
         argv += ["--hold-start"]
     if o.get("layout"):
@@ -503,6 +508,8 @@ def main():
     ap.add_argument("--yes", action="store_true", help="ask nothing: take the remembered (or default) answers")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VALUE", help="an answer given in advance (see --list-options)")
     ap.add_argument("--list-options", action="store_true")
+    ap.add_argument("--hand-controllers", action="store_true",
+                    help="set up the hand controllers (keyboard keys and/or joysticks) interactively, instead of running a simulation")
     ap.add_argument("--reset", action="store_true", help="put the scenario's answers back to the distribution defaults")
     ap.add_argument("--print", dest="mode", action="store_const", const="print", help="print the command only")
     ap.add_argument("--run", dest="mode", action="store_const", const="run", help="run it only")
@@ -511,6 +518,10 @@ def main():
     ap.add_argument("--tapes-dir", help="where the OI340700-OPS*.7z are (default: this directory); for tests")
     ap.add_argument("--no-save", action="store_true", help="do not remember the answers")
     a = ap.parse_args()
+    if a.hand_controllers:
+        import handcontroller_setup
+        handcontroller_setup.main()
+        return
 
     if a.list or a.list_options:
         if a.list_options:
