@@ -28,3 +28,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-11] Target: TIMELINE-STS134.md
 - AB28 PASS: undock SEPCFG->SEP3 on T1 from stamped ST3b sts134r-start. SEP2 1.52, NH2 1.97, MC5 1.09, NSR 2.75, TPI 3.15 ft/s (ST3b control 1.51/1.91/0.95/2.67/3.58).
+
+### [2026-11-12] Target: TIMELINE-STS134.md
+- T1-no16 (T1 minus MC1 only: GNC OPS 1/6; OPS 3 kept): tools/abridge_volume.py T1.mmv --con80 deck/CON80 --drop-mc 1; 2251 of 2665 blocks, sha256 25ef02250c86...; same command with --drop-mc 1,3 reproduces T1-no136 byte for byte. stamp_snapshots dry run: T1-no136 snapshots accept it (0 changed, 0 missing, 385 added). tapebuild/build.sh step 9 builds it. Encrypted OI340700-OPS3.7z is the owner to make (password).

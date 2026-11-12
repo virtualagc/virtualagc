@@ -196,5 +196,17 @@ if [ -n "${REF_ABRIDGED:-}" ]; then
   if cmp -s "$ABR" "$REF_ABRIDGED"; then echo "### MATCH: byte-identical to $REF_ABRIDGED"
   else echo "### MISMATCH against $REF_ABRIDGED"; cmp "$ABR" "$REF_ABRIDGED" | head -1; exit 1; fi
 fi
+echo "### 9. abridged volume: no GNC OPS 1 or 6 (OPS 3 kept, so landings run)"
+# Between the full volume and the one above: only memory configuration 1 (GNC OPS 1 and 6) is left off, so
+# entry and landing (OPS 3) work but launch and aborts do not.  Snapshots taken on the volume above run on it
+# (tools/stamp_snapshots.py --also).  REF_ABRIDGED16=<volume> checks it.
+ABR16="$WORK/OI340700-v44boot-noOPS16.mmv"
+python3 "$TOOLS/abridge_volume.py" "$OUT" --con80 "$T/CON80" --drop-mc 1 -o "$ABR16" \
+  || die "abridge_volume.py (no OPS 1/6)"
+if [ -n "${REF_ABRIDGED16:-}" ]; then
+  if cmp -s "$ABR16" "$REF_ABRIDGED16"; then echo "### MATCH: byte-identical to $REF_ABRIDGED16"
+  else echo "### MISMATCH against $REF_ABRIDGED16"; cmp "$ABR16" "$REF_ABRIDGED16" | head -1; exit 1; fi
+fi
 echo "### done -> $OUT"
 echo "###        $ABR"
+echo "###        $ABR16"
