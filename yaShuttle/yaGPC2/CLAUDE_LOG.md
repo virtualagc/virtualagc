@@ -25,3 +25,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-11] Target: TIMELINE-STS134.md
 - AB27 PASS: rendezvous-to-dock on T1 from the stamped ST4 sts134r-uplink snapshot (fly_return.py --from RNDZNAV --to STAY, no PFS/RESULT.json): hard mate 5.5 ft, -0.001 ft/s (AB25/ST4 control 5.4/5.5 ft). Wizard rendezvous scenario can start here. UNDOCK_PREFREE=skip is a recording aid only; NSTS_RPOP_PREDICTOR (hold|coast) is a display option the wizard exposes.
+
+### [2026-11-11] Target: TIMELINE-STS134.md
+- AB28 PASS: undock SEPCFG->SEP3 on T1 from stamped ST3b sts134r-start. SEP2 1.52, NH2 1.97, MC5 1.09, NSR 2.75, TPI 3.15 ft/s (ST3b control 1.51/1.91/0.95/2.67/3.58).
