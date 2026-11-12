@@ -262,7 +262,34 @@ def plain_volumes():
     return found
 
 
+def py7zr_module():
+    try:
+        import py7zr
+        return py7zr
+    except ImportError:
+        return None
+
+
+def need_unpacker():
+    """Exit with the way forward if the wizard has no means of opening an encrypted archive."""
+    if not has7z() and py7zr_module() is None:
+        sys.exit("flightwizard: the wizard can open the encrypted archives only with a 7z command or the Python module py7zr, and\n"
+                 "  has neither.  Either install the module (pip install py7zr), or unpack the archives with your usual unpacker\n"
+                 "  (it will ask for the password) -- OI340700-OPS1.7z gives a folder OI340700-OPS1/ holding the .mmv tape,\n"
+                 "  STS134-snapshots.7z a folder STS134-snapshots/ -- leave the folders in this directory (discretePanel/) and\n"
+                 "  run the wizard again; it finds them.")
+
+
 def archive_opens(path, pw):
+    if not has7z():
+        need_unpacker()
+        z7 = py7zr_module()
+        try:
+            with z7.SevenZipFile(path, password=pw) as z:
+                z.getnames()
+            return True
+        except (z7.exceptions.PasswordRequired, z7.exceptions.Bad7zFile):
+            return False
     r = subprocess.run([sevenz(), "l", "-slt", "--", path], input=(pw + "\n").encode(),
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return r.returncode == 0
@@ -313,6 +340,12 @@ class Volumes:
             sys.exit("flightwizard: that tier (%s) cannot fly this scenario%s.  Needed: one of %s." % (
                 held, "" if tier is None or tier["sha"] in accepted else " from these snapshots",
                 ", ".join(t["name"] for t in fits)))
+        if not has7z():
+            print("(no 7z command: the volume is unpacked once to local/tapes/%s.mmv for the simulator to read)" % tier["name"])
+            out = self.save_plain(tier, path)
+            if not out:
+                sys.exit("flightwizard: could not unpack %s" % path)
+            return tier, out, {}, "the unencrypted copy %s (unpacked from %s)" % (out, path)
         env = {"YAGPC_TAPE_PASSWORD": self.pw}
         if not asker.yes:
             if asker.ask("Save an unencrypted copy as local/tapes/%s.mmv so you are not asked again?" % tier["name"], False, bool):
@@ -321,14 +354,23 @@ class Volumes:
 
     def save_plain(self, tier, path):
         os.makedirs(os.path.join(LOCAL, "tapes"), exist_ok=True)
-        r = subprocess.run([sevenz(), "x", "-so", "--", path], input=(self.pw + "\n").encode(),
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if r.returncode != 0 or hashlib.sha256(r.stdout).hexdigest() != tier["sha"]:
-            print("(not saved: the archive did not give the expected volume)")
-            return
         out = os.path.join(LOCAL, "tapes", tier["name"] + ".mmv")
-        open(out, "wb").write(r.stdout)
+        if has7z():
+            r = subprocess.run([sevenz(), "x", "-so", "--", path], input=(self.pw + "\n").encode(),
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            data = r.stdout if r.returncode == 0 else b""
+        else:
+            with tempfile.TemporaryDirectory() as tmp:
+                with py7zr_module().SevenZipFile(path, password=self.pw) as z:
+                    z.extractall(tmp)
+                mm = [os.path.join(dp, f) for dp, _, fs in os.walk(tmp) for f in fs]
+                data = open(mm[0], "rb").read() if len(mm) == 1 else b""
+        if hashlib.sha256(data).hexdigest() != tier["sha"]:
+            print("(not saved: the archive did not give the expected volume)")
+            return False
+        open(out, "wb").write(data)
         print("saved %s" % out)
+        return out
 
 
 # ---------------------------------------------------------------- snapshots
