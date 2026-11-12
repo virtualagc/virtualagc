@@ -4100,7 +4100,13 @@ def main(argv=None):
                  "  pip install skyfield Pillow" % e.name)
     milkyway = np.load(MILKYWAY)
     stars = np.load(HIPPARCOS)
-    moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
+    # The Moon is a featureless dot at portview's resolution, so no picture of it is shipped: a plain
+    # disk (the shader cuts the disk out) matching the old texture's mean brightness as rendered stands in.  A textures/moon.jpg,
+    # if one is present, is still used.
+    if os.path.isfile(MOON_IMAGE):
+        moon = np.asarray(Image.open(MOON_IMAGE).convert('RGB'))
+    else:
+        moon = np.full((16, 16, 3), 137, np.uint8)
     site = None
     TERRAIN['on'] = args.terrain == 'on'
     EarthLayer.NIGHT_AMB = args.night_terrain
