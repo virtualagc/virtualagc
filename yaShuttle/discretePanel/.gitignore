@@ -2,3 +2,11 @@
 # snapshot staging.  Runs belong under ~/sts134-runs/ (or --logs with a full path), not here.
 /*/*.log
 /*/snapshot-staging/
+
+# Flight software never goes in git.  The encrypted OI340700-OPS*.7z tapes are tracked; anything unpacked is not:
+# tapes (T1.mmv, T1-no136.mmv, ...), and local/, the one place the flight wizard looks for the user's downloads --
+#   local/tapes/                 unencrypted tape copies (optional)
+#   local/snapshots/             the snapshot archive and its two JSON files
+#   local/snapshots/unpacked/    the unpacked snapshot set (optional)
+*.mmv
+/local/
