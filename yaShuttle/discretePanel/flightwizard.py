@@ -398,6 +398,13 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
     env = dict(env_extra)
     size = int(round(768 * float(o.get("size", 50)) / 100.0))
     if sc["driver"] is None:                      # the coast viewer: simulatePASS itself
+        # a restored vehicle model needs these on (simulatePASS says so when they are missing); the MET epoch is the
+        # snapshot's own: its GMT less its MET
+        env.update({"YAGPC_VEHDYN": "1", "YAGPC_MDM_DEVICES": "1"})
+        if row.get("_dir") and os.path.isfile(os.path.join(row["_dir"], "vehicle.json")):
+            env["YAGPC_MTU_MET_EPOCH"] = "%.3f" % json.load(open(os.path.join(row["_dir"], "vehicle.json")))["metEpoch"]
+        elif row.get("gmtUnix") is not None and row_seconds(row, True) is not None:
+            env["YAGPC_MTU_MET_EPOCH"] = "%.3f" % (row["gmtUnix"] - row_seconds(row, True))
         argv = [sys.executable, "-u", os.path.join(HERE, "simulatePASS.py"), "--gpcs", "1", "--tape", tape,
                 "--snapshot-resume", row["_arg"], "--rt-factor", "%g" % float(o["rate"]), "--port-base", str(base),
                 "--logs", os.path.join(run, "logs"), "--snapshot-dir", run, "--size", str(size), "--crts", str(o["crts"])]
