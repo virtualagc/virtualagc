@@ -12,9 +12,11 @@ offered as the defaults next time; a scenario can be put back to the distributio
 WHAT IT LOOKS FOR, all relative to this directory (discretePanel/) -- nothing is downloaded:
 
     OI340700-OPS1.7z .. OPS3.7z, OPS2.7z, OPS0.7z    the encrypted volumes, shipped here
-    local/tapes/*.mmv                  OPTIONAL unencrypted volumes (also *.mmv here): used in preference to the archives
+    local/tapes/*.mmv                  OPTIONAL unencrypted volumes (also *.mmv here, or in the folder an unpacker makes from
+                                       an archive, e.g. OI340700-OPS1/): used in preference to the archives
     STS134-snapshots.7z                the encrypted snapshot set, shipped here (with snapshot-index.json beside it)
-    local/snapshots/unpacked/SET/NAME  OPTIONAL: the same snapshots unpacked; used in preference to the archive
+    STS134-snapshots/SET/NAME          OPTIONAL: the same snapshots unpacked (the folder an unpacker makes), here, or
+                                       under local/snapshots/ (also as unpacked/SET/NAME); used in preference to the archive
     local/portview-textures.7z         the textures archive (unpacked here if portview's files are missing)
     *.layout                           window layouts, the same directory the Manager's file chooser opens
 
@@ -63,7 +65,11 @@ PASSWORD_ORDER = [t["archive"] for t in TIERS] + [OPS0["archive"]]      # OPS1, 
 SNAPSHOT_ARCHIVE = os.path.join(HERE, "STS134-snapshots.7z")
 if not os.path.isfile(SNAPSHOT_ARCHIVE):    # a copy kept under local/ (tests, or before it was shipped)
     SNAPSHOT_ARCHIVE = os.path.join(LOCAL, "snapshots", "STS134-snapshots.7z")
-SNAPSHOT_DIR = os.path.join(LOCAL, "snapshots", "unpacked")
+# Where unpacked snapshots may be: a folder named for the archive (what an unpacker normally makes) beside the archive,
+# or the folder the wizard itself unpacks to.
+SNAPSHOT_DIRS = [os.path.join(HERE, "STS134-snapshots"), os.path.join(LOCAL, "snapshots", "STS134-snapshots"),
+                 os.path.join(LOCAL, "snapshots", "unpacked")]
+SNAPSHOT_DIR = SNAPSHOT_DIRS[-1]
 TEXTURES_ARCHIVE = os.path.join(LOCAL, "portview-textures.7z")
 KEYPAD = os.path.join(HERE, "examples", "keys-keypad.json")
 MYKEYS = os.path.join(LOCAL, "hand-keys.json")      # written by --hand-controllers
@@ -228,18 +234,27 @@ def sha256_of(path):
 def sevenz():
     exe = shutil.which("7z") or shutil.which("7za") or shutil.which("7zz")
     if not exe:
-        sys.exit("flightwizard: no 7z on the PATH (the encrypted volumes and snapshots need it)")
+        sys.exit("flightwizard: no 7z command on the PATH, so the wizard cannot open the encrypted archives itself.\n"
+                 "  Unpack them with your usual unpacker (it will ask for the password) -- OI340700-OPS1.7z gives a folder\n"
+                 "  OI340700-OPS1/ holding the .mmv tape, STS134-snapshots.7z a folder STS134-snapshots/ -- leave the folders\n"
+                 "  in this directory (discretePanel/) and run the wizard again; it finds them.")
     return exe
+
+
+def has7z():
+    return bool(shutil.which("7z") or shutil.which("7za") or shutil.which("7zz"))
 
 
 def plain_volumes():
     """{sha256: path} of the unencrypted volumes found."""
     found = {}
-    for d in (os.path.join(LOCAL, "tapes"), HERE):
-        if os.path.isdir(d):
-            for f in sorted(os.listdir(d)):
+    skip = {"local", "examples", "portview", "textures", "__pycache__", "STS134-snapshots"}
+    for top in (os.path.join(LOCAL, "tapes"), HERE):
+        for dp, dn, fn in os.walk(top):          # also the folders an unpacker makes (OI340700-OPS1/), two levels down
+            dn[:] = [] if os.path.relpath(dp, top).count(os.sep) >= 1 else sorted(d for d in dn if d not in skip)
+            for f in sorted(fn):
                 if f.lower().endswith(".mmv"):
-                    p = os.path.join(d, f)
+                    p = os.path.join(dp, f)
                     try:
                         found.setdefault(sha256_of(p), p)
                     except OSError:
@@ -320,8 +335,9 @@ class Volumes:
 def snapshot_rows():
     """The index rows of the snapshots available: unpacked directories first, else the archive's index."""
     import snapshot_bundle as sb
-    if os.path.isdir(SNAPSHOT_DIR) and sb.snapshots_under(SNAPSHOT_DIR):
-        rows, where = sb.build_index([SNAPSHOT_DIR])
+    held = [d for d in SNAPSHOT_DIRS if os.path.isdir(d) and sb.snapshots_under(d)]
+    if held:
+        rows, where = sb.build_index(held[:1])
         for r in rows:
             r["_dir"] = where[r["name"]]
         return rows
@@ -329,7 +345,8 @@ def snapshot_rows():
     if os.path.isfile(SNAPSHOT_ARCHIVE) and os.path.isfile(idx):
         return json.load(open(idx))["snapshots"]
     sys.exit("flightwizard: no snapshots.  Put the snapshot archive STS134-snapshots.7z and its snapshot-index.json in\n"
-             "  %s\n  (or unpack the snapshots under %s/SET/NAME)." % (os.path.dirname(SNAPSHOT_ARCHIVE), SNAPSHOT_DIR))
+             "  %s\n  (or unpack STS134-snapshots.7z there with your usual unpacker: the folder it makes, STS134-snapshots/, is found.)"
+             % os.path.dirname(SNAPSHOT_ARCHIVE))
 
 
 def accepted_digests(row):
@@ -486,13 +503,13 @@ def ensure_textures(asker):
     if textures_ready():
         return True
     print("portview's textures are not unpacked here.")
-    if os.path.isfile(TEXTURES_ARCHIVE):
+    if os.path.isfile(TEXTURES_ARCHIVE) and has7z():
         if asker.ask("Unpack %s into %s?" % (TEXTURES_ARCHIVE, HERE), True, bool):
             subprocess.run([sevenz(), "x", "-y", os.path.abspath(TEXTURES_ARCHIVE)], cwd=HERE)
             return textures_ready()
     else:
-        print("  Download portview-textures.7z (900 MiB) from https://www.ibiblio.org/apollo/Downloads/ and put it in\n  %s"
-              % os.path.dirname(TEXTURES_ARCHIVE))
+        print("  Download portview-textures.7z (900 MiB) from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your\n"
+              "  usual unpacker into %s (the portview-textures/ folder it makes is fine), then run this again." % HERE)
     return False
 
 
