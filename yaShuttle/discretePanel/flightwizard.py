@@ -270,6 +270,11 @@ def py7zr_module():
         return None
 
 
+def use_py7zr():
+    """The Python module is preferred; the 7z command is the fallback when it is not installed."""
+    return py7zr_module() is not None
+
+
 def need_unpacker():
     """Exit with the way forward if the wizard has no means of opening an encrypted archive."""
     if not has7z() and py7zr_module() is None:
@@ -281,7 +286,7 @@ def need_unpacker():
 
 
 def archive_opens(path, pw):
-    if not has7z():
+    if use_py7zr() or not has7z():
         need_unpacker()
         z7 = py7zr_module()
         try:
@@ -340,8 +345,8 @@ class Volumes:
             sys.exit("flightwizard: that tier (%s) cannot fly this scenario%s.  Needed: one of %s." % (
                 held, "" if tier is None or tier["sha"] in accepted else " from these snapshots",
                 ", ".join(t["name"] for t in fits)))
-        if not has7z():
-            print("(no 7z command: the volume is unpacked once to local/tapes/%s.mmv for the simulator to read)" % tier["name"])
+        if use_py7zr():
+            print("(the volume is unpacked once to local/tapes/%s.mmv for the simulator to read)" % tier["name"])
             out = self.save_plain(tier, path)
             if not out:
                 sys.exit("flightwizard: could not unpack %s" % path)
@@ -355,7 +360,7 @@ class Volumes:
     def save_plain(self, tier, path):
         os.makedirs(os.path.join(LOCAL, "tapes"), exist_ok=True)
         out = os.path.join(LOCAL, "tapes", tier["name"] + ".mmv")
-        if has7z():
+        if not use_py7zr():
             r = subprocess.run([sevenz(), "x", "-so", "--", path], input=(self.pw + "\n").encode(),
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             data = r.stdout if r.returncode == 0 else b""

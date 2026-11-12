@@ -209,7 +209,11 @@ def extract_one_py7zr(archive, name, to, pw):
 
 def extract_one(archive, name, to, pw):
     """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path."""
-    if not have_7z():
+    try:
+        import py7zr    # preferred; the 7z command is the fallback
+    except ImportError:
+        py7zr = None
+    if py7zr is not None or not have_7z():
         return extract_one_py7zr(archive, name, to, pw)
     r = subprocess.run([sevenz(), "x", "-y", "-bso0", "-bsp0", "-o" + to, archive, name + "/*"],
                        input=(pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
