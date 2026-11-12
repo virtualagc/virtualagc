@@ -1302,14 +1302,19 @@ class Manager(object):
         names = PROGRAMS + ("rpop.py", "truthball.py", "manager.py")
         try:
             for pid, argv in _argvs():
-                if "--port-base" not in argv:
-                    continue
-                try:
-                    if argv[argv.index("--port-base") + 1] != base:
-                        continue
-                except IndexError:
-                    continue
                 bases = [os.path.basename(a) for a in argv]
+                # A simulatePASS started WITHOUT --port-base is on the default, 6900.  Skipping it for lacking the flag
+                # made "simulatePASS is gone" true of a live run: End Simulation then killed the programs from here, and
+                # simulatePASS -- alive -- started the display again (owner, 2026-11-12).
+                if "--port-base" not in argv:
+                    if "simulatePASS.py" not in bases or base != "6900":
+                        continue
+                else:
+                    try:
+                        if argv[argv.index("--port-base") + 1] != base:
+                            continue
+                    except IndexError:
+                        continue
                 if "simulatePASS.py" in bases:
                     sim = True
                 elif any(b in names for b in bases) and pid != os.getpid():
