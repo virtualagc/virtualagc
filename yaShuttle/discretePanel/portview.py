@@ -97,10 +97,31 @@ import argparse
 import importlib.util
 import math
 import os
+import shutil
 import socket
 import struct
 import sys
 import time
+
+
+def adopt_nested_unpack(here):
+    """Most unpackers put portview-textures.7z's contents in a folder named for the archive, giving
+    portview-textures/portview/cache and portview-textures/textures.  Move them to where portview looks (here/portview/cache,
+    here/textures), keeping anything already there, so the user need not know how to strip that level."""
+    top = os.path.join(here, "portview-textures")
+    if not os.path.isdir(top):
+        return
+    for sub in ("portview/cache", "textures"):
+        src, dst = os.path.join(top, *sub.split("/")), os.path.join(here, *sub.split("/"))
+        if not os.path.isdir(src):
+            continue
+        for dp, dn, fn in os.walk(src):
+            out = os.path.join(dst, os.path.relpath(dp, src))
+            os.makedirs(out, exist_ok=True)
+            for f in fn:
+                if not os.path.exists(os.path.join(out, f)):
+                    os.replace(os.path.join(dp, f), os.path.join(out, f))
+    shutil.rmtree(top, ignore_errors=True)      # what is left there duplicates files already in place
 
 
 def preflight():
@@ -113,6 +134,7 @@ def preflight():
     if missing:
         return "%s missing; pip install %s" % (", ".join(missing), " ".join(missing))
     here = os.path.dirname(os.path.abspath(__file__))
+    adopt_nested_unpack(here)
     dirs = [os.path.join(here, "textures"), os.path.join(here, "portview", "cache")]
     def have(f):
         return any(os.path.exists(os.path.join(d, f)) for d in dirs)
