@@ -13,7 +13,7 @@ WHAT IT LOOKS FOR, all relative to this directory (discretePanel/) -- nothing is
 
     OI340700-OPS1.7z .. OPS3.7z, OPS2.7z, OPS0.7z    the encrypted volumes, shipped here
     local/tapes/*.mmv                  OPTIONAL unencrypted volumes (also *.mmv here): used in preference to the archives
-    local/snapshots/STS134-snapshots.7z   the encrypted snapshot set (with snapshot-index.json beside it)
+    STS134-snapshots.7z                the encrypted snapshot set, shipped here (with snapshot-index.json beside it)
     local/snapshots/unpacked/SET/NAME  OPTIONAL: the same snapshots unpacked; used in preference to the archive
     local/portview-textures.7z         the textures archive (unpacked here if portview's files are missing)
     *.layout                           window layouts, the same directory the Manager's file chooser opens
@@ -60,7 +60,9 @@ TIERS = [
 OPS0 = {"name": "OPS0", "archive": "OI340700-OPS0.7z", "has": set(), "text": "the boot volume (no snapshot runs on it)"}
 PASSWORD_ORDER = [t["archive"] for t in TIERS] + [OPS0["archive"]]      # OPS1, OPS3, OPS2, OPS0
 
-SNAPSHOT_ARCHIVE = os.path.join(LOCAL, "snapshots", "STS134-snapshots.7z")
+SNAPSHOT_ARCHIVE = os.path.join(HERE, "STS134-snapshots.7z")
+if not os.path.isfile(SNAPSHOT_ARCHIVE):    # a copy kept under local/ (tests, or before it was shipped)
+    SNAPSHOT_ARCHIVE = os.path.join(LOCAL, "snapshots", "STS134-snapshots.7z")
 SNAPSHOT_DIR = os.path.join(LOCAL, "snapshots", "unpacked")
 TEXTURES_ARCHIVE = os.path.join(LOCAL, "portview-textures.7z")
 KEYPAD = os.path.join(HERE, "examples", "keys-keypad.json")
