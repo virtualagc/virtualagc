@@ -22,3 +22,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-11] Target: yaShuttle/yaGPC2/PHASES.md
 - Peer gate on unify a5dd3cb64 (relay: forClaude/unify/RELAY-TO-peers-unify.md): Mac, Win11-native, WSL all pass build, C tests, Python checks, snapshot_bundle round trip, and Zaragoza TAL on T1 (left main 189.9/191.6/190.0 kt, 3.0/2.9/2.9 ft/s). T1 docking not run on any peer: the only dock-start capture is T2-based and the tape-digest guard refuses it (docking passes on T2 stand). portview --help fixed afterwards (a617b1735, Linux-only check).
+
+### [2026-11-11] Target: TIMELINE-STS134.md
+- AB27 PASS: rendezvous-to-dock on T1 from the stamped ST4 sts134r-uplink snapshot (fly_return.py --from RNDZNAV --to STAY, no PFS/RESULT.json): hard mate 5.5 ft, -0.001 ft/s (AB25/ST4 control 5.4/5.5 ft). Wizard rendezvous scenario can start here. UNDOCK_PREFREE=skip is a recording aid only; NSTS_RPOP_PREDICTOR (hold|coast) is a display option the wizard exposes.
