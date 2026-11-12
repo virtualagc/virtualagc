@@ -17,7 +17,7 @@ WHAT IT LOOKS FOR, all relative to this directory (discretePanel/) -- nothing is
     STS134-snapshots.7z                the encrypted snapshot set, shipped here (with snapshot-index.json beside it)
     STS134-snapshots/SET/NAME          OPTIONAL: the same snapshots unpacked (the folder an unpacker makes), here, or
                                        under local/snapshots/ (also as unpacked/SET/NAME); used in preference to the archive
-    local/portview-textures.7z         the textures archive (unpacked here if portview's files are missing)
+    portview/cache, textures           the unpacked portview-textures.7z (you unpack it; a portview-textures/ folder is fine)
     *.layout                           window layouts, the same directory the Manager's file chooser opens
 
 THE VOLUME ("tier").  A snapshot runs only on the volumes it was taken with (vehicle.json), and a scenario needs the
@@ -70,7 +70,6 @@ if not os.path.isfile(SNAPSHOT_ARCHIVE):    # a copy kept under local/ (tests, o
 SNAPSHOT_DIRS = [os.path.join(HERE, "STS134-snapshots"), os.path.join(LOCAL, "snapshots", "STS134-snapshots"),
                  os.path.join(LOCAL, "snapshots", "unpacked")]
 SNAPSHOT_DIR = SNAPSHOT_DIRS[-1]
-TEXTURES_ARCHIVE = os.path.join(LOCAL, "portview-textures.7z")
 KEYPAD = os.path.join(HERE, "examples", "keys-keypad.json")
 MYKEYS = os.path.join(LOCAL, "hand-keys.json")      # written by --hand-controllers
 
@@ -231,20 +230,6 @@ def sha256_of(path):
     return h.hexdigest()
 
 
-def sevenz():
-    exe = shutil.which("7z") or shutil.which("7za") or shutil.which("7zz")
-    if not exe:
-        sys.exit("flightwizard: no 7z command on the PATH, so the wizard cannot open the encrypted archives itself.\n"
-                 "  Unpack them with your usual unpacker (it will ask for the password) -- OI340700-OPS1.7z gives a folder\n"
-                 "  OI340700-OPS1/ holding the .mmv tape, STS134-snapshots.7z a folder STS134-snapshots/ -- leave the folders\n"
-                 "  in this directory (discretePanel/) and run the wizard again; it finds them.")
-    return exe
-
-
-def has7z():
-    return bool(shutil.which("7z") or shutil.which("7za") or shutil.which("7zz"))
-
-
 def plain_volumes():
     """{sha256: path} of the unencrypted volumes found."""
     found = {}
@@ -262,42 +247,19 @@ def plain_volumes():
     return found
 
 
-def py7zr_module():
-    try:
-        import py7zr
-        return py7zr
-    except ImportError:
-        return None
-
-
-def use_py7zr():
-    """The Python module is preferred; the 7z command is the fallback when it is not installed."""
-    return py7zr_module() is not None
-
-
-def need_unpacker():
-    """Exit with the way forward if the wizard has no means of opening an encrypted archive."""
-    if not has7z() and py7zr_module() is None:
-        sys.exit("flightwizard: the wizard can open the encrypted archives only with a 7z command or the Python module py7zr, and\n"
-                 "  has neither.  Either install the module (pip install py7zr), or unpack the archives with your usual unpacker\n"
-                 "  (it will ask for the password) -- OI340700-OPS1.7z gives a folder OI340700-OPS1/ holding the .mmv tape,\n"
-                 "  STS134-snapshots.7z a folder STS134-snapshots/ -- leave the folders in this directory (discretePanel/) and\n"
-                 "  run the wizard again; it finds them.")
+try:
+    import py7zr
+except ImportError:
+    sys.exit("flightwizard: the Python module py7zr is needed (it opens the encrypted archives):  pip install py7zr")
 
 
 def archive_opens(path, pw):
-    if use_py7zr() or not has7z():
-        need_unpacker()
-        z7 = py7zr_module()
-        try:
-            with z7.SevenZipFile(path, password=pw) as z:
-                z.getnames()
-            return True
-        except (z7.exceptions.PasswordRequired, z7.exceptions.Bad7zFile):
-            return False
-    r = subprocess.run([sevenz(), "l", "-slt", "--", path], input=(pw + "\n").encode(),
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return r.returncode == 0
+    try:
+        with py7zr.SevenZipFile(path, password=pw) as z:
+            z.getnames()
+        return True
+    except (py7zr.exceptions.PasswordRequired, py7zr.exceptions.Bad7zFile):
+        return False
 
 
 class Volumes:
@@ -345,31 +307,20 @@ class Volumes:
             sys.exit("flightwizard: that tier (%s) cannot fly this scenario%s.  Needed: one of %s." % (
                 held, "" if tier is None or tier["sha"] in accepted else " from these snapshots",
                 ", ".join(t["name"] for t in fits)))
-        if use_py7zr():
-            print("(the volume is unpacked once to local/tapes/%s.mmv for the simulator to read)" % tier["name"])
-            out = self.save_plain(tier, path)
-            if not out:
-                sys.exit("flightwizard: could not unpack %s" % path)
-            return tier, out, {}, "the unencrypted copy %s (unpacked from %s)" % (out, path)
-        env = {"YAGPC_TAPE_PASSWORD": self.pw}
-        if not asker.yes:
-            if asker.ask("Save an unencrypted copy as local/tapes/%s.mmv so you are not asked again?" % tier["name"], False, bool):
-                self.save_plain(tier, path)
-        return tier, path, env, "the encrypted volume %s" % path
+        print("(the volume is unpacked once to local/tapes/%s.mmv for the simulator to read)" % tier["name"])
+        out = self.save_plain(tier, path)
+        if not out:
+            sys.exit("flightwizard: could not unpack %s" % path)
+        return tier, out, {}, "the unencrypted copy %s (unpacked from %s)" % (out, path)
 
     def save_plain(self, tier, path):
         os.makedirs(os.path.join(LOCAL, "tapes"), exist_ok=True)
         out = os.path.join(LOCAL, "tapes", tier["name"] + ".mmv")
-        if not use_py7zr():
-            r = subprocess.run([sevenz(), "x", "-so", "--", path], input=(self.pw + "\n").encode(),
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            data = r.stdout if r.returncode == 0 else b""
-        else:
-            with tempfile.TemporaryDirectory() as tmp:
-                with py7zr_module().SevenZipFile(path, password=self.pw) as z:
-                    z.extractall(tmp)
-                mm = [os.path.join(dp, f) for dp, _, fs in os.walk(tmp) for f in fs]
-                data = open(mm[0], "rb").read() if len(mm) == 1 else b""
+        with tempfile.TemporaryDirectory() as tmp:
+            with py7zr.SevenZipFile(path, password=self.pw) as z:
+                z.extractall(tmp)
+            mm = [os.path.join(dp, f) for dp, _, fs in os.walk(tmp) for f in fs]
+            data = open(mm[0], "rb").read() if len(mm) == 1 else b""
         if hashlib.sha256(data).hexdigest() != tier["sha"]:
             print("(not saved: the archive did not give the expected volume)")
             return False
@@ -550,13 +501,8 @@ def ensure_textures(asker):
     if textures_ready():
         return True
     print("portview's textures are not unpacked here.")
-    if os.path.isfile(TEXTURES_ARCHIVE) and has7z():
-        if asker.ask("Unpack %s into %s?" % (TEXTURES_ARCHIVE, HERE), True, bool):
-            subprocess.run([sevenz(), "x", "-y", os.path.abspath(TEXTURES_ARCHIVE)], cwd=HERE)
-            return textures_ready()
-    else:
-        print("  Download portview-textures.7z (900 MiB) from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your\n"
-              "  usual unpacker into %s (the portview-textures/ folder it makes is fine), then run this again." % HERE)
+    print("  Download portview-textures.7z (900 MiB) from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your\n"
+          "  usual unpacker into %s (the portview-textures/ folder it makes is fine), then run this again." % HERE)
     return False
 
 

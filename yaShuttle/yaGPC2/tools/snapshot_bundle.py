@@ -189,38 +189,17 @@ def cmd_list(a):
         print("%-52s %-15s %-13s %s" % (r["name"], r.get("gmt", "-"), r.get("met", "-"), r.get("next", "")))
 
 
-def have_7z():
-    return bool(shutil.which("7z") or shutil.which("7za") or shutil.which("7zz"))
-
-
-def extract_one_py7zr(archive, name, to, pw):
-    """The same without a 7z command, through the py7zr module (pip install py7zr)."""
-    try:
-        import py7zr
-    except ImportError:
-        sys.exit("snapshot_bundle: neither a 7z command nor the py7zr module is available (pip install py7zr)")
+def extract_one(archive, name, to, pw):
+    """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path.  Through py7zr (pip install py7zr)."""
+    import py7zr
     try:
         with py7zr.SevenZipFile(archive, password=pw) as z:
             z.extract(path=to, targets=[n for n in z.getnames() if n == name or n.startswith(name + "/")])
     except (py7zr.exceptions.PasswordRequired, py7zr.exceptions.Bad7zFile):
         sys.exit("snapshot_bundle: could not extract %s -- wrong password" % name)
-    return os.path.join(to, name)
-
-
-def extract_one(archive, name, to, pw):
-    """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path."""
-    try:
-        import py7zr    # preferred; the 7z command is the fallback
-    except ImportError:
-        py7zr = None
-    if py7zr is not None or not have_7z():
-        return extract_one_py7zr(archive, name, to, pw)
-    r = subprocess.run([sevenz(), "x", "-y", "-bso0", "-bsp0", "-o" + to, archive, name + "/*"],
-                       input=(pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     path = os.path.join(to, name)
-    if r.returncode != 0 or not os.path.isfile(os.path.join(path, "vehicle.json")):
-        sys.exit("snapshot_bundle: could not extract %s -- wrong password, or no such snapshot (`list`)\n%s"
-                 % (name, r.stderr.decode(errors="replace")[-300:]))
+    if not os.path.isfile(os.path.join(path, "vehicle.json")):
+        sys.exit("snapshot_bundle: no such snapshot %s (`list`)" % name)
     return path
 
 
