@@ -145,7 +145,7 @@ def preflight():
         absent.append("bluemarble_MM.jpg")
     if absent:
         return ("its prepared assets are missing (%s); unpack portview-textures.7z in this directory "
-                "(see textures/LICENSE.md), or run python3 portview/fetch_assets.py" % ", ".join(absent))
+                "(a portview-textures/ folder made by your unpacker is fine; see textures/LICENSE.md)" % ", ".join(absent))
     return None
 
 
