@@ -34,3 +34,6 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-12] Target: TIMELINE-STS134.md
 - AB29 PASS: landing chain on T1-no16 (OPS 301-304, entry, TAEM, landing, wheels stop) from the T1-no136 ST5 snapshot, stamped --also T1-no16: touchdown ~192 kt, X +2249 ft from KSC15 threshold, stopped +8406 ft. Staged snapshot set re-stamped for T1-no16 (needs repack).
+
+### [2026-11-12] Target: HANDOFF-snapshot-bundles.md
+- yaShuttle/discretePanel/flightwizard.py (master): scenarios prelaunch, launch, rtls, tal, coast, rendezvous, undock, landing; tiers T1 / T1-no16 (OI340700-OPS3.7z) / T1-no136 chosen by digest from local/tapes/*.mmv, else password tried OPS1,OPS3,OPS2,OPS0; snapshots from local/snapshots/{unpacked/,STS134-snapshots.7z}; per-scenario memory in local/wizard-settings.json. Run THROUGH the wizard on T1: launch (ET sep .118 = AB26), RTLS from the COUNT snapshot (main gear 207 kt/1.4 ft/s), TAL (191 kt/3.0 ft/s), coast (snapshot-resume; sets YAGPC_VEHDYN, YAGPC_MDM_DEVICES, YAGPC_MTU_MET_EPOCH). Rendezvous/undock/landing commands equal AB27/AB28/AB29 (not yet literally through the wizard). Untested: the ARCHIVE.7z::SET/NAME path on a real encrypted archive, encrypted-tape run end to end with a real tape.
