@@ -536,11 +536,13 @@ def main():
         if k not in OPTIONS:
             sys.exit("flightwizard: unknown option %s (--list-options)" % k)
         mine[k] = coerce(k, v)
+    changed = False
     if not a.yes and not a.set:
         print("Settings for this scenario (remembered from last time where you changed them):")
         for k in sc["opts"] + (["stop"] if sc["stop"] else []):
             print("  %-10s %s" % (k, mine.get(k)))
         choice = asker.ask("Keep these, change some, or reset to the distribution defaults? (k/c/r)", "k", str, ("k", "c", "r"))
+        changed = choice != "k"
         if choice == "r":
             mine = dict(dflt)
             settings.pop(scn_id, None)
@@ -563,11 +565,13 @@ def main():
         if a.yes:
             sys.exit("flightwizard: coast needs --set when=...")
         mine["when"] = asker.ask(OPTIONS["when"][0], "", str)
-    if not a.no_save:
-        keep = {k: v for k, v in mine.items() if v != dflt.get(k)}
-        if scn_id in settings or keep:
+    if changed and not a.no_save:               # --yes and --set answers are one-off: never remembered
+        keep = {k: v for k, v in mine.items() if v != dflt.get(k) and k != "when"}
+        if keep:
             settings[scn_id] = {k: v for k, v in mine.items() if k != "when"}
-            save_settings(settings)
+        else:
+            settings.pop(scn_id, None)
+        save_settings(settings)
 
     mode = a.mode
     if not mode:
