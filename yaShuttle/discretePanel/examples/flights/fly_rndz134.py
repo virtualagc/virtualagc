@@ -154,7 +154,7 @@ ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main
 LB_KG = 0.45359237
 OMS_AFTER_OMS2_LB = (70.8 * 19.32, 74.4 * 19.32)    # MR: OMS3+OMS5 left, OMS3+OMS4 right
 ASCENT_CONSUMABLES_LB = 3.0 * 49.0 * 858.0 / (287.0 + 858.0) + 3.6 + 2.8 + 4.2   # vehdyn.c
-ASCENT_STATE = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2/vehdyn.json")
+ASCENT_STATE = ""      # a start from IPL-side captures names its own: --ascent-state DIR/vehdyn.json (--from-fd13 and --from need none)
 ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what it loaded
 
 
@@ -327,7 +327,7 @@ LAMBERT_MC_SETS = (11, 12, 13, 14, 19)
 #   p. 6-4 TARGETING DATA, TGT 12's EL 29.072)
 # --dass-iloads applies the MM column, in the capture resumed from, to the
 # csects of the groups named; only words still holding LM are written.
-DASS_G2 = os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC")
+DASS_G2 = os.environ.get("DASS_G2", os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC"))   # maintainers only: the shipped snapshots already carry these I-loads
 # the same values made permanent on a volume (yaGPC2/tools/sites/
 # sts134-rndz-iloads.json through tools/mission_reconfig.py, 2026-10-09)
 RNDZ_VOLUME = os.path.expanduser("~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv")
@@ -3349,7 +3349,7 @@ def main():
     ap.add_argument("--no-rr-force", dest="rr_force", action="store_false",
                     help="don't play MCC's FORCE of the radar's refused range marks (see rr_converge)")
     ap.add_argument("--ascent-state", default=ASCENT_STATE, help="the ascent capture's vehdyn.json: the propellant and mass the rendezvous starts with")
-    ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
+    ap.add_argument("--targets", default=os.path.join(HERE, "sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
                     help="with --portview: portview's views, from front, up, left, right, aft, cl (the scene camera, a plain 768x768 window), "

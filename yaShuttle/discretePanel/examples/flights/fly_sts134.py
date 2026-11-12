@@ -1237,7 +1237,7 @@ def main():
     ap.add_argument("--rate", type=float, default=1.0,
                     help="simulated seconds per wall second (simulatePASS --rt-factor); 2 is "
                          "measured clean for one GPC on orbit")
-    ap.add_argument("--tape", default=os.path.expanduser("~/workspace/pass-run/OI340700-v44boot-sts134.mmv"))
+    ap.add_argument("--tape", required=True, help="the mass-memory volume: T1.mmv or T1-no136.mmv (unpacked from the OI340700-OPS*.7z tapes)")
     ap.add_argument("--portview", action="store_true",
                     help="start portview's out-the-window views (simulatePASS does by default; "
                          "this driver passes --no-portview unless asked, so automated and "
