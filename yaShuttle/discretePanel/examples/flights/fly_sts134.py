@@ -386,7 +386,7 @@ class Flight:
         if getattr(self.a, "abort", None) == "ATO":
             env["NSTS_ANNOUNCE_ROWS"] = "all"     # the MNVR pages' TIG, for EXEC
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
-               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
+               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", str(getattr(self.a, "size", 384)),
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration",
                str(getattr(self.a, "duration", None) or os.environ.get("FLY_DURATION", "20000")),
@@ -402,6 +402,9 @@ class Flight:
             cmd += ["--portview-textures", self.a.portview_textures]
         if self.a.portview and getattr(self.a, "portview_site", None):
             cmd += ["--portview-site", self.a.portview_site]
+        for opt in ("station", "input", "hc_keys"):     # the crew station and its hand controllers, as the other drivers
+            if getattr(self.a, opt, None):
+                cmd += ["--" + opt.replace("_", "-"), getattr(self.a, opt)]
         if self.a.hold_start:                    # windows up, the vehicle held
             cmd += ["--hold-start"]
         if self.a.layout:                        # the windows where this file says
@@ -1255,6 +1258,7 @@ def main():
                     help="WORKAROUND, not for new flights: disable the G3 archive retrieve "
                          "(DPS UTILITY ITEM 49) before OPS 301, for captures made before "
                          "yaGPC2 c87bce8b6 whose archive is empty (ledger #283)")
+    ap.add_argument("--size", type=int, default=384, help="simulatePASS --size: the MDU window size in pixels (default 384)")
     ap.add_argument("--crts", type=int, default=2,
                     help="display units: CRT 1 for the crew's DPS pages (the driver keys there), "
                          "CRT 2 (and 3) for the owner -- the A/E PFD in entry (default 2)")
@@ -1291,6 +1295,9 @@ def main():
     ap.add_argument("--layout", metavar="FILE",
                     help="simulatePASS's --layout: put the windows where this layout file says "
                          "once they are up (the Manager's Save then writes to it)")
+    ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), help="simulatePASS --station (default: its own)")
+    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), help="simulatePASS --input (default: its own)")
+    ap.add_argument("--hc-keys", metavar="FILE", help="simulatePASS --hc-keys: keys that stand in for the hand controllers")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring every window up, hold the vehicle until Enter is pressed in "
                          "this terminal (time to arrange the windows), then fly")

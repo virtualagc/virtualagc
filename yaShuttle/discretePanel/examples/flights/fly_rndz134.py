@@ -1415,7 +1415,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         else:
             env.pop("YAGPC_VEHDYN_START_REL", None)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
-               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
+               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", str(getattr(self.a, "size", 384)),
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", os.environ.get("FLY_DURATION", "20000"),   # wall s: a 40-hour coast at 3x needs ~50000
                # the commander's station, for the THC that trims the Ti burn's
@@ -3397,6 +3397,7 @@ def main():
     ap.add_argument("--from", dest="from_", choices=PHASES[1:])
     ap.add_argument("--from-fd13", metavar="DIR",
                     help="resume rendezvous from fly_fd13.py's NC4+2 min capture; UPLINK starts next")
+    ap.add_argument("--size", type=int, default=384, help="simulatePASS --size: the MDU window size in pixels (default 384)")
     ap.add_argument("--crts", type=int, default=1)
     ap.add_argument("--coast-min", type=float, default=76.9,
                     help="COAST: minutes after Ti to fly before stopping (default 76.9, to T2)")
