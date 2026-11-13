@@ -3,16 +3,16 @@
 
   portview-essential.7z   what portview cannot run without, and what any STS-134 flight needs: the star catalogue, the
                           ephemeris, the land/water mask, the night lights, every vehicle model (the ISS among them) and
-                          the launch gantry.  Small; with it alone portview shows the stars and a flat land-and-water Earth.
+                          the launch gantry, and KSC's imagery (sites/ksc: the pads and runways of the launch and RTLS flights).
+                          Small; with it alone portview shows the stars, a flat land-and-water Earth, and KSC in detail.
   portview-optional.7z    the large pictures: the Milky Way, the twelve Blue Marble months and the sites' imagery.
 
 Both are made from yaShuttle/discretePanel (the paths are those portview looks in), each member stored under its own
 path, so that unpacking in yaShuttle/discretePanel puts everything in place.  Most users' unpackers make a folder named for
 the archive (portview-essential/); portview.py moves its contents into place.
 
-  python3 portview/pack_archives.py [--out DIR] [--ksc-essential] [--dry-run]
+  python3 portview/pack_archives.py [--out DIR] [--dry-run]
 
---ksc-essential puts sites/ksc (119 MB) in the essential archive, for flights that launch or land at the Cape.
 Writes DIR/portview-essential.7z, DIR/portview-optional.7z and DIR/portview-archives.json (size and SHA-256 of each, and
 the files in each).  Needs the `7z` program; it is not needed by anyone who only downloads the archives.
 """
@@ -27,8 +27,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)                              # yaShuttle/discretePanel
 ESSENTIAL_FILES = ["portview/cache/hipparcos.npy", "portview/cache/de440s.bsp", "portview/cache/watermask.png",
                    "portview/cache/nightlights.jpg", "portview/cache/README.txt"]
-ESSENTIAL_DIRS = ["portview/cache/models"]                # every vehicle model, the ISS and the gantry
-KSC = "portview/cache/sites/ksc"
+ESSENTIAL_DIRS = ["portview/cache/models",                # every vehicle model, the ISS and the gantry
+                  "portview/cache/sites/ksc"]             # KSC: where STS-134 launched and where the RTLS flights land
 
 
 def members():
@@ -56,14 +56,9 @@ def sha256(path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default=os.path.join(ROOT, "local", "archives"))
-    ap.add_argument("--ksc-essential", action="store_true", help="sites/ksc in the essential archive")
     ap.add_argument("--dry-run", action="store_true", help="list what each archive would hold, and its size")
     a = ap.parse_args()
     essential, optional = members()
-    if a.ksc_essential:
-        moved = [f for f in optional if f.startswith(KSC + "/")]
-        essential += moved
-        optional = [f for f in optional if f not in set(moved)]
     for need in ("portview/cache/hipparcos.npy", "portview/cache/de440s.bsp", "portview/cache/watermask.png"):
         if need not in essential:
             sys.exit("pack_archives: %s is not in %s" % (need, ROOT))

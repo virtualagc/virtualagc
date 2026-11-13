@@ -163,8 +163,8 @@ def optional_missing(here):
            if not have(f)]
     if not any(f.startswith("bluemarble_") for d in dirs if os.path.isdir(d) for f in os.listdir(d)):
         out.append("the Blue Marble Earth")
-    if not have(os.path.join("sites", "ksc", "ring.json")):
-        out.append("the sites' imagery")
+    if not have(os.path.join("sites", "zza", "ring.json")):
+        out.append("the other sites' imagery")
     return out
 
 
