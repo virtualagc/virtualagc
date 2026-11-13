@@ -44,3 +44,5 @@ Staging area for documentation updates.  Append timestamped entries as
 ### [2026-11-12] Target: yaShuttle/discretePanel/examples/flights/fly_rndz134.py docs
 - W6 (flightwizard rendezvous on T1, rate 3) PASS: HARD MATE TCS 5.4 ft +0.001 ft/s, same as AB27. The docking driver never prints "done": its last phase is STAY ("End Simulation in the manager, or Ctrl-C") and it waits forever, so watchers must key on `== STAY` (the docked truth range 81.2 ft, RDOT 0.000 is the CG-to-ISS distance, not a hold). W6 sat docked ~10 h sim time before being noticed; ended by UDP quit to base+93.
 - track() fixed (888f4aabc): OPS 201 PRO + wait for the 2011/ title before the UNIV PTG items (they went to OMS MNVR EXEC 2021 -> ILLEGAL ENTRY), MSG RESET after. Test TF1 --from TRACK --to STRKNAV from AB27's RNDZNAV snapshot: STRKNAV reached, no ILLEGAL ENTRY.
+### [2026-11-12] Target: yaShuttle/yaGPC2/PHASES.md
+- AB30 PASS (return coast COAST->ORBIT on full T1 from ST3b coast-04 snapshot, rate 3, ended 19:08 CST): ORBIT-after-uplinks error 1.3 ft / 0.10 deg, control ST3c 2 ft.
