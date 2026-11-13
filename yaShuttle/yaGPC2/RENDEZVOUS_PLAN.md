@@ -2450,6 +2450,18 @@ Applied from the staging log (Full Documentation Sync, 2026-10-22); entries in d
 - Fly-around is documented (Stuit AIAA STORRM DTO paper p.12/Fig.10; JSC-49686 s6.17 p.114): start 450+-50 ft ahead, 2n lap (46 min), open to 650+-50 ft in ~100 deg, SEP1 1.5 fps radial up at 650 ft. The 650->820 spiral (#316) was a figure fit, not documented; fly_undock.py defaults now 450->650 over 100 deg (UNDOCK_FA_RHO0/RHO1/OPEN_DEG). f21 (plain 650, VERN after SEP1) SEP2 start 1,314 ft off the old figure's marker; f22 (450 start) running.
 - Stuit's figure (~/Desktop/trajectorySTORMMDTO2.png) is now the default for overlay_logged.py/figure_curve.py/compare_fig.py (FIGURE_OLD=1 and figure_curve_old.npy keep the first). f18 on it: 75.5% within 200 ft, 100% within 400, rms 148 ft; MC5->NSR leg is the weak one (9%).
 
+## 5r. RCS propellant at docking, and the docking time (2026-11-10, Linux) -- OPEN
+
+OPEN (owner-accepted for now): the single-tape OPS 2-only run ST4 (T1-no136) docks with RCS F 388 / L 674 / R 680 kg, against
+the Mission Report's undock F 385 / L 794 / R 794 kg; earlier runs (flown loads at Ti, no coast flown) had F too high and aft
+right.  The coast OPS 2 to NC4 (40 h) burns F 150 / L 184 / R 181 kg (about 4.5 kg/h per aft pod, ~0.4 %/h, against the owner's
+flown ~0.07 %/h).  Hypothesis, untested: the simulated attitude control during the coast over-consumes; investigate the coast's
+attitude control and jet selection (and the flown tank levels before docking are needed, not only those at undock).  The
+per-phase levels are in `vehdyn.json` fields 16-18 (F/L/R kg) of the captures under `~/sts134-runs/singletape/ST2-fd13-T1no136`
+and `ST4-rndz-dock-T1no136`.
+The ST4 dock capture is at 10:42:31 UTC against 10:36:27-10:36:39 for the recent single-tape runs (all earlier runs
+10:24:39-10:52:40); the extra ~6 min: arrival +1.5-2 min, VBAR to hold 3.5 min (against 0.1).  Contact was flown at 10:14 UTC.
+
 ## 6. The stages
 
 Effort is in working days for one agent with Ron's review, assuming the

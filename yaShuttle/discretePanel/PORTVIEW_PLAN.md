@@ -125,11 +125,17 @@ one Sun-visibility test per object per frame.
 
 ## Assets
 
-`portview/fetch_assets.py` downloads and converts the large inputs into a
-git-ignored `portview/cache/`: today the Milky Way map (200 MB as float16) and
-the Hipparcos catalogue (~4 MB prepared); later Blue Marble NG (12 months),
-Black Marble and DE440s.  `moon.jpg` stays committed; `starfield.jpg` is no
-longer used.  No Git LFS.
+`portview/fetch_assets.py` is the maintainer's record of how each large input was made (the Milky Way map, 200 MB as
+float16; the Hipparcos catalogue, ~4 MB prepared; Blue Marble NG, 12 months; Black Marble; DE440s; the sites' imagery).
+Users never run it: the results are shipped as two archives, `portview-essential.7z` (the star catalogue, ephemeris, land/
+water mask, night lights and every model: small) and `portview-optional.7z` (the Milky Way, the twelve Blue Marble months
+and the sites: large), made by `portview/pack_archives.py` and kept on www.ibiblio.org/apollo (see `textures/LICENSE.md`).
+portview needs only the essential files: with nothing else it draws the stars and a flat land-and-water Earth (from the
+mask; `FLAT_LAND`, `FLAT_WATER`), and `--check` reports `ready, basic (without ...)`.  Each optional item is used when
+present.  An unpacker's wrapper folder (`portview-essential/`, `portview-optional/`) is adopted into place.  `moon.jpg` is
+gone: the Moon is a plain grey disk (a `textures/moon.jpg`, if one is present, is still used); `starfield.jpg` is not used.
+No Git LFS.  Not done: a higher-resolution Earth (Blue Marble NG's full 86400 x 43200 grid, ~464 m/pixel, against the 16384 x
+8192 cut, ~2.4 km/pixel, the largest single GL texture) would need tiled streaming and a third optional archive.
 
 ## Dependencies
 
@@ -237,6 +243,20 @@ gives the pads' mounds (39A's top at 14.2 m, under the gantry's 48 ft) and
 the mountains on Edwards' and White Sands' horizons.  No terrain shadows;
 the imagery has its own.  `--terrain off` for the flat ground.  60 frames/s
 in four full-size views on the Mac, at 2 km and at 10 m.
+
+### Sites taken in turn, and imagery from flight-simulator add-ons (2026-11-07/08)
+`--site ksc,zza`: the sites are taken in turn as the eye moves; the old site's textures are deleted beyond its outer ring (its
+reach), the next one's are uploaded a band of rows a frame, with mips made in linear light on a thread.  Linux TAL run looked
+right; Mac M1 Max: swap 6 s, worst step 20 ms; Win11 (Intel UHD 770, ksc,edw): swap 43 s, worst step 41 ms; WSL (llvmpipe,
+ksc,edw): swap 29 s, worst step 138 ms; no errors on any.  `fly_sts134 --abort TAL` defaults to ksc,zza (zza,ksc from
+ENTRY/LAND).
+`portview/msfs_cgl.py` builds a site's ring0 (+-4 km, 8192 px) and ringF (+-1.5 km, 4096 or 8192 px) from a Microsoft Flight
+Simulator add-on's .cgl: it carves the 256-px PNG tiles, rebuilds the mosaic by edge matching, SIFT-registers it to the site's
+Sentinel-2 ring and snaps it to the Web Mercator grid; it keeps `*_s2.jpg` and `ring.json.s2` (`--restore` undoes it) and
+needs OpenCV.  Used for zza (LOD17/16/15, 0.89/1.8/3.6 m/px), esn (LOD18/17/16, 0.46/0.91/1.8), kbo (LOD19/18/17,
+0.19/0.38/0.75) and ilm (LOD20/19/18, 0.12/0.25/0.49).  Of 18 downloaded packages only these four have a CGL (the others are
+object packs; KTTS's has objects and decals only); no package states licence terms.  New sites are defined with
+`msfs_cgl.py --new-site`.  Peak memory 17 GB (ilm).  Verified on Linux only.
 
 ## Ascent (started 2026-10-07; Ron: higher priority than the rest)
 

@@ -497,6 +497,15 @@ stall, 6.5 ms with `NSTS_GUI_STALL_BUSY=1`. Unstalled regression, `simulatePASS
   it twice a second. Seen in a one-GPC run: `GPCIPL MENU (1) 1 PASS1 1 PASS5 9`
   13.5 s after STANDBY, then `GPC MEMORY MEM/BUS CONFIG READ/WRITE`.
 
+### 10.x Glyphs below the last text row are off the glass (2026-11-12)
+`drawGlyph` skips any glyph whose pen row is at or beyond `DPS_ROWS` (26; the DPS page has rows 0-25), but still advances
+the pen.  Cause: on UNIV PTG (2011) a lone `*` showed lower right.  CG2011.dfg's CUR and FUT option stars (XC 30 and 34)
+take their row from `CGZV_CUR_OPT_Y` / `CGZV_FUT_OPT_Y`, which PASS parks at -400 for "none selected" (CGZ28C, GETODM,
+GKTUNI, GVUUNI).  The beam Y is taken modulo the grid (the original CoffeeScript `%%` is a floored modulo, which is Python's
+`%`, so this is NOT a port error, and Don Schmidt's MEDS2 does the same); -400 wraps to row 26.85, just under the last text
+row.  Checked on seven snapshot IDP states with the old code: the only glyphs at row >= 26 anywhere were these stars.  The
+real tube's behaviour for off-grid beam positions is not documented here: this is a clip, not a modelled wrap.
+
 ---
 
 ## 11. Known gaps and untested ground

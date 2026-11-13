@@ -11,26 +11,30 @@ its origin is noted.
 | In the repository (this directory) | |
 |---|---|
 | `adi_ball.png` | The ADI ball map used by `truthball.py`, from the *Space Shuttle Ultra* add-on for the Orbiter simulator (GPL v2). |
-| `moon.jpg` | The Moon's near side, north up.  **Origin uncertain** (see below). |
 
-The large textures are not in git.  They are in one archive, **`portview-textures.7z`**, kept with the other downloads
-of the Virtual AGC project (<https://www.ibiblio.org/apollo/Downloads/portview-textures.7z>).  Unpack it in
-`yaShuttle/discretePanel`:
+The large textures are not in git.  They are in two archives, kept with the other downloads of the Virtual AGC project
+(<https://www.ibiblio.org/apollo/Downloads/>), each with its size and SHA-256 in `portview-archives.json` beside them
+(`portview/pack_archives.py` makes them):
 
-    7z x portview-textures.7z
+| Archive | Holds |
+|---|---|
+| **`portview-essential.7z`** (small) | What `portview.py` cannot run without, and what any STS-134 flight needs: `hipparcos.npy`, `de440s.bsp`, `watermask.png`, `nightlights.jpg`, every model under `models/` (the ISS and the launch gantry among them).  With this alone portview shows the stars and a flat land-and-water Earth. |
+| **`portview-optional.7z`** (large) | The big pictures: `milkyway_8k.npy`, `bluemarble_01.jpg` to `bluemarble_12.jpg`, and `sites/*` (the sites' imagery).  Each is used when present. |
 
-(900 MiB; sha256 `a6fac80c77b5bc6071a0e9c093e6702d0eb4a6fdf13961dfea7c4beb02488ae7`.)  It holds everything `portview.py` needs to run that is not in git: a `textures/` directory
-(which merges with this one) and a `portview/cache/` directory with the data that are not textures (listed at the end).
-The mission-specific items (the ISS model, the pad structures and KSC's imagery) are single snapshots, those of STS-134,
-and are marked so in the tables; no other date is available.  **The archive is the supported source.**  `python3 portview/fetch_assets.py` is the record of how each file was made from
+Unpack either in `yaShuttle/discretePanel` with your usual unpacker.  Most unpackers make a folder named for the archive
+(`portview-essential/`, `portview-optional/`); `portview.py` moves what is in it into place, so there is nothing to
+rearrange.  The archives hold a `textures/` directory (which merges with this one) and a `portview/cache/` directory with
+the data that are not textures (listed at the end).  The mission-specific items (the ISS model, the pad structures and
+KSC's imagery) are single snapshots, those of STS-134, and are marked so in the tables; no other date is available.
+**The archives are the supported source.**  `python3 portview/fetch_assets.py` is the record of how each file was made from
 its public source, and can remake them into `portview/cache/`, but the sources are web sites that can change or vanish;
 nobody should have to depend on them.  `portview.py` looks in `textures/` first and then in `portview/cache/`.
 
-| In the archive | Source |
+| In `portview-optional.7z` unless noted | Source |
 |---|---|
 | `bluemarble_01.jpg` to `bluemarble_12.jpg` | NASA Earth Observatory, *Blue Marble Next Generation* (2004), the monthly world maps, 21600 x 10800 cut to 16384 x 8192. |
-| `nightlights.jpg` | NASA Earth Observatory, *Black Marble* 2016 (3 km), city lights only. |
-| `watermask.png` | From the GEBCO bathymetry and elevation maps that NASA publishes with *Blue Marble Next Generation*. |
+| `nightlights.jpg` (essential archive) | NASA Earth Observatory, *Black Marble* 2016 (3 km), city lights only. |
+| `watermask.png` (essential archive) | From the GEBCO bathymetry and elevation maps that NASA publishes with *Blue Marble Next Generation*. |
 | `milkyway_8k.npy` | NASA Scientific Visualization Studio 4851, *Deep Star Maps 2020* (`milkyway_2020_8k.exr`); float16 RGB, J2000. |
 | `sites/ksc/` | `ringF.jpg`, `ring0.jpg` and the pad patches `patch_lc39a.jpg`, `patch_lc39b.jpg`: USDA NAIP, KSC's from the flight of 2010-05-02 (**the STS-134 snapshot**: the site and the pads as they were then).  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless (below). |
 | `sites/nor/` | `ringF.jpg`, `ring0.jpg`: USDA NAIP through the USGS National Map.  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless. |
@@ -56,7 +60,6 @@ us and the offending texture will be removed, or if you prefer, attributed to yo
 
 | Texture | What is known |
 |---|---|
-| `moon.jpg` | Source not recorded. |
 | `sites/zza/` | Zaragoza AB (LEZG): `ringF.jpg`, `ring0.jpg`, `ring1.jpg`, built from the imagery of the aerial-scenery add-on for Microsoft Flight Simulator *AirHispania LEZG Zaragoza v1.3.3* (a free download that states no licence terms), over a Sentinel-2 cloudless base. |
 | `sites/esn/` | Ankara Esenboga (LTAC): the same, from *argaeus-ltac-ankara v056*. |
 | `sites/kbo/` | Koeln/Bonn (EDDK): the same, from *eddk-aerial*. |
@@ -65,7 +68,7 @@ us and the offending texture will be removed, or if you prefer, attributed to yo
 For those four sites the outer rings (`ring2.jpg`, `ring3.jpg`) are Sentinel-2 cloudless (CC BY 4.0, above), and the
 heights (`height0.npy` to `height2.npy`) are from the AWS terrain tiles (SRTM / EU-DEM, about 30 m), which are open data.
 
-## Also in the archive, in `portview/cache/` (not textures)
+## Also in the essential archive, in `portview/cache/` (not textures)
 
 | File | Source |
 |---|---|

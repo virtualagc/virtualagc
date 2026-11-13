@@ -486,6 +486,31 @@ MECO; its max-q was 949 psf.  Changed since, each from a document:
 | The day's atmosphere and wind: the truth flies the Cape sounding at launch (12Z and 15Z interpolated to 12:56Z), PASS the 12Z winds as DOLILU message 11 | Cape Canaveral station 74794 soundings, University of Wyoming archive; JSC 37461 | 60ceb8368, eaaba5cc0 |
 | SRB separation I-loads: command delay 4.42 s and five more | Booster Console Handbook Table 2.2.1-I; mission reports App. A | d63cfcfd2 |
 
+### Single-tape (T1) tests and the flight wizard (2026-11-11 to 13)
+The phases were re-run from stamped snapshots on the full volume T1 (the tier with launch, landing and orbit), with no PFS
+and no `RESULT.json`, and then through `discretePanel/flightwizard.py`:
+- Ascent from the stamped IPL snapshot; deorbit/entry/landing 189.9 kt / 1.5 ft/s; a mid-set Ti burn.  Hard landings AB21/22
+  were no `YAGPC_NAVAIDS` (ledger #336; the default is now set in `fly_return`); the OPS 303 miss was a restart that
+  re-applied `RETURN_RESUME_FROM` (#337).  New with these: `snapshot_bundle.py`, simulatePASS `ARCHIVE.7z::SET/NAME`,
+  vehicle-key CRT lines, the MEDS2 dropped-key log, a screen dump on a wait timeout.
+- AB25: the nc4-plus-2-min snapshot (stamped for T1) through Ti, MC1-MC4, approach and DOCK30: HARD MATE TCS 5.4 ft +0.006 ft/s
+  (ST4 on T1-no136: 5.5 ft +0.001).
+- AB27: rendezvous to dock from the stamped ST4 `sts134r-uplink` (`fly_return.py --from RNDZNAV --to STAY`): hard mate 5.5 ft,
+  -0.001 ft/s.  AB28: undock SEPCFG to SEP3 from ST3b `sts134r-start`: SEP2 1.52, NH2 1.97, MC5 1.09, NSR 2.75, TPI 3.15 ft/s
+  (ST3b control 1.51/1.91/0.95/2.67/3.58).  AB30: the return coast COAST to ORBIT from ST3b coast-04 (rate 3): 1.3 ft / 0.10 deg after
+  the ORBIT uplinks (control ST3c ~2 ft).
+- T1-no16 (T1 minus MC1 only, GNC OPS 1/6; OPS 3 kept): `tools/abridge_volume.py T1.mmv --con80 deck/CON80 --drop-mc 1`; 2251
+  of 2665 blocks, sha256 25ef02250c86...; the same command with `--drop-mc 1,3` reproduces T1-no136 byte for byte;
+  `tapebuild/build.sh` step 9 builds it.  AB29: the landing chain on T1-no16 (OPS 301-304, entry, TAEM, wheels stop) from the
+  ST5 snapshot stamped for it: touchdown ~192 kt, X +2249 ft from the KSC15 threshold, stopped +8406 ft.
+- Through the wizard: launch (ET sep as AB26), RTLS (main gear 207 kt / 1.4 ft/s), TAL (191 kt / 3.0 ft/s), coast, and W6, the
+  rendezvous to the hard mate (TCS 5.4 ft +0.001 ft/s, as AB27).  The docking driver never prints `done`: its last phase,
+  `== STAY`, waits for End Simulation, and the docked truth range (81.2 ft, range rate 0.000) is the CG-to-ISS distance.
+  `UNDOCK_PREFREE=skip` is a recording aid only; `NSTS_RPOP_PREDICTOR` (hold|coast) is a display option the wizard offers.
+- `fly_rndz134.track()` now requests OPS 201 and waits for the 2011/ title before keying the UNIV PTG items (they had gone to
+  OMS MNVR EXEC: ILLEGAL ENTRY), then MSG RESET.
+
+
 ## Derived data and how it was obtained
 
 | Data | How | Where |

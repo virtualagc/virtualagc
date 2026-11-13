@@ -161,25 +161,7 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
 
-## Single tape T1: undock to SEP3
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
-
-## Single tape T1: post-ISS coast, deorbit, entry, landing
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
-
 ## Single tape T1: entry from TIG-1 capture
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | UNVERIFIED | passed on T2 (see Single tape T2 row) | fd13-codex ef635778e, T1 = merged tape, K_CMD_STG2 104 (flown) | Not re-run on T1. T1 differs from T2 in one cell, CGGS_K_CMD_STG2, read only by GG42ND second-stage guidance, so a phase started from a post-ascent capture does not execute it. | ledger #332 |  |
-
-## Single tape T1: docking (MC1 to STAY)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
@@ -196,6 +178,38 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB16-T1-ato (alone), AB14-T1-ato; controls AB12, AB15 | fd13-codex c947daaaa, T1 (K_CMD_STG2 104), 2026-11-08 | OPS 201 reached. T1 alone: OMS-1 TIG MET 0:11:37.6, 5012 kg / 292 s; OMS-2 0:55:55.6, 1032 kg / 66 s. Abort-tape controls (alone): 0:11:37.6 / 0:11:37.7, 4727-4744 kg / 275 s; 0:55:55.6, 1024-1026 kg / 62-64 s. TIG identical; T1 OMS-1 burns 270-290 kg / 17 s longer, repeatable: T1 carries the flown ascent I-loads the abort tape lacks. Documented dispersion; cause within those I-loads not isolated. | ledger #332 |  |
+
+## Single tape T1: docking (MC1 to STAY)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB25 (nc4-plus-2-min snapshot), AB27 (ST4 uplink snapshot), W6 (through the wizard) | unify / master (fly_return.py --from RNDZNAV --to STAY) | HARD MATE TCS 5.4 ft +0.006 ft/s (AB25); 5.5 ft -0.001 ft/s (AB27); 5.4 ft +0.001 ft/s (W6); control ST4 on T1-no136 5.5 ft +0.001 | ~/sts134-runs/singletape/AB25-T1-dock-from-nc4, AB27-T1-dock-from-uplink-snapshot, W6-wizard-rendezvous; the docking driver ends at == STAY (never prints done) |  |
+
+## Single tape T1: undock to SEP3
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB28-T1-undock-from-start | unify / master (fly_undock.py from stamped ST3b sts134r-start) | SEP2 1.52, NH2 1.97, MC5 1.09, NSR 2.75, TPI 3.15 ft/s; control ST3b 1.51/1.91/0.95/2.67/3.58 | ~/sts134-runs/singletape/AB28-T1-undock-from-start |  |
+
+## Single tape T1: post-ISS coast, deorbit, entry, landing
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | AB30 (return coast), AB21/AB23 (deorbit, entry, landing on T1), AB29 (landing on T1-no16) | unify / master (fly_return.py) | coast to ORBIT 1.3 ft / 0.10 deg after the uplinks (control ST3c ~2 ft); AB23 189.9 kt / 1.5 ft/s; AB29 (T1-no16) ~192 kt, X +2249 ft, stop +8406 ft | ~/sts134-runs/singletape/AB30-T1-coast-from-ST3b-coast04, AB23, AB29-T1no16-landing-from-ST5; AB21/22 floated only for lack of YAGPC_NAVAIDS (#336); OPS 303 miss in AB18/20 was a restart bug (#337) |  |
+
+## Flight wizard (flightwizard.py) on T1
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | launch, RTLS, TAL, coast, W6 rendezvous | master | launch ET sep as AB26; RTLS main gear 207 kt / 1.4 ft/s; TAL 191 kt / 3.0 ft/s; W6 HARD MATE TCS 5.4 ft +0.001 ft/s | not yet through the wizard: undock, landing, return coast (W7 running); real encrypted archives with py7zr; Mac, Win11, WSL |  |
+
+## Peer gate on unify a5dd3cb64 (build, C tests, Python checks, snapshot_bundle round trip, Zaragoza TAL on T1)
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Mac | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 189.9 kt / 3.0 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
+| Win11 | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 191.6 kt / 2.9 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
+| WSL | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 190.0 kt / 2.9 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
 
 ## Landing runs on disk (from the logs)
 

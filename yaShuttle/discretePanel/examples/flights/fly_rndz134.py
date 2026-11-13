@@ -88,6 +88,9 @@ phase by phase, with a capture (sts134r-<phase>) after each:
            R-bar through the R-bar pitch maneuver and the fly-around to
            station-keeping 100 ft out on the +V-bar, where docking would
            pick up (RENDEZVOUS_PLAN.md 5f; manual.json)
+  (fly_return.py goes on: DOCK30, DOCK, then STAY, the last phase.  The driver never prints "done" after a docking: at STAY
+           it waits for End Simulation in the Manager or Ctrl-C, with the docked stack at truth range 81.2 ft (the orbiter CG
+           to the ISS reference), range rate 0.000.  A watcher keys on "== STAY", not on "done".)
 
 --no-mc flies the M1b baseline instead: after Ti, OPS 201, the -Z track and
 the coast to T2 (TIG + 76.9 min).  --zero-sensor-bias is the sensor bias
