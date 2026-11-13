@@ -1760,6 +1760,11 @@ def main():
                     help="portview.py's --textures: force reduced (about 0.5 GB) textures on a GPU that "
                          "crashes or exits with the full ones, e.g. a shared-memory Intel GPU that reports "
                          "no memory size (default: portview's own auto)")
+    ap.add_argument("--portview-star-core", type=float, default=None, metavar="F",
+                    help="portview.py's --star-core, the faintest stars' core radius in pixels (default: portview's "
+                         "own, 1.0, made for a 4K screen; 0.1 with --portview-star-gain 0.7 suits 1920x1080)")
+    ap.add_argument("--portview-star-gain", type=float, default=None, metavar="G",
+                    help="portview.py's --star-gain, every star's brightness times G (default: portview's own, 1.0)")
     ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), default="auto",
                     help="which flight station's panels, displays and keyboards to show: "
                          "forward, the aft flight deck (rendezvous, docking, RMS), all "
@@ -2377,6 +2382,10 @@ def main():
                     pv_argv += ["--textures", args.portview_textures]
                 if args.portview_site:
                     pv_argv += ["--site", args.portview_site]
+                if args.portview_star_core:
+                    pv_argv += ["--star-core", "%g" % args.portview_star_core]
+                if args.portview_star_gain:
+                    pv_argv += ["--star-gain", "%g" % args.portview_star_gain]
                 if pv_views:
                     pv_argv += ["--views", pv_views]
                     # each view opens at its layout place and size.  The layout
@@ -2577,6 +2586,8 @@ def main():
                             "--portview-views", args.portview_views or "",
                             "--portview-textures", args.portview_textures or "auto",
                             "--portview-site", args.portview_site or "",
+                            "--portview-star-core", "%g" % (args.portview_star_core or 0),
+                            "--portview-star-gain", "%g" % (args.portview_star_gain or 0),
                             "--tape", tape,
                             "--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.

@@ -1533,6 +1533,10 @@ class Manager(object):
                 "--textures", self.args.portview_textures]
         if self.args.portview_site:
             argv += ["--site", self.args.portview_site]
+        if self.args.portview_star_core > 0:
+            argv += ["--star-core", "%g" % self.args.portview_star_core]
+        if self.args.portview_star_gain > 0:
+            argv += ["--star-gain", "%g" % self.args.portview_star_gain]
         # the run's own views unless a station asked for others: Start gave
         # only the forward view to a run begun with "aft,cctv" (owner)
         views = views or windowLayout.split_views(self.args.portview_views)[0]
@@ -1728,6 +1732,11 @@ def main(argv=None):
                          "--portview-views; empty: portview's default)")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), default="auto",
                     help="portview.py's --textures for Start under WINDOW VIEWS (simulatePASS --portview-textures)")
+    ap.add_argument("--portview-star-core", type=float, default=0.0, metavar="F",
+                    help="portview.py's --star-core for Start under WINDOW VIEWS (simulatePASS --portview-star-core; "
+                         "0: portview's default)")
+    ap.add_argument("--portview-star-gain", type=float, default=0.0, metavar="G",
+                    help="portview.py's --star-gain for Start under WINDOW VIEWS (0: portview's default)")
     ap.add_argument("--portview-site", default="", metavar="SITE",
                     help="portview.py's --site for Start under WINDOW VIEWS (simulatePASS --portview-site; "
                          "empty: portview's default, ksc)")
