@@ -2268,7 +2268,10 @@ wait crt 1 title 2011/ timeout 600
 
     def track(self):
         # -Z AXIS TARGET TRACK [12A] (and LOAD TARGET TRACK [9A]'s CNCL first)
-        script = ("+1     keys RESUME\n"
+        # the page is asked for and waited on: with RESUME alone the items
+        # went to whatever was up (OMS MNVR EXEC, 2021) -- ILLEGAL ENTRY
+        script = ("+1     keys OPS 2 0 1 PRO\n"
+                  "wait crt 1 title 2011/ timeout 180\n"
                   "+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
@@ -2276,7 +2279,8 @@ wait crt 1 title 2011/ timeout 600
                   "+3     dap c3 b\n"
                   "+2     dap c3 auto\n"
                   "+2     dap c3 alt\n"
-                  "+3     keys ITEM 1 9 EXEC\n")
+                  "+3     keys ITEM 1 9 EXEC\n"
+                  "+3     keys MSG_RESET\n")
         self.play(script, "target-track")
         self.script_done("target-track", 120)
         self.wait_sim(5)
