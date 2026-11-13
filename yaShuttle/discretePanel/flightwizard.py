@@ -88,6 +88,8 @@ OPTIONS = {
     "crts":     ("Number of CRT displays (1-4)", int, 2),
     "portview": ("Out-the-window views (portview)", bool, True),
     "views":    ("Which views, comma separated (front,up,left,right,aft,cctv,rpop)", str, "front,up,left,right"),
+    "starcore": ("Stars' core radius in pixels (0 = portview's default, made for 4K; 0.1 suits a 1920x1080 screen)", float, 0.0),
+    "stargain": ("Stars' brightness factor (0 = portview's default, made for 4K; 0.7 goes with a core of 0.1)", float, 0.0),
     "station":  ("Crew station windows (fwd, aft, all, auto)", str, "all"),
     "input":    ("Hand controllers (virtual = the keypad, auto, joystick, both)", str, "virtual"),
     "keypad":   ("Use the keyboard hand-controller layout (yours from --hand-controllers if you made one, else the keypad layout)", bool, True),
@@ -100,7 +102,7 @@ OPTIONS = {
     "stop":     ("Stop after", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
 }
-COMMON = ["rate", "size", "crts", "portview", "views", "station", "input", "keypad", "hold", "layout"]
+COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keypad", "hold", "layout"]
 
 
 def scenario_table():
@@ -444,6 +446,7 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
             argv += ["--hold-start"]
         if o.get("layout"):
             argv += ["--layout", os.path.join(HERE, o["layout"])]
+        star_env(o, env)
         return argv, env, HERE
     argv = [sys.executable, "-u", os.path.join(FLIGHTS, sc["driver"]), "--logs", run, "--tape", tape,
             "--port-base", str(base), "--rate", "%g" % float(o["rate"]), "--size", str(size), "--crts", str(o["crts"])]
@@ -475,7 +478,16 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         env["FLY_DURATION"] = "60000"
     if sc.get("resume_env"):
         env[sc["resume_env"]] = os.path.join(run, sc["capture"])
+    star_env(o, env)
     return argv, env, FLIGHTS
+
+
+def star_env(o, env):
+    """portview's --star-core and --star-gain, through the environment the drivers and simulatePASS pass on (0 = not set)."""
+    if o.get("portview"):
+        for key, var in (("starcore", "NSTS_STAR_CORE"), ("stargain", "NSTS_STAR_GAIN")):
+            if float(o.get(key) or 0) > 0:
+                env[var] = "%g" % float(o[key])
 
 
 def free_base(start=30000):
@@ -588,7 +600,7 @@ def main():
                 print("Layouts here: %s" % ", ".join(layouts()))
             for k in sc["opts"]:
                 q, kind, _ = OPTIONS[k]
-                if k == "views" and not mine.get("portview"):
+                if k in ("views", "starcore", "stargain") and not mine.get("portview"):
                     continue
                 if k == "when":
                     mine[k] = asker.ask(q, mine.get(k) or "", str)
