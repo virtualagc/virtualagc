@@ -4054,14 +4054,16 @@ def main(argv=None):
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none).  A list, ksc,zza, loads the first now and each other one once the "
                          "eye has left the one before, uploaded over many frames")
-    ap.add_argument("--star-core", type=float, default=1.0, metavar="F",
-                    help="the faintest stars' core radius, in pixels (default 1.0).  Smaller is sharper, "
-                         "0.5 a good try on a 1920x1080 screen; their light is kept, so they are not dimmer, "
-                         "but too small shimmers as the view moves")
-    ap.add_argument("--star-gain", type=float, default=1.0, metavar="G",
-                    help="every star's brightness times G (default 1.0).  A tight --star-core puts a faint star's "
-                         "light on fewer pixels, so more of them show: --star-core 0.1 with --star-gain 0.5 shows "
-                         "about the stars the default core does, but sharp")
+    ap.add_argument("--star-core", type=float, default=float(os.environ.get("NSTS_STAR_CORE") or 1.0), metavar="F",
+                    help="the faintest stars' core radius, in pixels (default 1.0, made for a 4K screen).  Smaller is "
+                         "sharper, but too small shimmers as the view moves.  On a 1920x1080 screen try "
+                         "--star-core 0.1 --star-gain 0.7.  A star's total light is kept as the core changes.  "
+                         "Default: $NSTS_STAR_CORE if set")
+    ap.add_argument("--star-gain", type=float, default=float(os.environ.get("NSTS_STAR_GAIN") or 1.0), metavar="G",
+                    help="every star's brightness times G (default 1.0, made for a 4K screen).  A tight --star-core "
+                         "puts a faint star's light on fewer pixels, so more of them show; on a 1920x1080 screen "
+                         "--star-core 0.1 --star-gain 0.7 is a good setting (0.5 shows about as many stars as the "
+                         "defaults do, but sharp)")
     ap.add_argument("--msaa", type=int, default=4, metavar="N",
                     help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
                          "none with reduced textures)")
