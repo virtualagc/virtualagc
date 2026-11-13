@@ -154,7 +154,7 @@ ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main
 LB_KG = 0.45359237
 OMS_AFTER_OMS2_LB = (70.8 * 19.32, 74.4 * 19.32)    # MR: OMS3+OMS5 left, OMS3+OMS4 right
 ASCENT_CONSUMABLES_LB = 3.0 * 49.0 * 858.0 / (287.0 + 858.0) + 3.6 + 2.8 + 4.2   # vehdyn.c
-ASCENT_STATE = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2/vehdyn.json")
+ASCENT_STATE = ""      # a start from IPL-side captures names its own: --ascent-state DIR/vehdyn.json (--from-fd13 and --from need none)
 ASCENT_START = "sts134-count"      # the same run's capture before liftoff: what it loaded
 
 
@@ -327,7 +327,7 @@ LAMBERT_MC_SETS = (11, 12, 13, 14, 19)
 #   p. 6-4 TARGETING DATA, TGT 12's EL 29.072)
 # --dass-iloads applies the MM column, in the capture resumed from, to the
 # csects of the groups named; only words still holding LM are written.
-DASS_G2 = os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC")
+DASS_G2 = os.environ.get("DASS_G2", os.path.expanduser("~/workspace/PFS/mafgen/DASS_G2.ASC"))   # maintainers only: the shipped snapshots already carry these I-loads
 # the same values made permanent on a volume (yaGPC2/tools/sites/
 # sts134-rndz-iloads.json through tools/mission_reconfig.py, 2026-10-09)
 RNDZ_VOLUME = os.path.expanduser("~/sts134-runs/rendezvous/OI340700-v44boot-sts134-ksc6-rndz2.mmv")
@@ -1415,7 +1415,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         else:
             env.pop("YAGPC_VEHDYN_START_REL", None)
         cmd = [sys.executable, "-u", os.path.join(PANEL, "simulatePASS.py"), "--gpcs", "1",
-               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", "384",
+               "--crts", str(self.a.crts), "--tape", self.a.tape, "--no-wait-user", "--size", str(getattr(self.a, "size", 384)),
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration", os.environ.get("FLY_DURATION", "20000"),   # wall s: a 40-hour coast at 3x needs ~50000
                # the commander's station, for the THC that trims the Ti burn's
@@ -2268,7 +2268,10 @@ wait crt 1 title 2011/ timeout 600
 
     def track(self):
         # -Z AXIS TARGET TRACK [12A] (and LOAD TARGET TRACK [9A]'s CNCL first)
-        script = ("+1     keys RESUME\n"
+        # the page is asked for and waited on: with RESUME alone the items
+        # went to whatever was up (OMS MNVR EXEC, 2021) -- ILLEGAL ENTRY
+        script = ("+1     keys OPS 2 0 1 PRO\n"
+                  "wait crt 1 title 2011/ timeout 180\n"
                   "+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
@@ -2276,7 +2279,8 @@ wait crt 1 title 2011/ timeout 600
                   "+3     dap c3 b\n"
                   "+2     dap c3 auto\n"
                   "+2     dap c3 alt\n"
-                  "+3     keys ITEM 1 9 EXEC\n")
+                  "+3     keys ITEM 1 9 EXEC\n"
+                  "+3     keys MSG_RESET\n")
         self.play(script, "target-track")
         self.script_done("target-track", 120)
         self.wait_sim(5)
@@ -3349,7 +3353,7 @@ def main():
     ap.add_argument("--no-rr-force", dest="rr_force", action="store_false",
                     help="don't play MCC's FORCE of the radar's refused range marks (see rr_converge)")
     ap.add_argument("--ascent-state", default=ASCENT_STATE, help="the ascent capture's vehdyn.json: the propellant and mass the rendezvous starts with")
-    ap.add_argument("--targets", default=os.path.expanduser("~/sts134-runs/rendezvous/sts134-targets.txt"))
+    ap.add_argument("--targets", default=os.path.join(HERE, "sts134-targets.txt"))
     ap.add_argument("--portview", action="store_true", help="start portview's window views")
     ap.add_argument("--views", default=None, metavar="LIST",
                     help="with --portview: portview's views, from front, up, left, right, aft, cl (the scene camera, a plain 768x768 window), "
@@ -3397,6 +3401,7 @@ def main():
     ap.add_argument("--from", dest="from_", choices=PHASES[1:])
     ap.add_argument("--from-fd13", metavar="DIR",
                     help="resume rendezvous from fly_fd13.py's NC4+2 min capture; UPLINK starts next")
+    ap.add_argument("--size", type=int, default=384, help="simulatePASS --size: the MDU window size in pixels (default 384)")
     ap.add_argument("--crts", type=int, default=1)
     ap.add_argument("--coast-min", type=float, default=76.9,
                     help="COAST: minutes after Ti to fly before stopping (default 76.9, to T2)")

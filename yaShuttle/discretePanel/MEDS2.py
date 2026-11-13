@@ -994,6 +994,7 @@ def geom():
 
 COL_PITCH = 19          # screen units per character column (small characters)
 ROW_PITCH = 27          # screen units per character row
+DPS_ROWS = 26           # text rows on a DPS page (0-25); a character below them is not on the glass
 COL_PITCH_L = 24        # ... large characters (SIZE=L)
 ROW_PITCH_L = 32
 
@@ -6265,6 +6266,13 @@ class Screen_DPS(MDUScreen):
                 st['beamY'] += st['minorStep']
 
         def drawGlyph(g):
+            if g not in (0x0d, 0x08, 0x00) and penY() >= DPS_ROWS:
+                # BELOW THE LAST TEXT ROW IS OFF THE GLASS.  PASS parks a marker it does not want shown at Y = -400
+                # (CGZV_FUT_OPT_Y and _CUR_OPT_Y on UNIV PTG, CG2011.dfg's "*" at XC=30 and XC=34); the beam position
+                # is taken modulo the grid, which brings that to row 26.85, just under the 26 rows of the page, and
+                # the star was drawn there (owner, 2026-11-12).  The beam still advances.
+                advance()
+                return
             if g == 0x0d:                          # carriage return
                 carriageReturn()
             elif g == 0x08:                        # backspace: undo one advance

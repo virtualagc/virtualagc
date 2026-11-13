@@ -64,9 +64,9 @@ DEFAULT_RCS_PULSE_TRIM_FPS = 0.08
 # (3.95 ft/s) and 10.6 s (2.37 ft/s), i.e. about 6.7 s per ft/s of vector.
 RCS_EFFECTIVE_MIDPOINT_OFFSET_S = 102.0
 RCS_MIDPOINT_S_PER_FPS = 6.7
-TAPE = os.path.expanduser("~/workspace/pass-run/rtls-fix/full2-kscG16.mmv")
-OPS2 = os.path.expanduser("~/sts134-runs/ascent2/sts134-ops2")
-TARGETS = os.path.expanduser("~/sts134-runs/approach-snaps/sts134-targets.txt")
+TAPE = None            # --tape is required
+OPS2 = ""              # --ops2 DIR (an OPS 2 capture) is needed unless --resume-from or --from-launch
+TARGETS = os.path.join(HERE, "sts134-targets.txt")
 START_UTC = "2011-05-18T06:10:00"
 # Option 2 (ledger #325): NC4 has three controls against a six-component state 2.5 min after its TIG, so it cannot absorb the
 # along-track phasing error the 14 h NC3-to-NC4 coast accumulates (the attitude-hold jets' unmodelled delta-V and the NC3 trim
@@ -778,7 +778,7 @@ class FD13(rndz.Rendezvous):
         source = self.a.resume_from or self.a.ops2
         if not os.path.isdir(source):
             label = "FD13 resume capture" if self.a.resume_from else "OPS2 capture"
-            raise FileNotFoundError(label + " directory not found: " + source)
+            raise FileNotFoundError(label + " directory not found: %r (name one: --ops2 DIR, or --resume-from DIR)" % source)
         label = ("after-" + self.a.resume_after if self.a.resume_after else "checkpoint") if self.a.resume_from else "ops2"
         dst = os.path.join(self.a.logs, "resume-" + label)
         if os.path.exists(dst):
@@ -1513,6 +1513,8 @@ def main():
         ap.error("--resume-from cannot be combined with --from-launch")
     if a.resume_after and TIG_NAMES.index(a.resume_after) >= TIG_NAMES.index(a.to):
         ap.error("--resume-after must precede --to")
+    if not a.tape:
+        ap.error("--tape VOLUME is required (T1.mmv, or T1-no136.mmv)")
     if not os.path.isfile(a.tape):
         ap.error("tape does not exist: " + a.tape)
     if not os.path.isfile(a.targets):

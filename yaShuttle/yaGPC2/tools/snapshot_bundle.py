@@ -190,13 +190,16 @@ def cmd_list(a):
 
 
 def extract_one(archive, name, to, pw):
-    """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path."""
-    r = subprocess.run([sevenz(), "x", "-y", "-bso0", "-bsp0", "-o" + to, archive, name + "/*"],
-                       input=(pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    """Unpack snapshot `name` ("SET/NAME") to to/SET/NAME; returns that path.  Through py7zr (pip install py7zr)."""
+    import py7zr
+    try:
+        with py7zr.SevenZipFile(archive, password=pw) as z:
+            z.extract(path=to, targets=[n for n in z.getnames() if n == name or n.startswith(name + "/")])
+    except (py7zr.exceptions.PasswordRequired, py7zr.exceptions.Bad7zFile):
+        sys.exit("snapshot_bundle: could not extract %s -- wrong password" % name)
     path = os.path.join(to, name)
-    if r.returncode != 0 or not os.path.isfile(os.path.join(path, "vehicle.json")):
-        sys.exit("snapshot_bundle: could not extract %s -- wrong password, or no such snapshot (`list`)\n%s"
-                 % (name, r.stderr.decode(errors="replace")[-300:]))
+    if not os.path.isfile(os.path.join(path, "vehicle.json")):
+        sys.exit("snapshot_bundle: no such snapshot %s (`list`)" % name)
     return path
 
 
