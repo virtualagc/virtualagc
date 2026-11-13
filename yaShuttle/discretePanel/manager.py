@@ -236,9 +236,12 @@ class Manager(object):
         shrink_fonts(root, 3 if MAC else 2)
         bold = tkfont.Font(family="Helvetica", size=7 if MAC else 8, weight="bold")
 
-        self.script = tk.StringVar(value=args.script or self._first_script())
-        self.layout = tk.StringVar(value=args.layout)
-        self.snapshot = tk.StringVar(value=args.snapshot_dir)
+        # No file is a sensible default for any of the three, so unless one was
+        # named on the command line each box holds a placeholder, which is any
+        # text starting with "(" (see chosen()).
+        self.script = tk.StringVar(value=args.script or "(Select a script)")
+        self.layout = tk.StringVar(value=args.layout or "(Select a layout)")
+        self.snapshot = tk.StringVar(value=args.snapshot_dir or "(Select a snapshot directory)")
         # ONE LINE.  There were two, and the upper one only ever restated what
         # the poll below already says -- a status line above the status line.
         # What is running is the standing status; a message from a button
@@ -488,9 +491,12 @@ class Manager(object):
         b.bind("<ButtonRelease-1>", release)
         return b
 
-    def _first_script(self):
-        here = sorted(glob.glob(os.path.join(HERE, "examples", "*.script")))
-        return here[0] if here else ""
+    @staticmethod
+    def chosen(var):
+        """The path in a box, or "" if it holds a placeholder: text beginning
+        with a parenthesis, as "(Select a script)" does."""
+        text = var.get().strip()
+        return "" if text.startswith("(") else text
 
     # How long a message from a button keeps the status line before what is
     # running takes it back.  Long enough to read, short enough that the line
@@ -514,8 +520,10 @@ class Manager(object):
 
     # -- what the buttons do ------------------------------------------------
     def browse_script(self):
+        current = self.chosen(self.script)
+        start = os.path.dirname(current) if current else os.path.join(HERE, "examples")
         got = native_dialog("open", "Crew script",
-                            os.path.join(HERE, "examples"),
+                            start if os.path.isdir(start) else os.path.join(HERE, "examples"),
                             "Crew scripts (*.script)")
         if got is None:
             self.say("Cannot open a file chooser")
@@ -523,7 +531,10 @@ class Manager(object):
             self.script.set(got)
 
     def browse_layout(self):
-        got = native_dialog("choose", "Window layout", HERE, "Layouts (*.layout)")
+        current = self.chosen(self.layout)
+        start = os.path.dirname(current) if current else HERE
+        got = native_dialog("choose", "Window layout", start if os.path.isdir(start) else HERE,
+                            "Layouts (*.layout)")
         if got is None:
             self.say("Cannot open a file chooser")
         elif got:
@@ -547,7 +558,7 @@ class Manager(object):
         of what this box is for, since it holds the snapshot to SAVE as well
         as the one to restore.
         """
-        current = self.snapshot.get().strip()
+        current = self.chosen(self.snapshot)
         # THE PARENT, not the snapshot itself.  Opening inside the last one
         # saved shows its gpc<N> files, which are not what is being chosen;
         # one level up is where the snapshots are.
@@ -561,7 +572,7 @@ class Manager(object):
             self.snapshot.set(got)
 
     def play(self):
-        path = self.script.get().strip()
+        path = self.chosen(self.script)
         if not path:
             self.say("No script chosen")
             return
@@ -681,7 +692,7 @@ class Manager(object):
             confirm="Replace")
 
     def save_layout(self):
-        path = self.layout.get().strip()
+        path = self.chosen(self.layout)
         if not path:
             self.say("No layout file chosen")
             return
@@ -715,7 +726,7 @@ class Manager(object):
     def add_to_layout(self):
         """ADD the windows on screen to the layout file: theirs replaced, the
         file's others kept.  Nothing is lost, so nothing is asked."""
-        path = self.layout.get().strip()
+        path = self.chosen(self.layout)
         if not path:
             self.say("No layout file chosen")
             return
@@ -739,10 +750,13 @@ class Manager(object):
         station when there is one, else the LAYOUT box's."""
         if getattr(self, "station", "all") == "aft" and getattr(self.args, "layout_aft", None):
             return self.args.layout_aft
-        return self.layout.get().strip()
+        return self.chosen(self.layout)
 
     def restore_layout(self, only_roles=None, path=None):
-        path = path or self.layout.get().strip()
+        path = path or self.chosen(self.layout)
+        if not path:
+            self.say("No layout file chosen")
+            return
         if not os.path.isfile(path):
             self.say("No such layout file: %s" % path)
             return
@@ -1152,7 +1166,7 @@ class Manager(object):
         threading.Thread(target=self._listen_progress, daemon=True).start()
 
     def _snapshot_dir(self, replacing=False):
-        path = self.snapshot.get().strip()
+        path = self.chosen(self.snapshot)
         if not path:
             self.say("No snapshot directory chosen")
             return None
@@ -1338,7 +1352,7 @@ class Manager(object):
             self.say("A caption box is already running on this port base")
             return
         look = []
-        path = self.layout.get().strip()
+        path = self.chosen(self.layout)
         if os.path.isfile(path):
             try:
                 look = windowLayout.look_in(path)
@@ -1705,8 +1719,8 @@ def main(argv=None):
     ap.add_argument("--port-base", type=int, default=None, metavar="N",
                     help="the simulation's port base (default 6900, or NSTS_BUS_PORT_BASE)")
     ap.add_argument("--script", metavar="FILE", help="crew script to start with in the box")
-    ap.add_argument("--layout", metavar="FILE", default=os.path.join(HERE, "demo.layout"),
-                    help="layout file to save to and restore from (default demo.layout here)")
+    ap.add_argument("--layout", metavar="FILE", default="",
+                    help="layout file to save to and restore from (default: none; the box asks you to select one)")
     ap.add_argument("--layout-aft", metavar="FILE", default=None,
                     help="the aft station's layout, applied when the station changes to aft "
                          "(--layout is then the forward station's)")

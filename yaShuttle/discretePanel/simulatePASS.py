@@ -14,7 +14,7 @@ The switch-and-keyboard steps for a configuration are printed by the same
 command with --instructions added, which starts nothing -- run it in a second
 terminal, where the programs' output will not scroll the steps away.  Once
 everything is up, press Enter in this terminal (or Ctrl-C) to shut it all
-down.  Each program's output goes to a log in --logs; the previous run's are
+down.  With --create-log each program's output goes to a log in --logs; the previous run's are
 kept in a prev-<time> directory there.
 
 The steps are the ones the scripted runs followed, which reached OPS 2 with
@@ -350,8 +350,9 @@ class Splash(object):
 
 
 class Launcher(object):
-    def __init__(self, logs):
+    def __init__(self, logs, keep=True):
         self.logs = logs
+        self.keep = keep                # False: the programs' output is discarded
         self.procs = []
         self.specs = {}
         self.revived = {}
@@ -359,7 +360,7 @@ class Launcher(object):
     def start(self, name, argv, cwd, env=None, pass_fds=(), stdin_text=None):
         """stdin_text, if given, is written to the child's standard input,
         which is then closed; otherwise the child has none."""
-        path = os.path.join(self.logs, name + ".log")
+        path = os.path.join(self.logs, name + ".log") if self.keep else os.devnull
         fh = open(path, "w")
         kw = {}
         if pass_fds:
@@ -382,7 +383,7 @@ class Launcher(object):
                 pass                # it has gone already, and its log says why
         self.procs.append((name, p, fh))
         self.specs[name] = (argv, cwd, env, pass_fds)
-        log("%-9s started (pid %d, log %s)" % (name, p.pid, path))
+        log("%-9s started (pid %d%s)" % (name, p.pid, ", log %s" % path if self.keep else ""))
         return p
 
     def revive(self, prefix="meds", limit=5):
@@ -404,7 +405,7 @@ class Launcher(object):
             self.revived[name] = self.revived.get(name, 0) + 1
             argv, cwd, env, pass_fds = self.specs[name]
             try:
-                fh2 = open(os.path.join(self.logs, name + ".log"), "a")
+                fh2 = open(os.path.join(self.logs, name + ".log") if self.keep else os.devnull, "a")
                 fh2.write("\n=== %s had exited (code %s); started again by simulatePASS (%d of %d) ===\n"
                           % (name, p.returncode, self.revived[name], limit))
                 fh2.flush()
@@ -1837,8 +1838,13 @@ def main():
                          "against a 5 ms SIMULATED receive time-out")
     ap.add_argument("--yagpc", metavar="PATH",
                     help="the yaGPC2 executable (default ../yaGPC2/yaGPC2)")
-    ap.add_argument("--logs", metavar="DIR", default="simulatePASS-logs",
-                    help="where the logs go (default ./simulatePASS-logs)")
+    ap.add_argument("--create-log", action="store_true",
+                    help="keep each program's output as a log (default: none is kept; the run's working "
+                         "files go in a temporary directory that is removed at the end).  Logs go in "
+                         "--logs, by default ./simulatePASS-logs.  --logs, or --keys, implies this")
+    ap.add_argument("--logs", metavar="DIR", default=None,
+                    help="where the logs go; giving it keeps them (default ./simulatePASS-logs with "
+                         "--create-log)")
     ap.add_argument("--window-scale", type=int, metavar="N",
                     help="physical pixels per Qt pixel, for window placement (default: "
                          "from the screen's DPI).  On macOS, how much the Tk windows' "
@@ -2033,7 +2039,12 @@ def main():
     except (OSError, ValueError):
         pass
 
-    logs = os.path.abspath(args.logs)
+    keep_logs = bool(args.create_log or args.logs or args.keys)   # --keys WAITs on panel.log
+    if keep_logs:
+        logs = os.path.abspath(args.logs or "simulatePASS-logs")
+    else:
+        logs = tempfile.mkdtemp(prefix="simulatePASS-run-")
+        atexit.register(shutil.rmtree, logs, True)
     os.makedirs(logs, exist_ok=True)
     old = [f for f in os.listdir(logs) if f.endswith(".log")]
     if old:
@@ -2250,7 +2261,7 @@ def main():
     if args.snapshot_resume and not os.path.isdir(args.snapshot_resume):
         raise SystemExit("simulatePASS: --snapshot-resume %s is not a directory"
                          % args.snapshot_resume)
-    L = Launcher(logs)
+    L = Launcher(logs, keep_logs)
     splash = Splash(not args.no_splash)
     LP = layout_positions(args.layout) if args.layout and not args.auto_place else {}
     splash.stage("Starting")
@@ -2589,7 +2600,9 @@ def main():
                             "--portview-star-core", "%g" % (args.portview_star_core or 0),
                             "--portview-star-gain", "%g" % (args.portview_star_gain or 0),
                             "--tape", tape,
-                            "--snapshot-dir", snapshot_dir]
+                            ]
+            if args.snapshot_dir:           # else the manager's box asks for one
+                manager_argv += ["--snapshot-dir", snapshot_dir]
             # And the hand controllers' options, for its HAND CONTROLLERS row.
             if args.joystick is not None:
                 manager_argv += ["--hc-joystick", str(args.joystick)]
@@ -2963,8 +2976,9 @@ def main():
                 continue
             break
         if gpc.poll() is not None:
-            log("yaGPC2 has exited (code %s); see %s" % (gpc.returncode,
-                                                        os.path.join(logs, "yaGPC2.log")))
+            log("yaGPC2 has exited (code %s); %s" % (gpc.returncode,
+                "see " + os.path.join(logs, "yaGPC2.log") if keep_logs
+                else "run again with --create-log to keep its log"))
     except KeyboardInterrupt:
         print()
     finally:
