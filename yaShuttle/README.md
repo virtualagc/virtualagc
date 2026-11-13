@@ -2,16 +2,16 @@
 
 # Table of Contents
 
-* [What's This?](#WhatIs)
-* [Some Background](#Background)
-* [Roadmap](#Roadmap)
-    * [Phase 1](#Phase1)
-    * [Phase 2 and Beyond](#Phase2)
-* [The Modern HAL/S Compiler and Preprocessor: modernHAL-S-FC and yaHAL-S-FC.py](#Compiler)
-* [Conventions and Restrictions](#Changes)
-    * [Column 1 and Comments](#Comments)
+* [What's This?](#what-s-this)
+* [Some Background](#some-background)
+* [Roadmap](#roadmap)
+    * [Phase 1](#phase-1)
+    * [Phase 2 and Beyond](#phase-2-and-beyond)
+* [The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py](#the-modern-hal-s-compiler-and-preprocessor-yahal_s-and-yahal-preprocessor-py)
+* [Conventions and Restrictions](#conventions-and-restrictions)
+    * [Column 1 and Comments](#column-1-and-comments)
 
-# <a name="WhatIs"></a>What's This?
+# What's This?
 
 This folder contains software associated with the Virtual AGC web-pages devoted to [Space Shuttle software](https://www.ibiblio.org/apollo/Shuttle.html) and the associated [Space Shuttle library](https://www.ibiblio.org/apollo/links-shuttle.html).  The concept is handling of Space Shuttle software in a manner analogous to our handling of AGC, AGS, LVDC, and Gemini OBC software.  Specifically:
 
@@ -21,7 +21,7 @@ This folder contains software associated with the Virtual AGC web-pages devoted 
 * Presentation of means of emulating execution of Space Shuttle software and certain of its peripheral devices.
 * Presentation of means of integrating such emulation with existing spaceflight simulators such as [Orbiter+SSU (Space Shuttle Ultra)](https://sourceforge.net/projects/shuttleultra/) or [FlightGear](https://wiki.flightgear.org/Space_Shuttle).
 
-# <a name="Background"></a>Some Background
+# Some Background
 
 (For more information, please consult our [Space Shuttle web page](https://www.ibiblio.org/apollo/Shuttle.html).)
 
@@ -40,18 +40,18 @@ Whereas the original development software included:
 * HAL/S-FC, the HAL/S compiler, written in XPL, but targeting the IBM AP-101S avionics computer used on the Shuttle.
 * ... others ...
 
-# <a name="Roadmap"></a>Roadmap
+# Roadmap
 
 Aside from attempting to acquire Space Shuttle source code, original development-tool source code, and documentation, which is an ongoing process, the intent is to produce "modern" software-development tools, in a phased development, capable of processing and executing the original Space Shuttle flight software.
 
-## <a name="Phase1"></a>Phase 1
+## Phase 1
 
 1. Creation of an intermediate language ("PALMAT"), i.e., neither source code nor code which is executable on an actual Shuttle computer system, suitable for distributing emulation-ready but unmodifiable Shuttle Software, from which source code is not recoverable.  This is seen as an ITAR-compatible method of open distribution, since the distributed PALMAT contains neither targeting capabilities, nor the means to add such capabilities.
 2. Creation of a "modern" compiler for the HAL/S language, generating PALMAT.
 3. Creation of an emulation (yaPASS.py) for certain peripherals (displays, keyboards), and low-speed emulation for PALMAT code.
 4. Creation of a high-speed emulator for PALMAT code, suitable for integration into existing spaceflight simulation systems.
 
-## <a name="Phase2"></a>Phase 2 and Beyond
+## Phase 2 and Beyond
 
 This is an open area, as many additional developments are possible.  Here's a list of some of the possibilities:
 
@@ -62,7 +62,7 @@ This is an open area, as many additional developments are possible.  Here's a li
 
 But I'm sure there are many other things that could be done as well.
 
-# <a name="Compiler"></a>The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py
+# The Modern HAL/S Compiler and Preprocessor: yaHAL_S and yaHAL-preprocessor.py
 
 When there's something definitive, I'll describe it here.  In general, though, the HAL/S compiler is under development.  You can read about the progress and status in the separate file yaHAL-S-Development.md.
 
@@ -80,9 +80,9 @@ Alternatively, the command
 
 invokes the preprocessor/compiler in a way that allows the user to repeatedly input lines of HAL/S code from the keyboard and to compile/execute it immediately on a line-by-line basis, or to analyze it in various ways not available in the batch compilation mode described earlier.
 
-# <a name="Changes"></a>Conventions and Restrictions
+# Conventions and Restrictions
 
-## <a name="Comments"></a>Column 1 and Comments
+## Column 1 and Comments
 
 In true HAL/S, column 1 of each source-code line has a special interpretation, while columns 2 and beyond are completely free-form.
 
