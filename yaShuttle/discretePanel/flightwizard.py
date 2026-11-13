@@ -17,7 +17,8 @@ WHAT IT LOOKS FOR, all relative to this directory (discretePanel/) -- nothing is
     STS134-snapshots.7z                the encrypted snapshot set, shipped here (with snapshot-index.json beside it)
     STS134-snapshots/SET/NAME          OPTIONAL: the same snapshots unpacked (the folder an unpacker makes), here, or
                                        under local/snapshots/ (also as unpacked/SET/NAME); used in preference to the archive
-    portview/cache, textures           the unpacked portview-textures.7z (you unpack it; a portview-textures/ folder is fine)
+    portview/cache, textures           the unpacked portview-essential.7z and, for the full picture, portview-optional.7z (you unpack them; a
+                                       portview-essential/ or portview-optional/ folder is fine)
     *.layout                           window layouts, the same directory the Manager's file chooser opens
 
 THE VOLUME ("tier").  A snapshot runs only on the volumes it was taken with (vehicle.json), and a scenario needs the
@@ -491,18 +492,24 @@ def free_base(start=30000):
     return start
 
 
-def textures_ready():
+def textures_check():
+    """(ready, portview's own one-line verdict): 'ready', 'ready, basic (...)' or 'not started -- why'."""
     r = subprocess.run([sys.executable, os.path.join(HERE, "portview.py"), "--check"], cwd=HERE,
-                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return r.returncode == 0
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    lines = r.stdout.strip().splitlines()
+    return r.returncode == 0, (lines[-1] if lines else "")
 
 
 def ensure_textures(asker):
-    if textures_ready():
+    ok, why = textures_check()
+    if ok:
+        if "basic" in why:                      # the optional archive is not unpacked: the views still work
+            print(why + "\n")
         return True
-    print("portview's textures are not unpacked here.")
-    print("  Download portview-textures.7z (900 MiB) from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your\n"
-          "  usual unpacker into %s (the portview-textures/ folder it makes is fine), then run this again." % HERE)
+    print("portview cannot start here: its essential files (star catalogue, ephemeris, land/water mask) are not unpacked.")
+    print("  Download portview-essential.7z from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your usual\n"
+          "  unpacker into %s (the portview-essential/ folder it makes is fine), then run this again.\n"
+          "  portview-optional.7z (large) adds the Milky Way, the Blue Marble Earth and the sites' imagery." % HERE)
     return False
 
 
