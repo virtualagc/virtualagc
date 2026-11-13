@@ -140,6 +140,13 @@ def scenario_table():
         args=["--from", "SEPCFG", "--targets", TARGETS_UNDOCK], stop=("--to", ["SEP3"], "SEP3"), logsfx="",
         opts=COMMON + ["predictor"], crts_default=4, views_default="front,up,left,right,aft,cctv,rpop",
         note="About 5.5 hours of flight time.")
+    t["return"] = dict(
+        title="Return coast: from the separation burn SEP3, through the days on orbit, to the deorbit preparations (ORBIT)",
+        need="orbit", snap="ST3b-undock-return/sts134r-sep3", capture="sts134r-sep3", driver="fly_return.py",
+        args=["--from", "COAST", "--targets", TARGETS_UNDOCK], stop=("--to", ["READY", "ORBIT"], "ORBIT"), logsfx="",
+        opts=COMMON,
+        note="About 42 hours of flight time (flown at the rate you choose, with the crew's recorded events and the "
+             "ground's state-vector uplinks); it ends with the vehicle ready for 'landing'.")
     t["landing"] = dict(
         title="Deorbit, entry and landing at KSC, from OPS 301 (TIG minus 75 minutes) to the wheels stopped",
         need="landing", snap="ST5-deorbit-prep/sts134r-pre-ops301", capture="sts134r-pre-ops301", driver="fly_return.py",
@@ -154,7 +161,7 @@ def scenario_table():
 
 
 SCENARIOS = scenario_table()
-ORDER = ["prelaunch", "launch", "rtls", "tal", "coast", "rendezvous", "undock", "landing"]
+ORDER = ["prelaunch", "launch", "rtls", "tal", "coast", "rendezvous", "undock", "return", "landing"]
 
 
 # ---------------------------------------------------------------- settings (per scenario)
