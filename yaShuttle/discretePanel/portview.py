@@ -105,23 +105,25 @@ import time
 
 
 def adopt_nested_unpack(here):
-    """Most unpackers put portview-textures.7z's contents in a folder named for the archive, giving
-    portview-textures/portview/cache and portview-textures/textures.  Move them to where portview looks (here/portview/cache,
-    here/textures), keeping anything already there, so the user need not know how to strip that level."""
-    top = os.path.join(here, "portview-textures")
-    if not os.path.isdir(top):
-        return
-    for sub in ("portview/cache", "textures"):
-        src, dst = os.path.join(top, *sub.split("/")), os.path.join(here, *sub.split("/"))
-        if not os.path.isdir(src):
+    """Most unpackers put portview-essential.7z's (and portview-optional.7z's) contents in a folder named for the
+    archive, giving portview-essential/portview/cache and portview-essential/textures.  Move them to where portview
+    looks (here/portview/cache, here/textures), keeping anything already there, so the user need not know how to strip
+    that level.  (portview-textures/ is the name of the single archive these two replaced.)"""
+    for wrapper in ("portview-essential", "portview-optional", "portview-textures"):
+        top = os.path.join(here, wrapper)
+        if not os.path.isdir(top):
             continue
-        for dp, dn, fn in os.walk(src):
-            out = os.path.join(dst, os.path.relpath(dp, src))
-            os.makedirs(out, exist_ok=True)
-            for f in fn:
-                if not os.path.exists(os.path.join(out, f)):
-                    os.replace(os.path.join(dp, f), os.path.join(out, f))
-    shutil.rmtree(top, ignore_errors=True)      # what is left there duplicates files already in place
+        for sub in ("portview/cache", "textures"):
+            src, dst = os.path.join(top, *sub.split("/")), os.path.join(here, *sub.split("/"))
+            if not os.path.isdir(src):
+                continue
+            for dp, dn, fn in os.walk(src):
+                out = os.path.join(dst, os.path.relpath(dp, src))
+                os.makedirs(out, exist_ok=True)
+                for f in fn:
+                    if not os.path.exists(os.path.join(out, f)):
+                        os.replace(os.path.join(dp, f), os.path.join(out, f))
+        shutil.rmtree(top, ignore_errors=True)      # what is left there duplicates files already in place
 
 
 def preflight():
@@ -138,21 +140,43 @@ def preflight():
     dirs = [os.path.join(here, "textures"), os.path.join(here, "portview", "cache")]
     def have(f):
         return any(os.path.exists(os.path.join(d, f)) for d in dirs)
-    files = ("milkyway_8k.npy", "hipparcos.npy", "de440s.bsp", "nightlights.jpg",
-             "watermask.png")
-    absent = [f for f in files if not have(f)]
-    if not any(f.startswith("bluemarble_") for d in dirs if os.path.isdir(d) for f in os.listdir(d)):
-        absent.append("bluemarble_MM.jpg")
+    absent = [f for f in ESSENTIAL if not have(f)]
     if absent:
-        return ("its prepared assets are missing (%s); unpack portview-textures.7z in this directory "
-                "(a portview-textures/ folder made by your unpacker is fine; see textures/LICENSE.md)" % ", ".join(absent))
+        return ("its essential assets are missing (%s); unpack portview-essential.7z in this directory "
+                "(a portview-essential/ folder made by your unpacker is fine; see textures/LICENSE.md)" % ", ".join(absent))
     return None
+
+
+# What portview cannot run without: the star catalogue, the ephemeris and the land/water mask (the flat Earth is
+# drawn from it).  Everything else -- the Milky Way, the night lights, the Blue Marble months and the sites' imagery --
+# improves the picture and is looked for in portview-optional.7z; without it the sky is stars alone and the Earth a
+# flat land and water.
+ESSENTIAL = ("hipparcos.npy", "de440s.bsp", "watermask.png")
+
+
+def optional_missing(here):
+    """What the optional archive would add that is not here, as short phrases (empty when all is)."""
+    dirs = [os.path.join(here, "textures"), os.path.join(here, "portview", "cache")]
+    def have(f):
+        return any(os.path.exists(os.path.join(d, f)) for d in dirs)
+    out = [what for f, what in (("milkyway_8k.npy", "the Milky Way"), ("nightlights.jpg", "the night lights"))
+           if not have(f)]
+    if not any(f.startswith("bluemarble_") for d in dirs if os.path.isdir(d) for f in os.listdir(d)):
+        out.append("the Blue Marble Earth")
+    if not have(os.path.join("sites", "ksc", "ring.json")):
+        out.append("the sites' imagery")
+    return out
 
 
 if __name__ == "__main__":
     _why = preflight()
     if "--check" in sys.argv[1:]:
-        print("portview: ready" if _why is None else "portview: not started -- " + _why)
+        if _why is None:
+            _opt = optional_missing(os.path.dirname(os.path.abspath(__file__)))
+            print("portview: ready" if not _opt else
+                  "portview: ready, basic (without %s; portview-optional.7z adds them)" % ", ".join(_opt))
+        else:
+            print("portview: not started -- " + _why)
         sys.exit(0 if _why is None else 1)
     if _why is not None and not {"-h", "--help"} & set(sys.argv[1:]):     # --help needs no assets
         print("portview: not started -- " + _why)
@@ -1472,6 +1496,20 @@ def make_earth_texture(rgb):
     return tid
 
 
+FLAT_LAND = (92, 104, 70)               # the flat Earth, where there is no Blue Marble: sRGB of a middling land
+FLAT_WATER = (10, 30, 66)               # and of the sea
+
+
+def flat_earth():
+    """The Earth in two colours, from the land and water mask (255 water): 4096 x 2048, the mask's edges
+    softened by its own anti-aliasing and the halving."""
+    m = halve(load_gray(WATERMASK).astype(np.float32))
+    w = (m / 255.0)[..., None]
+    land = np.array(FLAT_LAND, np.float32)
+    sea = np.array(FLAT_WATER, np.float32)
+    return np.clip(land + (sea - land) * w + 0.5, 0, 255).astype(np.uint8)
+
+
 def load_gray(path):
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
@@ -1626,7 +1664,9 @@ class Resources(object):
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
-        self.earthNightTex = upload("night lights", make_earth_texture, load_rgb(NIGHTLIGHTS))
+        self.earthNightTex = upload("night lights", make_earth_texture,
+                                    load_rgb(NIGHTLIGHTS) if os.path.exists(NIGHTLIGHTS)
+                                    else np.zeros((2, 4, 3), np.uint8))
         self.waterTex = upload("water mask", make_mask_texture, load_gray(WATERMASK))
         self.ringTex = []
         if self.site is not None:
@@ -1682,8 +1722,11 @@ class Resources(object):
             return
         have = [m for m in range(1, 13) if os.path.exists(bluemarble_path(m))]
         if not have:
-            sys.exit("portview: no Blue Marble month prepared\n"
-                     "  run: python3 portview/fetch_assets.py")
+            if self.earthDayTex is None:
+                self.earthDayTex = upload("flat Earth", make_earth_texture, flat_earth())
+                print("portview: no Blue Marble (portview-optional.7z has it): the Earth is flat land and water")
+            self.earthMonth = month
+            return
         use = min(have, key=lambda m: min(abs(m - month), 12 - abs(m - month)))
         if use != month:
             print("portview: Blue Marble month %d not prepared; using %d" % (month, use))
@@ -4111,16 +4154,20 @@ def main(argv=None):
                          % "|".join(bodies))
             test = (ra, dec)
 
-    for path in (MILKYWAY, HIPPARCOS, DE440S, NIGHTLIGHTS, WATERMASK):
+    for path in (HIPPARCOS, DE440S, WATERMASK):
         if not os.path.exists(path):
-            sys.exit("portview: missing %s\n  run: python3 portview/fetch_assets.py" % path)
+            sys.exit("portview: missing %s\n  unpack portview-essential.7z in yaShuttle/discretePanel" % path)
     try:
         from PIL import Image
         ephemeris = Ephemeris(DE440S)
     except ImportError as e:
         sys.exit("portview: a module it needs is missing (%s).\n"
                  "  pip install skyfield Pillow" % e.name)
-    milkyway = np.load(MILKYWAY)
+    if os.path.exists(MILKYWAY):
+        milkyway = np.load(MILKYWAY)
+    else:
+        print("portview: no Milky Way (portview-optional.7z has it): the sky is the stars alone")
+        milkyway = np.zeros((8, 16, 3), np.float16)
     stars = np.load(HIPPARCOS)
     # The Moon is a featureless dot at portview's resolution, so no picture of it is shipped: a plain
     # disk (the shader cuts the disk out) matching the old texture's mean brightness as rendered stands in.  A textures/moon.jpg,
@@ -4145,8 +4192,8 @@ def main(argv=None):
                 else:
                     others.append(Site(path, eager=False))
             else:
-                print("portview: no imagery for site %r (python3 portview/fetch_assets.py "
-                      "--sites %s); the Earth near it is Blue Marble only" % (name, name))
+                print("portview: no imagery for site %r (portview-optional.7z has the sites'); "
+                      "the Earth near it is not shown in detail" % name)
 
     QtCore.QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     fmt = QtGui.QSurfaceFormat()
