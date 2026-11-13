@@ -1366,7 +1366,7 @@ def load_rgb(path):
 TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
 THIN = {'gain': 0.2}                  # the brightness a hair-thin triangle keeps (--thin-gain)
-STAR_CORE = {'f': 1.0}                  # the stars' core radius, in pixels (--star-core)
+STAR_CORE = {'f': 1.0, 'gain': 1.0}     # the stars' core radius, in pixels (--star-core), and their brightness (--star-gain)
 MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 # 'full' takes about 1.4 GB of textures: two 16384 x 8192 Earth maps
@@ -2060,7 +2060,7 @@ class PointLayer(object):
         GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
         core = STAR_CORE['f']
         GL.glUniform1f(u["uCore"], core * view.devicePixelRatioF())
-        GL.glUniform1f(u["uFlux"], 4.0 / (core + 1.0) ** 2)      # the same total light as the standard core (1.0)
+        GL.glUniform1f(u["uFlux"], STAR_CORE['gain'] * 4.0 / (core + 1.0) ** 2)   # the same total light as the standard core (1.0), times the gain
         GL.glUniform1f(u["uCut"], self.CUT)
         GL.glUniform1f(u["uGrowExp"], self.GROW_EXP)
         GL.glUniform1f(u["uGrowMax"], self.GROW_MAX)
@@ -4058,6 +4058,10 @@ def main(argv=None):
                     help="the faintest stars' core radius, in pixels (default 1.0).  Smaller is sharper, "
                          "0.5 a good try on a 1920x1080 screen; their light is kept, so they are not dimmer, "
                          "but too small shimmers as the view moves")
+    ap.add_argument("--star-gain", type=float, default=1.0, metavar="G",
+                    help="every star's brightness times G (default 1.0).  A tight --star-core puts a faint star's "
+                         "light on fewer pixels, so more of them show: --star-core 0.1 with --star-gain 0.5 shows "
+                         "about the stars the default core does, but sharp")
     ap.add_argument("--msaa", type=int, default=4, metavar="N",
                     help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
                          "none with reduced textures)")
@@ -4190,6 +4194,7 @@ def main(argv=None):
     RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway=args.lit_runway)
     MSAA['samples'] = args.msaa
     STAR_CORE['f'] = min(2.0, max(0.1, args.star_core))
+    STAR_CORE['gain'] = min(10.0, max(0.0, args.star_gain))
     THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
     others = []
     if args.site != 'none':
