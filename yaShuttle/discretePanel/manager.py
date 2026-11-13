@@ -492,6 +492,20 @@ class Manager(object):
         return b
 
     @staticmethod
+    def _browse_start(var, kind):
+        """Where Browse opens: the folder of the file already chosen, else
+        discretePanel/<kind>/ (scripts, layouts, snapshots), made if absent."""
+        current = Manager.chosen(var)
+        if current and os.path.isdir(os.path.dirname(current)):
+            return os.path.dirname(current)
+        default = os.path.join(HERE, kind)
+        try:
+            os.makedirs(default, exist_ok=True)
+        except OSError:
+            return HERE
+        return default
+
+    @staticmethod
     def chosen(var):
         """The path in a box, or "" if it holds a placeholder: text beginning
         with a parenthesis, as "(Select a script)" does."""
@@ -520,10 +534,8 @@ class Manager(object):
 
     # -- what the buttons do ------------------------------------------------
     def browse_script(self):
-        current = self.chosen(self.script)
-        start = os.path.dirname(current) if current else os.path.join(HERE, "examples")
-        got = native_dialog("open", "Crew script",
-                            start if os.path.isdir(start) else os.path.join(HERE, "examples"),
+        start = self._browse_start(self.script, "scripts")
+        got = native_dialog("open", "Crew script", start,
                             "Crew scripts (*.script)")
         if got is None:
             self.say("Cannot open a file chooser")
@@ -531,9 +543,7 @@ class Manager(object):
             self.script.set(got)
 
     def browse_layout(self):
-        current = self.chosen(self.layout)
-        start = os.path.dirname(current) if current else HERE
-        got = native_dialog("choose", "Window layout", start if os.path.isdir(start) else HERE,
+        got = native_dialog("choose", "Window layout", self._browse_start(self.layout, "layouts"),
                             "Layouts (*.layout)")
         if got is None:
             self.say("Cannot open a file chooser")
@@ -562,9 +572,9 @@ class Manager(object):
         # THE PARENT, not the snapshot itself.  Opening inside the last one
         # saved shows its gpc<N> files, which are not what is being chosen;
         # one level up is where the snapshots are.
-        start = os.path.dirname(current.rstrip("/")) if current else HERE
+        start = os.path.dirname(current.rstrip("/")) if current else ""
         if not os.path.isdir(start):
-            start = HERE
+            start = self._browse_start(self.snapshot, "snapshots")
         got = native_dialog("dir", "Snapshot directory", start)
         if got is None:
             self.say("Cannot open a file chooser")
