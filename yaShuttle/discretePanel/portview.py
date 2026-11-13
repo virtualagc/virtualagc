@@ -1171,6 +1171,7 @@ uniform mat3 uJ2kToCam;
 uniform vec2 uTan;
 uniform float uMagRef;
 uniform float uCore;        // core radius, physical pixels
+uniform float uFlux;        // a star's light kept as its core is tightened (--star-core)
 uniform float uCut;         // relative brightness below which a star is skipped
 uniform float uMaxPx;       // the largest a point may grow to (its glare), physical pixels across
 uniform float uGrowExp, uGrowMax;   // how a point grows with its brightness: L^exp, to at most this many cores across
@@ -1188,7 +1189,7 @@ void main() {
     float sz = max(min(2.0 * uCore * grow + 2.0, uMaxPx), 2.0 * uCore + 2.0);
     float g = (sz - 2.0) / (2.0 * uCore);       // the growth it was allowed: the light stays the same
     gl_PointSize = sz;
-    vCol = aCol * L / (g * g);
+    vCol = aCol * uFlux * L / (g * g);
 }
 """
 
@@ -1365,6 +1366,7 @@ def load_rgb(path):
 TEXTURES = {'mode': 'full'}
 TERRAIN = {'on': True}                  # the ground's heights near a site (--terrain)
 THIN = {'gain': 0.2}                  # the brightness a hair-thin triangle keeps (--thin-gain)
+STAR_CORE = {'f': 1.0}                  # the stars' core radius, in pixels (--star-core)
 MSAA = {'samples': 4}                   # the Earth-and-vehicles pass's samples a pixel (--msaa)
 REDUCED_BELOW_KB = 3 * 1024 * 1024
 # 'full' takes about 1.4 GB of textures: two 16384 x 8192 Earth maps
@@ -1641,7 +1643,7 @@ class Resources(object):
         self.milkyway = None                   # on the GPU now
         self.starProg = compile_program(STARS_VS, STARS_FS)
         self.starU = uniforms(self.starProg, "uJ2kToCam", "uTan", "uMagRef",
-                              "uCore", "uCut", "uMaxPx", "uGrowExp", "uGrowMax")
+                              "uCore", "uFlux", "uCut", "uMaxPx", "uGrowExp", "uGrowMax")
         self.starVbo = GL.glGenBuffers(1)
         self.starCount = len(self.stars)
         self.planetVbo = GL.glGenBuffers(1)
@@ -2056,7 +2058,9 @@ class PointLayer(object):
         GL.glUniformMatrix3fv(u["uJ2kToCam"], 1, GL.GL_TRUE, j2k_to_cam.astype(np.float32))
         GL.glUniform2f(u["uTan"], view.tanX, view.tanY)
         GL.glUniform1f(u["uMagRef"], self.MAG_REF + 2.5 * math.log10(self.exposure.factor))
-        GL.glUniform1f(u["uCore"], 1.0 * view.devicePixelRatioF())
+        core = STAR_CORE['f']
+        GL.glUniform1f(u["uCore"], core * view.devicePixelRatioF())
+        GL.glUniform1f(u["uFlux"], 4.0 / (core + 1.0) ** 2)      # the same total light as the standard core (1.0)
         GL.glUniform1f(u["uCut"], self.CUT)
         GL.glUniform1f(u["uGrowExp"], self.GROW_EXP)
         GL.glUniform1f(u["uGrowMax"], self.GROW_MAX)
@@ -4050,6 +4054,10 @@ def main(argv=None):
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none).  A list, ksc,zza, loads the first now and each other one once the "
                          "eye has left the one before, uploaded over many frames")
+    ap.add_argument("--star-core", type=float, default=1.0, metavar="F",
+                    help="the faintest stars' core radius, in pixels (default 1.0).  Smaller is sharper, "
+                         "0.5 a good try on a 1920x1080 screen; their light is kept, so they are not dimmer, "
+                         "but too small shimmers as the view moves")
     ap.add_argument("--msaa", type=int, default=4, metavar="N",
                     help="samples a pixel for the vehicles' edges (default 4; 0 or 1 for none; "
                          "none with reduced textures)")
@@ -4181,6 +4189,7 @@ def main(argv=None):
     EarthLayer.NIGHT_AMB = args.night_terrain
     RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway=args.lit_runway)
     MSAA['samples'] = args.msaa
+    STAR_CORE['f'] = min(2.0, max(0.1, args.star_core))
     THIN['gain'] = min(1.0, max(0.0, args.thin_gain))
     others = []
     if args.site != 'none':
