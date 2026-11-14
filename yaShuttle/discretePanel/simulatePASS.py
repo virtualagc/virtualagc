@@ -356,6 +356,15 @@ class Launcher(object):
         self.procs = []
         self.specs = {}
         self.revived = {}
+        # REVIVE MUST NOT RUN WHILE A RESUME IS STOPPING EVERYTHING.  It runs
+        # every 5 s on the display watcher's thread, and stop() takes seconds
+        # (yaGPC2 alone is given 10): a MEDS2 that stop() had just ended was
+        # seen as one that had died, started again with its old arguments,
+        # and left out of the new list -- so the restored run had two CRT1s,
+        # the stray one fighting the restored one for IDP1 (owner,
+        # 2026-11-14).  stop() holds this and forgets the stopped programs'
+        # specs, so revive() neither overlaps it nor finds anything after it.
+        self.lock = threading.RLock()
 
     def start(self, name, argv, cwd, env=None, pass_fds=(), stdin_text=None):
         """stdin_text, if given, is written to the child's standard input,
@@ -381,8 +390,9 @@ class Launcher(object):
                 p.stdin.close()
             except OSError:
                 pass                # it has gone already, and its log says why
-        self.procs.append((name, p, fh))
-        self.specs[name] = (argv, cwd, env, pass_fds)
+        with self.lock:
+            self.procs.append((name, p, fh))
+            self.specs[name] = (argv, cwd, env, pass_fds)
         log("%-9s started (pid %d%s)" % (name, p.pid, ", log %s" % path if self.keep else ""))
         return p
 
@@ -396,6 +406,10 @@ class Launcher(object):
         stopped the whole run when it came to restart from one
         (owner, 2026-10-13).  A revived process comes up as a fresh one --
         its IDP powered off, as at the start -- and the log says so."""
+        with self.lock:
+            self._revive(prefix, limit)
+
+    def _revive(self, prefix, limit):
         for entry in list(self.procs):
             name, p, fh = entry
             if not name.startswith(prefix) or p.poll() is None or name not in self.specs:
@@ -412,6 +426,8 @@ class Launcher(object):
                 kw = {"pass_fds": pass_fds} if pass_fds else {}
                 if os.name == "posix":
                     kw["start_new_session"] = True
+                else:                       # as start() does
+                    kw["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
                 q = subprocess.Popen(argv, cwd=cwd, env=env, stdout=fh2, stderr=subprocess.STDOUT,
                                      stdin=subprocess.DEVNULL, **kw)
             except OSError as e:
@@ -431,6 +447,13 @@ class Launcher(object):
         typed in its path boxes and make the click look like a crash.  It is
         also a sibling, not a parent, so nothing else depends on it going.
         """
+        with self.lock:
+            self._stop(keep)
+
+    def _stop(self, keep):
+        for name, p, fh in self.procs:
+            if name not in keep:
+                self.specs.pop(name, None)      # nothing for revive() to restart
         kept = [e for e in self.procs if e[0] in keep]
         self.procs = [e for e in self.procs if e[0] not in keep]
         # yaGPC2 first, with SIGINT: that is the signal it treats as the end of
@@ -657,7 +680,14 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     # THE VEHICLE'S OWN DEVICES.  A capture without these restores computers
     # into a vehicle whose mass memory, intercomputer buses and timing unit
     # start from nothing, which is not the vehicle that was captured.
-    for f in ("icc.json", "mmu1.json", "mmu2.json", "mtu.json"):
+    # BUT ONLY THE DEVICES THIS VEHICLE HAS.  One computer is given one mass
+    # memory and no intercomputer bus (see the --mmu-model choice in main),
+    # so a one-GPC capture never has icc.json or mmu2.json, and demanding
+    # them called every one-GPC snapshot incomplete (owner, 2026-11-14).
+    devices = ["mmu1.json", "mtu.json"]
+    if len(gpcs) > 1:
+        devices += ["icc.json", "mmu2.json"]
+    for f in devices:
         if not os.path.isfile(os.path.join(snapdir, f)):
             missing.append(f)
     for n in range(1, crts + 1):
