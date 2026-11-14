@@ -1,0 +1,55 @@
+# One GPC's IPL, captioned -- ipl-one-gpc.script with the commentary a viewer
+# needs.  Same parameters, same waits, same order:
+#
+#   script ipl-one-gpc-circled.script gpc=2 crt=2 idp=2 kb=KB2
+#
+#   gpc   the GPC column the O6 controls act on, 1-5
+#   crt   the CRT its IPL display goes to, and the one waited on
+#   idp   the IDP given the spring-loaded LOAD toggle
+#   kb    the keyboard ITEM 1 EXEC is typed on: KB1, KB2 or KB3
+#
+# WHY A SEPARATE FILE rather than captions in the original: the original is
+# played by every unattended run in the tree, where a caption is at best
+# wasted work and at worst a window nobody asked for.  A video wants the
+# talking; a measurement does not.  The two stay in step because this file is
+# the other one with subtitle lines interleaved and NOTHING ELSE changed --
+# if you alter one, alter both.
+#
+# The waits are the point and are kept verbatim.  Read ipl-one-gpc.script's
+# own comments for why 'new-screen' has to come before 'title' (three
+# computers share CRT2, and a stale GPCIPL MENU satisfied the title test
+# instantly) and why the timeouts are sized for the slowest host we own.
+# A caption budget must never become a guessed delay: every caption here sits
+# between actions that are themselves gated on a wait.
+
++1   gpc $gpc
++2   source MM1
++2   crt $crt
++2   idpload $idp
++2   ipl
++0 circle activity-mm1 red 1.5
++2   nocircle
++1 mode STANDBY
++0 circle activity-mm1 red 1.5
+# test alone is met by the PREVIOUS computer's menu; see ipl-one-gpc.script.
+wait crt $crt new-screen timeout 120
++0 nocircle
+wait crt $crt title GPCIPL timeout 120
+
++2   keys $kb ITEM 1 EXEC
++0 circle activity-mm1 red 1.5
+
+# loaded: to RUN, and the IPL source back off
+wait gpc $gpc mode-tb RUN timeout 120
++0 nocircle
+
++2   crt 0
+
++0 mode RUN
++0 circle outputtb1 red 1.5
++1   source OFF
++10 nocircle
+
++1   keys GPC/CRT $gpc $crt EXEC
++5   subtitle
+
