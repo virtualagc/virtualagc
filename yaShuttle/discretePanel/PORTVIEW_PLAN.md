@@ -134,8 +134,23 @@ portview needs only the essential files: with nothing else it draws the stars an
 mask; `FLAT_LAND`, `FLAT_WATER`), and `--check` reports `ready, basic (without ...)`.  Each optional item is used when
 present.  An unpacker's wrapper folder (`portview-essential/`, `portview-optional/`) is adopted into place.  `moon.jpg` is
 gone: the Moon is a plain grey disk (a `textures/moon.jpg`, if one is present, is still used); `starfield.jpg` is not used.
-No Git LFS.  Not done: a higher-resolution Earth (Blue Marble NG's full 86400 x 43200 grid, ~464 m/pixel, against the 16384 x
+KSC's imagery (`sites/ksc/`, 119 MB) and `models/` (the ISS, the gantry) are in the essential archive: 215 MB unpacked
+against about 1037 MB for the optional one; `--check` tests `sites/zza` for "the other sites' imagery".  No Git LFS.  Not done: a higher-resolution Earth (Blue Marble NG's full 86400 x 43200 grid, ~464 m/pixel, against the 16384 x
 8192 cut, ~2.4 km/pixel, the largest single GL texture) would need tiled streaming and a third optional archive.
+
+### Star options and memory (2026-11-13)
+
+`--star-core F` (default 1.0) and `--star-gain G` (default 1.0; the environment's `NSTS_STAR_CORE` and `NSTS_STAR_GAIN` give the
+defaults) set the faintest stars' core radius in pixels (`uCore` = F x devicePixelRatio; a star's total light is kept by
+4/(F+1)^2) and a brightness multiplier.  The defaults are made for 4K; `--star-core 0.1 --star-gain 0.7` suits a 1920x1080
+screen (sharp, a few more stars than the default; gain 0.5 matches the default's star count, 2003 against 1942 local maxima
+on the `--test lvlh` sky at `--size 192`).  The defaults are deliberately unchanged; the wizard and `simulatePASS.py`
+(`--portview-star-core`, `--portview-star-gain`) pass the options on.
+
+Graphics memory, measured on a 2 GB NVIDIA with `nvidia-smi` and four views: 4K at 200% scaling and `--size 384`, reduced
+textures, 1517 MiB (the desktop alone 766); 1080p at 100% and `--size 384`, 1121 (383); 1080p and `--size 192`, 878 (356);
+full textures at 1080p and `--size 192`, 1826.  portview's own cost depends on `--size`, not on the desktop scaling; a view's
+buffers are shared, so extra views add about 70 MiB at 384 and about 20 at 192.
 
 ## Dependencies
 

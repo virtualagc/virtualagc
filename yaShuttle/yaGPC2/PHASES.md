@@ -197,12 +197,6 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 |---|---|---|---|---|---|---|
 | Linux | PASS | AB30 (return coast), AB21/AB23 (deorbit, entry, landing on T1), AB29 (landing on T1-no16) | unify / master (fly_return.py) | coast to ORBIT 1.3 ft / 0.10 deg after the uplinks (control ST3c ~2 ft); AB23 189.9 kt / 1.5 ft/s; AB29 (T1-no16) ~192 kt, X +2249 ft, stop +8406 ft | ~/sts134-runs/singletape/AB30-T1-coast-from-ST3b-coast04, AB23, AB29-T1no16-landing-from-ST5; AB21/22 floated only for lack of YAGPC_NAVAIDS (#336); OPS 303 miss in AB18/20 was a restart bug (#337) |  |
 
-## Flight wizard (flightwizard.py) on T1
-
-| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
-|---|---|---|---|---|---|---|
-| Linux | PASS | launch, RTLS, TAL, coast, W6 rendezvous | master | launch ET sep as AB26; RTLS main gear 207 kt / 1.4 ft/s; TAL 191 kt / 3.0 ft/s; W6 HARD MATE TCS 5.4 ft +0.001 ft/s | not yet through the wizard: undock, landing, return coast (W7 running); real encrypted archives with py7zr; Mac, Win11, WSL |  |
-
 ## Peer gate on unify a5dd3cb64 (build, C tests, Python checks, snapshot_bundle round trip, Zaragoza TAL on T1)
 
 | Platform | Verdict | Run | Build | Numbers | Evidence | Note |
@@ -210,6 +204,12 @@ Rule (owner, 2026-11-05): a simulation passes on Linux alone; NOT-REQUIRED on a 
 | Mac | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 189.9 kt / 3.0 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
 | Win11 | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 191.6 kt / 2.9 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
 | WSL | PASS | unify peer gate (relay forClaude/unify/RELAY-TO-peers-unify.md) | a5dd3cb64 | Zaragoza TAL on T1: left main 190.0 kt / 2.9 ft/s | T1 docking not run on any peer (the only dock-start capture was T2-based and the digest guard refuses it); portview --help fixed afterwards (a617b1735, Linux-only check) |  |
+
+## Flight wizard (flightwizard.py) on T1
+
+| Platform | Verdict | Run | Build | Numbers | Evidence | Note |
+|---|---|---|---|---|---|---|
+| Linux | PASS | launch, RTLS, TAL, coast, rendezvous, undock, return coast, landing (W6-W9) | master 13731c69b | launch ET sep as AB26; RTLS main gear 207 kt / 1.4 ft/s; TAL 191 kt / 3.0 ft/s; W6 HARD MATE TCS 5.4 ft +0.001 ft/s; W7 return coast ORBIT 1.09 ft / 0.074 deg (AB30 1.28 / 0.098); W8 undock SEP3 range 2708 ft (AB28 2840), same burn timeline; W9 landing wheels stopped t=4184 s (AB29 4180), chute armed 190 vs 191 KGS | ~/sts134-runs/singletape/W6*, W7.wizard.out, W8-wizard-undock/RUN-NOTE.txt, W9-wizard-landing/RUN-NOTE.txt | not yet through the wizard: the real encrypted archives with py7zr; Mac, Win11, WSL |
 
 ## Landing runs on disk (from the logs)
 

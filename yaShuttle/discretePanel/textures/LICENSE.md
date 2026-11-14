@@ -36,7 +36,7 @@ nobody should have to depend on them.  `portview.py` looks in `textures/` first 
 | `nightlights.jpg` (essential archive) | NASA Earth Observatory, *Black Marble* 2016 (3 km), city lights only. |
 | `watermask.png` (essential archive) | From the GEBCO bathymetry and elevation maps that NASA publishes with *Blue Marble Next Generation*. |
 | `milkyway_8k.npy` | NASA Scientific Visualization Studio 4851, *Deep Star Maps 2020* (`milkyway_2020_8k.exr`); float16 RGB, J2000. |
-| `sites/ksc/` | `ringF.jpg`, `ring0.jpg` and the pad patches `patch_lc39a.jpg`, `patch_lc39b.jpg`: USDA NAIP, KSC's from the flight of 2010-05-02 (**the STS-134 snapshot**: the site and the pads as they were then).  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless (below). |
+| `sites/ksc/` (essential archive) | `ringF.jpg`, `ring0.jpg` and the pad patches `patch_lc39a.jpg`, `patch_lc39b.jpg`: USDA NAIP, KSC's from the flight of 2010-05-02 (**the STS-134 snapshot**: the site and the pads as they were then).  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless (below). |
 | `sites/nor/` | `ringF.jpg`, `ring0.jpg`: USDA NAIP through the USGS National Map.  `ring1.jpg` to `ring3.jpg`: Sentinel-2 cloudless. |
 | `sites/edw/` | `ring0.jpg` to `ring3.jpg`: Sentinel-2 cloudless (Edwards has no NAIP). |
 | `sites/*/ring.json` | The rings' bounds, and each site's centre and height (from the airfield reference points and yaGPC2's navaids). |

@@ -6,6 +6,13 @@ in, with an example of each.  Crew scripts are the files that `simulatePASS.py
 `crewscript.send_control("play FILE", PORT_BASE)` hand to `panelO6.py`, which
 carries them out.
 
+panelO6's control socket (port base + 92) takes `play FILE`, `stop`, `save FILE`,
+`show` (map the windows a scripted run left hidden) and `layout FILE` (windows
+that first appear later, as an OPS changes, are placed from that layout file,
+as with `simulatePASS.py --layout`; `layout` alone clears it).  The manager
+sends `layout` whenever its LAYOUT box names a different existing file, and
+again every 30 s.
+
 Every example below is a complete script line.  `+N` means "N seconds after the
 line before"; `+0` is used throughout so that a line can be copied as it is.
 `python3 crewscript.py FILE` checks a script without running anything, and
@@ -17,7 +24,8 @@ are not controls (`wait`, `keygap`, `script`, `audio`, `snapshot`).
 * **Case does not matter**, either in command words or in positions:
   `mode run`, `MODE RUN` and `Mode Run` are the same.
 * **A control can be scripted while its window is hidden.**  Apart from O6, C2
-  and R11, panelO6 shows a panel's window only while an OPS that reads that
+  R11 and F2 (the forward MASTER ALARM; the aft station's A7 instead, at the aft
+  station), panelO6 shows a panel's window only while an OPS that reads that
   panel is on a display.  A script works on the panel's switch state, not on
   the window, so `switch` and `press` work regardless.
 * **Pushbuttons are pressed and released by themselves.**  Every pushbutton

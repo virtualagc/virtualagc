@@ -547,6 +547,19 @@ moves, IDP 4 has no KYBD_SEL) and screenshots at `--size` 384 / 512 / 768.
 
 ---
 
+### Which panel windows are up (2026-11-13)
+
+`BASE_PANELS`, always up, are O6, C2, R11 and F2 -- F2 for its MASTER ALARM
+pushbutton; the aft station's A7 is added only when the station is aft
+(`BASE_AFT_PANELS`).  A6U, the aft ADI/DAP, is not a base panel (the owner
+saw it appear in OPS 0, where nothing reads it): it comes with the GNC OPS
+that read it, 1, 6, 2, 3 and 8, through `OPS_PANELS`, and so no longer
+appears in OPS 0, OPS 9 or the SM OPS.  A panel that appears for the first
+time is placed from the run's layout, which is `simulatePASS.py --layout` or
+whatever the manager's LAYOUT box last named: the manager sends `layout
+FILE` on the control socket (port base + 92), and `panelO6` keeps the path in
+`layout_path`.
+
 ## Implementation notes that are easy to break
 
 **Reference coordinates.**  Layout lives in a 1684×1300 design space
