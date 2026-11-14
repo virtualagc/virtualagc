@@ -169,6 +169,20 @@ def running(port_base):
 # manager keeping a simulation's windows alive is the wrong place to discover
 # what happens when both try.  simulatePASS.py already asks Qt about the
 # screen the same way, in screen_info().
+#
+# EACH BUTTON OPENS THE CHOOSER ITS ACTION NEEDS -- an Open box to play or
+# restore something that exists, a Save box to name something new -- in place
+# of one Browse per section.  A Browse came before both kinds of action, so
+# it had to be one box that did both, and no platform has one: Windows' open
+# boxes refuse a name that does not exist yet ("Path does not exist"), its
+# save box cannot choose an existing folder, and macOS's save panel objects
+# to the existing file being looked for (owner, 2026-11-14).
+#
+#   open   an existing file
+#   save   a new name, or an existing file to be replaced (the platform asks)
+#   dir    an existing directory: a snapshot to restore
+#
+# `start` may name a file, which the box then opens beside, already selected.
 _QT_DIALOG = r"""
 import sys
 from PyQt6.QtWidgets import QApplication, QFileDialog
@@ -179,22 +193,14 @@ d.setViewMode(QFileDialog.ViewMode.Detail)
 if mode == "dir":
     d.setFileMode(QFileDialog.FileMode.Directory)
     d.setOption(QFileDialog.Option.ShowDirsOnly, True)
-    # Open, not Save: macOS's save panel says "Save As" and objects to the
-    # existing snapshot being looked for (owner, 2026-11-14).  Its open panel
-    # still has New Folder, for naming one to save into.
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
 else:
-    d.setFileMode(QFileDialog.FileMode.AnyFile if mode in ("save", "choose")
+    d.setFileMode(QFileDialog.FileMode.AnyFile if mode == "save"
                   else QFileDialog.FileMode.ExistingFile)
     if pattern:
         d.setNameFilters([pattern, "All files (*)"])
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptSave
-                    if mode in ("save", "choose") else QFileDialog.AcceptMode.AcceptOpen)
-    if mode == "choose":
-        # an existing file or a new name, without "replace it?": the box is
-        # as often used to find a layout to RESTORE (owner, 2026-10-13), and
-        # Save asks for itself before it overwrites
-        d.setOption(QFileDialog.Option.DontConfirmOverwrite, True)
+                    if mode == "save" else QFileDialog.AcceptMode.AcceptOpen)
 if d.exec():
     got = d.selectedFiles()
     if got:
@@ -241,11 +247,18 @@ class Manager(object):
         bold = tkfont.Font(family="Helvetica", size=7 if MAC else 8, weight="bold")
 
         # No file is a sensible default for any of the three, so unless one was
-        # named on the command line each box holds a placeholder, which is any
-        # text starting with "(" (see chosen()).
-        self.script = tk.StringVar(value=args.script or "(Select a script)")
-        self.layout = tk.StringVar(value=args.layout or "(Select a layout)")
-        self.snapshot = tk.StringVar(value=args.snapshot_dir or "(Select a snapshot directory)")
+        # named on the command line each box holds a placeholder.  The boxes
+        # only SHOW the file last used, relative to this directory; the path
+        # itself is kept in _paths (see _set_path and chosen()), and only the
+        # buttons' choosers change it.
+        self._paths = {}
+        self.script = tk.StringVar(value="(No script chosen)")
+        self.layout = tk.StringVar(value="(No layout chosen)")
+        self.snapshot = tk.StringVar(value="(No snapshot chosen)")
+        for var, given in ((self.script, args.script), (self.layout, args.layout),
+                           (self.snapshot, args.snapshot_dir)):
+            if given:
+                self._set_path(var, given)
         # ONE LINE.  There were two, and the upper one only ever restated what
         # the poll below already says -- a status line above the status line.
         # What is running is the standing status; a message from a button
@@ -284,7 +297,6 @@ class Manager(object):
         self.script_heading = self._section("SCRIPT", bold)
         self._path_box(self.script)
         row = self._row()
-        self._button(row, "Browse", self.browse_script)
         self._button(row, "Play", self.play, wide=True)
         self._button(row, "Stop", self.stop)
         # RECORD: what a person does, as a draft script (recordscript.py).
@@ -294,10 +306,9 @@ class Manager(object):
         self._section("LAYOUT", bold)
         self._path_box(self.layout)
         row = self._row()
-        self._button(row, "Browse", self.browse_layout)
         self._button(row, "Save", self.save_layout, wide=True)
         self._button(row, "Add", self.add_to_layout)
-        self._button(row, "Restore", self.restore_layout)
+        self._button(row, "Restore", self.choose_and_restore_layout)
         self._button(row, "All panels", self.toggle_all_panels)
 
         # SNAPSHOT.  Save & Continue is the one that has to be reachable at an
@@ -319,7 +330,6 @@ class Manager(object):
         # minimum button width rather than 7 or 8, are what make the margin,
         # so both are load-bearing.
         row = self._row()
-        self._button(row, "Browse", self.browse_snapshot)
         self._button(row, "Save", self.save_snapshot, wide=True)
         self.quit_button = self._button(row, "Save/Quit", self.save_and_quit)
         self._button(row, "Restore", self.restore_snapshot)
@@ -432,17 +442,21 @@ class Manager(object):
 
     def _row(self):
         # pady MATCHES THE BUTTONS' OWN padx, so two rows of buttons are
-        # separated by as much as two buttons side by side.  Without it
-        # "Browse | Save" and "Save & Quit | Restore" read as one block of
-        # four rather than as two rows.
+        # separated by as much as two buttons side by side.  Without it two
+        # rows of buttons read as one block rather than as two rows.
         row = tk.Frame(self.root, bg=C_BG)
         row.pack(fill="x", padx=pad(10), pady=BUTTON_GAP)
         return row
 
     def _path_box(self, var):
         """A file name box the width of the window, showing the END of the
-        path -- the part that says which file it is."""
+        path -- the part that says which file it is.
+
+        READ-ONLY: it shows the file last used, and the buttons' choosers are
+        what change it.  Typed into, it took a bare name with no directory
+        (owner, 2026-11-14).  It can still be selected and copied."""
         entry = tk.Entry(self.root, textvariable=var, bg="#1b1b1b", fg=C_FG,
+                         readonlybackground="#1b1b1b", state="readonly",
                          insertbackground=C_FG, highlightthickness=1,
                          highlightbackground="#4a4a4a", highlightcolor="#7a9a7a")
         entry.pack(fill="x", padx=pad(10), pady=(0, pad(2)))
@@ -496,26 +510,55 @@ class Manager(object):
         b.bind("<ButtonRelease-1>", release)
         return b
 
-    @staticmethod
-    def _browse_start(var, kind):
-        """Where Browse opens: the folder of the file already chosen, else
-        discretePanel/<kind>/ (scripts, layouts, snapshots), made if absent."""
-        current = Manager.chosen(var)
-        if current and os.path.isdir(os.path.dirname(current)):
-            return os.path.dirname(current)
-        default = os.path.join(HERE, kind)
-        try:
-            os.makedirs(default, exist_ok=True)
-        except OSError:
-            return HERE
-        return default
+    def chosen(self, var):
+        """The file a box stands for, absolute, or "" if none has been chosen."""
+        return self._paths.get(str(var), "")
 
-    @staticmethod
-    def chosen(var):
-        """The path in a box, or "" if it holds a placeholder: text beginning
-        with a parenthesis, as "(Select a script)" does."""
-        text = var.get().strip()
-        return "" if text.startswith("(") else text
+    def _set_path(self, var, path):
+        """Choose a file for a box: kept absolute, SHOWN relative to this
+        directory -- "layouts/myDemo.layout", not the whole of
+        C:\\Users\\...\\discretePanel\\layouts\\myDemo.layout.  A file on
+        another drive has no relative path and is shown whole."""
+        path = os.path.abspath(path)
+        self._paths[str(var)] = path
+        try:
+            shown = os.path.relpath(path, HERE)
+        except ValueError:
+            shown = path
+        var.set(shown)
+
+    def _choose(self, mode, title, var, kind, pattern="", start=None):
+        """Ask for a file with the chooser `mode` needs (see _QT_DIALOG), and
+        make it the box's.  Returns the absolute path, or None if nothing was
+        chosen.
+
+        It opens on the box's current file -- selected, so doing the same
+        thing to the same file again is one click -- or else in
+        discretePanel/<kind>/ (scripts, layouts, snapshots), made if absent.
+        `start` overrides that."""
+        if start is None:
+            start = self.chosen(var)
+            if start and (mode == "dir" or os.path.isdir(start)):
+                # THE PARENT, not the snapshot itself: opening inside one
+                # shows its gpc<N> files, which are not what is being chosen
+                # -- whether restoring one or saving the next (owner,
+                # 2026-11-14).
+                start = os.path.dirname(start.rstrip("/\\"))
+            if not start or not os.path.isdir(os.path.dirname(start) if mode != "dir"
+                                              else start):
+                start = os.path.join(HERE, kind)
+                try:
+                    os.makedirs(start, exist_ok=True)
+                except OSError:
+                    start = HERE
+        got = native_dialog(mode, title, start, pattern)
+        if got is None:
+            self.say("Cannot open a file chooser")
+            return None
+        if not got:
+            return None                         # cancelled: nothing to say
+        self._set_path(var, got)
+        return self.chosen(var)
 
     # How long a message from a button keeps the status line before what is
     # running takes it back.  Long enough to read, short enough that the line
@@ -538,70 +581,11 @@ class Manager(object):
         print("manager: %s" % text, flush=True)
 
     # -- what the buttons do ------------------------------------------------
-    def browse_script(self):
-        start = self._browse_start(self.script, "scripts")
-        got = native_dialog("open", "Crew script", start,
-                            "Crew scripts (*.script)")
-        if got is None:
-            self.say("Cannot open a file chooser")
-        elif got:
-            self.script.set(got)
-
-    def browse_layout(self):
-        """FIND AN EXISTING LAYOUT, OR NAME A NEW ONE.
-
-        A Save box told not to ask "replace it?", so that one box does both;
-        Save asks for itself before it writes over a layout.  EXCEPT ON macOS,
-        whose native save panel ignores that option: it said "Save As" and
-        objected to choosing the very file being looked for (owner,
-        2026-11-14).  There it is an Open box, and a NEW name is typed into the
-        path box instead.  Windows' Open box will not take a name that does not
-        exist yet, so elsewhere it stays a Save box (owner, 2026-11-14)."""
-        got = native_dialog("open" if MAC else "choose", "Window layout",
-                            self._browse_start(self.layout, "layouts"),
-                            "Layouts (*.layout)")
-        if got is None:
-            self.say("Cannot open a file chooser")
-        elif got:
-            self.layout.set(got)
-
-    def browse_snapshot(self):
-        """CHOOSE A SNAPSHOT DIRECTORY -- to restore, or to save into.
-
-        This was a hand-written list for a while, because Tk's chooser cannot
-        show WHEN a snapshot was taken and snapshots have deliberately similar
-        names.  Both halves of that were wrong.  The limitation was the
-        TOOLKIT, not the platform.  And the time was never missing: a snapshot
-        directory's mtime is within a second of the capture time its
-        vehicle.json records, measured across six of them, so a Detail view's
-        Date Modified column is the right time and not merely a time.  What a
-        snapshot HOLDS -- how many computers, what they were doing -- is the
-        business of whoever names it, not of the dialog that lists it.
-
-        What was genuinely wrong was navigation: the list could only descend,
-        and could not name a directory that did not exist yet, which is half
-        of what this box is for, since it holds the snapshot to SAVE as well
-        as the one to restore.
-        """
-        current = self.chosen(self.snapshot)
-        # THE PARENT, not the snapshot itself.  Opening inside the last one
-        # saved shows its gpc<N> files, which are not what is being chosen;
-        # one level up is where the snapshots are.
-        start = os.path.dirname(current.rstrip("/")) if current else ""
-        if not os.path.isdir(start):
-            start = self._browse_start(self.snapshot, "snapshots")
-        got = native_dialog("dir", "Snapshot directory", start)
-        if got is None:
-            self.say("Cannot open a file chooser")
-        elif got:
-            self.snapshot.set(got)
-
     def play(self):
-        path = self.chosen(self.script)
+        path = self._choose("open", "Play a crew script", self.script, "scripts",
+                            "Crew scripts (*.script)")
         if not path:
-            self.say("No script chosen")
             return
-        path = os.path.abspath(path)
         try:
             with open(path) as fh:
                 entries = crewscript.parse(fh.read(), path)
@@ -621,10 +605,11 @@ class Manager(object):
 
     def record(self):
         """START OR STOP RECORDING a draft script of what a person does --
-        panel switches, keyboard keys, MDU edgekeys -- into recordings/ beside
-        this program.  Stopping puts the recording in the SCRIPT box, ready to
-        open in an editor or play.  recordscript.py rewrites the file after
-        every action, so ending it at any moment loses nothing."""
+        panel switches, keyboard keys, MDU edgekeys -- into a file named when
+        recording starts (a Save box, opening in recordings/ beside this
+        program with a dated name filled in).  Stopping puts the recording in
+        the SCRIPT box.  recordscript.py rewrites the file after every action,
+        so ending it at any moment loses nothing."""
         if self._recorder is not None and self._recorder.poll() is None:
             self._recorder.terminate()
             try:
@@ -640,13 +625,26 @@ class Manager(object):
                     n = sum(1 for l in fh if l.startswith("+"))
             except OSError:
                 pass
-            self.script.set(path)
+            self._set_path(self.script, path)
             self.say("Recorded %d step(s) to %s; it is in the SCRIPT box"
                      % (n, os.path.basename(path)))
             return
         where = os.path.join(HERE, "recordings")
-        os.makedirs(where, exist_ok=True)
-        path = os.path.join(where, time.strftime("recorded-%Y%m%d-%H%M%S.script"))
+        try:
+            os.makedirs(where, exist_ok=True)
+        except OSError:
+            where = HERE
+        # Its own Save box, not the SCRIPT box's: the box keeps the script
+        # last played until the recording is finished.
+        got = native_dialog("save", "Record to", os.path.join(
+                                where, time.strftime("recorded-%Y%m%d-%H%M%S.script")),
+                            "Crew scripts (*.script)")
+        if got is None:
+            self.say("Cannot open a file chooser")
+            return
+        if not got:
+            return
+        path = os.path.abspath(got)
         argv = [sys.executable, os.path.join(HERE, "recordscript.py"), path]
         if self.args.port_base is not None:
             argv += ["--port-base", str(self.args.port_base)]
@@ -713,13 +711,16 @@ class Manager(object):
             "the windows on screen now, and cannot be undone."
             % (when, "s" if (self.args.gpcs or "").count(",") else "",
                self.args.gpcs or "?"),
-            "Change the name in the box first if you meant to keep both.",
+            "Cancel and Save again under another name if you meant to keep both.",
             confirm="Replace")
 
     def save_layout(self):
-        path = self.chosen(self.layout)
+        # The Save box asks "replace it?" itself; _layout_overwrite_ok then
+        # asks again only if the file was made for a different vehicle, which
+        # the platform's question cannot know.
+        path = self._choose("save", "Save the window layout", self.layout, "layouts",
+                            "Layouts (*.layout)")
         if not path:
-            self.say("No layout file chosen")
             return
         if os.path.isfile(path) and not self._layout_overwrite_ok(path):
             self.say("Save cancelled; %s is untouched" % os.path.basename(path))
@@ -750,10 +751,11 @@ class Manager(object):
 
     def add_to_layout(self):
         """ADD the windows on screen to the layout file: theirs replaced, the
-        file's others kept.  Nothing is lost, so nothing is asked."""
-        path = self.chosen(self.layout)
+        file's others kept.  Nothing is lost, so nothing is asked.  An
+        existing layout: Save makes a new one."""
+        path = self._choose("open", "Add the windows to a layout", self.layout,
+                            "layouts", "Layouts (*.layout)")
         if not path:
-            self.say("No layout file chosen")
             return
         def work():
             try:
@@ -776,6 +778,14 @@ class Manager(object):
         if getattr(self, "station", "all") == "aft" and getattr(self.args, "layout_aft", None):
             return self.args.layout_aft
         return self.chosen(self.layout)
+
+    def choose_and_restore_layout(self):
+        """The Restore button.  restore_layout itself is also called with the
+        box's layout when the station changes, where nothing should be asked."""
+        path = self._choose("open", "Restore a window layout", self.layout, "layouts",
+                            "Layouts (*.layout)")
+        if path:
+            self.restore_layout(path=path)
 
     def restore_layout(self, only_roles=None, path=None):
         path = path or self.chosen(self.layout)
@@ -1191,9 +1201,13 @@ class Manager(object):
         threading.Thread(target=self._listen_progress, daemon=True).start()
 
     def _snapshot_dir(self, replacing=False):
-        path = self.chosen(self.snapshot)
+        """Ask for the snapshot: a NEW name to save into (a Save box), or an
+        existing one to restore (a folder chooser)."""
+        if replacing:
+            path = self._choose("save", "Save a snapshot as", self.snapshot, "snapshots")
+        else:
+            path = self._choose("dir", "Restore a snapshot", self.snapshot, "snapshots")
         if not path:
-            self.say("No snapshot directory chosen")
             return None
         if replacing:
             # SAVING OVER ONE DESTROYS IT, SILENTLY, and the path box keeps
@@ -1216,8 +1230,8 @@ class Manager(object):
                             path.rstrip("/")),
                         "It was taken at %s, and saving over it cannot be "
                         "undone." % when,
-                        "Change the name in the box first if you meant to keep "
-                        "both.", confirm="Replace"):
+                        "Cancel and Save again under another name if you meant "
+                        "to keep both.", confirm="Replace"):
                     self.say("Save cancelled; %s is untouched"
                              % os.path.basename(path.rstrip("/")))
                     return None
