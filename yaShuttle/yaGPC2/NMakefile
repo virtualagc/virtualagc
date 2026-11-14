@@ -28,8 +28,11 @@
 #     BELOW or the link fails with its symbols unresolved.
 #   - No per-header incremental-rebuild tracking (GNU Make's
 #     -MMD -MP-generated .d files have no simple nmake equivalent without
-#     parsing cl.exe's /showIncludes output) — editing only a .h file
-#     without touching its .c file may require `nmake clean` first.
+#     parsing cl.exe's /showIncludes output).  Instead EVERY object depends
+#     on EVERY header (HEADERS below), so a changed .h rebuilds the lot.
+#     Coarse, but the alternative was worse: an object compiled against an
+#     old header linked beside new ones, and the resulting yaGPC2.exe stalled
+#     in OPS 0's IPL with "wait state (timeout)" (2026-11-14).
 #   - The test\*.sh scripts that `make test` runs first are bash and are
 #     not run here; `nmake test` runs the C unit tests only.  Run the
 #     scripts under WSL/MSYS2/Git Bash if needed.
@@ -158,6 +161,13 @@ LIB_OBJS = \
 	$(BUILD_DIR)\posix_win32.obj
 
 OBJS = $(BUILD_DIR)\main.obj $(LIB_OBJS)
+
+# Every header an object could include (see "Known simplifications" above).
+HEADERS = src\*.h $(WIN32_DIR)\*.h $(WIN32_DIR)\arpa\*.h \
+	$(WIN32_DIR)\netinet\*.h $(WIN32_DIR)\sys\*.h $(INTEGRATION_DIR)\*.h
+
+# No commands: the inference rule below still compiles each one.
+$(OBJS): $(HEADERS)
 
 all: $(BIN) $(LIBFILE)
 
