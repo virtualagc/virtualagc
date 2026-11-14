@@ -259,6 +259,7 @@ class Manager(object):
         # instead of being folded into it.  Layout saves and restores only
         # move windows and do not stop the vehicle, so they are not counted.
         self._rtLost = 0.0
+        self._panel_layout_at = 0.0
         self._rtCount = {"save": 0, "resume": 0}
         self._rtStart = {}
         self.rt = tk.StringVar(value=self._rt_text())
@@ -1689,7 +1690,30 @@ class Manager(object):
         # where it came from, and reads as clutter here.
         return "  \u00b7  ".join(bits) if bits else "Simulation"
 
+    def _tell_panel_layout(self):
+        """THE LAYOUT IN THE BOX IS THE RUN'S LAYOUT.  panelO6 puts a panel
+        window that appears later (an OPS change) where the layout says, but
+        knew a layout only from simulatePASS --layout; so one chosen here, or
+        first saved here, left new windows wherever the desktop put them.
+        Tell it whenever the box names a different existing file."""
+        path = self.chosen(self.layout)
+        path = os.path.abspath(path) if path and os.path.isfile(path) else ""
+        # Sent again every half minute: a datagram sent just as the panel is
+        # starting up has been seen not to arrive, and this one is harmless
+        # to repeat.
+        now = time.monotonic()
+        if path == getattr(self, "_panel_layout", None) and now < self._panel_layout_at + 30:
+            return
+        if not path and not hasattr(self, "_panel_layout"):
+            return
+        try:
+            crewscript.send_control("layout " + path, self.args.port_base)
+            self._panel_layout, self._panel_layout_at = path, now
+        except OSError:
+            pass
+
     def _poll(self):
+        self._tell_panel_layout()
         q = getattr(self, "_stationQ", None)
         while q is not None and not q.empty():
             item = q.get_nowait()

@@ -5939,7 +5939,7 @@ def _listen_control(panel):
     except OSError as e:
         log("cannot listen for script commands: %s" % e)
         return
-    log("script commands on %s:%d ('play FILE', 'stop', 'save FILE', 'show')"
+    log("script commands on %s:%d ('play FILE', 'stop', 'save FILE', 'layout FILE', 'show')"
         % (D.GROUP, D.PORT_BASE + crewscript.CONTROL_OFFSET))
     while True:
         try:
@@ -5952,6 +5952,11 @@ def _listen_control(panel):
         if word == "stop":
             log("script command: stop")
             panel.root.after(0, lambda: _stop_script(panel))
+        elif word == "layout":
+            # The manager's LAYOUT box: windows that appear from now on (an
+            # OPS change) are placed from this file, as with --layout.
+            log("script command: layout %s" % (rest or "(none)"))
+            panel.layout_path = os.path.abspath(rest) if rest else None
         elif word == "show":
             # A SCRIPTED RUN NEVER MAPS THIS WINDOW: nobody is looking, and a
             # window that is never mapped cannot steal the keyboard.  But a
