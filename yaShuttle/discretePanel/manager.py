@@ -184,12 +184,17 @@ if mode == "dir":
     # still has New Folder, for naming one to save into.
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
 else:
-    d.setFileMode(QFileDialog.FileMode.AnyFile if mode == "save"
+    d.setFileMode(QFileDialog.FileMode.AnyFile if mode in ("save", "choose")
                   else QFileDialog.FileMode.ExistingFile)
     if pattern:
         d.setNameFilters([pattern, "All files (*)"])
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptSave
-                    if mode == "save" else QFileDialog.AcceptMode.AcceptOpen)
+                    if mode in ("save", "choose") else QFileDialog.AcceptMode.AcceptOpen)
+    if mode == "choose":
+        # an existing file or a new name, without "replace it?": the box is
+        # as often used to find a layout to RESTORE (owner, 2026-10-13), and
+        # Save asks for itself before it overwrites
+        d.setOption(QFileDialog.Option.DontConfirmOverwrite, True)
 if d.exec():
     got = d.selectedFiles()
     if got:
@@ -543,14 +548,17 @@ class Manager(object):
             self.script.set(got)
 
     def browse_layout(self):
-        """FIND AN EXISTING LAYOUT -- an Open box, not a Save box.
+        """FIND AN EXISTING LAYOUT, OR NAME A NEW ONE.
 
-        It was a Save box told not to ask "replace it?", so that one box could
-        both find a layout and name a new one.  macOS's native save panel
-        ignores that option: it said "Save As" and objected to choosing the
-        very file being looked for (owner, 2026-11-14).  A NEW name is typed
-        into the path box instead, and Save asks before it writes over one."""
-        got = native_dialog("open", "Window layout", self._browse_start(self.layout, "layouts"),
+        A Save box told not to ask "replace it?", so that one box does both;
+        Save asks for itself before it writes over a layout.  EXCEPT ON macOS,
+        whose native save panel ignores that option: it said "Save As" and
+        objected to choosing the very file being looked for (owner,
+        2026-11-14).  There it is an Open box, and a NEW name is typed into the
+        path box instead.  Windows' Open box will not take a name that does not
+        exist yet, so elsewhere it stays a Save box (owner, 2026-11-14)."""
+        got = native_dialog("open" if MAC else "choose", "Window layout",
+                            self._browse_start(self.layout, "layouts"),
                             "Layouts (*.layout)")
         if got is None:
             self.say("Cannot open a file chooser")
