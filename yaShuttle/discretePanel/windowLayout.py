@@ -513,14 +513,33 @@ def claim(root, delay_ms=300):
     Linux desktop the windows were drawn for.  Here because this is called
     straight after Tk() in every program, before any font exists to have
     been sized the old way.  Nothing else is needed on Windows: a window
-    there already says whose it is."""
+    there already says whose it is.
+
+    AND KEPT THERE.  Tk on Windows recomputes its scaling from the screen on
+    every WM_DISPLAYCHANGE -- a KVM switch, monitors waking, a resolution
+    change -- which puts it back to Windows' 1.33.  Fonts that already exist
+    keep their size, but every one made afterwards is half of it: End
+    Simulation's question in the Manager came up in tiny print (owner,
+    2026-11-14).  So it is checked once a second and put back."""
     if WIN:
         scaling = os.environ.get("NSTS_TK_SCALING")
         if scaling:
             try:
                 root.tk.call("tk", "scaling", float(scaling))
+                # what Tk actually holds, rounded through the screen's size
+                # in millimetres, is what a later reading is compared with
+                want = float(root.tk.call("tk", "scaling"))
             except Exception:
-                pass
+                return
+
+            def keep():
+                try:
+                    if abs(float(root.tk.call("tk", "scaling")) - want) > 0.001:
+                        root.tk.call("tk", "scaling", float(scaling))
+                    root.after(1000, keep)
+                except Exception:
+                    pass                        # the window is gone
+            root.after(1000, keep)
         return
     cursor = os.environ.get("NSTS_TK_CURSOR")
     if cursor:
