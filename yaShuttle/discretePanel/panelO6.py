@@ -845,9 +845,11 @@ PANEL_WINDOWS = (
 # -- are always up.  Panels not yet built are listed so that adding one is
 # only adding its window.  O3 (RCS/OMS PRESS and PRPLT QTY, MISSION TIME) is up
 # in every OPS but 9 (owner, 2026-10-11).
-# A7 is the aft MASTER ALARM, which the aft station always has.  A6U, the aft ADI/DAP, is NOT here: nothing reads
-# it before a GNC OPS (owner, 2026-11-13), and OPS_PANELS lists it for each of those.
-BASE_PANELS = ("O6", "C2", "R11", "A7")
+# F2 is the always-up MASTER ALARM (its CDR pushbutton; the forward station's), and the aft station has A7 instead:
+# only the aft station adds BASE_AFT_PANELS.  A6U, the aft ADI/DAP, is NOT here: nothing reads it before a GNC OPS
+# (owner, 2026-11-13), and OPS_PANELS lists it for each of those.
+BASE_PANELS = ("O6", "C2", "R11", "F2")
+BASE_AFT_PANELS = ("A7",)
 OPS_PANELS = {
     ("GNC", 1): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
     ("GNC", 6): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
@@ -2845,6 +2847,8 @@ class PanelO6:
                 ops = sorted(set(ops) | set(keep))
                 held = " (transition: keeping %s)" % ", ".join("%s OPS %d" % k for k in keep)
         want = set(BASE_PANELS)
+        if self.station == "aft":
+            want.update(BASE_AFT_PANELS)
         for k in ops:
             want.update(OPS_PANELS.get(k, ()))
         if self.panel_mode == "all":
@@ -6197,7 +6201,7 @@ def main(argv=None):
     if args.all_panels:
         panel.panel_mode = "all"
     for name, win in panel.wins.items():
-        first = show and (args.all_panels or name in BASE_PANELS)
+        first = show and (args.all_panels or name in BASE_PANELS + BASE_AFT_PANELS)
         _dont_steal_focus(win.top, mapWindow=first)
         win.shown = first
     # The screen announcements and the script commands are wanted whether or
