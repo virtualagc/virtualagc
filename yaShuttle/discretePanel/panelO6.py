@@ -845,7 +845,9 @@ PANEL_WINDOWS = (
 # -- are always up.  Panels not yet built are listed so that adding one is
 # only adding its window.  O3 (RCS/OMS PRESS and PRPLT QTY, MISSION TIME) is up
 # in every OPS but 9 (owner, 2026-10-11).
-BASE_PANELS = ("O6", "C2", "R11", "A7", "A6U")    # A7 the aft MASTER ALARM, A6U the aft ADI/DAP: the aft station always has them
+# A7 is the aft MASTER ALARM, which the aft station always has.  A6U, the aft ADI/DAP, is NOT here: nothing reads
+# it before a GNC OPS (owner, 2026-11-13), and OPS_PANELS lists it for each of those.
+BASE_PANELS = ("O6", "C2", "R11", "A7")
 OPS_PANELS = {
     ("GNC", 1): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
     ("GNC", 6): ("C3", "O3", "A6U", "F2", "F3", "F4", "F6", "F7", "F8", "O7", "L2", "R2"),
