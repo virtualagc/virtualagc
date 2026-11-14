@@ -75,6 +75,7 @@ typedef struct {
     double lastPeerWall;    /* last datagram from the peer; 0 = never */
     bool cmdPending;        /* a command has gone out since the last hold budget */
     double heldSinceCmd;    /* wall seconds already spent holding for it */
+    bool resumeGrace;       /* one hold allowed before the peer is heard */
 } BceNetBusState;
 
 static double wall_now(void);
@@ -391,6 +392,7 @@ void bcenet_framer_flush_tick(BceNetFramer *f) {
 #define PEER_LIVE_SECONDS 3.0
 #define PEER_HOLD_SECONDS 0.200
 #define PEER_HOLD_PARTIAL_SECONDS 0.005
+#define PEER_RESUME_GRACE_SECONDS 0.050   /* bcenet_framer_trust_peers_once */
 #define PEER_HOLD_TICK_NS 50000L   /* 50 us between looks at the socket */
 
 static double peer_hold_seconds(void) {
@@ -415,7 +417,11 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
     double hold = peer_hold_seconds();
     if (hold <= 0.0 || !b->cmdPending) return false;
     double t0 = wall_now();
-    if (b->lastPeerWall <= 0.0 || t0 - b->lastPeerWall > PEER_LIVE_SECONDS) return false;
+    bool live = b->lastPeerWall > 0.0 && t0 - b->lastPeerWall <= PEER_LIVE_SECONDS;
+    if (!live && !b->resumeGrace) return false;
+    /* A bus trusted only on a resume's say-so may have nobody on it, so its
+     * one hold is short: a slow first reply is a few ms, not hundreds. */
+    if (!live && hold > PEER_RESUME_GRACE_SECONDS) hold = PEER_RESUME_GRACE_SECONDS;
     double budget = (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold) - b->heldSinceCmd;
     if (budget <= 0.0) {
         b->cmdPending = false;   /* spent: time out normally from here */
@@ -438,10 +444,35 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
         nanosleep(&ts, NULL);
     }
     b->heldSinceCmd += t - t0;
+    b->resumeGrace = false;     /* answered, or the budget is spent: used */
     if (!got && b->heldSinceCmd >= (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold))
         b->cmdPending = false;
     if (heldMs) *heldMs = (t - t0) * 1000.0;
     return got;
+}
+
+/* THE FIRST POLL AFTER A RESUME WAS NOT HELD FOR.  The hold above requires a
+ * peer heard from within PEER_LIVE_SECONDS, and a display unit speaks only
+ * when spoken to -- so a freshly started process has heard nothing on any
+ * bus, and the first command to it times out at full speed.  In a fresh run
+ * that first command is GPCIPL's, which retries; in a resumed one it is
+ * PASS's own poll of a display it already believes is up, and one late
+ * reply is an I/O error.  Measured (owner, 2026-11-14): MEDS2 answered the
+ * first CRT1 poll after a restore about 3.9 ms after the poll began, against
+ * a 5.0 ms window and no hold; half the restores timed out, and PASS put up
+ * a flashing "I/O ERROR CRT1" that stayed until MSG RESET.  Every later poll
+ * was held for (2.4-4.6 ms) and none timed out.
+ *
+ * So a resumed machine trusts every bus once: the first owed reply on each
+ * is held for whether or not its peer has been heard yet.  A bus with nobody
+ * on it costs one short hold (PEER_RESUME_GRACE_SECONDS) the first time it is
+ * commanded, and is then treated exactly as before.  With the fix, six
+ * restores in six held the first CRT1 poll for 2.9-6.1 ms and none timed out;
+ * the absent CRT2 and CRT3 buses each cost one hold. */
+void bcenet_framer_trust_peers_once(BceNetFramer *f) {
+    if (f == NULL) return;
+    for (int busID = 0; busID <= FRAMER_MAX_BUS_ID; busID++)
+        f->buses[busID].resumeGrace = true;
 }
 
 size_t bcenet_framer_clear_input(BceNetFramer *f) {

@@ -57,4 +57,9 @@ void bcenet_framer_flush_tick(BceNetFramer *f);
  * receives the wall time spent. */
 bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *heldMs);
 
+/* A machine RESUMED from a snapshot: each bus's first owed reply is held for
+ * even though its peer has not been heard from yet.  See the comment at its
+ * definition. */
+void bcenet_framer_trust_peers_once(BceNetFramer *f);
+
 #endif

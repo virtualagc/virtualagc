@@ -965,6 +965,10 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
         if (!veh->built) veh->transport = bcenet_transport_create(r->gpcId);
         r->bceTransport = veh->transport;
         r->bceFramer = bcenet_framer_create(r->bceTransport, r->gpcId);
+        /* A resumed machine's software already believes its peers are up
+         * and polls them at once; see bcenet_framer_trust_peers_once. */
+        if (opts->resumeDir != NULL)
+            bcenet_framer_trust_peers_once(r->bceFramer);
         base = bcenet_framer_service;
         baseCtx = r->bceFramer;
     }
