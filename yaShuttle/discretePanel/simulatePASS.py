@@ -574,6 +574,43 @@ def session_listener(port_base, stop_event):
             pass
 
 
+def in_foreground():
+    """Whether this process may touch its terminal without being STOPPED.
+
+    A BACKGROUND JOB (`simulatePASS.py ... &`, or Ctrl-Z then `bg`) that
+    reads its terminal is sent SIGTTIN, and one that sets its modes is sent
+    SIGTTOU; either stops the whole process, the session listener thread
+    included.  So End Simulation in the Manager went through all of its
+    motions, the 'quit' sat unread in the socket, and the run ended only
+    when the job was brought back with `fg` (owner, 2026-11-14)."""
+    try:
+        return os.tcgetpgrp(sys.stdin.fileno()) == os.getpgrp()
+    except (OSError, AttributeError, ValueError):
+        return False
+
+
+def tty_wait_for_enter():
+    """POSIX with a terminal: return when Enter is pressed there, or when the
+    session listener has left a request in SESSION.  Raises EOFError on
+    Ctrl-D, as input() does.
+
+    In place of input(), which a background job cannot call without being
+    stopped (in_foreground).  The terminal is read only while this is the
+    foreground job; otherwise this only watches SESSION, and a job moved
+    with `fg` or `bg` is followed within half a second."""
+    import select
+    fd = sys.stdin.fileno()
+    while SESSION["action"] is None:
+        if not in_foreground():
+            time.sleep(0.5)
+        elif select.select([fd], [], [], 0.5)[0]:
+            got = os.read(fd, 4096)
+            if not got:
+                raise EOFError
+            if b"\n" in got or b"\r" in got:
+                return
+
+
 def win_wait_for_enter():
     """Windows: return when Enter is pressed at the console, or when the
     session listener has left a request in SESSION.  Raises EOFError if
@@ -2784,7 +2821,7 @@ def main():
             # long enough for an Orbiter 100 ft from the ISS to drift.  Here
             # the computer has not started, so nothing moves at all.
             tty = sys.stdin is not None and sys.stdin.isatty() and os.name != "nt"
-            if tty:
+            if tty and in_foreground():
                 # A TERMINAL WITHOUT CR->NL TRANSLATION (something left it
                 # in raw mode, or `stty -icrnl`): Enter echoes "^M" and the
                 # line never completes, so the hold could not be ended from
@@ -2812,7 +2849,9 @@ def main():
             # a 'save' has no vehicle to save yet.
             while not SESSION["go"]:
                 try:
-                    if tty:
+                    if tty and not in_foreground():
+                        time.sleep(0.5)          # a background job: see in_foreground
+                    elif tty:
                         import select as _select
                         if _select.select([sys.stdin], [], [], 0.5)[0]:
                             # os.read, not readline: a terminal left without
@@ -2898,11 +2937,15 @@ def main():
                         if os.name == "nt":
                             win_wait_for_enter()
                         else:
-                            SESSION["in_input"] = True
-                            try:
-                                input()
-                            finally:
-                                SESSION["in_input"] = False
+                            if sys.stdin is not None and sys.stdin.isatty():
+                                # not input(): see in_foreground
+                                tty_wait_for_enter()
+                            else:
+                                SESSION["in_input"] = True
+                                try:
+                                    input()
+                                finally:
+                                    SESSION["in_input"] = False
                     except EOFError:
                         while gpc.poll() is None and SESSION["action"] is None:
                             time.sleep(0.5)

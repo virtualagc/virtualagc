@@ -179,18 +179,17 @@ d.setViewMode(QFileDialog.ViewMode.Detail)
 if mode == "dir":
     d.setFileMode(QFileDialog.FileMode.Directory)
     d.setOption(QFileDialog.Option.ShowDirsOnly, True)
-    d.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+    # Open, not Save: macOS's save panel says "Save As" and objects to the
+    # existing snapshot being looked for (owner, 2026-11-14).  Its open panel
+    # still has New Folder, for naming one to save into.
+    d.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
 else:
-    d.setFileMode(QFileDialog.FileMode.AnyFile)
+    d.setFileMode(QFileDialog.FileMode.AnyFile if mode == "save"
+                  else QFileDialog.FileMode.ExistingFile)
     if pattern:
         d.setNameFilters([pattern, "All files (*)"])
     d.setAcceptMode(QFileDialog.AcceptMode.AcceptSave
-                    if mode in ("save", "choose") else QFileDialog.AcceptMode.AcceptOpen)
-    if mode == "choose":
-        # an existing file or a new name, without "replace it?": the box is
-        # as often used to find a layout to RESTORE (owner, 2026-10-13), and
-        # Save asks for itself before it overwrites
-        d.setOption(QFileDialog.Option.DontConfirmOverwrite, True)
+                    if mode == "save" else QFileDialog.AcceptMode.AcceptOpen)
 if d.exec():
     got = d.selectedFiles()
     if got:
@@ -544,7 +543,14 @@ class Manager(object):
             self.script.set(got)
 
     def browse_layout(self):
-        got = native_dialog("choose", "Window layout", self._browse_start(self.layout, "layouts"),
+        """FIND AN EXISTING LAYOUT -- an Open box, not a Save box.
+
+        It was a Save box told not to ask "replace it?", so that one box could
+        both find a layout and name a new one.  macOS's native save panel
+        ignores that option: it said "Save As" and objected to choosing the
+        very file being looked for (owner, 2026-11-14).  A NEW name is typed
+        into the path box instead, and Save asks before it writes over one."""
+        got = native_dialog("open", "Window layout", self._browse_start(self.layout, "layouts"),
                             "Layouts (*.layout)")
         if got is None:
             self.say("Cannot open a file chooser")
