@@ -611,9 +611,11 @@ def role_of(pid, title):
 #
 # THE PERMISSION.  Moving another program's windows needs Accessibility access
 # for whatever runs this -- System Settings > Privacy & Security >
-# Accessibility, for Terminal -- and macOS asks once for leave to script
-# System Events.  Without them every call below fails, and a layout places
-# nothing and says so, which is what happened before this existed.
+# Accessibility (named "Device Control and Data Access" from macOS 27), for
+# Terminal -- and macOS asks once for leave to script System Events.  Without
+# them every call below fails, and a layout places nothing and says so, which
+# is what happened before this existed.  After an OS update the grant can go
+# stale while still reading as granted: switch Terminal off and on again.
 
 MAC = sys.platform == "darwin"
 
