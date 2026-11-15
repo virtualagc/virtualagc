@@ -568,6 +568,7 @@ class VirtualControls:
         self.drag = None                     # gimbal: "pr" or "yaw" while held
         self.buttons = set()                 # gimbal: mouse buttons held (1, 3)
         self.fingers = {}                    # split: finger id -> ("knob"|"ring", data)
+        self.thc_down = {}                   # pointer ("mouse" or finger id) -> THC contact it holds closed
         # The REAL keyboard focus, not an assumption: a window that never had
         # it gets no WINDOWFOCUSLOST, so "focused until told otherwise" showed
         # no red border at start-up from a terminal that kept the keyboard
@@ -658,6 +659,7 @@ class VirtualControls:
         elif e.type == pg.FINGERMOTION:
             self._finger_move(e)
         elif e.type == pg.FINGERUP:
+            self.thc_down.pop(e.finger_id, None)
             f = self.fingers.pop(e.finger_id, None)
             if f:
                 self._spring(f[0])
@@ -668,14 +670,19 @@ class VirtualControls:
         # release springs back only its own axes, and the drag carries on
         # with whatever is still held.
         elif e.type == pg.MOUSEBUTTONDOWN and not getattr(e, "touch", False):
-            if self.style == "gimbal":
+            hit = self._thc_hit(*self._px(e.pos)) if e.button == 1 else None
+            if hit:                             # a THC contact, held while the button is
+                self.thc_down["mouse"] = hit
+            elif self.style == "gimbal":
                 if e.button in (1, 3):
                     self.buttons.add(e.button)
                     self._gimbal_drag()
             elif e.button == 1:
                 self._finger_down(None, self._px(e.pos))  # split, by mouse
         elif e.type == pg.MOUSEBUTTONUP and not getattr(e, "touch", False):
-            if self.style == "gimbal":
+            if e.button == 1 and self.thc_down.pop("mouse", None):
+                pass                            # that contact is open again
+            elif self.style == "gimbal":
                 if e.button in self.buttons:
                     self.buttons.discard(e.button)
                     self._spring("knob" if e.button == 1 else "ring")
@@ -703,6 +710,22 @@ class VirtualControls:
             self._release_drag()
         self.focused = now
 
+    def _thc_rect(self, i):
+        """THC contact number i's rectangle, in the design's coordinates --
+        drawn there and clicked there."""
+        k = self.k
+        return self.pg.Rect(int(330 * k), int(40 * k) + i * int(34 * k), int(200 * k), int(28 * k))
+
+    def _thc_hit(self, x, y):
+        """The THC contact whose rectangle holds the point, or None (the PLT
+        has no THC)."""
+        if not self.thc_name:
+            return None
+        for i, d in enumerate(THC_ORDER):
+            if self._thc_rect(i).collidepoint(x, y):
+                return d
+        return None
+
     def _gimbal_drag(self):
         """Gimbal: what the held buttons drag -- yaw while the right one is
         down, pitch/roll while only the left is -- grabbing the pointer
@@ -721,6 +744,7 @@ class VirtualControls:
 
     def _release_drag(self):
         """Focus lost: everything back to centre, nothing held."""
+        self.thc_down.clear()
         if self.drag or self.buttons:
             self._spring("knob")
             self._spring("ring")
@@ -744,7 +768,10 @@ class VirtualControls:
         x, y = self._pos(e, pos)
         r = math.hypot(x - self.cx, y - self.cy)
         fid = "mouse" if e is None else e.finger_id
-        if r <= self.R:
+        hit = self._thc_hit(x, y)
+        if hit:                                 # a THC contact, held while touched
+            self.thc_down[fid] = hit
+        elif r <= self.R:
             self.fingers[fid] = ("knob", None)
             self._finger_move(e, pos)
         elif self.ring_in - 6 <= r <= self.ring_out + 6:
@@ -791,10 +818,12 @@ class VirtualControls:
         return dict((a, _clip(v)) for a, v in out.items())
 
     def thc_bits(self):
-        if not self.focused or not self.thc_name:
+        if not self.thc_name:
             return 0
-        keys = self.pg.key.get_pressed()
-        want = set(d for d, codes in self.thc_codes.items() if self._down(keys, codes))
+        want = set(self.thc_down.values())          # held by the mouse or a finger
+        if self.focused:
+            keys = self.pg.key.get_pressed()
+            want |= set(d for d, codes in self.thc_codes.items() if self._down(keys, codes))
         for axis in "XYZ":
             if "+" + axis in want and "-" + axis in want:
                 want -= {"+" + axis, "-" + axis}
@@ -892,14 +921,14 @@ class VirtualControls:
         text(degs + " DEG", int(10 * k), bottom - int(24 * k), right=rx)
         # THC: six contacts, lit when closed, with their keys -- at the CDR's
         # and the aft station; the PLT has none.
-        x0, y0 = int(330 * k), int(40 * k)
+        x0 = int(330 * k)
         if self.thc_name:
             if self.focused or self.scripted:
                 text("THC %s" % self.thc_name.upper(), x0, int(6 * k), self.font)
         for i, d in enumerate(THC_ORDER if self.thc_name else ()):
             name = (self.keys["thc"][d] or ["?"])[0]
             on = bool(bits & THC_BITS[d])
-            r = pg.Rect(x0, y0 + i * int(34 * k), int(200 * k), int(28 * k))
+            r = self._thc_rect(i)
             pg.draw.rect(s, (225, 190, 70) if on else (70, 72, 74), r, border_radius=4)
             col = (20, 20, 20) if on else ink
             text(d, r.x + int(10 * k), r.y + (r.h - self.font.get_height()) // 2, self.font, col)
