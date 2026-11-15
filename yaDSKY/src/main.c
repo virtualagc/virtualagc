@@ -334,9 +334,10 @@ Pulse (gpointer data)
 	    {
 	      // The condition i==-1,errno==0 occurs only on Win32, and 
 	      // I'm not sure exactly what it corresponds to---I assume 
-	      // means "no data" rather than error.
+	      // means "no data" rather than error. Keep the socket and
+	      // try again on a later pulse.
 	      if (errno == EAGAIN || errno == 0)
-	        i = 0;
+	        break;
 	      else
 	        {	
 		  printf ("yaDSKY reports server error %d\n", errno);
@@ -346,7 +347,13 @@ Pulse (gpointer data)
 	        }
 	    }
 	  if (i == 0)
-	    break;
+	    {
+	      // A return value of 0 means other side has closed the connection.
+	      // Drop the socket so that the next pulse tries to reconnect.
+	      close (ServerSocket);
+	      ServerSocket = -1;
+	      break;
+	    }
 	  // This (newer) code will accept any packet signature of the form
 	  // 00 XX XX XX.
 	  if (0 == (0xc0 & c))

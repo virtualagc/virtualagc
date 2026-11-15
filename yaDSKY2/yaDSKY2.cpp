@@ -1737,9 +1737,10 @@ TimerClass::Notify ()
 	      // The conditions i==-1,errno==0 or 9 occur only on Win32,
 	      // and I'm not sure exactly what they corresponds to---but
 	      // empirically I find that ignoring them makes no difference
-	      // to the operation of the program.
+	      // to the operation of the program. Keep the socket and try
+	      // again on a later pulse.
 	      if (errno == EAGAIN || errno == 0 || errno == 9)
-		i = 0;
+		break;
 	      else
 		{
 		  printf ("yaDSKY reports server error %d\n", errno);
@@ -1749,7 +1750,13 @@ TimerClass::Notify ()
 		}
 	    }
 	  if (i == 0)
-	    break;
+	    {
+	      // A return value of 0 means other side has closed the connection.
+	      // Drop the socket so that the next pulse tries to reconnect.
+	      close (ServerSocket);
+	      ServerSocket = -1;
+	      break;
+	    }
 	  // This (newer) code will accept any packet signature of the form
 	  // 00 XX XX XX.
 	  if (0 == (0xc0 & c))
