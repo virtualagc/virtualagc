@@ -678,6 +678,19 @@ command ends it returns to whatever the stick or keys are doing.
   the RHC "downmodes" to INRTL), and THC translation only out of detent; see
   `crew-switches-OPS2.md`.  The aft controllers are transformed by the A6U
   SENSE switch (`sense -z|-x`).
+* **In a one-GPC run the PLT's RHC shows nothing on SPEC 106 MANUAL
+  CONTROLS, and the CDR's and Aft's show only their first transducer row (L 1,
+  A 1).**  This is by design, not a bug: only FF1 is read (the NBAT never has
+  that GPC read FF2-FF4), and the PLT's RH RHC transducers are on FF2-FF4 (AID
+  card 14), as are the second and third transducers of the other two.  The
+  data does reach `yaGPC2` (`YAGPC_CREWTRACE=1` shows FF2/3/4 card 14
+  arriving); it is simply never read.  Do not "fix" it in `yaGPC2`.  The PLT
+  stick needs a run with more than one GPC (how many has not been
+  determined).  Seen 2026-11-15 on a one-GPC OPS 901 run.
+* A physical joystick works whatever window has keyboard focus
+  (`SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS`, set by `handcontrollers.py`); the
+  virtual window's keys and mouse still need focus.  Not yet tried with a
+  real stick (2026-11-15).
 
 ### Keys in the virtual window
 
