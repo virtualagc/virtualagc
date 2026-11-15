@@ -650,6 +650,37 @@ show: `wait crt N title TEXT [timeout S]` holds until TEXT appears in the top
 two lines of CRT N, and `wait crt N new-screen [timeout S]` holds until the
 page changes.  Example: `wait crt 1 title UNIV PTG timeout 60`.
 
+### Entering OPS PL9 (and why there is no OPS SM9)
+
+PASS User's Guide OI32 section 2.4.3 (pdf p. 64): PL9 is entered only from
+OPS 0 after IPL, with the IDP/CRT's MAJ FUNC switch at PL, and must run in a
+single GPC.  `OPS 9 0 1 PRO` alone is refused: the Guide's "GPC CONF" message
+means the target GPC is not in the redundant or common set (or OPS 0).  So set
+up the GPC reconfiguration table for memory configuration 6 (PL9) first:
+
+    +2  majfunc 1 pl
+    +2  keys ITEM 1 + 6 EXEC          memory configuration 6 = PL9 (before items 2-19)
+    +2  keys ITEM 2 + 1 EXEC          GPC 1 is the target
+    +2  keys ITEM 3 + 0 EXEC          items 3-6: the other GPCs out
+    +2  keys ITEM 4 + 0 EXEC
+    +2  keys ITEM 5 + 0 EXEC
+    +2  keys ITEM 6 + 0 EXEC
+    +2  keys ITEM 1 2 + 1 EXEC        CRT 1 and MM 1 commanded by GPC 1
+    +2  keys ITEM 1 8 + 1 EXEC
+    +2  keys OPS 9 0 1 PRO            -> 9011 MASS MEMORY R/W
+    +15 keys SPEC 1 1 1 PRO           -> 9011/111 SL MEMORY DUMP
+
+Verified 2026-11-15 on one-GPC, one-CRT runs from `OI340700-v44boot.mmv` and
+`T1-no136.mmv`; not tried on the OPS0 tier tape.  Items 12 and 18 were a guess
+and were not tried without them.  Without the table setup the CRT stayed on
+GPC MEMORY (CONFIG 0, no GPC assigned) with `OPS 901 PRO` left in the scratch
+pad, and no GPC CONF was seen.
+
+There is no OPS SM9: the Guide's memory configurations are 1 G1, 2 G2, 3 G3,
+4 SM2, 5 SM4, 6 PL9, 7 NA, 8 G8, 9 G9, and its OPS list has GNC9 and PL9 but
+no SM9.  (Its Appendix B change-request index mentions "OPS S9 and G9", but
+every section that entry cites is GNC9, so that reads as a typo or old label.)
+
 ---
 
 ## Hand-controller windows "THC FWD / RHC LH", "RHC RH" and "THC AFT / RHC AFT"
