@@ -1067,6 +1067,12 @@ def main(argv=None):
     # SDL otherwise takes SIGINT and SIGTERM for itself and turns them into a
     # quit event, so neither Ctrl-C nor simulatePASS's shutdown stopped this.
     os.environ.setdefault("SDL_NO_SIGNAL_HANDLERS", "1")
+    # THE STICK IS THE CREW'S HAND, NOT THIS WINDOW'S.  Once a video driver is
+    # up (the virtual controls' window), SDL drops joystick input while that
+    # window lacks keyboard focus, so the physical stick only worked with the
+    # virtual RHC window clicked on (owner, 2026-11-15).  This lets it through
+    # whatever has focus; the keyboard and mouse controls still need theirs.
+    os.environ.setdefault("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1")
     # No sound from here, ever: pygame.init() starts the mixer, which opens the
     # default audio device and streams silence at it for as long as this runs.
     # With a USB sound device that showed in pw-top as an ever-rising error
