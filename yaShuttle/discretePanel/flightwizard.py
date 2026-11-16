@@ -583,6 +583,11 @@ def main():
         if a.list_options:
             for k, (q, kind, d) in OPTIONS.items():
                 print("%-10s %s (default %s)" % (k, q, d))
+            print("\nstop, by scenario (choices; default):")
+            for k in ORDER:
+                st = SCENARIOS[k].get("stop")
+                if st:
+                    print("  %-11s %s; %s" % (k, ", ".join(st[1]), st[2]))
         else:
             for k in ORDER:
                 print("%-11s %s" % (k, SCENARIOS[k]["title"]))
