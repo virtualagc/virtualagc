@@ -51,6 +51,26 @@ from PyQt6.QtGui import QSurfaceFormat, QColor
 # sent (the bus-pump thread) and where they are used (the GUI thread, which
 # draws the flash)?  A line each minute: count, mean, 99th percentile and
 # longest gap, in ms, for each end.  Off unless asked for.
+_FLASH_RATE = [1.0, 0.0]      # the simulation rate (at most 1) and when it was last read
+
+
+def flash_clock():
+    """Seconds on the flash's clock: the wall clock at real time, slowed in step with a simulation run below real time
+    (simulatePASS --rt-factor, read from the run's rate file twice a second).  A video made of a slowed run, with frames
+    dropped to bring it back to speed, needs the flash to slow with the rest, or it flashes at the wrong rate in the
+    video.  It is a function of the wall clock alone, so every CRT (each its own process) still flashes in step; the one
+    jump is when the rate changes.  The flash was the display hardware's own 1 Hz, which is right at real time."""
+    now = time.time()
+    if now - _FLASH_RATE[1] >= 0.5:
+        _FLASH_RATE[1] = now
+        try:
+            from scriptclock import runtime_rate
+            _FLASH_RATE[0] = min(1.0, runtime_rate())
+        except Exception:
+            _FLASH_RATE[0] = 1.0
+    return now * _FLASH_RATE[0]
+
+
 _BEAT_TRACE = bool(os.environ.get("NSTS_MEDS_BEATTRACE"))
 # ON BY DEFAULT (owner, 2026-10-25, after the Mac, WSL and Windows 11 peer pass): NSTS_MEDS_CACHE=0 and
 # NSTS_MEDS_BATCH=0 restore the old paths.  The cache is byte-exact on all three platforms; the batch can differ
@@ -4569,7 +4589,7 @@ class VectorDisplay(object):
                 o.visible = True
             if _BEAT_TRACE:
                 _beat_gaps.setdefault('cache rebuild', []).append((time.perf_counter() - t0) * 1000.0)
-        _now = time.time()
+        _now = flash_clock()
         lit = (_now % 1.0) < 0.625
         if _BEAT_TRACE and c['blinks'] and getattr(self, '_shownLit', None) is not None \
                 and lit != self._shownLit:
@@ -6602,7 +6622,7 @@ class Screen_DPS(MDUScreen):
         5/8 s lit then 3/8 s dark; a late or bunched beat finds the right phase."""
         # The wall clock's second, so every CRT (each its own process) flashes
         # in step as well.
-        on = (time.time() % 1.0) < (self.BLINK_ON_BEATS / 8.0)
+        on = (flash_clock() % 1.0) < (self.BLINK_ON_BEATS / 8.0)
         if _BEAT_TRACE:
             _beat_seen('recv', time.monotonic())
         if on == self._blinkOn:
