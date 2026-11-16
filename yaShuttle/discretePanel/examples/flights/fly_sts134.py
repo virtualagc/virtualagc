@@ -399,7 +399,9 @@ class Flight:
                "--port-base", str(self.base), "--logs", os.path.join(self.a.logs, "logs"),
                "--snapshot-dir", self.a.logs, "--duration",
                str(getattr(self.a, "duration", None) or os.environ.get("FLY_DURATION", "20000")),
-               "--rhc", "lh", "--input", "virtual"]
+               ]
+        if getattr(self.a, "input", None) != "none":     # none: no RHC/THC window at all (IPL and the pad need no hand controller)
+            cmd += ["--rhc", "lh", "--input", "virtual"]
         cmd += ["--snapshot-resume", resume] if resume else ["--date-time-epoch", EPOCH]
         if self.a.rate != 1.0:                   # simulated seconds per wall second
             cmd += ["--rt-factor", "%g" % self.a.rate]
@@ -412,7 +414,7 @@ class Flight:
         if self.a.portview and getattr(self.a, "portview_site", None):
             cmd += ["--portview-site", self.a.portview_site]
         for opt in ("station", "input", "hc_keys"):     # the crew station and its hand controllers, as the other drivers
-            if getattr(self.a, opt, None):
+            if getattr(self.a, opt, None) and getattr(self.a, opt) != "none":
                 cmd += ["--" + opt.replace("_", "-"), getattr(self.a, opt)]
         if self.a.hold_start:                    # windows up, the vehicle held
             cmd += ["--hold-start"]
@@ -492,7 +494,9 @@ class Flight:
             raise SystemExit("fly_sts134: simulatePASS.py has exited%s (%s)" % (why, outp))
 
     def wait_file(self, path, text, timeout, after=0):
-        """text in path, looking only past byte offset after."""
+        """text in path, looking only past byte offset after.  The timeout is for a simulation at real time: a slowed one
+        (--rate below 1) is given proportionally longer."""
+        timeout *= max(1.0, 1.0 / max(float(getattr(self.a, "rate", 1.0) or 1.0), 1e-3))
         end = time.time() + timeout
         while time.time() < end:
             self.check_sim()
@@ -1324,7 +1328,7 @@ def main():
                     help="simulatePASS's --layout: put the windows where this layout file says "
                          "once they are up (the Manager's Save then writes to it)")
     ap.add_argument("--station", choices=("fwd", "aft", "all", "auto"), help="simulatePASS --station (default: its own)")
-    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), help="simulatePASS --input (default: its own)")
+    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual", "none"), help="simulatePASS --input (default: virtual); none starts no hand controller")
     ap.add_argument("--hc-keys", metavar="FILE", help="simulatePASS --hc-keys: keys that stand in for the hand controllers")
     ap.add_argument("--hold-start", action="store_true",
                     help="bring every window up, hold the vehicle until Enter is pressed in "

@@ -5670,6 +5670,10 @@ def _run_script(panel, entries, quit_after_ms=None, source=None):
                 raise SystemExit("panelO6: script: GPC must be 1 to %d, got %r"
                                  % (N_GPC, arg))
             target[0] = n - 1
+            # Selecting a computer to work on implies it is powered: a script need not say so, and a viewer is not left
+            # wondering how an unpowered GPC is running (owner, 2026-11-16).  A later `power off` still takes it down.
+            if panel.power[n - 1] != "ON":
+                panel._set_power(n - 1, "ON")
         elif verb == "mode":
             name = {"STANDBY": "STBY"}.get(arg.upper(), arg.upper())
             if name not in MODE_POS:

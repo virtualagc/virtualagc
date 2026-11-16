@@ -87,7 +87,7 @@ OPTIONS = {
     "starcore": ("star/planet sharpness (e.g., 1.0 for 4K, 0.1 for 1080p)", float, 1.0),
     "stargain": ("star/planet brightness (e.g., 1.0 for 4K, 0.7 for 1080p)", float, 1.0),
     "station":  ("crew station (fwd, aft, both, auto)", str, "both"),
-    "input":    ("hand controllers (joystick, virtual, both, auto)", str, "virtual"),
+    "input":    ("hand controllers (joystick, virtual, both, auto, none)", str, "virtual"),
     "keys":     ("RHC/THC hotkey file (blank for the built-in keys; --hand-controllers makes local/hand-keys.json)", str, ""),
     "hold":     ("wait for Enter before starting (True) or start immediately (False)", bool, True),
     "layout":   ("user-interface layout (blank for none)", str, ""),
@@ -107,14 +107,14 @@ def scenario_table():
         title="IPL: load the flight software from the tape, one GPC to OPS 9 (about 6 minutes; needs no snapshot)",
         need="ipl", snap=None, capture=None, driver="fly_sts134.py",
         args=[], stop=("--to", ["IPL", "UPLINK", "IMU"], "IPL"), logsfx="", opts=COMMON,
-        crts_default=1, portview_default=False,
+        crts_default=1, portview_default=False, input_default="none",
         note="On the pad, nothing flying.  Starts from the bare machine: IPL, the launch-day NBAT, GSE polling.  Stopping after\n"
              "UPLINK or IMU carries on through the day-of-launch uplink or the IMU alignment, as 'prelaunch' does from a snapshot.")
     t["prelaunch"] = dict(
         title="Pre-launch: the day-of-launch uplink and IMU alignment (about 50 minutes, on the pad)",
         need="orbit", snap="IPL-eq-T1-no136/sts134-ipl", capture="sts134-ipl", driver="fly_sts134.py",
         args=["--from", "UPLINK"], stop=("--to", ["IMU"], "IMU"), logsfx="", opts=COMMON,
-        crts_default=1, portview_default=False,
+        crts_default=1, portview_default=False, input_default="none",
         note="Ends with the vehicle gyrocompassed on the pad.  A vehicle left there can launch by 'launch' once its snapshot is taken.")
     t["launch"] = dict(
         title="Launch and ascent, from OPS 101 (the countdown from T-19 minutes) to orbit",
@@ -185,8 +185,10 @@ def save_settings(s):
 
 
 def visible(sc, mine):
-    """The settings worth showing: not the portview ones when there are no views, not a stop with only one choice."""
-    keep = [k for k in sc["opts"] if mine.get("portview") or k not in ("views", "starcore", "stargain")]
+    """The settings worth showing: not the portview ones when there are no views, not the hotkeys with no hand controller,
+    not a stop with only one choice."""
+    keep = [k for k in sc["opts"] if (mine.get("portview") or k not in ("views", "starcore", "stargain"))
+            and (mine.get("input") != "none" or k != "keys")]
     if sc["stop"] and len(sc["stop"][1]) > 1:
         keep.append("stop")
     return keep
@@ -457,7 +459,7 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         else:
             argv += ["--no-portview"]
         for k in ("station", "input"):
-            if o.get(k):
+            if o.get(k) and o[k] != "none":
                 argv += ["--" + k, "all" if o[k] == "both" and k == "station" else o[k]]
         if o.get("keys"):
             argv += ["--hc-keys", os.path.join(HERE, o["keys"])]

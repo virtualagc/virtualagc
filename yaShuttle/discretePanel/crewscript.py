@@ -1591,6 +1591,12 @@ class Player(object):
             except Exception as err:    # a circle is never worth stopping a script for
                 self.log("autocircle: %s" % err)
 
+    def _overdue(self, waited, e):
+        """A wait's timeout is wall seconds, sized for a simulation at real time; a slowed simulation (rate below 1) takes
+        proportionally longer to do the same thing, so the wait is given proportionally longer.  (A run at rate 0.25 timed
+        out in the IPL's NBAT entry, 2026-11-16.)"""
+        return waited * min(1.0, getattr(self.clock, "rate", 1.0) or 1.0) > e["timeout"]
+
     def _poll(self, k, e, begun):
         if self.stopped:
             self._mark(e, False)
@@ -1601,7 +1607,7 @@ class Player(object):
             self._mark(e, False)
             self.origin = self.clock.now()
             self._run(k + 1)
-        elif waited > e["timeout"]:
+        elif self._overdue(waited, e):
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped"
                      % (e["timeout"], e["text"]))
             self._mark(e, False)
@@ -1742,7 +1748,7 @@ class Player(object):
                      % (waited, e["text"], e["mdu"], cur[0]))
             self.origin = self.clock.now()
             self._run(k + 1)
-        elif waited > e["timeout"]:
+        elif self._overdue(waited, e):
             self.log("WAIT TIMED OUT after %.0f s: %s -- script stopped  [%s: %s]"
                      % (e["timeout"], e["text"], e["mdu"],
                         cur[0] if cur is not None else "nothing heard"))
