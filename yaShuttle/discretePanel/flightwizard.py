@@ -102,6 +102,15 @@ OPTIONS = {
     "stop":     ("Stop after", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
 }
+# a few words for each, shown beside the setting; the full text is OPTIONS' question (the h answer)
+BRIEF = {
+    "rate": "simulated s per real s", "size": "% of usual window size", "crts": "CRT count", "portview": "windows on/off",
+    "views": "which windows", "starcore": "0 = default, 4K look", "stargain": "0 = default, 4K look",
+    "station": "crew-station windows", "input": "hand controllers", "keypad": "keyboard layout for them",
+    "hold": "wait for Enter before starting", "layout": "saved window layout", "predictor": "RPOP predictor",
+    "engine": "engine that fails", "failat": "s after liftoff", "runway": "RTLS runway", "stop": "stop point",
+    "when": "time to start at",
+}
 COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keypad", "hold", "layout"]
 
 
@@ -596,8 +605,15 @@ def main():
     if not a.yes and not a.set:
         print("Settings for this scenario (remembered from last time where you changed them):")
         for k in sc["opts"] + (["stop"] if sc["stop"] else []):
-            print("  %-10s %s" % (k, mine.get(k)))
-        choice = asker.ask("Keep these, change some, or reset to the distribution defaults? (k/c/r)", "k", str, ("k", "c", "r"))
+            v = mine.get(k)
+            print("  %-10s %-14s %s" % (k, "" if v is None else v, BRIEF.get(k, "")))
+        choice = asker.ask("Keep these, change some, reset to the distribution defaults, or help on each? (k/c/r/h)", "k", str,
+                           ("k", "c", "r", "h"))
+        while choice == "h":
+            for k in sc["opts"] + (["stop"] if sc["stop"] else []):
+                print("  %-10s %s" % (k, OPTIONS[k][0] if k in OPTIONS else "Stop after: " + ", ".join(sc["stop"][1])))
+            choice = asker.ask("Keep these, change some, reset to the distribution defaults, or help on each? (k/c/r/h)", "k", str,
+                               ("k", "c", "r", "h"))
         changed = choice != "k"
         if choice == "r":
             mine = dict(dflt)
