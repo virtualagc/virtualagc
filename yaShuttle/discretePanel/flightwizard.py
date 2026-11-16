@@ -71,12 +71,8 @@ if not os.path.isfile(SNAPSHOT_ARCHIVE):    # a copy kept under local/ (tests, o
 SNAPSHOT_DIRS = [os.path.join(HERE, "STS134-snapshots"), os.path.join(LOCAL, "snapshots", "STS134-snapshots"),
                  os.path.join(LOCAL, "snapshots", "unpacked")]
 SNAPSHOT_DIR = SNAPSHOT_DIRS[-1]
-KEYPAD = os.path.join(HERE, "examples", "keys-keypad.json")
-MYKEYS = os.path.join(LOCAL, "hand-keys.json")      # written by --hand-controllers
 
 
-def keys_file():
-    return MYKEYS if os.path.isfile(MYKEYS) else KEYPAD
 TARGETS = os.path.join(FLIGHTS, "sts134-targets.txt")
 TARGETS_UNDOCK = os.path.join(FLIGHTS, "sts134-targets-undock-0320.txt")
 SITES = os.path.join(YAGPC2, "tools", "sites")
@@ -92,7 +88,7 @@ OPTIONS = {
     "stargain": ("star/planet brightness (e.g., 1.0 for 4K, 0.7 for 1080p)", float, 1.0),
     "station":  ("crew station (fwd, aft, both, auto)", str, "both"),
     "input":    ("hand controllers (joystick, virtual, both, auto)", str, "virtual"),
-    "keypad":   ("configuration for RHC/THC hotkeys", bool, True),
+    "keys":     ("RHC/THC hotkey file (blank for the built-in keys; --hand-controllers makes local/hand-keys.json)", str, ""),
     "hold":     ("wait for Enter before starting (True) or start immediately (False)", bool, True),
     "layout":   ("user-interface layout (blank for none)", str, ""),
     "predictor": ("RPOP predictor (coast or hold)", str, "coast"),
@@ -102,7 +98,7 @@ OPTIONS = {
     "stop":     ("milestone at which to end the simulation", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
 }
-COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keypad", "hold", "layout"]
+COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keys", "hold", "layout"]
 
 
 def scenario_table():
@@ -463,8 +459,8 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         for k in ("station", "input"):
             if o.get(k):
                 argv += ["--" + k, "all" if o[k] == "both" and k == "station" else o[k]]
-        if o.get("keypad") and os.path.isfile(keys_file()):
-            argv += ["--hc-keys", keys_file()]
+        if o.get("keys"):
+            argv += ["--hc-keys", os.path.join(HERE, o["keys"])]
         if o.get("hold"):
             argv += ["--hold-start"]
         if o.get("layout"):
@@ -481,8 +477,8 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
     for k, flag in (("station", "--station"), ("input", "--input")):
         if o.get(k):
             argv += [flag, "all" if o[k] == "both" and k == "station" else o[k]]
-    if o.get("keypad") and os.path.isfile(keys_file()):
-        argv += ["--hc-keys", keys_file()]
+    if o.get("keys"):
+        argv += ["--hc-keys", os.path.join(HERE, o["keys"])]
     if o.get("hold"):
         argv += ["--hold-start"]
     if o.get("layout"):
@@ -643,6 +639,8 @@ def main():
                     mine[k] = asker.ask(q, mine[k], kind)
             if "stop" in visible(sc, mine):
                 mine["stop"] = asker.ask("%s (%s)" % (OPTIONS["stop"][0], ", ".join(sc["stop"][1])), mine["stop"], str, sc["stop"][1])
+    if mine.get("keys") and not os.path.isfile(os.path.join(HERE, mine["keys"])):
+        sys.exit("flightwizard: no hotkey file %s (relative to %s; blank for the built-in keys)" % (mine["keys"], HERE))
     if mine.get("layout") and not os.path.isfile(os.path.join(HERE, mine["layout"])):
         sys.exit("flightwizard: no layout %s in %s" % (mine["layout"], HERE))
     if "when" in mine and not mine["when"]:

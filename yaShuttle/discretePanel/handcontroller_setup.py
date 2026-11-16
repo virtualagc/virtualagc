@@ -3,7 +3,7 @@
 it asks.  Run on request only:  python3 flightwizard.py --hand-controllers   (or  python3 handcontroller_setup.py).
 
 KEYBOARD   asks for a key for each of the twelve virtual-controller actions and writes local/hand-keys.json, which the
-           wizard then passes as --hc-keys in place of the keypad layout.  Backspace keeps an action's default key.
+           wizard passes as --hc-keys when you give that file as its `keys` setting (blank there means the built-in keys).  Backspace keeps an action's default key.
 JOYSTICK   lists the connected sticks, asks which is the RHC and where the THC comes from, finds each axis by watching
            which one moves, and merges the result into ~/.config/nsts/joysticks.json (the old file is kept as .bak;
            its other entries are kept).
@@ -93,7 +93,7 @@ def keyboard_setup(pygame):
     os.makedirs(os.path.dirname(KEYS_OUT), exist_ok=True)
     with open(KEYS_OUT, "w") as f:
         json.dump({"_comment": "Written by handcontroller_setup.py; actions not named keep the default keys.", "keys": keys}, f, indent=2)
-    print("Written %s.  The wizard uses it for the keyboard controllers from now on." % KEYS_OUT)
+    print("Written %s.  To use it, give the wizard's `keys` setting the value  local/hand-keys.json  (blank means the built-in keys)." % os.path.relpath(KEYS_OUT, HERE))
 
 
 # ---------------------------------------------------------------- joysticks
