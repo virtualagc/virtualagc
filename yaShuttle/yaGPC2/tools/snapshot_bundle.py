@@ -195,7 +195,8 @@ def extract_one(archive, name, to, pw):
     try:
         with py7zr.SevenZipFile(archive, password=pw) as z:
             z.extract(path=to, targets=[n for n in z.getnames() if n == name or n.startswith(name + "/")])
-    except (py7zr.exceptions.PasswordRequired, py7zr.exceptions.Bad7zFile):
+    except Exception:
+        # py7zr has no clean wrong-password error: on an encrypted header it raises LZMAError, TypeError, CrcError, ...
         sys.exit("snapshot_bundle: could not extract %s -- wrong password" % name)
     path = os.path.join(to, name)
     if not os.path.isfile(os.path.join(path, "vehicle.json")):
