@@ -120,12 +120,14 @@ def scenario_table():
         title="IPL: load the flight software from the tape, one GPC to OPS 9 (about 6 minutes; needs no snapshot)",
         need="ipl", snap=None, capture=None, driver="fly_sts134.py",
         args=[], stop=("--to", ["IPL", "UPLINK", "IMU"], "IPL"), logsfx="", opts=COMMON,
+        crts_default=1, portview_default=False,
         note="On the pad, nothing flying.  Starts from the bare machine: IPL, the launch-day NBAT, GSE polling.  Stopping after\n"
              "UPLINK or IMU carries on through the day-of-launch uplink or the IMU alignment, as 'prelaunch' does from a snapshot.")
     t["prelaunch"] = dict(
         title="Pre-launch: the day-of-launch uplink and IMU alignment (about 50 minutes, on the pad)",
         need="orbit", snap="IPL-eq-T1-no136/sts134-ipl", capture="sts134-ipl", driver="fly_sts134.py",
         args=["--from", "UPLINK"], stop=("--to", ["IMU"], "IMU"), logsfx="", opts=COMMON,
+        crts_default=1, portview_default=False,
         note="Ends with the vehicle gyrocompassed on the pad.  A vehicle left there can launch by 'launch' once its snapshot is taken.")
     t["launch"] = dict(
         title="Launch and ascent, from OPS 101 (the countdown from T-19 minutes) to orbit",
