@@ -83,33 +83,24 @@ SITES = os.path.join(YAGPC2, "tools", "sites")
 
 # ---- the options a user may change.  key: (question, kind, distribution default; per-scenario overrides below)
 OPTIONS = {
-    "rate":     ("Simulated seconds per wall second (1 = real time)", float, 1.0),
-    "size":     ("Window size as a percentage (100 = the usual size, 50 = half)", float, 50.0),
-    "crts":     ("Number of CRT displays (1-4)", int, 2),
-    "portview": ("Out-the-window views (portview)", bool, True),
-    "views":    ("Which views, comma separated (front,up,left,right,aft,cctv,rpop)", str, "front,up,left,right"),
-    "starcore": ("Stars' core radius in pixels (0 = portview's default, made for 4K; 0.1 suits a 1920x1080 screen)", float, 0.0),
-    "stargain": ("Stars' brightness factor (0 = portview's default, made for 4K; 0.7 goes with a core of 0.1)", float, 0.0),
-    "station":  ("Crew station windows (fwd, aft, all, auto)", str, "all"),
-    "input":    ("Hand controllers (virtual = the keypad, auto, joystick, both)", str, "virtual"),
-    "keypad":   ("Use the keyboard hand-controller layout (yours from --hand-controllers if you made one, else the keypad layout)", bool, True),
-    "hold":     ("Bring the windows up and hold the vehicle until you press Enter (time to arrange windows)", bool, True),
-    "layout":   ("Window layout file from this directory (blank for none)", str, ""),
+    "rate":     ("simulation rate vs real time", float, 1.0),
+    "size":     ("% scaling of user interface", float, 50.0),
+    "crts":     ("number of CRT displays (1-4)", int, 2),
+    "portview": ("show out-of-window views (True) or not (False)", bool, True),
+    "views":    ("which Orbiter windows (front, up, left, right, aft, cctv, rpop)?", str, "front,up,left,right"),
+    "starcore": ("star/planet sharpness (e.g., 1.0 for 4K, 0.1 for 1080p)", float, 1.0),
+    "stargain": ("star/planet brightness (e.g., 1.0 for 4K, 0.7 for 1080p)", float, 1.0),
+    "station":  ("crew station (fwd, aft, both, auto)", str, "both"),
+    "input":    ("hand controllers (joystick, virtual, both, auto)", str, "virtual"),
+    "keypad":   ("configuration for RHC/THC hotkeys", bool, True),
+    "hold":     ("wait for Enter before starting (True) or start immediately (False)", bool, True),
+    "layout":   ("user-interface layout (blank for none)", str, ""),
     "predictor": ("RPOP predictor (coast or hold)", str, "coast"),
-    "engine":   ("Failing main engine (1-3)", int, 2),
-    "failat":   ("Seconds after liftoff at which it fails", float, 150.0),
+    "engine":   ("failing main engine (1-3)", int, 2),
+    "failat":   ("seconds after liftoff at which it fails", float, 150.0),
     "runway":   ("RTLS runway (15 or 33)", int, 15),
-    "stop":     ("Stop after", str, ""),
+    "stop":     ("milestone at which to end the simulation", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
-}
-# a few words for each, shown beside the setting; the full text is OPTIONS' question (the h answer)
-BRIEF = {
-    "rate": "simulated s per real s", "size": "% of usual window size", "crts": "CRT count", "portview": "windows on/off",
-    "views": "which windows", "starcore": "0 = default, 4K look", "stargain": "0 = default, 4K look",
-    "station": "crew-station windows", "input": "hand controllers", "keypad": "keyboard layout for them",
-    "hold": "wait for Enter before starting", "layout": "saved window layout", "predictor": "RPOP predictor",
-    "engine": "engine that fails", "failat": "s after liftoff", "runway": "RTLS runway", "stop": "stop point",
-    "when": "time to start at",
 }
 COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keypad", "hold", "layout"]
 
@@ -195,6 +186,14 @@ def save_settings(s):
         json.dump(s, open(SETTINGS, "w"), indent=1)
     except OSError as e:
         print("(settings not saved: %s)" % e)
+
+
+def visible(sc, mine):
+    """The settings worth showing: not the portview ones when there are no views, not a stop with only one choice."""
+    keep = [k for k in sc["opts"] if mine.get("portview") or k not in ("views", "starcore", "stargain")]
+    if sc["stop"] and len(sc["stop"][1]) > 1:
+        keep.append("stop")
+    return keep
 
 
 def defaults_for(sc):
@@ -463,7 +462,7 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
             argv += ["--no-portview"]
         for k in ("station", "input"):
             if o.get(k):
-                argv += ["--" + k, o[k]]
+                argv += ["--" + k, "all" if o[k] == "both" and k == "station" else o[k]]
         if o.get("keypad") and os.path.isfile(keys_file()):
             argv += ["--hc-keys", keys_file()]
         if o.get("hold"):
@@ -481,7 +480,7 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         argv += ["--portview", "--portview-views" if sc["driver"] == "fly_sts134.py" else "--views", o["views"]]
     for k, flag in (("station", "--station"), ("input", "--input")):
         if o.get(k):
-            argv += [flag, o[k]]
+            argv += [flag, "all" if o[k] == "both" and k == "station" else o[k]]
     if o.get("keypad") and os.path.isfile(keys_file()):
         argv += ["--hc-keys", keys_file()]
     if o.get("hold"):
@@ -610,6 +609,8 @@ def main():
         settings.pop(scn_id, None)
     mine = dict(dflt)
     mine.update({k: v for k, v in settings.get(scn_id, {}).items() if k in dflt})
+    if mine.get("station") == "all":                # what an earlier version called it
+        mine["station"] = "both"
     for item in a.set:
         k, _, v = item.partition("=")
         if k not in OPTIONS:
@@ -618,16 +619,13 @@ def main():
     changed = False
     if not a.yes and not a.set:
         print("Settings for this scenario (remembered from last time where you changed them):")
-        for k in sc["opts"] + (["stop"] if sc["stop"] else []):
+        for k in visible(sc, mine):
             v = mine.get(k)
-            print("  %-10s %-14s %s" % (k, "" if v is None else v, BRIEF.get(k, "")))
-        choice = asker.ask("Keep these, change some, reset to the distribution defaults, or help on each? (k/c/r/h)", "k", str,
-                           ("k", "c", "r", "h"))
-        while choice == "h":
-            for k in sc["opts"] + (["stop"] if sc["stop"] else []):
-                print("  %-10s %s" % (k, OPTIONS[k][0] if k in OPTIONS else "Stop after: " + ", ".join(sc["stop"][1])))
-            choice = asker.ask("Keep these, change some, reset to the distribution defaults, or help on each? (k/c/r/h)", "k", str,
-                               ("k", "c", "r", "h"))
+            q = OPTIONS[k][0]
+            if k == "stop":
+                q += " (%s)" % ", ".join(sc["stop"][1])
+            print("  %-10s %-14s %s" % (k, "" if v is None else v, q))
+        choice = asker.ask("Keep these, change some, or reset to the distribution defaults? (k/c/r)", "k", str, ("k", "c", "r"))
         changed = choice != "k"
         if choice == "r":
             mine = dict(dflt)
@@ -637,14 +635,14 @@ def main():
                 print("Layouts here: %s" % ", ".join(layouts()))
             for k in sc["opts"]:
                 q, kind, _ = OPTIONS[k]
-                if k in ("views", "starcore", "stargain") and not mine.get("portview"):
+                if k not in visible(sc, mine):
                     continue
                 if k == "when":
                     mine[k] = asker.ask(q, mine.get(k) or "", str)
                 else:
                     mine[k] = asker.ask(q, mine[k], kind)
-            if sc["stop"]:
-                mine["stop"] = asker.ask("Stop after (%s)" % ", ".join(sc["stop"][1]), mine["stop"], str, sc["stop"][1])
+            if "stop" in visible(sc, mine):
+                mine["stop"] = asker.ask("%s (%s)" % (OPTIONS["stop"][0], ", ".join(sc["stop"][1])), mine["stop"], str, sc["stop"][1])
     if mine.get("layout") and not os.path.isfile(os.path.join(HERE, mine["layout"])):
         sys.exit("flightwizard: no layout %s in %s" % (mine["layout"], HERE))
     if "when" in mine and not mine["when"]:

@@ -110,15 +110,24 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "TERMINAL", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY", "LAND"]
 
-IPL_SCRIPT = """
+IPL_LOAD = """
 +0     gpc 1
 +0     mode HALT
 +0.02  idppower 1 on
 +0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
-{nbat1}
-# the same NBAT for memory configuration 9 (OPS 9): otherwise string 1 alone
+"""
+# GPC MEMORY holds one NBAT table per memory configuration.  The vehicle is in OPS 0 (memory configuration 1) when
+# this is done, and the table is read for the configuration being entered, so it is filled in twice, identically:
+# for 1 (G1: the ascent, OPS 101 on) and for 9 (G9: this OPS 9).
+IPL_MC1 = """
++11    keys ITEM 1 + 1 EXEC
+{nbat}
+"""
+IPL_MC9 = """
 +8     keys ITEM 1 + 9 EXEC
 {nbat}
+"""
+IPL_OPS9 = """
 +21    keys OPS 9 0 1 PRO
 # GSE POLL ENABLE: the launch data bus to the ground (DPS UTILITY, OPS 9)
 +40    keys SPEC 1 PRO
@@ -578,9 +587,18 @@ class Flight:
     # --- the phases -------------------------------------------------------
     def ipl(self):
         nbat = "\n".join("+8     keys ITEM %s EXEC" % i for i in NBAT_ITEMS)
-        nbat1 = "+11    keys ITEM 1 + 1 EXEC\n" + nbat
-        self.play(IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), nbat1=nbat1, nbat=nbat), "ipl")
-        self.script_done("ipl", 900)
+        self.say("IPL: loading the flight software")
+        self.play(IPL_LOAD.format(panel=PANEL.replace(os.sep, "/")), "ipl-load")
+        self.script_done("ipl-load", 900)
+        self.say("GPC MEMORY: the NBAT for memory configuration 1 (G1, the ascent from OPS 101 on)")
+        self.play(IPL_MC1.format(nbat=nbat), "ipl-nbat1")
+        self.script_done("ipl-nbat1", 300)
+        self.say("GPC MEMORY: the same NBAT for memory configuration 9 (G9, this OPS 9)")
+        self.play(IPL_MC9.format(nbat=nbat), "ipl-nbat9")
+        self.script_done("ipl-nbat9", 300)
+        self.say("OPS 9, then GSE polling on")
+        self.play(IPL_OPS9, "ipl-ops9")
+        self.script_done("ipl-ops9", 300)
         self.wait_sim(10)
 
     def uplink(self):
