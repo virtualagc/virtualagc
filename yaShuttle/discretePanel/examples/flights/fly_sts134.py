@@ -467,21 +467,26 @@ class Flight:
                 except (ValueError, OSError):
                     pass
 
+    def check_sim(self):
+        """Stop if simulatePASS.py has gone -- ended from the Manager, closed, or crashed -- rather than wait on a feed that
+        will never come (the waits below otherwise ran on for minutes, or for good, after the owner ended a run: 2026-11-16)."""
+        if getattr(self, "proc", None) is not None and self.proc.poll() is not None:
+            # and why, in its own words: "has exited" alone sent the owner
+            # looking (a missing --layout file, 2026-10-09)
+            outp = os.path.join(self.a.logs, "simulatePASS.out")
+            why = ""
+            try:
+                lines = [l.strip() for l in open(outp, errors="replace") if l.strip()]
+                why = (": " + lines[-1]) if lines else ""
+            except OSError:
+                pass
+            raise SystemExit("fly_sts134: simulatePASS.py has exited%s (%s)" % (why, outp))
+
     def wait_file(self, path, text, timeout, after=0):
         """text in path, looking only past byte offset after."""
         end = time.time() + timeout
         while time.time() < end:
-            if getattr(self, "proc", None) is not None and self.proc.poll() is not None:
-                # and why, in its own words: "has exited" alone sent the owner
-                # looking (a missing --layout file, 2026-10-09)
-                outp = os.path.join(self.a.logs, "simulatePASS.out")
-                why = ""
-                try:
-                    lines = [l.strip() for l in open(outp, errors="replace") if l.strip()]
-                    why = (": " + lines[-1]) if lines else ""
-                except OSError:
-                    pass
-                raise SystemExit("fly_sts134: simulatePASS.py has exited%s (%s)" % (why, outp))
+            self.check_sim()
             try:
                 with open(path, "rb") as fh:
                     fh.seek(after)
@@ -535,6 +540,7 @@ class Flight:
         # the feed goes quiet while the GPC is off its buses -- an OPS
         # transition reloading from mass memory takes tens of seconds
         for _ in range(100):
+            self.check_sim()
             tr = groundstation.truth_state(self.base, timeout=3.0)
             if tr:
                 return tr
@@ -691,6 +697,7 @@ class Flight:
                         self.play(RTLS_RW_SEC, "rtls-runway")
                         self.script_done("rtls-runway", 180)
                         self.say("crew: SPEC 50 ITEM 4 -- RTLS to KSC 33 (the secondary runway)")
+            self.check_sim()
             time.sleep(1 if not aborted else 5)
         # ET separation in the vehicle's GMT, from the time-tagged state lines
         # around it, kept for OMS 2 (which may start from a capture)
@@ -1062,6 +1069,7 @@ class Flight:
             tr = self.truth()
             if tr.get("gs_kt", 1e9) * 0.514444 / 0.3048 < 7000.0 or tr["gmt"] > t["ei"] + 25 * 60.0:
                 break
+            self.check_sim()
             time.sleep(2.0)
         self.play(GPS_INCORPORATE, "gps-incorporate-entry")
         self.script_done("gps-incorporate-entry", 60)
@@ -1114,6 +1122,7 @@ class Flight:
             # an abort's entry flies itself (MM 304 after a TAL's ET SEP; RTLS
             # MM 601-603 then 305): the air data probes at Mach 5, not before
             while (self.last_entry_state() or {}).get("M", 99.0) > 5.0:
+                self.check_sim()
                 time.sleep(2.0)
         if not getattr(self, "air_data_done", False):    # resumed past V = 7K
             self.play(AIR_DATA, "air-data")
@@ -1186,6 +1195,7 @@ class Flight:
                     return
             else:
                 stopped_since = None
+            self.check_sim()
             time.sleep(0.5)
 
     def run(self):
