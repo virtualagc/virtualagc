@@ -59,6 +59,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 
@@ -564,12 +565,25 @@ class Flight:
         # seconds is 1.5 times the gap at rate 3, so each wait overshot by up to half
         # of what was left, and the deorbit's EXEC at TIG-15 s went in after TIG
         # (deorb-2, 2026-10-25: the burn never fired).  Divide by the rate.
-        rate = max(1.0, float(getattr(self.a, "rate", 1.0) or 1.0))
+        # The rate is the one running NOW: the Manager's speed buttons change it
+        # mid-run (a 4x fast-forward through the count, 2026-11-16, left the
+        # wait at the command-line rate; GO FOR AUTO SEQUENCE then went in at
+        # T-10 s instead of T-31 s and the engines never started).
         while True:
             now = self.truth()["gmt"]
             if now >= gmt:
                 return
+            rate = max(1.0, float(getattr(self.a, "rate", 1.0) or 1.0), self.live_rate())
             time.sleep(min(30.0, max(0.5, (gmt - now) / (2.0 * rate))))
+
+    def live_rate(self):
+        """The simulation's rate as it is now (simulatePASS's rate file), 1 if unreadable."""
+        try:
+            with open(os.path.join(tempfile.gettempdir(), "simulatePASS-rate-%d" % self.base)) as fh:
+                r = float(fh.read().strip())
+            return r if math.isfinite(r) and r > 0 else 1.0
+        except (OSError, ValueError):
+            return 1.0
 
     def wait_sim(self, dt):
         t0 = self.truth()["t"]
