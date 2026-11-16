@@ -573,8 +573,13 @@ class Flight:
             now = self.truth()["gmt"]
             if now >= gmt:
                 return
-            rate = max(1.0, float(getattr(self.a, "rate", 1.0) or 1.0), self.live_rate())
-            time.sleep(min(30.0, max(0.5, (gmt - now) / (2.0 * rate))))
+            # Poll in short WALL slices, whatever the rate: the viewer may change
+            # it at any moment, so a long sleep sized for the rate of the moment
+            # can still be overrun by a later speed-up.  Near the target the
+            # slice is a quarter second, a few sim seconds even at 10x.
+            rate = max(1.0, self.live_rate())
+            gap = gmt - now
+            time.sleep(0.25 if gap < 120.0 else min(2.0, gap / (2.0 * rate)))
 
     def live_rate(self):
         """The simulation's rate as it is now (simulatePASS's rate file), 1 if unreadable."""
@@ -672,6 +677,10 @@ class Flight:
         # T-31 s -- PASS acts on it from GMTLO - 25 s, CGSV_LPS_GO_AUTO_SEQ_TIME
         # -- and GO FOR ENGINE START at about T-10 s
             self.wait_gmt(T0 - 31.0)
+            late = self.truth()["gmt"] - (T0 - 31.0)
+            if late > 4.0:
+                self.say("terminal: WARNING GO FOR AUTO SEQUENCE is %.0f s late (PASS acts on it only until about T-25 s); "
+                         "the run is likely to stay on the pad" % late)
             crewscript.send_lps("go_auto", self.base)
             self.say("ground: GO FOR AUTO SEQUENCE (T-31 s)")
         if self.truth()["gmt"] > T0 - 10.0:
