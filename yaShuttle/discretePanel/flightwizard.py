@@ -546,6 +546,8 @@ def ensure_textures(asker):
             print(why + "\n")
         return True
     print("portview cannot start here: its essential files (star catalogue, ephemeris, land/water mask) are not unpacked.")
+    if why:
+        print("  (" + why + ")")
     print("  Download portview-essential.7z from https://www.ibiblio.org/apollo/Downloads/ and unpack it with your usual\n"
           "  unpacker into %s (the portview-essential/ folder it makes is fine), then run this again.\n"
           "  portview-optional.7z (large) adds the Milky Way, the Blue Marble Earth and the sites' imagery." % HERE)

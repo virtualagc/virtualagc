@@ -108,22 +108,41 @@ def adopt_nested_unpack(here):
     """Most unpackers put portview-essential.7z's (and portview-optional.7z's) contents in a folder named for the
     archive, giving portview-essential/portview/cache and portview-essential/textures.  Move them to where portview
     looks (here/portview/cache, here/textures), keeping anything already there, so the user need not know how to strip
-    that level.  (portview-textures/ is the name of the single archive these two replaced.)"""
-    for wrapper in ("portview-essential", "portview-optional", "portview-textures"):
+    that level.  The folder may be nested again (portview-essential/portview-essential/..., which an unpacker makes when
+    told to extract into a folder of that name from inside one), carry a suffix ("portview-essential (1)", or the
+    archive's own name), or hold the contents one level up (portview-essential/cache/...).  (portview-textures/ is the
+    name of the single archive these two replaced.)  Returns the folders it emptied, for the message of a failure."""
+    seen = []
+    for wrapper in sorted(os.listdir(here)):
         top = os.path.join(here, wrapper)
-        if not os.path.isdir(top):
+        low = wrapper.lower()
+        if not (os.path.isdir(top) and low.startswith(("portview-essential", "portview-optional", "portview-textures"))):
             continue
-        for sub in ("portview/cache", "textures"):
-            src, dst = os.path.join(top, *sub.split("/")), os.path.join(here, *sub.split("/"))
-            if not os.path.isdir(src):
-                continue
-            for dp, dn, fn in os.walk(src):
-                out = os.path.join(dst, os.path.relpath(dp, src))
-                os.makedirs(out, exist_ok=True)
-                for f in fn:
-                    if not os.path.exists(os.path.join(out, f)):
-                        os.replace(os.path.join(dp, f), os.path.join(out, f))
-        shutil.rmtree(top, ignore_errors=True)      # what is left there duplicates files already in place
+        seen.append(wrapper)
+        moved = False
+        for dp, dn, fn in os.walk(top):
+            rel = os.path.relpath(dp, top).replace(os.sep, "/")
+            parts = [] if rel == "." else rel.split("/")
+            # the folder whose files belong in portview/cache, or in textures: found by its own name, wherever it is
+            if parts[-2:] == ["portview", "cache"] or (parts[-1:] == ["cache"] and parts[-2:-1] != ["portview"]
+                                                       and "portview" not in parts[:-1]) or parts[-1:] == ["textures"]:
+                dst_rel = "textures" if parts[-1] == "textures" else "portview/cache"
+                dst = os.path.join(here, *dst_rel.split("/"))
+                for sdp, sdn, sfn in os.walk(dp):
+                    out = os.path.join(dst, os.path.relpath(sdp, dp))
+                    os.makedirs(out, exist_ok=True)
+                    for f in sfn:
+                        target = os.path.join(out, f)
+                        if not os.path.exists(target):
+                            try:
+                                shutil.move(os.path.join(sdp, f), target)
+                                moved = True
+                            except OSError as e:
+                                print("portview: could not move %s: %s" % (os.path.join(sdp, f), e), file=sys.stderr)
+                dn[:] = []          # its subfolders were taken with it
+        if moved:
+            shutil.rmtree(top, ignore_errors=True)      # what is left there duplicates files already in place
+    return seen
 
 
 def preflight():
@@ -136,14 +155,16 @@ def preflight():
     if missing:
         return "%s missing; pip install %s" % (", ".join(missing), " ".join(missing))
     here = os.path.dirname(os.path.abspath(__file__))
-    adopt_nested_unpack(here)
+    seen = adopt_nested_unpack(here)
     dirs = [os.path.join(here, "textures"), os.path.join(here, "portview", "cache")]
     def have(f):
         return any(os.path.exists(os.path.join(d, f)) for d in dirs)
     absent = [f for f in ESSENTIAL if not have(f)]
     if absent:
         return ("its essential assets are missing (%s); unpack portview-essential.7z in this directory "
-                "(a portview-essential/ folder made by your unpacker is fine; see textures/LICENSE.md)" % ", ".join(absent))
+                "(a portview-essential/ folder made by your unpacker is fine; see textures/LICENSE.md)%s"
+                % (", ".join(absent), ("; found %s in %s but no portview/cache inside it holding them" % (", ".join(seen), here))
+                   if seen else "; no portview-essential* folder in %s" % here))
     return None
 
 
