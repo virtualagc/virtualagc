@@ -2360,6 +2360,8 @@ def main():
             except (OSError, subprocess.TimeoutExpired) as e:
                 log("portview: not started -- %s" % e)
 
+        PV_WAIT = {}        # the portview bring_up started, and how many views it opens
+
         def bring_up(resume=None, hold=False):
             # NO PREFIX UNLESS ONE WAS ASKED FOR.  It used to name the GPCs,
             # which made every display's task-bar button read "GPCs 1,2,3,4,..."
@@ -2481,7 +2483,8 @@ def main():
                             pv_argv += ["--geometry", "%s=%dx%d+%d+%d" % (
                                 _v, round(_r[2] / _qs), round(_r[3] / _qs),
                                 round(_r[0] / _qs), round(_r[1] / _qs))]
-                L.start("portview", pv_argv, HERE, env)
+                PV_WAIT["proc"] = L.start("portview", pv_argv, HERE, env)
+                PV_WAIT["views"] = len(pv_views.split(",")) if pv_views else 1
             if want_rpop and env.get("YAGPC_VEHDYN") == "1":
                 # at the displays' --size: under the desktop's QT_SCALE_FACTOR 2
                 # its default (768) opened at twice the PGSC's 1024 x 768
@@ -2711,7 +2714,37 @@ def main():
         #
         # A function, because a resume destroys and recreates every window but
         # the manager's, so they all have to be placed again.
+        def wait_for_portview():
+            # PORTVIEW'S VIEWS COME LAST, AND LATE.  It loads its textures
+            # before it opens a window -- 10 to 15 s on Windows -- and a run
+            # without a --layout waited for no window at all, so the splash
+            # went and "Everything is up" was printed while the views were
+            # still to come (owner, 2026-11-16).  Wait for the views of the
+            # portview just started, whatever the layout says, so long as it
+            # is still running.
+            pv = PV_WAIT.pop("proc", None)
+            want = PV_WAIT.pop("views", 1)
+            if pv is None or pv.poll() is not None:
+                return
+            splash.stage("Waiting for the views out of the windows")
+            deadline = time.time() + 120
+            next_say = time.time() + 15
+            while time.time() < deadline and pv.poll() is None:
+                pids = windowLayout.descendants(pv.pid)
+                have = sum(1 for w in windowLayout.windows()
+                           if w.get("pid") in pids and str(w.get("role", "")).startswith("pv_"))
+                if have >= want:
+                    return
+                if time.time() >= next_say:
+                    log("still waiting for portview's views (%d of %d open; up to %d s)"
+                        % (have, want, max(0, int(deadline - time.time()))))
+                    next_say = time.time() + 15
+                time.sleep(0.5)
+            if pv.poll() is None:
+                log("portview's views are not all open after 120 s; going on without them")
+
         def place_windows(windows_before, layout=None):
+            wait_for_portview()
             # A RESUME USES THE SNAPSHOT'S OWN, which is the point: the
             # windows go back where they were when it was taken, without
             # anyone having to remember a --layout or press Restore twice.
