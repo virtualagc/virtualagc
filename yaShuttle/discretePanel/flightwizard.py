@@ -116,8 +116,14 @@ COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "
 
 def scenario_table():
     t = {}
+    t["ipl"] = dict(
+        title="IPL: load the flight software from the tape, one GPC to OPS 9 (about 6 minutes; needs no snapshot)",
+        need="ipl", snap=None, capture=None, driver="fly_sts134.py",
+        args=[], stop=("--to", ["IPL", "UPLINK", "IMU"], "IPL"), logsfx="", opts=COMMON,
+        note="On the pad, nothing flying.  Starts from the bare machine: IPL, the launch-day NBAT, GSE polling.  Stopping after\n"
+             "UPLINK or IMU carries on through the day-of-launch uplink or the IMU alignment, as 'prelaunch' does from a snapshot.")
     t["prelaunch"] = dict(
-        title="Pre-launch: IPL, the day-of-launch uplink and IMU alignment (about 50 minutes of flight time)",
+        title="Pre-launch: the day-of-launch uplink and IMU alignment (about 50 minutes, on the pad)",
         need="orbit", snap="IPL-eq-T1-no136/sts134-ipl", capture="sts134-ipl", driver="fly_sts134.py",
         args=["--from", "UPLINK"], stop=("--to", ["IMU"], "IMU"), logsfx="", opts=COMMON,
         note="Ends with the vehicle gyrocompassed on the pad.  A vehicle left there can launch by 'launch' once its snapshot is taken.")
@@ -170,7 +176,7 @@ def scenario_table():
 
 
 SCENARIOS = scenario_table()
-ORDER = ["prelaunch", "launch", "rtls", "tal", "coast", "rendezvous", "undock", "return", "landing"]
+ORDER = ["ipl", "prelaunch", "launch", "rtls", "tal", "coast", "rendezvous", "undock", "return", "landing"]
 
 
 # ---------------------------------------------------------------- settings (per scenario)
@@ -307,7 +313,7 @@ class Volumes:
 
     def choose(self, need, accepted, asker):
         """-> (tier dict, tape argument, env for the child, how).  `accepted`: the digests the snapshot runs on."""
-        fits = [t for t in TIERS if need in t["has"] and t["sha"] in accepted]
+        fits = [t for t in TIERS if (need == "ipl" or need in t["has"]) and t["sha"] in accepted]
         if not fits:
             sys.exit("flightwizard: no volume both runs these snapshots and has what this scenario needs (%s)" % need)
         plain = plain_volumes()
@@ -507,16 +513,22 @@ def star_env(o, env):
 
 
 def free_base(start=30000):
+    """A port base none of whose ports (the simulation uses the base and about 40 above it, and the same above base + 100,
+    over UDP) is bound by a run already up."""
     import socket
     for base in range(start, 60000, 200):
+        socks = []
         try:
-            for p in (base, base + 100):
-                s = socket.socket()
-                s.bind(("127.0.0.1", p))
-                s.close()
+            for p in list(range(base, base + 40)) + list(range(base + 100, base + 140)):
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                socks.append(s)
+                s.bind(("0.0.0.0", p))
             return base
         except OSError:
             continue
+        finally:
+            for s in socks:
+                s.close()
     return start
 
 
@@ -582,11 +594,11 @@ def main():
         scn_id = a.scenario
     else:
         print("Which part of the flight?")
-        for i, k in enumerate(ORDER, 1):
+        for i, k in enumerate(ORDER):
             print("  %d  %s" % (i, SCENARIOS[k]["title"]))
         if a.yes:
             sys.exit("flightwizard: name a scenario")
-        scn_id = ORDER[asker.ask("Number", 1, int, range(1, len(ORDER) + 1)) - 1]
+        scn_id = ORDER[asker.ask("Number", 1, int, range(len(ORDER)))]
     sc = SCENARIOS[scn_id]
     print("\n%s\n%s\n" % (sc["title"], sc["note"]))
 
@@ -649,8 +661,10 @@ def main():
     if not mode:
         mode = asker.ask("Print the command, run it, or both? (print/run/both)", "both", str, ("print", "run", "both"))
 
-    rows = snapshot_rows()
-    if scn_id == "coast":
+    rows = snapshot_rows() if sc["snap"] or scn_id == "coast" else []
+    if scn_id == "ipl":
+        row = None                                  # no snapshot: any volume that boots will do
+    elif scn_id == "coast":
         row, off = coast_snapshot(rows, mine["when"])
         print("Starting at snapshot %s (GMT %s, MET %s): %.1f minutes before the time you asked for; at rate %g that is "
               "%.1f minutes of waiting." % (row["name"], row.get("gmt"), row.get("met", "-"), off / 60.0, mine["rate"],
@@ -661,7 +675,7 @@ def main():
             sys.exit("flightwizard: the snapshot %s is not in your snapshot set" % sc["snap"])
 
     vols = Volumes(a.tapes_dir)
-    tier, tape, venv, how = vols.choose(sc["need"], accepted_digests(row), asker)
+    tier, tape, venv, how = vols.choose(sc["need"], accepted_digests(row) if row else {t["sha"] for t in TIERS}, asker)
     print("Volume: %s (%s) -- %s" % (tier["name"], tier["text"], how))
 
     if mine.get("portview") and not a.yes:
@@ -679,7 +693,7 @@ def main():
         for name, cap in sc.get("also", []):
             r2 = next(r for r in rows if r["name"] == name)
             stage_snapshot(r2, os.path.join(run, cap), vols, asker)
-    else:
+    elif row:
         if row.get("_dir"):
             row["_arg"] = row["_dir"]
         else:
