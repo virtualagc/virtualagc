@@ -277,12 +277,18 @@ except ImportError:
     sys.exit("flightwizard: the Python module py7zr is needed (it opens the encrypted archives):  pip install py7zr")
 
 
+def dev_password(path):
+    import snapshot_bundle
+    return snapshot_bundle.dev_password(path)
+
+
 def archive_opens(path, pw):
     try:
         with py7zr.SevenZipFile(path, password=pw) as z:
             z.getnames()
         return True
-    except (py7zr.exceptions.PasswordRequired, py7zr.exceptions.Bad7zFile):
+    except Exception:
+        # py7zr has no clean wrong-password error: on an encrypted header it raises LZMAError, TypeError, CrcError, ...
         return False
 
 
@@ -303,10 +309,18 @@ class Volumes:
         return self.pw
 
     def open_tier(self):
-        """The first archive, in OPS1, OPS3, OPS2, OPS0 order, that the password opens; (name, path) or None."""
+        """The first archive, in OPS1, OPS3, OPS2, OPS0 order, that the password opens; (name, path) or None.
+        A developer's environment password for the archive (snapshot_bundle.dev_password) is tried first and the
+        prompt only if it is absent or does not open it; self.pw is left holding the password that did."""
         for name in PASSWORD_ORDER:
             path = self.archive_path(name)
-            if os.path.isfile(path) and archive_opens(path, self.password()):
+            if not os.path.isfile(path):
+                continue
+            dev = dev_password(path)
+            if dev and archive_opens(path, dev):
+                self.pw = dev
+                return name, path
+            if archive_opens(path, self.password()):
                 return name, path
         return None
 
@@ -421,10 +435,19 @@ def stage_snapshot(row, dest, pw_holder, asker):
             shutil.rmtree(dest)
         shutil.copytree(row["_dir"], dest)
         return dest
-    pw = pw_holder.pw or os.environ.get("YAGPC_SNAPSHOT_PASSWORD") or getpass.getpass("password for the snapshot archive: ")
     with tempfile.TemporaryDirectory() as tmp:
         try:
-            src = sb.extract_one(SNAPSHOT_ARCHIVE, row["name"], tmp, pw)
+            dev = sb.dev_password(SNAPSHOT_ARCHIVE)     # the developer's environment, if any; the prompt otherwise
+            if dev:
+                try:
+                    pw = dev
+                    src = sb.extract_one(SNAPSHOT_ARCHIVE, row["name"], tmp, pw)
+                except SystemExit:
+                    dev = None
+            if not dev:
+                pw = (pw_holder.pw or os.environ.get("YAGPC_SNAPSHOT_PASSWORD")
+                      or getpass.getpass("password for the snapshot archive: "))
+                src = sb.extract_one(SNAPSHOT_ARCHIVE, row["name"], tmp, pw)
         except SystemExit:
             pw = getpass.getpass("password for the snapshot archive (the volumes' did not open it): ")
             src = sb.extract_one(SNAPSHOT_ARCHIVE, row["name"], tmp, pw)

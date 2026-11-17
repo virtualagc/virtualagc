@@ -27,6 +27,7 @@ only so that the tool can be tested with a dummy.
 import argparse
 import datetime
 import getpass
+import re
 import hashlib
 import json
 import os
@@ -125,8 +126,25 @@ def build_index(roots):
     return rows, where
 
 
-def read_password(confirm):
-    pw = os.environ.get("YAGPC_BUNDLE_PASSWORD" if confirm else "YAGPC_TAPE_PASSWORD")
+def dev_password(archive):
+    """The password for ARCHIVE from the developer's environment, or None.  Not for users, and not documented to them:
+    PASSWORDx holds the password of OI340700-OPSx.7z (x = 0..3), and the snapshot archive's is PASSWORD2, so that
+    a development session can use the encrypted volumes without the passwords ever being typed, printed, logged or
+    written down.  Callers try this BEFORE prompting and fall back to the prompt if it does not open the archive.
+    Never print, log or pass on a command line what this returns."""
+    m = re.match(r"OI340700-OPS([0-3])\.7z$", os.path.basename(archive), re.I)
+    if m:
+        name = "PASSWORD" + m.group(1)
+    elif os.path.basename(archive).lower().startswith("sts134-snapshots"):
+        name = "PASSWORD2"
+    else:
+        return None
+    return os.environ.get(name) or None
+
+
+def read_password(confirm, archive=None):
+    pw = os.environ.get("YAGPC_BUNDLE_PASSWORD" if confirm else "YAGPC_TAPE_PASSWORD") \
+        or (None if confirm or not archive else dev_password(archive))
     if pw:
         return pw
     pw = getpass.getpass("archive password: ")
@@ -205,7 +223,7 @@ def extract_one(archive, name, to, pw):
 
 
 def cmd_extract(a):
-    pw = read_password(False)
+    pw = read_password(False, a.archive)
     os.makedirs(a.to, exist_ok=True)
     for name in a.names:
         print(extract_one(a.archive, name, a.to, pw))

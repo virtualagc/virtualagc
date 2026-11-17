@@ -735,6 +735,10 @@ def tape_password(path):
     global TAPE_PASSWORD
     if TAPE_PASSWORD is None:
         env = os.environ.get("YAGPC_TAPE_PASSWORD")
+        if not env:
+            sys.path.insert(0, os.path.join(YAGPC_DIR, "tools"))
+            import snapshot_bundle
+            env = snapshot_bundle.dev_password(path)        # developers' environment; falls back to the prompt
         if env:
             TAPE_PASSWORD = env
         else:
@@ -928,7 +932,8 @@ def snapshot_from_archive(spec):
     import snapshot_bundle
     where = tempfile.mkdtemp(prefix="snapshot-")
     atexit.register(shutil.rmtree, where, True)
-    pw = os.environ.get("YAGPC_TAPE_PASSWORD") or snapshot_bundle.getpass.getpass("snapshot set password: ")
+    pw = (os.environ.get("YAGPC_TAPE_PASSWORD") or snapshot_bundle.dev_password(archive)
+          or snapshot_bundle.getpass.getpass("snapshot set password: "))
     return snapshot_bundle.extract_one(archive, name, where, pw)
 
 
