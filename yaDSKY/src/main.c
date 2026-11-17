@@ -332,25 +332,33 @@ Pulse (gpointer data)
 	  i = recv (ServerSocket, &c, 1, MSG_NOSIGNAL);
 	  if (i == -1)
 	    {
-	      // The condition i==-1,errno==0 occurs only on Win32, and 
-	      // I'm not sure exactly what it corresponds to---I assume 
-	      // means "no data" rather than error. Keep the socket and
-	      // try again on a later pulse.
-	      if (errno == EAGAIN || errno == 0)
-	        break;
-	      else
-	        {	
-		  printf ("yaDSKY reports server error %d\n", errno);
-		  close (ServerSocket);
-		  ServerSocket = -1;
-		  break;
-	        }
+#ifdef unix
+	      int socketError = errno;
+	      if (socketError == EAGAIN || socketError == EWOULDBLOCK ||
+	          socketError == EINTR)
+#else
+	      int socketError = WSAGetLastError ();
+	      if (socketError == WSAEWOULDBLOCK)
+#endif
+	        break;  // No data yet, or interrupted: try on the next pulse.
+	      printf ("yaDSKY reports server error %d\n", socketError);
+#ifdef unix
+	      close (ServerSocket);
+#else
+	      closesocket (ServerSocket);
+#endif
+	      ServerSocket = -1;
+	      break;
 	    }
 	  if (i == 0)
 	    {
 	      // A return value of 0 means other side has closed the connection.
 	      // Drop the socket so that the next pulse tries to reconnect.
+#ifdef unix
 	      close (ServerSocket);
+#else
+	      closesocket (ServerSocket);
+#endif
 	      ServerSocket = -1;
 	      break;
 	    }
