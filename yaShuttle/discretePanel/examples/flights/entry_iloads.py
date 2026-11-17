@@ -47,3 +47,10 @@ def apply(capdir, say=print):
             % (os.path.relpath(path, os.path.dirname(capdir)), wrote, same, other))
         result = (wrote, same, other)
     return result
+
+
+def request_text(spec=None):
+    """The cells as yaGPC2's live-patch request (run.c batchrunner_apply_patch): ADDR WAS NEW per line."""
+    cells = json.load(open(spec or SPEC))["cells"]
+    return "".join("%s %s %s\n" % (c["addr"], c["was"], c["H"]) for c in cells)
+

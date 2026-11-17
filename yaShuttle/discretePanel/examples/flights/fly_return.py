@@ -302,6 +302,20 @@ class Return(U.Undock):
                 self.say("DEORBIT: captured sts134r-pre-ops301 (TIG-75 min); stopping before the OPS 301 request")
                 raise SystemExit(0)
             return
+        if where == "post-ops301":
+            # THE FLOWN ENTRY I-LOADS, live (ledger #306): OPS 3 is resident from here, and its generic I-loads are
+            # written over in the running computers, with no restart.  (They were written into a capture and the
+            # simulation started again from it, at TIG-105 s, which a viewer took for a crash -- owner, 2026-11-17.)
+            if self.patch_memory(entry_iloads.request_text(), "entry I-loads") is None:
+                # a yaGPC2 without the live patch: the old way, a capture patched and the simulation restarted ONCE, now
+                self.snapshot("ops301")
+                if entry_iloads.apply(os.path.join(self.a.logs, "sts134r-ops301"), self.say)[0]:
+                    self.say("DEORBIT: the simulation restarts ONCE now, to take the flown entry I-loads; its windows close and "
+                             "come back in about a minute")
+                    self.restart_from("ops301")
+                    self.pfd_up = False             # the restored capture has CRT 2 off
+                    self.pfd_on_crt2()
+            return
         if where == "pre-mnvr":
             self.snapshot("pre-mnvr")
             self.key_weight()
@@ -321,7 +335,9 @@ class Return(U.Undock):
             # OPS 3 came from the volume's generic G3 during this phase; the flown entry I-loads go into the capture and the
             # run continues from it, as --from EXEC would (ledger #306)
             if entry_iloads.apply(os.path.join(self.a.logs, "sts134r-tig1"), self.say)[0]:
-                self.restart_from("tig1")
+                self.restart_from("tig1")       # only when post-ops301's did not happen (a run that began after it)
+                self.pfd_up = False
+                self.pfd_on_crt2()
 
     def __init__(self, a):
         # the arguments fly_sts134's own parser gives its phases and fly_rndz134's does not

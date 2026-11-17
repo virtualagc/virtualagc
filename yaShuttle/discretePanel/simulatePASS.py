@@ -538,7 +538,7 @@ def session_listener(port_base, stop_event):
         return
     sock.settimeout(0.5)
     log("session commands on port %d ('save DIR', 'save-and-quit DIR', "
-        "'resume DIR', 'rate X', 'go', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
+        "'resume DIR', 'rate X', 'patch FILE', 'go', 'quit')" % (port_base + crewscript.SESSION_OFFSET))
     while not stop_event.is_set():
         try:
             data, _ = sock.recvfrom(4096)
@@ -576,6 +576,44 @@ def session_listener(port_base, stop_event):
                 log("session command: rate %g" % v)
             except (ValueError, KeyError, OSError) as e:
                 log("session command rate %r not taken: %s" % (rest, e))
+            continue
+        if word == "patch":
+            # A LIVE MEMORY PATCH of every computer: the request file `rest` (ADDR WAS NEW lines, see run.c) is put in
+            # yaGPC2's snapshot directory and yaGPC2 signalled as for a snapshot, which it takes for a patch because
+            # the file is there.  The answer is `rest`.result: "ok WRITTEN SAME OTHER" summed over the computers, or
+            # "failed WHY".
+            result = "failed no emulator running"
+            try:
+                gpc, stage, ids = SESSION["gpc_fn"](), SESSION["staging"], SESSION["gpcs"]
+                req = os.path.join(stage, "patch.request")
+                done = [os.path.join(stage, "patch.done.%d" % g) for g in ids]
+                for f in done:
+                    if os.path.exists(f):
+                        os.unlink(f)
+                shutil.copyfile(rest, req)
+                signal_gpc(gpc, "SIGUSR1")
+                deadline = time.time() + 60
+                while time.time() < deadline and not all(os.path.isfile(f) and os.path.getsize(f) > 0 for f in done):
+                    time.sleep(0.1)
+                if all(os.path.isfile(f) and os.path.getsize(f) > 0 for f in done):
+                    tot = [0, 0, 0]
+                    for f in done:
+                        for i, v in enumerate(open(f).read().split()[:3]):
+                            tot[i] += int(v)
+                    result = "ok %d %d %d" % tuple(tot)
+                else:
+                    result = "failed the computers did not answer in 60 s"
+                for f in done + [req]:
+                    if os.path.exists(f):
+                        os.unlink(f)
+            except (OSError, KeyError, ValueError) as e:
+                result = "failed %s" % e
+            log("session command: patch %s -> %s" % (rest, result))
+            try:
+                with open(rest + ".result", "w") as fh:
+                    fh.write(result + "\n")
+            except OSError:
+                pass
             continue
         if word not in ("save", "save-and-quit", "resume", "quit"):
             log("session command not understood: %r" % text)
@@ -2325,6 +2363,7 @@ def main():
     snapshot_dir = os.path.abspath(args.snapshot_dir
                                    or os.path.join(logs, "snapshot"))
     snapshot_staging = os.path.join(logs, "snapshot-staging")
+    SESSION["staging"], SESSION["gpcs"], SESSION["gpc_fn"] = snapshot_staging, list(args.gpcs), lambda: gpc
     try:
         os.makedirs(snapshot_staging, exist_ok=True)
         os.makedirs(os.path.dirname(snapshot_dir) or ".", exist_ok=True)

@@ -981,6 +981,30 @@ class Flight:
         prplt = kg / 0.45359237 * (1.0 - math.exp(-dv / 10136.8))
         return dict(tig=tig, ei=ei, theta=theta, c1=c1, c2=c2, ht=ht, prplt=prplt)
 
+    def patch_memory(self, request, what="memory patch"):
+        """THE RUNNING COMPUTERS' MEMORY, written live (simulatePASS 'patch', run.c batchrunner_apply_patch): `request` is
+        the text of the ADDR WAS NEW lines.  A cell is written only where the memory still holds WAS.  Returns
+        (written, already, neither), or None if the emulator could not do it."""
+        path = os.path.join(self.a.logs, "patch-%d.request" % int(time.time()))
+        with open(path, "w") as fh:
+            fh.write(request)
+        res = path + ".result"
+        if os.path.exists(res):
+            os.unlink(res)
+        crewscript.send_session("patch " + path, self.base)
+        self.wait_file(res, "\n", 120)
+        try:
+            out = open(res).read().split()
+        except OSError:
+            out = []
+        if not out or out[0] != "ok":
+            # an emulator without the live patch takes the signal for a snapshot request and never answers
+            self.say("%s: not taken live (%s)" % (what, " ".join(out) or "no answer"))
+            return None
+        w, same, other = (int(x) for x in out[1:4])
+        self.say("%s: %d written, %d already there, %d neither (left alone)" % (what, w, same, other))
+        return w, same, other
+
     def deorbit_hook(self, where):
         """A place for a subclass to look at (or capture) the vehicle during the deorbit sequence."""
 
@@ -1018,6 +1042,7 @@ class Flight:
             raise SystemExit("fly_sts134: OPS 301 did not complete (no DEORB MNVR COAST on CRT 1) "
                              "-- stopping before the deorbit targets are keyed")
         self.say("crew: OPS 301 (single G3)")
+        self.deorbit_hook("post-ops301")
         # TIG-45: the DEL PAD read up, the targets keyed on DEORB MNVR COAST
         self.wait_gmt(tig - 45 * 60.0)
         met = tig - T0
