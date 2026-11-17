@@ -499,6 +499,10 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         argv += [sc["stop"][0], o.get("stop") or sc["stop"][2]]
     if o.get("portview"):
         argv += ["--portview", "--portview-views" if sc["driver"] == "fly_sts134.py" else "--views", o["views"]]
+    if o.get("input") == "none" and sc["driver"] != "fly_sts134.py":
+        # the rendezvous, undocking and return drivers move the THC themselves and stop without a hand-controller window
+        print("(this scenario's autopilot moves the hand controllers: input virtual instead of none)")
+        o = dict(o, input="virtual")
     for k, flag in (("station", "--station"), ("input", "--input")):
         if o.get(k):
             argv += [flag, "all" if o[k] == "both" and k == "station" else o[k]]

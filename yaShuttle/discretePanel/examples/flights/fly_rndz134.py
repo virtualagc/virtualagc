@@ -3368,7 +3368,7 @@ def main():
     ap.add_argument("--layout", default=None, metavar="FILE",
                     help="simulatePASS --layout: where to place the windows (a file saved from "
                          "the manager's LAYOUT row); it wins over the capture's own layout")
-    ap.add_argument("--input", choices=("auto", "joystick", "virtual"), default=None,
+    ap.add_argument("--input", choices=("auto", "both", "joystick", "virtual"), default=None,
                     help="the hand controllers' input (simulatePASS --input): auto uses a "
                          "joystick if one is plugged in, and then draws no virtual controllers; "
                          "dock_autopilot.py uses virtual, so the THC's movements can be watched")

@@ -1092,6 +1092,31 @@ class Flight:
         self.pfd_up = True
         self.say("crew: A/E PFD on CRT 2")
 
+    # THE PFD ON CRT 2 FROM THE START OF EVERY FLOWN SCENARIO (owner, 2026-11-17: only the launch's terminal count and
+    # the entry set it up; a landing run from DEORBIT, and the orbit scenarios, left CRT 2 to the user).  Not for the
+    # IPL, UPLINK and IMU phases, which are the computer system's own and have nothing to fly.
+    PFD_FREE = ("IPL", "UPLINK", "IMU")
+    PFD_AE = ("COUNT", "TERMINAL", "ASCENT", "DEORBIT", "ENTRY", "LAND", "PRE-MNVR", "BURN", "TIG1", "EXEC")
+    ORBIT_PFD_ON_CRT2 = ("+1     idppower 2 on\n"
+                         "+10    edgekey crt2 1\n"          # UP: the main menu
+                         "+2     edgekey crt2 2\n"          # FLT INST
+                         "+2     edgekey crt2 3\n")         # ORBIT PFD
+
+    def pfd_at_start(self, first):
+        """CRT 2 on a PFD before the first phase: the A/E PFD for the launch and the descent, the ORBIT PFD for the
+        orbit scenarios.  With four CRTs the aft displays are the docking phase's own (dock_autopilot), so
+        pfd_up is left clear there and it still sets them up."""
+        if self.a.crts < 2 or first in self.PFD_FREE or getattr(self, "pfd_up", False):
+            return
+        if first in self.PFD_AE:
+            self.pfd_on_crt2()
+            return
+        self.play(self.ORBIT_PFD_ON_CRT2, "pfd-crt2-start")
+        self.script_done("pfd-crt2-start", 120)
+        if self.a.crts < 4:
+            self.pfd_up = True
+        self.say("crew: ORBIT PFD on CRT 2")
+
     def entry(self):
         t = getattr(self, "tgt", None) or json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
         self.wait_gmt(t["ei"] - 5 * 60.0)
@@ -1259,6 +1284,8 @@ class Flight:
         if getattr(self.a, "abort", None) in ("RTLS", "TAL") and "ASCENT" in phases:
             # no orbit: from the abort's ET SEP straight to the landing
             phases = phases[:phases.index("ASCENT") + 1] + (["LAND"] if "LAND" in phases else [])
+        if phases and not self.a.attach:
+            self.pfd_at_start(phases[0])
         for ph in phases:
             self.say("== %s" % ph)
             getattr(self, ph.lower())()
