@@ -609,6 +609,93 @@ static void dump_state_path(const BatchRunner *r, char *buf, size_t n) {
 }
 
 
+/* A LIVE MEMORY PATCH, asked for with the same SIGUSR1 as a snapshot.
+ *
+ * WHY.  A flight's own I-loads (the entry guidance's, say) are constants in
+ * an OPS overlay's memory image, and the overlay is resident only after the
+ * flight software has loaded it.  The generic volume holds the generic values,
+ * so the only way to the flown ones was to capture the vehicle, write the cells
+ * into the capture's memory file and start the simulation again -- a second
+ * splash screen in the middle of a scenario.  This writes them into the
+ * running computers instead.
+ *
+ * HOW.  The request is a text file, <--snapshot dir>/patch.request, one cell
+ * group per line: ADDR WAS NEW, the address in halfwords and WAS and NEW as hex
+ * halfword strings of equal length.  Whoever asks writes it BEFORE the signal,
+ * so a SIGUSR1 that finds the file is a patch and one that does not is a
+ * snapshot.  Every machine is parked at the rendezvous, as for a snapshot, and
+ * each applies the file to its OWN memory: a group is written only if the
+ * memory still holds WAS (a different build, or a cell the software has
+ * already changed, is left alone and counted), and counted as already done if
+ * it holds NEW.  Each machine leaves patch.done.<gpcId> -- "written same other"
+ * -- for the asker, who removes the request and the acknowledgements. */
+static bool patch_request_pending(const BatchRunner *r) {
+    if (r->opts == NULL || r->opts->snapshotDir == NULL) return false;
+    char path[512];
+    snprintf(path, sizeof path, "%s/patch.request", r->opts->snapshotDir);
+    FILE *f = fopen(path, "r");
+    if (f == NULL) return false;
+    fclose(f);
+    return true;
+}
+
+static int patch_hex(const char *s, size_t n, uint32_t *out, size_t max) {
+    /* n hex digits to halfwords; the count, or -1 if malformed */
+    if (n == 0 || n % 4 != 0 || n / 4 > max) return -1;
+    for (size_t i = 0; i < n / 4; i++) {
+        uint32_t v = 0;
+        for (int d = 0; d < 4; d++) {
+            char c = s[4 * i + d];
+            int x = (c >= '0' && c <= '9') ? c - '0' : (c >= 'a' && c <= 'f') ? c - 'a' + 10
+                  : (c >= 'A' && c <= 'F') ? c - 'A' + 10 : -1;
+            if (x < 0) return -1;
+            v = v << 4 | (uint32_t)x;
+        }
+        out[i] = v;
+    }
+    return (int)(n / 4);
+}
+
+static void batchrunner_apply_patch(BatchRunner *r) {
+    char path[512];
+    snprintf(path, sizeof path, "%s/patch.request", r->opts->snapshotDir);
+    FILE *f = fopen(path, "r");
+    int wrote = 0, same = 0, other = 0, bad = 0;
+    if (f != NULL) {
+        char line[4096];
+        uint32_t was[512], neu[512];
+        while (fgets(line, sizeof line, f) != NULL) {
+            char a[32], w[1100], n[1100];
+            if (line[0] == '#' || sscanf(line, "%31s %1099s %1099s", a, w, n) != 3) continue;
+            uint32_t addr = (uint32_t)strtoul(a, NULL, 16);
+            int nw = patch_hex(w, strlen(w), was, 512), nn = patch_hex(n, strlen(n), neu, 512);
+            if (nw < 0 || nw != nn) { bad++; continue; }
+            bool isWas = true, isNew = true;
+            for (int i = 0; i < nw; i++) {
+                uint32_t cur = membus_get16(r->age.gpc.cpu.ram, addr + (uint32_t)i) & 0xffff;
+                if (cur != was[i]) isWas = false;
+                if (cur != neu[i]) isNew = false;
+            }
+            if (isNew) same++;
+            else if (isWas) {
+                for (int i = 0; i < nw; i++)
+                    membus_set16(r->age.gpc.cpu.ram, addr + (uint32_t)i, neu[i], false);
+                wrote++;
+            } else other++;
+        }
+        fclose(f);
+    }
+    fprintf(stderr, "GPC%d PATCH at t=%.6f s: %d written, %d already there, %d neither (left alone)%s\n",
+            r->gpcId, r->age.gpc.cpu.elapsedTimeUs / 1e6, wrote, same, other,
+            f == NULL ? " -- no request file" : bad ? " -- malformed lines skipped" : "");
+    snprintf(path, sizeof path, "%s/patch.done.%d", r->opts->snapshotDir, r->gpcId);
+    FILE *d = fopen(path, "w");
+    if (d != NULL) {
+        fprintf(d, "%d %d %d\n", wrote, same, other);
+        fclose(d);
+    }
+}
+
 /* WRITE THIS COMPUTER'S CAPTURE, while the whole vehicle is parked.
  *
  * Called only between vehicle_pause_enter and vehicle_pause_exit, so every
@@ -669,6 +756,10 @@ static uint32_t batchrunner_find_run(MemoryBus *ram, const uint32_t *pat,
 static void batchrunner_write_capture(BatchRunner *r) {
     if (r->opts == NULL) return;
     const char *tag = vehicle_pause_tag(r->vehicle);
+    if (strcmp(tag, "patch") == 0) {
+        batchrunner_apply_patch(r);
+        return;
+    }
     /* A SIGUSR1 SNAPSHOT GOES IN A DIRECTORY, one pair of files per
      * computer, because that is what a restore reads back: a vehicle is
      * the set of its machines and naming them by their gpcId inside one
@@ -821,7 +912,8 @@ static void batchrunner_pause_point(BatchRunner *r) {
      * locks; see g_snapshot_requested. */
     if (g_snapshot_requested) {
         g_snapshot_requested = 0;
-        vehicle_pause_request(r->vehicle, "snapshot");
+        vehicle_pause_request(r->vehicle,
+                              patch_request_pending(r) ? "patch" : "snapshot");
     }
     /* A CAPTURE PUT OFF ASKS AGAIN.  Counted here rather than in the step
      * loop because a machine parked in the wait state still passes this
