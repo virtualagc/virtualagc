@@ -54,6 +54,7 @@
                 2023-08-20 RSB  Fixed OM/D bit in PIO 057.
                 2023-08-22 RSB  Fixed PIO 574 least-significant bits.
                 2025-07-17 RSB  Added HAS_ERRNO_H.
+                2026-11-18 RSB  Fixed a potential redefined `MSG_NOSIGNAL`.
  */
 
 #include <stdio.h>
@@ -73,9 +74,11 @@
 #endif
 #endif
 
+#ifndef MSG_NOSIGNAL
 #if (defined(__APPLE__) && defined(__MACH__)) || WIN32
 #define MSG_NOSIGNAL 0
 #endif
+#endif // 0
 
 /////////////////////////////////////////////////////////////////////////////////
 // Portable functions (*NIX and Win32) for working with sockets.
