@@ -231,6 +231,18 @@ if sys.platform.startswith('linux'):
                 os.environ.setdefault('GALLIUM_DRIVER', 'd3d12')
     except OSError:
         pass
+    # A Raspberry Pi 5 (BCM2712: Pi 5, Pi 500, Compute Module 5): its v3d driver
+    # stops at desktop GL 3.1 (the GPU has no tessellation or double-precision
+    # shaders), so the 4.1 core context asked for below is refused.  Have Mesa
+    # offer 4.1, as MEDS2.py does.  Matched on the chip, not on "Raspberry Pi",
+    # since a later Pi's GPU may not need it; a value already set is kept.
+    try:
+        with open('/proc/device-tree/compatible', 'rb') as _f:
+            if b'brcm,bcm2712' in _f.read().split(b'\0'):
+                os.environ.setdefault('MESA_GL_VERSION_OVERRIDE', '4.1')
+                os.environ.setdefault('MESA_GLSL_VERSION_OVERRIDE', '410')
+    except OSError:
+        pass
 
 try:
     from OpenGL import GL
@@ -1428,14 +1440,54 @@ def gl_errors():
     return out
 
 
+GL_LIMITS = {'max_tex': None}           # GL_MAX_TEXTURE_SIZE, read once in the GL thread (0: unknown)
+
+
+def max_texture_size():
+    """The largest texture side the GPU takes, px (0 if it would not say).  16384 on a desktop GPU; 4096 on a
+    Raspberry Pi 5, which refuses (GL_INVALID_VALUE) every 8192 and 16384 px map.  Needs a current context."""
+    if GL_LIMITS['max_tex'] is None:
+        try:
+            GL_LIMITS['max_tex'] = int(np.asarray(GL.glGetIntegerv(GL.GL_MAX_TEXTURE_SIZE)).ravel()[0])
+        except (GL.GLError, TypeError, ValueError):
+            GL_LIMITS['max_tex'] = 0
+        gl_errors()
+    return GL_LIMITS['max_tex']
+
+
+def half_image(img):
+    """img at half size, its own type kept.  8-bit images are summed in 16 bits, not converted to float: a
+    16384 x 8192 Blue Marble as float32 is 1.6 GB, too much for a 4 GB Pi."""
+    if img.dtype != np.uint8:
+        return halve(img).astype(img.dtype)
+    h, w = img.shape[0] // 2 * 2, img.shape[1] // 2 * 2
+    a = img[:h, :w]
+    s = a[0::2, 0::2].astype(np.uint16)
+    s += a[1::2, 0::2]
+    s += a[0::2, 1::2]
+    s += a[1::2, 1::2]
+    s += 2                                         # rounds, as clip(halve(img) + 0.5) did
+    s >>= 2
+    return s.astype(np.uint8)
+
+
 def upload(what, make, img, *a, **kw):
     """make(img, ...), a texture, checked: a failed upload or mipmap pass
     (out of memory, or a driver refusing to compress on upload) used to leave
     an incomplete texture that sampled black -- the Earth's mask with no
     imagery in it, and nothing said.  Now it is said, loudly, and tried again:
     without on-upload compression if the failure was not for memory, else at
-    half size, down to 1/8."""
+    half size, down to 1/8.  An image larger than the GPU's largest texture is
+    halved to fit first, with one line said, rather than failing and being
+    retried (which also turned off on-upload compression for every texture)."""
     gl_errors()                                    # not ours: clear them
+    lim, fit, w0, h0 = max_texture_size(), 1, img.shape[1], img.shape[0]
+    while lim and max(img.shape[:2]) > lim:
+        img = half_image(img)
+        fit *= 2
+    if fit > 1:
+        print("portview: %s %dx%d is larger than this GPU's largest texture (%d px): uploading it at 1/%d size" % (
+            what, w0, h0, lim, fit), file=sys.stderr, flush=True)
     scale = 1
     for _ in range(5):
         tid, why = None, None
@@ -1449,7 +1501,7 @@ def upload(what, make, img, *a, **kw):
             gl_errors()
         if why is None:
             if scale > 1:
-                print("portview: %s uploaded at 1/%d size" % (what, scale), file=sys.stderr, flush=True)
+                print("portview: %s uploaded at 1/%d size" % (what, scale * fit), file=sys.stderr, flush=True)
             return tid
         if tid is not None:
             GL.glDeleteTextures(1, [tid])
@@ -1465,8 +1517,7 @@ def upload(what, make, img, *a, **kw):
         if next_try.startswith("giving up"):
             return black_texture()
         if next_try == "trying half size":
-            img = halve(img).astype(img.dtype) if img.dtype != np.uint8 else \
-                np.clip(halve(img) + 0.5, 0, 255).astype(np.uint8)
+            img = half_image(img)
             scale *= 2
     return black_texture()
 
@@ -2797,6 +2848,15 @@ class SiteStream(object):
                 yield SITE_WAIT                             # waiting for the thread
             kind, k, chain = self.chains.pop(0)
             self.slots.release()
+            lim = max_texture_size()                        # levels the GPU cannot take: start at one it can
+            drop = 0
+            while lim and len(chain) - drop > 1 and max(chain[drop].shape[:2]) > lim:
+                drop += 1
+            if drop:
+                print("portview: site %s %s %d %dx%d is larger than this GPU's largest texture (%d px): "
+                      "uploading it at 1/%d size" % (s.name, kind, k, chain[0].shape[1], chain[0].shape[0],
+                                                     lim, 1 << drop), file=sys.stderr, flush=True)
+                chain = chain[drop:]
             tid = self.cur_tid = self._texture(chain, compress=(kind == 'ring' and k > 0))
             yield from self._fill(kind, k, chain, tid)
             (self.ring_tex if kind == 'ring' else self.patch_tex).append(tid)

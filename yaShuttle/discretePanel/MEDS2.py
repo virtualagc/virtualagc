@@ -42,6 +42,28 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
+
+def _pi5_gl_override():
+    """On a Raspberry Pi 5 (BCM2712: Pi 5, Pi 500, Compute Module 5), have Mesa offer the OpenGL 4.1 core
+    context the renderer asks for.  The Pi 5's v3d driver stops at desktop GL 3.1, because the GPU has no
+    tessellation or double-precision shaders, so a 4.1 request fails (EGL_BAD_MATCH) and no MDU window can
+    draw.  The renderer uses nothing the GPU lacks (its shaders are GLSL 330), and with the version raised
+    it draws correctly.  Matched on the chip, not on "Raspberry Pi", since a later Pi's GPU may not need it.
+    A value already in the environment is left alone.  Must run before Qt creates any GL context.
+    Returns whether this is a Pi 5 (MDUGLWidget has a second workaround for it)."""
+    try:
+        with open("/proc/device-tree/compatible", "rb") as f:
+            if b"brcm,bcm2712" not in f.read().split(b"\0"):
+                return False
+    except OSError:
+        return False            # no device tree: not a Pi (or not Linux)
+    os.environ.setdefault("MESA_GL_VERSION_OVERRIDE", "4.1")
+    os.environ.setdefault("MESA_GLSL_VERSION_OVERRIDE", "410")
+    return True
+
+
+_ON_PI5 = _pi5_gl_override()
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt, QTimer, QPoint, QPointF, QRectF, QSocketNotifier
 from PyQt6.QtGui import QSurfaceFormat, QColor
@@ -4336,6 +4358,16 @@ class MDUGLWidget(QOpenGLWidget):
         self.disp = disp
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # A RASPBERRY PI 5 BLANKED ABOUT HALF ITS FRAMES with the page cache on: the whole display black but
+        # for the header clock, on the repaints that only copy the cached page (the clock, the flash), never
+        # on a rebuild.  Qt clears the widget's framebuffer before every paintGL (NoPartialUpdate), and the
+        # Pi's tile-based v3d driver let that clear land AFTER _renderCached's blit, so the copy was wiped and
+        # only the clock drawn after it survived.  The cached pages themselves were sound (read back, never
+        # black), resetting blend/depth state before the blit did not help, and with the page cache off the
+        # fault was gone.  The cached path writes every pixel with its blit, so Qt's clear is not needed:
+        # 54 of 100 frames black on live traffic before, 0 of 100 after (2026-11-17).
+        if _ON_PI5 and _MEDS_CACHE:
+            self.setUpdateBehavior(QOpenGLWidget.UpdateBehavior.PartialUpdate)
 
     def initializeGL(self):
         prof = QOpenGLVersionProfile()
