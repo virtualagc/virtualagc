@@ -38,6 +38,7 @@ import threading
 import crewscript
 import time
 import traceback
+import weakref
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -2878,8 +2879,29 @@ class Object3D(object):
         self.name = ''
         self.userData = {}
         self.children = []
-        self.parent = None
+        self._parentRef = None
         self.matrixWorld = _IDENT4
+
+    # A WEAK REFERENCE, SO A DISCARDED SUBTREE IS FREED THE MOMENT IT IS
+    # DROPPED.  A strong one made every node and its parent a reference
+    # cycle, and the pages rebuild their meshes all the time, so each MEDS2
+    # left about 200,000 objects for the cyclic collector every half minute.
+    # A full collection holds the GIL while it runs: 320-520 ms on a
+    # Raspberry Pi 5, and the IDP's bus-pump thread then cannot answer a
+    # GPC poll.  yaGPC2 holds for a late reply for only 200 ms, so the poll
+    # timed out, PASS raised I/O ERROR CRT1/CRT2, and a keyboard message the
+    # IDP had already taken off its queue for that reply was lost (the
+    # SPEC 3 4 PRO that never reached PASS in rendezvous-20261118-084825).
+    # Nothing here keeps a parent alive through its child: every reader
+    # tests for None, then detaches or re-attaches the node.
+    @property
+    def parent(self):
+        r = self._parentRef
+        return r() if r is not None else None
+
+    @parent.setter
+    def parent(self, p):
+        self._parentRef = weakref.ref(p) if p is not None else None
 
     def add(self, o):
         if o is None:
