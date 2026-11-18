@@ -3964,7 +3964,9 @@ static int batchrunner_report_stop(BatchRunner *r) {
              r->age.gpc.cpu.timingPass2 ? "pass2" : "poo");
     batchrunner_info(r, msg);
     /* HOW LATE THE DISPLAY UNITS WERE, per bus: the margin against the hold's budget
-     * (YAGPC_PEER_HOLD_MS, 200 ms), which is where an I/O error ERROR CRT comes from. */
+     * (YAGPC_PEER_HOLD_MS, 200 ms), which is where an I/O ERROR CRT comes from.  "Expired" counts every hold whose own budget ran out, and the
+     * budget is 200 ms only for a bus that has been heard from: 50 ms on a bus trusted on a resume's say-so (an
+     * empty bus's one hold), 5 ms once part of a reply has arrived. */
     for (int b = 0; b < 25; b++) {
         const struct PeerHoldStats *s = &r->holdStats[b];
         if (s->n == 0) continue;
