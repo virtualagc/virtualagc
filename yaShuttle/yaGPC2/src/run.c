@@ -438,6 +438,16 @@ static bool run_peer_wait(void *ctx, int busID, bool gotAny) {
     /* A peer that answered slowly is not a stall either -- the wait state
      * the machine drops into next will make the time up (rtpacer.c).  This
      * used to rebase past PEER_HOLD_REBASE_MS and write the hold off. */
+    if (heldMs > 0.0 && busID >= 0 && busID < 25) {
+        static const double edge[8] = {1, 5, 10, 20, 50, 100, 150, 200};
+        struct PeerHoldStats *s = &r->holdStats[busID];
+        s->n++;
+        if (!got) s->expired++;
+        s->sumMs += heldMs;
+        if (heldMs > s->maxMs) s->maxMs = heldMs;
+        for (int k = 0; k < 8; k++)
+            if (heldMs >= edge[k]) s->atLeast[k]++;
+    }
     if (heldMs > 0.0 && yagpc_getenv("YAGPC_TIMEOUT_TRACE"))
         fprintf(stderr, "BCE%d PEER HOLD %.2f ms wall -> %s\n", busID, heldMs,
                 got ? "reply" : "none");
@@ -3953,6 +3963,18 @@ static int batchrunner_report_stop(BatchRunner *r) {
              r->age.gpc.cpu.elapsedTimeUs / 1000.0, r->age.gpc.cpu.elapsedTimeUs,
              r->age.gpc.cpu.timingPass2 ? "pass2" : "poo");
     batchrunner_info(r, msg);
+    /* HOW LATE THE DISPLAY UNITS WERE, per bus: the margin against the hold's budget
+     * (YAGPC_PEER_HOLD_MS, 200 ms), which is where an I/O error ERROR CRT comes from. */
+    for (int b = 0; b < 25; b++) {
+        const struct PeerHoldStats *s = &r->holdStats[b];
+        if (s->n == 0) continue;
+        snprintf(msg, sizeof msg,
+                 "--- PEER HOLDS BCE%d: %lld held, %lld expired unanswered, mean %.2f ms, max %.1f ms; "
+                 ">=1 ms %lld, >=5 %lld, >=10 %lld, >=20 %lld, >=50 %lld, >=100 %lld, >=150 %lld, >=200 %lld ---",
+                 b, s->n, s->expired, s->sumMs / (double)s->n, s->maxMs, s->atLeast[0], s->atLeast[1],
+                 s->atLeast[2], s->atLeast[3], s->atLeast[4], s->atLeast[5], s->atLeast[6], s->atLeast[7]);
+        batchrunner_info(r, msg);
+    }
     if (r->opts != NULL && r->opts->dumpState != NULL) {
         char dsPath[512];
         dump_state_path(r, dsPath, sizeof dsPath);

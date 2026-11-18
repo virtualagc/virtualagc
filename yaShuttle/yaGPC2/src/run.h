@@ -282,6 +282,15 @@ typedef struct {
     Triggers trig;
     double bigStepLastUs;   /* YAGPC_BIGSTEP_US; see run.c */
     bool failRecorded;      /* this computer's part of the failure record */
+    /* How late the peers (the display units, over --bce-network) answer: every
+     * hold of the machine in run_peer_wait, per bus, counted by its length
+     * (always on; one line per bus at the end of the run -- run.c). */
+    struct PeerHoldStats {
+        long long n;            /* holds (a reply was owed and overdue by 0.5 ms) */
+        long long expired;      /* holds that ended with no reply: an I/O error follows */
+        double sumMs, maxMs;
+        long long atLeast[8];   /* holds >= 1, 5, 10, 20, 50, 100, 150, 200 ms */
+    } holdStats[25];
 } BatchRunner;
 
 void batchrunner_init(BatchRunner *r, const Options *opts,
