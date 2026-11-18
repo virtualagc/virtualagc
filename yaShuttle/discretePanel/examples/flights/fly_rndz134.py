@@ -2490,7 +2490,7 @@ wait crt 1 title 2011/ timeout 600
                     "--orb", "%.4f" % go] + ["%.4f" % x for x in so] + \
                    ["--tgt", "%.4f" % gt] + ["%.4f" % x for x in stt] + \
                    ["--tig", "%.3f" % sol["T1_TIG_GMT"], "--dt", "%.6f" % (sol["COMP_PROX_DT"] / 60.0),
-                    "--offset", "%.6f,%.6f,%.6f" % tuple(offset)]
+                    "--offset=%.6f,%.6f,%.6f" % tuple(offset)]
             out = subprocess.run(args, capture_output=True, text=True)
             self.say("independent Lambert from %s (%s):\n%s%s"
                      % (name, label, out.stdout.rstrip(), out.stderr.rstrip()))
