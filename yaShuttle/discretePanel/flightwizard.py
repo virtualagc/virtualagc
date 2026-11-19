@@ -101,6 +101,18 @@ OPTIONS = {
 COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keys", "hold", "layout"]
 
 
+FLIGHT_SECONDS = {"ipl": 360, "prelaunch": 3000, "launch": 4400, "rtls": 2500, "tal": 3400, "rendezvous": 16600,
+                  "undock": 19800, "return": 151200, "landing": 8300}
+
+
+def duration_text(secs):
+    """'45 minutes', '1 hour 15 minutes', '4.6 hours', '42 hours'."""
+    if secs < 5400:
+        return "%d minutes" % (round(secs / 300.0) * 5 if secs >= 600 else round(secs / 60.0))
+    h = secs / 3600.0
+    return "%.1f hours" % h if h < 10 else "%d hours" % round(h)
+
+
 def scenario_table():
     t = {}
     t["ipl"] = dict(
@@ -161,6 +173,13 @@ def scenario_table():
         title="Coast on orbit: start at a time you name (the nearest snapshot before it, with the clocks running from there)",
         need="orbit", snap=None, capture=None, driver=None, args=[], stop=None, logsfx="", opts=COMMON + ["when"],
         note="No scripted burns or uplinks: the vehicle flies on as it was left.")
+    # How long each takes to fly, in simulated seconds.  The simulation runs in real time at rate 1, so this is also the
+    # time you will wait; a videoed run is usually cut down, and these are not.  Measured from the runs (the snapshot
+    # to the stop point): launch 12:37:28 -> OPS 2 about 73 min; RTLS 2484 s and TAL 3358 s to the wheels stopped.
+    for k, secs in FLIGHT_SECONDS.items():
+        t[k]["flight_s"] = secs
+        if "(about" not in t[k]["title"]:
+            t[k]["title"] += " (about %s at rate 1)" % duration_text(secs)
     return t
 
 
@@ -649,6 +668,10 @@ def main():
             sys.exit("flightwizard: unknown option %s (--list-options)" % k)
         mine[k] = coerce(k, v)
     changed = False
+    if sc.get("flight_s"):
+        print("Running time: about %s at rate %g (the simulation flies in real time at rate 1; any video of this scenario "
+              "was cut down, this run is not)." % (duration_text(sc["flight_s"] / max(float(mine.get("rate") or 1.0), 1e-9)),
+                                                    float(mine.get("rate") or 1.0)))
     if not a.yes and not a.set:
         print("Settings for this scenario (remembered from last time where you changed them):")
         for k in visible(sc, mine):
