@@ -29,7 +29,8 @@
 ##		2025-06-19 ZP	Corrections to whitepsace in comments (pg: 318-328).
 ##		2025-06-25 ZP	Corrections to whitespace in comments (pg: 329-349).
 ##		2025-06-26 RSB	Recorrected DSPOCTWD.
-##		2025-11-17 ZP	Corrections to whitespace in comments (pg: 350-360).
+##		2026-11-17 ZP	Corrections to whitespace in comments (pg: 350-360).
+##		2026-11-18 ZP   Corrections to whitespace in comments (pg: 360-370).
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
