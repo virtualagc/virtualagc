@@ -869,6 +869,11 @@ MARCO_FRAME_OFFSET = (22, 80)
 # windows() must run before geometry() is trusted on WSL; every flow here
 # (show, save, restore, place) lists first.
 _WESTON = False
+try:
+    _ON_WSL = (os.path.isdir("/mnt/wslg")
+               or "microsoft" in os.uname().release.lower())
+except AttributeError:                      # Windows has no os.uname
+    _ON_WSL = False
 
 
 # WSLg's OWN SCALE.  At a whole-number Windows scaling -- 200%, 300% -- WSLg
@@ -999,7 +1004,14 @@ def windows():
         return [w for w in _win_windows() if not WSLG_SUFFIX.search(w.get("title", ""))]
     out = []
     listing = run(["wmctrl", "-lpG"])
-    if not listing.strip() and _no_client_list():
+    # ON WSL ONLY.  Elsewhere an empty listing is a moment, not a desktop:
+    # labwc's own desktop and panel are Wayland windows, so its X client list
+    # is empty until the first X window maps, and a wmctrl timed out under
+    # the load of a start-up lists nothing too.  Taken for WSLg, that latched
+    # _WESTON for the life of the manager, every window was measured with
+    # MARCO_FRAME_OFFSET added, and a restore put the whole layout 22,80 up
+    # and to the left (Raspberry Pi OS, 2026-11-19).
+    if not listing.strip() and _ON_WSL and _no_client_list():
         global _WESTON
         _WESTON = True
         listing = _listing_without_wmctrl()
