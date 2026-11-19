@@ -184,7 +184,7 @@ def scenario_table():
     t["rendezvous"] = dict(
         title="Rendezvous with the ISS and docking, from the ground uplink on flight day 3 to the hard mate",
         need="orbit", snap="ST4-rndz-dock-T1no136/sts134r-uplink", capture="sts134r-uplink", driver="fly_return.py",
-        args=["--from", "RNDZNAV", "--targets", TARGETS], stop=("--to", ["STAY"], "STAY"), logsfx="", opts=COMMON + ["predictor"],
+        args=["--from", "RNDZNAV", "--targets", TARGETS], stop=("--to", ["DOCK"], "DOCK"), logsfx="", opts=COMMON + ["predictor"],
         crts_default=4, views_default="front,up,left,right,cctv,rpop", note="About 4.6 hours of flight time.")
     t["undock"] = dict(
         title="Undocking and fly-around, from the hatch closed to the separation burn SEP3",
@@ -559,7 +559,10 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
             "--port-base", str(base), "--rate", "%g" % float(o["rate"]), "--size", str(size), "--crts", str(o["crts"])]
     argv += sc["args"]
     if sc["stop"]:
-        argv += [sc["stop"][0], o.get("stop") or sc["stop"][2]]
+        # A REMEMBERED STOP NO LONGER OFFERED gives way to the default: the
+        # rendezvous used to stop at STAY, and its saved settings kept it there.
+        stop = o.get("stop") if o.get("stop") in sc["stop"][1] else sc["stop"][2]
+        argv += [sc["stop"][0], stop]
     if o.get("portview"):
         argv += ["--portview", "--portview-views" if sc["driver"] == "fly_sts134.py" else "--views", o["views"]]
     if o.get("input") == "none" and sc["driver"] != "fly_sts134.py":
