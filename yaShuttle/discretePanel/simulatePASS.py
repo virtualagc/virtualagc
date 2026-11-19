@@ -2167,6 +2167,18 @@ def main():
     # -- window placement ----------------------------------------------------
     wsl = on_wsl()
     wslg_s = wslg_raw = 1
+    if (not wsl and sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY")
+            and os.environ.get("DISPLAY")):
+        # A WAYLAND DESKTOP WITH XWAYLAND (Raspberry Pi OS's labwc): left to itself Qt opens
+        # MEDS2's displays and rpop.py as Wayland windows, which windowLayout.py (X11 tools)
+        # cannot see, so a --layout never placed them and a saved one left them out (owner,
+        # 2026-11-19).  X11 first, as on WSL; portview.py already chooses it for itself.
+        # MEDS2 draws under it on a Pi 5 (checked the same day).
+        os.environ.setdefault("QT_QPA_PLATFORM", "xcb;wayland")
+        missing = [t for t in ("wmctrl", "xdotool", "xprop", "xwininfo") if not shutil.which(t)]
+        if missing:
+            log("%s not installed, so layouts are neither saved nor restored; to fix:  "
+                "sudo apt install wmctrl xdotool x11-utils" % ", ".join(missing))
     if wsl:
         wslg_prepare()
         wslg_s = wslg_raw = windowLayout.wslg_output_scale()
