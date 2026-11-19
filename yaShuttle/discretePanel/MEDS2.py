@@ -25,6 +25,7 @@ core through Qt's own GL function wrappers.
 
 import argparse
 import ctypes
+import gc
 import heapq
 import json
 import math
@@ -3664,6 +3665,7 @@ class GLRenderer(object):
 
         _t0 = time.perf_counter()
         walk(scene, np.eye(4, dtype=np.float64) if rootMatrix is None else rootMatrix)
+        del walk  # a nested recursive function is a cycle through its own cell; see _iter_descendants
         _t1 = time.perf_counter()
 
         # three.js painterSortStable / reversePainterSortStable
@@ -4107,6 +4109,7 @@ def _svg_all_elements(path):
             out.append(c)
             walk(c)
     walk(root)
+    del walk  # see _iter_descendants
     return out
 
 
@@ -4358,6 +4361,12 @@ def _iter_descendants(e):
             out.append(c)
             walk(c)
     walk(e)
+    # A NESTED FUNCTION THAT CALLS ITSELF is a reference cycle (the function, the cell that
+    # names it), and the cycle holds whatever it closes over -- here `out`; in the renderer a
+    # frame's meshes.  Only a full collection would free them, and on a Raspberry Pi 5 a full
+    # collection that finds tens of thousands of objects holds the GIL for 100-180 ms, long
+    # enough to miss a bus poll.  Deleting the name empties the cell and breaks the cycle.
+    del walk
     return out
 
 
@@ -4918,6 +4927,7 @@ class VectorDisplay(object):
                 elif child.children:
                     walk(child, host, cm)
         walk(root, root, _IDENT4)
+        del walk  # see _iter_descendants
         if len(items) < 2:
             return root
         items.sort(key=lambda e: (e['ro'], e['mesh'].id))
@@ -9010,6 +9020,7 @@ class Screen_AE_PFD(MDUScreen):
             for c in list(o.children):
                 walk(c)
         walk(grp)
+        del walk  # see _iter_descendants
 
     def _redo(self, grp, builder):
         """Swap one data-driven group for a freshly built one."""
@@ -15465,6 +15476,22 @@ def main(argv=None):
     if not runner.windows and not runner.lrus:
         sys.stderr.write("meds: nothing to launch\n")
         return 2
+
+    # FREEZE WHAT HAS SURVIVED, so full collections skip it.  Nearly every object a running
+    # MEDS2 tracks (some 50,000: pages, fonts, meshes, Qt wrappers) lives as long as the
+    # process, yet a generation-2 collection walked them all every minute or so: 40-55 ms
+    # with the GIL held on a Raspberry Pi 5, time the BusPump thread could not answer a
+    # poll in (see Object3D.parent).  gc.freeze() moves them to a generation no collection
+    # visits; reference counting still frees them.  The first freeze waits for the pages to
+    # draw; later ones take what a minute of running has made permanent.  The cost: a
+    # cycle frozen while alive is never reclaimed if it dies later, which is rare now that
+    # scene nodes hold no cycles.  NSTS_MEDS_GC_FREEZE=0 turns it off.
+    if os.environ.get("NSTS_MEDS_GC_FREEZE", "1") != "0":
+        def _gcFreeze():
+            gc.collect()
+            gc.freeze()
+            QTimer.singleShot(60000, _gcFreeze)
+        QTimer.singleShot(20000, _gcFreeze)
     return app.exec()
 
 
