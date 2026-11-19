@@ -99,6 +99,14 @@ class Return(U.Undock):
         # restoring the env var's capture there put the vehicle back at TIG-75 min (AB18, AB20, 2026-11-10)
         alt = None if getattr(self, "_started_once", False) else (os.environ.get("RETURN_COAST_FROM") or os.environ.get("RETURN_RESUME_FROM"))
         self._started_once = True
+        # a capture taken in the deorbit sequence carries the ground's targets (fly_sts134.snapshot); the phases after
+        # DEORBIT read them from --logs
+        src = alt or resume
+        tg = os.path.join(src, "deorbit-targets.json") if src else None
+        dst = os.path.join(self.a.logs, "deorbit-targets.json")
+        if tg and os.path.isfile(tg) and not os.path.isfile(dst):
+            import shutil
+            shutil.copy(tg, dst)
         return super().start(alt or resume)
 
     # --- the coast: SEP3 to the deorbit preparations, flown ---------------------------------------------------
@@ -251,6 +259,19 @@ class Return(U.Undock):
         self.say("crew: OPS 303, MNVR to EI attitude")
         self.check_burn()
 
+    def ei(self):
+        """The capture sts134r-ei (OPS 304 done, EI ahead) itself, taken inside ENTRY; nothing to do."""
+
+    def eifly(self):
+        """--from EIFLY: from sts134r-ei, EI to the TAEM interface, then LAND in the same run (run it with --to EIFLY, as
+        EXEC is, since the stage is past LAND in the phase list)."""
+        self.tgt = json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
+        self.pfd_on_crt2()
+        self.entry_fly()
+        self.snapshot("entry")
+        self.say("== LAND")
+        self.land()
+
     def tig1(self):
         """The capture sts134r-tig1 (TIG-60 s) itself, taken inside DEORBIT; nothing to do."""
 
@@ -349,7 +370,7 @@ class Return(U.Undock):
 
 
 # the capture each --from restores, where OPS 3 is already resident (MM 302 onward), so its G3 is never reloaded from the volume
-OPS3_CAPTURES = {"EXEC": "tig1", "TIG1": "tig1", "BURN": "pre-mnvr", "ENTRY": "deorbit", "LAND": "entry"}
+OPS3_CAPTURES = {"EXEC": "tig1", "TIG1": "tig1", "BURN": "pre-mnvr", "ENTRY": "deorbit", "EIFLY": "ei", "LAND": "entry"}
 
 
 def flown_entry_iloads():
@@ -373,7 +394,7 @@ def main():
     flown_entry_iloads()
     setattr(Return, "pre-mnvr", lambda self: None)       # the capture --from BURN restores
     for ph in ("START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3",      # fly_undock's, so that COAST resumes from sts134r-sep3
-               "COAST", "READY", "ORBIT", "DEORBIT", "ENTRY", "LAND", "PRE-MNVR", "BURN", "TIG1", "EXEC"):
+               "COAST", "READY", "ORBIT", "DEORBIT", "ENTRY", "LAND", "EI", "EIFLY", "PRE-MNVR", "BURN", "TIG1", "EXEC"):
         if ph not in R.PHASES:
             R.PHASES.append(ph)
     for a, v in (("--rhc", "both"), ("--station", "all"), ("--input", "virtual")):

@@ -57,6 +57,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -599,6 +600,14 @@ class Flight:
         target = os.path.join(self.a.logs, FL["name"] + "-" + name)
         crewscript.send_session("save %s" % target, self.base)
         self.wait_file(os.path.join(target, "vehicle.json"), "{", 180)
+        # the ground's deorbit targets are not in the vehicle: carry them with the capture, so that a start from this
+        # snapshot, made anywhere, has them (fly_return.Return.start copies them back)
+        tg = os.path.join(self.a.logs, "deorbit-targets.json")
+        if os.path.isfile(tg):
+            try:
+                shutil.copy(tg, os.path.join(target, "deorbit-targets.json"))
+            except OSError:
+                pass
         self.say("captured %s" % target)
 
     def log_text(self):
@@ -1143,6 +1152,11 @@ class Flight:
         self.say("crew: ORBIT PFD on CRT 2")
 
     def entry(self):
+        self.entry_ei()
+        self.snapshot("ei")             # OPS 304 and the HORIZ SIT / atmosphere items done, EI about 5 minutes ahead: --from EIFLY
+        self.entry_fly()
+
+    def entry_ei(self):
         t = getattr(self, "tgt", None) or json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
         self.wait_gmt(t["ei"] - 5 * 60.0)
         self.play(ENTRY_OPS304, "ops304")
@@ -1159,6 +1173,10 @@ class Flight:
         self.script_done("atmosphere", 60)
         self.say("crew: G51 SEL ATMOSPHERE, ITEM %d (ENT/134/FIN FS 3-7, inclination > 50 deg, N descending)" % item)
         self.pfd_on_crt2()
+
+    def entry_fly(self):
+        """The rest of ENTRY, from the EI capture (--from EIFLY) or straight on: GPS and air data at V = 7K, to EI + 25 min."""
+        t = getattr(self, "tgt", None) or json.load(open(os.path.join(self.a.logs, "deorbit-targets.json")))
         # V = 7K: GPS INCORPORATE (Entry Checklist FS 3-34)
         while True:
             tr = self.truth()

@@ -107,34 +107,34 @@ FLIGHT_SECONDS = {"ipl": 360, "prelaunch": 3000, "launch": 4400, "rtls": 2500, "
 
 
 # WHERE TO BEGIN.  A scenario starts at its first snapshot; a person who wants the action, not the hours of floating before
-# it, can name a later one.  (id, what you get, snapshot in the set, the driver's --from stage, seconds left to fly.)  The
+# it, can name a later one.  (id, what you get, snapshot in the set, the driver's --from stage, seconds left to fly, and the --to it needs if any.)  The
 # stage is the one that restores that snapshot (a stage restores the capture before it); seconds are measured from the
 # runs (rendezvous: GMT of each snapshot to the hard mate at 138/10:42:31; landing: capture times of a full run to the
 # wheels stopped).  A start whose snapshot is not in your set is not offered.
 STARTS = {
     "rendezvous": [
         ("uplink", "the ground uplink on flight day 3, the ISS still hours away (the whole rendezvous)",
-         "ST4-rndz-dock-T1no136/sts134r-uplink", "RNDZNAV", 16600),
+         "ST4-rndz-dock-T1no136/sts134r-uplink", "RNDZNAV", 16600, None),
         ("arrival", "ARRIVAL, after the last mid-course correction, closing on the ISS",
-         "ST4-rndz-dock-T1no136/sts134r-arrival", "RBAR", 5500),
+         "ST4-rndz-dock-T1no136/sts134r-arrival", "RBAR", 5500, None),
         ("rpm", "the R-bar pitch maneuver (RPM), the ISS close enough to see",
-         "ST4-rndz-dock-T1no136/sts134r-rbar", "RPM", 4400),
+         "ST4-rndz-dock-T1no136/sts134r-rbar", "RPM", 4400, None),
         ("vbar", "on the V-bar, the final approach",
-         "ST4-rndz-dock-T1no136/sts134r-vbar", "HOLD", 2300),
+         "ST4-rndz-dock-T1no136/sts134r-vbar", "HOLD", 2300, None),
         ("dock30", "30 feet out, the last stretch to the hard mate",
-         "ST4-rndz-dock-T1no136/sts134r-dock30", "DOCK", 1200),
+         "ST4-rndz-dock-T1no136/sts134r-dock30", "DOCK", 1200, None),
     ],
     "landing": [
         ("ops301", "OPS 301 at TIG minus 75 minutes, the deorbit preparations (the whole descent)",
-         "ST5-deorbit-prep/sts134r-pre-ops301", "DEORBIT", 8300),
-        ("burn", "the deorbit burn about to be set up (pre-maneuver)",
-         "ST5-deorbit-prep/sts134r-pre-mnvr", "BURN", 5200),
-        ("exec", "TIG minus 60 seconds, the deorbit burn",
-         "ST5-deorbit-prep/sts134r-tig1", "EXEC", 4250),
-        ("ei", "after the burn, coasting to entry interface",
-         "ST5-deorbit-prep/sts134r-deorbit", "ENTRY", 3650),
+         "ST5-deorbit-prep/sts134r-pre-ops301", "DEORBIT", 8300, None),
+        ("exec", "TIG minus 60 seconds, the deorbit burn about to be executed",
+         "ST5-deorbit-prep/sts134r-tig1", "EXEC", 4250, "EXEC"),
+        ("postburn", "after the burn, coasting to entry interface",
+         "ST5-deorbit-prep/sts134r-deorbit", "ENTRY", 3650, None),
+        ("ei", "entry interface about 5 minutes ahead (OPS 304 done): the entry, S-turns and all, to the wheels stopped",
+         "ST5-deorbit-prep/sts134r-ei", "EIFLY", 2200, "EIFLY"),
         ("taem", "the Terminal Area Energy Management (TAEM) interface: the approach and landing",
-         "ST5-deorbit-prep/sts134r-entry", "LAND", 450),
+         "ST5-deorbit-prep/sts134r-entry", "LAND", 450, None),
     ],
 }
 
@@ -723,8 +723,10 @@ def main():
         if chosen:
             args = list(sc["args"])
             args[args.index("--from") + 1] = chosen[3]
-            sc = dict(sc, snap=chosen[2], capture=chosen[3] and "sts134r-" + chosen[2].rsplit("sts134r-", 1)[1],
-                      args=args, flight_s=chosen[4])
+            sc = dict(sc, snap=chosen[2], capture="sts134r-" + chosen[2].rsplit("sts134r-", 1)[1], args=args, flight_s=chosen[4])
+            if chosen[5]:                           # a stage past LAND in the phase list stops at itself (--to), not at LAND
+                sc["stop"] = None
+                sc["args"] = args + ["--to", chosen[5]]
             if chosen is not offered[0]:
                 sc["also"] = []
     if sc.get("flight_s"):
