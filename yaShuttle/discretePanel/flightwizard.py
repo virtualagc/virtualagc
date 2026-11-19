@@ -88,9 +88,9 @@ OPTIONS = {
     "stargain": ("star/planet brightness (e.g., 1.0 for 4K, 0.7 for 1080p)", float, 1.0),
     "station":  ("crew station (fwd, aft, both, auto)", str, "both"),
     "input":    ("hand controllers (joystick, virtual, both, auto, none)", str, "virtual"),
-    "keys":     ("RHC/THC hotkey file (blank for the built-in keys; --hand-controllers makes local/hand-keys.json)", str, ""),
+    "keys":     ("RHC/THC hotkey file (- for the built-in keys; --hand-controllers makes local/hand-keys.json)", str, ""),
     "hold":     ("wait for Enter before starting (True) or start immediately (False)", bool, True),
-    "layout":   ("user-interface layout (blank for none)", str, ""),
+    "layout":   ("user-interface layout (- for none)", str, ""),
     "predictor": ("RPOP predictor (coast or hold)", str, "coast"),
     "engine":   ("failing main engine (1-3)", int, 2),
     "failat":   ("seconds after liftoff at which it fails", float, 150.0),
@@ -99,6 +99,8 @@ OPTIONS = {
     "start":    ("where to begin (a start named in the list above)", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
 }
+# Settings that may be emptied again: "-" at their prompt (a blank answer keeps the old value).
+CLEARABLE = ("layout", "keys")
 COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keys", "hold", "layout"]
 
 
@@ -265,7 +267,7 @@ class Asker:
         self.yes = yes
         self.presets = presets                  # --set key=value, applied after the remembered values
 
-    def ask(self, prompt, default, kind=str, choices=None):
+    def ask(self, prompt, default, kind=str, choices=None, clearable=False):
         shown = ("yes" if default else "no") if kind is bool else default
         if self.yes:
             return default
@@ -276,6 +278,10 @@ class Asker:
                 sys.exit("\nflightwizard: no answer (standard input closed)")
             if raw == "":
                 return default
+            # A BLANK ANSWER KEEPS THE REMEMBERED VALUE, so a text setting once given (a layout,
+            # a hotkey file) could not be taken away again; "-" clears it (owner, 2026-11-19).
+            if raw == "-" and clearable:
+                return ""
             try:
                 if kind is bool:
                     if raw.lower() in ("y", "yes", "1", "true"):
@@ -756,11 +762,11 @@ def main():
                 if k == "when":
                     mine[k] = asker.ask(q, mine.get(k) or "", str)
                 else:
-                    mine[k] = asker.ask(q, mine[k], kind)
+                    mine[k] = asker.ask(q, mine[k], kind, clearable=k in CLEARABLE)
             if "stop" in visible(sc, mine):
                 mine["stop"] = asker.ask("%s (%s)" % (OPTIONS["stop"][0], ", ".join(sc["stop"][1])), mine["stop"], str, sc["stop"][1])
     if mine.get("keys") and not os.path.isfile(os.path.join(HERE, mine["keys"])):
-        sys.exit("flightwizard: no hotkey file %s (relative to %s; blank for the built-in keys)" % (mine["keys"], HERE))
+        sys.exit("flightwizard: no hotkey file %s (relative to %s; - at the prompt for the built-in keys)" % (mine["keys"], HERE))
     if mine.get("layout") and not os.path.isfile(os.path.join(HERE, mine["layout"])):
         sys.exit("flightwizard: no layout %s in %s" % (mine["layout"], HERE))
     if "when" in mine and not mine["when"]:
