@@ -96,6 +96,7 @@ OPTIONS = {
     "failat":   ("seconds after liftoff at which it fails", float, 150.0),
     "runway":   ("RTLS runway (15 or 33)", int, 15),
     "stop":     ("milestone at which to end the simulation", str, ""),
+    "start":    ("where to begin (a start named in the list above)", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
 }
 COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "station", "input", "keys", "hold", "layout"]
@@ -103,6 +104,39 @@ COMMON = ["rate", "size", "crts", "portview", "views", "starcore", "stargain", "
 
 FLIGHT_SECONDS = {"ipl": 360, "prelaunch": 3000, "launch": 4400, "rtls": 2500, "tal": 3400, "rendezvous": 16600,
                   "undock": 19800, "return": 151200, "landing": 8300}
+
+
+# WHERE TO BEGIN.  A scenario starts at its first snapshot; a person who wants the action, not the hours of floating before
+# it, can name a later one.  (id, what you get, snapshot in the set, the driver's --from stage, seconds left to fly.)  The
+# stage is the one that restores that snapshot (a stage restores the capture before it); seconds are measured from the
+# runs (rendezvous: GMT of each snapshot to the hard mate at 138/10:42:31; landing: capture times of a full run to the
+# wheels stopped).  A start whose snapshot is not in your set is not offered.
+STARTS = {
+    "rendezvous": [
+        ("uplink", "the ground uplink on flight day 3, the ISS still hours away (the whole rendezvous)",
+         "ST4-rndz-dock-T1no136/sts134r-uplink", "RNDZNAV", 16600),
+        ("arrival", "ARRIVAL, after the last mid-course correction, closing on the ISS",
+         "ST4-rndz-dock-T1no136/sts134r-arrival", "RBAR", 5500),
+        ("rpm", "the R-bar pitch maneuver (RPM), the ISS close enough to see",
+         "ST4-rndz-dock-T1no136/sts134r-rbar", "RPM", 4400),
+        ("vbar", "on the V-bar, the final approach",
+         "ST4-rndz-dock-T1no136/sts134r-vbar", "HOLD", 2300),
+        ("dock30", "30 feet out, the last stretch to the hard mate",
+         "ST4-rndz-dock-T1no136/sts134r-dock30", "DOCK", 1200),
+    ],
+    "landing": [
+        ("ops301", "OPS 301 at TIG minus 75 minutes, the deorbit preparations (the whole descent)",
+         "ST5-deorbit-prep/sts134r-pre-ops301", "DEORBIT", 8300),
+        ("burn", "the deorbit burn about to be set up (pre-maneuver)",
+         "ST5-deorbit-prep/sts134r-pre-mnvr", "BURN", 5200),
+        ("exec", "TIG minus 60 seconds, the deorbit burn",
+         "ST5-deorbit-prep/sts134r-tig1", "EXEC", 4250),
+        ("ei", "after the burn, coasting to entry interface",
+         "ST5-deorbit-prep/sts134r-deorbit", "ENTRY", 3650),
+        ("taem", "the Terminal Area Energy Management (TAEM) interface: the approach and landing",
+         "ST5-deorbit-prep/sts134r-entry", "LAND", 450),
+    ],
+}
 
 
 def duration_text(secs):
@@ -170,7 +204,7 @@ def scenario_table():
         opts=COMMON, also=[("ST5-deorbit-prep/sts134r-orbit", "sts134r-orbit")], resume_env="RETURN_RESUME_FROM",
         note="About 2.3 hours of flight time.")
     t["coast"] = dict(
-        title="Coast on orbit: start at a time you name (the nearest snapshot before it, with the clocks running from there)",
+        title="Coast on orbit: start at a time you name (flown from the nearest snapshot before it; the wait is shown once you name the time)",
         need="orbit", snap=None, capture=None, driver=None, args=[], stop=None, logsfx="", opts=COMMON + ["when"],
         note="No scripted burns or uplinks: the vehicle flies on as it was left.")
     # How long each takes to fly, in simulated seconds.  The simulation runs in real time at rate 1, so this is also the
@@ -421,6 +455,10 @@ def parse_when(text, rows):
     return met, day * 86400 + h * 3600 + mi * 60 + s
 
 
+def met_when(text):
+    return text.strip().upper().startswith("M")
+
+
 def row_seconds(row, met):
     key = "met" if met else "gmt"
     t = row.get(key)
@@ -668,6 +706,27 @@ def main():
             sys.exit("flightwizard: unknown option %s (--list-options)" % k)
         mine[k] = coerce(k, v)
     changed = False
+    start = mine.pop("start", "")
+    if scn_id in STARTS:
+        have = {r["name"] for r in (snapshot_rows() if not a.list_options else [])}
+        offered = [x for x in STARTS[scn_id] if x[2] in have]
+        if start and start not in [x[0] for x in offered]:
+            sys.exit("flightwizard: no start '%s' for %s in your snapshot set (here: %s)" %
+                     (start, scn_id, ", ".join(x[0] for x in offered)))
+        if len(offered) > 1:
+            if not start:
+                print("Where to begin?  (a later start skips the flight before it)")
+                for x in offered:
+                    print("  %-8s %s -- about %s at rate 1" % (x[0], x[1], duration_text(x[4])))
+                start = asker.ask("Start", offered[0][0], str, [x[0] for x in offered])
+        chosen = next((x for x in offered if x[0] == start), offered[0] if offered else None)
+        if chosen:
+            args = list(sc["args"])
+            args[args.index("--from") + 1] = chosen[3]
+            sc = dict(sc, snap=chosen[2], capture=chosen[3] and "sts134r-" + chosen[2].rsplit("sts134r-", 1)[1],
+                      args=args, flight_s=chosen[4])
+            if chosen is not offered[0]:
+                sc["also"] = []
     if sc.get("flight_s"):
         print("Running time: about %s at rate %g (the simulation flies in real time at rate 1; any video of this scenario "
               "was cut down, this run is not)." % (duration_text(sc["flight_s"] / max(float(mine.get("rate") or 1.0), 1e-9)),
@@ -726,6 +785,12 @@ def main():
         print("Starting at snapshot %s (GMT %s, MET %s): %.1f minutes before the time you asked for; at rate %g that is "
               "%.1f minutes of waiting." % (row["name"], row.get("gmt"), row.get("met", "-"), off / 60.0, mine["rate"],
                                            off / 60.0 / max(float(mine["rate"]), 1e-9)))
+        first = min((r for r in rows if not r["set"].startswith(("IPL", "ST6")) and row_seconds(r, met_when(mine["when"])) is not None),
+                    key=lambda r: row_seconds(r, met_when(mine["when"])), default=None)
+        if first is not None and first is not row:
+            span = parse_when(mine["when"], rows)[1] - row_seconds(first, met_when(mine["when"]))
+            print("(From the earliest snapshot, %s, GMT %s, the same time would be %s of flying at rate %g.)" %
+                  (first["name"], first.get("gmt"), duration_text(span / max(float(mine["rate"]), 1e-9)), float(mine["rate"])))
     else:
         row = next((r for r in rows if r["name"] == sc["snap"]), None)
         if row is None:
