@@ -2003,6 +2003,11 @@ def main():
                          "(windowLayout.py save FILE writes one).  If it names the caption "
                          "box and none is running, one is started first: subtitles.py "
                          "--font-size 14 --bg #404040 --edit")
+    ap.add_argument("--snapshot-layout", action="store_true",
+                    help="on a resume, put the windows where the capture's own layout.json "
+                         "says (its places AND sizes) when no --layout is given.  Off by "
+                         "default: a capture records the screen it was taken on, which for "
+                         "the distributed snapshots is not this one")
     ap.add_argument("--keys", metavar="FILE", help="timed keystrokes (see above)")
     ap.add_argument("--no-audio", action="store_true",
                     help="ignore every 'audio' line in a crew script: the file is not "
@@ -2267,21 +2272,38 @@ def main():
     if wsl and wslg_s >= 2:
         tk_font_scale = wslg_s
     size = args.size
+    # A LINUX DESKTOP AT SCALE 1 (a Raspberry Pi's, for one) draws the displays at their
+    # device-independent size, half of what they are on the scale-2 desktop the --size values
+    # were chosen on, while the Tk windows' sizes are physical pixels -- so the keyboards,
+    # panels, hand controllers and CAM came out twice as large beside the MDUs, and their text,
+    # drawn at that desktop's 96 dpi, half as large in them (owner, 2026-11-19).  As on macOS:
+    # the Tk windows are given half the size, and their text, which they size from the window,
+    # is doubled back.  Only their sizes: their places are physical pixels as before.  WSL is
+    # left alone (it doubles the displays instead, wslg_scale), and so is an explicit
+    # --window-scale.
+    tk_size_div = 1
+    if (sys.platform.startswith("linux") and not wsl and ws_auto == 1
+            and not args.window_scale and not os.environ.get("QT_SCALE_FACTOR")):
+        tk_size_div = 2
+        tk_font_scale = 2
+        log("display scale 1: the panel, keyboard, hand-controller and CAM windows are drawn "
+            "at half their --size, matching the displays")
+    tk_sz = int(round(size / float(tk_size_div)))         # --size for the Tk windows
     # MEDS2's IDP pane, in Qt pixels: hidden unless NSTS_MDU_PANE=1, since
     # panelO6.py has those switches.
     pane = int(round(180.0 * size / 768 / ws)) if os.environ.get("NSTS_MDU_PANE") == "1" else 0
     mdu_w = size + pane + 16                               # Qt pixels
     crt_pos = [(k * (mdu_w + 32), 0) for k in range(args.crts)]
     right = args.crts * (mdu_w + 32) * ws + 20             # physical pixels
-    kb_w = int(round(509.0 * size / 768))
-    o6_w = int(round(1684.0 * size / 768))                 # panelO6.py REF_W, with C2
+    kb_w = int(round(509.0 * tk_sz / 768))
+    o6_w = int(round(1684.0 * tk_sz / 768))                 # panelO6.py REF_W, with C2
     kb_side_by_side = True
     kbs_w = args.keyboards * (kb_w + 20)
     kb_geom = "+%d+0" % right
     o6_geom = "+%d+0" % (right + kbs_w)
     cam_x = right + kbs_w + o6_w + 20
     cam_geom = "+%d+0" % cam_x
-    cam_size = int(round(size * 0.75))
+    cam_size = int(round(tk_sz * 0.75))
     # SIDE BY SIDE IF IT FITS, AND OTHERWISE DON'T TRY HARD.  Several full
     # windows rarely fit one screen; when they don't, each kind of window gets
     # a stack of its own (below), so every title bar can still be grabbed.
@@ -2289,7 +2311,7 @@ def main():
     # An MDU window is the display plus MEDS2's edgekey strip under it
     # (EDGE_STRIP_K = 0.09 of the display's width) plus its frame.
     edge_h = int(round(0.09 * size)) if os.environ.get("NSTS_MDU_EDGEKEYS") != "0" else 0
-    need_h = max(int(round(1300.0 * size / 768)), (size + edge_h + 40) * ws)   # panelO6 REF_H
+    need_h = max(int(round(1300.0 * tk_sz / 768)), (size + edge_h + 40) * ws)   # panelO6 REF_H
     if screen_w is not None and (need_w > screen_w or need_h > screen_h):
         # One cascading STACK per kind of window -- the displays together, the
         # keyboard, the panel, the CAM -- the stacks left to right, each pulled
@@ -2472,7 +2494,7 @@ def main():
                     L.start("keyboard%d" % (k + 1),
                             [py, "stsKeyboard.py", "--kybd", str(k + 1), "--title",
                              str(k + 1), "--port-base",
-                             str(args.port_base), "--size", str(tk_px(size))]
+                             str(args.port_base), "--size", str(tk_px(tk_sz))]
                             + (["--geometry", geom] if args.auto_place else
                                ["--geometry", "+%d+%d" % LP["kybd%d" % (k + 1)][:2]]
                                if ("kybd%d" % (k + 1)) in LP else []),
@@ -2492,7 +2514,7 @@ def main():
             # begin with) is the one on top where the two share a place
             for rhc in (("aft", "lh") if args.rhc == "both" else (args.rhc,) if args.rhc else ()):
                 hc_argv = [py, "handcontrollers.py", "--rhc", rhc,
-                           "--port-base", str(args.port_base), "--size", str(tk_px(size))]
+                           "--port-base", str(args.port_base), "--size", str(tk_px(tk_sz))]
                 if args.joystick is not None:
                     hc_argv += ["--joystick", str(args.joystick)]
                 if args.input:
@@ -2507,7 +2529,7 @@ def main():
                         hc_argv, HERE, env)
             if args.truth_ball:
                 L.start("truthball", [py, "truthball.py", "--port-base", str(args.port_base),
-                                      "--size", str(tk_px(size))], HERE, env)
+                                      "--size", str(tk_px(tk_sz))], HERE, env)
             # "rpop" in the views is rpop.py, the aft PGSC's RPOP display --
             # a program of its own beside portview, not one of its windows
             pv_views, want_rpop = windowLayout.split_views(args.portview_views)
@@ -2634,7 +2656,7 @@ def main():
             # OFF and MODE HALT within a quarter second and halt it.
             panel_restore = os.path.join(resume, "panel.json") if resume else None
             panel_argv = [py, "panelO6.py", "--port-base", str(args.port_base),
-                          "--gpc-id", str(gpcs[0]), "--size", str(tk_px(size))]
+                          "--gpc-id", str(gpcs[0]), "--size", str(tk_px(tk_sz))]
             if args.auto_place:
                 panel_argv += ["--geometry", o6_geom]
             elif "panel_o6" in LP:
@@ -2718,7 +2740,7 @@ def main():
             manager_argv = [py, "manager.py", "--port-base", str(args.port_base),
                             "--gpcs", ",".join(map(str, gpcs)),
                             "--crts", str(args.crts),
-                            "--hc-size", str(tk_px(size)),
+                            "--hc-size", str(tk_px(tk_sz)),
                             "--portview-size", str(args.portview_size),
                             "--portview-views", args.portview_views or "",
                             "--portview-textures", args.portview_textures or "auto",
@@ -2908,8 +2930,13 @@ def main():
                     ", %d not exactly" % inexact if inexact else ""),
                 args.port_base)
 
+        # A CAPTURE'S OWN layout.json ONLY WHEN ASKED FOR (--snapshot-layout).  It records the
+        # screen the capture was taken on: for the distributed snapshots that is a 4K desktop at
+        # scale 2, whose sizes are physical pixels -- on a scale-1 Pi two of the four MDUs came
+        # up twice as large as the others and every panel and keyboard at the 4K size, over the
+        # --size asked for (owner, 2026-11-19).  Useful on one's own machine; wrong elsewhere.
         start_layout = (os.path.join(args.snapshot_resume, "layout.json")
-                        if args.snapshot_resume else None)
+                        if args.snapshot_resume and args.snapshot_layout else None)
         # A --layout GIVEN HERE WINS over a capture's own layout.json: the
         # capture's is where the windows were on the machine that took it
         # (Mac-portview's screen, for the rendezvous captures), the --layout
@@ -3133,7 +3160,8 @@ def main():
                 t0 = time.time()
                 snap_layout = os.path.join(snapdir, "layout.json")
                 place_windows(before,
-                              snap_layout if os.path.isfile(snap_layout) else None)
+                              snap_layout if args.snapshot_layout and os.path.isfile(snap_layout)
+                              else None)
                 crewscript.send_result("ok resume %s" % snapdir, args.port_base)
                 continue
             break
