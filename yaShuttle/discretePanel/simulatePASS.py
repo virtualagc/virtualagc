@@ -720,7 +720,9 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     # start from nothing, which is not the vehicle that was captured.
     # BUT ONLY THE DEVICES THIS VEHICLE HAS.  One computer is given one mass
     # memory and no intercomputer bus (see the --mmu-model choice in main),
-    # so a one-GPC capture never has icc.json or mmu2.json, and demanding
+    # so a one-GPC capture made before 2026-11-20 has no icc.json or mmu2.json (a one-GPC run now carries both
+    # mass memories, and a newer capture has mmu2.json, but an older one still restores: the unit starts
+    # fresh from the tape), and demanding
     # them called every one-GPC snapshot incomplete (owner, 2026-11-14).
     devices = ["mmu1.json", "mtu.json"]
     if len(gpcs) > 1:
@@ -2606,7 +2608,10 @@ def main():
                 if not resume:
                     gpc_argv += ["--gpcs", ",".join(map(str, gpcs))]
             else:
-                gpc_argv += ["--mmu-model", tape]
+                # BOTH MASS MEMORIES, as in the Orbiter (owner, 2026-11-20): a computer does not own an MMU, and
+                # the flight software queues requests for MMU2 at every overlay transition -- with one unit that
+                # is OFF/BUSY MMU2 three times in a launch (ledger #350).
+                gpc_argv += ["--mmu-model", "1:" + tape, "--mmu-model", "2:" + tape]
                 if not resume:
                     gpc_argv += ["--gpc-id", str(gpcs[0])]
             # AN ENCRYPTED VOLUME NEEDS THE PASSWORD DOWN THERE TOO, and the
