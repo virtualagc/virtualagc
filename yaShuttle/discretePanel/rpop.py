@@ -836,7 +836,9 @@ class View(QtWidgets.QWidget):
             self.auto_pick = False
             i, why = best(), "reset"
         elif not fits(i, 1.0):
-            i, why = max(best(), i + 1), "out"
+            # never past the largest step: at ~10,000 ft (RPOP from the
+            # uplink) nothing fits, and i + 1 ran off the end every tick
+            i, why = min(max(best(), i + 1), len(AUTO_STEPS) - 1), "out"
             self.auto_since = None
         elif i > 0 and fits(i - 1, AUTO_COMFORT):
             if self.auto_since is None:
