@@ -2184,6 +2184,14 @@ def main():
         if missing:
             log("%s not installed, so layouts are neither saved nor restored; to fix:  "
                 "sudo apt install wmctrl xdotool x11-utils" % ", ".join(missing))
+    elif (not wsl and sys.platform.startswith("linux") and os.environ.get("DISPLAY")
+            and os.environ.get("XDG_SESSION_TYPE") == "wayland"):
+        # AN X DISPLAY AND NO WAYLAND ONE IN A WAYLAND SESSION: xvfb-run (or
+        # WAYLAND_DISPLAY unset to keep a run off the desktop).  Qt goes by
+        # XDG_SESSION_TYPE and opened the MEDS displays on the desktop's own
+        # Wayland socket anyway, beside the hidden Tk windows (owner, Pi,
+        # 2026-11-19).  X11 only.
+        os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
     if wsl:
         wslg_prepare()
         wslg_s = wslg_raw = windowLayout.wslg_output_scale()
