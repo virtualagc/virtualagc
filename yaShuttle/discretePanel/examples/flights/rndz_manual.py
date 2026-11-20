@@ -807,11 +807,25 @@ class ManualPhase(object):
 
     def torva(self):
         """TORVA: from the R-bar to the +V-bar at twice the orbital rate,
-        -Z on the ISS (target track) and the ISS in the centerline camera,
-        range kept above 250 ft port to port; the arc's radius from where
-        the R-bar left the Orbiter to TORVA_END_FT."""
+        turning to the docking attitude on the way and the ISS in the
+        centerline camera, range kept above 250 ft port to port; the arc's
+        radius from where the R-bar left the Orbiter to TORVA_END_FT."""
         st = self.man_start()
         self.dap_pulse_modes()
+        # THE DOCKING ATTITUDE FROM THE START, AS CC 9-7 KEYS IT: "TORVA / GNC
+        # UNIV PTG / P ITEM 15 + 179 EXEC / TRK - ITEM 19 EXEC", pitch 179
+        # being the V-bar's docking attitude (docking-geometry-findings.md),
+        # held to the Earth's centre, and "ESTABLISH VBAR when pitch error <
+        # 2 deg" the end of that turn.  Holding the RPM's -Z track on TGT ID 1
+        # instead pointed the bay at PASS's own state of the ISS, which runs
+        # hundreds of feet off once the radar is inhibited at 650 ft: the ISS
+        # went 127 deg off -Z, the TCS lost it for 7 min and RPOP's
+        # Orbiter jumped six times when it came back (2026-11-19, Pi).  P 180
+        # and OM 0 as docking_attitude flies them; A's PRI rate (A7, 0.2
+        # deg/s) turns the 90 deg in ~7.5 min of the ~11-min arc.
+        self.univ_ptg("torva-att", 2, 180, 0, dap="pri", side="a")
+        self.say("crew: [CC 9-7, TORVA] UNIV PTG TGT ID 2, P 180, OM 0, TRK -- turning to the docking attitude; "
+                 "-Z %.1f deg from the ISS" % self.body_vec_err(90, "iss"))
         tru, tgt = self.feeds()
         n = ins.orbital_rate(tgt["r"], tgt["v"])
         th0 = math.atan2(st["r"][0], st["r"][2])          # 0 below, 90 deg ahead
