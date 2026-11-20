@@ -2590,7 +2590,7 @@ def main():
                 gpc_argv += ["--resume", os.path.abspath(resume)]
                 epoch = saved_epoch(resume)
                 if epoch is not None:
-                    gpc_argv += ["--date-time-epoch", "%.3f" % epoch]
+                    gpc_argv += ["--date-time-epoch", "%.6f" % epoch]
                     # and the captures this run takes record the vehicle's
                     # epoch too, not the wall clock's (a restored 2011 flight
                     # wrote 2026 into vehicle.json)
@@ -2598,7 +2598,7 @@ def main():
             elif args.date_time_epoch:
                 start = parse_epoch(args.date_time_epoch)
                 EPOCH_SHIFT = start - time.time()
-                gpc_argv += ["--date-time-epoch", "%.3f" % start]
+                gpc_argv += ["--date-time-epoch", "%.6f" % start]
             # THE MASS MEMORY, RESTORED OR NOT.  A restore used to be given the
             # snapshot INSTEAD of the tape, leaving a vehicle with no mass
             # memory at all: no re-IPL, no OPS transition.  See

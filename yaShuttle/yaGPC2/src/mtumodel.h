@@ -58,6 +58,7 @@ void mtumodel_set_epoch(struct MtuModel *m, const double *epochSec);
  * a restore to resume at: the vehicle's own GMT, which runs behind the wall
  * clock by however much simulated time has lagged. */
 double mtumodel_unix_now(const struct MtuModel *m);
+double mtumodel_unix_at(const struct MtuModel *m, double sharedUs);
 
 /* Simulated microseconds of the time of day that the calling computer's own
  * clock does not contain: whatever its real-time pacer wrote off while the
