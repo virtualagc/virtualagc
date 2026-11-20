@@ -1234,6 +1234,20 @@ static uint16_t mdm_word(const struct MtuModel *m, int b, int r) {
     return (i >= 0 && i < FF_REPLY_MAX) ? m->mdmData[b][i] : 0;
 }
 
+/* THE UNIT'S TIME AS UNIX TIME AT A GIVEN SHARED-CLOCK READING, not at the shared clock as of the last read
+ * any computer made.  m->sharedUs is refreshed only when a bus read reaches the unit, so at the moment of a
+ * capture it can be stale by tens of milliseconds, and that stale time went into capture.json's gmtUnix:
+ * a restore then resumed the unit a few ms off PASS's own clock, which FPMMTURM's K1 test (800 us) at the
+ * first time-management pass after the restore marks as a bad time source -- TIME MTU 1 in the fault summary,
+ * PASS on GPC time for the rest of the run (ledger #352). */
+double mtumodel_unix_at(const struct MtuModel *m, double sharedUs) {
+    if (m == NULL || m->epochSec == NULL || *m->epochSec <= 0.0) return -1.0;
+    if (sharedUs < 0.0 || ff_mdm_off()) return mtumodel_unix_now(m);
+    double epochUs = sharedUs + (m->haveBase ? m->baseUs
+                                 : (m->offsetUs != NULL ? *m->offsetUs : 0.0));
+    return *m->epochSec + epochUs / 1e6;
+}
+
 double mtumodel_unix_now(const struct MtuModel *m) {
     if (m == NULL || m->epochSec == NULL || *m->epochSec <= 0.0) return -1.0;
     double epochUs;

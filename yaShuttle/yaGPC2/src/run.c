@@ -868,7 +868,11 @@ static void batchrunner_write_capture(BatchRunner *r) {
                  * time keeps exact pace with real time, and a restore that
                  * resumed at a later GMT would move it forward under a
                  * flight software and a truth vehicle that had not moved. */
-                double gmtUnix = mtumodel_unix_now(r->mtuModel);
+                double liveShared = router_shared_us(&r->busRouter);
+                double gmtUnix = mtumodel_unix_at(r->mtuModel, liveShared);
+                if (getenv("YAGPC_CAPTURE_GMT_LOG") != NULL)
+                    fprintf(stderr, "capture gmt: live-shared %.1f us, stale %.6f s, live %.6f s\n", liveShared,
+                            mtumodel_unix_now(r->mtuModel), gmtUnix);
                 if (gmtUnix > 0.0) fprintf(cf, ",\n  \"gmtUnix\": %.6f", gmtUnix);
                 fprintf(cf, "\n}\n");
                 fclose(cf);
