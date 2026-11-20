@@ -48,6 +48,7 @@
  * 				incompatible with the versions build-in here.
  */
 
+#define _POSIX_C_SOURCE 200809L /* clock_gettime(), nanosleep() */
 #include <time.h>
 #include <sys/time.h>
 
@@ -74,11 +75,12 @@ int clock_gettime (int clock_id, struct timespec *timeSpec)
 #endif
 #endif
 
-// Win32 doesn't have clock_gettime.
 #ifdef WIN32
 #include <winbase.h>
 #define CLOCK_REALTIME 0
 #ifndef HAS_CLOCK_GETTIME
+#if 0
+// Obsolete; fixed by adding #define _POSIX_C_SOURCE 200809L
 int clock_gettime(int id, struct timespec *spec)      //C-file part
 {
    __int64 wintime;
@@ -88,6 +90,7 @@ int clock_gettime(int id, struct timespec *spec)      //C-file part
    spec->tv_nsec =wintime % 10000000LL * 100;      //nano-seconds
    return 0;
 }
+#endif // 0
 #endif
 #endif
 
