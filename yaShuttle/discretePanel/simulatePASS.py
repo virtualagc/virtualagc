@@ -718,8 +718,8 @@ def snapshot_shortfall(snapdir, gpcs, crts):
     # THE VEHICLE'S OWN DEVICES.  A capture without these restores computers
     # into a vehicle whose mass memory, intercomputer buses and timing unit
     # start from nothing, which is not the vehicle that was captured.
-    # BUT ONLY THE DEVICES THIS VEHICLE HAS.  One computer is given one mass
-    # memory and no intercomputer bus (see the --mmu-model choice in main),
+    # BUT ONLY THE DEVICES THIS VEHICLE HAS.  One computer has no intercomputer
+    # bus (see the --mmu-model choice in main), and used to have one mass memory,
     # so a one-GPC capture made before 2026-11-20 has no icc.json or mmu2.json (a one-GPC run now carries both
     # mass memories, and a newer capture has mmu2.json, but an older one still restores: the unit starts
     # fresh from the tape), and demanding
