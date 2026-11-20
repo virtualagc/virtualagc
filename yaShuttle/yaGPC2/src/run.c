@@ -1452,6 +1452,19 @@ static long batchrunner_load(BatchRunner *r) {
         fprintf(stderr, "GPC%d RESUME from %s\n", r->gpcId, r->opts->resumeDir);
     }
     ageharness_configure_from_opts(&r->age, usePath, useOpts, &res);
+    /* A RESTORE MUST NOT TAKE BACK A MASS MEMORY THIS VEHICLE HAS.  Each unit's "present" bit in discrete
+     * input A is set where the unit is made (above), and the restore then loads the capture's own copy of the
+     * register over it.  A capture made when one-computer runs had one mass memory (0x0a000000, no 0x01000000)
+     * leaves MMU2 absent to the flight software, which reports OFF/BUSY MMU2 at the next overlay transition
+     * -- OPS 101, OPS 3 for the landing scenario (ledger #350).  Put back the bit of every unit that exists. */
+    if (r->opts->resumeDir != NULL) {
+        for (int u = 0; u < 2; u++) {
+            if (r->mmuModel[u] == NULL) continue;
+            uint32_t bit = (u == 1) ? 0x01000000u : 0x02000000u;
+            iop_set_discrete_in(&r->age.gpc.iop, DISCRETES_REG_A,
+                                iop_discrete_in_a_stored(&r->age.gpc.iop) | bit);
+        }
+    }
     /* ANNOUNCE THE RESTORED OUTPUT DISCRETES IN FULL.
      *
      * discretes_publish_out sends only what CHANGED, and returns early when
