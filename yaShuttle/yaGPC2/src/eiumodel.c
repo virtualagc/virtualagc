@@ -54,6 +54,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "envcache.h"
@@ -76,6 +77,7 @@ typedef struct {
     bool limitOn, startEn, shutEn, started;
     uint32_t lastCmd;            /* the last command word heard (0 = none) */
     int pend[2];                 /* command status owed to the primary / secondary path */
+    double pendT;                /* when it was set (YAGPC_EIU_STATUS_LAG_MS) */
     long cmds, accepted, rejected, reads;
 } Eng;
 
@@ -217,8 +219,26 @@ bool eiu_reply(int busID, uint32_t cmd, int n, uint16_t *out, double t) {
     int path = (busID == 17) ? 1 : 0;
     for (int i = 0; i < n; i++) out[i] = 0;
     uint16_t id = (uint16_t)(0x0E00u | (unsigned)e);
-    unsigned stat = (unsigned)s->pend[path] << 13;
-    s->pend[path] = 0;
+    /* A COMMAND'S STATUS IS NOT SHOWN UNTIL IT HAS BEEN IN THE CONTROLLER FOR ONE FRAME.  The controller
+     * works in 20 ms frames (word 4 below counts them); the model showed the status at the very next read,
+     * which could come only a few ms after the command.  After zero thrust PASS's GPT expects the status
+     * one cycle later (GPTSSM.hal 46A-46C: masks 0x0001/0x0007 instead of 0x0002/0x000E), so the very
+     * first SHUTDOWN ENABLE was 'accepted with nothing sent' and MPS CMD C, L and R went into the fault
+     * summary of every continuous ascent (ledger #353).  Flown with 0, 20 and 40 ms: 20 ms removes it and
+     * changes nothing else (same MECO, same ET separation, 279 accepted commands, no new fault); 40 ms
+     * does not.  YAGPC_EIU_STATUS_LAG_MS overrides (0 = the old behaviour). */
+    static int lagInit = 0;
+    static double lagSec = 0.020;
+    if (!lagInit) {
+        lagInit = 1;
+        const char *e = yagpc_getenv("YAGPC_EIU_STATUS_LAG_MS");
+        if (e != NULL) lagSec = atof(e) / 1000.0;
+    }
+    unsigned stat = 0;
+    if (s->pend[path] != 0 && t - s->pendT >= lagSec) {
+        stat = (unsigned)s->pend[path] << 13;
+        s->pend[path] = 0;
+    }
     stat |= (s->limitOn ? 0x0100u : 0) | ((unsigned)(s->phase & 7) << 5) |
             ((unsigned)(s->mode & 7) << 2) | 0x0001u;
     double tc = (t - s->phaseT) / 0.020;
@@ -231,7 +251,7 @@ bool eiu_reply(int busID, uint32_t cmd, int n, uint16_t *out, double t) {
     return true;
 }
 
-static void status_for(Eng *s, int st) { s->pend[0] = s->pend[1] = st; }
+static void status_for(Eng *s, int st, double t) { s->pend[0] = s->pend[1] = st; s->pendT = t; }
 
 void eiu_command(int busID, uint32_t cmd, const uint16_t *w, int n, double t) {
     int e = eiu_engine(busID, cmd);
@@ -299,7 +319,7 @@ void eiu_command(int busID, uint32_t cmd, const uint16_t *w, int n, double t) {
     default: ok = 2; break;
     }
     if (ok == 3) s->accepted++; else s->rejected++;
-    status_for(s, ok);
+    status_for(s, ok, t);
     fprintf(stderr, "eiu: ME%d %04x%04x %s at t=%.3f -- phase %d mode %d, %.1f%%\n", e, w[0],
             n > 1 ? w[1] : 0, ok == 3 ? "accepted" : "REJECTED", t, s->phase, s->mode, s->pc);
 }
