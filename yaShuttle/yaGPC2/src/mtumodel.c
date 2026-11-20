@@ -63,8 +63,16 @@
  * and listeners like the flight-critical ones, so this model's machinery --
  * a reply per reader, the echo of the command, the armed length -- serves
  * them as it is. */
-#define MTU_BUS_FIRST  12
+#define MTU_BUS_FIRST  10
 #define MTU_BUS_LAST   23
+/* The buses the model marks as command-sync (Listen Mode waits for the
+ * commander's command): the flight-critical and launch buses only.  10 and 11
+ * are the PAYLOAD buses, PL1 and PL2 (bcenet_transport.c): the flight software
+ * checks their MDMs with the same return-word pattern command as the FC ones
+ * (532AAA / 632AAA, FIOCHECK) and a bus nobody answered logged I/O ERROR PL1
+ * and PL2 at the NBAT keying -- the model answers them as the MDMs they are
+ * (ledger: startup faults), but the sync marking is left as it was. */
+#define MTU_SYNC_FIRST 12
 
 /* The command word's IUA field, the same extraction iop.c's mia_xmit_cmd
  * uses. */
@@ -1017,7 +1025,7 @@ uint32_t mtumodel_bus_mask(void) {
      * sync on buses whose listeners are told not to expect one.  Making the
      * echo match the mask is the other way to resolve it and has not been
      * measured; see #219. */
-    int first = ff_mdm_off() ? 20 : MTU_BUS_FIRST;
+    int first = ff_mdm_off() ? 20 : MTU_SYNC_FIRST;
     int last  = ff_mdm_off() ? 22 : MTU_BUS_LAST;
     for (int b = first; b <= last && b < 32; b++)
         mask |= 1u << b;
