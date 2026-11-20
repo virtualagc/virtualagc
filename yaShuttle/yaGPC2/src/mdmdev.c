@@ -333,6 +333,45 @@ static void imu_torque(int n, uint16_t cmd1, double t) {
     plat_rotate(plat[n].P, v);
 }
 
+/* THE REDUNDANT GYRO'S RATE WORD (word 1 of the IMU read).  The IMU carries a
+ * fourth gyro on a skewed axis, K = CGMS_RED_KXYZR = (cos 12, sin 12, 0) in
+ * the cluster's axes (the I-load; the same on this tape, tools/pasvar.py), and
+ * the read returns its rate: bit 1 the sign (ON positive), bit 2 an out-of-range
+ * flag, bits 3-12 the magnitude in 0.138 deg/hr (GMYRGM.hal steps 3-4).  PASS
+ * subtracts the rate it COMMANDED, K . SUMRATE, while it torques the platform
+ * (step 6) and filters the difference (WRCF, 0.9441/0.0559); GMBIMU's redundant
+ * rate test (step 28) fails the IMU when |WRCF| exceeds 3.39e-6 rad/s.  This
+ * word was a constant zero, so any commanded rate left WRCF at -K . SUMRATE
+ * (3.4e-5 rad/s in the T-5 minute capture), which decayed through the filter
+ * past the test's start at T-4:16 -- IMU BITE/T 1, 2 and 3 for about a minute,
+ * an entry in every ascent's fault summary.  It is now the platform's own rate:
+ * the rotation since the last read, K . (vee(Pprev^T P) / dt). */
+static double redPrevP[4][3][3];
+static double redPrevT[4];
+static bool redPrevOk[4];
+static uint16_t red_rate_word(int n, const double P[3][3], double t) {
+    double r = 0.0;
+    if (redPrevOk[n] && t > redPrevT[n]) {
+        double R[3][3];
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                R[i][j] = redPrevP[n][0][i] * P[0][j] + redPrevP[n][1][i] * P[1][j] + redPrevP[n][2][i] * P[2][j];
+        double v[3] = { (R[2][1] - R[1][2]) / 2.0, (R[0][2] - R[2][0]) / 2.0, (R[1][0] - R[0][1]) / 2.0 };
+        double dt = t - redPrevT[n];
+        r = (0.978147566 * v[0] + 0.20791167 * v[1]) / dt;
+    }
+    memcpy(redPrevP[n], P, sizeof redPrevP[n]);
+    redPrevT[n] = t;
+    redPrevOk[n] = true;
+    { static int dbg = -1;
+      if (dbg < 0) dbg = yagpc_getenv("YAGPC_IMU_CMDLOG") != NULL;
+      if (dbg) fprintf(stderr, "imu-red: t=%.3f imu=%d rate=%.4e rad/s\n", t, n, r); }
+    double mag = fabs(r) / (0.138 * DEGHR_RADSEC);
+    uint16_t out = (r >= 0.0) ? 0x8000u : 0u;
+    if (mag > 1023.0) return (uint16_t)(out | 0x4000u | (1023u << 4));
+    return (uint16_t)(out | (((unsigned)(mag + 0.5)) << 4));
+}
+
 static void imu_dynamic(int n, uint16_t w[14]) {
     const PhysState *s = vehdyn_state();
     double R[3][3], CR[3][3], M1[3][3];
@@ -352,6 +391,7 @@ static void imu_dynamic(int n, uint16_t w[14]) {
     double PIT = asin(sp) * D;
     double OR = atan2(M1[2][1], M1[2][2]) * D;
     double AZ = atan2(M1[1][0], M1[0][0]) * D;
+    w[1] = red_rate_word(n, P, s->t);
     w[2] = 0;                                      /* inner roll 8X: null */
     resolver_words(OR, &w[3], &w[4]);
     resolver_words(PIT, &w[5], &w[6]);
@@ -2071,6 +2111,14 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         if (f == IMU_WRITE && u <= 3) {
             /* the slew running until now ran under the OLD word 2 */
             if (vehdyn_enabled()) imu_torque(u, words[0], vehdyn_state()->t);
+            {   /* YAGPC_IMU_CMDLOG=1: every change of an IMU's command words, with the vehicle time */
+                static int cl = -1;
+                if (cl < 0) cl = yagpc_getenv("YAGPC_IMU_CMDLOG") != NULL;
+                uint16_t n2 = (n > 1) ? words[1] : imu[u].cmd2;
+                if (cl && (n2 != imu[u].cmd2 || !imu[u].haveCmd))
+                    fprintf(stderr, "imu-cmd: t=%.3f imu=%d cmd1=%04x cmd2=%04x (was %04x)\n",
+                            vehdyn_enabled() ? vehdyn_state()->t : sharedUs / 1e6, u, words[0], n2, imu[u].cmd2);
+            }
             imu[u].cmd1 = words[0];
             imu[u].cmd2 = (n > 1) ? words[1] : imu[u].cmd2;
             imu[u].haveCmd = true;
