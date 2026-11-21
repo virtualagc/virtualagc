@@ -2121,6 +2121,16 @@ def main():
         if tape_digest(tape) is None:
             sys.exit("simulatePASS: %s would not open -- wrong password?  "
                      "Nothing started." % os.path.basename(tape))
+    # THE DISPLAY UNITS' STORED CRITICAL FORMATS, taken from this volume the first time they are needed (a real IDP
+    # boots from EEPROM, so it answers the computer's first poll as a unit that needs nothing; without them every
+    # unit but the one the crew loads logs an I/O ERROR CRTn at IPL, ledger #350).  Nothing is shipped: idp_eeprom.py
+    # finds the module on the user's own volume.  A volume that carries none leaves the units cold, as before.
+    try:
+        import idp_eeprom
+        idp_eeprom.provision(tape, tape_password(tape) if tape_is_archive(tape) else None, sevenzip(),
+                             log=lambda t: print("simulatePASS: " + t, flush=True))
+    except ImportError:
+        pass
     if args.snapshot_resume and ".7z::" in args.snapshot_resume.lower():
         args.snapshot_resume = snapshot_from_archive(args.snapshot_resume)
     if args.snapshot_resume:
