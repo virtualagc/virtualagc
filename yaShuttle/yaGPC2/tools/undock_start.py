@@ -134,6 +134,34 @@ def dock_block_offset(v):
     return None
 
 
+NO_CMD = -1e30                      # mdmdev.c IMU_NO_CMD: "no command yet" in imuOperate
+
+
+def imu_from_base(vd, bvd):
+    """Put BASE's IMU state into vehdyn.json VD, on VD's time axis.
+
+    The IMU model's counters (accumulated velocity, command words) and its platform orientations are HARDWARE state
+    that the flight software's own memory also remembers: its last PIPA counts, the alignment it commanded.  With
+    --base the memory is the fresh run's, so the docking run's counters and alignments disagree with it, and the
+    first IMU read after the restore trips a built-in test (IMU BITE/T 2 at the restore, found by the WSL post-ISS
+    run, ledger #357).  The physics -- the Orbiter's state, mass, the docking block -- stays SOURCE's.
+    Every time inside these blocks is on the vehicle clock of the vehdyn array (index 2), which differs between the
+    two captures; mdmdev_load subtracts that capture time, so BASE's times are shifted by SOURCE's minus BASE's."""
+    ts, tb = vd["vehdyn"][2], bvd["vehdyn"][2]
+    shift = ts - tb
+    vd["imu"] = list(bvd["imu"])
+    vd["imuTime"] = [x + shift for x in bvd["imuTime"]]
+    pl = list(bvd["imuPlatform"])
+    for k in range(3):
+        pl[11 * k + 10] += shift                     # each platform: 9 matrix words, started, time
+    vd["imuPlatform"] = pl
+    op = list(bvd["imuOperate"])
+    for k in range(3):
+        if op[2 * k] > NO_CMD / 10:                  # a real command time, not the sentinel
+            op[2 * k] += shift
+    vd["imuOperate"] = op
+
+
 def build(src, dst, gmt, targets, mass_kg, prop_kg, base=None):
     src, dst = Path(src).resolve(), Path(dst).resolve()
     if not src.is_dir() or dst.exists():
@@ -187,6 +215,7 @@ def build(src, dst, gmt, targets, mass_kg, prop_kg, base=None):
             raise ValueError("BASE is at %.0f, not within an hour of %s" % (bcap["gmtUnix"], gmt))
         shutil.copytree(base, dst)
         cap, veh = bcap, json.loads((base / "vehicle.json").read_text())
+        imu_from_base(vd, json.loads((base / "vehdyn.json").read_text()))
         # the physics' clock is BASE's: the docked state is carried to it
         v[IDX_GMT] = vehicle_gmt(bcap["gmtUnix"])
     else:
