@@ -2020,11 +2020,16 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         return txt
 
     # --- the phases ---------------------------------------------------------
+    # EVERY DISPLAY UNIT IS POWERED BEFORE THE COMPUTER IS IPLED (as fly_sts134's IPL is, ledger #350): the vehicle has
+    # four IDPs whatever --crts says (simulatePASS hosts the ones no window shows), and PASS logs an I/O ERROR CRTn
+    # for a DEU that has no power.  With --crts 4 IDP 4 is powered below, after the OPS 0 steps that hand it a CRT.
     IPL_SCRIPT = """
 +0     gpc 1
 +0     mode HALT
 +0.02  idppower 1 on
-+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
++0.1   idppower 2 on
++0.1   idppower 3 on
+{idp4_early}+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 {idp4}+11    keys ITEM 1 + 2 EXEC
 +8     keys ITEM 2 + 1 EXEC
 +8     keys ITEM 7 + 1 EXEC
@@ -2065,6 +2070,7 @@ wait crt 1 title 2011/ timeout 600
     def ipl(self):
         four = getattr(self.a, "crts", 1) >= 4
         self.play(self.IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), idp4=self.IPL_IDP4 if four else "",
+                                         idp4_early="" if four else "+0.1   idppower 4 on\n",
                                          nbat_crt4=self.IPL_NBAT_CRT4 if four else ""), "ipl")
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
