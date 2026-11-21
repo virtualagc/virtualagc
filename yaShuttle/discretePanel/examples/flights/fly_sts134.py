@@ -625,7 +625,7 @@ class Flight:
         nbat = "\n".join("+8     keys ITEM %s EXEC" % i for i in NBAT_ITEMS)
         self.say("IPL: loading the flight software")
         self.play(IPL_LOAD.format(panel=PANEL.replace(os.sep, "/"),
-                                  idp_power="".join("+0.1   idppower %d on\n" % k for k in range(2, self.a.crts + 1))),
+                                  idp_power="".join("+0.1   idppower %d on\n" % k for k in range(2, 5))),
                   "ipl-load")
         self.script_done("ipl-load", 900)
         self.say("GPC MEMORY: the NBAT for memory configuration 1 (G1, the ascent from OPS 101 on)")

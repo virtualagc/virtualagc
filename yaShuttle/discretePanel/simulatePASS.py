@@ -939,6 +939,10 @@ def seeded_idps(snapdir, logs, crts):
         loaded = cur.get("ipled") and cur.get("formatsLoaded") is not False
         if power[k - 1] == "ON" and not loaded:
             todo.append((k, cur))
+        elif power[k - 1] != "ON" and os.environ.get("NSTS_NO_HIDDEN_IDPS") is None:
+            # ALL FOUR UNITS EXIST (see the hidden host in main): one that a capture shows off, because the run
+            # that took it drew fewer CRTs, is put back powered and loaded, as the vehicle has it before launch
+            todo.append((k, cur))
         elif k == 4 and crts >= 4 and power[3] != "ON":
             todo.append((k, cur))
     if not todo:
@@ -2488,6 +2492,18 @@ def main():
                         + ["--port-base", str(args.port_base), "--size", str(size),
                            "--scale", str(args.scale)] + title_arg
                         + ["crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                time.sleep(1)
+            # THE DISPLAY UNITS NO WINDOW SHOWS STILL EXIST.  The vehicle has four IDPs; --crts says how many CRTs this
+            # run draws.  A unit with no process answers nothing, and PASS, which polls every DEU it is assigned,
+            # logs I/O ERROR CRTn once the polling starts -- "a DEU that has no power" (PASS User's Guide, Appendix F;
+            # ledger #350) -- on every RTLS, TAL and ascent run the wizard starts with its default two CRTs.  One
+            # windowless MEDS2 hosts them all.  NSTS_NO_HIDDEN_IDPS=1 restores the old behaviour.
+            hidden = [k for k in range(args.crts + 1, 5)]
+            if hidden and not os.environ.get("NSTS_NO_HIDDEN_IDPS"):
+                e = dict(env)
+                L.start("meds-idps",
+                        [py, "MEDS2.py"] + (["--idp-restore", os.path.abspath(resume)] if resume else [])
+                        + ["--port-base", str(args.port_base)] + ["idp%d" % k for k in hidden], HERE, e)
                 time.sleep(1)
             if args.crts >= 4:
                 # AFD 1, the aft station's other display, fed by IDP 4 like
