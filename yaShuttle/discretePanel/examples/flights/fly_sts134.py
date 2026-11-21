@@ -251,9 +251,19 @@ def atmosphere_item(gmt_s):
 # G&C AUT (SPEC 50 ITEM 28, the checklist's "ADTA AUT 28"), so PASS takes the
 # probes' air data into guidance and control once V < 2500 ft/s ("M = 2.0
 # Ensure ADTA to G&C") instead of its drag-derived estimate.
+#
+# AND NAV'S ADTA H TO AUTO, SPEC 50 ITEM 25.  The Entry Flight Procedures Handbook (JSC-11542 Rev E, 'ADTA to AUTO for G&C and
+# NAV', M <= 3.5): "Incorporate ADTA-H (SPEC 50, Item 25) and ADTA-G&C (Item 28)... ADTA-H and ADTA to G&C come up in INHIBIT...
+# MCC has the crew put ADTA-H and ADTA to G&C into AUTO before Mach 2.5, allowing barometric altitude to update the NAV...
+# In any case, ADTA data do not update NAV or GNC until Mach 2.5.  DRAG-H will continue to update NAV until Mach 2.5."  (Items
+# 19/22/25/42 are AUT, 20/23/26/43 INH, 21/24/27/44 FOR.)  With ADTA H left INHIBIT, baro altitude is only displayed, drag stops
+# at the I-loaded 85,200 ft, and below Mach 2.5 NOTHING counts as processed: PASS raises NAV EDIT ALT after 7 passes (ledger
+# #354) on every landing this driver flew.  FLY_ADTA_H_INH=1 leaves it inhibited, as the drivers did before 2026-11-21.
+_ADTA_H_AUT = "" if os.environ.get("FLY_ADTA_H_INH") else "+8     keys ITEM 2 5 EXEC\n"
 AIR_DATA = ("+1     switch adp_l DEPLOY\n"
             "+1     switch adp_r DEPLOY\n"
             "+1     keys SPEC 5 0 PRO\n"
+            + _ADTA_H_AUT +
             "+8     keys ITEM 2 8 EXEC\n"
             "+8     keys RESUME\n")
 # THE RTLS RUNWAY: SPEC 50 ITEM 4 selects the landing area's secondary runway
@@ -1203,11 +1213,7 @@ class Flight:
         self.play(AIR_DATA, "air-data")
         self.script_done("air-data", 60)
         self.air_data_done = True
-        self.say("crew: V = 7K, ADTA PROBES DEPLOY; ADTA to G&C AUT (SPEC 50 ITEM 28)")
-        if os.environ.get("FLY_ADTA_H_AUT"):   # DEVELOPMENT: NAV ADTA H to AUT (SPEC 50 ITEM 26), as for a site without MLS
-            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 2 6 EXEC\n+8     keys RESUME\n", "adta-h-aut")
-            self.script_done("adta-h-aut", 60)
-            self.say("crew: NAV ADTA H to AUT (SPEC 50 ITEM 26), development")
+        self.say("crew: V = 7K, ADTA PROBES DEPLOY; ADTA H to AUT and ADTA to G&C AUT (SPEC 50 ITEMS 25 and 28)")
         self.wait_gmt(t["ei"] + 25 * 60.0)
 
     def last_entry_state(self):
@@ -1247,7 +1253,7 @@ class Flight:
             self.play(AIR_DATA, "air-data")
             self.script_done("air-data", 60)
             self.air_data_done = True
-            self.say("crew: ADTA PROBES DEPLOY; ADTA to G&C AUT (at the start of LAND)")
+            self.say("crew: ADTA PROBES DEPLOY; ADTA H and ADTA to G&C AUT (ITEMS 25 and 28, at the start of LAND)")
         if self.a.gps_auto_at_land:
             # an abort's entry skips the V = 7K steps above; flight rules keep autolands out of aborts, but
             # where there is no (or no usable) navaid the autoland needs GPS in navigation: GPS TO NAV AUTO
