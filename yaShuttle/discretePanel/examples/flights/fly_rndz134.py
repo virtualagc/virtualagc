@@ -2020,6 +2020,10 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         return txt
 
     # --- the phases ---------------------------------------------------------
+    # THE NBAT TAKES GPCs 2-4 OUT OF THE TARGET SET (ITEM 3-5 + 0), as fly_sts134's NBAT_ITEMS do: this run flies one
+    # computer, and an OPS transition whose target GPC set is not the set of computers running raises GPC CONF
+    # (DM6OPS.hal DM6_PRE_POSIT_PARMS 043000; PASS User's Guide Appendix G).  Without them every fresh run of this
+    # driver, and every snapshot made from one, carried GPC CONF (ledger #356).
     # EVERY DISPLAY UNIT IS POWERED BEFORE THE COMPUTER IS IPLED (as fly_sts134's IPL is, ledger #350): the vehicle has
     # four IDPs whatever --crts says (simulatePASS hosts the ones no window shows), and PASS logs an I/O ERROR CRTn
     # for a DEU that has no power.  With --crts 4 IDP 4 is powered below, after the OPS 0 steps that hand it a CRT.
@@ -2032,6 +2036,9 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
 {idp4_early}+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 {idp4}+11    keys ITEM 1 + 2 EXEC
 +8     keys ITEM 2 + 1 EXEC
++8     keys ITEM 3 + 0 EXEC
++8     keys ITEM 4 + 0 EXEC
++8     keys ITEM 5 + 0 EXEC
 +8     keys ITEM 7 + 1 EXEC
 +8     keys ITEM 8 + 1 EXEC
 +8     keys ITEM 9 + 1 EXEC
