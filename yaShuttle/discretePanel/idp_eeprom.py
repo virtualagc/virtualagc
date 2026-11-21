@@ -106,11 +106,25 @@ def find_module(volume):
     return None
 
 
-def read_volume(tape, password=None, sevenzip="7z"):
+def find_7z():
+    """The 7z executable: on the PATH, else where 7-Zip installs itself on Windows (the same search simulatePASS's
+    sevenzip() makes), else the bare name so the failure says what was missing."""
+    import shutil
+    found = shutil.which("7z") or shutil.which("7z.exe")
+    if found:
+        return found
+    for var in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"):
+        exe = os.path.join(os.environ.get(var, ""), "7-Zip", "7z.exe")
+        if os.path.isfile(exe):
+            return exe
+    return "7z"
+
+
+def read_volume(tape, password=None, sevenzip=None):
     """The bytes of a plain volume, or of a 7z archive's plaintext through `7z x -so` (the password goes in on
     standard input, as yaGPC2's own reader does)."""
     if tape.lower().endswith(".7z"):
-        proc = subprocess.Popen([sevenzip, "x", "-so", "--", tape], stdin=subprocess.PIPE,
+        proc = subprocess.Popen([sevenzip or find_7z(), "x", "-so", "--", tape], stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         proc.stdin.write(((password or "") + "\n").encode())
         proc.stdin.close()
@@ -123,7 +137,7 @@ def read_volume(tape, password=None, sevenzip="7z"):
         return fh.read()
 
 
-def provision(tape, password=None, sevenzip="7z", log=lambda s: None):
+def provision(tape, password=None, sevenzip=None, log=lambda s: None):
     """Make sure the EEPROM image exists, extracting it from `tape` if it does not.  Returns True when an image is
     there afterwards.  Never raises: a volume that cannot be read, or carries no module, leaves units cold."""
     p = path()
