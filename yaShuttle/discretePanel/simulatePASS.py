@@ -750,6 +750,14 @@ def snapshot_shortfall(snapdir, gpcs, crts):
 SEVENZ_MAGIC = b"7z\xbc\xaf\x27\x1c"
 TAPE_PASSWORD = None            # asked for once, for an encrypted volume
 
+# EVERY IDP RUNS IN A PROCESS OF ITS OWN, NOT IN ITS WINDOW'S.  An IDP answers the computer's polls within about 5 ms
+# (the IOP's receive time-out); a window draws with software rendering, in Python, in the same process, and the poll
+# reply waits behind the drawing: on a Raspberry Pi 5 CRT2's replies averaged 49 ms and reached 201 ms in a TAL
+# (13 expired, 8 x I/O ERROR CRT2), on Linux at 2X one CRT3 first poll was missed, and the AFD display was split out
+# for the same reason in October (post3, 2026-10-10).  The windows talk to their IDP over the MEDS bus either way.
+# NSTS_COUPLED_IDPS=1 puts each IDP back in its window's process.
+SPLIT_IDPS = not os.environ.get("NSTS_COUPLED_IDPS")
+
 
 def tape_is_archive(path):
     """Whether this volume is an encrypted 7-Zip archive rather than a bare
@@ -2486,20 +2494,38 @@ def main():
                 # the changing fields, so the numbers appear over no format
                 # at all -- see gpc-causes #174.
                 meds_extra = (["--idp-restore", os.path.abspath(resume)]
-                              if resume else [])
+                              if resume and not SPLIT_IDPS else [])
                 L.start("meds%d" % (k + 1),
                         [py, "MEDS2.py"] + meds_extra
                         + ["--port-base", str(args.port_base), "--size", str(size),
                            "--scale", str(args.scale)] + title_arg
-                        + ["crt%d" % (k + 1), "idp%d" % (k + 1)], HERE, e)
+                        + (["crt%d" % (k + 1)] if SPLIT_IDPS else ["crt%d" % (k + 1), "idp%d" % (k + 1)]), HERE, e)
                 time.sleep(1)
             # THE DISPLAY UNITS NO WINDOW SHOWS STILL EXIST.  The vehicle has four IDPs; --crts says how many CRTs this
             # run draws.  A unit with no process answers nothing, and PASS, which polls every DEU it is assigned,
             # logs I/O ERROR CRTn once the polling starts -- "a DEU that has no power" (PASS User's Guide, Appendix F;
             # ledger #350) -- on every RTLS, TAL and ascent run the wizard starts with its default two CRTs.  One
             # windowless MEDS2 hosts them all.  NSTS_NO_HIDDEN_IDPS=1 restores the old behaviour.
-            hidden = [k for k in range(args.crts + 1, 5)]
+            #
+            # With SPLIT_IDPS the one windowless process hosts ALL FOUR, and is started AFTER the windows: a restore
+            # sends the whole of display memory to the windows once, as the unit comes up, and a window that is not
+            # yet listening never gets it (ledger #174).  So wait, up to 25 s, until every window has logged that it
+            # is up.
+            hidden = list(range(1, 5)) if SPLIT_IDPS else [k for k in range(args.crts + 1, 5)]
             if hidden and not os.environ.get("NSTS_NO_HIDDEN_IDPS"):
+                if SPLIT_IDPS and args.crts:
+                    deadline = time.time() + 25.0
+                    while time.time() < deadline:
+                        ready = 0
+                        for k in range(args.crts):
+                            try:
+                                with open(os.path.join(logs, "meds%d.log" % (k + 1)), errors="replace") as fh:
+                                    ready += "setCurrentDisplay" in fh.read()
+                            except OSError:
+                                pass
+                        if ready >= args.crts:
+                            break
+                        time.sleep(0.5)
                 e = dict(env)
                 L.start("meds-idps",
                         [py, "MEDS2.py"] + (["--idp-restore", os.path.abspath(resume)] if resume else [])
@@ -3142,7 +3168,7 @@ def main():
                 saving = time.time()
                 ok, why = take_snapshot(snapshot_staging, snapdir, gpc,
                                         args.port_base, gpcs, args.crts,
-                                        idps=range(1, args.crts + 1),
+                                        idps=range(1, 5) if SPLIT_IDPS else range(1, args.crts + 1),
                                         tape=tape)
                 # THE VEHICLE WAS NOT RUNNING WHILE THAT WAS WRITTEN, so the
                 # time it took is not time the run had.  --duration is a
