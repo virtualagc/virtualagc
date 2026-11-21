@@ -120,6 +120,20 @@ def to_frame(F, a): return [dot(row, a) for row in F]
 def from_frame(F, a): return [sum(F[k][i] * a[k] for k in range(3)) for i in range(3)]
 
 
+def dock_block_offset(v):
+    """How far from the END of vehdyn.json's state list the docking block's -3.0 marker lies, or None.
+
+    The block is the marker and 32 values (vehdyn.c vehdyn_save: dock.state, dock.k, the time since capture,
+    pCap 3, qCap 4, qHm 4, mated, contacts, then the APDS), followed in captures taken since the undocking work by
+    two more (dock.away, apds.undockComplete): so the marker is 35 from the end now, and was 33 before.  vehdyn_load
+    accepts both, and so does this -- the tool had the old 33 only and refused every current capture with 'no
+    docking block' (found by the WSL post-ISS run)."""
+    for off in (35, 33):
+        if len(v) >= off and v[-off] == -3.0:
+            return off
+    return None
+
+
 def build(src, dst, gmt, targets, mass_kg, prop_kg, base=None):
     src, dst = Path(src).resolve(), Path(dst).resolve()
     if not src.is_dir() or dst.exists():
@@ -131,10 +145,11 @@ def build(src, dst, gmt, targets, mass_kg, prop_kg, base=None):
     t = vd["targets"]
     if len(v) < IDX_DRY + 1 or v[IDX_GMT] < 1e6 or t[0] != -2:
         raise ValueError("unexpected vehdyn.json layout (version, GMT or targets)")
-    if not (v[-33] == -3.0):
+    off = dock_block_offset(v)
+    if off is None:
         raise ValueError("no docking block at the end of vehdyn.json")
-    if int(v[-32]) != 1:
-        raise ValueError("SOURCE is not a docked capture (dock.state %d)" % int(v[-32]))
+    if int(v[-off + 1]) != 1:
+        raise ValueError("SOURCE is not a docked capture (dock.state %d)" % int(v[-off + 1]))
     norad, epoch, r_new, v_new = read_target(targets)
     if int(t[1]) != norad:
         raise ValueError("target %d in the capture, %d in %s" % (int(t[1]), norad, targets))
