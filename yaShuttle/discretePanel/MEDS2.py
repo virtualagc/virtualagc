@@ -2030,6 +2030,49 @@ class SPL(object):
 # the GPC polls out of it.
 # ===========================================================================
 
+def idp_eeprom_path():
+    """WHERE A UNIT'S STORED CRITICAL FORMATS LIVE, or None when a cold power-on is asked for.
+
+    A real MEDS IDP keeps its critical formats in EEPROM and needs an IDP LOAD only after a software change or a
+    checksum failure (DPS Workbook, USA005350 2.5.9 and 3.7.1); the PASS User's Guide's default IPL does not load the
+    DEUs at all (steps 6, 7, 9 and 12 are omitted, and a display that does not appear is the FAILURE case, 2.3.1.2).
+    The image is flight data, so it is NEVER in the repository: it is written under local/ (ignored) the first time
+    a unit finishes being loaded, or when a loaded unit is restored from a capture, and every later power-on boots from
+    it.  NSTS_IDP_EEPROM names another file; NSTS_IDP_COLD_POWERON=1 restores the old behaviour, a unit that powers on
+    needing a load."""
+    if os.environ.get('NSTS_IDP_COLD_POWERON'):
+        return None
+    return os.environ.get('NSTS_IDP_EEPROM') or os.path.join(NSTS_TOP, 'local', 'idp-eeprom.mem.bin')
+
+
+def idp_eeprom_read():
+    path = idp_eeprom_path()
+    if not path:
+        return None
+    try:
+        raw = open(path, 'rb').read()
+    except OSError:
+        return None
+    if len(raw) != 2 * 8192:
+        return None
+    return np.frombuffer(raw, dtype='>u2').astype(np.uint16)
+
+
+def idp_eeprom_write(mem):
+    path = idp_eeprom_path()
+    if not path:
+        return False
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = "%s.%d.tmp" % (path, os.getpid())
+        with open(tmp, 'wb') as fh:
+            fh.write(np.asarray(mem, dtype=np.uint16).astype('>u2').tobytes())
+        os.replace(tmp, path)
+        return True
+    except OSError:
+        return False
+
+
 class DEUUnit(object):
     def __init__(self, o=None):
         o = o or {}
@@ -2062,6 +2105,7 @@ class DEUUnit(object):
         # nothing at all -- pictures frozen as they were and not a keystroke
         # acted on, 1084 tracebacks per IDP in one sitting.
         self.formatsLoaded = False
+        self._eepromSaved = False
         # MSG RESET and ACK are not keystrokes.  A press latches a header bit
         # that rides out on the next poll and is cleared once reported.
         self.msgResetPending = False
@@ -2095,6 +2139,7 @@ class DEUUnit(object):
         self.ipled = False
         self.iplRunning = False
         self.formatsLoaded = False
+        self._eepromSaved = False
         self.deuId = None
         self.mem[:] = 0
 
@@ -2103,6 +2148,17 @@ class DEUUnit(object):
         latches gone, and needing to be loaded.  The major function switch is
         a switch, not state, and keeps its position."""
         self.requestLoad()
+        img = idp_eeprom_read()
+        if img is not None:
+            # BOOTS FROM ITS STORED CRITICAL FORMATS: initialized, formats in, answering the first poll as a unit
+            # that needs nothing -- not with the IPL-required header-only reply that makes PASS log an I/O ERROR.
+            self.mem[:] = img
+            self.ipled = True
+            self.formatsLoaded = True
+            self._eepromSaved = True
+            m = re.search(r'(\d)$', self.name or '')
+            self.deuId = int(m.group(1)) if m else None
+            self.log("%s: powered on, initialized from its stored critical formats" % self.name)
         del self.keyQueue[:]
         self.spl.clear()
         self.msgResetPending = False
@@ -2404,6 +2460,11 @@ class DEUUnit(object):
         # The header is taken before the queue is drained: it carries the "a
         # keyboard message is ready" bit, which is set from the queue depth.
         hdr = self.takeHeader()
+        if self.ipled and self.formatsLoaded and not self._eepromSaved and not self.iplRunning:
+            # THE FIRST POLL AFTER A LOAD'S FORMATS ARE IN: what a real unit would hold in EEPROM.
+            self._eepromSaved = True
+            if idp_eeprom_write(self.mem):
+                self.log("%s: critical formats stored for later power-ons (%s)" % (self.name, idp_eeprom_path()))
         # One entry per message, never two concatenated.
         keys = self.keyQueue.pop(0) if (hdr & DEU.HDR.KYBD_MSG) else []
         o = {'header': hdr, 'keys': keys}
@@ -13572,6 +13633,7 @@ class IDP(LRU):
         # every restore and have PASS's display loader send them again for
         # nothing.
         u.formatsLoaded = bool(state.get('formatsLoaded', u.ipled))
+        u._eepromSaved = True          # a restored unit's memory holds a page in use: not what EEPROM would hold
         if state.get('kybdSel') is not None:
             self.kybdSel = int(state['kybdSel'])
         spl = state.get('spl')
@@ -13614,9 +13676,14 @@ class IDP(LRU):
             self.unit.log("IDP%s: POWER OFF" % self.id)
             return
         self.unit.powerUp()
-        self.unit.log("IDP%s: POWER ON -- memory cleared, requesting IPL" % self.id)
-        self._heartbeat()
-        self._clearMDUs()
+        if self.unit.ipled:
+            self.unit.log("IDP%s: POWER ON -- initialized from stored formats" % self.id)
+            self._heartbeat()
+            self._sendToMDUs(0, [int(w) for w in self.unit.mem])
+        else:
+            self.unit.log("IDP%s: POWER ON -- memory cleared, requesting IPL" % self.id)
+            self._heartbeat()
+            self._clearMDUs()
 
     def deuLoad(self):
         """DEU LOAD pushed.  Nothing happens to an unpowered unit."""

@@ -112,11 +112,15 @@ FL = {"name": "sts134", "dolilu": "sts134-dolilu.json", "rnp": [2011, 136],
       "env": {"YAGPC_VEHDYN_SOUNDING": "sts134-sounding-74794-20110516-1256Z.csv"}}
 PHASES = ["IPL", "UPLINK", "IMU", "COUNT", "TERMINAL", "ASCENT", "OMS2", "OPS2", "ORBIT", "DEORBIT", "ENTRY", "LAND"]
 
+# EVERY DISPLAY UNIT THAT EXISTS IS POWERED BEFORE THE COMPUTER IS IPLED, as the checklists do (PASS User's Guide, Table 2-2:
+# DEUs to STANDBY, then ON at least 30 s later, and the GPC IPL at least 2 minutes after the mass memories came on; the
+# Malfunction Procedures' GPC IPL steps start from IDPs already on).  The computer polls every DEU it is assigned from
+# the moment it runs, so a DEU left off, or not yet answering, is logged as an I/O ERROR CRTn (ledger #350).
 IPL_LOAD = """
 +0     gpc 1
 +0     mode HALT
 +0.02  idppower 1 on
-+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
+{idp_power}+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 """
 # GPC MEMORY holds one NBAT table per memory configuration.  The vehicle is in OPS 0 (memory configuration 1) when
 # this is done, and the table is read for the configuration being entered, so it is filled in twice, identically:
@@ -620,7 +624,9 @@ class Flight:
     def ipl(self):
         nbat = "\n".join("+8     keys ITEM %s EXEC" % i for i in NBAT_ITEMS)
         self.say("IPL: loading the flight software")
-        self.play(IPL_LOAD.format(panel=PANEL.replace(os.sep, "/")), "ipl-load")
+        self.play(IPL_LOAD.format(panel=PANEL.replace(os.sep, "/"),
+                                  idp_power="".join("+0.1   idppower %d on\n" % k for k in range(2, self.a.crts + 1))),
+                  "ipl-load")
         self.script_done("ipl-load", 900)
         self.say("GPC MEMORY: the NBAT for memory configuration 1 (G1, the ascent from OPS 101 on)")
         self.play(IPL_MC1.format(nbat=nbat), "ipl-nbat1")
