@@ -744,6 +744,12 @@ class Flight:
         self.launch_config_done = True
         self.pfd_on_crt2()
         self.play("+0     omseng left arm/press\n+1     omseng right arm/press\n", "oms-arm")
+        # WAIT FOR IT TO FINISH: the right engine is a +1 s line, and a script played meanwhile STOPS this one
+        # (panelO6.py 5571) and drops its last line without a word.  The next play (MSG RESET) arrived within a second on
+        # the Raspberry Pi 5, the right OMS engine stayed OFF, never fired in the OMS assist, and PASS raised R OMS PC
+        # (ledger #359, Claude-pi navedit-D).  Linux got away with it because waiting for the panel's receipt took over
+        # a second.
+        self.script_done("oms-arm", 30)
         self.say("crew: OMS ENG (two) ARM/PRESS (launch configuration)")
         self.play("+3     keys MSG_RESET\n+3     keys MSG_RESET\n", "msg-reset-launch")
 
@@ -795,6 +801,7 @@ class Flight:
             # setup arms them again ("sqrt OMS ENG (two) - ARM/PRESS").
             self.wait_sim(20)
             self.play("+0     omseng left off\n+1     omseng right off\n", "oms1-not-reqd")
+            self.script_done("oms1-not-reqd", 30)                   # see launch_config: a later play would stop it
             self.say("crew: OMS 1 not required: OMS ENG (two) OFF (ASC/134 FB 2-5)")
         else:
             # entry is OPS 3's: PASS stays in OPS 1 (MM 104) until the crew
@@ -955,6 +962,7 @@ class Flight:
         self.wait_gmt(tig + 300.0)
         # ASC/134 FB 2-8, CUTOFF: "+:02 OMS ENG (two) - OFF"
         self.play("+0     omseng left off\n+1     omseng right off\n", "oms-eng-off")
+        self.script_done("oms-eng-off", 30)                         # see launch_config: a later play would stop it
         self.say("crew: OMS ENG (two) OFF after the burn")
 
     def ops2(self):
@@ -1300,6 +1308,7 @@ class Flight:
                 self.say("crew: LANDING GEAR DN at %.0f ft, %.0f KGS" % (wh, kgs))
             if "chute" not in done and "MAIN gear TOUCHDOWN" in text:
                 self.play("+0     press chute_arm\n+1     press chute_dpy\n", "chute"); done.add("chute")
+                self.script_done("chute", 30)                       # DPY is the +1 s line; the brakes play follows
                 self.say("crew: DRAG CHUTE ARM, DPY at main-gear touchdown, %.0f KGS" % kgs)
             if "brakes" not in done and "NOSE gear TOUCHDOWN" in text and kgs < self.BRAKES_KGS:
                 self.play("+0     press brakes_on\n", "brakes"); done.add("brakes")
