@@ -120,7 +120,12 @@ IPL_LOAD = """
 +0     gpc 1
 +0     mode HALT
 +0.02  idppower 1 on
-{idp_power}+0.01  script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
+{idp_power}"""
+# ...AND THE COMPUTER IS NOT STARTED UNTIL EVERY UNIT HAS SAID IT IS UP.  The power commands only reach the display
+# processes; on a loaded host (a Pi at rate 2 with four CRTs: load 7.7 on 4 cores) IDP3's power-on had not completed
+# when the computer, running at twice real time, first polled it, and I/O ERROR CRT3 was logged at the IPL (ledger #362).
+IPL_RUN = """
++0     script {panel}/examples/ipl-one-gpc.script gpc=1 crt=1 idp=1 kb=KB1
 """
 # GPC MEMORY holds one NBAT table per memory configuration.  The vehicle is in OPS 0 (memory configuration 1) when
 # this is done, and the table is read for the configuration being entered, so it is filled in twice, identically:
@@ -630,13 +635,36 @@ class Flight:
         except OSError:
             return ""
 
+    def wait_idps_up(self, n, timeout=45.0):
+        """Wait (wall seconds) until n display units have logged that they powered on from their stored formats, in
+        any of the display processes' logs.  Only a safety wait: a cold-power-on run (no EEPROM image) never logs it,
+        and the timeout then just ends the wait."""
+        import glob
+        t0 = time.time()
+        while time.time() - t0 < timeout:
+            up = 0
+            for f in glob.glob(os.path.join(self.a.logs, "logs", "meds*.log")):
+                try:
+                    up += open(f, errors="replace").read().count("initialized from its stored critical formats")
+                except OSError:
+                    pass
+            if up >= n:
+                self.say("IPL: all %d display units up" % n)
+                return True
+            time.sleep(0.5)
+        self.say("IPL: only some display units reported up after %.0f s; going on" % timeout)
+        return False
+
     # --- the phases -------------------------------------------------------
     def ipl(self):
         nbat = "\n".join("+8     keys ITEM %s EXEC" % i for i in NBAT_ITEMS)
         self.say("IPL: loading the flight software")
         self.play(IPL_LOAD.format(panel=PANEL.replace(os.sep, "/"),
                                   idp_power="".join("+0.1   idppower %d on\n" % k for k in range(2, 5))),
-                  "ipl-load")
+                  "ipl-power")
+        self.script_done("ipl-power", 60)
+        self.wait_idps_up(4)
+        self.play(IPL_RUN.format(panel=PANEL.replace(os.sep, "/")), "ipl-load")
         self.script_done("ipl-load", 900)
         self.say("GPC MEMORY: the NBAT for memory configuration 1 (G1, the ascent from OPS 101 on)")
         self.play(IPL_MC1.format(nbat=nbat), "ipl-nbat1")
