@@ -1262,6 +1262,18 @@ class Flight:
             self.script_done("air-data", 60)
             self.air_data_done = True
             self.say("crew: ADTA PROBES DEPLOY; ADTA H and ADTA to G&C AUT (ITEMS 25 and 28, at the start of LAND)")
+        # INCORPORATE FIRST, THEN AUTO.  GPS to NAV AUTO applies the residual edit test, and until nav has been pulled
+        # to GPS the ratio is far above 1 (a TAL's nav has had no GPS since the pad): after an I-loaded number of
+        # cycles PASS raises NAV EDIT GPS (GLJRCV.hal 494: GPS_RATIO_FLAG on, GPS TO NAV = AUTO, N_RATIOS_ABOVE_LIMIT
+        # reached).  The old order here, AUTO (17 s of keystrokes) and only then INCORPORATE, left GPS in AUTO with the
+        # ratio above 1 for that long: the message fired when the cycles beat the second script (Win11-native twice,
+        # Pi navedit-C and -E; not Pi navedit-D, -F; ledger #360), and ITEM 44 after ITEM 42 ended in FORCE, which is
+        # exclusive with AUTO.  The handbook order is force first and AUTO once the ratio is below 1 (JSC-11542 Rev E,
+        # 'After the ratio has become less than 1, select AUTO'; ENT/134/FIN FS 3-34, V = 7K: GPS INCORPORATE).
+        if self.a.incorporate_at_land:
+            self.play(GPS_INCORPORATE, "gps-incorporate-land")
+            self.script_done("gps-incorporate-land", 60)
+            self.say("crew: GPS INCORPORATE at the start of LAND (--incorporate-at-land)")
         if self.a.gps_auto_at_land:
             # an abort's entry skips the V = 7K steps above; flight rules keep autolands out of aborts, but
             # where there is no (or no usable) navaid the autoland needs GPS in navigation: GPS TO NAV AUTO
@@ -1269,9 +1281,6 @@ class Flight:
             self.script_done("gps-auto-land", 60)
             self.say("crew: NAV GPS to AUTO (SPEC 50 ITEM 42) at the start of LAND (--gps-auto-at-land)")
         if self.a.incorporate_at_land:
-            self.play(GPS_INCORPORATE, "gps-incorporate-land")
-            self.script_done("gps-incorporate-land", 60)
-            self.say("crew: GPS INCORPORATE at the start of LAND (--incorporate-at-land)")
             self.play(METERING_OVERRIDE, "metering-override-land")
             self.script_done("metering-override-land", 60)
             self.say("crew: SPEC 55 METERING OVERRIDE (--incorporate-at-land)")
