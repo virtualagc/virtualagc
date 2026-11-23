@@ -3244,6 +3244,10 @@ class LampLayer(PointLayer):
         o_ef = m @ view_eye(view, fs)
         if np.linalg.norm(o_ef - site.ef) > 80e3:
             return
+        if RUNWAY_LIGHTS.get('auto'):                        # the runway being landed on: the threshold nearer the eye
+            near = min(SLF_THRESHOLDS, key=lambda r: float(np.linalg.norm(
+                geodetic_ef(SLF_THRESHOLDS[r][0], SLF_THRESHOLDS[r][1], site.height) - o_ef)))
+            RUNWAY_LIGHTS['runway'] = near
         lamps = slf_lights(site)
         rel = lamps.pos_ef - o_ef
         d = np.linalg.norm(rel, axis=1)
@@ -3255,7 +3259,7 @@ class LampLayer(PointLayer):
             sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
             mus = float(np.dot(site.ef / np.linalg.norm(site.ef), sun))
             t = min(max((mus + 0.1) / 0.15, 0.0), 1.0)
-            fade = 0.05 + 0.95 * (1.0 - t * t * (3.0 - 2.0 * t))        # lamps in daylight: faint
+            fade = 1.0 - t * t * (3.0 - 2.0 * t)                        # lamps in daylight: off (they are lit for night landings only)
         lux = lamps.cd * factor * LAMP_GAIN * fade / (d * d)
         keep = lux > 1e-12
         if not np.any(keep):
@@ -4153,8 +4157,9 @@ def main(argv=None):
                          "(default 0.1, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
     ap.add_argument("--runway-lights", choices=('on', 'off'), default='on',
                     help="the Shuttle Landing Facility's lights and floodlights at night (default on)")
-    ap.add_argument("--lit-runway", choices=('15', '33'), default='15',
-                    help="the runway whose lights and head-of-runway floodlights are on (default 15)")
+    ap.add_argument("--lit-runway", choices=('auto', '15', '33'), default='auto',
+                    help="the runway whose lights and head-of-runway floodlights are on (default auto: the "
+                         "runway whose threshold is nearer the eye)")
     ap.add_argument("--terrain", choices=('on', 'off'), default='on',
                     help="the ground's heights near the landing site and the pads (default on)")
     ap.add_argument("--thin-gain", type=float, metavar="G",
@@ -4274,7 +4279,8 @@ def main(argv=None):
     site = None
     TERRAIN['on'] = args.terrain == 'on'
     EarthLayer.NIGHT_AMB = args.night_terrain
-    RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway=args.lit_runway)
+    RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway='15' if args.lit_runway == 'auto' else args.lit_runway,
+                         auto=args.lit_runway == 'auto')
     MSAA['samples'] = args.msaa
     STAR_CORE['f'] = min(2.0, max(0.1, args.star_core))
     STAR_CORE['gain'] = min(10.0, max(0.0, args.star_gain))
