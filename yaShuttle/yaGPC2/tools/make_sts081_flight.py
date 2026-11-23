@@ -118,6 +118,62 @@ def words(ws):
     return "".join("%04X" % w for w in ws)
 
 
+def read_sounding(path):
+    rows = []
+    for ln in open(path).read().splitlines()[1:]:
+        c = [x.strip() for x in ln.split(",")]
+        if len(c) < 13 or not c[4] or not c[11] or not c[12]:
+            continue
+        rows.append(dict(raw=c, h=float(c[4]), dirn=float(c[11]), spd=float(c[12])))
+    rows.sort(key=lambda r: r["h"])
+    return rows
+
+
+def uv_fps(r):
+    """(east, north) wind in ft/s toward which it blows (the file's direction is where it comes FROM)."""
+    sp = r["spd"] / FT
+    d = math.radians(r["dirn"])
+    return -sp * math.sin(d), -sp * math.cos(d)
+
+
+def wind_tab(rows):
+    """WNDE_TAB, WNDN_TAB at 0/8/18/28/38/48/58/80 kft: the mean over +-1,000 ft, as sts134's."""
+    ek, nk = [], []
+    for alt in (0, 8, 18, 28, 38, 48, 58, 80):
+        lo, hi = max(0.0, (alt - 1.0)) * 1000 * FT, (alt + 1.0) * 1000 * FT
+        sel = [r for r in rows if lo <= r["h"] <= hi] or [min(rows, key=lambda r: abs(r["h"] - alt * 1000 * FT))]
+        uv = [uv_fps(r) for r in sel]
+        ek.append(round(sum(x[0] for x in uv) / len(uv), 1))
+        nk.append(round(sum(x[1] for x in uv) / len(uv), 1))
+    return ek, nk
+
+
+def interp_sounding(before, after, w, out):
+    """The air at launch: the two balloons' profiles (columns by height) blended, weight w on the later."""
+    def at(rows, h, col):
+        xs = [r for r in rows if r["raw"][col] not in ("",)]
+        for a, b in zip(xs, xs[1:]):
+            if a["h"] <= h <= b["h"] and b["h"] > a["h"]:
+                t = (h - a["h"]) / (b["h"] - a["h"])
+                return float(a["raw"][col]) * (1 - t) + float(b["raw"][col]) * t
+        return float(xs[0 if h < xs[0]["h"] else -1]["raw"][col])
+    hdr = open(os.path.join(FLIGHTS, "sts081-sounding-72206-1997011211Z.csv")).readline().strip()
+    lines = [hdr]
+    for r in after:
+        h = r["h"]
+        v = []
+        for col in (3, 5, 6, 7, 8, 9, 10):
+            v.append(w * float(r["raw"][col] or 0) + (1 - w) * at(before, h, col))
+        u1, v1 = uv_fps(r)
+        u0 = [uv_fps({"spd": at(before, h, 12), "dirn": at(before, h, 11)})][0]
+        ue, vn = w * u1 + (1 - w) * u0[0], w * v1 + (1 - w) * u0[1]
+        spd = math.hypot(ue, vn) * FT
+        dirn = (math.degrees(math.atan2(-ue, -vn))) % 360.0
+        lines.append("1997-01-12 09:27:23,%s,%s,%.1f,%5d,%5.1f,%5.1f,%5.1f,%3.0f,%3.0f,%.2f,%3.0f,%5.1f" % (
+            r["raw"][1], r["raw"][2], v[0], round(h), v[1], v[2], v[3], v[4], v[5], v[6], dirn, spd))
+    open(out, "w").write("\n".join(lines) + "\n")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--archive", default=os.path.expanduser("~/Desktop/Shuttle Stuff/S16609.txt"))
@@ -170,6 +226,19 @@ def main():
                 elif n == "ASSIST_OMS_DT":
                     f["E"] = 109.0
                     f["note"] = "the tape's: STS-81's OMS assist time not found"
+    # the air: Cape Canaveral's 74794 is not in the Wyoming archive for 1997, so the nearest east-coast balloon, Jacksonville
+    # (72206, 30.5 N, 81.7 W): PASS's wind table from the last one before liftoff (1997-01-11 23:04Z), the truth's air the
+    # 23:04Z and 11:03Z profiles blended to 09:27Z
+    s0 = read_sounding(os.path.join(a.out, "sts081-sounding-72206-1997011123Z.csv"))
+    s1 = read_sounding(os.path.join(a.out, "sts081-sounding-72206-1997011211Z.csv"))
+    w = ((SRB_IGN - datetime.datetime(1997, 1, 11, 23, 4, tzinfo=UTC)).total_seconds()
+         / (datetime.datetime(1997, 1, 12, 11, 3, tzinfo=UTC) - datetime.datetime(1997, 1, 11, 23, 4, tzinfo=UTC)).total_seconds())
+    interp_sounding(s0, s1, w, os.path.join(a.out, "sts081-sounding-72206-19970112-0927Z.csv"))
+    ek, nk = wind_tab(s0)
+    d["messages"].append({"op": 11, "name": "wind table (WNDE_TAB, WNDN_TAB)", "fields": [
+        {"E": ek, "name": "WNDE_TAB(1-8), ft/s toward east, at ALT_WND 0/8/18/28/38/48/58/80 kft: Jacksonville 72206 of 1997-01-11 23:04Z (University of Wyoming archive; Cape Canaveral 74794 is not archived for 1997), the last balloon before liftoff, averaged over +-1,000 ft"},
+        {"E": nk, "name": "WNDN_TAB(1-8), ft/s toward north, the same sounding"}]})
+    d["notes"][3] = "Message 11, the wind table: Jacksonville's (72206) balloon of 1997-01-11 23:04Z, the last before liftoff -- Cape Canaveral's 74794 is not in the archive for 1997, and Jacksonville is the nearest east-coast station that is.  The truth flies the 23:04Z and 11:03Z profiles blended to 09:27Z (sts081-sounding-72206-19970112-0927Z.csv, weight %.2f on the later)." % w
     json.dump(d, open(os.path.join(a.out, "sts081-dolilu.json"), "w"), indent=1)
     # the flight file
     f135 = json.load(open(os.path.join(a.out, "sts135-flight.json")))
@@ -178,10 +247,12 @@ def main():
               "epoch": CLOCK_START.strftime("%Y-%m-%dT%H:%M:%S"), "t0": t0, "gmtlo": [12, 9, 27, 20.0],
               "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9,
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
-              "env": {"YAGPC_VEHDYN_SSME_ISP": "453.18", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884"},
+              "env": {"YAGPC_VEHDYN_SSME_ISP": "453.18", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
+                      "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
+                      "YAGPC_VEHDYN_PAD_ALT": "64.1"},
               "notes": ["STS-81 (Mission Report Table I; Missions Summary p. 2-98): SRB ignition 012/09:27:22.984; GMTLO 09:27:20 gives T-0 at :22.8 (PASS's 2.8 s, see fly_sts134.py).",
                         "orbiter_kg is an ESTIMATE (%.0f lb); the ET and SRB masses are the vehicle model's defaults (ET-83 is a lightweight tank); SSME Isp tag 453.18 s and fuel bias 884 lb are the Missions Summary's." % a.orbiter_lb,
-                        "TO DO BEFORE COMPARING: the 1997-01-12 Cape sounding as env YAGPC_VEHDYN_SOUNDING and message 11; pad 39B's position and 55 ft elevation in the truth model (vehdyn) -- it uses 39A.",
+                        "Air: Jacksonville's 1997-01-11 23:04Z and 01-12 11:03Z balloons blended to liftoff (Cape Canaveral 74794 is not archived for 1997).  Pad: vehdyn and PASS's own nav-base I-load put the vehicle at LC-39A's latitude and longitude (2.6 km from 39B), kept on purpose so the truth and PASS agree; the height is 39B's, 55 ft instead of 39A's 48 (YAGPC_VEHDYN_PAD_ALT 64.1 m = 62.0 + 7 ft).",
                         "Made by tools/make_sts081_flight.py; do not edit by hand."]}
     json.dump(flight, open(os.path.join(a.out, "sts081-flight.json"), "w"), indent=1)
     # the OPS 1 overlay: the MECO targets
@@ -193,6 +264,12 @@ def main():
     alt = (r_ft - A_PASS_FT) / NM_FT
     rc["notes"] = ["STS-81 MECO targets: VI 25,915 ft/s (predicted; 25,922 flown, Missions Summary 2-98), the tape's flight-path angle 0.5 deg (STS-81's value NOT found), and the radius that makes the coast's apogee 159.9 nmi, the post OMS-2 apogee (OMS-2 at apogee raises the perigee): %.2f nmi above PASS's equatorial radius.  104%% throttle as STS-134 (K_CMD 104).  The rest as sts134-reconfig.json." % alt]
     for c in rc["cells"]:
+        # the volume this goes on already carries STS-134's overlay (the KSC6 lineage, tools/mission_reconfig.py): what
+        # the cell holds now is STS-134's value, so that is its "was"
+        for k in ("E", "H"):
+            if k in c:
+                c["was"] = c[k]
+                break
         if c["name"] == "CGGS_V_MAG_MECO_NOM":
             c["E"] = vi
         elif c["name"] in ("CGGS_RAD_MECO_NOM", "CGGV_RAD_MECO"):
