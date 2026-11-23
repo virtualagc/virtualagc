@@ -8769,6 +8769,10 @@ HSI_ORB = [[0, -1.36], [0.10, -0.90], [0.17, -0.50], [0.24, -0.10],
 # the display above it.  (This replaces the opaque menu-area mask the HSI
 # carried before: the clip needs no depth trick.)
 HSI_CLIP = Vector4(-1, 53, -2, 32.374)
+# The rule between the application area and the edgekey menu: at the bottom of the compass card, which rests on it (the
+# OI-33 SCOM's PFD figure, pdf p285, USA007587 2.7-3) -- it ran 0.174 row higher, through the card's last sliver.
+MENU_LINE_Y = HSI_CLIP.w
+MENU_LINE_SHIFT = MENU_LINE_Y - 32.2
 # Stacking on the face and the card.  An SDF stroke's geometry carries
 # z = 100, in front of every fill, so the fills join the same transparent
 # pass and the order is renderOrder throughout: dots under the deviation bar,
@@ -11948,7 +11952,7 @@ class MDUMenuArea(object):
             self.faultLineBlink = blink
             # TODO: implement blink support for fault line text
             color = self.d.c2h['white']
-            self.faultLine = self.d.str(3, 32, self.faultLineMsg, color, 1, .9)
+            self.faultLine = self.d.str(3, 32 + MENU_LINE_SHIFT, self.faultLineMsg, color, 1, .9)
             self.group.add(self.faultLine)
             self.d.dirty = True
 
@@ -12078,9 +12082,9 @@ class MDUMenuArea(object):
         # Dividing line between app area and menu area, drawn to the EDGES OF
         # THE WORLD, not to 53: the frustum's right edge is cell 52.442, so a
         # rule drawn to 53 has its last half-cell outside the world.
-        self.group.add(self.d.line([[self.d.camera.left, 32.2],
-                                    [self.d.camera.right, 32.2]], self.d.c2h['cyan']))
-        self.faultLine = self.d.str(3, 32, self.faultLineMsg, self.d.c2h['white'], 1, .9)
+        self.group.add(self.d.line([[self.d.camera.left, MENU_LINE_Y],
+                                    [self.d.camera.right, MENU_LINE_Y]], self.d.c2h['cyan']))
+        self.faultLine = self.d.str(3, 32 + MENU_LINE_SHIFT, self.faultLineMsg, self.d.c2h['white'], 1, .9)
         self.group.add(self.faultLine)
 
         self.menuGrp = Object3D()
