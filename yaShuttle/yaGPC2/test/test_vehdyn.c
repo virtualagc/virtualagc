@@ -99,6 +99,23 @@ int main(int argc, char **argv) {
         return segment_scenario(atoi(argv[2]));
     check_segment_depletion(argv[0]);
     setenv("YAGPC_VEHDYN", "1", 1);
+
+    /* THE ATMOSPHERE HAS NO STEP AT 66 KM (ledger #363): the Patrick table ends there and the 1976 standard, 17.8%
+     * thinner, used to take over.  Density across the join agrees to 0.1%, falls smoothly and monotonically from
+     * 60 to 100 km, and the standard is reached by 86 km + (the blend has faded). */
+    {
+        double lo = vehdyn_air_density(65999.0), hi = vehdyn_air_density(66001.0);
+        check(fabs(hi / lo - 1.0) < 1e-3, "atmosphere continuous at 66 km", hi / lo, 1.0);
+        double bad = 0.0, prev = vehdyn_air_density(60000.0);
+        for (double h = 60500.0; h <= 100000.0; h += 500.0) {
+            double r = vehdyn_air_density(h);
+            if (!(r < prev) && bad == 0.0) bad = h;
+            prev = r;
+        }
+        check(bad == 0.0, "density falls monotonically 60-100 km (got: first height that does not)", bad, 0.0);
+        double r86 = vehdyn_air_density(86000.0), r87 = vehdyn_air_density(87000.0);
+        check(r86 / r87 > 1.0 && r86 / r87 < 1.35, "no jump at 86 km", r86 / r87, 1.2);
+    }
     uint16_t ff[5] = { 0 }, fa[5] = { 0 };
 
     /* F1U FOR ONE SECOND. */

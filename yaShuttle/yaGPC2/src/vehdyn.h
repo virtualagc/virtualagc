@@ -209,4 +209,8 @@ bool vehdyn_target(int k, int *norad, double r[3], double v[3], double q[4]);
 int vehdyn_targets_save(double *b, int max);
 void vehdyn_targets_load(const double *b, int n);
 
+/* The model atmosphere's density, kg/m^3, at geometric height h_m above the ellipsoid (no wind, no weather
+ * sounding): the Patrick table to 66 km and the 1976 standard blended onto it above (ledger #363). */
+double vehdyn_air_density(double h_m);
+
 #endif

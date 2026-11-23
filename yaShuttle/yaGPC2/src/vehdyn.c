@@ -848,11 +848,43 @@ static int patrick(double h, double *rho, double *temp) {
     *temp = p / (*rho * 287.05);
     return 1;
 }
+static int patrick_in_use(void) {
+    double r, t;
+    return patrick(0.0, &r, &t);       /* the table answers at 0 m exactly when it is in use */
+}
 /* THE 1976 STANDARD ATMOSPHERE to 86 km, layer by layer: physics.c's
  * single exponential below 25 km is 20-26% thin where max-q happens. */
+/* THE PATRICK TABLE ENDS AT 66 KM, where it is 7.5% DENSER than the 1976 standard (1.5353e-4 against 1.4288e-4 kg/m^3,
+ * once the standard's heights are geopotential), and above that the standard takes over, so density, and with it q,
+ * stepped as a vehicle came down through 66 km (216,535 ft, near Mach 20 on entry: 18% before the height fix below, 7.5%
+ * after), and the step kicked the roll loop in every entry (ledger #363).  So
+ * above 66 km the standard is scaled by 1 + (r - 1) exp(-(h - 66 km) / 8 km), r the Patrick/standard ratio at 66 km:
+ * the two meet at 66 km and the excess fades out by 86 km, where the standard's own top layer ends.  Not applied
+ * with YAGPC_VEHDYN_ATMOS=us1976 (no Patrick table there to match) or inside a weather sounding. */
+#define ATM_BLEND_SCALE_M 8000.0
+static void us1976_standard(double h, double *rho, double *temp);
+static int patrick_in_use(void);
 static void us1976(double h, double *rho, double *temp) {
     if (sounding(h, rho, temp)) return;
     if (patrick(h, rho, temp)) return;
+    us1976_standard(h, rho, temp);
+    if (h >= PAT_H[PAT_N - 1] && patrick_in_use()) {
+        static double ratio = 0.0;
+        if (ratio == 0.0) {
+            double rp, tp, rs, ts;
+            patrick(PAT_H[PAT_N - 1] - 0.01, &rp, &tp);
+            us1976_standard(PAT_H[PAT_N - 1], &rs, &ts);
+            ratio = rp / rs;
+        }
+        *rho *= 1.0 + (ratio - 1.0) * exp(-(h - PAT_H[PAT_N - 1]) / ATM_BLEND_SCALE_M);
+    }
+}
+double vehdyn_air_density(double h_m) {
+    double rho, T;
+    us1976(h_m, &rho, &T);
+    return rho;
+}
+static void us1976_standard(double h, double *rho, double *temp) {
     static const double HB[] = { 0, 11000, 20000, 32000, 47000, 51000, 71000, 86000 };
     static const double LB[] = { -0.0065, 0.0, 0.001, 0.0028, 0.0, -0.0028, -0.002 };
     static const double PB[] = { 101325.0, 22632.06, 5474.889, 868.0187, 110.9063, 66.93887,
@@ -864,6 +896,11 @@ static void us1976(double h, double *rho, double *temp) {
         *rho = phys_air_density(h);
         return;
     }
+    /* THE LAYER BASES ABOVE ARE GEOPOTENTIAL HEIGHTS (the standard's own definition, r0 = 6356.766 km), and h is
+     * geometric: the layers were being fed h unconverted, which read every height too low by 0.7 km at 66 km and
+     * 1.15 km at 86 km, so density was 12% thin at 66 km and 17% thin at 85 km, and stepped UP 19% at the 86 km
+     * hand-off to phys_air_density (ledger #363). */
+    h = 6356766.0 * h / (6356766.0 + h);
     int i = 0;
     while (i < 6 && h >= HB[i + 1]) i++;
     double T = TB[i] + LB[i] * (h - HB[i]), P;
