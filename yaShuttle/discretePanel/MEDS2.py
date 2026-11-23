@@ -8769,10 +8769,13 @@ HSI_ORB = [[0, -1.36], [0.10, -0.90], [0.17, -0.50], [0.24, -0.10],
 # the display above it.  (This replaces the opaque menu-area mask the HSI
 # carried before: the clip needs no depth trick.)
 HSI_CLIP = Vector4(-1, 53, -2, 32.374)
-# The rule between the application area and the edgekey menu: at the bottom of the compass card, which rests on it (the
-# OI-33 SCOM's PFD figure, pdf p285, USA007587 2.7-3) -- it ran 0.174 row higher, through the card's last sliver.
-MENU_LINE_Y = HSI_CLIP.w
-MENU_LINE_SHIFT = MENU_LINE_Y - 32.2
+# The rule between the application area and the edgekey menu sits at the bottom of the compass card, which rests on it
+# (the OI-33 SCOM's PFD figures, pdf p285 and p297, USA007587 2.7-3).  The card's clip is HSI_CLIP's last number, on the
+# screen; the menu area's group is drawn MENU_GROUP_DY rows up (MDUMenuArea.build), so the rule's own y is that much
+# further down.  (The rule ran at 32.2 in the group, 31.56 on the screen, 0.8 row above the card's end: measured on a
+# screenshot, 2026-11-23, the card showed 16 px below the rule.)
+MENU_GROUP_DY = -0.643
+MENU_LINE_Y = HSI_CLIP.w - MENU_GROUP_DY
 # Stacking on the face and the card.  An SDF stroke's geometry carries
 # z = 100, in front of every fill, so the fills join the same transparent
 # pass and the order is renderOrder throughout: dots under the deviation bar,
@@ -11952,7 +11955,7 @@ class MDUMenuArea(object):
             self.faultLineBlink = blink
             # TODO: implement blink support for fault line text
             color = self.d.c2h['white']
-            self.faultLine = self.d.str(3, 32 + MENU_LINE_SHIFT, self.faultLineMsg, color, 1, .9)
+            self.faultLine = self.d.str(3, 32, self.faultLineMsg, color, 1, .9)
             self.group.add(self.faultLine)
             self.d.dirty = True
 
@@ -12084,7 +12087,7 @@ class MDUMenuArea(object):
         # rule drawn to 53 has its last half-cell outside the world.
         self.group.add(self.d.line([[self.d.camera.left, MENU_LINE_Y],
                                     [self.d.camera.right, MENU_LINE_Y]], self.d.c2h['cyan']))
-        self.faultLine = self.d.str(3, 32 + MENU_LINE_SHIFT, self.faultLineMsg, self.d.c2h['white'], 1, .9)
+        self.faultLine = self.d.str(3, 32, self.faultLineMsg, self.d.c2h['white'], 1, .9)
         self.group.add(self.faultLine)
 
         self.menuGrp = Object3D()
@@ -12157,7 +12160,7 @@ class MDUMenuArea(object):
         # bottom outside the frustum, and it is the fixed furniture everything
         # else is judged against.  menuX still applies.
         # -0.643 = 0.307 - 0.95, the fitted offset for the MAIN MENU rule.
-        self.group.position.set(ADJ['menuX'], -0.643, -0.9)
+        self.group.position.set(ADJ['menuX'], MENU_GROUP_DY, -0.9)
         self.d.add([self.group])
 
     def buildMenu(self, i, s, color):
