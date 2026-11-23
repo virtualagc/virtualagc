@@ -11416,8 +11416,11 @@ class Screen_AE_PFD(MDUScreen):
                     txt = "%.1f" % ((v if v is not None else 0) / 10.0)
                 else:
                     txt = "%d" % jsround(v if v is not None else 0)
-                g.add(self.d.strMEDS(41.66 + 1 - 1.726 * s - (len(txt) - 1) * 0.9,
-                                     (y0 + y1) / 2 - 0.330 * s, txt, C['white'], s, 0.9))
+                # a decimal point takes a whole character cell, which pushed XX.X's leading digit against the box's left
+                # edge (the owner, 2026-11-23): those pack at 0.82 and end 0.1 further right, into the right margin
+                adv, end = (0.82, 0.1) if '.' in txt else (0.9, 0.0)
+                g.add(self.d.strMEDS(41.66 + 1 - 1.726 * s + end - (len(txt) - 1) * adv,
+                                     (y0 + y1) / 2 - 0.330 * s, txt, C['white'], s, adv))
             else:
                 g.add(self.d.box(x0, y0, x1, y1, C['red'], C['red']))
         return g
