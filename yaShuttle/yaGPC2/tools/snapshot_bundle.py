@@ -2,7 +2,8 @@
 """THE SNAPSHOT SET AS ONE ENCRYPTED ARCHIVE: index it, pack it, verify a download, take one snapshot out.
 
     snapshot_bundle.py index  ROOT... [-o snapshot-index.json]
-    snapshot_bundle.py pack   ARCHIVE.7z ROOT... [--index snapshot-index.json]       (the OWNER runs this: it asks for the password)
+    snapshot_bundle.py release ROOT [-o OUTDIR] [--tiers snapshot-tiers.json] [--dry-run]   (the OWNER runs this)
+    snapshot_bundle.py pack   ARCHIVE.7z ROOT... [--index snapshot-index.json]       (older; use `release`)
     snapshot_bundle.py verify ARCHIVE.7z [MANIFEST.json]
     snapshot_bundle.py list   [snapshot-index.json]
     snapshot_bundle.py extract ARCHIVE.7z NAME... [--to DIR] [--index snapshot-index.json]
@@ -26,6 +27,7 @@ only so that the tool can be tested with a dummy.
 """
 import argparse
 import datetime
+import fnmatch
 import getpass
 import re
 import hashlib
@@ -188,6 +190,85 @@ def cmd_pack(a):
     print("also written (publish beside the archive; they hold no memory): %s, %s" % (index_out, mp))
 
 
+ARCHIVE = "STS134-snapshots.7z"            # the name the wizard looks for, and the one the manifest records
+
+
+def load_tiers(path):
+    cfg = json.load(open(path))
+    names = [t["name"] for t in cfg["tiers"]]
+    if len(set(names)) != len(names):
+        sys.exit("snapshot_bundle: tier names repeat in %s" % path)
+    return cfg
+
+
+def tier_of(cfg, name):
+    """The tier a snapshot `name` ('SET/NAME') is released at: the first matching rule."""
+    for pat, tier in cfg["rules"]:
+        if fnmatch.fnmatchcase(name, pat):
+            return tier
+    sys.exit("snapshot_bundle: no tier rule matches %s" % name)
+
+
+def tier_fields(cfg, tier):
+    """(tape file name, digest, digests of the more inclusive tiers) for tier `tier`."""
+    tiers = cfg["tiers"]
+    names = [t["name"] for t in tiers]
+    if tier not in names:
+        sys.exit("snapshot_bundle: the tier %s is not defined" % tier)
+    i = names.index(tier)
+    return tiers[i]["file"], tiers[i]["sha256"], [t["sha256"] for t in tiers[:i]]
+
+
+def cmd_release(a):
+    """THE WHOLE RELEASE IN ONE COMMAND: OUTDIR gets STS134-snapshots.7z, snapshot-index.json and snapshot-bundle.json,
+    with exactly those names, the manifest naming that archive, and every snapshot's tape recorded at the tier that
+    snapshot's scenarios need (snapshot-tiers.json): in the index AND in each snapshot's own vehicle.json inside the
+    archive (the wizard reads vehicle.json of an unpacked snapshot).  ROOT itself is not changed."""
+    cfg = load_tiers(a.tiers)
+    rows0, where = build_index([a.root])
+    if not rows0:
+        sys.exit("snapshot_bundle: no snapshots under %s" % a.root)
+    outdir = os.path.abspath(a.o)
+    targets = [os.path.join(outdir, n) for n in (ARCHIVE, INDEX, MANIFEST)]
+    if not a.dry_run:
+        os.makedirs(outdir, exist_ok=True)
+        for t in targets:
+            if os.path.exists(t):
+                sys.exit("snapshot_bundle: %s exists; it is not overwritten (move it or choose another -o)" % t)
+    counts = {}
+    for r in rows0:
+        counts.setdefault(tier_of(cfg, r["name"]), []).append(r["name"])
+    for tier in [t["name"] for t in cfg["tiers"]]:
+        if tier in counts:
+            print("  %-9s %3d snapshot(s)  e.g. %s" % (tier, len(counts[tier]), counts[tier][0]))
+    if a.dry_run:
+        return
+    pw = read_password(True)
+    with tempfile.TemporaryDirectory() as stage:
+        for name, src in where.items():
+            dst = os.path.join(stage, name)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copytree(src, dst)
+            vp = os.path.join(dst, "vehicle.json")
+            v = json.load(open(vp))
+            fname, sha, also = tier_fields(cfg, tier_of(cfg, name))
+            v["tape"], v["tapeSha256"], v["tapeSha256Also"] = fname, sha, also
+            json.dump(v, open(vp, "w"), indent=1)
+        rows, _ = build_index([stage])
+        json.dump({"snapshots": rows}, open(os.path.join(stage, INDEX), "w"), indent=1)
+        out = targets[0]
+        r = subprocess.run([sevenz(), "a", "-t7z", "-mx=9", "-mhe=on", "-p", "-bso0", "-bsp0", out, "."], cwd=stage,
+                           input=(pw + "\n" + pw + "\n").encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if r.returncode != 0:
+            sys.exit("snapshot_bundle: 7z failed:\n" + r.stderr.decode(errors="replace")[-600:])
+    json.dump({"snapshots": rows}, open(targets[1], "w"), indent=1)
+    man = {"archive": ARCHIVE, "bytes": os.path.getsize(targets[0]), "sha256": sha256_file(targets[0]),
+           "snapshots": len(rows), "sets": sorted({r["set"] for r in rows})}
+    json.dump(man, open(targets[2], "w"), indent=1)
+    print("%d snapshot(s) in %d set(s), %d bytes, sha256 %s" % (len(rows), len(man["sets"]), man["bytes"], man["sha256"][:16]))
+    print("written to %s:\n  %s\n  %s\n  %s" % (outdir, ARCHIVE, INDEX, MANIFEST))
+
+
 def cmd_verify(a):
     mp = a.manifest or os.path.join(os.path.dirname(os.path.abspath(a.archive)), MANIFEST)
     man = json.load(open(mp))
@@ -236,6 +317,12 @@ def main():
     p.add_argument("roots", nargs="+")
     p.add_argument("-o", default=INDEX)
     p.set_defaults(f=cmd_index)
+    p = sub.add_parser("release")
+    p.add_argument("root")
+    p.add_argument("-o", default=".", help="the directory the three files go in (default: here)")
+    p.add_argument("--tiers", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshot-tiers.json"))
+    p.add_argument("--dry-run", action="store_true", help="print the tier assignment and stop (no password)")
+    p.set_defaults(f=cmd_release)
     p = sub.add_parser("pack")
     p.add_argument("archive")
     p.add_argument("roots", nargs="+")

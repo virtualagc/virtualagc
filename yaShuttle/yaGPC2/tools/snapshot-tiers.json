@@ -1,0 +1,15 @@
+{
+ "comment": "THE TAPE TIER EACH SNAPSHOT IS RELEASED AT (snapshot_bundle.py release).  A snapshot is recorded as needing the LEAST inclusive volume that runs its scenarios, and as accepting every more inclusive one.  Tiers are listed most inclusive first; a snapshot's 'tapeSha256Also' is the digests of the tiers before its own.  The first matching rule wins (fnmatch on 'SET/NAME').  The digests are the volumes' contents (OI340700-OPSn.7z are their encrypted forms): T1 = OPS1.7z, T1-no16 = OPS3.7z, T1-no136 = OPS2.7z.",
+ "tiers": [
+  {"name": "T1",       "file": "T1.mmv",       "sha256": "9bdc5531838c45957aa42ec50a6683d094c88159decf16376c2776713b6530c4", "for": "launch, RTLS and TAL"},
+  {"name": "T1-no16",  "file": "T1-no16.mmv",  "sha256": "25ef02250c865586c7b575902c1ab1efdcb1e93fbf9c483bc6bf96607a2cf761", "for": "landing"},
+  {"name": "T1-no136", "file": "T1-no136.mmv", "sha256": "916a53b7cdc1201919b52abdad24bbedc8e1d8da84a22239fc07e28c5fb20452", "for": "orbit: coast, rendezvous, undocking, return"},
+  {"name": "T1-ops09", "file": "T1-ops09.mmv", "sha256": "0769e54e1c4334ab377099a9cb435e50d34eb612e61525f3e5fd9eb6d5a16edc", "for": "the IPL"}
+ ],
+ "rules": [
+  ["ST6-prelaunch-*/*", "T1"],
+  ["ST5-deorbit-prep/*", "T1-no16"],
+  ["IPL-*/*", "T1-ops09"],
+  ["*", "T1-no136"]
+ ]
+}
