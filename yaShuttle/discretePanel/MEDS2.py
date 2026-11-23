@@ -11410,7 +11410,12 @@ class Screen_AE_PFD(MDUScreen):
             if ok:
                 g.add(self.d.box(x0, y0, x1, y1, C['darkGray']))
                 s = GAUGE_DIG
-                txt = "%d" % jsround(v if v is not None else 0)
+                # GD3HSISC (OI-34, 'PRI_RANGE,SEC_RANGE = DIST_WP2 CGIK_CNMFS 10.'): in the TAEM and approach modes the
+                # word is tenths of a nautical mile; in the entry mode (GDN_ENTRY) it is whole nautical miles
+                if d.get('hsiMode') in (HSI_MODE_TAEM, HSI_MODE_APPROACH):
+                    txt = "%.1f" % ((v if v is not None else 0) / 10.0)
+                else:
+                    txt = "%d" % jsround(v if v is not None else 0)
                 g.add(self.d.strMEDS(41.66 + 1 - 1.726 * s - (len(txt) - 1) * 0.9,
                                      (y0 + y1) / 2 - 0.330 * s, txt, C['white'], s, 0.9))
             else:
