@@ -11235,8 +11235,8 @@ class Screen_AE_PFD(MDUScreen):
             # meds glyph ink at scale s runs y-0.08s to y+0.74s, so the upper
             # label's ink bottom and the lower's ink top clear the box
             # 0.7 scale: '5K' at 0.9 was wider than the 1.6 columns between the two tapes above
-            cx = (x0 + x1) / 2 - (len(lbl) - 1) * 0.35 - 0.3
-            g.add(self.d.strMEDS(cx, y0 - 0.65, lbl, C['white'], 0.7, 0.7))
+            cx = (x0 + x1) / 2 - (len(lbl) - 1) * 0.35 + 0.03   # glyph ink starts 0.33 left of x
+            g.add(self.d.strMEDS(cx, y0 - 0.57, lbl, C['white'], 0.7, 0.7))
             g.add(self.d.strMEDS(cx, y1 + 0.30, lbl, C['white'], 0.7, 0.7))
         if self.data().get('hsiGsiValid'):
             gsi = self.data().get('hsiGsi')
