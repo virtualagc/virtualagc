@@ -561,4 +561,16 @@ real tube's behaviour for off-grid beam positions is not documented here: this i
 | a display corrupts when several MDUs run | `GLResources` sweep keyed to the wrong renderer (§4) |
 | stroke widths right but everything washed out | an sRGB conversion crept into the shaders (§4) |
 
+---
+
+## 13. The landing scenario's entry I-loads are written live (2026-11-17)
+
+Not MEDS2's own business, but a landing run is where this shows, so it is recorded here.  STS-134's entry
+I-loads (gpc-causes #306) are written LIVE into the running computers right after OPS 301: the driver gives the
+simulatePASS session a `patch FILE` command, which `yaGPC2` carries out in `run.c` `batchrunner_apply_patch` (it
+is on master).  An emulator without it falls back to one early restart (`fly_return.deorbit_hook`, the
+`post-ops301` case).  The request file has one line per cell, `ADDR WAS NEW` (hex halfwords), and is written to
+`<--snapshot dir>/patch.request`; the driver then sends SIGUSR1 to `yaGPC2`, which acknowledges each computer with
+`patch.done.<gpc>`.  Touchdown comes at EI+31:32 (flown: 31:44; with the generic I-loads: 30:39).
+
 Later notes are staged in `CLAUDE_LOG.md` until the next documentation sync.

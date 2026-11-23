@@ -718,6 +718,12 @@ command ends it returns to whatever the stick or keys are doing.
   arriving); it is simply never read.  Do not "fix" it in `yaGPC2`.  The PLT
   stick needs a run with more than one GPC (how many has not been
   determined).  Seen 2026-11-15 on a one-GPC OPS 901 run.
+* **The same redundancy applies to the THC, from the flight source.**  The
+  RHC is three analog transducers per axis on three MDMs, mid-value
+  selected.  The THC contacts are in each FF's discrete word (compool CGBIH1,
+  `CGBB_FWD_THC_*_OUTPUT$(S)`, and `CGBB_AFT_THC_*` in DSCRT12) and enter
+  GP0THC through `CGRB_ORB_TRIPLE_OUT`, i.e. they are triple-redundant and
+  voted, so a one-GPC run (only FF1 is read) cannot exercise the redundancy.
 * A physical joystick works whatever window has keyboard focus
   (`SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS`, set by `handcontrollers.py`); the
   virtual window's keys and mouse still need focus.  Not yet tried with a
@@ -733,6 +739,11 @@ default layout follows the space-sim convention: THC `W`/`S` +X/-X, `D`/`A`
 each acts (pitch at the top and bottom, roll at the left and right of the
 knob's cross, yaw at the ring's softstop ticks), and each THC key flush right
 in its row, all in a fixed-width font.
+
+Each THC contact rectangle (+X, -X, ...) can also be held closed with the
+mouse (left button) or a finger, as well as by its hotkey; opposite contacts
+on one axis cancel, as with keys.  This works in both `--style split` and
+gimbal, and does not need keyboard focus (`handcontrollers.py`, 2026-11-15).
 
 The layout is configurable so no one is boxed into one convention: a `keys`
 object in the joystick profile file (`--joysticks`, `~/.config/nsts/joysticks.json`,
