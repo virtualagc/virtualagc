@@ -1428,6 +1428,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                "--rhc", self.a.rhc]
         if os.environ.get("SIM_SCALE"):
             cmd += ["--scale", os.environ["SIM_SCALE"]]
+        if os.environ.get("FLY_YAGPC"):          # another yaGPC2 build, for bisecting and experiments (fly_sts134 does the same)
+            cmd += ["--yagpc", os.environ["FLY_YAGPC"]]
         if resume and self.a.zero_sensor_bias:
             self.zero_sensor_bias(resume)
         if resume and self.a.lambert_mc:
