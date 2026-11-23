@@ -3254,7 +3254,7 @@ class LampLayer(PointLayer):
         w = rel / d[:, None]
         cosang = -np.sum(w * lamps.aim_ef, axis=1)
         factor = np.where(lamps.n < 0.0, np.abs(cosang) ** np.abs(lamps.n), np.clip(cosang, 0.0, 1.0) ** np.maximum(lamps.n, 0.0))
-        fade = 1.0
+        fade = 0.0                                          # no Sun known (no date): no way to say it is night, so unlit
         if fs.sky is not None:
             sun = unit(m @ J2000_TO_M50 @ fs.sky.pos['sun'])
             mus = float(np.dot(site.ef / np.linalg.norm(site.ef), sun))
