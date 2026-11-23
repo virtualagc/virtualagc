@@ -1071,10 +1071,16 @@ void batchrunner_init(BatchRunner *r, const Options *opts, Vehicle *veh,
         if (!veh->built) veh->transport = bcenet_transport_create(r->gpcId);
         r->bceTransport = veh->transport;
         r->bceFramer = bcenet_framer_create(r->bceTransport, r->gpcId);
-        /* A resumed machine's software already believes its peers are up
-         * and polls them at once; see bcenet_framer_trust_peers_once. */
-        if (opts->resumeDir != NULL)
-            bcenet_framer_trust_peers_once(r->bceFramer);
+        /* THE FIRST COMMAND ON EACH BUS IS HELD FOR, in a fresh run as well as a resumed one.  A resumed machine's
+         * software already believes its peers are up and polls them at once; and in a fresh run the loader (GPCIPL)
+         * polls only CRT1, so the first poll of CRT2 and CRT3 is PASS's own, a peer the framer has never heard from,
+         * which it does not hold for: the reply then had to land inside the software's own 5 ms window, and on a
+         * loaded host the first reply to a never-polled display unit (cold sockets and code paths) sometimes came
+         * after it, and PASS logged I/O ERROR CRT2/CRT3 at the IPL (ledger #362: the faulting poll was an initial
+         * time-out, no word of the reply, the first 16-word poll round at about 63.7 s, three runs in eight on a
+         * Pi at rate 2 with four CRTs).  See bcenet_framer_trust_peers_once: one short hold, spent on the first
+         * command, and a bus with nobody on it costs that one hold. */
+        bcenet_framer_trust_peers_once(r->bceFramer);
         base = bcenet_framer_service;
         baseCtx = r->bceFramer;
     }
