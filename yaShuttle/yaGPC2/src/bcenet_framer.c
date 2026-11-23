@@ -417,7 +417,12 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
     double hold = peer_hold_seconds();
     if (hold <= 0.0 || !b->cmdPending) return false;
     double t0 = wall_now();
-    bool live = b->lastPeerWall > 0.0 && t0 - b->lastPeerWall <= PEER_LIVE_SECONDS;
+    /* A PEER THAT HAS EVER ANSWERED IS LIVE until a hold on it expires with no word of a reply (below), not only for
+     * PEER_LIVE_SECONDS after it last spoke: a display unit speaks only when spoken to, and the loader polls only
+     * CRT1, early; PASS's first poll round comes about 50 s later, when the 3 s window had long closed, so it was not
+     * held for and had to win a 5 ms race (ledger #362: I/O ERROR CRT1 at the IPL on a Mac at rate 2, four CRTs, in
+     * 4 runs of 8).  A peer that has never answered gets the one short grace hold (bcenet_framer_trust_peers_once). */
+    bool live = b->lastPeerWall > 0.0;
     if (!live && !b->resumeGrace) return false;
     /* A bus trusted only on a resume's say-so may have nobody on it, so its
      * one hold is short: a slow first reply is a few ms, not hundreds. */
@@ -445,8 +450,10 @@ bool bcenet_framer_peer_wait(BceNetFramer *f, int busID, bool gotAny, double *he
     }
     b->heldSinceCmd += t - t0;
     b->resumeGrace = false;     /* answered, or the budget is spent: used */
-    if (!got && b->heldSinceCmd >= (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold))
+    if (!got && b->heldSinceCmd >= (gotAny ? PEER_HOLD_PARTIAL_SECONDS : hold)) {
         b->cmdPending = false;
+        if (!gotAny) b->lastPeerWall = 0.0;     /* not a word of a reply in the whole budget: the peer is gone */
+    }
     if (heldMs) *heldMs = (t - t0) * 1000.0;
     return got;
 }
