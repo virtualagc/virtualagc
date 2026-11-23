@@ -817,7 +817,9 @@ class Flight:
         self.play("+8     keys MSG_RESET\n+3     keys MSG_RESET\n", "msg-reset-etsep")
         # the ascent is over: CRT 2 from the A/E PFD to the ORBIT PFD, ahead of
         # the OMS burn displays (a run resumed past this does it in ops2)
-        self.orbit_pfd()
+        # (not after an RTLS or TAL: those go on to entry and keep the A/E PFD)
+        if getattr(self.a, "abort", None) not in ("RTLS", "TAL"):
+            self.orbit_pfd()
         if getattr(self.a, "abort", None) == "ATO":
             self.wait_sim(5)
             self.ato_burn("ato-oms1", ATO_OMS1, g + tsep - t + 84.0)
