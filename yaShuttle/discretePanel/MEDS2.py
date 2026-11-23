@@ -11234,10 +11234,9 @@ class Screen_AE_PFD(MDUScreen):
         if lbl is not None:
             # meds glyph ink at scale s runs y-0.08s to y+0.74s, so the upper
             # label's ink bottom and the lower's ink top clear the box
-            # 0.38 scale: the gap under the tapes is 0.5 row and the caption's ink is 0.82 of its scale high, so this leaves a margin each side
-            cx = (x0 + x1) / 2 + 0.29   # the glyph ink starts 1.13 scales left of x; measured on a render
-            g.add(self.d.strMEDS(cx, y0 - 0.434, lbl, C['white'], 0.38, 0.38))
-            g.add(self.d.strMEDS(cx, y1 + 0.30, lbl, C['white'], 0.38, 0.38))
+            cx = (x0 + x1) / 2 - (len(lbl) - 1) * 0.45 - 0.36
+            g.add(self.d.strMEDS(cx, y0 - 1.00, lbl, C['white'], 0.9, 0.9))
+            g.add(self.d.strMEDS(cx, y1 + 0.30, lbl, C['white'], 0.9, 0.9))
         if self.data().get('hsiGsiValid'):
             gsi = self.data().get('hsiGsi')
             v = max(-2.4, min(2.4, gsi if gsi is not None else 0))
