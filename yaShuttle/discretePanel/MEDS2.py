@@ -8707,7 +8707,8 @@ THETA_HALF = 1.15             # theta limit bracket half length, rows
 THETA_TICK = 0.42             # its turned end
 
 # Glide slope indicator: the box, and one dot of deviation in rows.
-GSI_BOX = [45.43, 20.55, 46.95, 31.31]
+# centred between the altitude tape's right edge (45.5) and the acceleration scale's face (48.80), x 47.15 (the owner, 2026-11-23)
+GSI_BOX = [46.39, 20.55, 47.91, 31.31]
 GSI_DOT = 2.275
 
 # Altitude acceleration scale.
@@ -11233,9 +11234,8 @@ class Screen_AE_PFD(MDUScreen):
             # meds glyph ink at scale s runs y-0.08s to y+0.74s, so the upper
             # label's ink bottom and the lower's ink top clear the box
             cx = (x0 + x1) / 2 - (len(lbl) - 1) * 0.45 - 0.36
-            # the altitude tape above ends at row 19.97 and its right edge is at 45.5: the upper label sits 0.15 lower and
-            # 0.2 to the right so its ink stays off the tape's lower corner (the owner, 2026-11-23)
-            g.add(self.d.strMEDS(cx + 0.2, y0 - 0.85, lbl, C['white'], 0.9, 0.9))
+            # the upper label sits 0.15 lower so its ink stays off the tape's lower corner
+            g.add(self.d.strMEDS(cx, y0 - 0.85, lbl, C['white'], 0.9, 0.9))
             g.add(self.d.strMEDS(cx, y1 + 0.30, lbl, C['white'], 0.9, 0.9))
         if self.data().get('hsiGsiValid'):
             gsi = self.data().get('hsiGsi')
