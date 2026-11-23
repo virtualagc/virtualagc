@@ -94,7 +94,7 @@ OPTIONS = {
     "predictor": ("RPOP predictor (coast or hold)", str, "coast"),
     "engine":   ("failing main engine (1-3)", int, 2),
     "failat":   ("seconds after liftoff at which it fails", float, 150.0),
-    "runway":   ("RTLS runway (15 or 33)", int, 15),
+    "runway":   ("runway at KSC (15 or 33)", int, 15),
     "stop":     ("milestone at which to end the simulation", str, ""),
     "start":    ("where to begin (a start named in the list above)", str, ""),
     "when":     ("GMT (DDD/HH:MM:SS) or MET (DDD/HH:MM:SS with a leading M, e.g. M001/12:00:00) to be at", str, ""),
@@ -203,7 +203,7 @@ def scenario_table():
         title="Deorbit, entry and landing at KSC, from OPS 301 (TIG minus 75 minutes) to the wheels stopped",
         need="landing", snap="ST5-deorbit-prep/sts134r-pre-ops301", capture="sts134r-pre-ops301", driver="fly_return.py",
         args=["--from", "DEORBIT", "--targets", TARGETS_UNDOCK], stop=("--to", ["EXEC", "ENTRY", "LAND"], "LAND"), logsfx="",
-        opts=COMMON, also=[("ST5-deorbit-prep/sts134r-orbit", "sts134r-orbit")], resume_env="RETURN_RESUME_FROM",
+        opts=COMMON + ["runway"], also=[("ST5-deorbit-prep/sts134r-orbit", "sts134r-orbit")], resume_env="RETURN_RESUME_FROM",
         note="About 2.3 hours of flight time.")
     t["coast"] = dict(
         title="Coast on orbit: start at a time you name (flown from the nearest snapshot before it; the wait is shown once you name the time)",
@@ -580,6 +580,8 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
         argv += ["--layout", os.path.join(HERE, o["layout"])]
     if scn_id == "rtls":
         argv += ["--rtls-runway", str(o["runway"])]
+    if scn_id == "landing" and "runway" in sc["opts"] and str(o.get("runway")) == "33":
+        env["FLY_LANDING_RUNWAY"] = "33"
     if "engine" in o:
         env["YAGPC_SSME_FAIL"] = "%d@%g" % (o["engine"], o["failat"])
     if sc.get("env_sites"):
@@ -738,6 +740,12 @@ def main():
                 sc["args"] = args + ["--to", chosen[5]]
             if chosen is not offered[0]:
                 sc["also"] = []
+            if scn_id == "landing" and chosen[0] in ("ei", "taem"):
+                # the runway is chosen at OPS 304, five minutes before entry interface: a start at or after that is flown
+                # to the runway the capture already has (the primary, 15)
+                sc["opts"] = [k for k in sc["opts"] if k != "runway"]
+                if mine.get("runway") not in (None, 15):
+                    print("(a start at '%s' is past the runway selection: the capture lands on runway 15)" % chosen[0])
     if sc.get("flight_s"):
         print("Running time: about %s at rate %g (the simulation flies in real time at rate 1; any video of this scenario "
               "was cut down, this run is not)." % (duration_text(sc["flight_s"] / max(float(mine.get("rate") or 1.0), 1e-9)),

@@ -1005,6 +1005,9 @@ class Flight:
         self.play(OPS201, "ops201")
         self.script_done("ops201", 900)
         self.say("OPS 201: GNC UNIV PTG on CRT 1")
+        self.play("+1     switch plbd OPEN\n", "plbd-open")           # RPOP's outline shows the doors from this switch
+        self.script_done("plbd-open", 30)
+        self.say("crew: PAYLOAD BAY DOOR OPEN")
         self.orbit_pfd()
         self.wait_sim(30)
 
@@ -1077,6 +1080,9 @@ class Flight:
         json.dump(t, open(os.path.join(self.a.logs, "deorbit-targets.json"), "w"), indent=1)
         tig = t["tig"]
         self.wait_gmt(tig - 75 * 60.0)
+        self.play("+1     switch plbd CLOSE\n", "plbd-close")
+        self.script_done("plbd-close", 30)
+        self.say("crew: PAYLOAD BAY DOOR CLOSE (the deorbit preparations)")
         self.deorbit_hook("pre-ops301")
         if self.a.attach:
             # --attach: the running vehicle's OPS 301 script was sent by the
@@ -1218,8 +1224,13 @@ class Flight:
         self.say("crew: OPS 304 at EI-5")
         # HORIZ SIT ITEM 9, "ALTM": the landing field's altimeter setting (ENT/134/FIN FS 3-7, GKFHOR CASE1 key 3 ->
         # CGZV_BARO -> GYAADT's pressure-altitude correction, HPC = HPU - BARO).  Default 29.9213.
-        self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 9 + %s EXEC\n+8     keys RESUME\n" %
-                  " ".join(ALTIMETER_INHG), "altimeter")
+        # FLY_LANDING_RUNWAY=33 (the wizard's landing runway): SPEC 50 ITEM 4, the secondary runway of the area (ITEM 3 the
+        # primary, CG0500.dfg), before the altimeter setting
+        rwy = "+8     keys ITEM 4 EXEC\n" if os.environ.get("FLY_LANDING_RUNWAY") == "33" else ""
+        if rwy:
+            self.say("crew: HORIZ SIT ITEM 4, the secondary runway (KSC 33)")
+        self.play("+1     keys SPEC 5 0 PRO\n%s+8     keys ITEM 9 + %s EXEC\n+8     keys RESUME\n" %
+                  (rwy, " ".join(ALTIMETER_INHG)), "altimeter")
         self.script_done("altimeter", 60)
         self.say("crew: HORIZ SIT ITEM 9, altimeter setting %s inHg" % "".join(ALTIMETER_INHG))
         item = atmosphere_item(t["ei"])

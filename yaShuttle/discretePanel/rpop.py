@@ -121,6 +121,7 @@ import rndz_instruments as ri                     # noqa: E402
 
 MCAST_GROUP = "239.255.1.1"
 TRUTH_OFFSET, TARGET_OFFSET = 98, 109
+PLBD_OFFSET = 111                # panelO6's payload bay doors: b'PLBD' + 1 open / 0 closed
 STALE_S = 3.0
 FT = 0.3048
 NMI = 1852.0
@@ -267,6 +268,9 @@ ORBITER_OUTLINE = orbiter_side([
     (238, 330), (260, 375), (320, 430), (420, 490), (520, 500), (582, 480),
     (1307, 480), (1310, 510), (1460, 1060), (1540, 1060), (1525, 520),
     (1560, 450), (1590, 330), (1530, 270), (1400, 255), (500, 260), (300, 285)])
+# The two doors open, seen edge-on from the side: hinged on the bay's rims and standing up, as in the STS-130 Mission to
+# the ISS report's RPOP figures (25.23, 25.24; ~100 in high here, the doors' chord).
+DOORS_OPEN_OUTLINE = orbiter_side([(582, 480), (582, 580), (1307, 580), (1307, 480)])
 ODS_OUTLINE = orbiter_side([(600, 410), (600, 476), (698, 476), (698, 410)])
 
 
@@ -434,7 +438,8 @@ class Rpop(QtCore.QObject):
         self.tcs_period = TCS_PERIOD_S   # RPOP Configuration's "Data Freq..." (RNDZ 7-24)
         self.auto = None               # (t, x) from the raw marks, TCS Auto
         self.socks = []
-        for off, fn in ((TRUTH_OFFSET, self._tru), (TARGET_OFFSET, self._tgt)):
+        self.doors_open = False       # the payload bay doors, as the panel's PAYLOAD BAY DOOR switch left them
+        for off, fn in ((TRUTH_OFFSET, self._tru), (TARGET_OFFSET, self._tgt), (PLBD_OFFSET, self._plbd)):
             s = mcast_socket(port_base + off)
             nt = QtCore.QSocketNotifier(s.fileno(), QtCore.QSocketNotifier.Type.Read, self)
             nt.activated.connect(lambda _x, s=s, fn=fn: self._drain(s, fn))
@@ -453,6 +458,10 @@ class Rpop(QtCore.QObject):
             except (BlockingIOError, OSError):
                 break
             fn(d)
+
+    def _plbd(self, d):
+        if d[:4] == b"PLBD" and len(d) >= 5:
+            self.doors_open = bool(d[4])
 
     def _tgt(self, d):
         g = parse_tgt(d)
@@ -1321,7 +1330,7 @@ class View(QtWidgets.QWidget):
             return cg + shift + A @ b
 
         p.setPen(QtGui.QPen(WHITE, 1))
-        for outline in (ORBITER_OUTLINE, ODS_OUTLINE):
+        for outline in (ORBITER_OUTLINE, ODS_OUTLINE) + ((DOORS_OPEN_OUTLINE,) if self.rp.doors_open else ()):
             p.drawPolygon(QtGui.QPolygonF([to_px(body(q)) for q in outline]))
         c = to_px(cg + shift)
         p.drawEllipse(c, 4, 4)

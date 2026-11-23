@@ -234,6 +234,7 @@ STU_POWERED, STU_DOOR_OPEN = 0x8000, 0x4000
 # closing does not.  SYS 1 and SYS 2 each drive one motor of BOTH doors.
 DOOR_MOTOR_RATE = 1.0 / 12.0                   # of full travel a second, a motor
 DOOR_TICK_MS = 200
+PLBD_OFFSET = 111               # the payload bay doors' state, once a second and on a change: b'PLBD' + 1 (open) or 0 (closed), for RPOP's drawing
 # The -Y door's limit-switch contacts (JSC-12770 Vol 6 B-35; CGBIH1.hal
 # 2877-2880): OP on FF1, CL on FF3, DSCRT11 bits 14 and 13.
 STRK_Y_DOOR_OP = (1, 11, 0x0004)
@@ -999,6 +1000,10 @@ class PanelO6:
         # by default, as they are from post-insertion to deorbit prep.
         self.strk_door = {"y": 1.0, "z": 1.0}
         self._strk_t = None
+        # the payload bay doors, closed until the crew's OPEN (instantly: no travel time yet); NSTS_PLBD=open starts them
+        # open, for a run from a capture that predates the saved state and was taken on orbit
+        self.plbd_door = os.environ.get("NSTS_PLBD", "").lower() == "open"
+        self._plbd_n = 0
         self.ctl_lamp = dict((k, False) for k, c in PC.CONTROLS.items() if c.get("lamps"))
         self.ctl_lamp.update((k, (False,) * len(c["halves"]))
                              for k, c in PC.CONTROLS.items() if c.get("halves"))
@@ -1321,8 +1326,17 @@ class PanelO6:
         p = self.strk_door[sd]
         return "OP" if p >= 1.0 else "CL" if p <= 0.0 else "BP"
 
+    def _plbd_send(self):
+        try:
+            self.sock.sendto(b"PLBD" + bytes([1 if self.plbd_door else 0]), (D.GROUP, D.PORT_BASE + PLBD_OFFSET))
+        except OSError:
+            pass
+
     def _strk_tick(self):
         """Tk tick: move the star tracker doors as their motors drive them."""
+        self._plbd_n += 1
+        if self._plbd_n % max(1, 1000 // DOOR_TICK_MS) == 0:
+            self._plbd_send()
         now = time.monotonic()
         dt = 0.0 if self._strk_t is None else min(now - self._strk_t, 1.0)
         self._strk_t = now
@@ -1439,6 +1453,7 @@ class PanelO6:
             out[name] = dict(v) if isinstance(v, dict) else (
                 list(v) if isinstance(v, list) else v)
         out["strk_door"] = dict(self.strk_door)
+        out["plbd_door"] = bool(self.plbd_door)
         # the OPS on the displays, for a restore to show their panels at once
         out["ops"] = sorted([list(k) for k in self._ops_on_screens() if k[1]])
         return out
@@ -1486,6 +1501,8 @@ class PanelO6:
                 if bad:
                     raise ValueError(bad)
                 setattr(self, name, new)
+        if "plbd_door" in state:
+            self.plbd_door = bool(state["plbd_door"])
         doors = state.get("strk_door")
         if isinstance(doors, dict):
             for sd, v in doors.items():
@@ -3637,6 +3654,10 @@ class PanelO6:
         else:
             self.ctl[key] = value
             new = value
+            if key == "plbd" and value in ("OPEN", "CLOSE"):    # STOP leaves the doors where they are
+                self.plbd_door = value == "OPEN"
+                log("PAYLOAD BAY DOORS  %s" % ("OPEN" if self.plbd_door else "CLOSED"))
+                self._plbd_send()
             pos = PC.positions_of(key)
             for tb, c in PC.CONTROLS.items():
                 if c["kind"] == "tb" and c.get("follows") == key:

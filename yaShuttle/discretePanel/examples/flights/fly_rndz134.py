@@ -1412,6 +1412,9 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
                    # start, before the restored computer drives a display
                    # (a held start's windows to arrange)
                    NSTS_PANEL_OPS="GNC,2",
+                   # the payload bay doors are open from flight day 1 to the deorbit preparations (a capture's own
+                   # panel.json, once it has the state, wins)
+                   NSTS_PLBD="open",
                    PYTHONUNBUFFERED="1")
         if rel:
             env["YAGPC_VEHDYN_START_REL"] = rel
