@@ -141,6 +141,7 @@ import downlist      # noqa: E402
 import fly_sts134    # noqa: E402
 import groundstation  # noqa: E402
 from rndz_manual import ManualPhase  # noqa: E402
+import rndz_instruments as ins_mod  # noqa: E402
 
 FT = 0.3048
 EPOCH = "2011-05-18T06:30:00"
@@ -233,6 +234,12 @@ def apply_mission(a):
         TGT_SETS[int(k)] = v
     if "targets" in m:
         a.targets = os.path.join(HERE, m["targets"])
+    # THE TARGET'S PORT and the kind of final approach, for the crew's instruments and the manual phase
+    # (rndz_instruments.set_port; the ISS's, with the V-bar final approach, when the file has no port)
+    port = ins_mod.parse_port(getattr(a, "targets", None) or os.path.join(HERE, "sts134-targets.txt"),
+                              m.get("norad"))
+    if port:
+        ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
 
 
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",

@@ -200,6 +200,15 @@ class ManualPhase(object):
                 self.say("rel(%s): a %.1f ft jump in %.2f s, beyond the motion -- sample dropped"
                          % (point, jump, dtj))
                 return None
+        axes = (ex, ey, ez)
+        if point == "ods" and ins.APPROACH == "rbar":
+            # THE PORT'S FRAME, not LVLH: x out of the port along its axis (Mir's: the nadir), y and z across
+            # it (y is LVLH y made square to the axis; z completes the set), so that the goals written for
+            # the ISS's V-bar ([d, 0, 0]: d ft out on the axis) fly Mir's R-bar unchanged
+            axes = self.port_basis(tgt, ex, ey, ez)
+            M = [[ins.dot(pk, e) for e in (ex, ey, ez)] for pk in axes]
+            r = [sum(M[k][j] * r[j] for j in range(3)) for k in range(3)]
+            v = [sum(M[k][j] * v[j] for j in range(3)) for k in range(3)]
         self._rel_bad[point] = 0
         self._rel_last[point] = (tru["gmt"], list(r), list(v))
         if noisy:
@@ -231,7 +240,27 @@ class ManualPhase(object):
                 r = [x + g(sr) for x in r]
             v = [x + g(0.005) for x in v]
         return {"r": r, "v": v, "t": tru["t"], "gmt": tru["gmt"], "tru": tru, "tgt": tgt,
-                "axes": (ex, ey, ez)}
+                "axes": axes}
+
+    def port_basis(self, tgt, ex, ey, ez):
+        """The port's frame as three M50 unit vectors (see _rel_once): x along the port's axis, y the
+        LVLH y made square to it, z = x cross y (the ISS's, axis +X: LVLH itself)."""
+        a = ins.to_m50(ins.qmat(tgt["q"]), list(ins.PORT_AX))
+        y = ins.sub(list(ey), ins.mul(ins.dot(ey, a), a))
+        n = ins.norm(y)
+        if n < 1e-6:                                  # the axis along LVLH y: use z
+            y = ins.sub(list(ez), ins.mul(ins.dot(ez, a), a))
+            n = ins.norm(y)
+        y = ins.mul(1.0 / n, y)
+        return list(a), y, ins.cross(a, y)
+
+    def port_lvlh_ft(self):
+        """The port's face in the target's LVLH (ft from its centre of mass; x ahead, y right, z down)."""
+        tru, tgt = self.feeds()
+        _, _, _, _, pma_r, _ = ins.points(tru, tgt)
+        ex, ey, ez = ins.lvlh_axes(list(tgt["r"]), list(tgt["v"]))
+        d = ins.sub(pma_r, list(tgt["r"]))
+        return [ins.dot(d, e) / FT for e in (ex, ey, ez)]
 
     def readings(self):
         tru, tgt = self.feeds()
@@ -509,7 +538,12 @@ class ManualPhase(object):
             settled["n"] = settled["n"] + 1 if ok else 0
             return t > RBAR_MIN_S and settled["n"] >= RBAR_SETTLE_N
 
-        stats = self.fly("RBAR", lambda t: ([0.0, 0.0, RBAR_FT], [0.0, 0.0, 0.0]), done,
+        # THE R-BAR LINE: the ISS's is the vertical through its centre; Mir's final approach is along the
+        # Docking Module's axis, which is the nadir through the port, off the centre of mass's vertical
+        line = [0.0, 0.0] if ins.APPROACH != "rbar" else self.port_lvlh_ft()[:2]
+        if ins.APPROACH == "rbar":
+            self.say("RBAR: the port's R-bar through X %+.1f Y %+.1f ft of the target's centre" % tuple(line))
+        stats = self.fly("RBAR", lambda t: ([line[0], line[1], RBAR_FT], [0.0, 0.0, 0.0]), done,
                          tau=RBAR_TAU, vmax=RBAR_VMAX, dead=0.08, every=10.0,
                          # NSTS_RBAR_LIMIT_S: a test may allow a longer leg (default 30 min)
                          limit=float(os.environ.get("NSTS_RBAR_LIMIT_S", "1800")))
@@ -691,6 +725,11 @@ class ManualPhase(object):
         in the track and the R-bar point held; then the rates back (p. 6-2's
         A7: 0.200 and 0.016) and the -Z target track."""
         self.man_start()
+        if ins.APPROACH == "rbar":
+            self.say("RPM: none -- the Mir approach is on the R-bar from below to contact (STS-81; the RPM is for "
+                     "the ISS's imagery)")
+            self.man_record("RPM", skipped="rbar approach")
+            return
         if getattr(self.a, "rpm_mode", "continuous") == "continuous":
             t, e, kg, log = self.rpm_continuous()
             # as the card: TORVA from wherever the turn left the Orbiter
@@ -811,6 +850,10 @@ class ManualPhase(object):
         centerline camera, range kept above 250 ft port to port; the arc's
         radius from where the R-bar left the Orbiter to TORVA_END_FT."""
         st = self.man_start()
+        if ins.APPROACH == "rbar":
+            self.say("TORVA: none -- the final approach stays on the R-bar (STS-81)")
+            self.man_record("TORVA", skipped="rbar approach")
+            return
         self.dap_pulse_modes()
         # THE DOCKING ATTITUDE FROM THE START, AS CC 9-7 KEYS IT: "TORVA / GNC
         # UNIV PTG / P ITEM 15 + 179 EXEC / TRK - ITEM 19 EXEC", pitch 179
@@ -936,6 +979,36 @@ class ManualPhase(object):
                  % best)
         return best
 
+    def docking_attitude_rbar(self):
+        """ESTABLISH the R-bar docking attitude, as the STS-81 Flight Plan's Attitude Timeline has it
+        (JSC-48000-81 p. 8-3, row 24, "Docking Att, Tail Fwd, +ZLV -XVV"): LVLH R 180 P 180 Y 0 = UNIV PTG TGT ID 2
+        (the Earth's centre), BODY VECT 5 P 270 (+Z body on it), OM 180 -- the belly to the Earth, the bay (-Z, the
+        ODS axis) up at Mir, the tail forward.  Held while the point the R-bar left the Orbiter at is held."""
+        here = self.rel("cg", noisy=False)["r"]
+        hold = lambda t: (list(here), [0.0, 0.0, 0.0])
+        self.univ_ptg("rbar-att", 2, 270, 180, dap="alt", side="b")
+        w = {"still": 0}
+
+        def turned(t, st, err, w=w):
+            rate = self.body_rate_dps()
+            w["moved"] = w.get("moved") or rate > 0.15
+            w["still"] = w["still"] + 1 if (t > 20.0 and rate < 0.1 and (w["moved"] or t > 90.0)) else 0
+            return w["still"] >= 3
+
+        self.fly("RBAR docking attitude", hold, turned, tau=120.0, vmax=0.3, dead=0.08, every=8.0,
+                 limit=900.0, log_every=120.0)
+        self.play("+1     dap c3 a\n+2     dap c3 auto\n+2     dap c3 vern\n", "rbar-att-vern")
+        self.script_done("rbar-att-vern", 60)
+        tru, tgt = self.feeds()
+        R = ins.qmat(tru["q"])
+        ex, ey, ez = ins.lvlh_axes(list(tgt["r"]), list(tgt["v"]))
+        bx, bz = ins.to_m50(R, [1.0, 0.0, 0.0]), ins.to_m50(R, [0.0, 0.0, 1.0])
+        self.say("crew: ESTABLISH the R-bar docking attitude -- body +Z %.1f deg from the nadir, +X %.1f deg from "
+                 "the -V-bar (LVLH R 180 P 180 Y 0, tail forward)"
+                 % (math.degrees(math.acos(max(-1.0, min(1.0, ins.dot(bz, ez))))),
+                    math.degrees(math.acos(max(-1.0, min(1.0, -ins.dot(bx, ex)))))))
+        return (180, 0.0)
+
     def dap_dock_store(self, config=10, tries=3):
         """DAP A10/B10 keyed to DAP_DOCK in the stored configurations (DAP
         EDIT: DAP A - ITEM 3 +10, the edit column's item 50 + row, LOAD -
@@ -1016,7 +1089,7 @@ class ManualPhase(object):
         First DAP A10/B10 are stored as p. 6-2's DOCKING (dap_dock_store)."""
         self.man_start()
         self.dap_dock_store()
-        om = self.docking_attitude()
+        om = self.docking_attitude() if ins.APPROACH != "rbar" else self.docking_attitude_rbar()
         self.dap_pulse_modes()
         st = self.rel("ods")
         d0 = st["r"][0]

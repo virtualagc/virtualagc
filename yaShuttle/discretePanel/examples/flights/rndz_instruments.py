@@ -67,6 +67,57 @@ ODS_HARDMATE_BODY = structural(ODS_XO, 0.0, ODS_HARDMATE_ZO)
 CLCAM_BODY = structural(CLCAM_XO, 0.0, CLCAM_ZO)
 TCS_BODY = structural(TCS_XO, TCS_YO, TCS_ZO)
 PMA2 = (15.655, 0.0, 5.562)                # ISS frame, m: portview.ISS_PMA2 (the model's own PMA-2)
+# THE TARGET'S PORT, in the target's body frame (m; unit axis out of the port, toward the approaching
+# Orbiter; unit "up", the direction the Orbiter's +X takes when mated).  The ISS's by default (vehdyn's
+# port defaults: axis +X, up -Z); set_port() puts another vehicle's (Mir's Docking Module, from the
+# `port` of its targets-file line) in its place.  APPROACH is "vbar" (the ISS: the final approach along
+# the +V-bar) or "rbar" (Mir: the port axis is the nadir, the final approach on the R-bar).
+PORT_B = PMA2
+PORT_AX = (1.0, 0.0, 0.0)
+PORT_UP = (0.0, 0.0, -1.0)
+APPROACH = "vbar"
+
+
+def set_port(b, ax=None, up=None, approach=None):
+    """Replace the port (see above); b in metres, ax and up are normalised."""
+    global PORT_B, PORT_AX, PORT_UP, PMA2, APPROACH
+    def unit(v):
+        n = math.sqrt(sum(x * x for x in v))
+        return tuple(x / n for x in v)
+    PORT_B = PMA2 = tuple(float(x) for x in b)
+    if ax is not None:
+        PORT_AX = unit(ax)
+    if up is not None:
+        PORT_UP = unit(up)
+    if approach is not None:
+        APPROACH = approach
+
+
+def parse_port(targets_file, norad=None):
+    """The `port` of a targets-file line (vehdyn.c: port X Y Z [AX AY AZ UX UY UZ]) as (b, ax, up),
+    or None.  With norad, the line for that catalogue number."""
+    try:
+        lines = open(targets_file).read().splitlines()
+    except OSError:
+        return None
+    for ln in lines:
+        w = ln.split()
+        if not w or w[0] != "target" or "port" not in w:
+            continue
+        if norad is not None and int(w[1]) != int(norad):
+            continue
+        v = [float(x) for x in w[w.index("port") + 1:w.index("port") + 10] if _isnum(x)]
+        if len(v) >= 3:
+            return v[:3], (v[3:6] if len(v) >= 9 else None), (v[6:9] if len(v) >= 9 else None)
+    return None
+
+
+def _isnum(x):
+    try:
+        float(x)
+        return True
+    except ValueError:
+        return False
 TCS_MAX_FT, HHL_MAX_FT = 10000.0, 5000.0
 
 
@@ -117,7 +168,7 @@ def points(tru, tgt):
     and the two bodies' rotation matrices."""
     Ro, Rt = qmat(tru["q"]), qmat(tgt["q"])
     ods_r, ods_v = body_point(tru, Ro, ODS_BODY)
-    pma_arm = to_m50(Rt, list(PMA2))
+    pma_arm = to_m50(Rt, list(PORT_B))
     # the ISS turns at the orbital rate (LVLH hold): about its -Y in LVLH
     n = orbital_rate(tgt["r"], tgt["v"])
     _, ey, _ = lvlh_axes(tgt["r"], tgt["v"])
@@ -191,8 +242,8 @@ class Instruments(object):
             # is the ISS +Z (nadir) against the Orbiter's -X, which the
             # docking attitude puts there (nose to the zenith, bay to the
             # ISS: fly_rndz134's VBAR)
-            ax = to_body(Ro, [Rt[i][0] for i in range(3)])         # ISS +X in Orbiter body
-            nz = to_body(Ro, [Rt[i][2] for i in range(3)])         # ISS +Z in Orbiter body
+            ax = to_body(Ro, to_m50(Rt, list(PORT_AX)))              # the port's axis in Orbiter body
+            nz = to_body(Ro, to_m50(Rt, [-x for x in PORT_UP]))      # the port's "down" (ISS +Z) in Orbiter body
             out["cl_pitch_deg"] = math.degrees(math.atan2(ax[0], ax[2])) + self.g(0.05)
             out["cl_yaw_deg"] = math.degrees(math.atan2(ax[1], ax[2])) + self.g(0.05)
             out["cl_roll_deg"] = math.degrees(math.atan2(nz[1], -nz[0])) + self.g(0.05)
