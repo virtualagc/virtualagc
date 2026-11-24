@@ -7,9 +7,8 @@ Writes examples/flights/sts081-flight.json, sts081-dolilu.json and sts081-reconf
 constants fly_sts134.py --flight takes, the DOLILU (launch targeting from MIR's plane, OMS-2 TIG,
 masses) and the OPS 1 overlay I-loads (MECO velocity, radius, flight-path angle).  Everything not
 changed here is STS-135's (the DOLILU tables shaped for STS-134) -- STS-81 is flown first as a cross-check
-flight, as STS-135 was, and the tables retuned by flight.  What is sourced and what is an estimate is
-said in each file's notes; the estimates are the orbiter and ET weights at liftoff, to be tuned until the
-simulated MECO reaches the flown VI.
+flight, as STS-135 was, and the tables retuned by flight.  What is sourced and what is not is said in each
+file's notes; the weights are the Missions Summary's Appendix A-6 table (pdf page 278).
 
 Sources: STS-81 Space Shuttle Mission Report (Table I, events; mission summary), Space Shuttle Missions
 Summary 2-98 (MECO VI 25,922 fps actual, 25,915 predicted; MECO 8:29.9; post OMS-2 159.9 x 84.9 nmi;
@@ -42,7 +41,12 @@ ET_SEP = datetime.datetime(1997, 1, 12, 9, 36, 14, tzinfo=UTC)
 OMS2_TIG = datetime.datetime(1997, 1, 12, 10, 10, 23, 300000, tzinfo=UTC)
 # a flight-day start: the vehicle's clock starts 5,187.99 s before SRB ignition on STS-134 and 135
 CLOCK_START = SRB_IGN - datetime.timedelta(seconds=5187.99)
-ORBITER_LB_EST = 242000.0        # UNVERIFIED: landing weight 215,337 lb + consumables, propellants, cargo delta
+# Space Shuttle Missions Summary, Appendix A-6 (pdf page 278), STS-81 row: orbiter 250,167 lb at SRB ignition (242,178 at
+# insertion; landing 215,337), ET 1,663,879 lb and SRB 1,298,753 lb (each, the table's average) at SRB ignition, shuttle total 4,511,011
+ORBITER_LB = 250167.0
+ET_LB = 1663879.0
+SRB_LB = 1298753.0
+TAPE_ET_LB = 1662224.0           # the tape's default ET, from sts135's MASS_VEHICLE_ET shift (1,657,525 lb gave -146.05 slug)
 
 
 def gmt_s(t):
@@ -178,7 +182,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--archive", default=os.path.expanduser("~/Desktop/Shuttle Stuff/S16609.txt"))
     ap.add_argument("--out", default=FLIGHTS)
-    ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB_EST)
+    ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
     pl = iyd(inc, node)
@@ -194,7 +198,7 @@ def main():
     d["notes"] = [
         "A CROSS-CHECK FLIGHT, as STS-135: the vehicle model and first-stage tables were built for STS-134; flown with them to see which differences from the real flight are the model's.  The first run will show how far the yaw, pitch and throttle tables are off; retune by flight.",
         "IYD: MIR's plane at SRB ignition, Earth-fixed: inclination %.4f deg, node %.4f deg east (RAAN of date less GMST); IYD = (-sin i sin node, sin i cos node, -cos i), the form sts134/135's use.  The pad (39B) is %.2f deg off this plane at SRB ignition and in plane at 1997 day 12 GMT %s (T_GMTLO_REF), about %d s later: the flown launch was at the opening of the 6m59s planar window, so the window closed about when the pad passed through the plane." % (inc, node, math.degrees(off), t_in.strftime("%H:%M:%S"), (t_in - SRB_IGN).total_seconds()),
-        "MASSES ARE ESTIMATES: orbiter at SRB ignition %.0f lb (the Missions Summary gives only landing weight 215,337 lb and 215,403 at MECO+; consumables, propellants and the cargo delta added).  ET and SRB masses are the tape's (ET-83 is a lightweight tank).  Tune ORBITER until the simulated MECO VI reaches 25,922 ft/s at 8:29.9." % a.orbiter_lb,
+        "MASSES: the Space Shuttle Missions Summary's Appendix A-6 weight table (pdf page 278), STS-81 row: orbiter %.0f lb at SRB ignition (242,178 at insertion), ET 1,663,879 lb, SRB 1,298,753 lb, shuttle total 4,511,011 lb.  The first run used an estimate of 242,000 lb and MECO came 7 s early." % a.orbiter_lb,
         "NO WIND TABLE YET: add message 11 from the 1997-01-12 Cape sounding (74794) before this is flown for comparison; until then PASS indexes its first-stage tables with the tape's default wind.",
         "OMS 2: TIG = ET separation + %.1f s (ET sep 09:36:14, OMS-2 10:10:23.3); pre-flight targets are placeholders -- the ground designs them after MECO for 159.9 x 84.9 nmi (75.5 ft/s flown)." % (OMS2_TIG - ET_SEP).total_seconds(),
     ]
@@ -221,8 +225,8 @@ def main():
             for f in m["fields"]:
                 n = f.get("name", "")
                 if n in ("M_EMPTY", "MASS_VEHICLE_ET", "ET_LEVEL_SENSOR_MASS", "MASS_ORBITER_LIFTOFF", "OMS_CUTOFF_MASS(1)", "OMS_CUTOFF_MASS(2)", "MBOD_ONE", "MBOD_TWO"):
-                    f["E"] = round(f["was"] + dm, 2)
-                    f["note"] = "STS-81: orbiter %.0f lb at SRB ignition (an estimate); the tape's value moved with it" % a.orbiter_lb
+                    f["E"] = round(f["was"] + dm + ((ET_LB - TAPE_ET_LB) / 32.174 if n == "MASS_VEHICLE_ET" else 0.0), 2)
+                    f["note"] = "STS-81: orbiter %.0f lb at SRB ignition (Missions Summary A-6); the tape's value moved with it" % a.orbiter_lb
                 elif n == "ASSIST_OMS_DT":
                     f["E"] = 109.0
                     f["note"] = "the tape's: STS-81's OMS assist time not found"
@@ -249,9 +253,10 @@ def main():
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
               "env": {"YAGPC_VEHDYN_SSME_ISP": "453.18", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
-                      "YAGPC_VEHDYN_PAD_ALT": "64.1"},
+                      "YAGPC_VEHDYN_PAD_ALT": "64.1",
+                      "YAGPC_VEHDYN_ET_LB": "%.0f" % ET_LB, "YAGPC_VEHDYN_SRB_LB": "%.0f" % SRB_LB},
               "notes": ["STS-81 (Mission Report Table I; Missions Summary p. 2-98): SRB ignition 012/09:27:22.984; GMTLO 09:27:20 gives T-0 at :22.8 (PASS's 2.8 s, see fly_sts134.py).",
-                        "orbiter_kg is an ESTIMATE (%.0f lb); the ET and SRB masses are the vehicle model's defaults (ET-83 is a lightweight tank); SSME Isp tag 453.18 s and fuel bias 884 lb are the Missions Summary's." % a.orbiter_lb,
+                        "Weights (Missions Summary A-6, pdf page 278): orbiter %.0f lb, ET 1,663,879, SRB 1,298,753 at SRB ignition; SSME Isp tag 453.18 s and fuel bias 884 lb from the Missions Summary p. 2-98." % a.orbiter_lb,
                         "Air: Jacksonville's 1997-01-11 23:04Z and 01-12 11:03Z balloons blended to liftoff (Cape Canaveral 74794 is not archived for 1997).  Pad: vehdyn and PASS's own nav-base I-load put the vehicle at LC-39A's latitude and longitude (2.6 km from 39B), kept on purpose so the truth and PASS agree; the height is 39B's, 55 ft instead of 39A's 48 (YAGPC_VEHDYN_PAD_ALT 64.1 m = 62.0 + 7 ft).",
                         "Made by tools/make_sts081_flight.py; do not edit by hand."]}
     json.dump(flight, open(os.path.join(a.out, "sts081-flight.json"), "w"), indent=1)
