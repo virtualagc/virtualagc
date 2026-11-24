@@ -225,6 +225,7 @@ def apply_mission(a):
     g["TI_TIG"] = m["ti_tig"]
     t0 = datetime.datetime.fromisoformat(m["met_zero"]).replace(tzinfo=datetime.timezone.utc)
     g["MET_ZERO_UNIX"] = t0.timestamp()
+    fly_sts134.T0 = gmt_of_unix(g["MET_ZERO_UNIX"])      # the vehicle's MET zero in its GMT (DEORB MNVR's TIG is keyed in MET: tig - T0)
     g["RNP"] = tuple(m["rnp"])
     if "orbiter_kg" in m:
         g["ORBITER_KG"] = m["orbiter_kg"]
@@ -232,6 +233,8 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
+    if m.get("no_gps"):
+        os.environ["FLY_NO_GPS"] = "1"                # the vehicle had no GPS (OV-104 in 1997): the drivers key none of it
     if "targets" in m and os.path.abspath(a.targets) == os.path.join(HERE, "sts134-targets.txt"):
         a.targets = os.path.join(HERE, m["targets"])            # unless --targets named another file (the undock day's)
     # THE TARGET'S PORT and the kind of final approach, for the crew's instruments and the manual phase

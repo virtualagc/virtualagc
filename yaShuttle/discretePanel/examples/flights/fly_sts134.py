@@ -1141,9 +1141,10 @@ class Flight:
         self.play(script, "deorb-targets")
         self.script_done("deorb-targets", 300)
         self.say("crew: DEORB MNVR targets loaded (MET TIG %d/%02d:%02d:%04.1f)" % (d, hh, mm, ss))
-        self.play(GPS_INCORPORATE, "gps-incorporate-deorbit")
-        self.script_done("gps-incorporate-deorbit", 60)
-        self.say("crew: GPS INCORPORATE (SPEC 50 ITEM 44)")
+        if not os.environ.get("FLY_NO_GPS"):         # OV-104 (STS-81, 1997) had no GPS: nothing to incorporate
+            self.play(GPS_INCORPORATE, "gps-incorporate-deorbit")
+            self.script_done("gps-incorporate-deorbit", 60)
+            self.say("crew: GPS INCORPORATE (SPEC 50 ITEM 44)")
         self.wait_gmt(tig - 25 * 60.0)
         self.play(OPS302, "ops302")
         self.wait_gmt(tig - 20 * 60.0)
@@ -1249,13 +1250,14 @@ class Flight:
                 break
             self.check_sim()
             time.sleep(2.0)
-        self.play(GPS_INCORPORATE, "gps-incorporate-entry")
-        self.script_done("gps-incorporate-entry", 60)
-        self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
+        if not os.environ.get("FLY_NO_GPS"):         # OV-104 (STS-81, 1997) had no GPS: TACAN is its entry navaid
+            self.play(GPS_INCORPORATE, "gps-incorporate-entry")
+            self.script_done("gps-incorporate-entry", 60)
+            self.say("crew: V = 7K, GPS INCORPORATE (SPEC 50 ITEM 44)")
         # OV-105 has no TACAN (STS-118 on); "GPS will be prime navigational tool during entry" (STS-118 MOD FRR, Three
         # String GPS), so after the V = 7K INCORPORATE (item 44, one update) GPS stays in navigation: GPS TO NAV AUTO
         # (SPEC 50 item 42).  FLY_GPS_INH=1 leaves it inhibited, as the checklist's HORIZ SIT config alone would.
-        if not os.environ.get("FLY_GPS_INH"):
+        if not os.environ.get("FLY_GPS_INH") and not os.environ.get("FLY_NO_GPS"):
             self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 4 2 EXEC\n+8     keys RESUME\n", "gps-aut")
             self.script_done("gps-aut", 60)
             self.say("crew: NAV GPS to AUTO (SPEC 50 ITEM 42): GPS prime for entry navigation on OV-105")

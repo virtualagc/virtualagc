@@ -219,6 +219,15 @@ def main():
                 elif n.startswith("OMS 2:"):
                     f["E"] = [round((OMS2_TIG - ET_SEP).total_seconds(), 1), 84.9, 330.0, 0.0, 0.0]
                     f["name"] = "OMS 2: TIG = ET separation + %.1f s (STS-81: ET sep 09:36:14, OMS-2 TIG 10:10:23.3); placeholders -- the ground designs them for 159.9 x 84.9 nmi" % (OMS2_TIG - ET_SEP).total_seconds()
+        elif m["op"] == 14:
+            # THROTTLE VELOCITIES: the Vrel (ft/s) on the simulated vehicle at the flown throttle times (Mission Report Table I:
+            # up to 104 % at T+4.2 s, down to 70 % at T+31.1 s, up to 104 % at T+60.7 s; the vehicle's Vrel at those times in
+            # the STS-81 runs, sts081 run4: 31.1 s 770 ft/s, 60.7 s 1447 ft/s, T+4.2 about 66)
+            m["fields"][0]["E"] = [66.0, 770.0, 1447.0, 10000.0]
+            m["fields"][0]["name"] = "QPOLY(1-4): Vrel at STS-81's flown throttle times T+4.2, 31.1, 60.7 s (Mission Report Table I) on the simulated vehicle"
+        elif m["op"] == 39:
+            m["fields"][0]["I"] = [104, 70, 104, 104]
+            m["fields"][0]["name"] = "THROT(1-4): 104, 70 (the flown max-q bucket, Table I), 104, 104"
         elif m["op"] == 96:
             for f in m["fields"]:
                 if f.get("name") == "VDMAG":
@@ -253,7 +262,7 @@ def main():
               "epoch": CLOCK_START.strftime("%Y-%m-%dT%H:%M:%S"), "t0": t0, "gmtlo": [12, 9, 27, 20.0],
               "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9,
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
-              "env": {"YAGPC_VEHDYN_SSME_ISP": "453.18", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
+              "env": {"YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
                       "YAGPC_VEHDYN_PAD_ALT": "64.1",
                       "YAGPC_VEHDYN_ET_LB": "%.0f" % ET_LB, "YAGPC_VEHDYN_SRB_LB": "%.0f" % SRB_LB},
