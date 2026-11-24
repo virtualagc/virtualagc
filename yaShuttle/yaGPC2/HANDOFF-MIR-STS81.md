@@ -183,6 +183,68 @@ CAUTIONS:
 4. Mir port geometry: find the Docking Module port in `model.json`/`mir.py` coordinates; decide the dock point and approach corridor.
 5. Only then decide how much of the ISS procedures (STS-134 Rendezvous book) to adapt, and whether to fly OI-34 with Mir as the target.
 
+## Plan and status as of 2026-11-24 (supersedes the "FEASIBILITY ONLY" status and the 2026-11-11 revision above)
+
+**Goals (Ron, 2026-11-23).**  OI-34.07 is released and working, so two separate goals, each worthwhile alone, both kept documented and runnable:
+(A) STS-81 flown on OI-34.07 (procedures adapted OI-25 -> 34); (B) STS-81 flown on OI-30.17 (OI301700).  A is not a stepping stone to be
+discarded.  Order: A first; OI-30.17 bring-up (link, tape, IPL to OPS 1; lnk101, the OI340600 link-and-compare and OI340700 tape-build
+handoffs as templates) is a PARALLEL track that does not block A.  Do NOT borrow the OI-34.07 memory map for OI-30.17: the layout must come
+from an OI-30 link, the OI-34 DASS dumps validate only OI-34, and address-based tooling (I-loads, scrub, ledger addresses) needs true OI-30
+addresses.  Re-measure before relying: OI301700 HAL/S corpus compiles in full, AP-101S assembly 272/272 byte for byte (2026-08-08); link,
+tape and IPL not done.  Codex's draft `~/workspace-codex/virtualagc/yaShuttle/yaGPC2/Requirements-OI30.md` has toolchain pointers.
+
+**Phases (Ron, 2026-11-24).**
+1. STS-81 on OI-34.07, with the post-2000 glass cockpit (MEDS and control panels) AS IS, edgekeys included.  (CURRENT.)
+2. Middle phase: a real OI-30.17 mission, STS-117 (chosen by Ron after correcting his launch-time mix-up; glass cockpit as flown; landing on
+   Edwards runway 22 by day).  STS-116 (the OI-30-era night launch, 9 Dec 2006) and STS-114 (night landing at Edwards 22) are optional extras.
+   Launch/landing times to be confirmed against the Missions Summary.
+3. STS-81 on OI-30.17, now simulating the pre-2000 cockpit as far as feasible: a new `MEDS2.py --mcds` switch (beyond `--no-edgekeys`)
+   that also removes the edgekey-menu canvas area and renders green-on-black monochrome, plus whatever else the MCDS-era CRTs need
+   (check the DEU vs IDP display formats); and the ADI and other PFD elements, which were physical instruments on panels F6 and F8 --
+   a NOTE only so far, the pre-2000 panel elements need more thought.
+
+**Method for phase 1.**  STS-81 is a new FLIGHT, not a new tape: `fly_sts134.py --flight FILE` (ascent through ORBIT) and
+`fly_rndz134.py --mission FILE` (rendezvous, from the JSON keys epoch, ti_tig, met_zero, rnp, norad, orbiter_kg, tgt_sets, targets).
+OV-104 had no GPS in 1997 (OI-34 expects it: CGNS_GPS_LOCKOUT, GPS-to-NAV procedures): fly with GPS inhibited; whether TACAN is needed for
+entry/landing is open.  Acceptance is the phase chain completing within documented dispersions (the owner's standard), not a match to the record.
+
+**Done so far (2026-11-23/24).**
+- `tools/mir_elements.py` (5dd3eb634): loads S16609.txt (11,001 usable sets, 2 hand-made 1999 records dropped), picks the last set at or before
+  an instant (never after docking), emits a TLE or a `target` line.  Mir's orbit (a 6765.0 km, e 0.0008, mean altitude 209.0 nmi) matches the
+  Orbiter's 209.5 x 208.9 nmi braking orbit; the pad is 1.056 deg off Mir's plane at SRB ignition and in plane +404 s later.
+- Flight files (`tools/make_sts081_flight.py`; c4928893b, 1b458faa7, f06d2d7c7): `sts081-flight.json`, `sts081-dolilu.json`,
+  `sts081-reconfig.json`.  Sourced from the Mission Report Table I and Missions Summary: SRB ignition 012/09:27:22.984, MECO 09:35:55
+  (8:29.9), ET sep 531 s MET, OMS-2 TIG 10:10:23.3 to 159.9 x 84.9 nmi (75.5 ft/s), MECO VI 25,922 ft/s.  `--apogee-trim` (default -6.7 nmi,
+  a calibration of the MECO aim) and `--oms-assist-dt` (default 0: STS-81 flew NO OMS assist, the Missions Summary p. 127 says STS-90 was
+  the first; verified, OMS burned 43.2 s vs 150.3 s with the tape's 109 s).
+- Ascent runs 1-4 (Linux): IPL through OMS2 complete.  Remaining misses: ET sep 5-6 s early (525.8 vs 531 s; not the OMS assist; FPA unknown, the
+  tape's 0.5 deg is used; throttle/profile suspected), post-OMS-2 perigee about 78 nmi vs 84.9 (altitudes are above PASS's equatorial radius,
+  +-3 nmi convention), inclination 51.687 vs Mir 51.672.  Run 3 tuning: orbit 160.9 x 78.1.
+- Report Table I numbering trap: it lists OMS-3 as 013:01:02:27.8 and OMS-4 as 013:13:03:03.4, but chronologically OMS-3 is 012:13:03:03
+  (82 ft/s, 51.4 s), OMS-4 = NC-2 013:01:02:27.8 (8 ft/s, 10.2 s, one engine), OMS-5 014:09:10:44.1, OMS-6 014:23:41:15.6, OMS-7 = Ti
+  015:01:13:54.1 (12.0 s, left engine).  The table above has the corrected clock times; trust the MET column.
+- Rendezvous generalized (`fly_rndz134.py --mission examples/flights/sts081-rndz.json`; `rndz_start.py --norad`; commit a5090222a, TITLE_YEAR
+  016b4b97a: the CRT titles show 2011/ whatever the date).  Ti burn on Mir: 10.00 ft/s, left OMS 12.40 s (flown 9.5 ft/s, 12.0 s); independent
+  Lambert agrees; T2 arrival X -900 Y 0 Z +1800 ft.  Star tracker and radar navigation phases ran on Mir's state; MC1-MC4 and ARRIVAL (about
+  1500 ft) flew.  The Ti point and TGT sets are STS-134's, an assumption (STS-81's MC-1/2/3 at Ti+22/52/62 min fit them).
+- Docking port: Mir's model frame is turned 180 deg about X in `portview/vehicles/mir.py` (369559f6a), so the Docking Module's free APAS face
+  (2.929, 0.081, 17.698) m is on the +Z/nadir side under `lvlh` (the Shuttle docked from below), axis +Z; `tle_target.py --port` takes the axis and
+  up too; the Mir target line carries it (`sts081-targets.txt`, regenerate with the same command).  No vehdyn.c change.  Cached portview models
+  need `fetch_assets.py --vehicles mir --rebuild`.  APAS-89 (Mir) vs APAS-95 (ISS): the ODS is the same hardware and vehdyn's capture is
+  geometric (closing <= 0.20 ft/s, lateral <= 4.2 in, angular 4 deg), so no mechanism model is needed (from memory, to confirm).
+- Run rz4 (IPL through HOLD, full chain): RBAR/RPM/TORVA/VBAR/HOLD all ran; HOLD at 100 ft from the port within 3 ft; manual-phase RCS
+  347/71/354/150/17 lb.  `dock_autopilot.py --from DOCK30` on that capture flew 100 -> 30 ft along the port axis with lateral rms 0.3 ft;
+  the leg to contact/capture was running when this was written (result in ~/work/sts081/dk1.out).
+
+**Open items.**
+- PASS's onboard range to Mir at HOLD is about 10x the truth (1.7 kft vs 170 ft; filter error +1.6 kft LVLH x, slowly growing): a target-state or
+  nav mismatch, invisible to the truth-driven manual phase.  Investigate (target epoch/propagation, RR and ST marks).
+- Unsourced: Mir ballistic coefficient (130 is the ISS's), the port's "up" axis (+X), Mir's attitude (lvlh nadir assumed), weight at SRB ignition
+  (242,000 lb estimated; ET/SRB masses are model defaults), the 1997-01-12 Cape sounding (74794) and message 11, pad 39B position/55 ft elevation
+  (the code uses 39A, 48 ft), night-launch lighting, the Table I OMS-5/6 naming versus the Missions Summary's NC5/NC6.
+- Remaining chain: undock, deorbit, entry and landing generalized (KSC 33, 1997-01-22 14:22:44, a wizard option), GPS/TACAN handling, then the
+  scripts for OI-30 and the phase 2/3 work above.
+
 ## Related
 
 Ledger: no Mir entries yet.  Memory: [[reference-gps-to-nav-flown-procedures]] (the orbit-ops GPS procedures, relevant because 1997 had no GPS

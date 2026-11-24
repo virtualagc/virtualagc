@@ -2859,6 +2859,22 @@ last because it is the slowest to run and adds the least that is new.
 6. **The ISS's docking attitude and mass properties** for ULF6. They are
    needed only for Stage 6.
 
+## 9. STS-81 on Mir with the same machinery (status 2026-11-24)
+
+The drivers take a mission file (`fly_rndz134.py --mission examples/flights/sts081-rndz.json`), so the STS-134 chain flies a
+Mir rendezvous with no C change.  Details and open items are in `HANDOFF-MIR-STS81.md`.
+
+- **rz4, IPL through HOLD** on Mir's state (target line with the Docking Module port 2.929 0.081 17.698, axis +Z, nadir side under `lvlh`):
+  every phase ran, including RBAR, RPM, TORVA, VBAR and HOLD; HOLD was at 100 ft from the port within 3 ft; manual-phase RCS
+  347 / 71 / 354 / 150 / 17 lb.  Commit 016b4b97a (the CRT title year).
+- **`dock_autopilot.py --from DOCK30`** on that capture flew 100 to 30 ft along the port axis with lateral rms 0.3 ft: the port geometry comes
+  from the truth-reported port, so it needed no change.  (The leg to contact and capture was running when this was written.)
+- **Open:** PASS's onboard range to Mir at HOLD is about 10x the truth (1.7 kft against 170 ft; filter error +1.6 kft in LVLH x, slowly growing),
+  a target-state or navigation mismatch that the truth-driven manual phase does not see.  Investigate the target epoch and propagation and
+  the RR and star tracker marks.
+- **Cockpit (owner, 2026-11-24):** the OI-34.07 STS-81 phase uses the post-2000 glass cockpit as is.  The pre-2000 MCDS-era changes
+  (`MEDS2.py --mcds`, F6/F8 physical instruments) belong only to the later STS-81 on OI-30.17 phase.
+
 ## Sources
 
 - **JSC-48072-134 Rendezvous checklist, Final Rev A** (2011-03-15, PCN-2).
