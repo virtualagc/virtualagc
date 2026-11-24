@@ -45,21 +45,26 @@ def main():
     ap.add_argument("--tape", required=True); ap.add_argument("--targets", required=True)
     ap.add_argument("--utc", default="2011-06-01T03:50:00")
     ap.add_argument("--port-base", type=int, default=45800); ap.add_argument("--rate", default="3")
+    ap.add_argument("--year", type=int, default=2011, help="the year of the flight (the vehicle's GMT counts days of it)")
+    ap.add_argument("--norad", type=int, default=25544, help="the target's catalogue number (the boot's dummy START_REL)")
+    ap.add_argument("--mission", help="a mission file for the fresh PASS's boot (fly_rndz134.py --mission): RNP, target, MET zero")
+    ap.add_argument("--sim-props", action="store_true",
+                    help="keep the simulation's own propellant and mass (STS-134's are the Mission Report's, below)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     boot = os.path.join(a.out, "boot")
     if not os.path.isdir(os.path.join(boot, "sts134r-uplink")):
-        env = dict(os.environ, YAGPC_VEHDYN_START_REL="25544,-1524,0,0,0,0,0,%.3f" % unix_of(a.utc),
+        env = dict(os.environ, YAGPC_VEHDYN_START_REL="%d,-1524,0,0,0,0,0,%.3f" % (a.norad, unix_of(a.utc)),
                    NSTS_NO_AUDIO="1", PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(HERE, "fly_rndz134.py"), "--logs", boot, "--tape", a.tape,
                "--targets", a.targets, "--start-utc", a.utc, "--to", "UPLINK", "--rate", a.rate,
-               "--port-base", str(a.port_base)]
+               "--port-base", str(a.port_base)] + (["--mission", a.mission] if a.mission else [])
         print("booting a fresh PASS at %s: %s" % (a.utc, " ".join(cmd)), flush=True)
         subprocess.run(cmd, env=env, check=True, stdout=open(os.path.join(a.out, "boot.out"), "w"), stderr=subprocess.STDOUT)
     base = os.path.join(boot, "sts134r-uplink")
     gmt_unix = json.load(open(os.path.join(base, "capture.json")))["gmtUnix"]
     src_v = json.load(open(os.path.join(a.sep3, "vehdyn.json")))["vehdyn"]
-    src_unix = 1293840000.0 + src_v[126] - 86400.0
+    src_unix = calendar.timegm((a.year, 1, 1, 0, 0, 0)) + src_v[126] - 86400.0
     secs = gmt_unix - src_unix
     print("SEP3 physics at unix %.1f, the fresh capture at %.1f: coasting %.0f s (%.1f h)" % (src_unix, gmt_unix, secs, secs / 3600.0))
     coasted = os.path.join(a.out, "coasted")
@@ -87,7 +92,10 @@ def main():
     out = os.path.join(a.out, "sts134r-ready")
     if os.path.exists(out):
         shutil.rmtree(out)
-    rec = orbit_overlay.overlay(coasted, out, base, mass_kg=mass, prop_kg=prop_kg)
+    if a.sim_props:
+        rec = orbit_overlay.overlay(coasted, out, base)
+    else:
+        rec = orbit_overlay.overlay(coasted, out, base, mass_kg=mass, prop_kg=prop_kg)
     print(json.dumps(rec))
     for f in os.listdir(os.path.join(boot)):
         if f.endswith(".json") and not os.path.exists(os.path.join(a.out, f)):

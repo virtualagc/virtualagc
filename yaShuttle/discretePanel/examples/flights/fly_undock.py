@@ -71,6 +71,31 @@ UNDOCK_GMT = 150 * 86400 + 3 * 3600 + 55 * 60 + 22          # +Z pulse, Mission 
 FREE_GMT = 150 * 86400 + 3 * 3600 + 52 * 60 + 28            # ISS FREE / Orbiter FREE (03:52:28)
 
 
+def apply_mission_undock(path):
+    """--mission FILE's "undock" block: the day-150 constants of STS-134 (the hook drive, the +Z pulse, FREE
+    drift) and the attitude UNIV PTG holds, replaced by another flight's.  "hook", "undock", "free" are
+    'DDD/HH:MM:SS' GMTs; "att" is [tgt, bv, p, om] (the ISS's V-bar attitude: 2, 5, 180, 0; Mir's R-bar docking
+    attitude: 2, 5, 270, 180); "sepx" the separation burn [GMT, dv ft/s along the Orbiter's +X]."""
+    global HOOK_GMT, UNDOCK_GMT, FREE_GMT, UNDOCK_ATT, SEPX
+    u = json.load(open(path)).get("undock")
+    if not u:
+        return
+
+    def g(t):
+        d, rest = t.split("/")
+        h, m, sec = (rest.split(":") + ["0", "0"])[:3]
+        return int(d) * 86400 + int(h) * 3600 + int(m) * 60 + float(sec)
+    HOOK_GMT, UNDOCK_GMT, FREE_GMT = g(u["hook"]), g(u["undock"]), g(u["free"])
+    if "att" in u:
+        UNDOCK_ATT = tuple(u["att"])
+    if "sepx" in u:
+        SEPX = (g(u["sepx"][0]), float(u["sepx"][1]))
+
+
+UNDOCK_ATT = (2, 5, 180, 0)                                  # UNIV PTG TGT ID, BODY VECT, P, OM at the separation configuration
+SEPX = None                                                   # (GMT, ft/s along the Orbiter's +X): the Mir flight's separation burn
+
+
 def sp(n):
     """A number as the keyboard takes it: one key a digit."""
     return " ".join(str(int(n)))
@@ -175,13 +200,15 @@ class Undock(R.Rendezvous):
                 10, "SPEC 23 RCS F selected, the forward jets as they are (all available)")
         # [GNC_UNIV_PTG]: TGT ID +2, BODY VECT +5, P +180, Y +0, OM +0, ERR TOT, TRK
         self.do("sep-univptg", "+1     keys RESUME\n"
-                               "+3     keys ITEM 8 + 2 EXEC\n"
-                               "+3     keys ITEM 1 4 + 5 EXEC\n"
-                               "+3     keys ITEM 1 5 + 1 8 0 EXEC\n"
+                               "+3     keys ITEM 8 + %s EXEC\n"
+                               "+3     keys ITEM 1 4 + %s EXEC\n"
+                               "+3     keys ITEM 1 5 + %s EXEC\n"
                                "+3     keys ITEM 1 6 + 0 EXEC\n"
-                               "+3     keys ITEM 1 7 + 0 EXEC\n"
+                               "+3     keys ITEM 1 7 + %s EXEC\n"
                                "+3     keys ITEM 2 3 EXEC\n"
-                               "+3     keys ITEM 1 9 EXEC\n", 15, "UNIV PTG")
+                               "+3     keys ITEM 1 9 EXEC\n"
+                               % (sp(UNDOCK_ATT[0]), sp(UNDOCK_ATT[1]), sp(UNDOCK_ATT[2]), sp(UNDOCK_ATT[3])),
+                               15, "UNIV PTG")
         c = self.compare() or {}
         self.say("SEPCFG: DAP attitude error %s, PASS attitude vs the truth %s" % (c.get("dap_att_err"), c.get("pass_att_err_deg")))
         # ORBIT MNVR EXEC [5A]: TIG = the undock, any non-zero delta-V, the Orbiter's weight
@@ -273,7 +300,13 @@ class Undock(R.Rendezvous):
         # 0.16 s for the 0.10 ft/s the page says), so the speed is flown as a THC hold along the port's axis (+x)
         self.reselect_fwd_up_jets()
         s = self.lvlh_state()
-        self.thc_burn((0.35 - s[3], 0.0, 0.0), "und-sep")
+        if ins.APPROACH == "rbar":
+            # the port's axis is the nadir, not the V-bar: close at 0.35 ft/s along it
+            a = self.port_axis_lvlh()
+            along = float(np.dot(s[3:6], a))
+            self.thc_burn(tuple((0.35 - along) * a), "und-sep")
+        else:
+            self.thc_burn((0.35 - s[3], 0.0, 0.0), "und-sep")
         r, rd = self.rng()
         self.say("UNDOCK: separating at RDOT %s ft/s, range %s ft" % (rd, r))
         t0 = self.truth()["t"]
@@ -319,6 +352,35 @@ class Undock(R.Rendezvous):
                            "+3     keys ITEM 1 7 EXEC\n+3     keys ITEM 1 9 EXEC\n+3     keys ITEM 2 1 EXEC\n"
                            "+4     keys RESUME\n", 8, "SPEC 23, F1U F3U F2U reselected")
         self._fwd_up_in = True
+
+    def port_axis_lvlh(self):
+        """The target's port axis in its LVLH (unit; the ISS's +X, Mir's +Z the nadir)."""
+        tru, tgt = self.feeds()
+        ex, ey, ez = ins.lvlh_axes(list(tgt["r"]), list(tgt["v"]))
+        a = ins.to_m50(ins.qmat(tgt["q"]), list(ins.PORT_AX))
+        return np.array([ins.dot(a, e) for e in (ex, ey, ez)])
+
+    def sepx(self):
+        """THE SEPARATION BURN of a flight with no fly-around and re-rendezvous (STS-81: the +X separation, 3.0
+        ft/s, Mission Report 020:04:02:00): a THC burn along the Orbiter's +X, the DAP on A/AUTO/PRI,
+        then the range watched until it opens past a mile."""
+        if SEPX is None:
+            self.say("SEPX: no separation burn in this flight's mission file")
+            return
+        tig, dv = SEPX
+        # the burn's direction in the target's LVLH: the Orbiter's +X in the attitude it holds
+        axes, q = self.body_axes_lvlh()
+        bx = ins.to_m50(ins.qmat(q), [1.0, 0.0, 0.0])
+        d = [dv * ins.dot(bx, e) for e in axes]
+        self.say("SEPX: %.1f ft/s along +X, LVLH %+.2f %+.2f %+.2f, TIG GMT %.0f (now %.0f)"
+                 % (dv, *d, tig, self.truth()["gmt"]))
+        if self.truth()["gmt"] < tig - 90.0:
+            self.wait_gmt(tig - 90.0)
+        got = self.thc_burn(tuple(d), "sepx", tig=tig)
+        self.wait_sim(120)
+        s = self.lvlh_state()
+        self.say("SEPX done: range %.0f ft, x %.0f y %.0f z %.0f, GMT %.0f; dv got %s"
+                 % (float(np.linalg.norm(s[:3])), s[0], s[1], s[2], self.truth()["gmt"], [round(float(x), 2) for x in got]))
 
     def lvlh_state(self):
         """The Orbiter's centre of mass against the ISS: (x, y, z, xdot, ydot, zdot) in ft, ft/s, LVLH
@@ -1027,7 +1089,9 @@ def lowz_on(f):
 
 def main():
     R.Rendezvous = Undock
-    R.PHASES.extend(["START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3"])      # after dock_autopilot's DOCK30, DOCK, STAY
+    if "--mission" in sys.argv:
+        apply_mission_undock(sys.argv[sys.argv.index("--mission") + 1])
+    R.PHASES.extend(["START", "SEPCFG", "UNDOCK", "SEPX", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3"])      # after dock_autopilot's DOCK30, DOCK, STAY
     for a, v in (("--rhc", "both"), ("--station", "all"), ("--input", "virtual")):
         if a not in sys.argv:
             sys.argv += [a, v]

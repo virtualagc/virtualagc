@@ -383,6 +383,29 @@ def flown_entry_iloads():
         entry_iloads.apply(os.path.join(os.path.expanduser(argv[argv.index("--logs") + 1]), "sts134r-" + cap))
 
 
+def apply_mission_return(path):
+    """--mission FILE's "return" block: the deorbit opportunity and the runway of another flight than STS-134's.
+    "tff" (TIG to EI, min), "gamma_ei" (deg), "ei" and "landing" ('DDD/HH:MM:SS' GMT of EI and of the landing the
+    opportunity is chosen by), "runway_slot" (the site file's, 1 KSC15, 2 KSC33) and "runway" ('15'/'33', the key
+    at OPS 304); and U.apply_mission_undock for the undock block, which the coast's start shares."""
+    m = json.load(open(path)).get("return")
+    U.apply_mission_undock(path)
+    if not m:
+        return
+
+    def g(t):
+        d, rest = t.split("/")
+        h, mi, sec = (rest.split(":") + ["0", "0"])[:3]
+        return int(d) * 86400.0 + int(h) * 3600 + int(mi) * 60 + float(sec)
+    args = ["--tff", str(m["tff"]), "--gamma-ei", str(m["gamma_ei"]), "--ei-gmt", "%.1f" % g(m["ei"]),
+            "--near-gmt", "%.1f" % g(m["landing"])]
+    if "runway_slot" in m:
+        args += ["--runway", str(m["runway_slot"])]
+    Return.DEORBIT_ARGS = args
+    if "runway" in m:
+        os.environ["FLY_LANDING_RUNWAY"] = str(m["runway"])
+
+
 def main():
     # THE LANDING AIDS (runways, MLS) are not optional: a run without them lands blind on PASS's own nav -- the same chain
     # that touched down at 191 kt / 1.2 ft/s with them floated to 127.6 kt / 12 ft/s without (AB21, AB22, 2026-11-10).
@@ -391,6 +414,8 @@ def main():
     if os.path.exists(navaids):
         os.environ.setdefault("YAGPC_NAVAIDS", os.path.normpath(navaids))
     R.Rendezvous = Return
+    if "--mission" in sys.argv:
+        apply_mission_return(sys.argv[sys.argv.index("--mission") + 1])
     flown_entry_iloads()
     setattr(Return, "pre-mnvr", lambda self: None)       # the capture --from BURN restores
     for ph in ("START", "SEPCFG", "UNDOCK", "FLYAROUND", "SEP1", "SEP2", "NH2", "MC5", "NSR", "TPI", "TDA", "SEP3",      # fly_undock's, so that COAST resumes from sts134r-sep3

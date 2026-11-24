@@ -10,5 +10,30 @@
  "norad": 16609,
  "targets": "sts081-targets.txt",
  "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X.",
- "approach": "rbar"
+ "approach": "rbar",
+ "undock": {
+  "free": "020/02:12:37",
+  "hook": "020/02:13:17",
+  "undock": "020/02:15:30",
+  "att": [
+   2,
+   5,
+   270,
+   180
+  ],
+  "sepx": [
+   "020/02:30:00",
+   3.0
+  ],
+  "note": "Mission Report: ODS powered 020:01:46:24, undocking complete 020:02:15:24, then a fly-around (not flown here) and the +X separation 3.0 ft/s at 020:04:02:00 (flown here 15 min after the undock instead: no fly-around leaves nothing to hold the Orbiter near Mir for 1h45m). FREE/hook/pulse GMTs follow STS-134's offsets (FREE = hook-40 s; hook = undock complete - 127 s)."
+ },
+ "return": {
+  "tff": 33.5,
+  "gamma_ei": -0.96,
+  "ei": "022/13:51:00",
+  "landing": "022/14:22:44",
+  "runway_slot": 2,
+  "runway": "33",
+  "note": "Mission Report: deorbit TIG 022:13:17:33.2 (355.8 ft/s, dual engine), landing KSC 33 022 14:22:44 GMT; EI is put 31.7 min before the landing as STS-134's was (06:03:06 for 06:34:50); TIG to EI 33.5 min is the flown TIG to this EI. gamma_ei -0.96 is STS-134's design value."
+ }
 }

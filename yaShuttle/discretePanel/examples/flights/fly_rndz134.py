@@ -232,8 +232,8 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
-    if "targets" in m:
-        a.targets = os.path.join(HERE, m["targets"])
+    if "targets" in m and os.path.abspath(a.targets) == os.path.join(HERE, "sts134-targets.txt"):
+        a.targets = os.path.join(HERE, m["targets"])            # unless --targets named another file (the undock day's)
     # THE TARGET'S PORT and the kind of final approach, for the crew's instruments and the manual phase
     # (rndz_instruments.set_port; the ISS's, with the V-bar final approach, when the file has no port)
     port = ins_mod.parse_port(getattr(a, "targets", None) or os.path.join(HERE, "sts134-targets.txt"),
