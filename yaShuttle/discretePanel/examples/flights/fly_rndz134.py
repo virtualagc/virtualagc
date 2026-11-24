@@ -214,6 +214,26 @@ def ascent_end_state(path, say=print):
         return dict(rcs_used=",".join("%.1f" % (x + e) for x, e in zip((109.6, 77.6, 78.0), PRESTART_EXTRA_RCS_LB)),
                     oms_used="7820.736,7898.016", orbiter_kg=ORBITER_KG)
 
+def apply_mission(a):
+    """--mission FILE: the constants that were STS-134's (EPOCH, TI_TIG, MET_ZERO_UNIX, RNP, ORBITER_KG, the TGT sets and
+    the target line file) replaced by another flight's."""
+    m = json.load(open(a.mission))
+    g = globals()
+    g["EPOCH"] = m["epoch"]
+    g["TI_TIG"] = m["ti_tig"]
+    t0 = datetime.datetime.fromisoformat(m["met_zero"]).replace(tzinfo=datetime.timezone.utc)
+    g["MET_ZERO_UNIX"] = t0.timestamp()
+    g["RNP"] = tuple(m["rnp"])
+    if "orbiter_kg" in m:
+        g["ORBITER_KG"] = m["orbiter_kg"]
+    if "norad" in m:
+        g["NORAD_ISS"] = m["norad"]
+    for k, v in m.get("tgt_sets", {}).items():
+        TGT_SETS[int(k)] = v
+    if "targets" in m:
+        a.targets = os.path.join(HERE, m["targets"])
+
+
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
           # the manual phase (rndz_manual.py, Stage 5), to 100 ft station-keeping
@@ -1382,7 +1402,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         rel = None if fd13 else os.environ.get("YAGPC_VEHDYN_START_REL")
         if not rel and not fd13:
             out = subprocess.run([sys.executable, os.path.join(YAGPC2, "tools", "rndz_start.py"), "start",
-                                  "--targets", self.a.targets, "--ti", TI_TIG, "--start", EPOCH],
+                                  "--targets", self.a.targets, "--ti", TI_TIG, "--start", EPOCH, "--norad", str(NORAD_ISS)],
                                  check=True, capture_output=True, text=True).stdout
             open(os.path.join(self.a.logs, "rndz-start.txt"), "w").write(out)
             rel = re.search(r"YAGPC_VEHDYN_START_REL=(\S+)", out).group(1)
@@ -2053,7 +2073,7 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
 {nbat_crt4}+8     keys ITEM 1 8 + 1 EXEC
 +8     keys ITEM 1 9 + 1 EXEC
 +21    keys OPS 2 0 1 PRO
-wait crt 1 title 2011/ timeout 600
+wait crt 1 title {year}/ timeout 600
 +20    dap c3 free
 +10    keys SPEC 2 1 PRO
 +5     keys ITEM 4 EXEC
@@ -2083,7 +2103,7 @@ wait crt 1 title 2011/ timeout 600
         four = getattr(self.a, "crts", 1) >= 4
         self.play(self.IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), idp4=self.IPL_IDP4 if four else "",
                                          idp4_early="" if four else "+0.1   idppower 4 on\n",
-                                         nbat_crt4=self.IPL_NBAT_CRT4 if four else ""), "ipl")
+                                         nbat_crt4=self.IPL_NBAT_CRT4 if four else "", year=RNP[0]), "ipl")
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
         self.wait_sim(10)
@@ -2292,7 +2312,7 @@ wait crt 1 title 2011/ timeout 600
         # the page is asked for and waited on: with RESUME alone the items
         # went to whatever was up (OMS MNVR EXEC, 2021) -- ILLEGAL ENTRY
         script = ("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title 2011/ timeout 180\n"
+                  "wait crt 1 title %d/ timeout 180\n" % RNP[0] +
                   "+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
@@ -2892,7 +2912,7 @@ wait crt 1 title 2011/ timeout 600
         whole coast, which [12A] does not, and whose translations move the
         truth itself."""
         self.play("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title 2011/ timeout 180\n" + self.TRACK_KEYS, name)
+                  "wait crt 1 title %d/ timeout 180\n" % RNP[0] + self.TRACK_KEYS, name)
         self.script_done(name, 300)
         self.say("crew: OPS 201, -Z target track")
         self.track_complete(name + "-vern", limit)
@@ -3422,6 +3442,9 @@ def main():
     ap.add_argument("--from", dest="from_", choices=PHASES[1:])
     ap.add_argument("--from-fd13", metavar="DIR",
                     help="resume rendezvous from fly_fd13.py's NC4+2 min capture; UPLINK starts next")
+    ap.add_argument("--mission", metavar="FILE", help="another flight than STS-134: a JSON file of epoch, ti_tig, "
+                    "met_zero (UTC, SRB ignition), rnp [year, day], orbiter_kg and optionally tgt_sets and targets "
+                    "(examples/flights/sts081-rndz.json); the module's STS-134 constants are replaced by them")
     ap.add_argument("--size", type=int, default=384, help="simulatePASS --size: the MDU window size in pixels (default 384)")
     ap.add_argument("--crts", type=int, default=1)
     ap.add_argument("--coast-min", type=float, default=76.9,
@@ -3578,6 +3601,8 @@ def main():
                  "\n  make it once from the KSC6 volume (yaGPC2/tools): python3 mission_reconfig.py "
                  "sites/%s %s --out %s\n  (or copy it from forClaude/volumes/)"
                  % (spec, BASE_VOLUME, a.tape)))
+    if a.mission:
+        apply_mission(a)
     if a.start_utc:
         globals()["EPOCH"] = a.start_utc
     a.attach = a.attach_running
