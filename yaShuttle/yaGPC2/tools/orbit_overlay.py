@@ -48,7 +48,9 @@ def overlay(src, dst, base, mass_kg=None, prop_kg=None):
     # tanks, the ISS -- is SRC's, on FRESH's clock (the instruments' times are on it).
     v[2] = vd["vehdyn"][2]
     vd["vehdyn"] = v
-    vd["targets"] = sd["targets"]
+    if sd["targets"]:
+        vd["targets"] = sd["targets"]
+    # (an ascent capture has no target: the base's, the boot's own, stays -- STS-81's Mir at its epoch)
     if prop_kg:
         v[IDX_PROP:IDX_PROP + 5] = list(prop_kg)
     if mass_kg:

@@ -52,13 +52,16 @@ def main():
                     help="an impulsive burn the coast carries over: GMT (seconds of the year), delta-V along the "
                          "velocity (ft/s, negative = retrograde), OMS propellant used (lb, half from each tank); "
                          "STS-81's OMS-8 (020:13:53:53.2, 42.7 ft/s) is one")
+    ap.add_argument("--base-phase", default="uplink", help="the fresh boot's capture the physics is put on (sts134r-<phase>): "
+                    "uplink for the return (fly_return --from ORBIT), ipl for a rendezvous start (fly_rndz134 --from UPLINK)")
+    ap.add_argument("--out-name", default="sts134r-ready", help="the capture written (sts134r-ipl for a rendezvous start)")
     ap.add_argument("--sim-props", action="store_true",
                     help="keep the simulation's own propellant and mass (STS-134's are the Mission Report's, below)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     os.environ["VEHDYN_COAST_JAN1"] = str(calendar.timegm((a.year, 1, 1, 0, 0, 0)))     # tools/vehdyn_coast.c's year
     boot = os.path.join(a.out, "boot")
-    if not os.path.isdir(os.path.join(boot, "sts134r-uplink")):
+    if not os.path.isdir(os.path.join(boot, "sts134r-" + a.base_phase)):
         env = dict(os.environ, YAGPC_VEHDYN_START_REL="%d,-1524,0,0,0,0,0,%.3f" % (a.norad, unix_of(a.utc)),
                    NSTS_NO_AUDIO="1", PYTHONUNBUFFERED="1")
         cmd = [sys.executable, "-u", os.path.join(HERE, "fly_rndz134.py"), "--logs", boot, "--tape", a.tape,
@@ -66,7 +69,7 @@ def main():
                "--port-base", str(a.port_base)] + (["--mission", a.mission] if a.mission else [])
         print("booting a fresh PASS at %s: %s" % (a.utc, " ".join(cmd)), flush=True)
         subprocess.run(cmd, env=env, check=True, stdout=open(os.path.join(a.out, "boot.out"), "w"), stderr=subprocess.STDOUT)
-    base = os.path.join(boot, "sts134r-uplink")
+    base = os.path.join(boot, "sts134r-" + a.base_phase)
     gmt_unix = json.load(open(os.path.join(base, "capture.json")))["gmtUnix"]
     src_v = json.load(open(os.path.join(a.sep3, "vehdyn.json")))["vehdyn"]
     src_unix = calendar.timegm((a.year, 1, 1, 0, 0, 0)) + src_v[126] - 86400.0
@@ -114,7 +117,7 @@ def main():
     mass0 = v[167] + sum(v[16:21])
     print("the simulation's own SEP3 tanks (lb) %s, mass %.0f kg -- NOT used; the report's: %s lb, %.0f kg"
           % ([round(x / LB_KG) for x in v[16:21]], mass0, prop_lb, mass))
-    out = os.path.join(a.out, "sts134r-ready")
+    out = os.path.join(a.out, a.out_name)
     if os.path.exists(out):
         shutil.rmtree(out)
     if a.sim_props:

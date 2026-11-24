@@ -184,7 +184,7 @@ def main():
     ap.add_argument("--out", default=FLIGHTS)
     ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
     ap.add_argument("--oms-assist-dt", type=float, default=0.0, help="ASSIST_OMS_DT, s: 0 = no OMS assist, as flown (the Missions Summary, pdf p. 127, makes STS-90 the first to use it); the tape's STS-134 value is 109")
-    ap.add_argument("--apogee-trim", type=float, default=-4.7, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
+    ap.add_argument("--apogee-trim", type=float, default=-11.3, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
     pl = iyd(inc, node)
