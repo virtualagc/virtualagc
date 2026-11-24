@@ -363,7 +363,7 @@ class Return(U.Undock):
     def __init__(self, a):
         # the arguments fly_sts134's own parser gives its phases and fly_rndz134's does not
         for k, v in (("g3_from_mm", False), ("abort", None), ("attach", False), ("incorporate_at_land", False),
-                     ("land_time", 900.0), ("gps_auto_at_land", False)):
+                     ("land_time", float(os.environ.get("RETURN_LAND_TIME", "900"))), ("gps_auto_at_land", False)):
             if not hasattr(a, k):
                 setattr(a, k, v)
         super().__init__(a)
@@ -397,8 +397,11 @@ def apply_mission_return(path):
         d, rest = t.split("/")
         h, mi, sec = (rest.split(":") + ["0", "0"])[:3]
         return int(d) * 86400.0 + int(h) * 3600 + int(mi) * 60 + float(sec)
-    args = ["--tff", str(m["tff"]), "--gamma-ei", str(m["gamma_ei"]), "--ei-gmt", "%.1f" % g(m["ei"]),
-            "--near-gmt", "%.1f" % g(m["landing"])]
+    args = ["--tff", str(m["tff"]), "--gamma-ei", str(m["gamma_ei"]), "--near-gmt", "%.1f" % g(m["landing"])]
+    if "ei" in m:
+        args += ["--ei-gmt", "%.1f" % g(m["ei"])]            # EI pinned to a time (STS-134's); else REI is the aim
+    if "rei" in m:
+        args += ["--rei", str(m["rei"])]
     if "runway_slot" in m:
         args += ["--runway", str(m["runway_slot"])]
     Return.DEORBIT_ARGS = args

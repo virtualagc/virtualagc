@@ -48,10 +48,15 @@ def main():
     ap.add_argument("--year", type=int, default=2011, help="the year of the flight (the vehicle's GMT counts days of it)")
     ap.add_argument("--norad", type=int, default=25544, help="the target's catalogue number (the boot's dummy START_REL)")
     ap.add_argument("--mission", help="a mission file for the fresh PASS's boot (fly_rndz134.py --mission): RNP, target, MET zero")
+    ap.add_argument("--burn", action="append", default=[], metavar="GMT,DV_FPS,PROP_LB",
+                    help="an impulsive burn the coast carries over: GMT (seconds of the year), delta-V along the "
+                         "velocity (ft/s, negative = retrograde), OMS propellant used (lb, half from each tank); "
+                         "STS-81's OMS-8 (020:13:53:53.2, 42.7 ft/s) is one")
     ap.add_argument("--sim-props", action="store_true",
                     help="keep the simulation's own propellant and mass (STS-134's are the Mission Report's, below)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
+    os.environ["VEHDYN_COAST_JAN1"] = str(calendar.timegm((a.year, 1, 1, 0, 0, 0)))     # tools/vehdyn_coast.c's year
     boot = os.path.join(a.out, "boot")
     if not os.path.isdir(os.path.join(boot, "sts134r-uplink")):
         env = dict(os.environ, YAGPC_VEHDYN_START_REL="%d,-1524,0,0,0,0,0,%.3f" % (a.norad, unix_of(a.utc)),
@@ -70,7 +75,27 @@ def main():
     coasted = os.path.join(a.out, "coasted")
     if os.path.exists(coasted):
         shutil.rmtree(coasted)
-    d = undock_coast.coast(a.sep3, secs, coasted, a.targets)
+    d = None
+    src, here = a.sep3, src_unix
+    for k, b in enumerate(sorted(a.burn, key=lambda x: float(x.split(",")[0]))):
+        gmt_b, dv_fps, prop_lb = (float(x) for x in b.split(","))
+        t_b = calendar.timegm((a.year, 1, 1, 0, 0, 0)) + gmt_b - 86400.0
+        part = os.path.join(a.out, "coasted-burn%d" % k)
+        if os.path.exists(part):
+            shutil.rmtree(part)
+        d = undock_coast.coast(src, t_b - here, part, a.targets)
+        v = d["vehdyn"]
+        sp = (v[6] ** 2 + v[7] ** 2 + v[8] ** 2) ** 0.5
+        dv = dv_fps * 0.3048
+        for i in range(3):
+            v[6 + i] += dv * v[6 + i] / sp            # along the velocity
+        kg = prop_lb * LB_KG / 2.0
+        v[19] -= kg
+        v[20] -= kg
+        json.dump(d, open(os.path.join(part, "vehdyn.json"), "w"), indent=2)
+        print("burn at GMT %.1f: %.1f ft/s along the velocity, %.0f lb of OMS propellant" % (gmt_b, dv_fps, prop_lb), flush=True)
+        src, here = part, t_b
+    d = undock_coast.coast(src, gmt_unix - here, coasted, a.targets)
     v = d["vehdyn"]
     # THE TANKS AND THE MASS ARE THE REPORT'S, not the simulation's residuals from the legs before it (owner,
     # 2026-10-18: the pre-ISS and post-ISS runs are independent, and runs differ from one another so that no
