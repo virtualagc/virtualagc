@@ -183,6 +183,7 @@ def main():
     ap.add_argument("--archive", default=os.path.expanduser("~/Desktop/Shuttle Stuff/S16609.txt"))
     ap.add_argument("--out", default=FLIGHTS)
     ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
+    ap.add_argument("--apogee-trim", type=float, default=-6.7, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
     pl = iyd(inc, node)
@@ -265,7 +266,7 @@ def main():
     rc["flight"] = "STS-81, Atlantis"
     vi = 25915.0
     gam = 0.5                    # the tape's flight-path angle: STS-81's MECO value not found
-    r_ft = meco_radius_for_apogee(159.9, vi, gam)
+    r_ft = meco_radius_for_apogee(159.9 + a.apogee_trim, vi, gam)
     alt = (r_ft - A_PASS_FT) / NM_FT
     rc["notes"] = ["STS-81 MECO targets: VI 25,915 ft/s (predicted; 25,922 flown, Missions Summary 2-98), the tape's flight-path angle 0.5 deg (STS-81's value NOT found), and the radius that makes the coast's apogee 159.9 nmi, the post OMS-2 apogee (OMS-2 at apogee raises the perigee): %.2f nmi above PASS's equatorial radius.  104%% throttle as STS-134 (K_CMD 104).  The rest as sts134-reconfig.json." % alt]
     for c in rc["cells"]:
