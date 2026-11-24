@@ -149,6 +149,7 @@ TI_TIG = "2011-05-18T07:38:00"            # STS-134's Ti, as flown (left OMS, ~8
 MET_ZERO_UNIX = calendar.timegm((2011, 5, 16, 12, 56, 27)) + 0.994
 NORAD_ISS = 25544
 RNP = (2011, 136)                          # the flight's RNP epoch, launch day
+TITLE_YEAR = 2011                          # the year this tape's CRT titles show whatever the date (an I-load/constant of PASS, not the clock): 2011 on STS-81 too (run rz1)
 ORBITER_KG = 121912                        # fly_sts134.FL; see the note in main()
 
 # What the ascent left the vehicle with.  The rendezvous model starts two days
@@ -2103,7 +2104,7 @@ wait crt 1 title {year}/ timeout 600
         four = getattr(self.a, "crts", 1) >= 4
         self.play(self.IPL_SCRIPT.format(panel=PANEL.replace(os.sep, "/"), idp4=self.IPL_IDP4 if four else "",
                                          idp4_early="" if four else "+0.1   idppower 4 on\n",
-                                         nbat_crt4=self.IPL_NBAT_CRT4 if four else "", year=RNP[0]), "ipl")
+                                         nbat_crt4=self.IPL_NBAT_CRT4 if four else "", year=TITLE_YEAR), "ipl")
         self.script_done("ipl", 1500)
         self.say("OPS 201, IMUs in OPERATE, DAP A/AUTO/VERN")
         self.wait_sim(10)
@@ -2312,7 +2313,7 @@ wait crt 1 title {year}/ timeout 600
         # the page is asked for and waited on: with RESUME alone the items
         # went to whatever was up (OMS MNVR EXEC, 2021) -- ILLEGAL ENTRY
         script = ("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title %d/ timeout 180\n" % RNP[0] +
+                  "wait crt 1 title %d/ timeout 180\n" % TITLE_YEAR +
                   "+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
@@ -2912,7 +2913,7 @@ wait crt 1 title {year}/ timeout 600
         whole coast, which [12A] does not, and whose translations move the
         truth itself."""
         self.play("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title %d/ timeout 180\n" % RNP[0] + self.TRACK_KEYS, name)
+                  "wait crt 1 title %d/ timeout 180\n" % TITLE_YEAR + self.TRACK_KEYS, name)
         self.script_done(name, 300)
         self.say("crew: OPS 201, -Z target track")
         self.track_complete(name + "-vern", limit)
