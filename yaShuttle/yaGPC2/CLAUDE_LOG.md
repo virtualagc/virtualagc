@@ -39,3 +39,6 @@ Staging area for documentation updates.  Append timestamped entries as
 ### [2026-11-23] Target: HANDOFF-MIR-STS81.md
 - STS-81 flew NO OMS assist (owner, from the Missions Summary pdf p. 127: STS-90 was the first use during ascent).  make_sts081_flight.py now defaults ASSIST_OMS_DT to 0 (run 4: OMS burned 43.2 s, OMS-2 only, vs 150.3 s with the tape's 109 s); the 6 s early ET sep does not come from it (run 4: 525.8 s MET vs 524.7 with the assist; flown 531), orbit after OMS-2 160.1 x 78.2 nmi, inc 51.687.
 - Rendezvous: fly_rndz134.py --mission examples/flights/sts081-rndz.json (epoch Ti-68 min, Ti 015:01:13:54, MET zero, RNP 1997/12, Mir target line, rndz_start.py --norad) flies IPL, UPLINK (Mir state, message 10) and RNDZNAV on the STS-134 rndz2 volume (no ascent overlays needed).  The CRT titles show 2011/ whatever the date (TITLE_YEAR).  Ti point and TGT sets are STS-134's, an assumption: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them.
+
+### [2026-11-23] Target: HANDOFF-MIR-STS81.md
+- STS-81 rendezvous on OI-34.07, rz2 (IPL -> POSTTI): Ti burn on Mir came out 10.00 ft/s, left OMS 12.40 s, residual VGO <0.2 ft/s; flown OMS-7 (Ti) 12.0 s, 9.5 ft/s.  Independent Lambert agrees with PASS's solution; T2 arrival X -900 Y 0 Z +1800 ft.  Star tracker and radar navigation phases ran on Mir's state (STRKNAV, RRNAV).  Next: MC1-MC4 and ARRIVAL (rz3).
