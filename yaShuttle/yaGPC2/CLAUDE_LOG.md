@@ -48,3 +48,11 @@ Staging area for documentation updates.  Append timestamped entries as
 
 ### [2026-11-24] Target: HANDOFF-MIR-STS81.md
 - Owner (2026-11-24): the launch times were mixed up; STS-117 is the better candidate for the middle phase (a real OI-30.17 mission between STS-81/OI-34.07 and STS-81/OI-30.17).  Its launch/landing times to be confirmed against the Missions Summary.  STS-116 (night launch) and STS-114 (night landing at Edwards 22) stay optional extras.
+
+### [2026-11-24] Target: RENDEZVOUS_PLAN.md
+- STS-81 rz4 (full re-fly IPL..HOLD, Mir target line with port 2.929 0.081 17.698 axis +Z, --mission sts081-rndz.json) completed: all phases through RBAR/RPM/TORVA/VBAR/HOLD ran; HOLD at 100 ft from Mir's port within 3 ft; manual-phase RCS 347/71/354/150/17 lb. Commit 016b4b97a (TITLE_YEAR edit).
+- dock_autopilot.py --from DOCK30 on that capture: 100 -> 30 ft along the port axis, lateral error rms 0.3 ft (no code change needed; geometry comes from the truth-reported port).
+- OPEN: PASS onboard range to Mir is ~10x the truth at HOLD (PASS 1.7 kft vs truth 170 ft; FLTR error +1.6 kft in LVLH x, growing) -- target-state/nav mismatch, not seen as a problem by the truth-driven manual phase; investigate (target state epoch/Mir vs PASS prop, RR/ST marks).
+
+### [2026-11-24] Target: RENDEZVOUS_PLAN.md
+- Owner plan note: STS-81 on OI-34.07 (phase 1) uses the post-2000 glass cockpit as is (MEDS + control panels, edgekeys included). The pre-2000 cockpit changes (MEDS2.py --mcds: no edgekey canvas area, green-on-black monochrome; F6/F8 physical instruments) apply only in the final phase, STS-81 on OI-30.17. Middle phase (STS-117 on OI-30.17) stays glass cockpit as flown.
