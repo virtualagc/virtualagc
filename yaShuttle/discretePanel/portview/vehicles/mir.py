@@ -16,10 +16,14 @@ The complex then (the layout unchanged since Priroda arrived in April
     and on Kvant-1's aft port Progress M-39 (docked 16 May 1998).
 
 Body frame: +X along the core's axis toward the forward node (Mir's own -X:
-Mir's +X points aft, toward Kvant-1); +Z Mir's +Z (toward Priroda; -Z,
-Kristall and the Docking Module, faced the Shuttle and the Earth when it
-docked from below); +Y = Mir's -Y (toward Spektr), so the frame stays
-right-handed.  Origin: the complex's centre of mass, from the module masses
+Mir's +X points aft, toward Kvant-1); +Z Mir's -Z (toward Kristall and the
+Docking Module, which faced the Shuttle and the Earth when it docked from
+below, so +Z is nadir in vehdyn's lvlh attitude: +X velocity, +Z nadir);
++Y = Mir's +Y (toward Spektr), so the frame stays right-handed.  (Until the
+STS-81 work this frame was the other way up -- the same model turned 180 deg
+about X -- which put the Docking Module on the zenith side under lvlh.)  The
+Docking Module's free APAS face, the Shuttle's port, is at (2.929, 0.081,
+17.698) m, axis +Z (HANDOFF-MIR-STS81.md).  Origin: the complex's centre of mass, from the module masses
 (NASA RP-1357, "Mir Hardware Heritage"; Soyuz TM and Progress M loaded
 masses) each at its hull's mid-length -- 4 m aft of the node's centre and
 a few tenths of a metre off the axis.
@@ -126,12 +130,14 @@ def build(kit):
     m = np.array([w for _, w, _ in MASSES], float)
     c = np.array([p for _, _, p in MASSES], float)
     com = (m[:, None] * c).sum(0) / m.sum()
-    parts = kit.transform_parts(a.parts(kit), np.eye(3), -com)
+    Rx = np.diag([1.0, -1.0, -1.0])      # 180 deg about X: the Docking Module on the +Z (nadir) side
+    parts = kit.transform_parts(a.parts(kit), Rx, Rx @ -com)
     return dict(meta=dict(
         name="Mir (STS-91, June 1998: Kvant-1, -2, Kristall with the Docking Module, Spektr, "
              "Priroda, Soyuz TM-27, Progress M-39)",
-        frame="Mir: +X along the core toward the forward node (Mir -X), +Z toward Priroda "
-              "(Mir +Z), +Y toward Spektr (Mir -Y); m; centre of mass",
+        frame="Mir: +X along the core toward the forward node (Mir -X), +Z toward Kristall and "
+              "the Docking Module (Mir -Z; nadir when docked from below), +Y toward Spektr (Mir +Y); "
+              "m; centre of mass; the Docking Module's port face (2.929, 0.081, 17.698), axis +Z",
         source="portview/vehicles/mir.py: shapes to published dimensions (NASA RP-1357 Mir Hardware "
                "Heritage, NASA TM-107502, NASA Mir Mission Chronicle) and STS-71..91 photographs",
         norad=16609, mag_1000km=-0.8, mass_kg=float(m.sum()),

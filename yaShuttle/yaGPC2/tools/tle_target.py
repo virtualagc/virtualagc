@@ -41,7 +41,7 @@ def main():
     ap.add_argument("--attitude", choices=("lvlh", "inertial"), default="lvlh",
                     help="lvlh: +X along the velocity, +Z nadir (the ISS's); inertial: held "
                          "as identity -- edit the line for another")
-    ap.add_argument("--port", help="X,Y,Z: a docking port's face in the vehicle's body, m (axis +X)")
+    ap.add_argument("--port", help="X,Y,Z: a docking port's face in the vehicle's body, m (axis +X); or X,Y,Z,AX,AY,AZ,UX,UY,UZ with the axis out of it and the direction the Orbiter's +X points when mated (vehdyn.c reads the nine)")
     args = ap.parse_args()
     port = ""
     if args.port:
@@ -49,9 +49,9 @@ def main():
             xyz = [float(x) for x in args.port.split(",")]
         except ValueError:
             xyz = []
-        if len(xyz) != 3:
-            sys.exit("tle_target: --port wants X,Y,Z in metres")
-        port = " port %g %g %g" % tuple(xyz)
+        if len(xyz) not in (3, 9):
+            sys.exit("tle_target: --port wants X,Y,Z in metres, or those and the axis and up vectors")
+        port = " port" + " %g" * len(xyz) % tuple(xyz)
     try:
         from skyfield.api import EarthSatellite, load
     except ImportError:
