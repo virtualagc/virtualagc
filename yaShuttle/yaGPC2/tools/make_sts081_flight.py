@@ -183,7 +183,7 @@ def main():
     ap.add_argument("--archive", default=os.path.expanduser("~/Desktop/Shuttle Stuff/S16609.txt"))
     ap.add_argument("--out", default=FLIGHTS)
     ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
-    ap.add_argument("--oms-assist-dt", type=float, default=109.0, help="ASSIST_OMS_DT, s: the tape's (STS-134) value; STS-81's use of the OMS assist is not established")
+    ap.add_argument("--oms-assist-dt", type=float, default=0.0, help="ASSIST_OMS_DT, s: 0 = no OMS assist, as flown (the Missions Summary, pdf p. 127, makes STS-90 the first to use it); the tape's STS-134 value is 109")
     ap.add_argument("--apogee-trim", type=float, default=-6.7, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
@@ -231,7 +231,7 @@ def main():
                     f["note"] = "STS-81: orbiter %.0f lb at SRB ignition (Missions Summary A-6); the tape's value moved with it" % a.orbiter_lb
                 elif n == "ASSIST_OMS_DT":
                     f["E"] = a.oms_assist_dt
-                    f["note"] = "the tape's: STS-81's OMS assist time not found"
+                    f["note"] = "STS-81 flew no OMS assist (Missions Summary, pdf p. 127: STS-90 the first); the tape's is 109 s"
     # the air: Cape Canaveral's 74794 is not in the Wyoming archive for 1997, so the nearest east-coast balloon, Jacksonville
     # (72206, 30.5 N, 81.7 W): PASS's wind table from the last one before liftoff (1997-01-11 23:04Z), the truth's air the
     # 23:04Z and 11:03Z profiles blended to 09:27Z
