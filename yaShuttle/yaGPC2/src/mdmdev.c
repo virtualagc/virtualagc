@@ -971,6 +971,7 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t now = (op == CREW_OP_SET) ? (uint16_t)(was | w)
                      : (op == CREW_OP_RESET) ? (uint16_t)(was & ~w) : w;
         crewIn[k][card][c] = now;
+        if (k >= 1 && k <= 3 && card == 9u && c == 2u) landaids_tacan_gpc(k, (now & 0x0001u) != 0);  /* O7 TACAN MODE: GPC */
         if (crewTrace && now != was)
             fprintf(stderr, "mdmdev: %s%d card %u ch %u crew contacts %04x -> %04x\n",
                     k <= CREW_NFF ? "FF" : "FA", (k - 1) % CREW_NFF + 1, card, c, was, now);

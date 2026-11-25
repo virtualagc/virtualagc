@@ -252,23 +252,50 @@ static double ellipsoid_height_ft(const double r[3]) {
  *   bearing  the MAGNETIC bearing from the vehicle TO the station,
  *            atan2(E, N) of the vehicle about the station + 180 deg - the
  *            table's east-positive variation (GNBTAC.hal:252-257).
- * WHEN IT LOCKS: the unit is tuned (the control register's channel and mode
- * are a station of the file), at most TACAN_MAX_NMI (400, LEC-13790 p.12) and
- * inside the radio horizon, 1.23 (sqrt h_veh + sqrt h_stn) n.mi. (heights in
- * ft), below TACAN_LOCK_ALT_FT (default 150,000 ft: the planned acquisition
- * altitude is ~148.5 kft in LEC-13790, STS-2 locked at Mach 9.6 / 157.6 kft,
- * STS 41-B at ~130 kft; the plasma blackout is not modelled, so this is its
- * end), and TACAN_ACQ_S (default 10 s, the antenna search; PASS itself toggles
- * antennas after 11 s, GYTTAC.hal:216-222) after those hold.  Noise is white:
- * bearing TACAN_BRG_SIGMA_DEG (0.3; spec 1.0 deg) and range TACAN_RNG_SIGMA_NMI
+ * WHEN IT LOCKS: the unit is in GPC mode (O7's rotary contact, DSCRT8 0x0001 --
+ * with the rotary OFF, RCV or T/R, which the one contact cannot tell apart, the
+ * unit reads unpowered; with no panel running it is taken as in GPC), tuned
+ * (the control register's channel and mode are a station of the file), at most
+ * TACAN_MAX_NMI (400, LEC-13790 p.12) and inside the radio horizon,
+ * 1.23 (sqrt h_veh + sqrt h_stn) n.mi. (heights in ft), out of the entry
+ * plasma blackout -- not before the air-relative Mach is below
+ * YAGPC_TACAN_LOCK_MACH (default 9.6, STS-2's lock, read from its reports on
+ * 2026-10-30; STS 41-B locked at ~130 kft or Mach 6, the two accounts differ) --
+ * with the station in the SELECTED antenna's hemisphere (PASS's antenna word,
+ * DSCWD2 bit 0x0400: clear is the lower, belly, antenna, set the upper; the
+ * lower sees body +Z, the upper -Z, to 10 deg past the plane; the antennas sit
+ * YAGPC_TACAN_ANT_LOWER / _UPPER body metres from the nav base, defaults
+ * (6.0, 0, 2.5) and (-2.0, 0, -4.0): ASSUMPTIONS), and TACAN_ACQ_S (default 10 s,
+ * the search; PASS itself toggles antennas after 11 s without a range lock,
+ * GYTTAC.hal:216-222) after those hold.  Noise is white: bearing
+ * TACAN_BRG_SIGMA_DEG (0.3; the spec is 1.0 deg) and range TACAN_RNG_SIGMA_NMI
  * (0.03; spec 0.1) -- ASSUMPTIONS, as is a fixed per-unit bearing bias
- * (TACAN_BRG_BIAS_DEG, 0.5 deg, signs 0, +1, -1 by unit); flights saw a
- * station bias of about 2 deg and 40 deg bearing glitches (AE_009M, AE_013M),
- * which PASS's RM is built for.  Never locked before TIME of the first
- * tuned read: a unit not yet commanded reads powered with no data.
+ * (TACAN_BRG_BIAS_DEG, 0.5 deg, signs 0, +1, -1 by unit).  THE CONE OF
+ * SILENCE: with the station above 45 deg elevation the bearing's noise is ten
+ * times larger, above 70 deg the bearing reads no data (the range stays); the
+ * limits are assumptions (PASS drops the bearing itself at 35 deg).  THE 40 DEG
+ * GLITCH (TD101 p.1-26; PASS's RM drops "near-multiples of 40 deg"): a unit's
+ * bearing is, now and then, off by +/-40 deg for 5-30 s, at a rate of
+ * YAGPC_TACAN_GLITCH_PER_S (default 1/900 per unit while locked); flights saw
+ * a station bias of ~2 deg and 40 deg glitches (AE_009M, AE_013M).  Never
+ * locked before the unit's first command: a unit not yet commanded reads
+ * powered with no data.
  * The model is OFF (the words read as before, TACAN power off) unless the
  * navaids file has a tacan line: OV-105 (STS-134) had no TACAN. */
-static struct { uint16_t ctrl, ant; int have; double tTuned, tLock; } tun[4];
+static struct { uint16_t ctrl, ant; int have; double tTuned, tLock, tLast, gEnd, gSign; } tun[4];
+static int gpcMode[4] = { -1, -1, -1, -1 };      /* O7 rotary: 1 GPC, 0 not, -1 no panel heard: GPC */
+
+/* a 40 degree glitch on demand (the tests; and a script that wants one at a chosen time): this unit's bearing is off
+ * by deg until the vehicle time `until` */
+void landaids_tacan_glitch(int unit, double deg, double until) {
+    if (unit < 1 || unit > 3) return;
+    tun[unit].gSign = deg;
+    tun[unit].gEnd = until;
+}
+
+void landaids_tacan_gpc(int unit, int gpc) {
+    if (unit >= 1 && unit <= 3) gpcMode[unit] = gpc ? 1 : 0;
+}
 
 void landaids_tacan_command(int unit, uint16_t ctrl, uint16_t ant) {
     if (unit < 1 || unit > 3) return;
@@ -306,38 +333,79 @@ static double envd(const char *n, double dflt) {
 #define TACAN_MAX_NMI 400.0
 #define NMI_FT 6076.1155
 
-/* the measurement for a unit; 1 when locked (range and bearing set) */
-static int tacan_measure(int unit, const double r[3], const double v[3], double *rng_nmi, double *brg_deg) {
+/* the measurement for a unit: 1 when locked (range and bearing set; *brg_ok 0: the bearing reads no data) */
+static int tacan_measure(int unit, const double r[3], const double v[3], const double C[3][3], double *rng_nmi,
+                         double *brg_deg, int *brg_ok) {
     Tacan *st = NULL;
     uint16_t cw = tun[unit].ctrl & 0x21FEu;
     for (int k = 0; k < nTac; k++)
         if (tac[k].slot && channel_word(tac[k].channel, tac[k].y) == cw) { st = &tac[k]; break; }
     if (st == NULL) return 0;
+    double t = vehdyn_enabled() ? vehdyn_state()->t : 0.0;
     double rb[3], d[3], R, h_veh;
     for (int i = 0; i < 3; i++) rb[i] = r[i] - v[i] * 0.029;       /* the 29 ms PASS takes back */
-    for (int i = 0; i < 3; i++) d[i] = rb[i] - st->ef[i];
+    /* the selected antenna's place: PASS's antenna word, bit 0x0400 clear = lower (belly), set = upper */
+    int upper = (tun[unit].ant & 0x0400u) != 0;
+    double off[3] = { upper ? -2.0 : 6.0, 0.0, upper ? -4.0 : 2.5 };
+    {
+        const char *e = yagpc_getenv(upper ? "YAGPC_TACAN_ANT_UPPER" : "YAGPC_TACAN_ANT_LOWER");
+        if (e != NULL) sscanf(e, "%lf,%lf,%lf", &off[0], &off[1], &off[2]);
+    }
+    double ant[3];
+    for (int i = 0; i < 3; i++) ant[i] = rb[i] + (C[i][0] * off[0] + C[i][1] * off[1] + C[i][2] * off[2]) / FT_M * FT_M;
+    for (int i = 0; i < 3; i++) d[i] = ant[i] - st->ef[i];
     R = sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-    double rn = sqrt(rb[0] * rb[0] + rb[1] * rb[1] + rb[2] * rb[2]);
-    (void)rn;
     h_veh = ellipsoid_height_ft(rb);
     double nmi = R / NMI_FT;
-    if (nmi > TACAN_MAX_NMI) return 0;
+    tun[unit].tLast = t;
+    if (nmi > TACAN_MAX_NMI) { tun[unit].tLock = -1.0; return 0; }
     double hv = h_veh > 0 ? h_veh : 0, hs = st->alt > 0 ? st->alt : 0;
-    if (nmi > 1.23 * (sqrt(hv) + sqrt(hs))) return 0;                 /* beyond the radio horizon */
-    if (h_veh > envd("YAGPC_TACAN_LOCK_ALT_FT", 150000.0)) return 0;
-    double t = vehdyn_enabled() ? vehdyn_state()->t : 0.0;
+    if (nmi > 1.23 * (sqrt(hv) + sqrt(hs))) { tun[unit].tLock = -1.0; return 0; }    /* beyond the radio horizon */
+    if (h_veh > envd("YAGPC_TACAN_LOCK_ALT_FT", 1.0e9)) { tun[unit].tLock = -1.0; return 0; }
+    {   /* the plasma blackout ends at the lock Mach; on orbit (Mach in the 20s) there is none to lock through */
+        double ap, am;
+        vehdyn_air_data(&ap, &am, NULL, NULL, NULL);
+        if (am > envd("YAGPC_TACAN_LOCK_MACH", 9.6)) { tun[unit].tLock = -1.0; return 0; }
+    }
+    /* the station in the antenna's hemisphere: the direction from the vehicle in the body frame, +Z the belly */
+    double dv[3] = { -d[0], -d[1], -d[2] }, bz = 0.0;
+    for (int i = 0; i < 3; i++) bz += C[i][2] * dv[i];
+    bz /= R;
+    if (upper ? bz > 0.17 : bz < -0.17) { tun[unit].tLock = -1.0; return 0; }
     if (tun[unit].tLock < 0.0) tun[unit].tLock = t;                    /* the conditions now hold: the search starts */
     if (t - tun[unit].tLock < envd("YAGPC_TACAN_ACQ_S", 10.0)) return 0;
     double n_ = st->M[0][0] * d[0] + st->M[0][1] * d[1] + st->M[0][2] * d[2];
     double e_ = st->M[1][0] * d[0] + st->M[1][1] * d[1] + st->M[1][2] * d[2];
+    double u_ = -(st->M[2][0] * d[0] + st->M[2][1] * d[1] + st->M[2][2] * d[2]);
+    double elev = atan2(u_, sqrt(n_ * n_ + e_ * e_)) * 180.0 / LA_PI;      /* the vehicle's elevation at the station */
     double q = atan2(e_, n_) - st->magvar + LA_PI;
     q = fmod(q, 2.0 * LA_PI); if (q < 0.0) q += 2.0 * LA_PI;
     static unsigned seed[4] = { 0, 12345u, 67890u, 24680u };
     double bias = (unit == 2 ? 1.0 : unit == 3 ? -1.0 : 0.0) * envd("YAGPC_TACAN_BRG_BIAS_DEG", 0.5);
-    *brg_deg = q * 180.0 / LA_PI + bias + gauss(&seed[unit]) * envd("YAGPC_TACAN_BRG_SIGMA_DEG", 0.3);
+    double sig = envd("YAGPC_TACAN_BRG_SIGMA_DEG", 0.3) * (elev > 45.0 ? 10.0 : 1.0);
+    /* the 40 degree glitch: a Poisson event, then +/-40 deg until its end */
+    {
+        double dt = tun[unit].tLast - t;                               /* 0: the clock has not moved since the last call */
+        (void)dt;
+        double rate = envd("YAGPC_TACAN_GLITCH_PER_S", 1.0 / 900.0);
+        static double lastT[4] = { -1, -1, -1, -1 };
+        double step = lastT[unit] < 0.0 ? 0.0 : t - lastT[unit];
+        lastT[unit] = t;
+        seed[unit] = seed[unit] * 1664525u + 1013904223u;
+        double u = ((seed[unit] >> 8) + 0.5) / 16777216.0;
+        if (t >= tun[unit].gEnd && step > 0.0 && step < 30.0 && u < rate * step) {
+            seed[unit] = seed[unit] * 1664525u + 1013904223u;
+            double u2 = ((seed[unit] >> 8) + 0.5) / 16777216.0;
+            tun[unit].gEnd = t + 5.0 + 25.0 * u2;
+            tun[unit].gSign = (seed[unit] & 0x100u) ? 40.0 : -40.0;
+        }
+    }
+    double glitch = (t < tun[unit].gEnd) ? tun[unit].gSign : 0.0;
+    *brg_deg = q * 180.0 / LA_PI + bias + glitch + gauss(&seed[unit]) * sig;
     *rng_nmi = nmi + gauss(&seed[unit]) * envd("YAGPC_TACAN_RNG_SIGMA_NMI", 0.03);
     if (*rng_nmi < 0.0) *rng_nmi = 0.0;
-    *brg_deg = fmod(*brg_deg + 360.0, 360.0);
+    *brg_deg = fmod(*brg_deg + 720.0, 360.0);
+    *brg_ok = elev <= 70.0;
     return 1;
 }
 
@@ -354,15 +422,16 @@ void landaids_tacan_ra(int unit, uint16_t w[7]) {
     double rM[3], vM[3], C[3][3], r[3], vf[3];
     vehdyn_navbase_ef(rM, vM, C);
     for (int i = 0; i < 3; i++) { r[i] = rM[i] / FT_M; vf[i] = vM[i] / FT_M; }
-    if (nTac > 0) {                                        /* the TACAN: powered, tuned by the GPC's command */
+    if (nTac > 0 && gpcMode[unit] != 0) {                  /* the TACAN: in GPC mode, powered, tuned by the GPC's command */
         w[5] |= 0x5000u;                                   /* power on, test status good */
         w[6] = tun[unit].have ? tun[unit].ctrl : 0u;
         w[0] = 0x4000u; w[1] = 0x0001u; w[2] = 0x8000u; w[3] = 0x0089u;      /* no data, until locked */
         double rng, brg;
-        if (tun[unit].have && tacan_measure(unit, r, vf, &rng, &brg)) {
+        int bok = 1;
+        if (tun[unit].have && tacan_measure(unit, r, vf, C, &rng, &brg, &bok)) {
             long tb = lround(brg / (90.0 / 2048.0));
             if (tb > 8191) tb -= 8192;
-            w[0] = (uint16_t)((tb >= 4096 ? 0x6000u : 0u) | (((unsigned)tb & 0xFFFu) << 1));
+            if (bok) w[0] = (uint16_t)((tb >= 4096 ? 0x6000u : 0u) | (((unsigned)tb & 0xFFFu) << 1));
             long h = lround(rng * 100.0);
             if (h > 39999) h = 39999;
             w[2] = (uint16_t)((((h / 10000) % 10) << 12) | (((h / 1000) % 10) << 8) | (((h / 100) % 10) << 4) | ((h / 10) % 10));

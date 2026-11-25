@@ -38,6 +38,7 @@ int main(void) {
     setenv("YAGPC_VEHDYN", "1", 1);
     setenv("YAGPC_NAVAIDS", "tools/sites/ksc-navaids-tacan.txt", 1);   /* the same runways and MLS, plus TTS and COF */
     setenv("YAGPC_TACAN_ACQ_S", "0", 1);
+    setenv("YAGPC_TACAN_GLITCH_PER_S", "0", 1);
     setenv("YAGPC_TACAN_BRG_SIGMA_DEG", "0", 1);
     setenv("YAGPC_TACAN_RNG_SIGMA_NMI", "0", 1);
     setenv("YAGPC_TACAN_BRG_BIAS_DEG", "0", 1);
@@ -175,6 +176,54 @@ int main(void) {
         vehdyn_set_rv(rr, vv);
         landaids_tacan_ra(2, t);
         check(t[0] == 0x4000 && t[2] == 0x8000, "past 400 n.mi. the TACAN reads no data", t[2], 0x8000);
+        /* back to the 250 n.mi. point (rr was the 450 n.mi. one) */
+        for (int i = 0; i < 3; i++) rr[i] = (Me[0][i] * vEf[0] + Me[1][i] * vEf[1] + Me[2][i] * vEf[2]) * FT;
+        vehdyn_set_rv(rr, vv);
+        landaids_tacan_ra(1, t);
+        check((t[2] & 0xC000) == 0, "locked again at 250 n.mi.", t[2], 0);
+        /* the O7 rotary out of GPC: the unit reads unpowered (PASS then skips it) */
+        landaids_tacan_command(1, 0x8800 | 0x2134, 0);
+        landaids_tacan_gpc(1, 0);
+        landaids_tacan_ra(1, t);
+        check((t[5] & 0x4000u) == 0 && t[2] == 0 && t[0] == 0, "rotary not in GPC: TACAN unpowered, no words", t[5], 0);
+        landaids_tacan_gpc(1, 1);
+        /* the plasma blackout: past Mach 9.6 no lock */
+        {
+            double vh[3] = { vv[0] + 3100.0, vv[1], vv[2] };
+            vehdyn_set_rv(rr, vh);
+            landaids_tacan_ra(1, t);
+            check(t[0] == 0x4000 && t[2] == 0x8000, "in the blackout (Mach > 9.6) no data", t[2], 0x8000);
+            vehdyn_set_rv(rr, vv);
+            landaids_tacan_ra(1, t);
+            check((t[2] & 0xC000) == 0, "and locked again at rest", t[2], 0);
+            vehdyn_set_rv(rr, vv);
+        }
+        /* straight over the station: the cone of silence -- range valid, bearing no data */
+        {
+            double ov[3], ovr[3];
+            geo_ef(slat, slon, 60000.0, ov);
+            for (int i = 0; i < 3; i++) ovr[i] = (Me[0][i] * ov[0] + Me[1][i] * ov[1] + Me[2][i] * ov[2]) * FT;
+            vehdyn_set_rv(ovr, vv);
+            landaids_tacan_ra(1, t);
+            check((t[2] & 0xC000) == 0 && t[0] == 0x4000, "over the station: range valid, bearing no data", t[0], 0x4000);
+        }
+        /* the 40 degree glitch, forced: the unit's bearing moves by +40 deg until its end */
+        {
+            vehdyn_set_rv(rr, vv);
+            landaids_tacan_command(2, 0x8800 | 0x2134, 0);
+            landaids_tacan_ra(2, t);
+            int st0 = (t[0] >> 13) & 3;
+            double b0 = (((t[0] >> 1) & 0xFFF) + (st0 == 3 ? 4096 : 0)) * 90.0 / 2048.0;
+            landaids_tacan_glitch(2, 40.0, 1.0e9);
+            landaids_tacan_ra(2, t);
+            int sk = (t[0] >> 13) & 3;
+            double bk = (((t[0] >> 1) & 0xFFF) + (sk == 3 ? 4096 : 0)) * 90.0 / 2048.0;
+            double dd = fmod(bk - b0 + 540.0, 360.0) - 180.0;
+            check(fabs(dd - 40.0) < 1.0, "a forced glitch moves the bearing by 40 deg", dd, 40.0);
+            landaids_tacan_glitch(2, 0.0, 0.0);
+            vehdyn_reset(0.0);                                     /* the clock ran: start the approach again */
+            vehdyn_set_attitude(q, w0);
+        }
         vehdyn_set_rv(r, v);                                       /* back to the approach, for the ADTAs below */
     }
 
