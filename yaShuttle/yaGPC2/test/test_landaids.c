@@ -36,7 +36,11 @@ static void geo_ef(double lat, double lon, double alt, double r[3]) {
 
 int main(void) {
     setenv("YAGPC_VEHDYN", "1", 1);
-    setenv("YAGPC_NAVAIDS", "tools/sites/ksc-navaids.txt", 1);
+    setenv("YAGPC_NAVAIDS", "tools/sites/ksc-navaids-tacan.txt", 1);   /* the same runways and MLS, plus TTS and COF */
+    setenv("YAGPC_TACAN_ACQ_S", "0", 1);
+    setenv("YAGPC_TACAN_BRG_SIGMA_DEG", "0", 1);
+    setenv("YAGPC_TACAN_RNG_SIGMA_NMI", "0", 1);
+    setenv("YAGPC_TACAN_BRG_BIAS_DEG", "0", 1);
     /* KSC 15's threshold and landing azimuth, as the navaids file has them */
     double lat0 = 0.49973583221435547, lon0 = -1.4085865020751953, az = 2.6178817749023438;
     double alt0 = 8.3, back = 30380.0, hgt = 1500.0;   /* 5 n.mi. short, 1500 ft up */
@@ -109,6 +113,70 @@ int main(void) {
     vehdyn_set_rv(far, v);
     landaids_mls(1, w);
     check(w[0] == 1 && w[1] == 1 && w[2] == 1, "out of coverage the words read invalid", w[0], 1);
+
+
+    /* THE TACAN: 250 n.mi. due east of TTS (59Y, 28-37-34.2N 80-41-45.0W, variation 0) at 100,000 ft, tuned the way
+     * PASS tunes it (control word 0x8800 | 0x2134).  The words decode, as PASS decodes them (GYTTAC.hal:110-184), to
+     * the magnetic bearing to the station (270 deg) and the range the test's own geometry gives; an untuned unit and a
+     * point past 400 n.mi. read no data; COF (97X) is a different station. */
+    {
+        double slat = 0.49962085485458374, slon = -1.4084081649780273, salt = 57.0;
+        double A = 20925646.3255, f_ = 1.0 / 298.3, e2_ = f_ * (2 - f_), sn = sin(slat);
+        double Nr = A / sqrt(1 - e2_ * sn * sn);
+        double vlat = slat, vlon = slon + 250.0 * 6076.1155 / (Nr * cos(slat)), vh = 100000.0;
+        double sEf[3], vEf[3], rr[3], vv[3];
+        geo_ef(slat, slon, salt, sEf);
+        geo_ef(vlat, vlon, vh, vEf);
+        double we_ = phys_earth_rate(), pl[3];
+        phys_earth_pole(pl);
+        for (int i = 0; i < 3; i++) rr[i] = (Me[0][i] * vEf[0] + Me[1][i] * vEf[1] + Me[2][i] * vEf[2]) * FT;
+        vv[0] = we_ * (pl[1] * rr[2] - pl[2] * rr[1]);
+        vv[1] = we_ * (pl[2] * rr[0] - pl[0] * rr[2]);
+        vv[2] = we_ * (pl[0] * rr[1] - pl[1] * rr[0]);
+        vehdyn_set_rv(rr, vv);
+        uint16_t t[7];
+        landaids_tacan_ra(1, t);
+        check(t[0] == 0x4000 && t[2] == 0x8000, "an untuned TACAN reads no data", t[0], 0x4000);
+        check((t[5] & 0x4000u) && (t[5] & 0x1000u), "TACAN power and test status in word 6", t[5], 0x5000);
+        landaids_tacan_command(1, 0x8800 | 0x2134, 0);
+        landaids_tacan_ra(1, t);
+        check((t[6] & 0x21FE) == 0x2134, "word 7 reads back the channel (59Y = 0x2134)", t[6] & 0x21FE, 0x2134);
+        int bst = (t[0] >> 13) & 3;
+        check(bst == 0 || bst == 3, "bearing status valid", bst, 0);
+        double bear = (((t[0] >> 1) & 0xFFF) + (bst == 3 ? 4096 : 0)) * 90.0 / 2048.0;
+        double dd[3], nn_ = 0, ee_ = 0;
+        double cs = cos(slat), ss = sin(slat), co_ = cos(slon), so_ = sin(slon);
+        for (int i = 0; i < 3; i++) dd[i] = vEf[i] - sEf[i];
+        nn_ = -ss * co_ * dd[0] - ss * so_ * dd[1] + cs * dd[2];
+        ee_ = -so_ * dd[0] + co_ * dd[1];
+        double bwant = fmod(atan2(ee_, nn_) * 180.0 / PI + 180.0 + 360.0, 360.0);
+        check(fabs(bear - bwant) < 0.1, "magnetic bearing to TTS (variation 0)", bear, bwant);
+        check((t[2] & 0xC000) == 0, "range status valid", t[2], 0);
+        double rn = ((t[2] >> 12) & 3) * 100 + ((t[2] >> 8) & 15) * 10 + ((t[2] >> 4) & 15) + (t[2] & 15) * 0.1 + ((t[3] >> 12) & 15) * 0.01;
+        double d[3];
+        for (int i = 0; i < 3; i++) d[i] = vEf[i] - sEf[i];
+        double want = sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) / 6076.1155;
+        check(fabs(rn - want) < 0.15, "range to TTS, n.mi.", rn, want);   /* 29 ms of the Earth's rotation: ~0.03 */
+        check((t[3] & 0xFF) == 0x89 && t[1] == 1, "range B label and bearing B", t[3], 0x89);
+        landaids_tacan_ra(3, t);                                   /* unit 3 is untuned */
+        check(t[0] == 0x4000 && t[2] == 0x8000, "unit 3, never commanded, reads no data", t[0], 0x4000);
+        landaids_tacan_command(3, 0x8800 | 0x01D2, 0);             /* COF 97X, about 26 n.mi. farther south */
+        landaids_tacan_ra(3, t);
+        double rn3 = ((t[2] >> 12) & 3) * 100 + ((t[2] >> 8) & 15) * 10 + ((t[2] >> 4) & 15) + (t[2] & 15) * 0.1 + ((t[3] >> 12) & 15) * 0.01;
+        double cEf[3];
+        geo_ef(0.49284052848815918, -1.4069404602050781, 5.0, cEf);
+        for (int i = 0; i < 3; i++) dd[i] = vEf[i] - cEf[i];
+        double cwant = sqrt(dd[0] * dd[0] + dd[1] * dd[1] + dd[2] * dd[2]) / 6076.1155;
+        check((t[2] & 0xC000) == 0 && fabs(rn3 - cwant) < 0.15 && fabs(cwant - rn) > 1.0, "COF is a different station", rn3, cwant);
+        landaids_tacan_command(2, 0x8800 | 0x2134, 0);
+        double far2[3];
+        geo_ef(vlat, slon + 450.0 * 6076.1155 / (Nr * cos(slat)), 100000.0, far2);
+        for (int i = 0; i < 3; i++) rr[i] = (Me[0][i] * far2[0] + Me[1][i] * far2[1] + Me[2][i] * far2[2]) * FT;
+        vehdyn_set_rv(rr, vv);
+        landaids_tacan_ra(2, t);
+        check(t[0] == 0x4000 && t[2] == 0x8000, "past 400 n.mi. the TACAN reads no data", t[2], 0x8000);
+        vehdyn_set_rv(r, v);                                       /* back to the approach, for the ADTAs below */
+    }
 
     /* THE ADTAs: PASS's own arithmetic (GYEADT.hal, written out again here
      * from the HAL, not from adtaair.c) turns the words back into the
