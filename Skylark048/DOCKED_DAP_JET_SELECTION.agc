@@ -13,6 +13,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-02-18 MAS  Created.
 ##		2024-03-04 MAS  Finished filling out.
+##		2026-11-24 MAS  Added missing "GOODC" label, and corrected
+##				MINUSCOMP to MNUSCOMP.
 
 ## This log section is entirely new in Skylark. Comments have been adapted
 ## from Artemis 72 or Luminary 210, where appropriate. Likewise, names
@@ -162,7 +164,7 @@ FORCE		INDEX	SPNDX
 		EXTEND
 		BZF	BADC
 
-		INDEX	SPNDX
+GOODC		INDEX	SPNDX
 		TS	61PW
 
 		INDEX	DPNDX
@@ -455,7 +457,7 @@ ROLLMATH	CCS	SPNDX
 		CCS	TRCOMPAC
 		TCF	PLUSCOMP
 		TCF	ROLLOUT
-		TCF	MINUSCOMP
+		TCF	MNUSCOMP
 		TCF	ROLLOUT
 
 PLUSCOMP	CA	TAU
@@ -469,7 +471,7 @@ PLUSCOMP	CA	TAU
 		BZMF	UPDATTAU
 		TCF	ZEROTAU
 
-MINUSCOMP	CA	TAU
+MNUSCOMP	CA	TAU
 		EXTEND
 		BZMF	ROLLOUT
 

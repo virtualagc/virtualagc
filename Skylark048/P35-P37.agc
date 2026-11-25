@@ -13,6 +13,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2023-09-04 MAS  Created from Artemis 072.
 ##		2024-03-05 MAS  Updated for Skylark 48.
+##		2026-11-24 MAS  Renamed 130DEG to CENTANG, per Programmed Guidance
+##				Equations for Skylark.
 
 
 ## This log section is derived from Artemis's P34-P35, P74-P75.
@@ -273,7 +275,7 @@ P34/P74E	TC	INTPRET
 			P34/P74C
 P34/74E		SETPD	DLOAD
 			0D
-			130DEG
+			CENTANG
 		PUSH	COS
 		STODL	CSTH
 		SIN
@@ -346,7 +348,7 @@ NOWRT35		CALL
 			VN1645
 		GOTO
 			P34/P74C
-130DEG		OCT	13434		# 13  DEG - CENTANG
+CENTANG		OCT	13434		# 130 DEG
 		OCT	16163
 
 # RENDEZVOUS MID-COURSE MANEUVER PROGRAMS (P35 AND P75)
