@@ -55,6 +55,7 @@ def main():
     ap.add_argument("--base-phase", default="uplink", help="the fresh boot's capture the physics is put on (sts134r-<phase>): "
                     "uplink for the return (fly_return --from ORBIT), ipl for a rendezvous start (fly_rndz134 --from UPLINK)")
     ap.add_argument("--out-name", default="sts134r-ready", help="the capture written (sts134r-ipl for a rendezvous start)")
+    ap.add_argument("--mass-kg", type=float, help="with --sim-props: the total mass (kg) at the end of the coast, the tanks as carried")
     ap.add_argument("--sim-props", action="store_true",
                     help="keep the simulation's own propellant and mass (STS-134's are the Mission Report's, below)")
     a = ap.parse_args()
@@ -121,7 +122,7 @@ def main():
     if os.path.exists(out):
         shutil.rmtree(out)
     if a.sim_props:
-        rec = orbit_overlay.overlay(coasted, out, base)
+        rec = orbit_overlay.overlay(coasted, out, base, mass_kg=a.mass_kg)
     else:
         rec = orbit_overlay.overlay(coasted, out, base, mass_kg=mass, prop_kg=prop_kg)
     print(json.dumps(rec))
