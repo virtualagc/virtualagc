@@ -262,7 +262,7 @@ def main():
               "epoch": CLOCK_START.strftime("%Y-%m-%dT%H:%M:%S"), "t0": t0, "gmtlo": [12, 9, 27, 20.0],
               "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9,
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
-              "env": {"YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
+              "env": {"YAGPC_VEHDYN_ET_INERT_LB": "66000", "YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
                       "YAGPC_VEHDYN_PAD_ALT": "64.1",
                       "YAGPC_VEHDYN_ET_LB": "%.0f" % ET_LB, "YAGPC_VEHDYN_SRB_LB": "%.0f" % SRB_LB},
