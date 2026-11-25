@@ -58,6 +58,8 @@ import fly_sts134  # noqa: E402 -- PANEL_LOCK
 FT = 0.3048
 PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
+RBAR_MIR_FT = 1000.0             # STS-81's RBAR ARRIVAL (Flight Plan p. 49: "DAP: LOWZ (1000 ft/305 m)", ESTABLISH RBAR at Ti+72 min)
+MIR_CLOSE_FPS = 0.30             # the R-bar closing to 200 ft, flown so that the 100 ft point comes at the Flight Plan's Ti+129 min
 TORVA_END_FT = 340.0             # the +V-bar point TORVA ends at (CG range; the card's arrival is "415-315 ft")
 # THE R-BAR LEG'S PACE.  The Mission Report has the RPM begin at 138/09:15:31,
 # ~5 min before the legs' old pace (0.3 ft/s, tau 150, 8 min and two more
@@ -543,7 +545,8 @@ class ManualPhase(object):
         line = [0.0, 0.0] if ins.APPROACH != "rbar" else self.port_lvlh_ft()[:2]
         if ins.APPROACH == "rbar":
             self.say("RBAR: the port's R-bar through X %+.1f Y %+.1f ft of the target's centre" % tuple(line))
-        stats = self.fly("RBAR", lambda t: ([line[0], line[1], RBAR_FT], [0.0, 0.0, 0.0]), done,
+        rb = RBAR_MIR_FT if ins.APPROACH == "rbar" else RBAR_FT
+        stats = self.fly("RBAR", lambda t: ([line[0], line[1], rb], [0.0, 0.0, 0.0]), done,
                          tau=RBAR_TAU, vmax=RBAR_VMAX, dead=0.08, every=10.0,
                          # NSTS_RBAR_LIMIT_S: a test may allow a longer leg (default 30 min)
                          limit=float(os.environ.get("NSTS_RBAR_LIMIT_S", "1800")))
@@ -1105,9 +1108,10 @@ class ManualPhase(object):
             through = getattr(self.a, "through_100", False)
             if d0 <= 100.0 and not through:
                 return HOLD_FT, 0.0
-            t_lin = max(d0 - 200.0, 0.0) / 0.25
+            vlin = MIR_CLOSE_FPS if ins.APPROACH == "rbar" else 0.25
+            t_lin = max(d0 - 200.0, 0.0) / vlin
             if t < t_lin:
-                return d0 - 0.25 * t, -0.25
+                return d0 - vlin * t, -vlin
             d1 = min(d0, 200.0)
             u = t - t_lin
             if through:
