@@ -1240,6 +1240,12 @@ class Flight:
         self.play("+1     keys SPEC 5 1 PRO\n+8     keys ITEM %d %d EXEC\n+8     keys RESUME\n" % (item // 10, item % 10), "atmosphere")
         self.script_done("atmosphere", 60)
         self.say("crew: G51 SEL ATMOSPHERE, ITEM %d (ENT/134/FIN FS 3-7, inclination > 50 deg, N descending)" % item)
+        if os.environ.get("FLY_TACAN"):
+            # TACAN AUTO (SPEC 50 ITEM 19; 20 = INHIBIT, the default, 21 = FORCE; GKFHOR.hal:620-631): the crew's choice
+            # on a TACAN vehicle, so its navigation takes the fixes once the units lock
+            self.play("+1     keys SPEC 5 0 PRO\n+8     keys ITEM 1 9 EXEC\n+8     keys RESUME\n", "tacan-auto")
+            self.script_done("tacan-auto", 60)
+            self.say("crew: TACAN to AUTO (SPEC 50 ITEM 19)")
         self.pfd_on_crt2()
 
     def entry_fly(self):

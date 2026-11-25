@@ -20,9 +20,19 @@ SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."
                     "sts134-entry-iloads.json")
 
 
+def tacan_cells():
+    """A TACAN vehicle's configuration (FLY_TACAN=1; the volume's is OV-105's, GPS only): PASS's TACAN filter,
+    GRY_TAC_FDI, runs only if CGNV_NUM_GPS_INSTALLED < 3 (GYTTAC.hal:236-242; CGBGPS.hal:158 INITIAL 3, here @064F4) and the
+    entry nav takes TACAN only with CGNS_GPS_TAC_CONFIG OFF (CGNGPS.hal:897 INITIAL ON, @0CAFF).  Addresses are G3's."""
+    if not os.environ.get("FLY_TACAN"):
+        return []
+    return [dict(addr="064f4", was="0003", H="0000", name="CGNV_NUM_GPS_INSTALLED"),
+            dict(addr="0caff", was="0001", H="0000", name="CGNS_GPS_TAC_CONFIG")]
+
+
 def apply(capdir, say=print):
     """Write the flown cells into every gpcN.mem.bin of `capdir`; returns (written, already, other) of the last image."""
-    cells = json.load(open(SPEC))["cells"]
+    cells = json.load(open(SPEC))["cells"] + tacan_cells()
     result = (0, 0, 0)
     for path in sorted(glob.glob(os.path.join(capdir, "gpc*.mem.bin"))):
         mem = np.frombuffer(open(path, "rb").read(), dtype=">u2").copy()
@@ -51,6 +61,6 @@ def apply(capdir, say=print):
 
 def request_text(spec=None):
     """The cells as yaGPC2's live-patch request (run.c batchrunner_apply_patch): ADDR WAS NEW per line."""
-    cells = json.load(open(spec or SPEC))["cells"]
+    cells = json.load(open(spec or SPEC))["cells"] + tacan_cells()
     return "".join("%s %s %s\n" % (c["addr"], c["was"], c["H"]) for c in cells)
 

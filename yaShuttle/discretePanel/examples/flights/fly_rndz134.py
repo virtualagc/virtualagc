@@ -238,6 +238,13 @@ def apply_mission(a):
         g["LAST_MC"] = 13
         if "MC4" in PHASES:
             PHASES.remove("MC4")
+    if m.get("tacan"):
+        # a TACAN vehicle (OV-102/103/104; OV-105 had none): the navaids file with the site's TACAN stations, PASS
+        # configured for TACAN (entry_iloads.tacan_cells), and SPEC 50's TACAN item to AUTO in the entry
+        os.environ["FLY_TACAN"] = "1"
+        _na = os.path.normpath(os.path.join(HERE, "..", "..", "..", "yaGPC2", "tools", "sites", "ksc-navaids-tacan.txt"))
+        if os.path.exists(_na):
+            os.environ["YAGPC_NAVAIDS"] = _na
     if m.get("no_gps"):
         os.environ["FLY_NO_GPS"] = "1"                # the vehicle had no GPS (OV-104 in 1997): the drivers key none of it
     if "targets" in m and os.path.abspath(a.targets) == os.path.join(HERE, "sts134-targets.txt"):
