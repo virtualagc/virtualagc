@@ -9,7 +9,7 @@
  ],
  "norad": 16609,
  "targets": "sts081-targets.txt",
- "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver. midcourse 3: STS-81 flew MC-1/2/3 (015/01:36:06, 02:06:16, 02:16:00 = Ti+22.2, +52.4 min and MC2+9.73 min); the TGT sets keep STS-134's offsets and DTs (STS-81's are not in any document here) with the flown times as T1; set 13's T2 is the R-bar point 600 ft below.",
+ "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver. midcourse 3: STS-81 flew MC-1/2/3 (015/01:36:06, 02:06:16, 02:16:00 = Ti+22.2, +52.4 min and MC2+9.73 min); the TGT sets keep STS-134's offsets and DTs (STS-81's are not in any document here) with the flown times as T1; set 13's T2 is the R-bar point 600 ft below. START: the Orbiter's state at the 00:21:00 epoch is Mir's (TLE) plus the designed relative state (rndz_start.py; the same Ti-point geometry that reproduces the flown Ti of 9.5 ft/s), not the physics carry of the flown OMS-3..NH burns: those are ground-targeted from tracking and the carry (burn_chain.py, documented in HANDOFF-MIR-STS81) misses the phase by ~27 deg although it reproduces the documented apsides after NC5/NC6 to ~3 nmi with OMS-3 x1.22.",
  "approach": "rbar",
  "undock": {
   "free": "020/02:12:37",
@@ -63,5 +63,6 @@
    "DY": 0.0,
    "DZ": 0.6
   }
- }
+ },
+ "orbiter_kg": 105600
 }
