@@ -11,7 +11,7 @@ METHOD (written by Mac-integrate, 2026-11-05, reproduces its run5c 2,756 ft; the
 2,230 / 2,632 / 2,730 ft figures never saved its own, ledger #320 / 2026-11-05 conversation):
   - position: the "vehdyn-state:" lines of RUN_DIR/logs/yaGPC2.log (truth, M50, ft and ft/s, every 10 s plus the last);
     touchdown time t from driver.out;
-  - M50 -> Earth-fixed: fd13_propagator.pass_rnp(2011, 136) (vehdyn.c's own matrix), then Rz(PASS_EARTH_RATE * (gmt - 136*86400));
+  - M50 -> Earth-fixed: fd13_propagator.pass_rnp(2011, 136) (env TD_RNP_YEAR / TD_RNP_DAY for another flight: 1997 12 for STS-81) (vehdyn.c's own matrix), then Rz(PASS_EARTH_RATE * (gmt - 136*86400));
   - touchdown point: cubic Hermite between the two 10 s samples that bracket t, in Earth-fixed position and velocity;
   - runway: the lat/lon/azimuth of KSC15 and KSC33 in tools/sites/ksc-navaids.txt, WGS-84 ECEF, local East/North.
 A crude gmst + fixed 0.70 deg rotation (deorbit_target.to_earth) is NOT good enough: it put P1's stop 36 kft off the runway.
@@ -20,7 +20,8 @@ Cross-check: Win11 run5b, Mac run5c and Linux P1 all come out within 20 ft of th
 import sys,re,math
 import os; sys.path.insert(0,sys.argv[2] if len(sys.argv)>2 else os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","..","discretePanel","examples","flights"))
 import fd13_propagator as P
-RNP=P.pass_rnp(2011,136); W=P.PASS_EARTH_RATE; day=136
+RNP_YEAR=int(os.environ.get("TD_RNP_YEAR","2011")); day=int(os.environ.get("TD_RNP_DAY","136"))   # STS-81: 1997, 12
+RNP=P.pass_rnp(RNP_YEAR,day); W=P.PASS_EARTH_RATE
 pat=re.compile(r'^vehdyn-state: t=(\S+) gmt=(\S+) r_ft=(\S+) (\S+) (\S+) v_fts=(\S+) (\S+) (\S+)')
 rows=[list(map(float,m.groups())) for m in (pat.match(l) for l in open(sys.argv[1]+'/logs/yaGPC2.log',errors='replace')) if m]
 txt=open(sys.argv[1]+'/driver.out',errors='replace').read()
