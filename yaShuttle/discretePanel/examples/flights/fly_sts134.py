@@ -434,6 +434,8 @@ class Flight:
             cmd += ["--portview-textures", self.a.portview_textures]
         if self.a.portview and getattr(self.a, "portview_site", None):
             cmd += ["--portview-site", self.a.portview_site]
+        if self.a.portview and getattr(self.a, "portview_pad", None):
+            cmd += ["--portview-pad", self.a.portview_pad]
         for opt in ("station", "input", "hc_keys"):     # the crew station and its hand controllers, as the other drivers
             if getattr(self.a, opt, None) and getattr(self.a, opt) != "none":
                 cmd += ["--" + opt.replace("_", "-"), getattr(self.a, opt)]
@@ -1479,6 +1481,9 @@ def main():
                     help="with --abort TAL: the ground at this TAL site's runway height "
                          "(default %s, the site PASS flies on this tape; the crew's site "
                          "selection is not changed)" % TAL_DEFAULT)
+    ap.add_argument("--portview-pad", choices=("lc39a", "lc39b", "none"), metavar="PAD",
+                    help="with --portview: portview's --pad, the launch pad to draw (default lc39a, STS-134's; "
+                         "lc39b for STS-81, whose night launch the pad's searchlights light)")
     ap.add_argument("--portview-site", metavar="SITE",
                     help="with --portview: portview's --site, the landing site whose close-up imagery to load "
                          "(default: portview's own, ksc; with --abort TAL, ksc and the TAL site "

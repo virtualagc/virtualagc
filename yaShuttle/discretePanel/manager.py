@@ -1586,6 +1586,8 @@ class Manager(object):
                 "--textures", self.args.portview_textures]
         if self.args.portview_site:
             argv += ["--site", self.args.portview_site]
+        if getattr(self.args, "portview_pad", ""):
+            argv += ["--pad", self.args.portview_pad]
         if self.args.portview_star_core > 0:
             argv += ["--star-core", "%g" % self.args.portview_star_core]
         if self.args.portview_star_gain > 0:
@@ -1813,6 +1815,8 @@ def main(argv=None):
                          "0: portview's default)")
     ap.add_argument("--portview-star-gain", type=float, default=0.0, metavar="G",
                     help="portview.py's --star-gain for Start under WINDOW VIEWS (0: portview's default)")
+    ap.add_argument("--portview-pad", default="", metavar="PAD",
+                    help="portview.py's --pad for Start under WINDOW VIEWS (simulatePASS --portview-pad)")
     ap.add_argument("--portview-site", default="", metavar="SITE",
                     help="portview.py's --site for Start under WINDOW VIEWS (simulatePASS --portview-site; "
                          "empty: portview's default, ksc)")

@@ -1734,7 +1734,8 @@ class Resources(object):
                                "uRingNear", "uRingFar", "uRing0", "uRing1", "uRing2", "uRing3",
                                "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2",
                                "uHgtOn", "uHgt", "uHgtP", "uPatchHgt", "uSiteEF", "uSiteH",
-                               "uInvR", "uHgtMax", "uFloodPos", "uFloodAim", "uFloodCd", "uFloodExp", "uFloodGain", "uFloodOn")
+                               "uInvR", "uHgtMax", "uFloodPos", "uFloodAim", "uFloodCd", "uFloodExp", "uFloodGain", "uFloodOn",
+                               "uPadPos", "uPadAim", "uPadCd", "uPadExp", "uPadOn")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -1774,7 +1775,8 @@ class Resources(object):
         self.modelProg = compile_program(MODEL_VS, MODEL_FS, MODEL_GS)
         self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
-                               "uSunVis", "uEarthLit", "uViewPx", "uThinGain")
+                               "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
+                               "uLampPos", "uLampAim", "uLampCd", "uLampExp", "uLampOn", "uLampGain")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
                                  "uCctv", "uSize")
@@ -2266,6 +2268,9 @@ uniform float uSunE, uNightGain, uLit, uMoonGain, uNightAmb;
 uniform vec3 uFloodPos[8];          // the Shuttle Landing Facility's xenon floodlights, site east-north-up (m)
 uniform vec3 uFloodAim[8];
 uniform float uFloodCd, uFloodExp, uFloodGain;
+uniform vec3 uPadPos[8];            // the launch pad's xenon searchlights, site east-north-up (m)
+uniform vec3 uPadAim[8];
+uniform float uPadCd, uPadExp, uPadOn;
 uniform int uFloodOn;
 uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses; moonlight)
 uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
@@ -2584,6 +2589,18 @@ void main() {
                 fe += uFloodCd * pow(max(dot(-fw, uFloodAim[i]), 0.0), uFloodExp) * max(fw.z, 0.0) / (fd * fd);
             }
             flood = albedo / PI * fe * uFloodGain;
+        }
+        // The launch pad's searchlights (night launches), lighting the ground round the pad the same way.
+        if (uPadOn > 0.5 && uSiteOn == 1) {
+            vec3 pe = uCamEnu + uEfToEnu * rel;
+            float fe = 0.0;
+            for (int i = 0; i < 8; i++) {
+                vec3 tl = uPadPos[i] - pe;
+                float fd = length(tl);
+                vec3 fw = tl / fd;
+                fe += uPadCd * pow(max(dot(-fw, uPadAim[i]), 0.0), uPadExp) * max(fw.z, 0.0) / (fd * fd);
+            }
+            flood += albedo / PI * fe * uFloodGain;
         }
         vec3 night = (lights + moonlit + ambient) * uNightGain * (1.0 - smoothstep(-0.1, 0.02, mus))
                      + flood * (1.0 - smoothstep(-0.1, 0.02, mus));
@@ -3043,6 +3060,13 @@ class EarthLayer(object):
             GL.glUniform1f(U["uFloodCd"], FLOOD_CD)
             GL.glUniform1f(U["uFloodExp"], FLOOD_EXP)
             GL.glUniform1f(U["uFloodGain"], FLOOD_GAIN)
+        pl = pad_lights_site(res.site) if res.site is not None else None
+        GL.glUniform1f(U["uPadOn"], 1.0 if pl is not None else 0.0)
+        if pl is not None:
+            GL.glUniform3fv(U["uPadPos"], 8, pl[0].astype(f32))
+            GL.glUniform3fv(U["uPadAim"], 8, pl[1].astype(f32))
+            GL.glUniform1f(U["uPadCd"], PAD_LAMP_CD)
+            GL.glUniform1f(U["uPadExp"], PAD_LAMP_EXP)
         for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
                                  (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
             GL.glActiveTexture(GL.GL_TEXTURE0 + unit_)
@@ -3380,6 +3404,9 @@ uniform vec3 uSunB;             // the Sun's direction, body frame
 uniform vec3 uEyeB;             // the eye, body frame, m
 uniform vec3 uEarthB;           // the Earth's direction (nadir), body frame
 uniform float uSunE, uSunVis, uEarthLit;
+uniform vec3 uLampPos[8];       // the pad's searchlights, this model's frame (m)
+uniform vec3 uLampAim[8];
+uniform float uLampCd, uLampExp, uLampOn, uLampGain;
 const float PI = 3.14159265358979;
 void main() {
     vec3 alb = uColor.rgb;
@@ -3393,6 +3420,16 @@ void main() {
     vec3 h = normalize(uSunB + toEye);
     float spec = 0.04 * pow(max(dot(n, h), 0.0), 40.0) * uSunVis * step(0.0, dot(n, uSunB));
     vec3 c = (alb / PI * (sun + earth + 0.01) + spec) * uSunE;
+    if (uLampOn > 0.0) {                             // a night launch: the xenon searchlights on the structure
+        float fe = 0.0;
+        for (int i = 0; i < 8; i++) {
+            vec3 tl = uLampPos[i] - vPos;
+            float d = max(length(tl), 1.0);
+            vec3 w = tl / d;
+            fe += uLampCd * pow(max(dot(-w, uLampAim[i]), 0.0), uLampExp) * max(dot(n, w), 0.0) / (d * d);
+        }
+        c += alb / PI * fe * uLampGain * uLampOn;
+    }
     c *= mix(uThinGain, 1.0, vThin);                 // slivers' brightness capped
     fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
     fragTrans = vec4(0.0);
@@ -3446,6 +3483,54 @@ class Model(object):
         self.ready = True
 
 
+# The launch pad's night lighting.  A night launch (STS-81, 04:27 EST) is lit by the pad's xenon searchlights, which
+# stand round the pad and are aimed at the stack, and the stack in turn by the flame.  Positions are a judgement (no
+# document the project has gives them): eight lamps, four at the corners and four at the sides of a square 120 m
+# (corners 170 m) from the stack's axis, 12 m above the pad, each aimed at the Orbiter, 40 m above the pad.  NSTS_PAD_CD
+# is a lamp's peak candela (the SLF's floodlights are 1e9, seen from ~1 km; these are nearer), NSTS_PAD_EXP the beam's
+# cosine power.  Gantry, ground and the pad's own structures are lit by them; with the Sun up they are not drawn.
+PAD_LAMP_CD = float(os.environ.get("NSTS_PAD_CD", "5.0e7"))
+PAD_LAMP_EXP = float(os.environ.get("NSTS_PAD_EXP", "20"))
+PAD_LAMP_RING_M = float(os.environ.get("NSTS_PAD_RING_M", "120"))
+PAD_MODEL_GAIN = float(os.environ.get("NSTS_PAD_MODEL_GAIN", "0.12"))   # the structure's exposure against the ground's (it is much nearer the lamps)
+PAD_LAMP_HEIGHT_M = 12.0
+PAD_AIM_HEIGHT_M = 40.0
+PAD_LIGHTS = {'obj': None}
+
+
+def pad_lamp_defs():
+    """(east, north, up) of each lamp, and the unit aim, about the stack's axis on the pad."""
+    out = []
+    for k in range(8):
+        a = math.radians(45.0 * k)
+        rad = PAD_LAMP_RING_M * (1.0 if k % 2 else 1.4142)
+        pos = np.array([rad * math.sin(a), rad * math.cos(a), PAD_LAMP_HEIGHT_M])
+        aim = np.array([0.0, 0.0, PAD_AIM_HEIGHT_M]) - pos
+        out.append((pos, aim / np.linalg.norm(aim)))
+    return out
+
+
+def pad_lamps_body(key):
+    """The pad's lamps in the model's own frame, for the pad object named key (or None)."""
+    g = PAD_LIGHTS['obj']
+    if g is None or g.key != key:
+        return None
+    return g.lamps_body
+
+
+def pad_lights_site(site):
+    """The pad's lamps and aims in a landing site's east-north-up frame (None without a pad)."""
+    g = PAD_LIGHTS['obj']
+    if g is None:
+        return None
+    c = getattr(site, '_pad', None)
+    if c is None or c[0] is not g:
+        pos = (g.lamps_ef - site.ef) @ site.ef_to_enu.T
+        aim = g.aims_ef @ site.ef_to_enu.T
+        c = site._pad = (g, pos, aim)
+    return c[1], c[2]
+
+
 class GroundObject(object):
     """A model fixed to the ground (the launch pad's structures): its frame
     east-north-up at a geodetic point on PASS's ellipsoid, turned by heading
@@ -3468,6 +3553,14 @@ class GroundObject(object):
         e2_, n2_ = math.cos(h) * east - math.sin(h) * north, math.sin(h) * east + math.cos(h) * north
         self.axes = np.column_stack([e2_, n2_, up])          # model -> Earth-fixed
         self.ef = self.ef - self.axes @ np.array([offset[0], offset[1], 0.0])
+        # the stack's axis on the ground, and the lamps round it (pad_lamp_defs), in Earth-fixed and model frames
+        axis_ef = self.ef + self.axes @ np.array([offset[0], offset[1], 0.0])
+        enu = np.column_stack([east, north, up])
+        defs = pad_lamp_defs()
+        self.lamps_ef = np.array([axis_ef + enu @ d[0] for d in defs])
+        self.aims_ef = np.array([enu @ d[1] for d in defs])
+        self.lamps_body = (np.array([self.axes.T @ (p - self.ef) for p in self.lamps_ef]),
+                           np.array([self.axes.T @ a for a in self.aims_ef]))
 
     def state(self, fs):
         m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
@@ -3548,6 +3641,17 @@ class VehicleLayer(object):
             GL.glUniform1f(U["uSunE"], self.SUN_E)
             GL.glUniform1f(U["uSunVis"], vis)
             GL.glUniform1f(U["uEarthLit"], earth_lit)
+            lamps = pad_lamps_body(vid)
+            if lamps is not None:
+                mus = float(np.dot(to_sun / dsun, r / np.linalg.norm(r)))     # the Sun's height over the pad
+                GL.glUniform3fv(U["uLampPos"], 8, lamps[0].astype(f32))
+                GL.glUniform3fv(U["uLampAim"], 8, lamps[1].astype(f32))
+                GL.glUniform1f(U["uLampCd"], PAD_LAMP_CD)
+                GL.glUniform1f(U["uLampExp"], PAD_LAMP_EXP)
+                GL.glUniform1f(U["uLampGain"], FLOOD_GAIN * PAD_MODEL_GAIN)
+                GL.glUniform1f(U["uLampOn"], 1.0 - min(max((mus + 0.1) / 0.12, 0.0), 1.0))
+            else:
+                GL.glUniform1f(U["uLampOn"], 0.0)
             GL.glUniform2f(U["uViewPx"], float(view.hdrSize[0]), float(view.hdrSize[1]))
             GL.glUniform1f(U["uThinGain"], THIN['gain'])
             GL.glUniform1i(U["uTex"], 0)
@@ -4133,8 +4237,9 @@ def main(argv=None):
                          "(overrides --size for that window); repeatable")
     ap.add_argument("--port-base", type=int,
                     default=int(os.environ.get("NSTS_BUS_PORT_BASE", "6900")))
-    ap.add_argument("--pad", default="lc39a", choices=list(PADS) + ['none'],
-                    help="the launch pad whose structures to draw (default lc39a, STS-134's)")
+    ap.add_argument("--pad", default=os.environ.get("NSTS_PAD", "lc39a"), choices=list(PADS) + ['none'],
+                    help="the launch pad whose structures to draw (default lc39a, STS-134's; NSTS_PAD in the "
+                         "environment sets the default, lc39b for STS-81)")
     ap.add_argument("--site", default="ksc", metavar="SITE",
                     help="the landing site whose close-up imagery to load (default ksc; "
                          "none for none).  A list, ksc,zza, loads the first now and each other one once the "
@@ -4351,6 +4456,7 @@ def main(argv=None):
         lat, lon, heading = PADS[args.pad]
         models[args.pad] = Model(GANTRY_MODEL, point=False)
         ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_M, heading, offset=GANTRY_STACK))
+        PAD_LIGHTS['obj'] = ground[-1]
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
               SunLayer(), MoonLayer(), EarthLayer(), LampLayer(exposure), VehicleLayer(models, exposure)]
     views = []

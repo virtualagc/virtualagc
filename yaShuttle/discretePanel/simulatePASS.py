@@ -1881,6 +1881,9 @@ def main():
     ap.add_argument("--portview-site", default=None, metavar="SITE",
                     help="portview.py's --site, the landing site whose close-up imagery to load "
                          "(default: portview's own, ksc; e.g. zza for a Zaragoza TAL)")
+    ap.add_argument("--portview-pad", default=None, choices=("lc39a", "lc39b", "none"), metavar="PAD",
+                    help="portview.py's --pad, the launch pad whose structures to draw (default lc39a, "
+                         "STS-134's; lc39b for STS-81); a night launch is lit by the pad's searchlights")
     ap.add_argument("--portview-textures", choices=("auto", "full", "reduced"), default=None,
                     help="portview.py's --textures: force reduced (about 0.5 GB) textures on a GPU that "
                          "crashes or exits with the full ones, e.g. a shared-memory Intel GPU that reports "
@@ -2602,6 +2605,8 @@ def main():
                     pv_argv += ["--textures", args.portview_textures]
                 if args.portview_site:
                     pv_argv += ["--site", args.portview_site]
+                if args.portview_pad:
+                    pv_argv += ["--pad", args.portview_pad]
                 if args.portview_star_core:
                     pv_argv += ["--star-core", "%g" % args.portview_star_core]
                 if args.portview_star_gain:
@@ -2810,6 +2815,7 @@ def main():
                             "--portview-views", args.portview_views or "",
                             "--portview-textures", args.portview_textures or "auto",
                             "--portview-site", args.portview_site or "",
+                            "--portview-pad", args.portview_pad or "",
                             "--portview-star-core", "%g" % (args.portview_star_core or 0),
                             "--portview-star-gain", "%g" % (args.portview_star_gain or 0),
                             "--tape", tape,
