@@ -60,7 +60,7 @@ PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
 RBAR_MIR_FT = 1000.0             # STS-81's RBAR ARRIVAL (Flight Plan p. 49: "DAP: LOWZ (1000 ft/305 m)", ESTABLISH RBAR at Ti+72 min)
 RBAR_MIR_VMAX = 1.2              # the R-bar leg from the MC-3 arrival point (-900 ft, +1800 ft) to the 1000 ft R-bar point
-MIR_CLOSE_FPS = 0.40             # the R-bar closing to 200 ft, flown so that the 100 ft point comes at the Flight Plan's Ti+129 min
+MIR_CLOSE_FPS = 0.50             # the R-bar closing to 200 ft, flown so that the 100 ft point comes at the Flight Plan's Ti+129 min
 TORVA_END_FT = 340.0             # the +V-bar point TORVA ends at (CG range; the card's arrival is "415-315 ft")
 # THE R-BAR LEG'S PACE.  The Mission Report has the RPM begin at 138/09:15:31,
 # ~5 min before the legs' old pace (0.3 ft/s, tau 150, 8 min and two more
