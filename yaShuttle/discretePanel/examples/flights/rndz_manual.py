@@ -548,7 +548,10 @@ class ManualPhase(object):
             self.say("RBAR: the port's R-bar through X %+.1f Y %+.1f ft of the target's centre" % tuple(line))
         rb = RBAR_MIR_FT if ins.APPROACH == "rbar" else RBAR_FT
         stats = self.fly("RBAR", lambda t: ([line[0], line[1], rb], [0.0, 0.0, 0.0]), done,
-                         tau=RBAR_TAU, vmax=(RBAR_MIR_VMAX if ins.APPROACH == "rbar" else RBAR_VMAX), dead=0.08, every=10.0,
+                         tau=RBAR_TAU, vmax=(RBAR_MIR_VMAX if ins.APPROACH == "rbar" else RBAR_VMAX), dead=0.08,
+                         # Mir: the MC-3 arrival carries ~9 ft/s; braking it is a few seconds of THC holds, here a longer
+                         # run of pulses per pass (nmax) at a shorter interval, the crew's NORM Z braking gates
+                         every=(5.0 if ins.APPROACH == "rbar" else 10.0), nmax=(12 if ins.APPROACH == "rbar" else 4),
                          # NSTS_RBAR_LIMIT_S: a test may allow a longer leg (default 30 min)
                          limit=float(os.environ.get("NSTS_RBAR_LIMIT_S", "1800")))
         rep = self.leg_report("RBAR (the last 3 min)", stats, 180.0)
