@@ -233,6 +233,11 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
+    if m.get("midcourse") == 3:
+        # STS-81 flew MC-1..MC-3 only (Mission Report); the arrival is MC-3's T2 and there is no MC-4
+        g["LAST_MC"] = 13
+        if "MC4" in PHASES:
+            PHASES.remove("MC4")
     if m.get("no_gps"):
         os.environ["FLY_NO_GPS"] = "1"                # the vehicle had no GPS (OV-104 in 1997): the drivers key none of it
     if "targets" in m and os.path.abspath(a.targets) == os.path.join(HERE, "sts134-targets.txt"):
@@ -245,6 +250,7 @@ def apply_mission(a):
         ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
 
 
+LAST_MC = 14                        # the last midcourse burn: 14 (STS-134's MC-4), 13 for a flight of three (STS-81)
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
           # the manual phase (rndz_manual.py, Stage 5), to 100 ft station-keeping
@@ -3116,7 +3122,7 @@ wait crt 1 title {year}/ timeout 600
         targeted MC4 on radar navigation (LATE RADAR NAV [20E]); with no
         radar here (Stage 3) it is the star tracker pass's FLTR state,
         propagated since the ISS set -- a deviation, logged."""
-        if self.a.no_mc:
+        if self.a.no_mc or LAST_MC != 14:
             return
         self.mc_tig[14] = self.mc_base_met() + gmt_of_unix(MET_ZERO_UNIX) + TGT_SETS[14]["T1"] * 60.0
         self.say("== TARGET MC4 [20A], Ti %+.1f min (%s)"
@@ -3134,7 +3140,7 @@ wait crt 1 title {year}/ timeout 600
         TGT 14's aim point (0, 0, +0.6 kft), and the burns' table."""
         if self.a.no_mc:
             return
-        t2 = self.mc_tig[14] + TGT_SETS[14]["DT"] * 60.0
+        t2 = self.mc_tig[LAST_MC] + TGT_SETS[LAST_MC]["DT"] * 60.0
         # THE DOCKING DAP, A10/B10, stored now, in the quiet after MC4: the
         # flight had it loaded long before the approach, and keyed in the
         # VBAR leg it cost ~4 min of the approach's clock
@@ -3146,8 +3152,8 @@ wait crt 1 title {year}/ timeout 600
         if rel:
             sys.path.insert(0, os.path.join(YAGPC2, "tools"))
             import rndz_start
-            self.say("ARRIVAL at MC4 + %.1f min: truth %s; TGT 14 aims at X 0, Y 0, Z +600 ft"
-                     % ((self.truth()["gmt"] - self.mc_tig[14]) / 60.0, rndz_start.fmt_rel(rel)))
+            self.say("ARRIVAL at MC%d + %.1f min: truth %s; TGT %d aims at X 0, Y 0, Z +600 ft"
+                     % (LAST_MC - 10, (self.truth()["gmt"] - self.mc_tig[LAST_MC]) / 60.0, rndz_start.fmt_rel(rel), LAST_MC))
             self.arrival_rel = rel
         self.burn_table()
         # (no longer 2 min past T2: the R-bar leg is on the Mission Report's clock)

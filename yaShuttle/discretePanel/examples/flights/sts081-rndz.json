@@ -9,7 +9,7 @@
  ],
  "norad": 16609,
  "targets": "sts081-targets.txt",
- "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver.",
+ "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver. midcourse 3: STS-81 flew MC-1/2/3 (015/01:36:06, 02:06:16, 02:16:00 = Ti+22.2, +52.4 min and MC2+9.73 min); the TGT sets keep STS-134's offsets and DTs (STS-81's are not in any document here) with the flown times as T1; set 13's T2 is the R-bar point 600 ft below.",
  "approach": "rbar",
  "undock": {
   "free": "020/02:12:37",
@@ -36,5 +36,32 @@
   "note": "Mission Report: deorbit TIG 022:13:17:33.2 (355.8 ft/s, dual engine), landing KSC 33 022 14:22:44 GMT.  The planner takes the pass nearest that landing and puts EI 4,400 n.mi. from the runway (STS-134's 4,393-4,438); an EI pinned 31.7 min before the landing with the simulated orbit's phase gave REI 7,690 n.mi., an entry that cannot reach the runway.  gamma_ei -0.96 is STS-134's design value.",
   "rei": 4400
  },
- "no_gps": true
+ "no_gps": true,
+ "midcourse": 3,
+ "tgt_sets": {
+  "11": {
+   "T1": 22.2,
+   "EL": 0.0,
+   "DT": 56.9,
+   "DX": -0.9,
+   "DY": 0.0,
+   "DZ": 1.8
+  },
+  "12": {
+   "T1": 52.4,
+   "EL": 29.07,
+   "DT": 27.0,
+   "DX": -0.9,
+   "DY": 0.0,
+   "DZ": 1.8
+  },
+  "13": {
+   "T1": 9.73,
+   "EL": 0.0,
+   "DT": 18.0,
+   "DX": 0.0,
+   "DY": 0.0,
+   "DZ": 0.6
+  }
+ }
 }
