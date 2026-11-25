@@ -1735,7 +1735,7 @@ class Resources(object):
                                "uPatchCount", "uPatch", "uPatch0", "uPatch1", "uPatch2",
                                "uHgtOn", "uHgt", "uHgtP", "uPatchHgt", "uSiteEF", "uSiteH",
                                "uInvR", "uHgtMax", "uFloodPos", "uFloodAim", "uFloodCd", "uFloodExp", "uFloodGain", "uFloodOn",
-                               "uPadPos", "uPadAim", "uPadCd", "uPadExp", "uPadOn")
+                               "uPadPos", "uPadAim", "uPadCdv", "uPadExp", "uPadOn")
         self.earthPlainProg = compile_program(FULLSCREEN_VS, EARTH_PLAIN_FS)
         self.earthPlainU = uniforms(self.earthPlainProg, "uCamToEF", "uOrigin", "uTan")
         self.transTex = make_lut_texture(transmittance_table())
@@ -1776,7 +1776,7 @@ class Resources(object):
         self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
-                               "uLampPos", "uLampAim", "uLampCd", "uLampExp", "uLampOn", "uLampGain")
+                               "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
                                  "uCctv", "uSize")
@@ -2270,7 +2270,8 @@ uniform vec3 uFloodAim[8];
 uniform float uFloodCd, uFloodExp, uFloodGain;
 uniform vec3 uPadPos[8];            // the launch pad's xenon searchlights, site east-north-up (m)
 uniform vec3 uPadAim[8];
-uniform float uPadCd, uPadExp, uPadOn;
+uniform float uPadCdv[8];           // each cluster's peak candela (0: no cluster in that slot)
+uniform float uPadExp, uPadOn;
 uniform int uFloodOn;
 uniform vec3 uMoonEF;           // the Moon, Earth-fixed, m (its shadow: solar eclipses; moonlight)
 uniform float uCTop, uCGround;  // |eye|^2 - radius^2, atmosphere top and ground (scaled space)
@@ -2598,7 +2599,7 @@ void main() {
                 vec3 tl = uPadPos[i] - pe;
                 float fd = length(tl);
                 vec3 fw = tl / fd;
-                fe += uPadCd * pow(max(dot(-fw, uPadAim[i]), 0.0), uPadExp) * max(fw.z, 0.0) / (fd * fd);
+                fe += uPadCdv[i] * pow(max(dot(-fw, uPadAim[i]), 0.0), uPadExp) * max(fw.z, 0.0) / (fd * fd);
             }
             flood += albedo / PI * fe * uFloodGain;
         }
@@ -3065,7 +3066,7 @@ class EarthLayer(object):
         if pl is not None:
             GL.glUniform3fv(U["uPadPos"], 8, pl[0].astype(f32))
             GL.glUniform3fv(U["uPadAim"], 8, pl[1].astype(f32))
-            GL.glUniform1f(U["uPadCd"], PAD_LAMP_CD)
+            GL.glUniform1fv(U["uPadCdv"], 8, (pl[2] * PAD_GROUND_GAIN).astype(f32))
             GL.glUniform1f(U["uPadExp"], PAD_LAMP_EXP)
         for unit_, name, tex in ((0, "uDay", res.earthDayTex), (1, "uNight", res.earthNightTex),
                                  (2, "uTrans", res.transTex), (3, "uWater", res.waterTex)):
@@ -3406,7 +3407,8 @@ uniform vec3 uEarthB;           // the Earth's direction (nadir), body frame
 uniform float uSunE, uSunVis, uEarthLit;
 uniform vec3 uLampPos[8];       // the pad's searchlights, this model's frame (m)
 uniform vec3 uLampAim[8];
-uniform float uLampCd, uLampExp, uLampOn, uLampGain;
+uniform float uLampCdv[8];
+uniform float uLampExp, uLampOn, uLampGain;
 const float PI = 3.14159265358979;
 void main() {
     vec3 alb = uColor.rgb;
@@ -3426,7 +3428,7 @@ void main() {
             vec3 tl = uLampPos[i] - vPos;
             float d = max(length(tl), 1.0);
             vec3 w = tl / d;
-            fe += uLampCd * pow(max(dot(-w, uLampAim[i]), 0.0), uLampExp) * max(dot(n, w), 0.0) / (d * d);
+            fe += uLampCdv[i] * pow(max(dot(-w, uLampAim[i]), 0.0), uLampExp) * max(dot(n, w), 0.0) / (d * d);
         }
         c += alb / PI * fe * uLampGain * uLampOn;
     }
@@ -3483,30 +3485,41 @@ class Model(object):
         self.ready = True
 
 
-# The launch pad's night lighting.  A night launch (STS-81, 04:27 EST) is lit by the pad's xenon searchlights, which
-# stand round the pad and are aimed at the stack, and the stack in turn by the flame.  Positions are a judgement (no
-# document the project has gives them): eight lamps, four at the corners and four at the sides of a square 120 m
-# (corners 170 m) from the stack's axis, 12 m above the pad, each aimed at the Orbiter, 40 m above the pad.  NSTS_PAD_CD
-# is a lamp's peak candela (the SLF's floodlights are 1e9, seen from ~1 km; these are nearer), NSTS_PAD_EXP the beam's
-# cosine power.  Gantry, ground and the pad's own structures are lit by them; with the Sun up they are not drawn.
-PAD_LAMP_CD = float(os.environ.get("NSTS_PAD_CD", "5.0e7"))
+# The launch pad's night lighting.  A night launch (STS-81, 04:27 EST) is lit by the pad's xenon searchlights: FORTY per
+# pad, in FIVE clusters of eight round the pad's perimeter, 20 kW lamps of 6,000 K, giving 200 foot-candles (2,153 lux) on
+# the stack before ignition and ~1,000 fc (10,764 lux) for the 5-6 s after SRB ignition (KSC release 76-97, 13 May 1997,
+# "Photographic Exposure Guidelines for Night Space Shuttle Launches", via the owner's ChatGPT note -- not yet read in the
+# original).  Photographs (STS-81-39B's long exposure; STS-133-39A, the lamp housings) show them on the ground or on short
+# stands, tens to a few hundred metres out, beams passing the stack and on into the sky.  What NO document the project has
+# gives is where the clusters stand, so the layout is a JUDGEMENT: five clusters (each drawn as one lamp of eight lamps'
+# candela) at azimuths 72 deg apart and 120-260 m from the stack's axis, 4 m up, each aimed at the Orbiter 40 m above the
+# pad, and the candela set so that together they give PAD_ILLUM_LUX on the stack at the aim point.  NSTS_PAD_LUX,
+# NSTS_PAD_EXP (beam, cosine power) and NSTS_PAD_GAIN (exposure of the structure against the ground, 1) tune them.  The
+# structures' own warm lamps and the exhaust's light are not modelled.
+PAD_ILLUM_LUX = float(os.environ.get("NSTS_PAD_LUX", "2153"))
 PAD_LAMP_EXP = float(os.environ.get("NSTS_PAD_EXP", "20"))
-PAD_LAMP_RING_M = float(os.environ.get("NSTS_PAD_RING_M", "120"))
-PAD_MODEL_GAIN = float(os.environ.get("NSTS_PAD_MODEL_GAIN", "0.12"))   # the structure's exposure against the ground's (it is much nearer the lamps)
-PAD_LAMP_HEIGHT_M = 12.0
+PAD_GAIN = float(os.environ.get("NSTS_PAD_GAIN", "1.0"))
+PAD_GROUND_GAIN = float(os.environ.get("NSTS_PAD_GROUND_GAIN", "4.0"))   # the ground's exposure against the structure's: the lamps are aimed at the stack, so the ground gets their spill, and a photograph's exposure is set by the lit structure (a JUDGEMENT; see STS-81-39B)
+PAD_CLUSTERS = ((10.0, 150.0), (82.0, 230.0), (154.0, 125.0), (226.0, 260.0), (298.0, 180.0))   # azimuth deg (E of N), m
+PAD_LAMP_HEIGHT_M = 4.0
 PAD_AIM_HEIGHT_M = 40.0
 PAD_LIGHTS = {'obj': None}
 
 
 def pad_lamp_defs():
-    """(east, north, up) of each lamp, and the unit aim, about the stack's axis on the pad."""
+    """(east, north, up) of each of the 8 slots, the unit aim (zero: no cluster there) and the peak candela."""
     out = []
+    aimpt = np.array([0.0, 0.0, PAD_AIM_HEIGHT_M])
     for k in range(8):
-        a = math.radians(45.0 * k)
-        rad = PAD_LAMP_RING_M * (1.0 if k % 2 else 1.4142)
+        if k >= len(PAD_CLUSTERS):
+            out.append((np.array([0.0, 0.0, 1.0e6]), np.zeros(3), 0.0))
+            continue
+        az, rad = PAD_CLUSTERS[k]
+        a = math.radians(az)
         pos = np.array([rad * math.sin(a), rad * math.cos(a), PAD_LAMP_HEIGHT_M])
-        aim = np.array([0.0, 0.0, PAD_AIM_HEIGHT_M]) - pos
-        out.append((pos, aim / np.linalg.norm(aim)))
+        d = aimpt - pos
+        dist = float(np.linalg.norm(d))
+        out.append((pos, d / dist, PAD_ILLUM_LUX * dist * dist / len(PAD_CLUSTERS)))
     return out
 
 
@@ -3528,7 +3541,7 @@ def pad_lights_site(site):
         pos = (g.lamps_ef - site.ef) @ site.ef_to_enu.T
         aim = g.aims_ef @ site.ef_to_enu.T
         c = site._pad = (g, pos, aim)
-    return c[1], c[2]
+    return c[1], c[2], g.cd
 
 
 class GroundObject(object):
@@ -3559,8 +3572,9 @@ class GroundObject(object):
         defs = pad_lamp_defs()
         self.lamps_ef = np.array([axis_ef + enu @ d[0] for d in defs])
         self.aims_ef = np.array([enu @ d[1] for d in defs])
+        self.cd = np.array([d[2] for d in defs])
         self.lamps_body = (np.array([self.axes.T @ (p - self.ef) for p in self.lamps_ef]),
-                           np.array([self.axes.T @ a for a in self.aims_ef]))
+                           np.array([self.axes.T @ a for a in self.aims_ef]), self.cd)
 
     def state(self, fs):
         m = fs.m50_to_ef if fs.m50_to_ef is not None else gmst_matrix(fs.unix)
@@ -3646,9 +3660,9 @@ class VehicleLayer(object):
                 mus = float(np.dot(to_sun / dsun, r / np.linalg.norm(r)))     # the Sun's height over the pad
                 GL.glUniform3fv(U["uLampPos"], 8, lamps[0].astype(f32))
                 GL.glUniform3fv(U["uLampAim"], 8, lamps[1].astype(f32))
-                GL.glUniform1f(U["uLampCd"], PAD_LAMP_CD)
+                GL.glUniform1fv(U["uLampCdv"], 8, lamps[2].astype(f32))
                 GL.glUniform1f(U["uLampExp"], PAD_LAMP_EXP)
-                GL.glUniform1f(U["uLampGain"], FLOOD_GAIN * PAD_MODEL_GAIN)
+                GL.glUniform1f(U["uLampGain"], FLOOD_GAIN * PAD_GAIN)
                 GL.glUniform1f(U["uLampOn"], 1.0 - min(max((mus + 0.1) / 0.12, 0.0), 1.0))
             else:
                 GL.glUniform1f(U["uLampOn"], 0.0)
