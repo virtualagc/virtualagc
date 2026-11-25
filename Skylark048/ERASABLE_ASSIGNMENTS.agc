@@ -13,6 +13,9 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2023-09-04 MAS  Created from Artemis 072.
 ##		2024-03-05 MAS  Updated for Skylark 48.
+##		2026-11-24 MAS  Added missing definition for TYMR, and corrected
+##				erasable definitions surrounding it. Also fixed
+##				typo in unreferenced flagbit NCLPBIT.
 
 
 ## Erasable definitions have been very heavily changed from Artemis 72.
@@ -479,7 +482,7 @@ TARG1BIT	=	BIT10
 #			BIT 9 FLAG 1
 NCLPFLG		= 	021D		# COMPUTING EH2		COMPUTING EH1
 					# IN P31/P32		IN P31/P32
-NCPLBIT		= 	BIT9
+NCLPBIT		= 	BIT9
 
 #			BIT 8 FLAG 1
 VEHUPFLG	=	022D		# CSM STATE VECTOR	OWS STATE VECTOR
@@ -4103,8 +4106,9 @@ LASTTIG		EQUALS	NN +2		# I(2)
 
 #	R27 STORAGE.							(28D)
 VHF.W		EQUALS	LASTTIG +2	# B(18)
-SVEC		EQUALS	VHF.W +18D	# B(8)
-VSAV		EQUALS	SVEC +8D	# B(2)
+SVEC		EQUALS	VHF.W +18D	# B(6)
+TYMR		EQUALS	SVEC +6		# B(2)
+VSAV		EQUALS	TYMR +2		# B(2)
 
 
 # 	DISPLAY REGISTER FOR VG						(2D)
