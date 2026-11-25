@@ -3492,7 +3492,8 @@ class Model(object):
 # original).  Photographs (STS-81-39B's long exposure; STS-133-39A, the lamp housings) show them on the ground or on short
 # stands, tens to a few hundred metres out, beams passing the stack and on into the sky.  What NO document the project has
 # gives is where the clusters stand, so the layout is a JUDGEMENT: five clusters (each drawn as one lamp of eight lamps'
-# candela) at azimuths 72 deg apart and 120-260 m from the stack's axis, 4 m up, each aimed at the Orbiter 40 m above the
+# candela) one in each of five of the eight sectors of the pad's roughly octagonal perimeter (radius ~3,000 ft; the owner:
+# WHICH five sectors and how far out are unknown), 500 m out by default, 4 m up, each aimed at the Orbiter 40 m above the
 # pad, and the candela set so that together they give PAD_ILLUM_LUX on the stack at the aim point.  NSTS_PAD_LUX,
 # NSTS_PAD_EXP (beam, cosine power) and NSTS_PAD_GAIN (exposure of the structure against the ground, 1) tune them.  The
 # structures' own warm lamps and the exhaust's light are not modelled.
@@ -3500,7 +3501,9 @@ PAD_ILLUM_LUX = float(os.environ.get("NSTS_PAD_LUX", "2153"))
 PAD_LAMP_EXP = float(os.environ.get("NSTS_PAD_EXP", "20"))
 PAD_GAIN = float(os.environ.get("NSTS_PAD_GAIN", "1.0"))
 PAD_GROUND_GAIN = float(os.environ.get("NSTS_PAD_GROUND_GAIN", "4.0"))   # the ground's exposure against the structure's: the lamps are aimed at the stack, so the ground gets their spill, and a photograph's exposure is set by the lit structure (a JUDGEMENT; see STS-81-39B)
-PAD_CLUSTERS = ((10.0, 150.0), (82.0, 230.0), (154.0, 125.0), (226.0, 260.0), (298.0, 180.0))   # azimuth deg (E of N), m
+PAD_SECTORS = [int(x) for x in os.environ.get("NSTS_PAD_SECTORS", "0,1,3,5,6").split(",")]   # which 5 of the 8 octagon sectors (centre azimuth 45 k deg E of N): UNKNOWN, a guess
+PAD_CLUSTER_M = float(os.environ.get("NSTS_PAD_CLUSTER_M", "500"))   # the clusters' distance: UNKNOWN, inside the ~3,000 ft (914 m) octagon
+PAD_CLUSTERS = tuple((45.0 * k, PAD_CLUSTER_M) for k in PAD_SECTORS)   # azimuth deg (E of N), m
 PAD_LAMP_HEIGHT_M = 4.0
 PAD_AIM_HEIGHT_M = 40.0
 PAD_LIGHTS = {'obj': None}
