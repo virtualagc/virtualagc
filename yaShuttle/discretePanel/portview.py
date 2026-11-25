@@ -1776,7 +1776,10 @@ class Resources(object):
         self.modelU = uniforms(self.modelProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uTex",
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
-                               "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain")
+                               "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain",
+                               "uSLamp", "uSLampN", "uSLampCd", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
+        self.glowProg = compile_program(GLOW_VS, GLOW_FS)
+        self.glowU = uniforms(self.glowProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uPxPerM", "uSizeM", "uCol", "uGlow")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
         self.presentU = uniforms(self.presentProg, "uHdr", "uEarth", "uEarthTrans", "uOffset",
                                  "uCctv", "uSize")
@@ -3409,6 +3412,12 @@ uniform vec3 uLampPos[8];       // the pad's searchlights, this model's frame (m
 uniform vec3 uLampAim[8];
 uniform float uLampCdv[8];
 uniform float uLampExp, uLampOn, uLampGain;
+uniform vec3 uSLamp[256];       // the structure\'s own warm lamps (sodium / incandescent), this model\'s frame
+uniform int uSLampN;
+uniform float uSLampCd;
+uniform vec3 uFlPos[8];         // its white floodlights
+uniform vec3 uFlAim[8];
+uniform float uFlCd, uFlExp;
 const float PI = 3.14159265358979;
 void main() {
     vec3 alb = uColor.rgb;
@@ -3431,6 +3440,24 @@ void main() {
             fe += uLampCdv[i] * pow(max(dot(-w, uLampAim[i]), 0.0), uLampExp) * max(dot(n, w), 0.0) / (d * d);
         }
         c += alb / PI * fe * uLampGain * uLampOn;
+        float fl = 0.0;
+        for (int i = 0; i < 8; i++) {                // the white floods: beams, like the searchlights
+            vec3 tl = uFlPos[i] - vPos;
+            float d = max(length(tl), 1.0);
+            vec3 w = tl / d;
+            fl += uFlCd * pow(max(dot(-w, uFlAim[i]), 0.0), uFlExp) * max(dot(n, w), 0.0) / (d * d);
+        }
+        c += alb / PI * fl * uLampGain * uLampOn;
+        float lo = 0.0;                              // the warm lamps: points shining down and out, 30 m reach
+        for (int i = 0; i < uSLampN; i++) {
+            vec3 tl = uSLamp[i] - vPos;
+            float d2 = dot(tl, tl);
+            if (d2 > 900.0) continue;
+            float d = sqrt(d2) + 0.01;
+            vec3 w = tl / d;
+            lo += max(dot(n, w), 0.0) * (0.5 - 0.5 * w.z) / (d2 + 1.0);   // below the lamp: full; level: half; above: none
+        }
+        c += alb / PI * lo * uSLampCd * vec3(1.0, 0.55, 0.22) * uLampGain * uLampOn;
     }
     c *= mix(uThinGain, 1.0, vThin);                 // slivers' brightness capped
     fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
@@ -3545,6 +3572,102 @@ def pad_lights_site(site):
         aim = g.aims_ef @ site.ef_to_enu.T
         c = site._pad = (g, pos, aim)
     return c[1], c[2], g.cd
+
+
+GLOW_VS = """
+#version 410 core
+in vec3 aPos;
+uniform mat3 uRot;
+uniform vec3 uTrans;
+uniform vec2 uTan;
+uniform float uNear, uFar, uPxPerM, uSizeM;
+out float vDist;
+void main() {
+    vec3 c = uRot * aPos + uTrans;
+    float z = ((c.z - uNear) / (uFar - uNear)) * 2.0 - 1.0;
+    gl_Position = vec4(c.x / uTan.x, c.y / uTan.y, z * c.z, c.z);
+    vDist = c.z;
+    gl_PointSize = clamp(uPxPerM * uSizeM * 2.0 / max(c.z, 0.5), 2.0, 18.0);
+}
+"""
+GLOW_FS = """
+#version 410 core
+in float vDist;
+uniform float uNear, uFar, uGlow;
+uniform vec3 uCol;
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec4 fragTrans;
+void main() {
+    float d = length(gl_PointCoord - vec2(0.5)) * 2.0;
+    if (d > 1.0) discard;
+    float f = exp(-3.5 * d * d);
+    fragColor = vec4(uCol * uGlow * f, 0.0);
+    fragTrans = vec4(0.0);
+    gl_FragDepth = clamp((vDist - uNear) / (uFar - uNear), 0.0, 1.0);
+}
+"""
+STRUCT_LAMP_CD = float(os.environ.get("NSTS_STRUCT_LAMP_CD", "1500"))     # a 150 W high-pressure sodium lamp: ~15,000 lm, ~1,200 cd
+STRUCT_LAMP_CELL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CELL_M", "7"))
+STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
+FLOOD_STRUCT_CD = float(os.environ.get("NSTS_STRUCT_FLOOD_CD", "6.0e5"))
+FLOOD_STRUCT_EXP = 6.0
+
+
+def structure_lamps(model, cell=None, maxn=256):
+    """The pad structure's own warm lamps, PLACED BY RULE from the model (it has none): one under each overhang, below a
+    downward-facing surface (platform undersides, the access arm's belly, the MLP's deck) -- the photographs
+    (STS-114/121/122/28 at 39A/39B) show rows of them along exactly those, a few metres apart.  The largest down-facing
+    triangle in each cell-metre cell above 2.5 m gets one, 0.4 m below it; at most maxn, the biggest areas first.  A
+    JUDGEMENT of where and how many; the lamp type is the photographs' warm colour, not a documented fixture."""
+    cell = cell or STRUCT_LAMP_CELL_M
+    best = {}
+    for p in model.parts:
+        if p.get('data') is None:
+            continue
+        P = p['data'][:, :3].astype(np.float64)
+        I = p['idx'].reshape(-1, 3)
+        a, b, c = P[I[:, 0]], P[I[:, 1]], P[I[:, 2]]
+        nv = np.cross(b - a, c - a)
+        A = np.linalg.norm(nv, axis=1) / 2.0
+        nz = nv[:, 2] / np.maximum(2.0 * A, 1e-12)
+        sel = (nz < -0.8) & (A > 0.5)
+        cen = ((a + b + c) / 3.0)[sel]
+        for q, ar in zip(cen, A[sel]):
+            if q[2] < 2.5:
+                continue
+            k = tuple(np.floor(q / cell).astype(int))
+            if k not in best or ar > best[k][0]:
+                best[k] = (ar, q)
+    items = sorted(best.values(), key=lambda t: -t[0])[:maxn]
+    return np.array([q - np.array([0.0, 0.0, 0.4]) for _, q in items], np.float32).reshape(-1, 3)
+
+
+def structure_floods(model):
+    """White floodlights on the pad structure, in the model's frame, placed from the MLP's own vertices: four at the
+    deck's corners, 3 m up and 1.5 m in, aimed at the stack (STS-114-39B, STS-121-39B: bright white fixtures at the deck
+    rail) and four under the deck, 0.5 m below its underside and 4 m in from its corners, lighting the crawler and the
+    trench.  Positions and strengths are JUDGEMENTS from the photographs' look."""
+    sx, sy = GANTRY_STACK
+    names = [m['name'] for m in model.meta['materials']]
+
+    def verts(kind):
+        v = [pt['data'][:, :3] for pt, n in zip(model.parts, names) if kind in n and pt.get('data') is not None]
+        return np.vstack(v).astype(np.float64) if v else np.zeros((0, 3))
+    pos, aim = [], []
+    for kind, dz, inset, tgt_z in (('mlp_top', 3.0, 1.5, 45.0), ('mlp_under', -0.5, 4.0, 0.0)):
+        V = verts(kind)
+        c = V.mean(axis=0) if len(V) else np.array([0.0, 0.0, 10.0])
+        for sxn, syn in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+            if len(V):
+                q = V[np.argmax(sxn * (V[:, 0] - c[0]) + syn * (V[:, 1] - c[1]))].copy()
+            else:
+                q = np.array([c[0] + 24.0 * sxn, c[1] + 24.0 * syn, c[2]])
+            d = np.array([c[0] - q[0], c[1] - q[1], 0.0])
+            q = q + inset * d / max(np.linalg.norm(d), 1e-9)
+            q[2] = (V[:, 2].max() if kind == 'mlp_top' and len(V) else V[:, 2].min() if len(V) else q[2]) + dz
+            a_ = np.array([sx, sy, tgt_z]) - q
+            pos.append(q); aim.append(a_ / np.linalg.norm(a_))
+    return np.array(pos, np.float32), np.array(aim, np.float32)
 
 
 class GroundObject(object):
@@ -3667,8 +3790,22 @@ class VehicleLayer(object):
                 GL.glUniform1f(U["uLampExp"], PAD_LAMP_EXP)
                 GL.glUniform1f(U["uLampGain"], FLOOD_GAIN * PAD_GAIN)
                 GL.glUniform1f(U["uLampOn"], 1.0 - min(max((mus + 0.1) / 0.12, 0.0), 1.0))
+                sl = getattr(model, 'slamps', None)
+                n_ = 0 if sl is None else len(sl)
+                GL.glUniform1i(U["uSLampN"], n_)
+                if n_:
+                    buf = np.zeros((256, 3), f32)
+                    buf[:n_] = sl
+                    GL.glUniform3fv(U["uSLamp"], 256, buf)
+                GL.glUniform1f(U["uSLampCd"], STRUCT_LAMP_CD)
+                fp, fa = model.floods
+                GL.glUniform3fv(U["uFlPos"], 8, fp)
+                GL.glUniform3fv(U["uFlAim"], 8, fa)
+                GL.glUniform1f(U["uFlCd"], FLOOD_STRUCT_CD)
+                GL.glUniform1f(U["uFlExp"], FLOOD_STRUCT_EXP)
             else:
                 GL.glUniform1f(U["uLampOn"], 0.0)
+                GL.glUniform1i(U["uSLampN"], 0)
             GL.glUniform2f(U["uViewPx"], float(view.hdrSize[0]), float(view.hdrSize[1]))
             GL.glUniform1f(U["uThinGain"], THIN['gain'])
             GL.glUniform1i(U["uTex"], 0)
@@ -3693,8 +3830,58 @@ class VehicleLayer(object):
                     GL.glActiveTexture(GL.GL_TEXTURE0)
                     GL.glBindTexture(GL.GL_TEXTURE_2D, p['tex'])
                 GL.glDrawElements(GL.GL_TRIANGLES, p['count'], GL.GL_UNSIGNED_INT, None)
+            if lamps is not None and getattr(model, 'slamps', None) is not None and len(model.slamps):
+                lon = 1.0 - min(max((mus + 0.1) / 0.12, 0.0), 1.0)
+                if lon > 0.0:
+                    self._glow(res, view, model, vid, cam.T @ Cv, rel, dist, lon)
             GL.glBindVertexArray(view.vao)
             GL.glDisable(GL.GL_DEPTH_TEST)
+
+    def _glow(self, res, view, model, vid, rot, rel, dist, lon):
+        """The structure's lamps as glowing points, depth-tested against the model just drawn: the warm ones, then the
+        floods' white glare."""
+        f32 = np.float32
+        if not hasattr(model, 'glowVbo'):
+            pts = np.vstack([model.slamps, model.floods[0]]).astype(f32)
+            model.glowVbo = GL.glGenBuffers(1)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, model.glowVbo)
+            GL.glBufferData(GL.GL_ARRAY_BUFFER, pts.nbytes, pts, GL.GL_STATIC_DRAW)
+        vao = view.modelVaos.get((vid, 'glow'))
+        if vao is None:
+            vao = view.modelVaos[(vid, 'glow')] = GL.glGenVertexArrays(1)
+            GL.glBindVertexArray(vao)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, model.glowVbo)
+            loc = GL.glGetAttribLocation(res.glowProg, "aPos")
+            GL.glEnableVertexAttribArray(loc)
+            GL.glVertexAttribPointer(loc, 3, GL.GL_FLOAT, GL.GL_FALSE, 12, None)
+        U = res.glowU
+        GL.glUseProgram(res.glowProg)
+        GL.glUniformMatrix3fv(U["uRot"], 1, GL.GL_TRUE, rot.astype(f32))
+        GL.glUniform3fv(U["uTrans"], 1, rel.astype(f32))
+        GL.glUniform2f(U["uTan"], view.tanX, view.tanY)
+        GL.glUniform1f(U["uNear"], max(0.05, dist - model.radius))
+        GL.glUniform1f(U["uFar"], dist + model.radius)
+        GL.glUniform1f(U["uPxPerM"], (view.hdrSize[0] / 2.0) / view.tanX)
+        GL.glBindVertexArray(vao)
+        GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)
+        GL.glDepthMask(GL.GL_FALSE)
+        GL.glDepthFunc(GL.GL_LEQUAL)
+        GL.glEnablei(GL.GL_BLEND, 0)
+        GL.glBlendFunci(0, GL.GL_ONE, GL.GL_ONE)
+        near = min(1.0, (80.0 / max(dist, 1.0)) ** 2)
+        n_ = len(model.slamps)
+        GL.glUniform1f(U["uSizeM"], 0.35)
+        GL.glUniform3f(U["uCol"], 1.0, 0.55, 0.22)
+        GL.glUniform1f(U["uGlow"], STRUCT_GLOW * near * lon)
+        GL.glDrawArrays(GL.GL_POINTS, 0, n_)
+        GL.glUniform1f(U["uSizeM"], 0.8)
+        GL.glUniform3f(U["uCol"], 0.9, 0.95, 1.0)
+        GL.glUniform1f(U["uGlow"], 2.5 * near * lon)
+        GL.glDrawArrays(GL.GL_POINTS, n_, 8)
+        GL.glDisablei(GL.GL_BLEND, 0)
+        GL.glDepthMask(GL.GL_TRUE)
+        GL.glDepthFunc(GL.GL_LESS)
+        GL.glDisable(GL.GL_PROGRAM_POINT_SIZE)
 
     def _point(self, res, view, fs, dir_j2k, mag):
         """A vehicle as a point (the eye's offset from TRU1's point is
@@ -4472,6 +4659,9 @@ def main(argv=None):
     if os.path.exists(os.path.join(GANTRY_MODEL, "model.json")) and args.pad != 'none':
         lat, lon, heading = PADS[args.pad]
         models[args.pad] = Model(GANTRY_MODEL, point=False)
+        models[args.pad].slamps = structure_lamps(models[args.pad])
+        models[args.pad].floods = structure_floods(models[args.pad])
+        print("portview: %d warm lamps and 8 floods on the pad structure" % len(models[args.pad].slamps), file=sys.stderr)
         ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_M, heading, offset=GANTRY_STACK))
         PAD_LIGHTS['obj'] = ground[-1]
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
