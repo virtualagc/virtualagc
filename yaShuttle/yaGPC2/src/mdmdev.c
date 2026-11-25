@@ -92,6 +92,7 @@ static void discrete_write(uint16_t (*out)[NCARD][NCHAN], bool (*seen)[NCARD][NC
  * ------------------------------------------------------------------- */
 #define IMU_READ   0x24C0Du   /* FIOIMUC1: card 3 ch 0, 14 data words      */
 #define IMU_DSCRT  0x27C00u   /* FIOIMUC2: card 15 ch 0, the IMU discretes  */
+#define TACAN_WRITE 0x200C1u  /* FIOHO205: card 0 ch 6, TACAN control register and antenna word */
 #define IMU_WRITE  0x20C01u   /* FIOIMUC3: card 3 ch 0, command words 1, 2  */
 #define STU_READ   0x24C42u   /* FIOFFIC5: card 3 ch 2, a star tracker's 3 words */
 #define STU_WRITE  0x20C40u   /* FIOHO203: card 3 ch 2, its command word     */
@@ -970,6 +971,7 @@ static void crew_apply(int k, const uint8_t *buf, int len) {
         uint16_t now = (op == CREW_OP_SET) ? (uint16_t)(was | w)
                      : (op == CREW_OP_RESET) ? (uint16_t)(was & ~w) : w;
         crewIn[k][card][c] = now;
+        if (k >= 1 && k <= 3 && card == 9u && c == 2u) landaids_tacan_gpc(k, (now & 0x0001u) != 0);  /* O7 TACAN MODE: GPC */
         if (crewTrace && now != was)
             fprintf(stderr, "mdmdev: %s%d card %u ch %u crew contacts %04x -> %04x\n",
                     k <= CREW_NFF ? "FF" : "FA", (k - 1) % CREW_NFF + 1, card, c, was, now);
@@ -2103,6 +2105,10 @@ void mdmdev_output(int busID, uint32_t cmd, const uint16_t *words, int n,
         int u = ff_unit(busID);
         ffWrites++;
         if (f == GPS_WRITE && u <= 3) { gps_write(u, words, n); return; }
+        if (f == TACAN_WRITE && u <= 3) {
+            landaids_tacan_command(u, words[0], n > 1 ? words[1] : 0);
+            return;
+        }
         if (f == STU_WRITE && startrk_unit(u)) {
             startrk_command(startrk_unit(u), words[0], vehdyn_enabled() ? vehdyn_state()->t
                                                                          : sharedUs / 1e6);
