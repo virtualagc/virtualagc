@@ -599,8 +599,10 @@ def build(scn_id, sc, o, tape, run, base, row, rows, env_extra):
 
 
 def star_env(o, env):
-    """portview's --star-core and --star-gain, through the environment the drivers and simulatePASS pass on (0 = not set)."""
+    """portview's --star-core and --star-gain, through the environment the drivers and simulatePASS pass on (0 = not set),
+    and its window size: the same percentage as the displays', with 50% the 368 simulatePASS gives portview by default."""
     if o.get("portview"):
+        env["NSTS_PORTVIEW_SIZE"] = str(int(round(368 * float(o.get("size", 50)) / 50.0)))
         for key, var in (("starcore", "NSTS_STAR_CORE"), ("stargain", "NSTS_STAR_GAIN")):
             if float(o.get(key) or 0) > 0:
                 env[var] = "%g" % float(o[key])
