@@ -1913,9 +1913,9 @@ def main():
                          "not started, so nothing moves -- until the session command 'go' "
                          "(or Enter, when this terminal is interactive): time to arrange "
                          "the windows before anything happens")
-    ap.add_argument("--portview-size", type=int, default=368, metavar="N",
-                    help="portview.py's --size (768 is full size; default 368, four views "
-                         "across one 1920-wide screen)")
+    ap.add_argument("--portview-size", type=int, default=int(os.environ.get("NSTS_PORTVIEW_SIZE") or 368), metavar="N",
+                    help="portview.py's --size (768 is full size; default $NSTS_PORTVIEW_SIZE if set, "
+                         "else 368, four views across one 1920-wide screen)")
     ap.add_argument("--truth-ball", action="store_true",
                     help="start truthball.py, a debugging attitude indicator driven "
                          "by the vehicle dynamics' truth state (needs YAGPC_MDM_DEVICES=1 "
