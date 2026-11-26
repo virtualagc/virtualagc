@@ -59,7 +59,7 @@ FT = 0.3048
 PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
 RBAR_MIR_FT = 1000.0             # STS-81's RBAR ARRIVAL (Flight Plan p. 49: "DAP: LOWZ (1000 ft/305 m)", ESTABLISH RBAR at Ti+72 min)
-RBAR_MIR_VMAX = 3.0              # the R-bar leg from the MC-3 arrival point (-900 ft, +1800 ft) to the 1000 ft R-bar point
+RBAR_MIR_VMAX = 10.0              # the R-bar leg from the MC-3 arrival point (-900 ft, +1800 ft) to the 1000 ft R-bar point
 MIR_CLOSE_FPS = 0.49             # the R-bar closing to 200 ft, tuned so CAPTURE comes at the Mission Report's Ti+160.9 min with the Ti+72.1 aim and the 66 kft Ti point: 0.50 -> Ti+159.2 (rr15), 0.49 -> 160.2 (rr17), 0.47 -> 165.5 (rr16; the response is not linear).  The 100 ft point comes at ~Ti+133.8 (Flight Plan +129)
 FP_PROFILE = None              # a mission file's "fp_profile" {"r170": Ti+min the ring is 170 ft out, "r100": Ti+min it is 100 ft out}: the R-bar approach flown to the Flight Plan's times (STS-81 pp. 3-14: 170 ft stationkeeping at MET 1/17:39 = Ti+96, 100 ft at 1/18:10 = Ti+127) instead of MIR_CLOSE_FPS
 TORVA_END_FT = 340.0             # the +V-bar point TORVA ends at (CG range; the card's arrival is "415-315 ft")
