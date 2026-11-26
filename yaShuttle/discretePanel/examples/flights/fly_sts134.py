@@ -960,8 +960,14 @@ class Flight:
         # measure from: STS-134's 124.3 x 175.8 for 259.2 ft/s is unreachable
         # otherwise, and taken so it designs to 262.0 (flight sts134d)
         mr = (6378137.0 - 6371000.0) / 1852.0
+        if FL.get("apsis_eq"):
+            # STS-81: the Missions Summary's 159.9 x 84.9 are heights above the EQUATORIAL radius (the Orbiter's own element
+            # sets, planet4589 S24711, give 163.3 x 88.7 above a 6,371 km sphere = 159.5 x 84.9 above the equatorial radius
+            # after OMS-2, and 213.5 x 145.5 = 209.7 x 141.7 after OMS-5; the burn table at k = 1 from the flown state
+            # reproduces them)
+            mr = 0.0
         out = subprocess.run([sys.executable, omst, "design", state, "%.2f" % (FL["oms2_hp"] - mr),
-                              "%.2f" % (FL["oms2_ha"] - mr), "--ahead", "%.1f" % OMS2_AHEAD_DEG], check=True,
+                              "%.2f" % (FL["oms2_ha"] - mr), "--ahead", "%.1f" % FL.get("oms2_ahead", OMS2_AHEAD_DEG)], check=True,
                              capture_output=True, text=True).stdout
         m = re.search(r"HT ([\d.]+)\s+THETA T ([\d.]+)", out)
         ht, th = float(m.group(1)), float(m.group(2))

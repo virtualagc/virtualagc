@@ -194,7 +194,7 @@ def main():
     ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
     ap.add_argument("--oms-assist-dt", type=float, default=0.0, help="ASSIST_OMS_DT, s: 0 = no OMS assist, as flown (the Missions Summary, pdf p. 127, makes STS-90 the first to use it); the tape's STS-134 value is 109")
     ap.add_argument("--node-lead", type=float, default=NODE_LEAD_DEG, help="deg the launch plane's node leads (is east of) Mir's at SRB ignition: the lower Orbiter's node regresses faster than Mir's, so by Ti (015 01:14) the planes coincide only if the launch plane led; the J2 integral over the documented orbits is %.3f deg (see NODE_LEAD_DEG); 0 = launch into Mir's plane as it was" % NODE_LEAD_DEG)
-    ap.add_argument("--apogee-trim", type=float, default=-11.3, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
+    ap.add_argument("--apogee-trim", type=float, default=-6.9, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
     node += a.node_lead
@@ -271,7 +271,7 @@ def main():
     t0 = [12, 9, 27, 22.984]
     flight = {"name": "sts081", "dolilu": "sts081-dolilu.json", "rnp": [1997, 12],
               "epoch": CLOCK_START.strftime("%Y-%m-%dT%H:%M:%S"), "t0": t0, "gmtlo": [12, 9, 27, 20.0],
-              "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9,
+              "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9, "apsis_eq": True,
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
               "env": {"YAGPC_VEHDYN_ET_INERT_LB": "66000", "YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
