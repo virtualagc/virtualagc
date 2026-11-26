@@ -1118,11 +1118,12 @@ class RadarNav(object):
         w = self.strk_watch()
         g = w.get
         return ("RR RNG %s ft RDOT %s ft/s ROLL %s PITCH %s; ACPT ang %s/%s rng %s rdot %s, REJ rng %s rdot %s; "
-                "RESID rng %s rdot %s; SV UPDATE POS %s kft; sensor %s, SV SEL bit %s"
+                "RESID rng %s rdot %s; ang REJ %s/%s RESID %s/%s; SV UPDATE POS %s kft; sensor %s, SV SEL bit %s"
                 % (_f(g("CGYV_RR_RNG_LFE")), _f(g("CGYV_RR_RNGR_LFE")), _f(g("CGYV_RR_ROLL_LFE")),
                    _f(g("CGYV_RR_PITCH_LFE")), g("CGNV_N_ACCEPT$1"), g("CGNV_N_ACCEPT$2"), g("CGNV_N_ACCEPT$3"),
                    g("CGNV_N_ACCEPT$4"), g("CGNV_N_REJECT$3"), g("CGNV_N_REJECT$4"), _f(g("CGNV_DISP_DELQ$3")),
-                   _f(g("CGNV_DISP_DELQ$4")), _f(g("CGNV_R_MEAS_RSS")), g("CGZV_ST_RR_COAS_LFE"),
+                   _f(g("CGNV_DISP_DELQ$4")), g("CGNV_N_REJECT$1"), g("CGNV_N_REJECT$2"), _f(g("CGNV_DISP_DELQ$1")),
+                   _f(g("CGNV_DISP_DELQ$2")), _f(g("CGNV_R_MEAS_RSS")), g("CGZV_ST_RR_COAS_LFE"),
                    w.sv_sel_bit()))
 
     def ku_switches(self, name, **pos):

@@ -2894,3 +2894,11 @@ Mir rendezvous with no C change.  Details and open items are in `HANDOFF-MIR-STS
   `STAR_TRACKER_PLAN.md`, `TIMELINE-STS134.md`, `CAUSES.md` (#159, #164),
   `discretePanel/groundstation.py`, `portview.py`, `SCRIPTABLE_CONTROLS.md`,
   `examples/flights/fly_sts134.py`, `examples/1gpc-ops201-imu.script`.
+
+## 5o. STS-81 on Mir: the pre-Ti TRACK fix and navigation after Ti (2026-11-25, Linux)
+
+- STS-81 rr9/dk9 (pre-Ti TRACK fixed, f161084): -Z held 1.4 deg from Mir before Ti, S TRK PRES Ti-32.6, radar lock Ti-23.5, Ti 9.76 ft/s; MC1/2/3 sensed 0.60/1.65/2.98 (flown ~0.7/0.7/0.2); capture ~Ti+157 min (flown ~160.9), hard mate reached.
+- Nav: PASS range within 5-50 ft of truth from 132 kft to ~1 kft; nav error at MC2/MC3 only 25-40 ft, so the MC2/MC3 size mismatch is NOT navigation. The 23 kft "diffs" and big FLTR/PROP errors in rel_errors are mixed-frame (15/20/24) sampling artifacts (1 s x 24 kft/s). Absolute orbiter/target vectors drift together to ~500-650 ft by Ti+100 (relative only corrected).
+- Real divergence from ~Ti+105-113 (range <800 ft, OUTPUT LOW at ~691 ft): PASS range error +128 ft at 174 ft growing to ~3.4 kft by mate, mostly lateral; range/rdot residuals <1 ft; ang accept counts stall at 727 (Ti+122, ~225 ft) and 750 (Ti+131); all RR counts freeze after Ti+131.8 (range < ~174 ft). rr10 (angle REJ and RESID now logged) re-runs RBAR->HOLD to see why.
+
+The fix itself: fly_rndz134.py waits for the UNIV PTG page title (the year-prefix wait matched SPEC 34); commit f161084.  The Ku radar procedure is the STS-103 KU OPS card (CC 8-5) and the Ku Workbook 7.4 (RNDZ_KU_CNTL=PNL for radar ops).
