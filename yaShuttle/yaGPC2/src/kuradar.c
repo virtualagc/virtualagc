@@ -47,6 +47,11 @@
  * CGNS_M_BODY_TO_RR is the source's INITIAL (CGNMC2.hal 399-401), as
  * flown: a turn of 67 deg about body Z.
  *
+ * (CLOSE-RANGE WANDER: 3 m of structure wander read 1.7 deg at 330 ft, far over PASS's 0.19 deg
+ * allowance; PASS then rejected the angles from ~240 ft and its lateral state ran off (3.4 kft by
+ * the mate, rr10/dk9).  0.3 m, YAGPC_KU_WANDER_M, keeps the angle residuals under 0.7 deg and PASS
+ * range within 2 ft at 170 ft (rr11); still a judgement, no source gives the wander.)
+ *
  * THE MODEL -- an estimate, not a specification.  There is no SM computer
  * here to point the antenna from GNC's line of sight (SM antenna
  * management), so the radar stands in for it: powered ON in a RADAR mode
@@ -273,7 +278,12 @@ void kuradar_read(uint16_t w[10], double t) {
     roll_pitch(g.u, &roll, &pitch);
     if (R < 3000.0) {
         double dt = t - rr.wanderT, tau = 30.0;
-        double sg = atan(3.0 / (R * FT)) * R2D;
+        static double wander_m = -1.0;          /* YAGPC_KU_WANDER_M: the structure's wander, m (default 0.3) */
+        if (wander_m < 0.0) {
+            const char *e = getenv("YAGPC_KU_WANDER_M");
+            wander_m = e ? atof(e) : 0.3;
+        }
+        double sg = atan(wander_m / (R * FT)) * R2D;
         double k = dt > 0 ? exp(-dt / tau) : 1.0;
         for (int i = 0; i < 2; i++)
             rr.wander[i] = rr.wander[i] * k + sg * sqrt(1.0 - k * k) * gauss();
