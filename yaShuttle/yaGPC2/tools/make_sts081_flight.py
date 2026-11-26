@@ -49,6 +49,27 @@ SRB_LB = 1298753.0
 TAPE_ET_LB = 1662224.0           # the tape's default ET, from sts135's MASS_VEHICLE_ET shift (1,657,525 lb gave -146.05 slug)
 
 
+# THE MECO TARGETS, from the Orbiter's own tracked orbit (planet4589 elements/24700/S24711, NORAD 24711).  The first
+# element set is NASA's state 2 s after the OMS-2 cutoff (epoch 012/10:11:12.9): altitude 159.80 nmi above the equatorial
+# radius, 25,232.1 ft/s, flight-path angle -0.073 deg, osculating 160.1 x 90.6.  Backing the Mission Report's 75.5 ft/s
+# OMS-2 out of it (47.6 s, inertial hold along the velocity) and coasting back in the J2-J4 field gives the coast state
+# just after MECO (MET 513.3, the Mission Report's SSME shutdown is MET 511.8): 57.56 nmi, 25,879.7 ft/s, +0.604 deg,
+# and before OMS-2 160.0 x 49.4.  The sim's cutoff lands +7.9 ft/s, +0.15 nmi and +0.033 deg from its targets (run9), so
+# the targets are those less that bias.  THE MISSIONS SUMMARY'S "MECO CMD 8:29.9, VI 25922 / 25915" ON THE STS-81 PAGE
+# ARE STS-80'S, COPIED (the two pages' MECO blocks are identical; STS-80 flew 28.45 deg): the earlier targets (VI
+# 25,915, a + 49-53 nmi, 0.5 deg) put MECO 6.6 nmi low and 45 ft/s fast, the post-OMS-2 apsis line 14 deg off and OMS-2
+# at 82 ft/s for 75.5.
+MECO_VI = 25880.0
+MECO_ALT_NMI = 57.41
+MECO_FPA_DEG = 0.571
+# OMS-2's aim, osculating at the cutoff, from the same tracked state (the Missions Summary's 159.9 x 84.9 are mean-element
+# heights; 75.5 ft/s from 160.0 x 49.4 reaches the osculating 90.6, not 84.9)
+# the angle from the burn to the perigee target: the tracked post-burn true anomaly 187.5 at the epoch, 184.2 at TIG, so ~175.8;
+# 174.3 reproduced the tracked phase in run10 (187.4 against 187.5)
+OMS2_AHEAD = 174.3
+OMS2_HP_OSC = 90.6
+OMS2_HA_OSC = 160.1
+
 # THE PLANE LEAD.  Differential nodal regression, J2, Orbiter against Mir (209 nmi circular), integrated over the
 # documented orbits (heights above a 6,371 km sphere, perigee x apogee, nmi) from OMS-2 to Ti: 12 Jan 10:10 -> OMS-3
 # 13:03 at 84.9 x 159.9 (-0.053 deg); OMS-3 -> OMS-5 (14 Jan 09:10, 44.1 h) at 122.6 x 165.0, the orbit the sim's
@@ -242,7 +263,7 @@ def main():
         elif m["op"] == 96:
             for f in m["fields"]:
                 if f.get("name") == "VDMAG":
-                    f["E"] = 25915.0
+                    f["E"] = MECO_VI
         elif m["op"] == 37:
             for f in m["fields"]:
                 n = f.get("name", "")
@@ -271,7 +292,7 @@ def main():
     t0 = [12, 9, 27, 22.984]
     flight = {"name": "sts081", "dolilu": "sts081-dolilu.json", "rnp": [1997, 12],
               "epoch": CLOCK_START.strftime("%Y-%m-%dT%H:%M:%S"), "t0": t0, "gmtlo": [12, 9, 27, 20.0],
-              "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": 84.9, "oms2_ha": 159.9, "apsis_eq": True,
+              "oms2_dtig": round((OMS2_TIG - ET_SEP).total_seconds(), 1), "oms2_hp": OMS2_HP_OSC, "oms2_ha": OMS2_HA_OSC, "apsis_eq": True, "oms2_ahead": OMS2_AHEAD,
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
               "env": {"YAGPC_VEHDYN_ET_INERT_LB": "66000", "YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
@@ -285,9 +306,9 @@ def main():
     # the OPS 1 overlay: the MECO targets
     rc = json.load(open(os.path.join(a.out, "sts134-reconfig.json")))
     rc["flight"] = "STS-81, Atlantis"
-    vi = 25915.0
-    gam = 0.5                    # the tape's flight-path angle: STS-81's MECO value not found
-    r_ft = meco_radius_for_apogee(159.9 + a.apogee_trim, vi, gam)
+    vi = MECO_VI
+    gam = MECO_FPA_DEG
+    r_ft = A_PASS_FT + MECO_ALT_NMI * NM_FT        # (--apogee-trim is no longer used: the radius is the tracked one)
     alt = (r_ft - A_PASS_FT) / NM_FT
     rc["notes"] = ["STS-81 MECO targets: VI 25,915 ft/s (predicted; 25,922 flown, Missions Summary 2-98), the tape's flight-path angle 0.5 deg (STS-81's value NOT found), and the radius that makes the coast's apogee 159.9 nmi, the post OMS-2 apogee (OMS-2 at apogee raises the perigee): %.2f nmi above PASS's equatorial radius.  104%% throttle as STS-134 (K_CMD 104).  The rest as sts134-reconfig.json." % alt]
     for c in rc["cells"]:
@@ -300,9 +321,9 @@ def main():
         if c["name"] == "CGGS_V_MAG_MECO_NOM":
             c["E"] = vi
         elif c["name"] in ("CGGS_RAD_MECO_NOM", "CGGV_RAD_MECO"):
-            c["H"] = words(ibm_long(r_ft)); c["value"] = "%.0f ft = a + %.2f nmi (computed for a 159.9 nmi apogee at VI 25,915, FPA 0.5 deg; tape 21,290,308 = a + 60.02 nmi)" % (r_ft, alt)
+            c["H"] = words(ibm_long(r_ft)); c["value"] = "%.0f ft = a + %.2f nmi (the tracked MECO altitude less the sim's cutoff bias, see MECO_ALT_NMI; tape 21,290,308 = a + 60.02 nmi)" % (r_ft, alt)
         elif c["name"] == "CGGS_FPA_MECO_NOM":
-            c["H"] = words(ibm_short(math.radians(gam))); c["value"] = "0.5 deg: the tape's (STS-81's value not found)"
+            c["H"] = words(ibm_short(math.radians(gam))); c["value"] = "%.3f deg: the tracked flight-path angle less the sim's cutoff bias (MECO_FPA_DEG; the tape's is 0.5)" % gam
     json.dump(rc, open(os.path.join(a.out, "sts081-reconfig.json"), "w"), indent=1)
     print("Mir plane: inc %.4f node(EF) %.4f  pad off-plane at SRB ign %.3f deg  in-plane %s (+%.0f s)" % (inc, node, math.degrees(off), t_in.strftime("%H:%M:%S"), (t_in - SRB_IGN).total_seconds()))
     print("IYD", pl, " T_GMTLO_REF", round(in_plane), " clock start", CLOCK_START.isoformat(), " MECO radius %.0f ft = a + %.2f nmi" % (r_ft, alt))

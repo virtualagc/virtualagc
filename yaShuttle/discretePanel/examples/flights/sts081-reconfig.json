@@ -1,14 +1,14 @@
 {
  "flight": "STS-81, Atlantis",
  "notes": [
-  "STS-81 MECO targets: VI 25,915 ft/s (predicted; 25,922 flown, Missions Summary 2-98), the tape's flight-path angle 0.5 deg (STS-81's value NOT found), and the radius that makes the coast's apogee 159.9 nmi, the post OMS-2 apogee (OMS-2 at apogee raises the perigee): 50.85 nmi above PASS's equatorial radius.  104% throttle as STS-134 (K_CMD 104).  The rest as sts134-reconfig.json."
+  "STS-81 MECO targets: VI 25,915 ft/s (predicted; 25,922 flown, Missions Summary 2-98), the tape's flight-path angle 0.5 deg (STS-81's value NOT found), and the radius that makes the coast's apogee 159.9 nmi, the post OMS-2 apogee (OMS-2 at apogee raises the perigee): 57.41 nmi above PASS's equatorial radius.  104% throttle as STS-134 (K_CMD 104).  The rest as sts134-reconfig.json."
  ],
  "cells": [
   {
    "name": "CGGS_V_MAG_MECO_NOM",
    "config": "G16",
    "addr": "0f102",
-   "E": 25915.0,
+   "E": 25880.0,
    "was": 25819.0
   },
   {
@@ -22,25 +22,25 @@
    "name": "CGGS_RAD_MECO_NOM",
    "config": "G16",
    "addr": "0f13c",
-   "H": "4714403B1B7AD80A",
+   "H": "471449F6C0FE9100",
    "was": "471441F040000000",
-   "value": "21234610 ft = a + 50.85 nmi (computed for a 159.9 nmi apogee at VI 25,915, FPA 0.5 deg; tape 21,290,308 = a + 60.02 nmi)"
+   "value": "21274476 ft = a + 57.41 nmi (the tracked MECO altitude less the sim's cutoff bias, see MECO_ALT_NMI; tape 21,290,308 = a + 60.02 nmi)"
   },
   {
    "name": "CGGV_RAD_MECO",
    "config": "G16",
    "addr": "0f140",
-   "H": "4714403B1B7AD80A",
+   "H": "471449F6C0FE9100",
    "was": "471441F040000000",
-   "value": "21234610 ft = a + 50.85 nmi (computed for a 159.9 nmi apogee at VI 25,915, FPA 0.5 deg; tape 21,290,308 = a + 60.02 nmi)"
+   "value": "21274476 ft = a + 57.41 nmi (the tracked MECO altitude less the sim's cutoff bias, see MECO_ALT_NMI; tape 21,290,308 = a + 60.02 nmi)"
   },
   {
    "name": "CGGS_FPA_MECO_NOM",
    "config": "G16",
    "addr": "0f0da",
-   "H": "3F23BE8D",
+   "H": "3F28D1EE",
    "was": "3F2E77B8",
-   "value": "0.5 deg: the tape's (STS-81's value not found)"
+   "value": "0.571 deg: the tracked flight-path angle less the sim's cutoff bias (MECO_FPA_DEG; the tape's is 0.5)"
   },
   {
    "name": "CGGS_ASSUMED_SSME_FAIL_MET",
