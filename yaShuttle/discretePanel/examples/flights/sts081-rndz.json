@@ -42,7 +42,7 @@
     "11": {
       "T1": 22.2,
       "EL": 0.0,
-      "DT": 54.7,
+      "DT": 49.9,
       "DX": -0.9,
       "DY": 0.0,
       "DZ": 1.8
@@ -50,7 +50,7 @@
     "12": {
       "T1": 52.4,
       "EL": 0.0,
-      "DT": 24.5,
+      "DT": 19.7,
       "DX": -0.9,
       "DY": 0.0,
       "DZ": 1.8
@@ -58,7 +58,15 @@
     "13": {
       "T1": 9.73,
       "EL": 0.0,
-      "DT": 14.77,
+      "DT": 10.0,
+      "DX": -0.9,
+      "DY": 0.0,
+      "DZ": 1.8
+    },
+    "10": {
+      "T1": 0.0,
+      "EL": 0.0,
+      "DT": 72.1,
       "DX": -0.9,
       "DY": 0.0,
       "DZ": 1.8
@@ -66,11 +74,13 @@
   },
   "orbiter_kg": 105600,
   "tacan": true,
-  "tgt_sets_note": "Every set aims at T2 = Ti+76.9 min, the TGT 10 (Ti) aim, as STS-134's sets do (20.0+56.9, 49.9+27.0, 17.0+10 after MC2 = 49.9; all 76.9).  STS-81's flown MC times (Ti+22.2, +52.4, +62.1) with that T2 give DT 54.7, 24.5, 14.77; EL 0 on set 12 so MC2 flies at the flown time instead of GWR iterating to EL 29.07 (TIG Ti+56.6, 4 min late).  rr9 kept STS-134's DTs (T2 79.1/83.6/76.6) and MC2/MC3 came out 1.65/2.98 ft/s (flown 0.7/0.2).",
+  "tgt_sets_note": "EXPERIMENT (rr14): every set aims at T2 = Ti+72.1 = the flown MC3 TIG (Ti+62.13) + STS-134's 10 min DT, which is the Flight Plan's ESTABLISH RBAR at Ti+72 (pp. 47-49): TGT 10 DT 72.1, set 11 DT 49.9 (22.2+49.9), set 12 DT 19.7 (52.4+19.7), set 13 DT 10.  Before: T2 = Ti+76.9 (STS-134's), rr12/13.",
   "apds_waits": [
     30,
     10,
     10
   ],
-  "apds_waits_note": "STS-81 flew capture 03:54:50 -> docking complete 04:02:43 (7.9 min, Mission Report); the ISS-era cards' crew waits (90, 30, 30 s) gave 10.3 min with the mechanism's own 198 s ring-in and the hooks.  No STS-81 card is available: these shorter waits are a CALIBRATION to the flown duration, not sourced."
+  "apds_waits_note": "STS-81 flew capture 03:54:50 -> docking complete 04:02:43 (7.9 min, Mission Report); the ISS-era cards' crew waits (90, 30, 30 s) gave 10.3 min with the mechanism's own 198 s ring-in and the hooks.  No STS-81 card is available: these shorter waits are a CALIBRATION to the flown duration, not sourced.",
+  "ti_point": "-66.04,0,1.2",
+  "ti_point_note": "CALIBRATION: with every set aimed at T2 = Ti+72.1 (the Flight Plan's ESTABLISH RBAR at Ti+72) STS-134's Ti point (-48.6 kft, 1.2 kft below) gives a 10.58 ft/s Ti burn in PASS (rndz_start's Lambert: 10.44); the flown OMS-7 was 9.5 ft/s.  -66.04 kft behind gives 9.50 in the Lambert scan (tools/rndz_start.py functions, DT 72.1, aim -0.9,0,1.8 kft).  No source gives STS-81's Ti point."
 }

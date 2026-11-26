@@ -233,6 +233,8 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
+    if "ti_point" in m:
+        g["TI_POINT"] = m["ti_point"]
     if "apds_waits" in m:
         g["APDS_WAITS"] = tuple(m["apds_waits"])
     if m.get("midcourse") == 3:
@@ -259,6 +261,7 @@ def apply_mission(a):
         ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
 
 
+TI_POINT = ""                       # "DX,DY,DZ" kft at Ti TIG for rndz_start (default TGT 9's -48.6,0,1.2); a mission file's "ti_point" replaces it
 APDS_WAITS = (90, 30, 30)           # s: the dampers' settle after CAPTURE, the lead to the ring check, the steady before RING IN (CC 9-11/9-12, ISS-era card); a mission file's "apds_waits" replaces them
 LAST_MC = 14                        # the last midcourse burn: 14 (STS-134's MC-4), 13 for a flight of three (STS-81)
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
@@ -1430,7 +1433,8 @@ class Rendezvous(ManualPhase, RadarNav, StarTrackerNav, fly_sts134.Flight):
         rel = None if fd13 else os.environ.get("YAGPC_VEHDYN_START_REL")
         if not rel and not fd13:
             out = subprocess.run([sys.executable, os.path.join(YAGPC2, "tools", "rndz_start.py"), "start",
-                                  "--targets", self.a.targets, "--ti", TI_TIG, "--start", EPOCH, "--norad", str(NORAD_ISS)],
+                                  "--targets", self.a.targets, "--ti", TI_TIG, "--start", EPOCH, "--norad", str(NORAD_ISS)]
+                                 + (["--ti-point=" + TI_POINT] if TI_POINT else []),
                                  check=True, capture_output=True, text=True).stdout
             open(os.path.join(self.a.logs, "rndz-start.txt"), "w").write(out)
             rel = re.search(r"YAGPC_VEHDYN_START_REL=(\S+)", out).group(1)
