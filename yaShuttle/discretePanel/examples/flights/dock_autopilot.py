@@ -387,14 +387,14 @@ def apds_sequence(self):
         return ", ".join(sorted(lit)) if lit else "(none)"
     self.say("A7L after CAPTURE: %s" % lights())
     # "PETAL POS BASE steady 60 s": the dampers working on the misalignment
-    self.wait_sim(90)
+    self.wait_sim(R.APDS_WAITS[0])
     a7l(self, "power_on", tag="a7l-dampers-off")
     if not a7l_wait(self, "RING ALIGNED", limit=60, label="dampers off"):
         return False
     self.say("A7L: dampers off, RING ALIGNED -- %s" % lights())
     # the ring check (CC 9-11): FIXER OFF, RING IN, 5 s, POWER ON; APDS CIRC
     # PROT OFF, RING OUT, 5 s, POWER OFF; POWER ON
-    self.wait_sim(30)
+    self.wait_sim(R.APDS_WAITS[1])
     a7l(self, "fixer_off", "ring_in", tag="a7l-fixers")
     self.wait_sim(5)
     a7l(self, "power_on", "circ_prot_off", "ring_out", tag="a7l-ringout")
@@ -404,7 +404,7 @@ def apds_sequence(self):
     # the retraction: RING ALIGNED and 30 s steady, then RING IN
     if not a7l_wait(self, "RING ALIGNED", limit=120, label="before RING IN"):
         return False
-    self.wait_sim(30)
+    self.wait_sim(R.APDS_WAITS[2])
     a7l(self, "ring_in", tag="a7l-retract")
     t0 = self.truth()["t"]
     if not a7l_wait(self, "READY TO HOOK", limit=300, label="RING IN"):

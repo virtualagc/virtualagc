@@ -233,6 +233,8 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
+    if "apds_waits" in m:
+        g["APDS_WAITS"] = tuple(m["apds_waits"])
     if m.get("midcourse") == 3:
         # STS-81 flew MC-1..MC-3 only (Mission Report); the arrival is MC-3's T2 and there is no MC-4
         g["LAST_MC"] = 13
@@ -257,6 +259,7 @@ def apply_mission(a):
         ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
 
 
+APDS_WAITS = (90, 30, 30)           # s: the dampers' settle after CAPTURE, the lead to the ring check, the steady before RING IN (CC 9-11/9-12, ISS-era card); a mission file's "apds_waits" replaces them
 LAST_MC = 14                        # the last midcourse burn: 14 (STS-134's MC-4), 13 for a flight of three (STS-81)
 PHASES = ["IPL", "UPLINK", "RNDZNAV", "TRACK", "STRKNAV", "TI", "RRNAV", "STRKEND", "TIBURN", "POSTTI",
           "MC1", "MC2", "MC3", "MC4", "ARRIVAL",
