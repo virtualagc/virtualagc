@@ -3,7 +3,7 @@
 ## Filename:	BANK_03_INTERPRETER_SECTION.agc
 ## Purpose:	Part of the source code for Solarium build 55. This
 ##		is for the Command Module's (CM) Apollo Guidance
-##		Computer (AGC), for Apollo 6.
+##		Computer (AGC), for Apollo 4 and 6.
 ## Assembler:	yaYUL --block1
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo/index.html
@@ -13,6 +13,7 @@
 ##		2016-08-18 RSB	Some corrections.
 ## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2026-11-25 MAS	Updated header to reflect both Apollo 4 and 6
 
 ## Page 70
 		SETLOC	6000
