@@ -52,6 +52,8 @@ int main(int argc, char **argv) {
     /* the state's GMT (index 126) is day*86400 + seconds of the day; Unix = Jan 1 of the year + that - 86400 */
     double gmt = v[126];
     double jan1_2011 = 1293840000.0;
+    const char *jy = getenv("VEHDYN_COAST_JAN1");     /* Unix time of Jan 1 of another year's flight (1997: 852076800) */
+    if (jy && *jy) jan1_2011 = atof(jy);
     double unix0 = jan1_2011 + gmt - 86400.0;
     vehdyn_reset(0.0);
     vehdyn_set_gmt_zero(unix0);

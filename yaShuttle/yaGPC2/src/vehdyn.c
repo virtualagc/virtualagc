@@ -459,7 +459,7 @@ static double padAltM = PAD_ALT_M_DEFAULT;
  * second-stage CG table): ET inert Xo 525, LO2 Xo 59, LH2 Xo 869.  SRBs:
  * 1,110 klb propellant (SCOM) and the rest inert, 1,299,069 lb each (the
  * mean of the two), CG Xo 975. */
-#define ET_INERT_KG      (58500.0 * 0.45359237)
+#define ET_INERT_KG      (fl.etInertLb * 0.45359237)
 #define ET_LO2_KG        (fl.etLo2Lb * 0.45359237)
 #define ET_LH2_KG        (fl.etLh2Lb * 0.45359237)
 #define ET_AXIS_ZO       63.5
@@ -554,11 +554,12 @@ static const double SRB_T[][2] = {   /* s, Mlbf */
  *   YAGPC_VEHDYN_SRB_LB        each SRB at SRB ignition, lb
  *   YAGPC_VEHDYN_SRB_PC50_S    the SRMs' 50 psia time after ignition, s
  *   YAGPC_VEHDYN_SSME_ISP      the SSMEs' predicted Isp tag value, s
+ *   YAGPC_VEHDYN_ET_INERT_LB   the ET's inert weight, lb (58,500 SLWT; a lightweight tank 66,000)
  * The ET's split assumes the SLWT's 58,500 lb inert and the 13,860 lb the
  * main engines burn on the pad here. */
 static struct {
-    double etLo2Lb, etLh2Lb, srbInertLb, pc50, isp;
-} fl = { 1381587.0, 231218.0, 189069.0, 120.13, 452.07 };
+    double etLo2Lb, etLh2Lb, srbInertLb, pc50, isp, etInertLb;
+} fl = { 1381587.0, 231218.0, 189069.0, 120.13, 452.07, 58500.0 };
 static void flight_params(void) {
     static bool done = false;
     if (done) return;
@@ -567,7 +568,8 @@ static void flight_params(void) {
     double etLb = 1657445.0, bias = 954.0;
     if ((e = yagpc_getenv("YAGPC_VEHDYN_ET_LB")) != NULL) etLb = atof(e);
     if ((e = yagpc_getenv("YAGPC_VEHDYN_FUEL_BIAS_LB")) != NULL) bias = atof(e);
-    double loaded = etLb - 58500.0 + 13860.0;
+    if ((e = yagpc_getenv("YAGPC_VEHDYN_ET_INERT_LB")) != NULL) fl.etInertLb = atof(e);   /* ET inert, lb: the SLWT's 58,500 by default, the LWT's 66,000 (STS-81's ET-83) */
+    double loaded = etLb - fl.etInertLb + 13860.0;
     fl.etLh2Lb = (loaded - bias) / 7.0 + bias;
     fl.etLo2Lb = (loaded - bias) * 6.0 / 7.0;
     if ((e = yagpc_getenv("YAGPC_VEHDYN_SRB_LB")) != NULL) fl.srbInertLb = atof(e) - 1110000.0;
