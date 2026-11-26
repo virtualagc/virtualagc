@@ -1,69 +1,70 @@
 {
- "name": "STS-81 rendezvous with Mir (fly_rndz134.py --mission)",
- "epoch": "1997-01-15T00:21:00",
- "ti_tig": "1997-01-15T01:13:54",
- "met_zero": "1997-01-12T09:27:22.984",
- "rnp": [
-  1997,
-  12
- ],
- "norad": 16609,
- "targets": "sts081-targets.txt",
- "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver. midcourse 3: STS-81 flew MC-1/2/3 (015/01:36:06, 02:06:16, 02:16:00 = Ti+22.2, +52.4 min and MC2+9.73 min); the TGT sets keep STS-134's offsets and DTs (STS-81's are not in any document here) with the flown times as T1; set 13's T2 is the R-bar point 600 ft below. START: the Orbiter's state at the 00:21:00 epoch is Mir's (TLE) plus the designed relative state (rndz_start.py; the same Ti-point geometry that reproduces the flown Ti of 9.5 ft/s), not the physics carry of the flown OMS-3..NH burns: those are ground-targeted from tracking and the carry (burn_chain.py, documented in HANDOFF-MIR-STS81) misses the phase by ~27 deg although it reproduces the documented apsides after NC5/NC6 to ~3 nmi with OMS-3 x1.22. set 13 (MC-3): T2 = MC-3 + 10 min = Ti+72 min, the Flight Plan's ESTABLISH RBAR (JSC-48000-81 p. 8-3 row 23, MET 1/17:15 = Ti+72 min) at the RBAR ARRIVAL range of 1000 ft (LOW Z from 1000 ft, p. 49). set 13 back to STS-134's offsets (-900 ft, +1800 ft) at MC-3 + 10 min = Ti+72 (the Flight Plan's ESTABLISH RBAR time): a 1000 ft R-bar aim needed 5.5 ft/s where the flight burned 0.2; the manual RBAR leg then flies to the R-bar at 1000 ft.",
- "approach": "rbar",
- "undock": {
-  "free": "020/02:12:37",
-  "hook": "020/02:13:17",
-  "undock": "020/02:15:30",
-  "att": [
-   2,
-   5,
-   270,
-   180
+  "name": "STS-81 rendezvous with Mir (fly_rndz134.py --mission)",
+  "epoch": "1997-01-15T00:21:00",
+  "ti_tig": "1997-01-15T01:13:54",
+  "met_zero": "1997-01-12T09:27:22.984",
+  "rnp": [
+    1997,
+    12
   ],
-  "sepx": [
-   "020/02:30:00",
-   3.0
-  ],
-  "note": "Mission Report: ODS powered 020:01:46:24, undocking complete 020:02:15:24, then a fly-around (not flown here) and the +X separation 3.0 ft/s at 020:04:02:00 (flown here 15 min after the undock instead: no fly-around leaves nothing to hold the Orbiter near Mir for 1h45m). FREE/hook/pulse GMTs follow STS-134's offsets (FREE = hook-40 s; hook = undock complete - 127 s)."
- },
- "return": {
-  "tff": 33.5,
-  "gamma_ei": -1.37,
-  "landing": "022/14:22:44",
-  "runway_slot": 2,
-  "runway": "33",
-  "note": "Mission Report: deorbit TIG 022:13:17:33.2 (355.8 ft/s, dual engine), landing KSC 33 022 14:22:44 GMT.  The planner takes the pass nearest that landing and puts EI 4,400 n.mi. from the runway (STS-134's 4,393-4,438); an EI pinned 31.7 min before the landing with the simulated orbit's phase gave REI 7,690 n.mi., an entry that cannot reach the runway.  gamma_ei -1.37 is the value at which the planner's burn is the flown 355.8 ft/s (-0.96, STS-134's design value, gave 270 ft/s and an entry that skipped out at perigee near the 51.6 deg latitude turning point).",
-  "rei": 4400
- },
- "no_gps": true,
- "midcourse": 3,
- "tgt_sets": {
-  "11": {
-   "T1": 22.2,
-   "EL": 0.0,
-   "DT": 56.9,
-   "DX": -0.9,
-   "DY": 0.0,
-   "DZ": 1.8
+  "norad": 16609,
+  "targets": "sts081-targets.txt",
+  "notes": "Ti = OMS-7 015:01:13:54.1 (Mission Report); epoch = Ti - 68 min, ten minutes before NH (015:00:16:12 RCS).  Target line: Mir's last element set before capture, SGP4 to the epoch, lvlh attitude, no docking port yet (HANDOFF-MIR-STS81.md step 4: the port axis is -Z in portview's Mir frame, vehdyn's is +X).  TGT sets stay STS-134's: STS-81's MC-1/2/3 at Ti+22/52/62 min fit them (T1 20, 49.9 with EL 29.07, +17), not otherwise checked. approach rbar: the Docking Module's axis is the nadir (the Shuttle docks from below, tail forward: Flight Plan JSC-48000-81 p. 8-3 'Docking Att, Tail Fwd, +ZLV -XVV', LVLH R180 P180 Y0), so the port's up is Mir -X. epoch moved to 00:21:00 (Ti-52.9 min): the flown burn table's NH (00:16:12) is carried by the physics (make_return_start --burn), not flown by the driver. midcourse 3: STS-81 flew MC-1/2/3 (015/01:36:06, 02:06:16, 02:16:00 = Ti+22.2, +52.4 min and MC2+9.73 min); the TGT sets keep STS-134's offsets and DTs (STS-81's are not in any document here) with the flown times as T1; set 13's T2 is the R-bar point 600 ft below. START: the Orbiter's state at the 00:21:00 epoch is Mir's (TLE) plus the designed relative state (rndz_start.py; the same Ti-point geometry that reproduces the flown Ti of 9.5 ft/s), not the physics carry of the flown OMS-3..NH burns: those are ground-targeted from tracking and the carry (burn_chain.py, documented in HANDOFF-MIR-STS81) misses the phase by ~27 deg although it reproduces the documented apsides after NC5/NC6 to ~3 nmi with OMS-3 x1.22. set 13 (MC-3): T2 = MC-3 + 10 min = Ti+72 min, the Flight Plan's ESTABLISH RBAR (JSC-48000-81 p. 8-3 row 23, MET 1/17:15 = Ti+72 min) at the RBAR ARRIVAL range of 1000 ft (LOW Z from 1000 ft, p. 49). set 13 back to STS-134's offsets (-900 ft, +1800 ft) at MC-3 + 10 min = Ti+72 (the Flight Plan's ESTABLISH RBAR time): a 1000 ft R-bar aim needed 5.5 ft/s where the flight burned 0.2; the manual RBAR leg then flies to the R-bar at 1000 ft.",
+  "approach": "rbar",
+  "undock": {
+    "free": "020/02:12:37",
+    "hook": "020/02:13:17",
+    "undock": "020/02:15:30",
+    "att": [
+      2,
+      5,
+      270,
+      180
+    ],
+    "sepx": [
+      "020/02:30:00",
+      3.0
+    ],
+    "note": "Mission Report: ODS powered 020:01:46:24, undocking complete 020:02:15:24, then a fly-around (not flown here) and the +X separation 3.0 ft/s at 020:04:02:00 (flown here 15 min after the undock instead: no fly-around leaves nothing to hold the Orbiter near Mir for 1h45m). FREE/hook/pulse GMTs follow STS-134's offsets (FREE = hook-40 s; hook = undock complete - 127 s)."
   },
-  "12": {
-   "T1": 52.4,
-   "EL": 29.07,
-   "DT": 27.0,
-   "DX": -0.9,
-   "DY": 0.0,
-   "DZ": 1.8
+  "return": {
+    "tff": 33.5,
+    "gamma_ei": -1.37,
+    "landing": "022/14:22:44",
+    "runway_slot": 2,
+    "runway": "33",
+    "note": "Mission Report: deorbit TIG 022:13:17:33.2 (355.8 ft/s, dual engine), landing KSC 33 022 14:22:44 GMT.  The planner takes the pass nearest that landing and puts EI 4,400 n.mi. from the runway (STS-134's 4,393-4,438); an EI pinned 31.7 min before the landing with the simulated orbit's phase gave REI 7,690 n.mi., an entry that cannot reach the runway.  gamma_ei -1.37 is the value at which the planner's burn is the flown 355.8 ft/s (-0.96, STS-134's design value, gave 270 ft/s and an entry that skipped out at perigee near the 51.6 deg latitude turning point).",
+    "rei": 4400
   },
-  "13": {
-   "T1": 9.73,
-   "EL": 0.0,
-   "DT": 10.0,
-   "DX": -0.9,
-   "DY": 0.0,
-   "DZ": 1.8
-  }
- },
- "orbiter_kg": 105600,
- "tacan": true
+  "no_gps": true,
+  "midcourse": 3,
+  "tgt_sets": {
+    "11": {
+      "T1": 22.2,
+      "EL": 0.0,
+      "DT": 54.7,
+      "DX": -0.9,
+      "DY": 0.0,
+      "DZ": 1.8
+    },
+    "12": {
+      "T1": 52.4,
+      "EL": 0.0,
+      "DT": 24.5,
+      "DX": -0.9,
+      "DY": 0.0,
+      "DZ": 1.8
+    },
+    "13": {
+      "T1": 9.73,
+      "EL": 0.0,
+      "DT": 14.77,
+      "DX": -0.9,
+      "DY": 0.0,
+      "DZ": 1.8
+    }
+  },
+  "orbiter_kg": 105600,
+  "tacan": true,
+  "tgt_sets_note": "Every set aims at T2 = Ti+76.9 min, the TGT 10 (Ti) aim, as STS-134's sets do (20.0+56.9, 49.9+27.0, 17.0+10 after MC2 = 49.9; all 76.9).  STS-81's flown MC times (Ti+22.2, +52.4, +62.1) with that T2 give DT 54.7, 24.5, 14.77; EL 0 on set 12 so MC2 flies at the flown time instead of GWR iterating to EL 29.07 (TIG Ti+56.6, 4 min late).  rr9 kept STS-134's DTs (T2 79.1/83.6/76.6) and MC2/MC3 came out 1.65/2.98 ft/s (flown 0.7/0.2)."
 }
