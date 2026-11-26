@@ -43,44 +43,54 @@
       "T1": 22.2,
       "EL": 0.0,
       "DT": 49.9,
-      "DX": -0.9,
+      "DX": 0.0,
       "DY": 0.0,
-      "DZ": 1.8
+      "DZ": 1.0
     },
     "12": {
       "T1": 52.4,
       "EL": 0.0,
       "DT": 19.7,
-      "DX": -0.9,
+      "DX": 0.0,
       "DY": 0.0,
-      "DZ": 1.8
+      "DZ": 1.0
     },
     "13": {
       "T1": 9.73,
       "EL": 0.0,
       "DT": 10.0,
-      "DX": -0.9,
+      "DX": 0.0,
       "DY": 0.0,
-      "DZ": 1.8
+      "DZ": 1.0
     },
     "10": {
       "T1": 0.0,
       "EL": 0.0,
       "DT": 72.1,
-      "DX": -0.9,
+      "DX": 0.0,
       "DY": 0.0,
-      "DZ": 1.8
+      "DZ": 1.0
     }
   },
-  "orbiter_kg": 105600,
+  "orbiter_kg": 109847,
   "tacan": true,
-  "tgt_sets_note": "EXPERIMENT (rr14): every set aims at T2 = Ti+72.1 = the flown MC3 TIG (Ti+62.13) + STS-134's 10 min DT, which is the Flight Plan's ESTABLISH RBAR at Ti+72 (pp. 47-49): TGT 10 DT 72.1, set 11 DT 49.9 (22.2+49.9), set 12 DT 19.7 (52.4+19.7), set 13 DT 10.  Before: T2 = Ti+76.9 (STS-134's), rr12/13.",
+  "tgt_sets_note": "EXPERIMENT (rr14): every set aims at T2 = Ti+72.1 = the flown MC3 TIG (Ti+62.13) + STS-134's 10 min DT, which is the Flight Plan's ESTABLISH RBAR at Ti+72 (pp. 47-49): TGT 10 DT 72.1, set 11 DT 49.9 (22.2+49.9), set 12 DT 19.7 (52.4+19.7), set 13 DT 10.  Before: T2 = Ti+76.9 (STS-134's), rr12/13.  rr18: the aim is now ON the R-bar, 1000 ft below (DX 0, DZ +1.0 kft): Flight Plan pp. 3-14 'RBAR ARRIVAL (DAP LOW Z 1000 ft)' at MET 1/17:15 = Ti+72, the tail-forward maneuver at 17:23 (Ti+80), 170 ft stationkeeping at 17:39 (Ti+96), 100 ft at 18:10 (Ti+127), 30 ft at 18:25 (Ti+142), contact 18:44 (Ti+161) (3 px/min on the page).  With that aim the Ti burn is 9.85 ft/s at best (Ti point -84 kft; flown 9.5).",
   "apds_waits": [
     30,
     10,
     10
   ],
   "apds_waits_note": "STS-81 flew capture 03:54:50 -> docking complete 04:02:43 (7.9 min, Mission Report); the ISS-era cards' crew waits (90, 30, 30 s) gave 10.3 min with the mechanism's own 198 s ring-in and the hooks.  No STS-81 card is available: these shorter waits are a CALIBRATION to the flown duration, not sourced.",
-  "ti_point": "-66.04,0,1.2",
-  "ti_point_note": "CALIBRATION: with every set aimed at T2 = Ti+72.1 (the Flight Plan's ESTABLISH RBAR at Ti+72) STS-134's Ti point (-48.6 kft, 1.2 kft below) gives a 10.58 ft/s Ti burn in PASS (rndz_start's Lambert: 10.44); the flown OMS-7 was 9.5 ft/s.  -66.04 kft behind gives 9.50 in the Lambert scan (tools/rndz_start.py functions, DT 72.1, aim -0.9,0,1.8 kft).  No source gives STS-81's Ti point."
+  "ti_point": "-84.0,0,1.2",
+  "ti_point_note": "CALIBRATION: with every set aimed at T2 = Ti+72.1 (the Flight Plan's ESTABLISH RBAR at Ti+72) STS-134's Ti point (-48.6 kft, 1.2 kft below) gives a 10.58 ft/s Ti burn in PASS (rndz_start's Lambert: 10.44); the flown OMS-7 was 9.5 ft/s.  -66.04 kft behind gives 9.50 in the Lambert scan (tools/rndz_start.py functions, DT 72.1, aim -0.9,0,1.8 kft).  No source gives STS-81's Ti point.",
+  "fp_profile": {
+    "r170": 96.0,
+    "r100": 127.0
+  },
+  "final_fps": 0.04,
+  "final_fps_note": "PACING: the 30 -> 10 ft closing slowed from 0.07 to 0.04 ft/s so that CAPTURE comes at the flown Ti+160.9 (rr18/dk19: aligned at 30 ft Ti+150.4 = the Flight Plan's NORM Z at ~151, capture Ti+156.7); the plan puts contact at 1/18:44 'SHK AOS +3 min'.",
+  "takeover_min": 5.0,
+  "takeover_note": "Manual takeover 5 min after MC-3's TIG (Ti+67), when the Orbiter is about 2,800 ft below (JSC-63400 Fig 20.17: 'manual takeover about 2,800 ft below ... braking gates 2,000-1,200 ft'); before, the manual phase began at T2 (Ti+72.2) 878 ft out with 5 ft/s of closing, overshot to 632 ft and took 11 min to settle.",
+  "oms_used_lb": "4266.0,4459.0",
+  "orbiter_kg_note": "vehdyn's ORBITER_KG is the Orbiter with FULL OMS and RCS, from which the propellant used is then subtracted (OMS_USED_LB, RCS_USED_LB); it was given 105,600 (the mass at Ti), so the typed STS-134 OMS use (15.7 klb) was subtracted again and the sim's Orbiter weighed 97,284 kg at Ti (the Ti burn lasted 10.0 s against the flown 12.0 s).  Now: A-6's 242,178 lb at insertion = 109,847 kg, less the STS-81 burns' OMS propellant before Ti at 19.32 lb/s per engine (OMS-2, OMS-3, OMS-5, OMS-6 both engines 47.6+51.4+58.5+63.3 = 220.8 s, NC-2 right engine 10.0 s: L 4,266 lb, R 4,459 lb) and the typed RCS use: about 105,380 kg at Ti (the ascent's own 8 klb consumption is already in the 242,178)."
 }

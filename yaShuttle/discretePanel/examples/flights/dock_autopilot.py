@@ -655,7 +655,7 @@ def dock(self):
                  "%.1f ft of the face" % CONTACT_FT)
 
     # "on through the face": it is the contact that stops the ring
-    goal = RangeSchedule(self, DOCK30_FT, [(FINAL_10_FT, FINAL_FPS), (-1.0, CLOSE_FPS)])
+    goal = RangeSchedule(self, DOCK30_FT, [(FINAL_10_FT, R.DOCK_FINAL_FPS or FINAL_FPS), (-1.0, CLOSE_FPS)])
     goal.holding = True
 
     def contact_report(truth, what):
@@ -687,7 +687,7 @@ def dock(self):
                 self.say("DOCK: aligned at 30 ft (%.2f, %.2f ft off the axis; camera P %s Y %s R %s deg); "
                          "initiating final approach at %.2f ft/s"
                          % ((s["r"][1], s["r"][2]) + (tuple("%+.1f" % a for a in cam) if cam else ("?",) * 3)
-                            + (FINAL_FPS,)))
+                            + (R.DOCK_FINAL_FPS or FINAL_FPS,)))
             return False
         truth = self.rel("ods", noisy=False)
         phase["cam"] = camera(self) or phase.get("cam")

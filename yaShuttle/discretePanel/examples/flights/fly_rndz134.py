@@ -141,6 +141,7 @@ import downlist      # noqa: E402
 import fly_sts134    # noqa: E402
 import groundstation  # noqa: E402
 from rndz_manual import ManualPhase  # noqa: E402
+import rndz_manual  # noqa: E402
 import rndz_instruments as ins_mod  # noqa: E402
 
 FT = 0.3048
@@ -214,7 +215,7 @@ def ascent_end_state(path, say=print):
     except Exception as e:
         say("start: WARNING no usable ascent capture (%s: %s); typed propellant figures" % (path, e))
         return dict(rcs_used=",".join("%.1f" % (x + e) for x, e in zip((109.6, 77.6, 78.0), PRESTART_EXTRA_RCS_LB)),
-                    oms_used="7820.736,7898.016", orbiter_kg=ORBITER_KG)
+                    oms_used=(OMS_USED_LB or "7820.736,7898.016"), orbiter_kg=ORBITER_KG)
 
 def apply_mission(a):
     """--mission FILE: the constants that were STS-134's (EPOCH, TI_TIG, MET_ZERO_UNIX, RNP, ORBITER_KG, the TGT sets and
@@ -233,6 +234,14 @@ def apply_mission(a):
         g["NORAD_ISS"] = m["norad"]
     for k, v in m.get("tgt_sets", {}).items():
         TGT_SETS[int(k)] = v
+    if "fp_profile" in m:
+        rndz_manual.FP_PROFILE = m["fp_profile"]
+    if "final_fps" in m:
+        g["DOCK_FINAL_FPS"] = m["final_fps"]
+    if "takeover_min" in m:
+        g["TAKEOVER_MIN"] = m["takeover_min"]
+    if "oms_used_lb" in m:
+        g["OMS_USED_LB"] = m["oms_used_lb"]
     if "ti_point" in m:
         g["TI_POINT"] = m["ti_point"]
     if "apds_waits" in m:
@@ -261,6 +270,9 @@ def apply_mission(a):
         ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
 
 
+DOCK_FINAL_FPS = None               # ft/s, the 30 -> 10 ft closing (dock_autopilot FINAL_FPS 0.07); a mission file's "final_fps" replaces it
+TAKEOVER_MIN = None                 # minutes after the last MC TIG that the manual phase takes over (STS-81: 5, about 2,800 ft below); a mission file's "takeover_min"
+OMS_USED_LB = ""                    # "L,R" lb of OMS propellant used before the start (default STS-134's typed 7820.7,7898.0); a mission file's "oms_used_lb"
 TI_POINT = ""                       # "DX,DY,DZ" kft at Ti TIG for rndz_start (default TGT 9's -48.6,0,1.2); a mission file's "ti_point" replaces it
 APDS_WAITS = (90, 30, 30)           # s: the dampers' settle after CAPTURE, the lead to the ring check, the steady before RING IN (CC 9-11/9-12, ISS-era card); a mission file's "apds_waits" replaces them
 LAST_MC = 14                        # the last midcourse burn: 14 (STS-134's MC-4), 13 for a flight of three (STS-81)
@@ -3163,6 +3175,10 @@ wait crt 1 title {year}/ timeout 600
         if self.a.no_mc:
             return
         t2 = self.mc_tig[LAST_MC] + TGT_SETS[LAST_MC]["DT"] * 60.0
+        if TAKEOVER_MIN is not None:
+            # the manual takeover comes before T2: JSC-63400 Fig 20.17, "manual takeover about 2,800 ft below", braking
+            # gates 2,000-1,200 ft, then the +R-bar arrival at 1,000 ft (the Flight Plan's RBAR ARRIVAL at Ti+72-74)
+            t2 = self.mc_tig[LAST_MC] + TAKEOVER_MIN * 60.0
         # THE DOCKING DAP, A10/B10, stored now, in the quiet after MC4: the
         # flight had it loaded long before the approach, and keyed in the
         # VBAR leg it cost ~4 min of the approach's clock

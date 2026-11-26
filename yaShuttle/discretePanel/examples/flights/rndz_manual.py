@@ -59,8 +59,9 @@ FT = 0.3048
 PULSE_FPS = 0.10                 # DAP A7 PRI TRAN PLS (p. 6-2)
 RBAR_FT = 600.0                  # APPROACH cue card: stationkeep 600-620 ft
 RBAR_MIR_FT = 1000.0             # STS-81's RBAR ARRIVAL (Flight Plan p. 49: "DAP: LOWZ (1000 ft/305 m)", ESTABLISH RBAR at Ti+72 min)
-RBAR_MIR_VMAX = 1.2              # the R-bar leg from the MC-3 arrival point (-900 ft, +1800 ft) to the 1000 ft R-bar point
+RBAR_MIR_VMAX = 3.0              # the R-bar leg from the MC-3 arrival point (-900 ft, +1800 ft) to the 1000 ft R-bar point
 MIR_CLOSE_FPS = 0.49             # the R-bar closing to 200 ft, tuned so CAPTURE comes at the Mission Report's Ti+160.9 min with the Ti+72.1 aim and the 66 kft Ti point: 0.50 -> Ti+159.2 (rr15), 0.49 -> 160.2 (rr17), 0.47 -> 165.5 (rr16; the response is not linear).  The 100 ft point comes at ~Ti+133.8 (Flight Plan +129)
+FP_PROFILE = None              # a mission file's "fp_profile" {"r170": Ti+min the ring is 170 ft out, "r100": Ti+min it is 100 ft out}: the R-bar approach flown to the Flight Plan's times (STS-81 pp. 3-14: 170 ft stationkeeping at MET 1/17:39 = Ti+96, 100 ft at 1/18:10 = Ti+127) instead of MIR_CLOSE_FPS
 TORVA_END_FT = 340.0             # the +V-bar point TORVA ends at (CG range; the card's arrival is "415-315 ft")
 # THE R-BAR LEG'S PACE.  The Mission Report has the RPM begin at 138/09:15:31,
 # ~5 min before the legs' old pace (0.3 ft/s, tau 150, 8 min and two more
@@ -1101,6 +1102,7 @@ class ManualPhase(object):
         st = self.rel("ods")
         d0 = st["r"][0]
         self.say("VBAR: ODS ring %.1f ft from PMA-2's face; %s" % (d0, self.readings()))
+        m0 = self.ti_min() if FP_PROFILE else 0.0      # Ti+ minutes at the start of the closing
 
         def dist(t):
             # THE CUE CARD'S CLOSING (CC 9-8, ring ranges): about -0.2 ft/s
@@ -1112,6 +1114,20 @@ class ManualPhase(object):
             through = getattr(self.a, "through_100", False)
             if d0 <= 100.0 and not through:
                 return HOLD_FT, 0.0
+            if FP_PROFILE and ins.APPROACH == "rbar" and not through:
+                # THE FLIGHT PLAN'S PROFILE: close to 170 ft by Ti+r170, stationkeep there (the Russian
+                # ground-station coverage pause, JSC-63400 Fig 20.17), then the card's d' = -d/800 from
+                # 170 ft to arrive at 100 ft at Ti+r100
+                tA = max((FP_PROFILE["r170"] - m0) * 60.0, 60.0)
+                v1 = (d0 - 170.0) / tA
+                if t < tA:
+                    return d0 - v1 * t, -v1
+                u0 = (FP_PROFILE["r100"] - m0) * 60.0 - 800.0 * math.log(1.7)
+                if t < u0:
+                    return 170.0, 0.0
+                u = t - u0
+                d = 170.0 * math.exp(-u / 800.0)
+                return max(d, HOLD_FT), (-d / 800.0 if d > HOLD_FT else 0.0)
             vlin = MIR_CLOSE_FPS if ins.APPROACH == "rbar" else 0.25
             t_lin = max(d0 - 200.0, 0.0) / vlin
             if t < t_lin:
