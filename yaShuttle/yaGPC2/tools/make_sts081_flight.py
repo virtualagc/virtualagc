@@ -49,6 +49,15 @@ SRB_LB = 1298753.0
 TAPE_ET_LB = 1662224.0           # the tape's default ET, from sts135's MASS_VEHICLE_ET shift (1,657,525 lb gave -146.05 slug)
 
 
+# THE PLANE LEAD.  Differential nodal regression, J2, Orbiter against Mir (209 nmi circular), integrated over the
+# documented orbits (heights above a 6,371 km sphere, perigee x apogee, nmi) from OMS-2 to Ti: 12 Jan 10:10 -> OMS-3
+# 13:03 at 84.9 x 159.9 (-0.053 deg); OMS-3 -> OMS-5 (14 Jan 09:10, 44.1 h) at 122.6 x 165.0, the orbit the sim's
+# burn table gives after OMS-3 (the report gives none): -0.605 deg; OMS-5 -> OMS-6 (14.5 h) at 142.4 x 209.7:
+# -0.099 deg; the last 1.6 h: -0.000.  Total -0.758 deg, the Orbiter's node west of where it was relative to Mir's, so
+# the launch plane must lead by that much (the trial-and-error figure of the rendezvous start analysis, 0.76 deg).
+NODE_LEAD_DEG = 0.758
+
+
 def gmt_s(t):
     return (t - datetime.datetime(1997, 1, 1, tzinfo=UTC)).total_seconds() + 86400.0
 
@@ -184,9 +193,11 @@ def main():
     ap.add_argument("--out", default=FLIGHTS)
     ap.add_argument("--orbiter-lb", type=float, default=ORBITER_LB)
     ap.add_argument("--oms-assist-dt", type=float, default=0.0, help="ASSIST_OMS_DT, s: 0 = no OMS assist, as flown (the Missions Summary, pdf p. 127, makes STS-90 the first to use it); the tape's STS-134 value is 109")
+    ap.add_argument("--node-lead", type=float, default=NODE_LEAD_DEG, help="deg the launch plane's node leads (is east of) Mir's at SRB ignition: the lower Orbiter's node regresses faster than Mir's, so by Ti (015 01:14) the planes coincide only if the launch plane led; the J2 integral over the documented orbits is %.3f deg (see NODE_LEAD_DEG); 0 = launch into Mir's plane as it was" % NODE_LEAD_DEG)
     ap.add_argument("--apogee-trim", type=float, default=-11.3, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
     a = ap.parse_args()
     inc, node, t_in, setep, off = mir_plane(a.archive)
+    node += a.node_lead
     pl = iyd(inc, node)
     in_plane = gmt_s(t_in)
     d135 = json.load(open(os.path.join(a.out, "sts135-dolilu.json")))
@@ -199,7 +210,7 @@ def main():
     ]
     d["notes"] = [
         "A CROSS-CHECK FLIGHT, as STS-135: the vehicle model and first-stage tables were built for STS-134; flown with them to see which differences from the real flight are the model's.  The first run will show how far the yaw, pitch and throttle tables are off; retune by flight.",
-        "IYD: MIR's plane at SRB ignition, Earth-fixed: inclination %.4f deg, node %.4f deg east (RAAN of date less GMST); IYD = (-sin i sin node, sin i cos node, -cos i), the form sts134/135's use.  The pad (39B) is %.2f deg off this plane at SRB ignition and in plane at 1997 day 12 GMT %s (T_GMTLO_REF), about %d s later: the flown launch was at the opening of the 6m59s planar window, so the window closed about when the pad passed through the plane." % (inc, node, math.degrees(off), t_in.strftime("%H:%M:%S"), (t_in - SRB_IGN).total_seconds()),
+        "IYD: MIR's plane at SRB ignition LEADING by the J2 regression the lower Orbiter will have gained by Ti (NODE_LEAD_DEG in make_sts081_flight.py; --node-lead 0 for Mir's plane as it was), Earth-fixed: inclination %.4f deg, node %.4f deg east (RAAN of date less GMST); IYD = (-sin i sin node, sin i cos node, -cos i), the form sts134/135's use.  The pad (39B) is %.2f deg off this plane at SRB ignition and in plane at 1997 day 12 GMT %s (T_GMTLO_REF), about %d s later: the flown launch was at the opening of the 6m59s planar window, so the window closed about when the pad passed through the plane." % (inc, node, math.degrees(off), t_in.strftime("%H:%M:%S"), (t_in - SRB_IGN).total_seconds()),
         "MASSES: the Space Shuttle Missions Summary's Appendix A-6 weight table (pdf page 278), STS-81 row: orbiter %.0f lb at SRB ignition (242,178 at insertion), ET 1,663,879 lb, SRB 1,298,753 lb, shuttle total 4,511,011 lb.  The first run used an estimate of 242,000 lb and MECO came 7 s early." % a.orbiter_lb,
         "NO WIND TABLE YET: add message 11 from the 1997-01-12 Cape sounding (74794) before this is flown for comparison; until then PASS indexes its first-stage tables with the tape's default wind.",
         "OMS 2: TIG = ET separation + %.1f s (ET sep 09:36:14, OMS-2 10:10:23.3); pre-flight targets are placeholders -- the ground designs them after MECO for 159.9 x 84.9 nmi (75.5 ft/s flown)." % (OMS2_TIG - ET_SEP).total_seconds(),

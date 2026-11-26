@@ -7,7 +7,7 @@
  ],
  "notes": [
   "A CROSS-CHECK FLIGHT, as STS-135: the vehicle model and first-stage tables were built for STS-134; flown with them to see which differences from the real flight are the model's.  The first run will show how far the yaw, pitch and throttle tables are off; retune by flight.",
-  "IYD: MIR's plane at SRB ignition, Earth-fixed: inclination 51.6721 deg, node 255.5038 deg east (RAAN of date less GMST); IYD = (-sin i sin node, sin i cos node, -cos i), the form sts134/135's use.  The pad (39B) is 1.06 deg off this plane at SRB ignition and in plane at 1997 day 12 GMT 09:34:06 (T_GMTLO_REF), about 403 s later: the flown launch was at the opening of the 6m59s planar window, so the window closed about when the pad passed through the plane.",
+  "IYD: MIR's plane at SRB ignition LEADING by the J2 regression the lower Orbiter will have gained by Ti (NODE_LEAD_DEG in make_sts081_flight.py; --node-lead 0 for Mir's plane as it was), Earth-fixed: inclination 51.6721 deg, node 256.2618 deg east (RAAN of date less GMST); IYD = (-sin i sin node, sin i cos node, -cos i), the form sts134/135's use.  The pad (39B) is 1.06 deg off this plane at SRB ignition and in plane at 1997 day 12 GMT 09:34:06 (T_GMTLO_REF), about 403 s later: the flown launch was at the opening of the 6m59s planar window, so the window closed about when the pad passed through the plane.",
   "MASSES: the Space Shuttle Missions Summary's Appendix A-6 weight table (pdf page 278), STS-81 row: orbiter 250167 lb at SRB ignition (242,178 at insertion), ET 1,663,879 lb, SRB 1,298,753 lb, shuttle total 4,511,011 lb.  The first run used an estimate of 242,000 lb and MECO came 7 s early.",
   "Message 11, the wind table: Jacksonville's (72206) balloon of 1997-01-11 23:04Z, the last before liftoff -- Cape Canaveral's 74794 is not in the archive for 1997, and Jacksonville is the nearest east-coast station that is.  The truth flies the 23:04Z and 11:03Z profiles blended to 09:27Z (sts081-sounding-72206-19970112-0927Z.csv, weight 0.87 on the later).",
   "OMS 2: TIG = ET separation + 2049.3 s (ET sep 09:36:14, OMS-2 10:10:23.3); pre-flight targets are placeholders -- the ground designs them after MECO for 159.9 x 84.9 nmi (75.5 ft/s flown)."
@@ -23,24 +23,24 @@
     },
     {
      "D": [
-      0.7595,
-      -0.19637,
+      0.76203,
+      -0.1863,
       -0.62016
      ],
      "name": "IY_MIN"
     },
     {
      "D": [
-      0.7595,
-      -0.19637,
+      0.76203,
+      -0.1863,
       -0.62016
      ],
      "name": "IYD"
     },
     {
      "D": [
-      0.7595,
-      -0.19637,
+      0.76203,
+      -0.1863,
       -0.62016
      ],
      "name": "IYD_NOM"
@@ -409,16 +409,16 @@
    "fields": [
     {
      "D": [
-      0.7595,
-      -0.19637,
+      0.76203,
+      -0.1863,
       -0.62016
      ],
      "name": "IYD_OMS(1): the Mir plane (PEG 4 flies the present orbit's plane regardless, GGILTV step 31)"
     },
     {
      "D": [
-      0.7595,
-      -0.19637,
+      0.76203,
+      -0.1863,
       -0.62016
      ],
      "name": "IYD_OMS(2)"
