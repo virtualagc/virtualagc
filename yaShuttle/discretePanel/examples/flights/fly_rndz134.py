@@ -1164,7 +1164,7 @@ class RadarNav(object):
                 break
             time.sleep(2.0)
         self.say("KU OPS at Ti %+.1f min: NAV RNG %s kft" % (self.ti_min(), _f((self.pass_range_ft() or 0) / 1e3)))
-        self.ku_switches("ku-ops", power="ON", steering="GPC", control="CMD")
+        self.ku_switches("ku-ops", power="ON", steering="GPC", control=os.environ.get("RNDZ_KU_CNTL", "CMD"))   # STS-103 CC 8-5 and the Ku workbook 7.4: PNL for radar ops
         self.play("+1     keys SPEC 3 3 PRO\n+5     keys ITEM 2 EXEC\n+3     keys RESUME\n", "ku-ant-ena")
         self.script_done("ku-ant-ena", 60)
         # RR RNG < 135 kft: data on SPEC 33
@@ -2335,8 +2335,15 @@ wait crt 1 title {year}/ timeout 600
         # -Z AXIS TARGET TRACK [12A] (and LOAD TARGET TRACK [9A]'s CNCL first)
         # the page is asked for and waited on: with RESUME alone the items
         # went to whatever was up (OMS MNVR EXEC, 2021) -- ILLEGAL ENTRY
-        script = ("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title %d/ timeout 180\n" % TITLE_YEAR +
+        # The page is waited on BY NAME: every page's title begins with the
+        # year ("2011/"), so waiting on that returned at once while SPEC 34
+        # was still up, and the UNIV PTG items went to SPEC 34 (rr3: the
+        # track never happened, -Z stayed 95-175 deg from Mir, no star
+        # tracker marks, no radar lock).  RESUME leaves SPEC 34 for the
+        # major mode's own page.
+        script = ("+1     keys RESUME\n"
+                  "+1     keys OPS 2 0 1 PRO\n"
+                  "wait crt 1 title UNIV PTG timeout 180\n" +
                   "+3     keys ITEM 2 1 EXEC\n"
                   "+3     keys ITEM 8 + 1 EXEC\n"
                   "+3     keys ITEM 1 4 + 3 EXEC\n"
@@ -2936,7 +2943,7 @@ wait crt 1 title {year}/ timeout 600
         whole coast, which [12A] does not, and whose translations move the
         truth itself."""
         self.play("+1     keys OPS 2 0 1 PRO\n"
-                  "wait crt 1 title %d/ timeout 180\n" % TITLE_YEAR + self.TRACK_KEYS, name)
+                  "wait crt 1 title UNIV PTG timeout 180\n" + self.TRACK_KEYS, name)
         self.script_done(name, 300)
         self.say("crew: OPS 201, -Z target track")
         self.track_complete(name + "-vern", limit)
