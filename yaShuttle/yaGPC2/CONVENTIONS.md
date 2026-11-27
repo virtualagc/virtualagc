@@ -52,7 +52,9 @@ heights they quote.  That has to be established per source.
 | TGT set times (`T1`, `DT`, `EL`) | `T2 = TIG + DT`; `T1` is minutes after BASE TIME (Ti TIG for sets 10-12; MC2 TIG for 13 and 14) | VERIFIED (code comments, JSC-48072-134) | `fly_rndz134.py` `TGT_SETS`.  Every STS-81 set now aims at Ti+72.1. |
 | Ranges in the logs | "truth RNG" is Orbiter-CG to target-CG; the manual phase works in the ODS ring's distance to the port face (100 ft HOLD, 30 ft, contact) | ASSUMED (log reading) | Label which one a number is. |
 | OMS engine | 6,087 lbf, Isp 315.1 s, nozzle cant 15.82 deg up and 6.50 deg inboard, gimbal limits 7 / 8 deg | VERIFIED against the FSSR as quoted in `vehdyn.c` | A single engine is steered through the CG (~11.9 deg of yaw); its thrust is 0.503 of a pair's, not 0.5. |
-| MECO targets for STS-81 | VI 25,915 ft/s predicted (25,922 flown); FPA 0.5 deg is the **tape's default** | **ASSUMED** | "STS-81's value not found".  The flown post-OMS-2 phase and the 75.5 ft/s OMS-2 do not both fit these (CLAUDE_LOG 2026-11-26). |
+| MECO targets for STS-81 | 57.56 nmi, 25,879.7 ft/s, +0.604 deg at MET 513.3 (tracked coast state backed from the flown OMS-2); sim uses MECO_VI 25,880 / 57.41 nmi / 0.571 deg (`make_sts081_flight.py`) | VERIFIED by tracking (run12: burn table at k = 1 reproduces the flown chain) | Replaces the ASSUMED 25,915 / 0.5 deg, which came from STS-80's block (next row). |
+| **Missions Summary MECO block** (MECO CMD time, VI) | NOT TRUSTED for STS-81: its page repeats STS-80's values verbatim (8:29.9 / 8:30.4, 25922 / 25915).  Mission Report: SSME shutdown MET 511.8, no speed. | VERIFIED (the two pages compared; the tracked orbit needs ~25,880 ft/s) | Check any Summary number against the neighbouring flights' pages for duplication before use. |
+| **Documented apsides vs osculating** | The Summary's 159.9 x 84.9 are MEAN-element heights (TLE mean 159.5 x 84.9 eq); osculating at the OMS-2 cutoff is 160.1 x 90.6.  vehdyn-orbit HA/HP are osculating. | VERIFIED | Compare states at the same instant, never osculating against mean; near e = 0.01 the perigees differ by ~6 nmi and the apsis lines by several degrees. |
 | Flight Plan page reading | The timeline's left axis is 3 px per minute at the page images used (`pdftoppm -r 110`); read pages as **images**, the OCR text layer is garbage | VERIFIED (a cross-check against the 1/18:44 contact) | STS-81 Flight Plan pp. 3-12 to 3-14. |
 | Element sets | planet4589 `elements/<NNN00>/S<catalogue>`; Mir 16609, STS-81 24711; no 2011 sets | VERIFIED | `tools/mir_elements.py` for Mir. |
 
@@ -82,5 +84,6 @@ fails from the *simulated* state but passes from the *flown* one, the fault is i
 | STS-134's target-set DTs kept with STS-81's burn times | MC2 and MC3 aimed at different times. |
 | CRT page title matched on the year prefix (`2011/`) | The pre-Ti tracking never ran. |
 | Attitude notation read as two separate attitudes | Wrong picture of the rendezvous attitudes. |
+| Missions Summary page for STS-81 carries STS-80's MECO numbers; mean apsides compared with osculating | The ascent orbit's phase (14 deg) and OMS-2 size, and with the apsis convention the OMS-3 x1.22. |
 
 Append to this table, and to the register, when the next one is found.
