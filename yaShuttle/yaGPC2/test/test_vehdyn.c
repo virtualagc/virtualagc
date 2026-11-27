@@ -119,10 +119,19 @@ int main(int argc, char **argv) {
         const char *args[3][2] = { { "-", "-" }, { "28.62722", "-80.62083" }, { "28.62722", "-" } };
         for (int k = 0; k < 3; k++) {
             char cmd[512];
+#ifdef _WIN32       /* MSVC has _popen/_pclose and cmd.exe has NUL, not /dev/null (as test_volsource.c) */
+            snprintf(cmd, sizeof cmd, "%s --pad %s %s 2>NUL", argv[0], args[k][0], args[k][1]);
+            FILE *f = _popen(cmd, "r");
+#else
             snprintf(cmd, sizeof cmd, "%s --pad %s %s 2>/dev/null", argv[0], args[k][0], args[k][1]);
             FILE *f = popen(cmd, "r");
+#endif
             int n = f ? fscanf(f, "%lf %lf %lf", &r[k][0], &r[k][1], &r[k][2]) : 0;
+#ifdef _WIN32
+            if (f) _pclose(f);
+#else
             if (f) pclose(f);
+#endif
             check(n == 3, "pad subprocess printed a position", n, 3);
             if (n != 3) r[k][0] = r[k][1] = r[k][2] = 0.0;
         }
