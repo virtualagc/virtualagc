@@ -95,10 +95,42 @@ static void check_segment_depletion(const char *self) {
 }
 
 int main(int argc, char **argv) {
+    if (argc == 4 && strcmp(argv[1], "--pad") == 0) {
+        setenv("YAGPC_VEHDYN", "1", 1);
+        setenv("YAGPC_VEHDYN_PAD", "1", 1);
+        if (strcmp(argv[2], "-") != 0) setenv("YAGPC_VEHDYN_PAD_LAT", argv[2], 1);
+        if (strcmp(argv[3], "-") != 0) setenv("YAGPC_VEHDYN_PAD_LON", argv[3], 1);
+        vehdyn_reset(0.0);
+        vehdyn_advance(1.0);
+        const PhysState *p = vehdyn_state();
+        printf("%.3f %.3f %.3f\n", p->r[0], p->r[1], p->r[2]);
+        return 0;
+    }
     if (argc == 3 && strcmp(argv[1], "--segment") == 0)
         return segment_scenario(atoi(argv[2]));
     check_segment_depletion(argv[0]);
     setenv("YAGPC_VEHDYN", "1", 1);
+
+    /* THE PAD IS A CHOICE: LC-39A by default (PASS's own nav-base I-load), another by YAGPC_VEHDYN_PAD_LAT / _LON in
+     * degrees (STS-81 stood on LC-39B, 2.6 km away); a half-given pair is ignored.  The environment is read once per
+     * process (envcache), so each case runs in its own: argv[0] --pad LAT LON prints the pad's position. */
+    {
+        double r[3][3];
+        const char *args[3][2] = { { "-", "-" }, { "28.62722", "-80.62083" }, { "28.62722", "-" } };
+        for (int k = 0; k < 3; k++) {
+            char cmd[512];
+            snprintf(cmd, sizeof cmd, "%s --pad %s %s 2>/dev/null", argv[0], args[k][0], args[k][1]);
+            FILE *f = popen(cmd, "r");
+            int n = f ? fscanf(f, "%lf %lf %lf", &r[k][0], &r[k][1], &r[k][2]) : 0;
+            if (f) pclose(f);
+            check(n == 3, "pad subprocess printed a position", n, 3);
+            if (n != 3) r[k][0] = r[k][1] = r[k][2] = 0.0;
+        }
+        double d01 = sqrt(pow(r[0][0] - r[1][0], 2) + pow(r[0][1] - r[1][1], 2) + pow(r[0][2] - r[1][2], 2));
+        double d02 = sqrt(pow(r[0][0] - r[2][0], 2) + pow(r[0][1] - r[2][1], 2) + pow(r[0][2] - r[2][2], 2));
+        check(d01 > 2400.0 && d01 < 2900.0, "LC-39B is 2.4-2.9 km from the default pad (39A)", d01, 2650.0);
+        check(d02 < 1.0, "a latitude without a longitude leaves the pad at 39A", d02, 0.0);
+    }
 
     /* THE ATMOSPHERE HAS NO STEP AT 66 KM (ledger #363): the Patrick table ends there and the 1976 standard, 17.8%
      * thinner, used to take over.  Density across the join agrees to 0.1%, falls smoothly and monotonically from

@@ -78,6 +78,16 @@ OMS2_HA_OSC = 160.1
 # the launch plane must lead by that much (the trial-and-error figure of the rendezvous start analysis, 0.76 deg).
 NODE_LEAD_DEG = 0.758
 
+# THE LAUNCH PAD IS A CHOICE (--pad): the two pads are 2.6 km apart and flights used both (STS-81 stood on LC-39B; the
+# generic software, and STS-134, have LC-39A).  Degrees N, E: the same pair portview draws the pad structure at, so the
+# truth stack, PASS's navigation (nav-base I-loads CGGS_NAVBASE_LAT / _LONG on the volume) and the scenery agree.
+PADS = {"39a": (28.60852, -80.60409), "39b": (28.62722, -80.62083)}
+PAD = "39b"
+# What the volume's nav-base cells hold now (the generic OI-34 tape, LC-39A: .4993115 and -1.4068068 rad) as read out of
+# a G16 image by tools/pasvar.py, the cells' "was".
+NAVBASE_WAS = {"CGGS_NAVBASE_LAT": ("05b2c", "407FD2DB03C734DD", (133308, 841020)),
+               "CGGS_NAVBASE_LONG": ("05b30", "C1168247D0CF0FF3", (133312, 841024))}   # flat halfword positions of each copy (mission_reconfig.load), as the G2 file sts134-gnc-iloads.json has 133309 for LAT+1
+
 
 def gmt_s(t):
     return (t - datetime.datetime(1997, 1, 1, tzinfo=UTC)).total_seconds() + 86400.0
@@ -106,7 +116,7 @@ def mir_plane(archive):
     inc = math.degrees(math.acos(h[2]))
     raan = math.degrees(math.atan2(h[0], -h[1])) % 360.0
     node_ef = (raan - gst(SRB_IGN)) % 360.0
-    lat, lon = math.radians(28.627), math.radians(-80.621)    # pad 39B
+    lat, lon = math.radians(PADS[PAD][0]), math.radians(PADS[PAD][1])
 
     def oop(t):
         ra = math.radians(gst(t)) + lon
@@ -209,6 +219,7 @@ def interp_sounding(before, after, w, out):
 
 
 def main():
+    global PAD
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--archive", default=os.path.expanduser("~/Desktop/Shuttle Stuff/S16609.txt"))
     ap.add_argument("--out", default=FLIGHTS)
@@ -216,14 +227,16 @@ def main():
     ap.add_argument("--oms-assist-dt", type=float, default=0.0, help="ASSIST_OMS_DT, s: 0 = no OMS assist, as flown (the Missions Summary, pdf p. 127, makes STS-90 the first to use it); the tape's STS-134 value is 109")
     ap.add_argument("--node-lead", type=float, default=NODE_LEAD_DEG, help="deg the launch plane's node leads (is east of) Mir's at SRB ignition: the lower Orbiter's node regresses faster than Mir's, so by Ti (015 01:14) the planes coincide only if the launch plane led; the J2 integral over the documented orbits is %.3f deg (see NODE_LEAD_DEG); 0 = launch into Mir's plane as it was" % NODE_LEAD_DEG)
     ap.add_argument("--apogee-trim", type=float, default=-6.9, help="nmi added to the 159.9 nmi MECO apogee aim: run 2 (VI aim 25,915) came out 6.7 nmi high after OMS-2 (166.6 vs 159.9), so the aim is lowered by that")
+    ap.add_argument("--pad", choices=sorted(PADS), default=PAD, help="launch pad: 39b (STS-81's, the default) or 39a")
     a = ap.parse_args()
+    PAD = a.pad
     inc, node, t_in, setep, off = mir_plane(a.archive)
     node += a.node_lead
     pl = iyd(inc, node)
     in_plane = gmt_s(t_in)
     d135 = json.load(open(os.path.join(a.out, "sts135-dolilu.json")))
     d = copy.deepcopy(d135)
-    d["flight"] = "STS-81, Atlantis, LC-39B, 1997-01-12 09:27:23 UTC"
+    d["flight"] = "STS-81, Atlantis, LC-%s, 1997-01-12 09:27:23 UTC" % PAD.upper()
     d["sources"] = [
         "STS-81 Space Shuttle Mission Report: Table I (SRB ignition 012:09:27:22.984, MECO 09:35:55, ET separation 09:36:14, OMS-2 TIG 10:10:23.3); Missions Summary NASA/TM-2011-216142 p. 2-98 (MECO VI 25,922 actual / 25,915 predicted, MECO cmd 8:29.9, 104/104/109%, ET-83 LWT, post OMS-2 159.9 x 84.9 nmi, launch window 6m59s, Mir planar/phase window)",
         "Mir's plane: the element set of %s UTC from S16609.txt (tools/mir_elements.py), inclination %.4f deg" % (setep.strftime("%Y-%m-%dT%H:%M:%S"), inc),
@@ -296,12 +309,15 @@ def main():
               "orbiter_kg": round(a.orbiter_lb * 0.45359237),
               "env": {"YAGPC_VEHDYN_ET_INERT_LB": "66000", "YAGPC_VEHDYN_SSME_ISP": "453.59", "YAGPC_VEHDYN_SRB_PC50_S": "120.41", "YAGPC_VEHDYN_FUEL_BIAS_LB": "884",
                       "YAGPC_VEHDYN_SOUNDING": "sts081-sounding-72206-19970112-0927Z.csv",
-                      "YAGPC_VEHDYN_PAD_ALT": "64.1",
+                      "YAGPC_VEHDYN_PAD_ALT": "64.1" if PAD == "39b" else "62.0", "NSTS_PAD": "lc" + PAD,
                       "YAGPC_VEHDYN_ET_LB": "%.0f" % ET_LB, "YAGPC_VEHDYN_SRB_LB": "%.0f" % SRB_LB},
               "notes": ["STS-81 (Mission Report Table I; Missions Summary p. 2-98): SRB ignition 012/09:27:22.984; GMTLO 09:27:20 gives T-0 at :22.8 (PASS's 2.8 s, see fly_sts134.py).",
                         "Weights (Missions Summary A-6, pdf page 278): orbiter %.0f lb, ET 1,663,879, SRB 1,298,753 at SRB ignition; SSME Isp tag 453.18 s and fuel bias 884 lb from the Missions Summary p. 2-98." % a.orbiter_lb,
-                        "Air: Jacksonville's 1997-01-11 23:04Z and 01-12 11:03Z balloons blended to liftoff (Cape Canaveral 74794 is not archived for 1997).  Pad: vehdyn and PASS's own nav-base I-load put the vehicle at LC-39A's latitude and longitude (2.6 km from 39B), kept on purpose so the truth and PASS agree; the height is 39B's, 55 ft instead of 39A's 48 (YAGPC_VEHDYN_PAD_ALT 64.1 m = 62.0 + 7 ft).",
+                        "Air: Jacksonville's 1997-01-11 23:04Z and 01-12 11:03Z balloons blended to liftoff (Cape Canaveral 74794 is not archived for 1997).  Pad: LC-%s (--pad; STS-81 stood on 39B, the default; 39A is 2.6 km away): vehdyn's stack (YAGPC_VEHDYN_PAD_LAT/LON, set for 39B only: unset is 39A) and PASS's nav-base I-loads (CGGS_NAVBASE_LAT/LONG cells in sts081-reconfig.json) are at the same place, and portview draws that pad (NSTS_PAD); the height is the pad's: 64.1 m for 39B (55 ft), 62.0 m for 39A (48 ft)." % PAD.upper() + "",
                         "Made by tools/make_sts081_flight.py; do not edit by hand."]}
+    if PAD != "39a":                 # 39A is vehdyn's own default (and the tape's): only another pad is given
+        flight["env"]["YAGPC_VEHDYN_PAD_LAT"] = "%.5f" % PADS[PAD][0]
+        flight["env"]["YAGPC_VEHDYN_PAD_LON"] = "%.5f" % PADS[PAD][1]
     json.dump(flight, open(os.path.join(a.out, "sts081-flight.json"), "w"), indent=1)
     # the OPS 1 overlay: the MECO targets
     rc = json.load(open(os.path.join(a.out, "sts134-reconfig.json")))
@@ -324,6 +340,15 @@ def main():
             c["H"] = words(ibm_long(r_ft)); c["value"] = "%.0f ft = a + %.2f nmi (the tracked MECO altitude less the sim's cutoff bias, see MECO_ALT_NMI; tape 21,290,308 = a + 60.02 nmi)" % (r_ft, alt)
         elif c["name"] == "CGGS_FPA_MECO_NOM":
             c["H"] = words(ibm_short(math.radians(gam))); c["value"] = "%.3f deg: the tracked flight-path angle less the sim's cutoff bias (MECO_FPA_DEG; the tape's is 0.5)" % gam
+    # PASS's navigation starts where the truth stack stands: the nav-base latitude and longitude (radians, long floats)
+    for nm, val in (("CGGS_NAVBASE_LAT", math.radians(PADS[PAD][0])), ("CGGS_NAVBASE_LONG", math.radians(PADS[PAD][1]))):
+        addr, was, flats = NAVBASE_WAS[nm]
+        # both copies of the GNC common block on the volume, placed by "flat": the one-sided context search cannot
+        # place LONG (a load-block boundary), and "was" still refuses a different build
+        rc["cells"] = [c for c in rc["cells"] if c["name"] != nm] + [
+            {"name": nm, "config": "G16", "addr": addr, "flat": f, "H": words(ibm_long(val)), "was": was,
+             "value": "%.6f rad = LC-%s (%.5f deg); the generic tape holds LC-39A's" % (val, PAD.upper(), math.degrees(val))}
+            for f in flats]
     json.dump(rc, open(os.path.join(a.out, "sts081-reconfig.json"), "w"), indent=1)
     print("Mir plane: inc %.4f node(EF) %.4f  pad off-plane at SRB ign %.3f deg  in-plane %s (+%.0f s)" % (inc, node, math.degrees(off), t_in.strftime("%H:%M:%S"), (t_in - SRB_IGN).total_seconds()))
     print("IYD", pl, " T_GMTLO_REF", round(in_plane), " clock start", CLOCK_START.isoformat(), " MECO radius %.0f ft = a + %.2f nmi" % (r_ft, alt))

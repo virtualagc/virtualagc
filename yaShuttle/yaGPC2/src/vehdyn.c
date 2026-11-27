@@ -429,8 +429,15 @@ static void dock_reset(void);
  * truth stands where the vehicle stood; PASS keeps its flown I-load and so
  * starts with the 62 m altitude error the real one did (ledger: pad nav-base
  * height).  YAGPC_VEHDYN_PAD_ALT (m) overrides; -0.73152 is PASS's own. */
-#define PAD_LAT_RAD      0.49931150
-#define PAD_LON_RAD      (-1.4068068)
+#define PAD_LAT_RAD_DEFAULT 0.49931150
+#define PAD_LON_RAD_DEFAULT (-1.4068068)
+/* A flight from the OTHER pad (STS-81 stood on LC-39B, 2.6 km from 39A) gives the stack's latitude and longitude in
+ * degrees in YAGPC_VEHDYN_PAD_LAT / YAGPC_VEHDYN_PAD_LON, and the same pair as PASS's nav-base I-loads
+ * (CGGS_NAVBASE_LAT / _LONG, radians) on its volume (tools/mission_reconfig.py), so that truth and PASS agree.  Unset:
+ * LC-39A, PASS's own load, as before. */
+static double padLatRad = PAD_LAT_RAD_DEFAULT, padLonRad = PAD_LON_RAD_DEFAULT;
+#define PAD_LAT_RAD padLatRad
+#define PAD_LON_RAD padLonRad
 #define PAD_ALT_M_DEFAULT 62.0
 static double padAltM = PAD_ALT_M_DEFAULT;
 /* The orbiter's heading on the pad: the azimuth (deg from north, toward
@@ -1764,6 +1771,14 @@ static void pad_init(double t) {
     if (az != NULL) padAz = atof(az);
     const char *alt = yagpc_getenv("YAGPC_VEHDYN_PAD_ALT");
     if (alt != NULL) padAltM = atof(alt);
+    const char *plat = yagpc_getenv("YAGPC_VEHDYN_PAD_LAT"), *plon = yagpc_getenv("YAGPC_VEHDYN_PAD_LON");
+    if (plat != NULL && plon != NULL) {              /* both or neither: half a position is no pad */
+        padLatRad = atof(plat) * VD_PI / 180.0;
+        padLonRad = atof(plon) * VD_PI / 180.0;
+    } else {
+        padLatRad = PAD_LAT_RAD_DEFAULT;
+        padLonRad = PAD_LON_RAD_DEFAULT;
+    }
     /* ON PASS'S OWN ELLIPSOID, as GNKGEO.hal converts the same I-loads: the
      * equatorial radius 20,925,646.3255 ft (CGNS_EARTH_EQU_RADIUS_D) and
      * flattening 1/298.3 -- so that the truth's nav base is exactly above
