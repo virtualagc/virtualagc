@@ -79,9 +79,10 @@ OMS2_HA_OSC = 160.1
 NODE_LEAD_DEG = 0.758
 
 # THE LAUNCH PAD IS A CHOICE (--pad): the two pads are 2.6 km apart and flights used both (STS-81 stood on LC-39B; the
-# generic software, and STS-134, have LC-39A).  Degrees N, E: the same pair portview draws the pad structure at, so the
-# truth stack, PASS's navigation (nav-base I-loads CGGS_NAVBASE_LAT / _LONG on the volume) and the scenery agree.
-PADS = {"39a": (28.60852, -80.60409), "39b": (28.62722, -80.62083)}
+# generic software, and STS-134, have LC-39A).  Degrees N, E of the nav base; portview draws the structure round it
+# (its PADS hold the ET axis, 9.12 m north), so the truth stack, PASS's navigation (CGGS_NAVBASE_LAT / _LONG on the
+# volume) and the scenery agree.  39B's position was measured from the aerial imagery (see portview.PADS).
+PADS = {"39a": (28.60844, -80.60409), "39b": (28.62733, -80.62084)}   # the NAV BASE: the ET axis (portview.PADS) less 9.12 m north
 PAD = "39b"
 # What the volume's nav-base cells hold now (the generic OI-34 tape, LC-39A: .4993115 and -1.4068068 rad) as read out of
 # a G16 image by tools/pasvar.py, the cells' "was".

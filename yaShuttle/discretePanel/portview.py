@@ -326,7 +326,10 @@ GANTRY_MODEL = os.path.join(CACHE, "models", "gantry")
 # Each pad: the ET axis's place (lat, lon, deg) and the model's heading.  For
 # 39A, vehdyn's nav base (PAD_LAT_RAD 0.49931150, PAD_LON_RAD -1.4068068:
 # 28.6084416 N, 80.6040922 W, on PASS's ellipsoid) plus 9.12 m north, the
-# Orbiter's line to the ET's axis.  vehdyn has no 39B; that one is approximate.
+# Orbiter's line to the ET's axis.  39B's: the ET axis found by matching 39A's pad (+-150 m of it) against 39B's in the
+# 2010 NAIP patches (patch_lc39a/b.jpg; same orientation, normalised cross-correlation 0.62, the next rotation 0.39; the
+# 100 m and 150 m templates agree to ~1 m): 21.6 m north of the published, arc-second-rounded 28.62722 -80.62083 that was
+# here, which had the gantry far from where the Orbiter stands.  The nav base is 9.12 m south of it (tools/make_sts081_flight.py).
 GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
 # The model's base is the pad's surface, 48 ft above sea level (the pads are
 # raised 15 m on their hardstands; its MLP deck, on 22 ft pedestals and 25 ft
@@ -335,7 +338,8 @@ GANTRY_STACK = (8.9, 12.6)               # model east, north (m)
 # ~29 m below the ellipsoid).  Over the flat ground drawn at the site's height
 # the pad's mound isn't modelled, so the gantry stands on a 12 m step.
 PAD_SURFACE_M = 48 * 0.3048
-PADS = {'lc39a': (28.608524, -80.604092, -90.0), 'lc39b': (28.62722, -80.62083, -90.0)}
+PAD_SURFACE_FT = {'lc39a': 48.0, 'lc39b': 55.0}   # the concrete pad above sea level (owner: 39A 48 ft, 39B 55 ft)
+PADS = {'lc39a': (28.608524, -80.604092, -90.0), 'lc39b': (28.627412, -80.620845, -90.0)}
 DE440S = os.path.join(CACHE, "de440s.bsp")
 MOON_IMAGE = texture_path("moon.jpg")
 NIGHTLIGHTS = texture_path("nightlights.jpg")
@@ -4662,7 +4666,7 @@ def main(argv=None):
         models[args.pad].slamps = structure_lamps(models[args.pad])
         models[args.pad].floods = structure_floods(models[args.pad])
         print("portview: %d warm lamps and 8 floods on the pad structure" % len(models[args.pad].slamps), file=sys.stderr)
-        ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_M, heading, offset=GANTRY_STACK))
+        ground.append(GroundObject(args.pad, lat, lon, PAD_SURFACE_FT.get(args.pad, 48.0) * 0.3048, heading, offset=GANTRY_STACK))
         PAD_LIGHTS['obj'] = ground[-1]
     layers = [MilkyWayLayer(exposure), StarLayer(exposure), PlanetLayer(exposure),
               SunLayer(), MoonLayer(), EarthLayer(), LampLayer(exposure), VehicleLayer(models, exposure)]
