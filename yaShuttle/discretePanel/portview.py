@@ -1781,7 +1781,7 @@ class Resources(object):
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
                                "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain",
-                               "uSLampTex", "uSLampN", "uSLampCd", "uSLampReach", "uSLampCol", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
+                               "uSLampTex", "uSLampN", "uSLampCd", "uSLampReach", "uSLampCol", "uWash", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
         self.glowProg = compile_program(GLOW_VS, GLOW_FS)
         self.glowU = uniforms(self.glowProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uPxPerM", "uSizeM", "uCol", "uGlow")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
@@ -3419,7 +3419,7 @@ uniform float uLampExp, uLampOn, uLampGain;
 uniform sampler2D uSLampTex;   // the structure\'s own warm lamps (sodium / incandescent), this model\'s frame: xyz per texel, 1024 a row
 uniform int uSLampN;
 uniform float uSLampCd, uSLampReach;
-uniform vec3 uSLampCol;
+uniform vec3 uSLampCol, uWash;
 uniform vec3 uFlPos[8];         // its white floodlights
 uniform vec3 uFlAim[8];
 uniform float uFlCd, uFlExp;
@@ -3444,7 +3444,7 @@ void main() {
             vec3 w = tl / d;
             fe += uLampCdv[i] * pow(max(dot(-w, uLampAim[i]), 0.0), uLampExp) * max(dot(n, w), 0.0) / (d * d);
         }
-        c += alb / PI * fe * uLampGain * uLampOn;
+        c += alb / PI * fe * uLampGain * uLampOn * uWash;
         float fl = 0.0;
         for (int i = 0; i < 8; i++) {                // the white floods: beams, like the searchlights
             vec3 tl = uFlPos[i] - vPos;
@@ -3452,7 +3452,7 @@ void main() {
             vec3 w = tl / d;
             fl += uFlCd * pow(max(dot(-w, uFlAim[i]), 0.0), uFlExp) * max(dot(n, w), 0.0) / (d * d);
         }
-        c += alb / PI * fl * uLampGain * uLampOn;
+        c += alb / PI * fl * uLampGain * uLampOn * uWash;
         float lo = 0.0;                              // the warm lamps: points shining down and out, uSLampReach m reach
         float reach2 = uSLampReach * uSLampReach;
         for (int i = 0; i < uSLampN; i++) {
@@ -3617,6 +3617,11 @@ STRUCT_LAMP_CELL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CELL_M", "3"))     #
 STRUCT_LAMP_MAX = int(os.environ.get("NSTS_STRUCT_LAMP_MAX", "4096"))
 STRUCT_LAMP_CULL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CULL_M", "90"))      # lamps farther than this from the eye are not lit-from (reach + the distance the eye sees lit surfaces at)
 STRUCT_LAMP_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_LAMP_RGB", "1.0,0.55,0.22").split(","))   # the warm lamps' colour, linear
+# The structure's overall colour under the pad lights.  In STS-114-39B the vehicle is neutral (Orbiter #99989B) and the
+# fixed service structure's lattice is orange-brown (#7E5C45, ratio 1 : 0.73 : 0.55; means of the non-black pixels); the model's beige albedo already has G/R 0.85, B/R 0.71, so the wash is 1 : 0.63 : 0.43 to land on that (render #8B7661 with 1 : 0.73 : 0.55):
+# something lights the structure warm (sodium floods; the project has no document saying what).  The xenon and flood
+# terms on the structure are multiplied by this; the vehicle is not drawn by this shader, so it stays white.
+PAD_WASH_RGB = tuple(float(x) for x in os.environ.get("NSTS_PAD_WASH_RGB", "1.0,0.63,0.43").split(","))
 STRUCT_GLOW_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_GLOW_RGB", "0.94,1.0,0.965").split(","))   # the fixtures as drawn: the owner measures the lamps in the photographs at #F8FFFB (linear 0.94,1.0,0.965), near white
 STRUCT_LAMP_REACH_M = float(os.environ.get("NSTS_STRUCT_LAMP_REACH_M", "40"))
 STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
@@ -3892,6 +3897,7 @@ class VehicleLayer(object):
                 GL.glUniform1f(U["uSLampCd"], STRUCT_LAMP_CD)
                 GL.glUniform1f(U["uSLampReach"], STRUCT_LAMP_REACH_M)
                 GL.glUniform3f(U["uSLampCol"], *STRUCT_LAMP_RGB)
+                GL.glUniform3f(U["uWash"], *PAD_WASH_RGB)
                 fp, fa = model.floods
                 GL.glUniform3fv(U["uFlPos"], 8, fp)
                 GL.glUniform3fv(U["uFlAim"], 8, fa)
