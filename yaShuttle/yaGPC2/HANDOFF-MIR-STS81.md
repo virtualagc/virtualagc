@@ -145,7 +145,7 @@ CAUTIONS:
   azimuth to landmarks and the horizon change).
 - Concrete pad elevation (Ron): 39A is 48 ft above sea level, 39B is 55 ft.  The 7 ft difference matters wherever the sim takes
   the pad altitude (launch-site altitude in the truth model, terrain/height-above-ground for the portview views, the start of
-  the countdown/ascent state).  UNVERIFIED: where in the code the 39A altitude and position are set; grep before changing.
+  the countdown/ascent state).  (Done 2026-11-26/27: see "Progress 2026-11-26/27: launch pad and night lighting".)
 - STS-81 was a NIGHT launch (Missions Summary: liftoff 4:27:23 AM EST on 12 January 1997 = 09:27:23 UTC; "Shuttle night launch
   #15").  A launch simulation of it needs night lighting modelled: pad floodlighting/xenon searchlights, the exhaust plume and
   SRB flame as the light sources, illumination of the vehicle and the ground, no sun.  Ron had not asked for a launch
@@ -449,6 +449,57 @@ RBAR ARRIVAL (DAP LOW Z, 1000 ft) about MET 1/17:15 = Ti+72, TAIL FORWARD MANEUV
 - RUN12 (tracked MECO targets: MECO_VI 25,880, MECO_ALT_NMI 57.41, MECO_FPA_DEG 0.571, OMS-2 aim osculating 160.1 x 90.6 with oms2_ahead 174.3; tape STS081g): MECO at MET 513.2 alt 57.55 nmi, 25,878.2 ft/s, +0.603 deg, osc 157.7 x 43.7 (tracked 57.56, 25,879.7, +0.604, 158.5 x 43.7); ET sep MET 532.6 (flown 531.0), OMS-2 TIG 2581.9 (2580.3); OMS-2 designed 89.7 ft/s (flown 75.5; run9 82.3, run10 102.9, run11 103.4); at the TLE epoch 164.7 x 88.0, true anomaly 189.2 (flown 160.1 x 90.6, 187.5): phase 1.7 deg off (was 14).  BURN TABLE AT k = 1 FROM RUN12'S OWN OMS-2 CAPTURE (eq): after OMS-3 166.9 x 132.9 (flown-TLE-start chain 163.1 x 132.6), NC-2 167.6 x 136.2 (163.7 x 136.1), NC-3 166.1 x 138.8 (161.9 x 138.1), NC-4 166.7 x 140.1 (162.1 x 139.5), OMS-5 213.2 x 142.7 (212.1 x 141.3; documented mean 209.7 x 142.4), OMS-6 213.3 x 205.1 (208.7 x 205.4; documented 209.9 x 201.6), NH 210.4 x 200.6 (209.8 x 199.5): perigees within 1.5 nmi throughout; apogees 1-5 nmi high (the oversized OMS-2 leaves the post-burn apogee 164.7 vs 160.1).  THE OMS-3 x1.22 IS GONE: the sim's own ascent orbit now carries the Mission Report's burns at k = 1.  Run history of the post-OMS-2 fix: run8 (old sphere offset) chain after OMS-5 213.2 x 124.1; run9 215.2 x 134.2; run10 216.9 x 132.3; run11 (MECO fixed, ahead 190.5) 159.7 x 78.8 at the epoch, OMS-2 103.4; run12 as above.
 - STILL OPEN (small): OMS-2 designed 89.7 vs 75.5 ft/s and the post-burn apogee +4.6 nmi: PASS's design takes HT and THETA T only, so HA falls out (162.9 designed); the 14 ft/s excess is the extra apogee energy; trimming OMS2_HP_OSC / OMS2_AHEAD would trade it against the perigee and the phase.  Not needed for the burn-table check.
 
+
+## Progress 2026-11-26/27: launch pad and night lighting (from CLAUDE_LOG)
+
+Branch `review/pad-choice` (worktree `~/work/wt-pad`; commits 2205ee7b1, e652cbd7d, 7b9263ead, 41e3f3471, 730eaa793, 87d2ed9ff,
+7bccad1f2).  NOT pushed, NOT merged: it carries a C change (`vehdyn.c`), so Mac, Win11 and WSL must gate it first.
+
+- **The launch pad is a choice (owner: 39A and 39B must both stay available).**  STS-81 had been flown from LC-39A's position
+  (vehdyn `PAD_LAT/LON` constants and PASS's `CGGS_NAVBASE_LAT/LONG` cells, 28.6085 N, 2.6 km from 39B) with only the pad
+  height 39B's, so portview's 39B gantry and lamps were out of sight; the earlier "pad 39B" answer rested on the generator,
+  which used 39B only for the launch-plane calculation.  Fix: vehdyn reads `YAGPC_VEHDYN_PAD_LAT/LON` (degrees, both or
+  neither; default 39A unchanged); `make_sts081_flight.py --pad 39a|39b` (default 39b) writes the env (lat/lon, `NSTS_PAD`, pad
+  height 64.1 / 62.0 m) and the nav-base cells (both copies of the GNC common block, flat 133308/841020 for LAT, +4 for LONG);
+  `test_vehdyn` has a per-process pad case (`yagpc_getenv` caches, so env changes inside a process are invisible).  Tape
+  STS081h = STS081g + the cells (`mission_reconfig`; never in the repo).  The `NSTS_PAD_AT` portview stopgap was reverted.
+- **39B position (owner: the gantry filled 5-10% of the CDR windows against most of them on STS-134).**  portview's `lc39b`
+  was the published, arc-second-rounded 28.62722 -80.62083 (a ~30 m rounding) while `lc39a` is the calibrated ET axis (nav base
+  + 9.12 m north).  Measured instead by matching 39A's pad (+-150 m template) onto 39B's in the 2010 NAIP patches
+  (`portview/cache/sites/ksc/patch_lc39a/b.jpg`; same orientation, NCC 0.62 against 0.39 for the next rotation, the 100 m and
+  150 m templates agree to ~1 m): the ET axis is 28.627412 -80.620845 (21.6 m north, 1.2 m west of the rounded point), nav base
+  28.62733 -80.62084.  portview's pad surface is per pad now (39A 48 ft, 39B 55 ft).  The layout of the two pads is assumed
+  identical.  Captures for the launch scenario must come from a fresh IPL->OMS2 run on the new tape (the nav-base cells act at
+  IPL; a capture restores the GPC memory it was taken with): run14 (port 45800) is the one; run13's nav base is 12 m off.
+  run14: MECO 57.50 nmi / 25,876.6 ft/s / +0.600 deg, OMS-2 designed 91.0 ft/s, post-burn 166.4 x 87.5 (run12 on 39A: 57.55 /
+  25,878.2 / +0.603, 89.7 ft/s, 164.7 x 88.0).  The launch scenario is `fly_sts134.py --from COUNT --to OPS2` on
+  `~/work/sts081/launch1` (a copy of run14's `sts081-imu`) with `--portview-pad lc39b --station fwd`; it ends at about MET 0:54-0:56
+  (OPS 201 at MET 0:50 plus the keystroke script, the CRT wait and the payload-bay-door step) -- the OPS 2 transition itself has
+  not been exercised on STS-81.
+- **Pad lamps (owner, from the night photos in `~/Desktop/pad-night-photos/`: ~3 m apart along a layer, much brighter, and they
+  tint what is near them; source for the number: "several hundred" lights on the structures and perimeter fence).**
+  `structure_lamps` cell 7 -> 3 m (246 -> 874 lamps, cap 4096), read from an RGB32F texture (a 256-vec3 uniform no longer
+  fits), reach 30 -> 40 m, `STRUCT_LAMP_CD` 1500 -> 6000.  `lamps_seen_from_stack` then keeps a lamp only if a ray from some
+  window position (stack axis plus a 5 m ring, heights 30-600 m) reaches it through a 1 m voxel model of the structure's
+  surfaces: 874 -> 223 lamps, and 60 s for 60 ticks of a software-GL test again (it was 188 s with all 874).  The lamp is tested,
+  not the surfaces it lights, so a hidden lamp that would have lit a visible column is dropped (`NSTS_STRUCT_LAMP_OCCLUDE=0`
+  turns it off).  Lamps are drawn 0.9 m across, glow 4, a hot core in a soft halo, 3-48 px, fall-off (150/d)^1.5
+  (`NSTS_STRUCT_GLOW_SIZE_M`, `NSTS_STRUCT_GLOW`; 1.4 m / 6 was too blobby from 150 m); the fixture colour is #F8FFFB as
+  measured in the photographs (`NSTS_STRUCT_GLOW_RGB`), the light they cast stays warm (`NSTS_STRUCT_LAMP_RGB`).  The owner
+  accepted these ("plenty good enough").
+- **Structure colour.**  STS-114-39B pixel means: Orbiter #99989B (neutral), FSS lattice #7E5C45, ET #6D461A; our structure
+  under white xenon and floods was #8A867C.  portview multiplies the xenon and flood terms on the structure by
+  `NSTS_PAD_WASH_RGB` (the vehicle is another shader and stays white).  The first fit used the photograph's sRGB ratio
+  1 : 0.73 : 0.55 as though it were linear and was too pale; in LINEAR light the lattice is 1 : 0.50 : 0.27, so the light on
+  the steel is ~1 : 0.52 : 0.30 (about 25% white xenon spill and 75% high-pressure sodium; the owner's ChatGPT: 400-1,000 W HPS
+  floods on the FSS, RSS and MLP, aviation obstruction lights on the tall structures, no layout known).  Default 1,0.52,0.30;
+  tower render #866146 (G/R 0.72, B/R 0.53) against the photo's #7E5C45 (0.73, 0.55).  Lowering the searchlights
+  (`NSTS_PAD_GAIN` 0.25) only darkened the structure.  The owner: colour and brightness "still don't seem quite right" but
+  not worth pursuing.  What actually lights the real FSS warm, and where the floods stand, is a JUDGEMENT; aviation
+  obstruction lights are not modelled.  Lesson: fit colours in linear light.
+- **Open.**  Unseen on screen after the final lamp change; the 39B layout is assumed identical to 39A and rests on 2010
+  imagery; peer gate for the branch; the owner's launch, docking, undocking and landing run-through decides Phase 1; Phase 2
+  not started.
 
 ## Related
 
