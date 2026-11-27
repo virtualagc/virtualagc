@@ -3618,10 +3618,13 @@ STRUCT_LAMP_MAX = int(os.environ.get("NSTS_STRUCT_LAMP_MAX", "4096"))
 STRUCT_LAMP_CULL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CULL_M", "90"))      # lamps farther than this from the eye are not lit-from (reach + the distance the eye sees lit surfaces at)
 STRUCT_LAMP_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_LAMP_RGB", "1.0,0.55,0.22").split(","))   # the warm lamps' colour, linear
 # The structure's overall colour under the pad lights.  In STS-114-39B the vehicle is neutral (Orbiter #99989B) and the
-# fixed service structure's lattice is orange-brown (#7E5C45, ratio 1 : 0.73 : 0.55; means of the non-black pixels); the model's beige albedo already has G/R 0.85, B/R 0.71, so the wash is 1 : 0.63 : 0.43 to land on that (render #8B7661 with 1 : 0.73 : 0.55):
-# something lights the structure warm (sodium floods; the project has no document saying what).  The xenon and flood
-# terms on the structure are multiplied by this; the vehicle is not drawn by this shader, so it stays white.
-PAD_WASH_RGB = tuple(float(x) for x in os.environ.get("NSTS_PAD_WASH_RGB", "1.0,0.63,0.43").split(","))
+# fixed service structure's lattice is orange-brown (#7E5C45; means of the non-black pixels).  IN LINEAR LIGHT (the
+# photograph's values are sRGB: ^2.2) that is R:G:B = 1 : 0.50 : 0.27; the steel's own albedo is 1 : 0.96 : 0.90, so the
+# light on it is ~1 : 0.52 : 0.30.  That is ~25% white (the xenon's spill) and ~75% a high-pressure sodium lamp's light
+# (linear ~1 : 0.37 : 0.05; the owner's ChatGPT: 400-1,000 W HPS floods on the FSS, RSS and MLP, no layout known).  The
+# xenon and flood terms on the structure are multiplied by this; the vehicle is another shader and stays white.  (The first
+# value, 1 : 0.73 : 0.55, matched the photograph's SRGB ratio as though it were linear: too pale.)
+PAD_WASH_RGB = tuple(float(x) for x in os.environ.get("NSTS_PAD_WASH_RGB", "1.0,0.52,0.30").split(","))
 STRUCT_GLOW_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_GLOW_RGB", "0.94,1.0,0.965").split(","))   # the fixtures as drawn: the owner measures the lamps in the photographs at #F8FFFB (linear 0.94,1.0,0.965), near white
 STRUCT_LAMP_REACH_M = float(os.environ.get("NSTS_STRUCT_LAMP_REACH_M", "40"))
 STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
