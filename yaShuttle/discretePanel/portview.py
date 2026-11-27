@@ -3593,7 +3593,7 @@ void main() {
     float z = ((c.z - uNear) / (uFar - uNear)) * 2.0 - 1.0;
     gl_Position = vec4(c.x / uTan.x, c.y / uTan.y, z * c.z, c.z);
     vDist = c.z;
-    gl_PointSize = clamp(uPxPerM * uSizeM * 2.0 / max(c.z, 0.5), 2.0, 18.0);
+    gl_PointSize = clamp(uPxPerM * uSizeM * 2.0 / max(c.z, 0.5), 3.0, 48.0);
 }
 """
 GLOW_FS = """
@@ -3606,7 +3606,7 @@ layout(location = 1) out vec4 fragTrans;
 void main() {
     float d = length(gl_PointCoord - vec2(0.5)) * 2.0;
     if (d > 1.0) discard;
-    float f = exp(-3.5 * d * d);
+    float f = exp(-14.0 * d * d) + 0.35 * exp(-3.0 * d * d);       // a hot core in a wide soft halo, like a bright lamp's bloom
     fragColor = vec4(uCol * uGlow * f, 0.0);
     fragTrans = vec4(0.0);
     gl_FragDepth = clamp((vDist - uNear) / (uFar - uNear), 0.0, 1.0);
@@ -3627,7 +3627,8 @@ STRUCT_LAMP_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_LAMP_RGB",
 PAD_WASH_RGB = tuple(float(x) for x in os.environ.get("NSTS_PAD_WASH_RGB", "1.0,0.52,0.30").split(","))
 STRUCT_GLOW_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_GLOW_RGB", "0.94,1.0,0.965").split(","))   # the fixtures as drawn: the owner measures the lamps in the photographs at #F8FFFB (linear 0.94,1.0,0.965), near white
 STRUCT_LAMP_REACH_M = float(os.environ.get("NSTS_STRUCT_LAMP_REACH_M", "40"))
-STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
+STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "4.0"))
+STRUCT_GLOW_SIZE_M = float(os.environ.get("NSTS_STRUCT_GLOW_SIZE_M", "0.9"))     # the bloom's diameter on a lamp (the lamp itself is ~0.3 m)
 FLOOD_STRUCT_CD = float(os.environ.get("NSTS_STRUCT_FLOOD_CD", "6.0e5"))
 FLOOD_STRUCT_EXP = 6.0
 
@@ -3971,9 +3972,9 @@ class VehicleLayer(object):
         GL.glDepthFunc(GL.GL_LEQUAL)
         GL.glEnablei(GL.GL_BLEND, 0)
         GL.glBlendFunci(0, GL.GL_ONE, GL.GL_ONE)
-        near = min(1.0, (80.0 / max(dist, 1.0)) ** 2)
+        near = min(1.0, (150.0 / max(dist, 1.0)) ** 1.5)
         n_ = len(model.slamps)
-        GL.glUniform1f(U["uSizeM"], 0.35)
+        GL.glUniform1f(U["uSizeM"], STRUCT_GLOW_SIZE_M)
         GL.glUniform3f(U["uCol"], *STRUCT_GLOW_RGB)
         GL.glUniform1f(U["uGlow"], STRUCT_GLOW * near * lon)
         GL.glDrawArrays(GL.GL_POINTS, 0, n_)
