@@ -1781,7 +1781,7 @@ class Resources(object):
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
                                "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain",
-                               "uSLampTex", "uSLampN", "uSLampCd", "uSLampReach", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
+                               "uSLampTex", "uSLampN", "uSLampCd", "uSLampReach", "uSLampCol", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
         self.glowProg = compile_program(GLOW_VS, GLOW_FS)
         self.glowU = uniforms(self.glowProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uPxPerM", "uSizeM", "uCol", "uGlow")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
@@ -3419,6 +3419,7 @@ uniform float uLampExp, uLampOn, uLampGain;
 uniform sampler2D uSLampTex;   // the structure\'s own warm lamps (sodium / incandescent), this model\'s frame: xyz per texel, 1024 a row
 uniform int uSLampN;
 uniform float uSLampCd, uSLampReach;
+uniform vec3 uSLampCol;
 uniform vec3 uFlPos[8];         // its white floodlights
 uniform vec3 uFlAim[8];
 uniform float uFlCd, uFlExp;
@@ -3462,7 +3463,7 @@ void main() {
             vec3 w = tl / d;
             lo += max(dot(n, w), 0.0) * (0.5 - 0.5 * w.z) / (d2 + 1.0);   // below the lamp: full; level: half; above: none
         }
-        c += alb / PI * lo * uSLampCd * vec3(1.0, 0.55, 0.22) * uLampGain * uLampOn;
+        c += alb / PI * lo * uSLampCd * uSLampCol * uLampGain * uLampOn;
     }
     c *= mix(uThinGain, 1.0, vThin);                 // slivers' brightness capped
     fragColor = vec4(c, 0.0);       // alpha 0: a vehicle here (no dither; see PRESENT_FS)
@@ -3615,6 +3616,8 @@ STRUCT_LAMP_CD = float(os.environ.get("NSTS_STRUCT_LAMP_CD", "6000"))     # a 15
 STRUCT_LAMP_CELL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CELL_M", "3"))     # the photographs (STS-114/121/122/28): ~3 m apart along a layer (owner, from the people in them)
 STRUCT_LAMP_MAX = int(os.environ.get("NSTS_STRUCT_LAMP_MAX", "4096"))
 STRUCT_LAMP_CULL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CULL_M", "90"))      # lamps farther than this from the eye are not lit-from (reach + the distance the eye sees lit surfaces at)
+STRUCT_LAMP_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_LAMP_RGB", "1.0,0.55,0.22").split(","))   # the warm lamps' colour, linear
+STRUCT_GLOW_RGB = tuple(float(x) for x in os.environ.get("NSTS_STRUCT_GLOW_RGB", "0.94,1.0,0.965").split(","))   # the fixtures as drawn: the owner measures the lamps in the photographs at #F8FFFB (linear 0.94,1.0,0.965), near white
 STRUCT_LAMP_REACH_M = float(os.environ.get("NSTS_STRUCT_LAMP_REACH_M", "40"))
 STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
 FLOOD_STRUCT_CD = float(os.environ.get("NSTS_STRUCT_FLOOD_CD", "6.0e5"))
@@ -3648,7 +3651,66 @@ def structure_lamps(model, cell=None, maxn=None):
             if k not in best or ar > best[k][0]:
                 best[k] = (ar, q)
     items = sorted(best.values(), key=lambda t: -t[0])[:maxn]
-    return np.array([q - np.array([0.0, 0.0, 0.4]) for _, q in items], np.float32).reshape(-1, 3)
+    lamps = np.array([q - np.array([0.0, 0.0, 0.4]) for _, q in items], np.float32).reshape(-1, 3)
+    if STRUCT_LAMP_OCCLUDE and len(lamps):
+        lamps = lamps[lamps_seen_from_stack(model, lamps)]
+    return lamps
+
+
+STRUCT_LAMP_OCCLUDE = os.environ.get("NSTS_STRUCT_LAMP_OCCLUDE", "1") != "0"
+STACK_EYE_Z_M = (30.0, 36.0, 45.0, 60.0, 90.0, 150.0, 300.0, 600.0)     # heights of the Orbiter's windows up the pad, then the climb (model frame, m)
+STACK_EYE_RING_M = 5.0
+
+
+def lamps_seen_from_stack(model, lamps, vox=1.0, step=0.5):
+    """Which lamps can be seen from SOME window position of the Orbiter on the pad and on its climb: a ray from an eye
+    on the stack axis (a ring of five points round it, at each of STACK_EYE_Z_M) to the lamp, marched through a 1 m
+    voxel model of the structure's surfaces, must not enter a solid voxel before the last 1.5 m.  A lamp under a deck
+    the windows can never see past (the lower levels, the MLP's trench) lights nothing the crew can see, so it is not
+    simulated.  The structure's surfaces are sampled every 0.5 m (a thin plate still closes its voxels)."""
+    pts = []
+    for p in model.parts:
+        if p.get('data') is None:
+            continue
+        P = p['data'][:, :3].astype(np.float64)
+        I = p['idx'].reshape(-1, 3)
+        a, b, c = P[I[:, 0]], P[I[:, 1]], P[I[:, 2]]
+        area = np.linalg.norm(np.cross(b - a, c - a), axis=1) / 2.0
+        n = np.minimum(np.ceil(area / (step * step)).astype(int) + 1, 400)
+        k = np.repeat(np.arange(len(a)), n)
+        u, v = np.random.default_rng(1).random((2, len(k)))
+        f = u + v > 1.0
+        u[f], v[f] = 1.0 - u[f], 1.0 - v[f]
+        pts.append(a[k] + (b[k] - a[k]) * u[:, None] + (c[k] - a[k]) * v[:, None])
+    P = np.vstack(pts)
+    lo = np.minimum(P.min(axis=0), lamps.min(axis=0)) - 2.0
+    hi = np.maximum(P.max(axis=0), lamps.max(axis=0)) + 2.0
+    hi[2] = max(hi[2], max(STACK_EYE_Z_M) + 2.0)
+    dim = np.ceil((hi - lo) / vox).astype(int) + 1
+    occ = np.zeros(dim, bool)
+    ij = np.floor((P - lo) / vox).astype(int)
+    occ[ij[:, 0], ij[:, 1], ij[:, 2]] = True
+    sx, sy = GANTRY_STACK
+    eyes = []
+    for z in STACK_EYE_Z_M:
+        eyes.append((sx, sy, z))
+        for k in range(4):
+            a = math.pi / 2.0 * k
+            eyes.append((sx + STACK_EYE_RING_M * math.cos(a), sy + STACK_EYE_RING_M * math.sin(a), z))
+    seen = np.zeros(len(lamps), bool)
+    L = lamps.astype(np.float64)
+    for e in eyes:
+        e = np.array(e)
+        d = L - e
+        dist = np.linalg.norm(d, axis=1)
+        for i in np.nonzero(~seen)[0]:
+            t = np.arange(0.0, max(dist[i] - 1.5, 0.0), step)
+            q = e + d[i] / dist[i] * t[:, None]
+            g = np.floor((q - lo) / vox).astype(int)
+            g = np.clip(g, 0, dim - 1)
+            ok = not occ[g[:, 0], g[:, 1], g[:, 2]].any()
+            seen[i] = ok
+    return seen
 
 
 def structure_floods(model):
@@ -3829,6 +3891,7 @@ class VehicleLayer(object):
                 GL.glUniform1i(U["uSLampN"], n_)
                 GL.glUniform1f(U["uSLampCd"], STRUCT_LAMP_CD)
                 GL.glUniform1f(U["uSLampReach"], STRUCT_LAMP_REACH_M)
+                GL.glUniform3f(U["uSLampCol"], *STRUCT_LAMP_RGB)
                 fp, fa = model.floods
                 GL.glUniform3fv(U["uFlPos"], 8, fp)
                 GL.glUniform3fv(U["uFlAim"], 8, fa)
@@ -3902,7 +3965,7 @@ class VehicleLayer(object):
         near = min(1.0, (80.0 / max(dist, 1.0)) ** 2)
         n_ = len(model.slamps)
         GL.glUniform1f(U["uSizeM"], 0.35)
-        GL.glUniform3f(U["uCol"], 1.0, 0.55, 0.22)
+        GL.glUniform3f(U["uCol"], *STRUCT_GLOW_RGB)
         GL.glUniform1f(U["uGlow"], STRUCT_GLOW * near * lon)
         GL.glDrawArrays(GL.GL_POINTS, 0, n_)
         GL.glUniform1f(U["uSizeM"], 0.8)
