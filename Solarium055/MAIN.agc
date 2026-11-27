@@ -3,7 +3,7 @@
 # Filename:	MAIN.agc
 # Purpose:	Part of the source code for Solarium build 55. This
 #		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
+#		Computer (AGC), for Apollo 4 and 6.
 # Assembler:	yaYUL --block1
 # Contact:	Ron Burkey <info@sandroid.org>
 # Website:	www.ibiblio.org/apollo/index.html
@@ -15,6 +15,7 @@
 #				REENTRY_CONTROL.agc.
 #		2023-06-19 MAS	Restored original names of DUMMY 501
 #				INITIALISATION and RE-ENTRY CONTROL.
+#		2026-11-25 MAS	Updated header to reflect both Apollo 4 and 6
 #
 # This file is a little different from the other Solarium055 files being provided, 
 # in that it doesn't represent anything that appears directly in the original source.  

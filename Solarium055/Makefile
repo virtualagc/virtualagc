@@ -2,7 +2,7 @@
 # Filename:	Makefile
 # Purpose:	Makefile for Solarium build 055.
 #		(The source code for the Command Module's (CM)
-#		Apollo Guidance Computer (AGC), for Apollo 6
+#		Apollo Guidance Computer (AGC), for Apollo 4 and 6)
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Mod history:	
 #		2009-07-25 RSB	Created, based on Artemis072 version.
@@ -15,6 +15,7 @@
 #		2016-10-21 RSB	Hadn't accounted for the need for a --block1
 #				arg for oct2bin.
 #		2017-01-30 MAS	Changed to += for extra args.
+#		2026-11-25 MAS	Updated header to reflect both Apollo 4 and 6
 
 BASENAME=Solarium055
 EXTRA_YAYUL_ARGS+=--block1 --honeywell

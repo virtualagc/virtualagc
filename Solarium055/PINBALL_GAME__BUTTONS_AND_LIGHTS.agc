@@ -3,7 +3,7 @@
 ## Filename:	PINBALL_GAME_BUTTONS_AND_LIGHTS.agc
 ## Purpose:	Part of the source code for Solarium build 55. This
 ##		is for the Command Module's (CM) Apollo Guidance
-##		Computer (AGC), for Apollo 6.
+##		Computer (AGC), for Apollo 4 and 6.
 ## Assembler:	yaYUL --block1
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo/index.html
@@ -17,6 +17,7 @@
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2021-05-30 ABS	Added ENDVBFAN symbol present in scans.
+##		2026-11-25 MAS	Updated header to reflect both Apollo 4 and 6
 
 ## Page 481
 

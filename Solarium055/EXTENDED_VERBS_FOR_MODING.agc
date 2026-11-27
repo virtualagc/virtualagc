@@ -3,7 +3,7 @@
 ## Filename:	EXTENDED_VERBS_FOR_MODING.agc
 ## Purpose:	Part of the source code for Solarium build 55. This
 ##		is for the Command Module's (CM) Apollo Guidance
-##		Computer (AGC), for Apollo 6.
+##		Computer (AGC), for Apollo 4 and 6.
 ## Assembler:	yaYUL --block1
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo/index.html
@@ -15,6 +15,7 @@
 ##				and fixed errors found.
 ##		2021-05-30 ABS	Fixed capitalization of various page marker comments.
 ##				OCT1DNV -> OCTIDNV
+##		2026-11-25 MAS	Updated header to reflect both Apollo 4 and 6
 
 ## Page 235
 
