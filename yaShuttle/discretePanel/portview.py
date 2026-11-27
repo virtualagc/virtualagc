@@ -1781,7 +1781,7 @@ class Resources(object):
                                "uHasTex", "uColor", "uSunB", "uEyeB", "uEarthB", "uSunE",
                                "uSunVis", "uEarthLit", "uViewPx", "uThinGain",
                                "uLampPos", "uLampAim", "uLampCdv", "uLampExp", "uLampOn", "uLampGain",
-                               "uSLamp", "uSLampN", "uSLampCd", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
+                               "uSLampTex", "uSLampN", "uSLampCd", "uSLampReach", "uFlPos", "uFlAim", "uFlCd", "uFlExp")
         self.glowProg = compile_program(GLOW_VS, GLOW_FS)
         self.glowU = uniforms(self.glowProg, "uRot", "uTrans", "uTan", "uNear", "uFar", "uPxPerM", "uSizeM", "uCol", "uGlow")
         self.presentProg = compile_program(FULLSCREEN_VS, PRESENT_FS)
@@ -3416,9 +3416,9 @@ uniform vec3 uLampPos[8];       // the pad's searchlights, this model's frame (m
 uniform vec3 uLampAim[8];
 uniform float uLampCdv[8];
 uniform float uLampExp, uLampOn, uLampGain;
-uniform vec3 uSLamp[256];       // the structure\'s own warm lamps (sodium / incandescent), this model\'s frame
+uniform sampler2D uSLampTex;   // the structure\'s own warm lamps (sodium / incandescent), this model\'s frame: xyz per texel, 1024 a row
 uniform int uSLampN;
-uniform float uSLampCd;
+uniform float uSLampCd, uSLampReach;
 uniform vec3 uFlPos[8];         // its white floodlights
 uniform vec3 uFlAim[8];
 uniform float uFlCd, uFlExp;
@@ -3452,11 +3452,12 @@ void main() {
             fl += uFlCd * pow(max(dot(-w, uFlAim[i]), 0.0), uFlExp) * max(dot(n, w), 0.0) / (d * d);
         }
         c += alb / PI * fl * uLampGain * uLampOn;
-        float lo = 0.0;                              // the warm lamps: points shining down and out, 30 m reach
+        float lo = 0.0;                              // the warm lamps: points shining down and out, uSLampReach m reach
+        float reach2 = uSLampReach * uSLampReach;
         for (int i = 0; i < uSLampN; i++) {
-            vec3 tl = uSLamp[i] - vPos;
+            vec3 tl = texelFetch(uSLampTex, ivec2(i & 1023, i >> 10), 0).xyz - vPos;
             float d2 = dot(tl, tl);
-            if (d2 > 900.0) continue;
+            if (d2 > reach2) continue;
             float d = sqrt(d2) + 0.01;
             vec3 w = tl / d;
             lo += max(dot(n, w), 0.0) * (0.5 - 0.5 * w.z) / (d2 + 1.0);   // below the lamp: full; level: half; above: none
@@ -3610,20 +3611,24 @@ void main() {
     gl_FragDepth = clamp((vDist - uNear) / (uFar - uNear), 0.0, 1.0);
 }
 """
-STRUCT_LAMP_CD = float(os.environ.get("NSTS_STRUCT_LAMP_CD", "1500"))     # a 150 W high-pressure sodium lamp: ~15,000 lm, ~1,200 cd
-STRUCT_LAMP_CELL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CELL_M", "7"))
+STRUCT_LAMP_CD = float(os.environ.get("NSTS_STRUCT_LAMP_CD", "6000"))     # a 150 W high-pressure sodium lamp: ~15,000 lm, ~1,200 cd
+STRUCT_LAMP_CELL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CELL_M", "3"))     # the photographs (STS-114/121/122/28): ~3 m apart along a layer (owner, from the people in them)
+STRUCT_LAMP_MAX = int(os.environ.get("NSTS_STRUCT_LAMP_MAX", "4096"))
+STRUCT_LAMP_CULL_M = float(os.environ.get("NSTS_STRUCT_LAMP_CULL_M", "90"))      # lamps farther than this from the eye are not lit-from (reach + the distance the eye sees lit surfaces at)
+STRUCT_LAMP_REACH_M = float(os.environ.get("NSTS_STRUCT_LAMP_REACH_M", "40"))
 STRUCT_GLOW = float(os.environ.get("NSTS_STRUCT_GLOW", "1.6"))
 FLOOD_STRUCT_CD = float(os.environ.get("NSTS_STRUCT_FLOOD_CD", "6.0e5"))
 FLOOD_STRUCT_EXP = 6.0
 
 
-def structure_lamps(model, cell=None, maxn=256):
+def structure_lamps(model, cell=None, maxn=None):
     """The pad structure's own warm lamps, PLACED BY RULE from the model (it has none): one under each overhang, below a
     downward-facing surface (platform undersides, the access arm's belly, the MLP's deck) -- the photographs
     (STS-114/121/122/28 at 39A/39B) show rows of them along exactly those, a few metres apart.  The largest down-facing
     triangle in each cell-metre cell above 2.5 m gets one, 0.4 m below it; at most maxn, the biggest areas first.  A
     JUDGEMENT of where and how many; the lamp type is the photographs' warm colour, not a documented fixture."""
     cell = cell or STRUCT_LAMP_CELL_M
+    maxn = maxn or STRUCT_LAMP_MAX
     best = {}
     for p in model.parts:
         if p.get('data') is None:
@@ -3795,13 +3800,35 @@ class VehicleLayer(object):
                 GL.glUniform1f(U["uLampGain"], FLOOD_GAIN * PAD_GAIN)
                 GL.glUniform1f(U["uLampOn"], 1.0 - min(max((mus + 0.1) / 0.12, 0.0), 1.0))
                 sl = getattr(model, 'slamps', None)
-                n_ = 0 if sl is None else len(sl)
+                n_ = 0
+                if sl is not None and len(sl):
+                    # Only the lamps that can light what the eye sees are lit: those within the lamp's reach plus the
+                    # visible distance (STRUCT_LAMP_CULL_M) of the eye, reselected when the eye has moved 10 m.
+                    eye = (Cv.T @ (-d)).astype(np.float64)
+                    last = getattr(model, 'slampEye', None)
+                    if last is None or np.linalg.norm(eye - last) > 10.0:
+                        model.slampEye = eye
+                        sel = sl[np.linalg.norm(sl - eye, axis=1) < STRUCT_LAMP_CULL_M]
+                        model.slampN = len(sel)
+                        rows = max(1, (model.slampN + 1023) // 1024)
+                        buf = np.zeros((rows * 1024, 3), f32)
+                        buf[:model.slampN] = sel
+                        if not hasattr(model, 'slampTex'):
+                            model.slampTex = GL.glGenTextures(1)
+                        GL.glActiveTexture(GL.GL_TEXTURE1)
+                        GL.glBindTexture(GL.GL_TEXTURE_2D, model.slampTex)
+                        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB32F, 1024, rows, 0, GL.GL_RGB, GL.GL_FLOAT, buf)
+                        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+                        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+                        GL.glActiveTexture(GL.GL_TEXTURE0)
+                    n_ = model.slampN
+                    GL.glActiveTexture(GL.GL_TEXTURE1)
+                    GL.glBindTexture(GL.GL_TEXTURE_2D, model.slampTex)
+                    GL.glActiveTexture(GL.GL_TEXTURE0)
+                    GL.glUniform1i(U["uSLampTex"], 1)
                 GL.glUniform1i(U["uSLampN"], n_)
-                if n_:
-                    buf = np.zeros((256, 3), f32)
-                    buf[:n_] = sl
-                    GL.glUniform3fv(U["uSLamp"], 256, buf)
                 GL.glUniform1f(U["uSLampCd"], STRUCT_LAMP_CD)
+                GL.glUniform1f(U["uSLampReach"], STRUCT_LAMP_REACH_M)
                 fp, fa = model.floods
                 GL.glUniform3fv(U["uFlPos"], 8, fp)
                 GL.glUniform3fv(U["uFlAim"], 8, fa)
