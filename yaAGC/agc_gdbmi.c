@@ -1815,7 +1815,7 @@ GdbmiHandlePrint (int i)
       
       /* we have an expression */
       GdbmiSkipSpace();
-      AddrStr = sraw;
+      AddrStr = s;
 
       if (*AddrStr == '&')
 	{
@@ -1823,7 +1823,7 @@ GdbmiHandlePrint (int i)
 	  AddrStr++;
 	}
 
-      /* I like to also see values of constants eventhough the default
+      /* I like to also see values of constants even though the default
        agc implementation did not do  this */
       Symbol = ResolveSymbol (
 	  AddrStr, SYMBOL_VARIABLE | SYMBOL_REGISTER | SYMBOL_CONSTANT);
@@ -1832,14 +1832,13 @@ GdbmiHandlePrint (int i)
 	  agc_addr = &Symbol->Value;
 	  gdbmi_addr = DbgLinearAddr (agc_addr);
 
+	  printf ("$1 = ");
 	  if (AddrFlag){
-	    printf ("$1 = ");
 	    GdbmiPrintFmt(fmt,gdbmi_addr);
 	    printf ("\n");
 	  }
 	  else
 	  {
-	    printf ("$1 = ");
 	    agc_value = DbgGetValueByAddress (gdbmi_addr);
 	    if (fmt == 'f') agc_value = (agc_value << 16) | DbgGetValueByAddress (gdbmi_addr + 1);
 	    GdbmiPrintFmt(fmt,agc_value);
