@@ -3539,7 +3539,7 @@ PAD_CLUSTER_M = float(os.environ.get("NSTS_PAD_CLUSTER_M", "500"))   # the clust
 PAD_CLUSTERS = tuple((45.0 * k, PAD_CLUSTER_M) for k in PAD_SECTORS)   # azimuth deg (E of N), m
 PAD_LAMP_HEIGHT_M = 4.0
 PAD_AIM_HEIGHT_M = 40.0
-PAD_LIGHTS = {'obj': None}
+PAD_LIGHTS = {'obj': None, 'on': True}
 
 
 def pad_lamp_defs():
@@ -3562,7 +3562,7 @@ def pad_lamp_defs():
 def pad_lamps_body(key):
     """The pad's lamps in the model's own frame, for the pad object named key (or None)."""
     g = PAD_LIGHTS['obj']
-    if g is None or g.key != key:
+    if g is None or g.key != key or not PAD_LIGHTS['on']:
         return None
     return g.lamps_body
 
@@ -3570,7 +3570,7 @@ def pad_lamps_body(key):
 def pad_lights_site(site):
     """The pad's lamps and aims in a landing site's east-north-up frame (None without a pad)."""
     g = PAD_LIGHTS['obj']
-    if g is None:
+    if g is None or not PAD_LIGHTS['on']:
         return None
     c = getattr(site, '_pad', None)
     if c is None or c[0] is not g:
@@ -4568,8 +4568,15 @@ def main(argv=None):
     ap.add_argument("--night-terrain", type=float, metavar="F", default=EarthLayer.NIGHT_AMB,
                     help="the terrain's glow on a moonless night, as a fraction of an overhead full Moon's "
                          "(default 0.1, or NSTS_NIGHT_TERRAIN; 0 is flat black)")
-    ap.add_argument("--runway-lights", choices=('on', 'off'), default='on',
-                    help="the Shuttle Landing Facility's lights and floodlights at night (default on)")
+    ap.add_argument("--night-lights", choices=('on', 'off'), default=os.environ.get("NSTS_NIGHT_LIGHTS", "on"),
+                    help="the default for --runway-lights and --pad-lights together (default on; NSTS_NIGHT_LIGHTS): "
+                         "the SLF is lit for an RTLS or for the aircraft supporting a launch, and the pad may or may "
+                         "not be lit for a night landing, so each can be set alone")
+    ap.add_argument("--runway-lights", choices=('on', 'off'), default=None,
+                    help="the Shuttle Landing Facility's lights and floodlights at night (default: --night-lights)")
+    ap.add_argument("--pad-lights", choices=('on', 'off'), default=None,
+                    help="the launch pad's searchlights, floodlights and structure lamps at night (default: "
+                         "--night-lights)")
     ap.add_argument("--lit-runway", choices=('auto', '15', '33'), default='auto',
                     help="the runway whose lights and head-of-runway floodlights are on (default auto: the "
                          "runway whose threshold is nearer the eye)")
@@ -4692,7 +4699,8 @@ def main(argv=None):
     site = None
     TERRAIN['on'] = args.terrain == 'on'
     EarthLayer.NIGHT_AMB = args.night_terrain
-    RUNWAY_LIGHTS.update(on=args.runway_lights == 'on', runway='15' if args.lit_runway == 'auto' else args.lit_runway,
+    PAD_LIGHTS['on'] = (args.pad_lights or args.night_lights) == 'on'
+    RUNWAY_LIGHTS.update(on=(args.runway_lights or args.night_lights) == 'on', runway='15' if args.lit_runway == 'auto' else args.lit_runway,
                          auto=args.lit_runway == 'auto')
     MSAA['samples'] = args.msaa
     STAR_CORE['f'] = min(2.0, max(0.1, args.star_core))
