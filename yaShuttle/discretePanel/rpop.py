@@ -273,10 +273,11 @@ ORBITER_OUTLINE = orbiter_side([
 # the ISS report's RPOP figures (25.23, 25.24; ~100 in high here, the doors' chord).
 DOORS_OPEN_OUTLINE = orbiter_side([(582, 480), (582, 580), (1307, 580), (1307, 480)])
 # ... but the documentation's drawing shows the open bay as a rectangular CUT-OUT of the fuselage's top, not a box on it: the
-# same outline with the bay's rims dropping to the bay floor (~Z_o 310, 15 ft below the sill) and across.
+# same outline with the bay's rims dropping to the bay floor (Z_o 384, 8 ft below the sill: the owner's recollection of the
+# documentation's drawings; 15 ft was too severe) and across.
 ORBITER_OPEN_OUTLINE = orbiter_side([
     (238, 330), (260, 375), (320, 430), (420, 490), (520, 500), (582, 480),
-    (582, 310), (1307, 310),
+    (582, 384), (1307, 384),
     (1307, 480), (1310, 510), (1460, 1060), (1540, 1060), (1525, 520),
     (1560, 450), (1590, 330), (1530, 270), (1400, 255), (500, 260), (300, 285)])
 ODS_OUTLINE = orbiter_side([(600, 410), (600, 476), (698, 476), (698, 410)])
