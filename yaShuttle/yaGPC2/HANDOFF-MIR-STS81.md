@@ -497,9 +497,38 @@ Branch `review/pad-choice` (worktree `~/work/wt-pad`; commits 2205ee7b1, e652cbd
   (`NSTS_PAD_GAIN` 0.25) only darkened the structure.  The owner: colour and brightness "still don't seem quite right" but
   not worth pursuing.  What actually lights the real FSS warm, and where the floods stand, is a JUDGEMENT; aviation
   obstruction lights are not modelled.  Lesson: fit colours in linear light.
+- **Night-light switches.**  The bright dotted line along the horizon in the launch view is the SLF runway's edge lights, 7-8.5 km
+  west of the pad (the SLF may be lit for an RTLS or for launch-support aircraft, and the pad may or may not be lit for a night
+  SLF landing).  portview `--pad-lights on|off` (searchlights, floods, structure lamps, pad ground light) and the existing
+  `--runway-lights` are independent; `--night-lights on|off` (`NSTS_NIGHT_LIGHTS`, default on) is the default for both.
+  Checked: `--pad-lights off` leaves the runway line and removes every pad light.
+- **Peer gate and push (2026-11-27).**  review/pad-choice (tip f9a5d0c3d, C: vehdyn pad choice + the test_vehdyn Windows fix) passed
+  Mac-integrate, Win11-native (build, tests, TAL, STS-134 COUNT -> ORBIT; not the docking leg, whose capture is on the retired T2
+  tape) and WSL-integration (build, 34 test binaries, landing, docking chain at rate 2).  Rebased onto one unrelated Solarium055
+  commit and pushed: origin/master 3414fa53c (the yaShuttle tree equals the gated tip plus the Python-only pad-lights commit).
+  Win11's first FAIL was test_vehdyn's POSIX popen/pclose/2>/dev/null, fixed with `#ifdef _WIN32`.  WSL's finding, NOT in the
+  ledger and unfixed: kuradar loses track on the first tick after a snapshot resume (src/kuradar.c ~247), so every `--from`
+  resume in a rendezvous adds one G33 RNDZ RADAR entry.
+- **Jump guard (09f79c8f8).**  `rndz_manual.rel()`'s guard (a sample that moves more than 5 + 2 dt ft from the last one is dropped,
+  three in a row are taken) ran BEFORE the R-bar port-frame conversion but stored the converted sample, so every Mir (R-bar)
+  sample looked like a 1.41 x range jump: pairs of drops, two samples in three lost, 10-20 s gaps (64 in 7 min at 953 ft).
+  Now it runs after the conversion; a headless run from `arrival` to V-bar logged none.
+- **RPOP for Mir (30cde3955).**  rpop.py assumed the ISS: the docking corridor and target were drawn along +X (V-bar), and the
+  reflector was the ISS's PMA-2 in Mir's frame (~40 ft off), so DP-DP R read ~44 ft long (146 against 99 at a 100 ft ring, X -42
+  instead of -1) and the Orbiter seemed to approach 90 degrees off the cone.  fly_rndz134 now exports `NSTS_RPOP_PORT`
+  (JSON: port, axis, up, approach); rpop.py applies it (`ri.set_port`), the corridor and a Docking Module box follow the
+  port's axis (`port_axis`), and `geo["axis"]` carries it.  The open payload bay is a rectangular cut-out in the fuselage
+  outline (bay floor ~Z_o 310 in), not the doors as a box on it.  Owner decisions: the Rdot window and the layout stay
+  where the STS-126 capture puts them (nothing documents another place; F5 hides the window; the real PGSC's pointing device
+  is unknown, so no dragging); close in on R-bar the nose half of the Orbiter is cropped at the right edge, and the owner uses
+  F8 (orbiter-centred) and Ctrl+Left (pan).
+- **Rendezvous start from `arrival`.**  A driver resumes from the capture of the phase BEFORE `--from`, so `arrival` is
+  `--from RBAR`.  The R-bar approach holds at 170 ft from Ti+96 to about Ti+120 min (Flight Plan JSC-48000-81 pp. 3-14:
+  `fp_profile` r170 96, r100 127), closes to 100 ft by Ti+127, holds there ~10 min, then DOCK30.
+  RPOP's big R is CG-CG or DP-DP by the "Orb ... to Tgt ..." line; CG-CG is ~74 ft more than the ring distance.
 - **Open.**  Unseen on screen after the final lamp change; the 39B layout is assumed identical to 39A and rests on 2010
-  imagery; peer gate for the branch; the owner's launch, docking, undocking and landing run-through decides Phase 1; Phase 2
-  not started.
+  imagery; the kuradar post-resume track loss above; the owner's launch, docking, undocking and landing run-through decides
+  Phase 1; Phase 2 not started.
 
 ## Related
 
