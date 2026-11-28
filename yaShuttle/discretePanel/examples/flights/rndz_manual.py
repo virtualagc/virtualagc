@@ -188,7 +188,17 @@ class ManualPhase(object):
         # rates in the turning frame (as rndz_start.m50_to_lvc): it turns at
         # omega = -n y, and omega x r = (-n z, 0, n x)
         v = [v[0] + n * r[2], v[1], v[2] - n * r[0]]
-        # A JUMP GUARD on the truth itself: from one sample to the next the
+        axes = (ex, ey, ez)
+        if point == "ods" and ins.APPROACH == "rbar":
+            # THE PORT'S FRAME, not LVLH: x out of the port along its axis (Mir's: the nadir), y and z across
+            # it (y is LVLH y made square to the axis; z completes the set), so that the goals written for
+            # the ISS's V-bar ([d, 0, 0]: d ft out on the axis) fly Mir's R-bar unchanged
+            axes = self.port_basis(tgt, ex, ey, ez)
+            M = [[ins.dot(pk, e) for e in (ex, ey, ez)] for pk in axes]
+            r = [sum(M[k][j] * r[j] for j in range(3)) for k in range(3)]
+            v = [sum(M[k][j] * v[j] for j in range(3)) for k in range(3)]
+        # A JUMP GUARD on the truth itself (AFTER the port-frame conversion above, so it compares like with like: the
+        # stored sample is in that frame, and a guard before it saw the 90-degree frame change as a ~1.41 x range jump): from one sample to the next the
         # point can move only as its rate carries it (the jets add well under
         # a foot per second); a step far beyond that is a timing fault in the
         # feeds, logged and not used -- three in a row are taken (a restore)
@@ -204,15 +214,6 @@ class ManualPhase(object):
                 self.say("rel(%s): a %.1f ft jump in %.2f s, beyond the motion -- sample dropped"
                          % (point, jump, dtj))
                 return None
-        axes = (ex, ey, ez)
-        if point == "ods" and ins.APPROACH == "rbar":
-            # THE PORT'S FRAME, not LVLH: x out of the port along its axis (Mir's: the nadir), y and z across
-            # it (y is LVLH y made square to the axis; z completes the set), so that the goals written for
-            # the ISS's V-bar ([d, 0, 0]: d ft out on the axis) fly Mir's R-bar unchanged
-            axes = self.port_basis(tgt, ex, ey, ez)
-            M = [[ins.dot(pk, e) for e in (ex, ey, ez)] for pk in axes]
-            r = [sum(M[k][j] * r[j] for j in range(3)) for k in range(3)]
-            v = [sum(M[k][j] * v[j] for j in range(3)) for k in range(3)]
         self._rel_bad[point] = 0
         self._rel_last[point] = (tru["gmt"], list(r), list(v))
         if noisy:
