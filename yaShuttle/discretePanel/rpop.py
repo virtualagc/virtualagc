@@ -105,6 +105,7 @@ DATA.  TRU1 (port base + 98) and TGT1 (port base + 109), multicast on
 portview.py reads them; the readings are rndz_instruments.Instruments'.
 """
 import argparse
+import json
 import math
 import os
 import socket
@@ -271,6 +272,13 @@ ORBITER_OUTLINE = orbiter_side([
 # The two doors open, seen edge-on from the side: hinged on the bay's rims and standing up, as in the STS-130 Mission to
 # the ISS report's RPOP figures (25.23, 25.24; ~100 in high here, the doors' chord).
 DOORS_OPEN_OUTLINE = orbiter_side([(582, 480), (582, 580), (1307, 580), (1307, 480)])
+# ... but the documentation's drawing shows the open bay as a rectangular CUT-OUT of the fuselage's top, not a box on it: the
+# same outline with the bay's rims dropping to the bay floor (~Z_o 310, 15 ft below the sill) and across.
+ORBITER_OPEN_OUTLINE = orbiter_side([
+    (238, 330), (260, 375), (320, 430), (420, 490), (520, 500), (582, 480),
+    (582, 310), (1307, 310),
+    (1307, 480), (1310, 510), (1460, 1060), (1540, 1060), (1525, 520),
+    (1560, 450), (1590, 330), (1530, 270), (1400, 255), (500, 260), (300, 285)])
 ODS_OUTLINE = orbiter_side([(600, 410), (600, 476), (698, 476), (698, 410)])
 
 
@@ -559,7 +567,8 @@ class Rpop(QtCore.QObject):
         # target's own attitude (the crew's "Update target attitude", RNDZ
         # 7-17), moving with the target's LVLH (instruments.points).
         refl = L.T @ (np.array(ri.qmat(tgt["q"])) @ np.array(ri.PMA2)) / FT
-        return {"A": A, "arm": arm, "wrel": wrel, "L": L, "n": n, "refl": refl,
+        axis = L.T @ (np.array(ri.qmat(tgt["q"])) @ np.array(ri.PORT_AX))      # out of the port, in target LVLH
+        return {"A": A, "arm": arm, "wrel": wrel, "L": L, "n": n, "refl": refl, "axis": axis,
                 "dock": s.get("dock", 0)}
 
     def rel_truth(self, s, tgt, geo):
@@ -1272,18 +1281,31 @@ class View(QtWidgets.QWidget):
         self.text(p, x0 - 4, y0 + 14, "TGT", 10, GREY_TXT, align="r")
         self.text(p, x0 - 4, y0 + 25, "LVLH", 10, GREY_TXT, align="r")
 
+    def port_axis(self, ih, iv):
+        """(k, sign, lateral): the port's axis -- the V-bar's +X for the ISS, the nadir (+Z) for Mir's R-bar -- as the
+        LVLH axis it lies along and which way, and the other axis of the view; None when the view (ih, iv) does not
+        contain it."""
+        g = self.rp.geo
+        a = np.array(g["axis"]) if g is not None and "axis" in g else np.array(ri.PORT_AX, float)
+        k = int(np.argmax(np.abs(a)))
+        if k not in (ih, iv):
+            return None
+        return k, (1.0 if a[k] >= 0 else -1.0), (iv if k == ih else ih)
+
     def draw_overlay(self, p, to_px, ih, iv, face):
-        """The +V-bar docking corridor ([RNDZ] CC 9-7, 9-8; drawn as [JSC]):
+        """The docking corridor along the port's axis (the +V-bar for the ISS; Mir's R-bar) ([RNDZ] CC 9-7, 9-8; drawn as [JSC]):
         8 deg out to 250 ft, the 170 +/- 10 ft hold, 5 deg inside 30 ft, and
         the 350-250 ft V-bar arrival zone."""
-        if ih != 0:
+        pa = self.port_axis(ih, iv)
+        if pa is None:
             return
+        pk, ps, pl = pa
         p.setPen(QtGui.QPen(WHITE, 1))
 
-        def P(x, lat):                     # about PMA-2's face and axis
+        def P(x, lat):                     # about the port's face and axis (the +V-bar; Mir's: the R-bar below it)
             q = face.copy()
-            q[0] += x
-            q[iv] += lat
+            q[pk] += ps * x
+            q[pl] += lat
             return to_px(q)
 
         t8, t5 = math.tan(math.radians(8.0)), math.tan(math.radians(5.0))
@@ -1304,17 +1326,23 @@ class View(QtWidgets.QWidget):
         face = np.zeros(3) if dp else (g["refl"] if g is not None else ri_pma2_ft())
         p.setPen(QtGui.QPen(WHITE, 1))
 
+        pa = self.port_axis(ih, iv)
+        if pa is None:
+            return
+        pk, ps, pl = pa
+
         def box(x0, x1, half):
             q = []
             for x, lat in ((x0, -half), (x1, -half), (x1, half), (x0, half)):
                 v = face.copy()
-                v[0] += x
-                if iv != 0:
-                    v[iv] += lat
+                v[pk] += ps * x
+                v[pl] += lat
                 q.append(to_px(v))
             p.drawPolygon(QtGui.QPolygonF(q))
 
-        if ih == 0:
+        if ri.APPROACH == "rbar":            # Mir's Docking Module, 4.7 m long, 2.9 m across
+            box(0.0, -15.4, 4.75)
+        else:
             box(0.0, -8.0, 3.0)
             box(-8.0, -32.0, 7.25)
 
@@ -1330,7 +1358,7 @@ class View(QtWidgets.QWidget):
             return cg + shift + A @ b
 
         p.setPen(QtGui.QPen(WHITE, 1))
-        for outline in (ORBITER_OUTLINE, ODS_OUTLINE) + ((DOORS_OPEN_OUTLINE,) if self.rp.doors_open else ()):
+        for outline in ((ORBITER_OPEN_OUTLINE if self.rp.doors_open else ORBITER_OUTLINE), ODS_OUTLINE):
             p.drawPolygon(QtGui.QPolygonF([to_px(body(q)) for q in outline]))
         c = to_px(cg + shift)
         p.drawEllipse(c, 4, 4)
@@ -1513,6 +1541,13 @@ def main(argv=None):
     ap.add_argument("--snapshot", metavar="PNG", help="save the window after --snapshot-after s and exit")
     ap.add_argument("--snapshot-after", type=float, default=5.0, metavar="S")
     args = ap.parse_args(argv)
+    # THE TARGET'S PORT, as the flight driver found it (fly_rndz134 exports it; the ISS's when it did not)
+    try:
+        pj = json.loads(os.environ.get("NSTS_RPOP_PORT", "null"))
+    except ValueError:
+        pj = None
+    if pj:
+        ri.set_port(pj["b"], pj.get("ax"), pj.get("up"), pj.get("approach"))
     try:
         import macdock
         macdock.set_app_name("RPOP")

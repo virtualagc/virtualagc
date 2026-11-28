@@ -268,6 +268,8 @@ def apply_mission(a):
                               m.get("norad"))
     if port:
         ins_mod.set_port(port[0], port[1], port[2], m.get("approach", "vbar"))
+        os.environ["NSTS_RPOP_PORT"] = json.dumps({"b": port[0], "ax": port[1], "up": port[2],
+                                                   "approach": m.get("approach", "vbar")})   # for RPOP, started by the manager
 
 
 DOCK_FINAL_FPS = None               # ft/s, the 30 -> 10 ft closing (dock_autopilot FINAL_FPS 0.07); a mission file's "final_fps" replaces it
